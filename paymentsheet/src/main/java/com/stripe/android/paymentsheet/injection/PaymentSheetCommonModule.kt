@@ -8,6 +8,8 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.paymentsheet.BuildConfig
@@ -77,6 +79,9 @@ internal abstract class PaymentSheetCommonModule {
     abstract fun bindsPaymentSheetUpdater(
         impl: DefaultPaymentSelectionUpdater,
     ): PaymentSelectionUpdater
+
+    @Binds
+    abstract fun bindsLinkConfigurationCoordinator(impl: RealLinkConfigurationCoordinator): LinkConfigurationCoordinator
 
     companion object {
         /**

@@ -11,6 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -360,6 +361,15 @@ class PaymentSessionTest {
     }
 
     private class FakeStripeRepository : AbsFakeStripeRepository() {
+
+        override suspend fun getPaymentMethods(
+            listPaymentMethodsParams: ListPaymentMethodsParams,
+            productUsageTokens: Set<String>,
+            requestOptions: ApiRequest.Options
+        ): Result<List<PaymentMethod>> {
+            return Result.success(emptyList())
+        }
+
         override suspend fun createPaymentMethod(
             paymentMethodCreateParams: PaymentMethodCreateParams,
             options: ApiRequest.Options

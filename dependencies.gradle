@@ -58,7 +58,7 @@ ext.versions = [
         playServicesTfLite          : '16.0.1',
         playServicesWallet          : '19.2.1',
         retrofit                    : '2.9.0',
-        robolectric                 : '4.10.3',
+        robolectric                 : '4.11.1',
         shot                        : '5.14.1',
         showkase                    : '1.0.0-beta18',
         stripe3ds2                  : '6.1.7',

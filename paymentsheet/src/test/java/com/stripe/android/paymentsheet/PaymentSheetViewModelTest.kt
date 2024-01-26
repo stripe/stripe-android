@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import android.app.Application
+import android.os.Build
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
@@ -18,8 +19,6 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -76,10 +75,10 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -100,6 +99,7 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 import java.io.IOException
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
@@ -107,6 +107,7 @@ import kotlin.test.Test
 import kotlin.time.Duration
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
@@ -153,9 +154,7 @@ internal class PaymentSheetViewModelTest {
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
     private val fakeEditPaymentMethodInteractorFactory = FakeEditPaymentMethodInteractorFactory(testDispatcher)
 
-    private val linkConfigurationCoordinator = mock<LinkConfigurationCoordinator> {
-        on { getAccountStatusFlow(any()) } doReturn flowOf(AccountStatus.SignedOut)
-    }
+    private val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
 
     @BeforeTest
     fun setup() {
@@ -1019,7 +1018,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `Resets selection correctly after cancelling Google Pay`() = runTest {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(initialPaymentSelection = null)
 
         val initialSelection = PaymentSelection.New.Card(
             PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
@@ -1386,7 +1385,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `updateSelection with new payment method updates the current selection`() = runTest {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(initialPaymentSelection = null)
 
         viewModel.selection.test {
             val newSelection = PaymentSelection.New.Card(
@@ -1404,7 +1403,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `updateSelection with saved payment method updates the current selection`() = runTest {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(initialPaymentSelection = null)
 
         viewModel.selection.test {
             val savedSelection = PaymentSelection.Saved(
@@ -2234,6 +2233,8 @@ internal class PaymentSheetViewModelTest {
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
         lpmRepository: LpmRepository = this.lpmRepository,
+        initialPaymentSelection: PaymentSelection? =
+            customerPaymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
@@ -2252,6 +2253,7 @@ internal class PaymentSheetViewModelTest {
                     customerPaymentMethods = customerPaymentMethods,
                     delay = delay,
                     isGooglePayAvailable = isGooglePayReady,
+                    paymentSelection = initialPaymentSelection,
                 ),
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,

@@ -1,7 +1,11 @@
 package com.stripe.android.payments.wechatpay
 
+import android.app.Application
+import android.os.Bundle
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.WeChat
 import com.stripe.android.payments.wechatpay.reflection.WeChatPayReflectionHelper
@@ -13,7 +17,6 @@ import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
-import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -31,8 +34,18 @@ class WeChatPayAuthenticatorTest {
         it.reflectionHelper = mockReflectionHelper
     }
 
-    private val host = mock<AuthActivityStarterHost> {
-        on { lifecycleOwner } doReturn TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
+    private val host = object : AuthActivityStarterHost {
+
+        override fun startActivityForResult(target: Class<*>, extras: Bundle, requestCode: Int) {
+            // Nothing to do here
+        }
+
+        override val statusBarColor: Int? = null
+
+        override val lifecycleOwner: LifecycleOwner = TestLifecycleOwner(initialState = Lifecycle.State.RESUMED)
+
+        override val application: Application
+            get() = ApplicationProvider.getApplicationContext()
     }
 
     @Before
