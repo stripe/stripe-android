@@ -40,6 +40,7 @@ internal data class FinancialConnectionsTypography(
 @Immutable
 internal data class FinancialConnectionsV3Typography(
     val headingXLarge: TextStyle,
+    val headingXLargeSubdued: TextStyle,
     val headingLarge: TextStyle,
     val headingMedium: TextStyle,
     val bodyMediumEmphasized: TextStyle,
@@ -62,6 +63,10 @@ internal fun TypePreview() {
             Text(
                 text = "Heading XLarge",
                 style = v3Typography.headingXLarge
+            )
+            Text(
+                text = "Heading XLarge Subdued",
+                style = v3Typography.headingXLargeSubdued
             )
             Text(
                 text = "Heading Large",

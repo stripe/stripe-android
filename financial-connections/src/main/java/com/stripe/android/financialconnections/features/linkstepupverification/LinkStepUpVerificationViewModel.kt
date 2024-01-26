@@ -229,6 +229,11 @@ internal data class LinkStepUpVerificationState(
     val resendOtp: Async<Unit> = Uninitialized,
 ) : MavericksState {
 
+    val submitLoading: Boolean
+        get() = confirmVerification is Loading || resendOtp is Loading
+    val submitError: Throwable?
+        get() = (confirmVerification as? Fail)?.error ?: (resendOtp as? Fail)?.error
+
     data class Payload(
         val email: String,
         val phoneNumber: String,

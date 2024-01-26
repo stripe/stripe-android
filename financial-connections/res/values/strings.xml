@@ -120,8 +120,8 @@
     <string name="stripe_link_account_picker_title_nobusiness">Select an account to connect to this business</string>
     <string name="stripe_link_account_picker_new_account">New bank account</string>
     <string name="stripe_link_account_picker_cta">Connect account</string>
-    <string name="stripe_link_stepup_verification_title">Check your email to confirm your identity</string>
-    <string name="stripe_link_stepup_verification_desc">To keep your Link account safe, we periodically need to confirm you\'re you. Enter the code sent to your email %1$s.</string>
+    <string name="stripe_link_stepup_verification_title">Confirm your email</string>
+    <string name="stripe_link_stepup_verification_desc">Enter the code sent to %1$s. We periodically request this extra step to keep your account safe.</string>
     <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
     <string name="stripe_networking_save_to_link_verification_title">Sign in to Link</string>
     <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>

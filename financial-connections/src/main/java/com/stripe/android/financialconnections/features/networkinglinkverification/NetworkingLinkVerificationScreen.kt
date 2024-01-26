@@ -3,10 +3,10 @@
 package com.stripe.android.financialconnections.features.networkinglinkverification
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -20,6 +20,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -29,8 +30,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
+import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
@@ -43,9 +43,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Layout
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.OTPController
-import com.stripe.android.uicore.elements.OTPElement
 
 @Composable
 internal fun NetworkingLinkVerificationScreen() {
@@ -76,7 +73,8 @@ private fun NetworkingLinkVerificationContent(
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkVerificationLoaded(
                 payload = payload(),
-                confirmVerificationAsync = state.confirmVerification
+                confirmVerificationAsync = state.confirmVerification,
+                onCloseFromErrorClick = onCloseFromErrorClick
             )
 
             is Fail -> UnclassifiedErrorContent(
@@ -92,6 +90,7 @@ private fun NetworkingLinkVerificationContent(
 private fun NetworkingLinkVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
     payload: Payload,
+    onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
@@ -103,14 +102,16 @@ private fun NetworkingLinkVerificationLoaded(
             keyboardController?.hide()
         }
     }
-    Layout(
+    if (confirmVerificationAsync is Fail && confirmVerificationAsync.error !is OTPError) {
+        UnclassifiedErrorContent(
+            error = confirmVerificationAsync.error,
+            onCloseFromErrorClick = onCloseFromErrorClick
+        )
+    } else Layout(
+        verticalArrangement = Arrangement.spacedBy(24.dp),
         body = {
+            item { Header(payload) }
             item {
-                Spacer(modifier = Modifier.size(16.dp))
-                Header(payload)
-            }
-            item {
-                Spacer(modifier = Modifier.size(24.dp))
                 VerificationSection(
                     focusRequester = focusRequester,
                     otpElement = payload.otpElement,
@@ -121,9 +122,7 @@ private fun NetworkingLinkVerificationLoaded(
             if (confirmVerificationAsync is Loading) {
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(20.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         V3LoadingSpinner(Modifier.size(24.dp))
@@ -136,65 +135,29 @@ private fun NetworkingLinkVerificationLoaded(
 
 @Composable
 private fun Header(payload: Payload) {
-    Text(
-        text = stringResource(R.string.stripe_networking_verification_title),
-        style = FinancialConnectionsTheme.v3Typography.headingXLarge,
-    )
-    Spacer(modifier = Modifier.size(16.dp))
-    Text(
-        text = stringResource(R.string.stripe_networking_verification_desc, payload.phoneNumber),
-        style = FinancialConnectionsTheme.v3Typography.bodyMedium,
-    )
-}
-
-@Composable
-@Preview(group = "NetworkingLinkVerification Pane", name = "Entering OTP")
-internal fun NetworkingLinkVerificationScreenPreview() {
-    FinancialConnectionsPreview {
-        NetworkingLinkVerificationContent(
-            state = NetworkingLinkVerificationState(
-                payload = Success(
-                    Payload(
-                        email = "email@gmail.com",
-                        phoneNumber = "12345678",
-                        otpElement = OTPElement(
-                            IdentifierSpec.Generic("otp"),
-                            OTPController()
-                        ),
-                        consumerSessionClientSecret = "12345678"
-                    )
-                )
-            ),
-            onCloseClick = {},
-            onCloseFromErrorClick = {}
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Text(
+            text = stringResource(R.string.stripe_networking_verification_title),
+            style = FinancialConnectionsTheme.v3Typography.headingXLarge,
+        )
+        Text(
+            text = stringResource(R.string.stripe_networking_verification_desc, payload.phoneNumber),
+            style = FinancialConnectionsTheme.v3Typography.bodyMedium,
         )
     }
 }
 
 @Composable
-@Preview(group = "NetworkingLinkVerification Pane", name = "Error")
-internal fun NetworkingLinkVerificationScreenWithErrorPreview() {
+@Preview(group = "NetworkingLinkVerification Pane")
+internal fun NetworkingLinkVerificationScreenPreview(
+    @PreviewParameter(NetworkingLinkVerificationPreviewParameterProvider::class)
+    state: NetworkingLinkVerificationState
+) {
     FinancialConnectionsPreview {
         NetworkingLinkVerificationContent(
-            state = NetworkingLinkVerificationState(
-                confirmVerification = Fail(
-                    ConfirmVerification.OTPError(
-                        message = "consumer_verification_max_attempts_exceeded",
-                        type = Type.SMS_CODE_EXPIRED
-                    )
-                ),
-                payload = Success(
-                    Payload(
-                        email = "email@gmail.com",
-                        phoneNumber = "12345678",
-                        otpElement = OTPElement(
-                            IdentifierSpec.Generic("otp"),
-                            OTPController()
-                        ),
-                        consumerSessionClientSecret = "12345678"
-                    )
-                )
-            ),
+            state = state,
             onCloseClick = {},
             onCloseFromErrorClick = {}
         )
