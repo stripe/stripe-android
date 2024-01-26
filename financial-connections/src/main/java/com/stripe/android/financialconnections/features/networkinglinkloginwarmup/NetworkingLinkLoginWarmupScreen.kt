@@ -5,6 +5,7 @@ package com.stripe.android.financialconnections.features.networkinglinkloginwarm
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -108,7 +109,6 @@ private fun NetworkingLinkLoginWarmupContent(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun NetworkingLinkLoginWarmupLoaded(
     lazyListState: LazyListState,
@@ -125,30 +125,11 @@ private fun NetworkingLinkLoginWarmupLoaded(
         )
     } else {
         Layout(
+            verticalArrangement = Arrangement.spacedBy(24.dp),
             lazyListState = lazyListState,
             body = {
-                item {
-                    CircleIcon(
-                        painter = painterResource(id = R.drawable.stripe_ic_person),
-                        contentDescription = stringResource(R.string.stripe_networking_link_login_warmup_title)
-                    )
-                    Spacer(modifier = Modifier.size(16.dp))
-                    Text(
-                        text = stringResource(R.string.stripe_networking_link_login_warmup_title),
-                        style = v3Typography.headingLarge,
-                    )
-                    Spacer(modifier = Modifier.size(16.dp))
-                    Text(
-                        text = stringResource(R.string.stripe_networking_link_login_warmup_description),
-                        style = v3Typography.bodyMedium,
-                    )
-                }
-                item {
-                    Spacer(modifier = Modifier.size(24.dp))
-                    ExistingEmailSection(
-                        email = payload.email
-                    )
-                }
+                item { HeaderSection() }
+                item { ExistingEmailSection(email = payload.email) }
             },
             footer = {
                 Footer(
@@ -157,6 +138,27 @@ private fun NetworkingLinkLoginWarmupLoaded(
                     onSkipClicked = onSkipClicked
                 )
             }
+        )
+    }
+}
+
+@Composable
+private fun HeaderSection(
+) {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        CircleIcon(
+            painter = painterResource(id = R.drawable.stripe_ic_person),
+            contentDescription = stringResource(R.string.stripe_networking_link_login_warmup_title)
+        )
+        Text(
+            text = stringResource(R.string.stripe_networking_link_login_warmup_title),
+            style = v3Typography.headingLarge,
+        )
+        Text(
+            text = stringResource(R.string.stripe_networking_link_login_warmup_description),
+            style = v3Typography.bodyMedium,
         )
     }
 }
