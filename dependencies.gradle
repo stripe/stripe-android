@@ -62,7 +62,7 @@ ext.versions = [
         robolectric                 : '4.11.1',
         shot                        : '5.14.1',
         showkase                    : '1.0.0-beta18',
-        stripe3ds2                  : '6.1.7',
+        stripe3ds2                  : '6.1.8',
         tensorflowLite              : '2.11.0',
         tensorflowLiteSupport       : '0.4.3',
         testParameterInjector       : '1.12',
