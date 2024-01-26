@@ -16,17 +16,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
 import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Warning
+import androidx.compose.material.icons.Icons.Default
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.toMutableStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -35,8 +34,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.version.StripeSdkVersion
-
-private const val SurfaceOverlayOpacity = 0.12f
 
 class FinancialConnectionsLauncherActivity : AppCompatActivity() {
 
@@ -98,26 +95,20 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
 
     @Composable
     private fun MainScreen(items: List<MenuItem>) {
-        val groupedItems = remember(items) {
-            items.groupBy(MenuItem::section)
+        val groupedItems = remember(items) { items.groupBy(MenuItem::section) }
+        val isExpandedMap: MutableMap<MenuItem.Section, Boolean> = remember {
+            groupedItems.keys.map { it to it.expanded }.toMutableStateMap()
         }
 
         LazyColumn {
-            section(
-                title = "Recommended Integrations",
-                items = groupedItems.getOrElse(MenuItem.Section.CompleteFlow) { emptyList() },
-            )
-
-            section(
-                title = "Alternatives",
-                badge = { NotRecommended() },
-                items = groupedItems.getOrElse(MenuItem.Section.Alternative) { emptyList() },
-            )
-
-            section(
-                title = "Internal",
-                items = groupedItems.getOrElse(MenuItem.Section.Internal) { emptyList() },
-            )
+            groupedItems.forEach {
+                section(
+                    section = it.key,
+                    expanded = isExpandedMap.getValue(it.key),
+                    onHeaderClick = { section -> isExpandedMap[section] = !isExpandedMap[section]!! },
+                    items = it.value,
+                )
+            }
 
             item {
                 Box(
@@ -135,61 +126,51 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
         }
     }
 
-    @Composable
-    @OptIn(ExperimentalMaterialApi::class)
-    private fun NotRecommended() {
-        Chip(
-            colors = ChipDefaults.chipColors(
-                backgroundColor = MaterialTheme.colors.error.copy(
-                    alpha = SurfaceOverlayOpacity,
-                ),
-            ),
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Rounded.Warning,
-                    contentDescription = null,
-                )
-            },
-            onClick = { },
-            modifier = Modifier.padding(top = 4.dp),
-        ) {
-            Text(text = "Not recommended")
-        }
-    }
-
     @Suppress("MagicNumber")
     private fun LazyListScope.section(
-        title: String,
+        section: MenuItem.Section,
+        expanded: Boolean,
+        onHeaderClick: (MenuItem.Section) -> Unit,
         items: List<MenuItem>,
         badge: @Composable () -> Unit = { },
     ) {
         item {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth().padding(top = 16.dp, start = 16.dp),
+                modifier = Modifier
+                    .clickable { onHeaderClick(section) }
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp, start = 16.dp),
             ) {
                 Text(
-                    text = title,
+                    text = section.title,
                     style = MaterialTheme.typography.h6,
                     color = MaterialTheme.colors.onSurface,
                     modifier = Modifier
+                        .weight(1f)
                         .alpha(.7f),
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 badge()
+                Icon(
+                    imageVector = if (expanded) Default.KeyboardArrowUp else Default.KeyboardArrowDown,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.size(16.dp))
             }
         }
 
-        itemsIndexed(items) { index, item ->
-            MenuItemRow(item)
+        if (expanded) {
+            itemsIndexed(items) { index, item ->
+                MenuItemRow(item)
 
-            if (index < items.lastIndex) {
-                Divider(startIndent = 16.dp)
+                if (index < items.lastIndex) {
+                    Divider(startIndent = 16.dp)
+                }
             }
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
     @Composable
     private fun MenuItemRow(item: MenuItem) {
         val context = LocalContext.current
@@ -221,10 +202,13 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
         val section: Section,
     ) {
 
-        enum class Section {
-            CompleteFlow,
-            Alternative,
-            Internal,
+        enum class Section(
+            val title: String,
+            val expanded: Boolean,
+        ) {
+            CompleteFlow("Recommended Integrations", true),
+            Alternative("Alternatives", false),
+            Internal("Internal", false),
         }
     }
 }
