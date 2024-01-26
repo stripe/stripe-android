@@ -43,6 +43,7 @@ dependencies {
 
     // Other
     implementation libs.playServicesWallet
+    implementation libs.payButtonCompose
     implementation libs.material
 
     // Tooling support (Previews, etc.)

@@ -4,10 +4,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.android.gms.wallet.button.ButtonConstants
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.GooglePayButton
@@ -36,7 +36,7 @@ class GooglePayButtonTest {
             GooglePayButton(
                 state = null,
                 allowCreditCards = true,
-                buttonType = ButtonConstants.ButtonType.PAY,
+                buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {}
@@ -53,7 +53,7 @@ class GooglePayButtonTest {
             GooglePayButton(
                 state = PrimaryButton.State.Ready,
                 allowCreditCards = true,
-                buttonType = ButtonConstants.ButtonType.PAY,
+                buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {}
@@ -70,7 +70,7 @@ class GooglePayButtonTest {
             GooglePayButton(
                 state = PrimaryButton.State.StartProcessing,
                 allowCreditCards = true,
-                buttonType = ButtonConstants.ButtonType.PAY,
+                buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {}
@@ -87,7 +87,7 @@ class GooglePayButtonTest {
             GooglePayButton(
                 state = PrimaryButton.State.FinishProcessing {},
                 allowCreditCards = true,
-                buttonType = ButtonConstants.ButtonType.PAY,
+                buttonType = GooglePayButtonType.Pay,
                 billingAddressParameters = GooglePayJsonFactory.BillingAddressParameters(),
                 isEnabled = true,
                 onPressed = {}

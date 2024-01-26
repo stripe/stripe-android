@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -10,22 +9,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.viewinterop.AndroidView
-import com.google.android.gms.wallet.button.ButtonConstants.ButtonTheme
-import com.google.android.gms.wallet.button.ButtonConstants.ButtonType
-import com.google.android.gms.wallet.button.ButtonOptions
+import com.google.pay.button.ButtonTheme
+import com.google.pay.button.ButtonType
+import com.google.pay.button.PayButton
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.uicore.convertDpToPx
+import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import org.json.JSONArray
-import com.google.android.gms.wallet.button.PayButton as GmsWalletPayButton
 
 @Composable
 internal fun GooglePayButton(
     state: PrimaryButton.State?,
     allowCreditCards: Boolean,
-    @ButtonType buttonType: Int,
+    buttonType: GooglePayButtonType,
     billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters?,
     isEnabled: Boolean,
     onPressed: () -> Unit,
@@ -53,21 +49,21 @@ internal fun GooglePayButton(
     }
 
     val buttonTheme = if (isSystemInDarkTheme()) {
-        ButtonTheme.LIGHT
+        ButtonTheme.Light
     } else {
-        ButtonTheme.DARK
+        ButtonTheme.Dark
     }
 
     when (state) {
         null,
-        is PrimaryButton.State.Ready -> ComposePayButton(
-            modifier = modifier,
+        is PrimaryButton.State.Ready -> PayButton(
+            modifier = modifier.testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
             allowedPaymentMethods = allowedPaymentMethods,
-            buttonType = buttonType,
-            buttonTheme = buttonTheme,
+            type = buttonType.toComposeButtonType(),
+            theme = buttonTheme,
             radius = PrimaryButtonTheme.shape.cornerRadius,
             enabled = isEnabled,
-            onPressed = onPressed,
+            onClick = onPressed,
         )
         is PrimaryButton.State.StartProcessing,
         is PrimaryButton.State.FinishProcessing -> GooglePrimaryButton(
@@ -75,45 +71,6 @@ internal fun GooglePayButton(
             state = state,
         )
     }
-}
-
-@Composable
-private fun ComposePayButton(
-    allowedPaymentMethods: String,
-    @ButtonType buttonType: Int,
-    @ButtonTheme buttonTheme: Int,
-    radius: Dp,
-    enabled: Boolean,
-    onPressed: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    AndroidView(
-        modifier = modifier.fillMaxWidth().testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
-        factory = { context -> GmsWalletPayButton(context) },
-        update = { button ->
-            button.apply {
-                initialize(
-                    ButtonOptions.newBuilder()
-                        .setButtonType(buttonType)
-                        .setButtonTheme(buttonTheme)
-                        .setCornerRadius(button.context.convertDpToPx(radius).toInt())
-                        .setAllowedPaymentMethods(allowedPaymentMethods)
-                        .build()
-                )
-
-                alpha = if (enabled) FULL_ALPHA else HALF_ALPHA
-                isEnabled = enabled
-
-                if (enabled) {
-                    setOnClickListener {
-                        onPressed()
-                    }
-                } else {
-                    setOnClickListener(null)
-                }
-            }
-        }
-    )
 }
 
 @Composable
@@ -159,8 +116,18 @@ private fun GooglePrimaryButton(
     }
 }
 
-private const val FULL_ALPHA = 1f
-private const val HALF_ALPHA = 0.5f
+private fun GooglePayButtonType.toComposeButtonType(): ButtonType {
+    return when (this) {
+        GooglePayButtonType.Book -> ButtonType.Book
+        GooglePayButtonType.Buy -> ButtonType.Buy
+        GooglePayButtonType.Checkout -> ButtonType.Checkout
+        GooglePayButtonType.Donate -> ButtonType.Donate
+        GooglePayButtonType.Order -> ButtonType.Order
+        GooglePayButtonType.Pay -> ButtonType.Pay
+        GooglePayButtonType.Plain -> ButtonType.Plain
+        GooglePayButtonType.Subscribe -> ButtonType.Subscribe
+    }
+}
 
 internal const val GOOGLE_PAY_BUTTON_TEST_TAG = "google-pay-button"
 internal const val GOOGLE_PAY_PRIMARY_BUTTON_TEST_TAG = "google-pay-primary-button"
