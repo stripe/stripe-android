@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -57,7 +58,9 @@ internal fun GooglePayButton(
     when (state) {
         null,
         is PrimaryButton.State.Ready -> PayButton(
-            modifier = modifier.testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
+            modifier = modifier
+                .fillMaxWidth()
+                .testTag(GOOGLE_PAY_BUTTON_TEST_TAG),
             allowedPaymentMethods = allowedPaymentMethods,
             type = buttonType.toComposeButtonType(),
             theme = buttonTheme,
