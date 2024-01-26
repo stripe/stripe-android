@@ -96,16 +96,16 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
     @Composable
     private fun MainScreen(items: List<MenuItem>) {
         val groupedItems = remember(items) { items.groupBy(MenuItem::section) }
-        val isExpandedMap: MutableMap<MenuItem.Section, Boolean> = remember {
-            groupedItems.keys.map { it to it.expanded }.toMutableStateMap()
+        val collapsedMap: MutableMap<MenuItem.Section, Boolean?> = remember {
+            groupedItems.keys.map { key -> key to key.collapsable.takeIf { it } }.toMutableStateMap()
         }
 
         LazyColumn {
             groupedItems.forEach {
                 section(
                     section = it.key,
-                    expanded = isExpandedMap.getValue(it.key),
-                    onHeaderClick = { section -> isExpandedMap[section] = !isExpandedMap[section]!! },
+                    collapsed = collapsedMap.getValue(it.key),
+                    onHeaderClick = { section -> collapsedMap[section] = !collapsedMap[section]!! },
                     items = it.value,
                 )
             }
@@ -129,7 +129,7 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
     @Suppress("MagicNumber")
     private fun LazyListScope.section(
         section: MenuItem.Section,
-        expanded: Boolean,
+        collapsed: Boolean?,
         onHeaderClick: (MenuItem.Section) -> Unit,
         items: List<MenuItem>,
         badge: @Composable () -> Unit = { },
@@ -138,7 +138,7 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable { onHeaderClick(section) }
+                    .clickable { if (collapsed != null) { onHeaderClick(section) }  }
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 8.dp, start = 16.dp),
             ) {
@@ -152,15 +152,18 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                 )
                 Spacer(modifier = Modifier.size(16.dp))
                 badge()
-                Icon(
-                    imageVector = if (expanded) Default.KeyboardArrowUp else Default.KeyboardArrowDown,
-                    contentDescription = null
-                )
-                Spacer(modifier = Modifier.size(16.dp))
+                collapsed?.let {
+                    Icon(
+                        imageVector = if (it) Default.KeyboardArrowUp else Default.KeyboardArrowDown,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                }
+
             }
         }
 
-        if (expanded) {
+        if (collapsed == null || collapsed == false) {
             itemsIndexed(items) { index, item ->
                 MenuItemRow(item)
 
@@ -204,10 +207,10 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
 
         enum class Section(
             val title: String,
-            val expanded: Boolean,
+            val collapsable: Boolean,
         ) {
-            CompleteFlow("Recommended Integrations", true),
-            Alternative("Alternatives", false),
+            CompleteFlow("Recommended Integrations", false),
+            Alternative("Alternatives", true),
             Internal("Internal", false),
         }
     }
