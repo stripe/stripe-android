@@ -23,7 +23,7 @@ if [ "$INCLUDE_SCREENSHOT_ON_FAILURE" == "true" ] && [ "$BITRISE_BUILD_STATUS" =
   copy_test_results ".*/screenshots/debug$"
 fi
 
-# If screenshots were requested, and it's a failure.
+# If dependenciesπ were requested, and it's a failure.
 if [ "$INCLUDE_DEPENDENCIES_ON_FAILURE" == "true" ] && [ "$BITRISE_BUILD_STATUS" == 1 ]; then
   copy_test_results ".*/dependencies$"
 fi
