@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: '*'
-    pipeline: main-trigger-pipeline
+  - pull_request_source_branch: 'carlosmuvi/fix-finbank-maestro-tests'
+    pipeline: pipeline-connections-e2e-debug-tests
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
@@ -374,9 +374,9 @@ workflows:
     steps:
       - avd-manager@1:
           inputs:
-            - profile: "pixel_6"
+            - profile: "pixel_3a"
             - abi: "x86_64"
-            - api_level: 33
+            - api_level: 32
             - tag: "google_apis"
             - start_command_flags: >
                -camera-back none
