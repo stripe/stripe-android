@@ -37,6 +37,7 @@ stages:
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
       - run-paymentsheet-screenshot-tests: { }
+      - check-dependencies: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
