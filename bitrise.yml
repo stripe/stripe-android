@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: 'carlosmuvi/fix-finbank-maestro-tests'
-    pipeline: pipeline-connections-e2e-debug-tests
+  - pull_request_source_branch: '*'
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
