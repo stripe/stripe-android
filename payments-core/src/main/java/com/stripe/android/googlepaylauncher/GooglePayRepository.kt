@@ -88,6 +88,8 @@ internal class DefaultGooglePayRepository(
                     logger.info("Google Pay ready? $isReady")
                     isReadyState.value = isReady
                 }
+        }.onFailure {
+            isReadyState.value = false
         }
 
         return isReadyState.filterNotNull()
