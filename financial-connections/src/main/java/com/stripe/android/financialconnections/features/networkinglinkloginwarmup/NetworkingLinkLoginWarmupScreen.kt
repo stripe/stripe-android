@@ -143,8 +143,7 @@ private fun NetworkingLinkLoginWarmupLoaded(
 }
 
 @Composable
-private fun HeaderSection(
-) {
+private fun HeaderSection() {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
