@@ -138,7 +138,7 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clickable { if (collapsed != null) { onHeaderClick(section) }  }
+                    .clickable { if (collapsed != null) onHeaderClick(section) }
                     .fillMaxWidth()
                     .padding(top = 8.dp, bottom = 8.dp, start = 16.dp),
             ) {
