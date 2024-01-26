@@ -13,15 +13,6 @@ apply from: rootProject.file('build-configuration/ktlint.gradle')
 
 check.dependsOn('ktlint')
 
-configurations {
-    configureEach {
-        resolutionStrategy {
-            // Not depending on 1.4.0 because it requires compile SDK 34
-            force 'androidx.emoji2:emoji2:1.3.0'
-        }
-    }
-}
-
 android {
     namespace STRIPE_ANDROID_NAMESPACE
     compileSdkVersion rootProject.ext.compileSdkVersion

@@ -4,12 +4,10 @@ import android.widget.FrameLayout
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
-import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.times
 import org.mockito.kotlin.mock
@@ -257,47 +255,43 @@ class PaymentMethodsAdapterTest {
     }
 
     @Test
-    fun `click on add card view should emit args`() = runTest {
+    fun `click on add card view should emit args`() {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             shouldShowGooglePay = true
         )
 
-        adapter.addPaymentMethodArgs.test {
-            assertThat(awaitItem()).isNull() // Initial value.
+        val listener = mock<PaymentMethodsAdapter.Listener>()
+        adapter.listener = listener
 
-            val viewHolder = adapter.createViewHolder(
-                FrameLayout(context),
-                PaymentMethodsAdapter.ViewType.AddCard.ordinal
-            )
-            adapter.onBindViewHolder(viewHolder, 0)
-            viewHolder.itemView.performClick()
+        val viewHolder = adapter.createViewHolder(
+            FrameLayout(context),
+            PaymentMethodsAdapter.ViewType.AddCard.ordinal
+        )
+        adapter.onBindViewHolder(viewHolder, 0)
+        viewHolder.itemView.performClick()
 
-            assertThat(awaitItem())
-                .isEqualTo(adapter.addCardArgs)
-        }
+        verify(listener).onAddPaymentMethodClick(adapter.addCardArgs)
     }
 
     @Test
-    fun `click on add FPX view should emit args`() = runTest {
+    fun `click on add FPX view should emit args`() {
         val adapter = PaymentMethodsAdapter(
             ARGS,
             shouldShowGooglePay = true
         )
 
-        adapter.addPaymentMethodArgs.test {
-            assertThat(awaitItem()).isNull() // Initial value.
+        val listener = mock<PaymentMethodsAdapter.Listener>()
+        adapter.listener = listener
 
-            val viewHolder = adapter.createViewHolder(
-                FrameLayout(context),
-                PaymentMethodsAdapter.ViewType.AddFpx.ordinal
-            )
-            adapter.onBindViewHolder(viewHolder, 0)
-            viewHolder.itemView.performClick()
+        val viewHolder = adapter.createViewHolder(
+            FrameLayout(context),
+            PaymentMethodsAdapter.ViewType.AddFpx.ordinal
+        )
+        adapter.onBindViewHolder(viewHolder, 0)
+        viewHolder.itemView.performClick()
 
-            assertThat(awaitItem())
-                .isEqualTo(adapter.addFpxArgs)
-        }
+        verify(listener).onAddPaymentMethodClick(adapter.addFpxArgs)
     }
 
     private companion object {

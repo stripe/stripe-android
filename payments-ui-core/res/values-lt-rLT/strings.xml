@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Pirkti naudojant UPI ID</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">AU BECS tiesioginis debetas</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">„Bacs“ tiesioginis debetas</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kortelė</string>
   <!-- Label for Konbini Payment Method -->

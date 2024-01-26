@@ -234,17 +234,26 @@ internal class PaymentLauncherViewModel @Inject constructor(
                     InternalPaymentResult.Completed(stripeIntentResult.intent)
                 StripeIntentResult.Outcome.FAILED ->
                     InternalPaymentResult.Failed(
-                        LocalStripeException(displayMessage = stripeIntentResult.failureMessage)
+                        LocalStripeException(
+                            displayMessage = stripeIntentResult.failureMessage,
+                            analyticsValue = "failedIntentOutcomeError",
+                        )
                     )
                 StripeIntentResult.Outcome.CANCELED ->
                     InternalPaymentResult.Canceled
                 StripeIntentResult.Outcome.TIMEDOUT ->
                     InternalPaymentResult.Failed(
-                        LocalStripeException(displayMessage = TIMEOUT_ERROR + stripeIntentResult.failureMessage)
+                        LocalStripeException(
+                            displayMessage = TIMEOUT_ERROR + stripeIntentResult.failureMessage,
+                            analyticsValue = "timedOutIntentOutcomeError",
+                        )
                     )
                 else ->
                     InternalPaymentResult.Failed(
-                        LocalStripeException(displayMessage = UNKNOWN_ERROR + stripeIntentResult.failureMessage)
+                        LocalStripeException(
+                            displayMessage = UNKNOWN_ERROR + stripeIntentResult.failureMessage,
+                            analyticsValue = "unknownIntentOutcomeError",
+                        )
                     )
             }
     }

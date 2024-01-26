@@ -7,7 +7,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
@@ -24,7 +23,7 @@ import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -43,7 +42,6 @@ internal class AddressElementActivity : ComponentActivity() {
         requireNotNull(AddressElementActivityContract.Args.fromIntent(intent))
     }
 
-    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -118,6 +116,6 @@ internal class AddressElementActivity : ComponentActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
+        fadeOut()
     }
 }

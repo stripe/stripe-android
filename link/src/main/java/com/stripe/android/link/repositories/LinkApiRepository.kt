@@ -138,6 +138,7 @@ internal class LinkApiRepository @Inject constructor(
                 paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
                     paymentDetailsId = passthroughModePaymentMethodId,
                     consumerSessionClientSecret = consumerSessionClientSecret,
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams)
                 ),
             )
         }

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -11,13 +12,15 @@ import kotlin.time.DurationUnit
 internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     val params: Map<String, Any?>
-        get() = standardParams(isDeferred) + additionalParams
+        get() = standardParams(isDeferred, linkEnabled) + additionalParams
 
     protected abstract val isDeferred: Boolean
+    protected abstract val linkEnabled: Boolean
     protected abstract val additionalParams: Map<String, Any?>
 
     class LoadStarted(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_started"
         override val additionalParams: Map<String, Any?> = emptyMap()
@@ -26,6 +29,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class LoadSucceeded(
         duration: Duration?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -37,6 +41,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         duration: Duration?,
         error: String,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -48,6 +53,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class ElementsSessionLoadFailed(
         error: String,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_elements_session_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -59,6 +65,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private val mode: EventReporter.Mode,
         private val configuration: PaymentSheet.Configuration,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
 
         override val eventName: String
@@ -140,6 +147,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                         .name,
                 )
 
+                val preferredNetworks = configuration.preferredNetworks.takeIf { brands ->
+                    brands.isNotEmpty()
+                }?.joinToString { brand ->
+                    brand.code
+                }
+
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
@@ -150,6 +163,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         billingDetailsCollectionConfigMap,
+                    FIELD_PREFERRED_NETWORKS to preferredNetworks
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -159,6 +173,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class Dismiss(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_dismiss"
         override val additionalParams: Map<String, Any> = emptyMap()
@@ -166,26 +181,24 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class ShowNewPaymentOptionForm(
         mode: EventReporter.Mode,
-        linkEnabled: Boolean,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_newpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_LINK_ENABLED to linkEnabled,
             FIELD_CURRENCY to currency,
         )
     }
 
     class ShowExistingPaymentOptions(
         mode: EventReporter.Mode,
-        linkEnabled: Boolean,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = formatEventName(mode, "sheet_savedpm_show")
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_LINK_ENABLED to linkEnabled,
             FIELD_CURRENCY to currency,
         )
     }
@@ -194,6 +207,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         code: String,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_carousel_payment_method_tapped"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -207,6 +221,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         paymentSelection: PaymentSelection?,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String =
             formatEventName(mode, "paymentoption_${analyticsValue(paymentSelection)}_select")
@@ -218,6 +233,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class PressConfirmButton(
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_confirm_button_tapped"
         override val additionalParams: Map<String, Any?> = mapOf(
@@ -232,6 +248,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         private val paymentSelection: PaymentSelection?,
         currency: String?,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
         private val deferredIntentConfirmationType: DeferredIntentConfirmationType?,
     ) : PaymentSheetEvent() {
 
@@ -285,6 +302,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class LpmSerializeFailureEvent(
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "luxe_serialize_failure"
         override val additionalParams: Map<String, Any?> = emptyMap()
@@ -293,6 +311,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     class AutofillEvent(
         type: String,
         override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         private fun String.toSnakeCase() = replace(
             "(?<=.)(?=\\p{Upper})".toRegex(),
@@ -303,10 +322,92 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = emptyMap()
     }
 
+    class ShowEditablePaymentOption(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_open_edit_screen"
+
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class HideEditablePaymentOption(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_cancel_edit_screen"
+
+        override val additionalParams: Map<String, Any?> = emptyMap()
+    }
+
+    class ShowPaymentOptionBrands(
+        source: Source,
+        selectedBrand: CardBrand,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_open_cbc_dropdown"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CBC_EVENT_SOURCE to source.value,
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
+        )
+
+        enum class Source(val value: String) {
+            Edit(VALUE_EDIT_CBC_EVENT_SOURCE), Add(VALUE_ADD_CBC_EVENT_SOURCE)
+        }
+    }
+
+    class HidePaymentOptionBrands(
+        source: Source,
+        selectedBrand: CardBrand?,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_close_cbc_dropdown"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_CBC_EVENT_SOURCE to source.value,
+            FIELD_SELECTED_CARD_BRAND to selectedBrand?.code
+        )
+
+        enum class Source(val value: String) {
+            Edit(VALUE_EDIT_CBC_EVENT_SOURCE), Add(VALUE_ADD_CBC_EVENT_SOURCE)
+        }
+    }
+
+    class UpdatePaymentOptionSucceeded(
+        selectedBrand: CardBrand,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_update_card"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code
+        )
+    }
+
+    class UpdatePaymentOptionFailed(
+        selectedBrand: CardBrand,
+        error: Throwable,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_update_card_failed"
+
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
+            FIELD_ERROR_MESSAGE to error.message,
+        )
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
+        linkEnabled: Boolean,
     ): Map<String, Any?> = mapOf(
         FIELD_IS_DECOUPLED to isDecoupled,
+        FIELD_LINK_ENABLED to linkEnabled,
     )
 
     internal companion object {
@@ -329,6 +430,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_GOOGLE_PAY = "googlepay"
         const val FIELD_PRIMARY_BUTTON_COLOR = "primary_button_color"
         const val FIELD_BILLING = "default_billing_details"
+        const val FIELD_PREFERRED_NETWORKS = "preferred_networks"
         const val FIELD_DELAYED_PMS = "allows_delayed_payment_methods"
         const val FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION = "mpe_config"
         const val FIELD_APPEARANCE = "appearance"
@@ -354,6 +456,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CURRENCY = "currency"
         const val FIELD_SELECTED_LPM = "selected_lpm"
         const val FIELD_ERROR_MESSAGE = "error_message"
+        const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
+        const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
+
+        const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
+        const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
     }
 }
 

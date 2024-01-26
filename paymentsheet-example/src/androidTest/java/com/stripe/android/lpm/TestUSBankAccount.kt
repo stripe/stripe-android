@@ -1,7 +1,7 @@
 package com.stripe.android.lpm
 
-import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.isEnabled
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.example.playground.settings.Country
@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymen
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.test.core.ui.ComposeButton
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -32,8 +33,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 authorizationAction = AuthorizeAction.Cancel,
             ),
             afterAuthorization = {
-                rules.compose.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .assertIsEnabled()
+                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .waitFor(isEnabled())
             }
         )
     }
@@ -45,8 +46,8 @@ internal class TestUSBankAccount : BasePlaygroundTest() {
                 authorizationAction = AuthorizeAction.Cancel,
             ),
             afterAuthorization = {
-                rules.compose.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
-                    .assertIsEnabled()
+                ComposeButton(rules.compose, hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
+                    .waitFor(isEnabled())
             }
         )
     }

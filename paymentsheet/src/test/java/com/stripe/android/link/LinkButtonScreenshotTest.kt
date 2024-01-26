@@ -14,7 +14,7 @@ import org.junit.Test
 internal class LinkButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        arrayOf(SystemAppearance.LightTheme),
+        arrayOf(SystemAppearance.LightTheme, SystemAppearance.DarkTheme),
         FontSize.values(),
         boxModifier = Modifier
             .padding(0.dp)

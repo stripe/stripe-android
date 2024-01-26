@@ -17,6 +17,12 @@ com.stripe.android.financialconnections.exception
 com.stripe.android.financialconnections.features.linkaccountpicker
 com.stripe.android.financialconnections.launcher
 com.stripe.android.financialconnections.model
+module:hcaptcha
+com.stripe.hcaptcha
+com.stripe.hcaptcha.config
+com.stripe.hcaptcha.encode
+com.stripe.hcaptcha.task
+com.stripe.hcaptcha.webview
 module:identity
 com.stripe.android.identity
 com.stripe.android.identity.navigation
@@ -37,6 +43,7 @@ com.stripe.android.cards
 com.stripe.android.exception
 com.stripe.android.googlepaylauncher
 com.stripe.android.googlepaylauncher.injection
+com.stripe.android.hcaptcha
 com.stripe.android.model
 com.stripe.android.model.parsers
 com.stripe.android.model.wallets

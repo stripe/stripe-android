@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.analytics
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentDetailsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -15,6 +16,7 @@ import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
+@Suppress("LargeClass")
 class PaymentSheetEventTest {
 
     @Test
@@ -23,6 +25,7 @@ class PaymentSheetEventTest {
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
+            linkEnabled = false,
         )
 
         assertThat(
@@ -60,9 +63,11 @@ class PaymentSheetEventTest {
                 "phone" to "Automatic",
                 "address" to "Automatic",
             ),
+            "preferred_networks" to null,
         )
 
         assertThat(event.params).run {
+            containsEntry("link_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
         }
@@ -72,8 +77,11 @@ class PaymentSheetEventTest {
     fun `Init event with minimum config should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
+                preferredNetworks = listOf(CardBrand.CartesBancaires, CardBrand.Visa)
+            ),
             isDeferred = false,
+            linkEnabled = false,
         )
 
         assertThat(
@@ -111,9 +119,64 @@ class PaymentSheetEventTest {
                 "phone" to "Automatic",
                 "address" to "Automatic",
             ),
+            "preferred_networks" to "cartes_bancaires, visa",
         )
 
         assertThat(event.params).run {
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @Test
+    fun `Init event with preferred networks`() {
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Complete,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_complete_init_default"
+        )
+
+        val expectedConfig = mapOf(
+            "customer" to false,
+            "googlepay" to false,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+            "preferred_networks" to null,
+        )
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
         }
@@ -132,6 +195,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -146,6 +210,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "card",
             )
         )
@@ -160,6 +225,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -174,6 +240,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "card",
             )
         )
@@ -188,6 +255,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -202,6 +270,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "google_pay",
             )
         )
@@ -216,6 +285,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -230,6 +300,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "link",
             )
         )
@@ -250,6 +321,7 @@ class PaymentSheetEventTest {
             result = PaymentSheetEvent.Payment.Result.Success,
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -264,6 +336,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
             )
         )
     }
@@ -283,6 +356,7 @@ class PaymentSheetEventTest {
             ),
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -297,6 +371,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "card",
                 "error_message" to "apiError",
             )
@@ -314,6 +389,7 @@ class PaymentSheetEventTest {
             ),
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -328,6 +404,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "card",
                 "error_message" to "apiError",
             )
@@ -345,6 +422,7 @@ class PaymentSheetEventTest {
             ),
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -359,6 +437,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "google_pay",
                 "error_message" to "apiError",
             )
@@ -376,6 +455,7 @@ class PaymentSheetEventTest {
             ),
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -390,6 +470,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "selected_lpm" to "link",
                 "error_message" to "apiError",
             )
@@ -413,6 +494,7 @@ class PaymentSheetEventTest {
             ),
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -427,6 +509,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "duration" to 0.001F,
                 "is_decoupled" to false,
+                "link_enabled" to false,
                 "error_message" to "apiError",
             )
         )
@@ -439,6 +522,7 @@ class PaymentSheetEventTest {
             paymentSelection = PaymentSelection.GooglePay,
             currency = "usd",
             isDeferred = false,
+            linkEnabled = false,
         )
         assertThat(
             event.eventName
@@ -451,6 +535,197 @@ class PaymentSheetEventTest {
             mapOf(
                 "currency" to "usd",
                 "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShowEditablePaymentOption event should return expected toString()`() {
+        val event = PaymentSheetEvent.ShowEditablePaymentOption(
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_open_edit_screen",
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `HideEditablePaymentOption event should return expected toString()`() {
+        val event = PaymentSheetEvent.HideEditablePaymentOption(
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_cancel_edit_screen",
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShowPaymentOptionBrands event with edit source should return expected toString()`() {
+        val event = PaymentSheetEvent.ShowPaymentOptionBrands(
+            selectedBrand = CardBrand.Visa,
+            source = PaymentSheetEvent.ShowPaymentOptionBrands.Source.Edit,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_open_cbc_dropdown"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "cbc_event_source" to "edit",
+                "selected_card_brand" to "visa",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `ShowPaymentOptionBrands event with add source should return expected toString()`() {
+        val event = PaymentSheetEvent.ShowPaymentOptionBrands(
+            selectedBrand = CardBrand.Visa,
+            source = PaymentSheetEvent.ShowPaymentOptionBrands.Source.Add,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_open_cbc_dropdown"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "cbc_event_source" to "add",
+                "selected_card_brand" to "visa",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `HidePaymentOptionBrands event with add source should return expected toString()`() {
+        val event = PaymentSheetEvent.HidePaymentOptionBrands(
+            selectedBrand = CardBrand.CartesBancaires,
+            source = PaymentSheetEvent.HidePaymentOptionBrands.Source.Add,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_close_cbc_dropdown"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "cbc_event_source" to "add",
+                "selected_card_brand" to "cartes_bancaires",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `HidePaymentOptionBrands event with edit source should return expected toString()`() {
+        val event = PaymentSheetEvent.HidePaymentOptionBrands(
+            selectedBrand = CardBrand.CartesBancaires,
+            source = PaymentSheetEvent.HidePaymentOptionBrands.Source.Edit,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_close_cbc_dropdown"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "cbc_event_source" to "edit",
+                "selected_card_brand" to "cartes_bancaires",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `UpdatePaymentOptionSucceeded event should return expected toString()`() {
+        val event = PaymentSheetEvent.UpdatePaymentOptionSucceeded(
+            selectedBrand = CardBrand.CartesBancaires,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_update_card"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "selected_card_brand" to "cartes_bancaires",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `UpdatePaymentOptionFailed event should return expected toString()`() {
+        val event = PaymentSheetEvent.UpdatePaymentOptionFailed(
+            selectedBrand = CardBrand.CartesBancaires,
+            error = Exception("No network available!"),
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_update_card_failed"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "selected_card_brand" to "cartes_bancaires",
+                "error_message" to "No network available!",
+                "is_decoupled" to false,
+                "link_enabled" to false,
             )
         )
     }
@@ -489,17 +764,20 @@ class PaymentSheetEventTest {
             "allows_delayed_payment_methods" to false,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
+            "preferred_networks" to null,
         )
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
                 isDeferred = false,
+                linkEnabled = false,
             ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
                 "is_decoupled" to false,
+                "link_enabled" to false,
             )
         )
     }
@@ -538,17 +816,20 @@ class PaymentSheetEventTest {
             "allows_delayed_payment_methods" to true,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
+            "preferred_networks" to null,
         )
         assertThat(
             PaymentSheetEvent.Init(
                 mode = EventReporter.Mode.Complete,
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
                 isDeferred = false,
+                linkEnabled = false,
             ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
                 "is_decoupled" to false,
+                "link_enabled" to false,
             )
         )
     }

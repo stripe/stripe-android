@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -645,6 +646,25 @@ internal class PaymentOptionsViewModelTest {
 
         paymentMethodsTurbine.ensureAllEventsConsumed()
         paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `Displays Link wallet button if customer has not saved PMs and Google Pay is not available`() = runTest {
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.NeedsVerification,
+            ),
+            isGooglePayReady = false,
+        )
+
+        val viewModel = createViewModel(args = args)
+
+        viewModel.walletsState.test {
+            val state = awaitItem()
+            assertThat(state?.link).isEqualTo(WalletsState.Link(email = null))
+            assertThat(state?.googlePay).isNull()
+        }
     }
 
     private fun createViewModel(

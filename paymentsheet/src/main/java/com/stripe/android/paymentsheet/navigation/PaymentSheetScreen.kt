@@ -32,8 +32,9 @@ internal sealed interface PaymentSheetScreen {
 
     val showsBuyButton: Boolean
     val showsContinueButton: Boolean
-    val showsWalletsHeader: Boolean
     val canNavigateBack: Boolean
+
+    fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean
 
     @Composable
     fun Content(viewModel: BaseSheetViewModel, modifier: Modifier)
@@ -42,8 +43,11 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
-        override val showsWalletsHeader: Boolean = false
         override val canNavigateBack: Boolean = false
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
+            return false
+        }
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -55,8 +59,11 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
-        override val showsWalletsHeader: Boolean = true
         override val canNavigateBack: Boolean = false
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
+            return isCompleteFlow
+        }
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -81,8 +88,11 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
-        override val showsWalletsHeader: Boolean = true
         override val canNavigateBack: Boolean = true
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
+            return isCompleteFlow
+        }
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -94,8 +104,11 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
-        override val showsWalletsHeader: Boolean = true
         override val canNavigateBack: Boolean = false
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
+            return true
+        }
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
@@ -109,8 +122,11 @@ internal sealed interface PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
-        override val showsWalletsHeader: Boolean = false
         override val canNavigateBack: Boolean = true
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
+            return false
+        }
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {

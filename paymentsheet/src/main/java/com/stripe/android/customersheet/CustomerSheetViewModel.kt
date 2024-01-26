@@ -47,6 +47,7 @@ import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.state.toInternal
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -330,6 +331,10 @@ internal class CustomerSheetViewModel @Inject constructor(
             )
         } else {
             backStack.update {
+                it.last().eventReporterScreen?.let { screen ->
+                    eventReporter.onScreenHidden(screen)
+                }
+
                 it.dropLast(1)
             }
         }
@@ -456,6 +461,15 @@ internal class CustomerSheetViewModel @Inject constructor(
         ).onSuccess { updatedMethod ->
             onBackPressed()
             updatePaymentMethodInState(updatedMethod)
+
+            eventReporter.onUpdatePaymentMethodSucceeded(
+                selectedBrand = brand
+            )
+        }.onFailure { cause, _ ->
+            eventReporter.onUpdatePaymentMethodFailed(
+                selectedBrand = brand,
+                error = cause
+            )
         }
     }
 
@@ -512,6 +526,22 @@ internal class CustomerSheetViewModel @Inject constructor(
             to = CustomerSheetViewState.EditPaymentMethod(
                 editPaymentMethodInteractor = editInteractorFactory.create(
                     initialPaymentMethod = paymentMethod,
+                    eventHandler = { event ->
+                        when (event) {
+                            is EditPaymentMethodViewInteractor.Event.ShowBrands -> {
+                                eventReporter.onShowPaymentOptionBrands(
+                                    source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = event.brand
+                                )
+                            }
+                            is EditPaymentMethodViewInteractor.Event.HideBrands -> {
+                                eventReporter.onHidePaymentOptionBrands(
+                                    source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                                    selectedBrand = event.brand
+                                )
+                            }
+                        }
+                    },
                     displayName = providePaymentMethodName(paymentMethod.type?.code),
                     removeExecutor = { pm ->
                         removePaymentMethod(pm).onSuccess {
@@ -1137,6 +1167,8 @@ internal class CustomerSheetViewModel @Inject constructor(
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.AddPaymentMethod)
             is CustomerSheetViewState.SelectPaymentMethod ->
                 eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.SelectPaymentMethod)
+            is CustomerSheetViewState.EditPaymentMethod ->
+                eventReporter.onScreenPresented(CustomerSheetEventReporter.Screen.EditPaymentMethod)
             else -> { }
         }
 
@@ -1156,6 +1188,14 @@ internal class CustomerSheetViewModel @Inject constructor(
             }
         }
     }
+
+    private val CustomerSheetViewState.eventReporterScreen: CustomerSheetEventReporter.Screen?
+        get() = when (this) {
+            is CustomerSheetViewState.AddPaymentMethod -> CustomerSheetEventReporter.Screen.AddPaymentMethod
+            is CustomerSheetViewState.SelectPaymentMethod -> CustomerSheetEventReporter.Screen.SelectPaymentMethod
+            is CustomerSheetViewState.EditPaymentMethod -> CustomerSheetEventReporter.Screen.EditPaymentMethod
+            else -> null
+        }
 
     object Factory : ViewModelProvider.Factory {
 

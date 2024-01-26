@@ -14,7 +14,6 @@
     <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$@Source.SourceType private fun asSourceType(sourceType: String?): String</ID>
     <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$private inline fun &lt;reified T : StripeModel> optStripeJsonModel( jsonObject: JSONObject, @Size(min = 1) key: String ): T?</ID>
     <ID>CyclomaticComplexMethod:StripeErrorMapping.kt$internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String?</ID>
-    <ID>EmptyFunctionBlock:AbsPaymentController.kt$AbsPaymentController${ }</ID>
     <ID>EmptyFunctionBlock:CardWidgetProgressView.kt$CardWidgetProgressView.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:CustomerSessionTest.kt$CustomerSessionTest.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:DeletePaymentMethodDialogFactory.kt$DeletePaymentMethodDialogFactory.PaymentMethodDeleteListener${ }</ID>
@@ -49,13 +48,13 @@
     <ID>LongMethod:PaymentFlowResultProcessor.kt$PaymentFlowResultProcessor$suspend fun processResult( unvalidatedResult: PaymentFlowResult.Unvalidated ): Result&lt;S></ID>
     <ID>LongMethod:PaymentIntentJsonParser.kt$PaymentIntentJsonParser$override fun parse(json: JSONObject): PaymentIntent?</ID>
     <ID>LongMethod:PaymentMethodJsonParser.kt$PaymentMethodJsonParser$override fun parse(json: JSONObject): PaymentMethod</ID>
-    <ID>LongMethod:PaymentMethodsActivity.kt$PaymentMethodsActivity$override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:SourceParamsTest.kt$SourceParamsTest$@Test fun `createKlarna() should create expected params`()</ID>
     <ID>LongMethod:StaticCardAccountRangeSourceTest.kt$StaticCardAccountRangeSourceTest$@Test fun `getAccountRange() should return expected AccountRange`()</ID>
     <ID>LongMethod:Stripe3ds2ChallengeResultProcessor.kt$DefaultStripe3ds2ChallengeResultProcessor$override suspend fun process( challengeResult: ChallengeResult ): PaymentFlowResult.Unvalidated</ID>
     <ID>LongMethod:Stripe3ds2TransactionActivity.kt$Stripe3ds2TransactionActivity$public override fun onCreate(savedInstanceState: Bundle?)</ID>
     <ID>LongMethod:StripeApiRepositoryTest.kt$StripeApiRepositoryTest$@Test fun getPaymentMethods_whenPopulated_returnsExpectedList()</ID>
     <ID>LongMethod:WebIntentAuthenticator.kt$WebIntentAuthenticator$override suspend fun performAuthentication( host: AuthActivityStarterHost, authenticatable: StripeIntent, requestOptions: ApiRequest.Options )</ID>
+    <ID>MagicNumber:AnimationConstants.kt$34</ID>
     <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText$3</ID>
     <ID>MagicNumber:BecsDebitBsbEditText.kt$BecsDebitBsbEditText.&lt;no name provided>$4</ID>
     <ID>MagicNumber:BecsDebitWidget.kt$BecsDebitWidget$4</ID>
@@ -206,6 +205,7 @@
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:DefaultPaymentAuthenticatorRegistry.kt$e: Exception</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
+    <ID>SwallowedException:StripeBrowserLauncherActivity.kt$StripeBrowserLauncherActivity$e: ActivityNotFoundException</ID>
     <ID>ThrowsCount:StripeApiRepository.kt$StripeApiRepository$@Throws( InvalidRequestException::class, AuthenticationException::class, CardException::class, APIException::class ) private fun handleApiError(response: StripeResponse&lt;String>)</ID>
     <ID>TooGenericExceptionCaught:DefaultPaymentAuthenticatorRegistry.kt$e: Exception</ID>
     <ID>TooGenericExceptionThrown:DefaultAlipayRepository.kt$DefaultAlipayRepository$throw RuntimeException("Unable to authenticate Payment Intent with Alipay SDK")</ID>

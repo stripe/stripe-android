@@ -10,6 +10,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
+import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
 import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
@@ -92,6 +93,9 @@ class PaparazziRule(
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.SHRINK,
             showSystemUi = false,
+            environment = detectEnvironment().run {
+                copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
+            },
         )
     }
 }

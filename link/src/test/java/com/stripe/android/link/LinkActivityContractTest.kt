@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.model.StripeIntentFixtures
+import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.networking.StripeRepository
 import org.junit.After
 import org.junit.Before
@@ -36,11 +37,15 @@ class LinkActivityContractTest {
             stripeIntent = StripeIntentFixtures.PI_SUCCEEDED,
             merchantName = "Merchant, Inc",
             merchantCountryCode = "US",
-            customerName = "Name",
-            customerEmail = "customer@email.com",
-            customerPhone = "1234567890",
-            customerBillingCountryCode = "US",
+            customerInfo = LinkConfiguration.CustomerInfo(
+                name = "Name",
+                email = "customer@email.com",
+                phone = "1234567890",
+                billingCountryCode = "US",
+                shouldPrefill = true,
+            ),
             shippingValues = null,
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             passthroughModeEnabled = false,
         )
 

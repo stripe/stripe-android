@@ -384,6 +384,7 @@ internal class CustomerSheetScreenshotTest {
                 displayName = "Card",
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
+                eventHandler = {}
             ),
             isLiveMode = true,
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),

@@ -67,6 +67,8 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Beli menggunakan ID UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Debit Terus BECS AU</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Debit Terus Bacs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Kad</string>
   <!-- Label for Konbini Payment Method -->

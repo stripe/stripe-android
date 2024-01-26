@@ -36,6 +36,7 @@ stages:
       - run-financial-connections-instrumentation-tests: { }
       - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
+      - run-paymentsheet-screenshot-tests: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
@@ -248,6 +249,32 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
+  run-paymentsheet-screenshot-tests:
+    envs:
+      - INCLUDE_SCREENSHOT_ON_FAILURE: true
+    before_run:
+      - start_screenshot_emulator
+      - prepare_all
+    after_run:
+      - conclude_all
+    steps:
+      - script@1:
+          title: Assemble Instrumentation tests
+          timeout: 600
+          inputs:
+            - content: ./gradlew :paymentsheet:assembleAndroidTest
+      - wait-for-android-emulator@1:
+          inputs:
+            - boot_timeout: 600
+      - script@1:
+          title: Execute instrumentation tests
+          timeout: 1200
+          inputs:
+            - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
+      - script@1:
+          title: Check updated screenshots
+          inputs:
+            - content: ruby scripts/check_for_changed_paymentsheet_screenshots.rb
   run-paymentsheet-instrumentation-tests:
     before_run:
       - start_emulator
@@ -347,9 +374,9 @@ workflows:
     steps:
       - avd-manager@1:
           inputs:
-            - profile: "pixel_3a"
+            - profile: "pixel_6"
             - abi: "x86_64"
-            - api_level: 32
+            - api_level: 33
             - tag: "google_apis"
             - start_command_flags: >
                -camera-back none
@@ -360,6 +387,25 @@ workflows:
                -no-snapshot
                -no-audio
                -no-window
+  start_screenshot_emulator:
+    steps:
+      - avd-manager@1:
+          inputs:
+            - profile: "Nexus 6"
+            - abi: "x86_64"
+            - api_level: 28
+            - start_command_flags: >
+                -camera-back none
+                -camera-front none
+                -netdelay none
+                -netspeed full
+                -memory 2048
+                -no-snapshot
+                -no-audio
+                -no-window
+                -no-snapshot-save
+                -gpu swiftshader_indirect
+                -no-boot-anim
   prepare_all:
     steps:
       - activate-ssh-key@4:

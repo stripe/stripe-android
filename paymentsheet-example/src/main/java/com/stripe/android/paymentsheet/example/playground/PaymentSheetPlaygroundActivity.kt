@@ -99,6 +99,8 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                     AppearanceButton()
 
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
+
+                    ClearLinkDataButton()
                 },
                 bottomBarContent = {
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
@@ -158,6 +160,19 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             modifier = Modifier.fillMaxWidth(),
         ) {
             Text("QR code for current settings")
+        }
+    }
+
+    @Composable
+    private fun ClearLinkDataButton() {
+        val context = LocalContext.current
+        Button(
+            onClick = {
+                PaymentSheet.resetCustomer(context)
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Text("Clear Link customer")
         }
     }
 

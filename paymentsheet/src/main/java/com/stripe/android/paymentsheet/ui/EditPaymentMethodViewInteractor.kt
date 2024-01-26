@@ -28,6 +28,12 @@ internal interface EditPaymentMethodViewInteractor {
     val viewState: StateFlow<EditPaymentMethodViewState>
 
     fun handleViewAction(viewAction: EditPaymentMethodViewAction)
+
+    sealed interface Event {
+        data class ShowBrands(val brand: CardBrand) : Event
+
+        data class HideBrands(val brand: CardBrand?) : Event
+    }
 }
 
 internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethodViewInteractor {
@@ -36,6 +42,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
     interface Factory {
         fun create(
             initialPaymentMethod: PaymentMethod,
+            eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String,
@@ -46,6 +53,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
 internal class DefaultEditPaymentMethodViewInteractor constructor(
     initialPaymentMethod: PaymentMethod,
     displayName: String,
+    private val eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
     workContext: CoroutineContext = Dispatchers.Default,
@@ -97,6 +105,8 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
             is EditPaymentMethodViewAction.OnRemovePressed -> onRemovePressed()
             is EditPaymentMethodViewAction.OnRemoveConfirmed -> onRemoveConfirmed()
             is EditPaymentMethodViewAction.OnUpdatePressed -> onUpdatePressed()
+            is EditPaymentMethodViewAction.OnBrandChoiceOptionsShown -> onBrandChoiceOptionsShown()
+            is EditPaymentMethodViewAction.OnBrandChoiceOptionsDismissed -> onBrandChoiceOptionsDismissed()
             is EditPaymentMethodViewAction.OnBrandChoiceChanged -> onBrandChoiceChanged(viewAction.choice)
             is EditPaymentMethodViewAction.OnRemoveConfirmationDismissed -> onRemoveConfirmationDismissed()
         }
@@ -147,8 +157,18 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
         }
     }
 
+    private fun onBrandChoiceOptionsShown() {
+        eventHandler(EditPaymentMethodViewInteractor.Event.ShowBrands(choice.value.brand))
+    }
+
+    private fun onBrandChoiceOptionsDismissed() {
+        eventHandler(EditPaymentMethodViewInteractor.Event.HideBrands(brand = null))
+    }
+
     private fun onBrandChoiceChanged(choice: EditPaymentMethodViewState.CardBrandChoice) {
         this.choice.value = choice
+
+        eventHandler(EditPaymentMethodViewInteractor.Event.HideBrands(brand = choice.brand))
     }
 
     private fun onRemoveConfirmationDismissed() {
@@ -183,12 +203,14 @@ internal class DefaultEditPaymentMethodViewInteractor constructor(
     object Factory : ModifiableEditPaymentMethodViewInteractor.Factory {
         override fun create(
             initialPaymentMethod: PaymentMethod,
+            eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String,
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
+                eventHandler = eventHandler,
                 removeExecutor = removeExecutor,
                 updateExecutor = updateExecutor,
                 displayName = displayName,

@@ -173,7 +173,7 @@ internal fun Wallet(
             GooglePayButton(
                 state = googlePay.buttonState?.convert(),
                 allowCreditCards = googlePay.allowCreditCards,
-                buttonType = googlePay.buttonType.value,
+                buttonType = googlePay.buttonType,
                 billingAddressParameters = googlePay.billingAddressParameters,
                 isEnabled = state.buttonsEnabled,
                 onPressed = onGooglePayPressed,
@@ -186,7 +186,7 @@ internal fun Wallet(
             }
 
             LinkButton(
-                email = null,
+                email = it.email,
                 enabled = state.buttonsEnabled,
                 onClick = onLinkPressed,
             )

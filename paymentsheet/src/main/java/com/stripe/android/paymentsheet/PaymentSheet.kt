@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
-import com.stripe.android.link.account.CookieStore
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -1058,6 +1058,12 @@ class PaymentSheet internal constructor(
         internal val collectsEmail: Boolean
             get() = email == CollectionMode.Always
 
+        internal val collectsAnything: Boolean
+            get() = name == CollectionMode.Always ||
+                phone == CollectionMode.Always ||
+                email == CollectionMode.Always ||
+                address == AddressCollectionMode.Full
+
         internal fun toBillingAddressConfig(): GooglePayPaymentMethodLauncher.BillingAddressConfig {
             val collectAddress = address == AddressCollectionMode.Full
             val collectPhone = phone == CollectionMode.Always
@@ -1407,7 +1413,7 @@ class PaymentSheet internal constructor(
          * @param context the Application [Context].
          */
         fun resetCustomer(context: Context) {
-            CookieStore(context).clear()
+            LinkStore(context).clear()
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.stripe.android.googlepaylauncher
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
@@ -12,7 +11,7 @@ import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 import org.json.JSONObject
@@ -39,11 +38,8 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
     private lateinit var args: GooglePayLauncherContract.Args
 
-    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setFadeAnimations()
 
         args = runCatching {
             requireNotNull(GooglePayLauncherContract.Args.fromIntent(intent)) {
@@ -81,7 +77,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        setFadeAnimations()
+        fadeOut()
     }
 
     private fun payWithGoogle(task: Task<PaymentData>) {
@@ -169,10 +165,6 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 )
         )
         finish()
-    }
-
-    private fun setFadeAnimations() {
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
     }
 
     private companion object {

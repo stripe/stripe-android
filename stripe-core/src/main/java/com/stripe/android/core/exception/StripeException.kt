@@ -19,6 +19,9 @@ abstract class StripeException(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     val isClientError = statusCode in 400..499
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    abstract fun analyticsValue(): String?
+
     override fun toString(): String {
         return listOfNotNull(
             requestId?.let { "Request-id: $it" },

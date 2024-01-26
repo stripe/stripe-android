@@ -1,6 +1,7 @@
 package com.stripe.android.payments
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
@@ -50,10 +51,10 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
 
         val intent = viewModel.createLaunchIntent(args)
 
-        if (intent != null) {
+        try {
             launcher.launch(intent)
             viewModel.hasLaunched = true
-        } else {
+        } catch (e: ActivityNotFoundException) {
             finishWithFailure(args)
         }
     }

@@ -227,7 +227,22 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-default-stripe-network-client/index.html">DefaultStripeNetworkClient</a>&nbsp;<span><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">workContext<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a><span class="token operator"> = </span>Dispatchers.IO<span class="token punctuation">, </span></span><span class="parameter ">connectionFactory<span class="token operator">: </span><a href="-connection-factory/index.html">ConnectionFactory</a><span class="token operator"> = </span>ConnectionFactory.Default<span class="token punctuation">, </span></span><span class="parameter ">retryDelaySupplier<span class="token operator">: </span><a href="-retry-delay-supplier/index.html">RetryDelaySupplier</a><span class="token operator"> = </span>RetryDelaySupplier()<span class="token punctuation">, </span></span><span class="parameter ">maxRetries<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_MAX_RETRIES<span class="token punctuation">, </span></span><span class="parameter ">logger<span class="token operator">: </span><a href="../com.stripe.android.core/-logger/index.html">Logger</a><span class="token operator"> = </span>Logger.noop()</span></span><span class="token punctuation">)</span> : <a href="-stripe-network-client/index.html">StripeNetworkClient</a></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="-default-stripe-network-client/index.html">DefaultStripeNetworkClient</a>&nbsp;<span><span class="token annotation builtin">@</span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.jvm/-jvm-overloads/index.html"><span class="token annotation builtin">JvmOverloads</span></a>&nbsp;</span><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">workContext<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.coroutines/-coroutine-context/index.html">CoroutineContext</a><span class="token operator"> = </span>Dispatchers.IO<span class="token punctuation">, </span></span><span class="parameter ">connectionFactory<span class="token operator">: </span><a href="-connection-factory/index.html">ConnectionFactory</a><span class="token operator"> = </span>ConnectionFactory.Default<span class="token punctuation">, </span></span><span class="parameter ">retryDelaySupplier<span class="token operator">: </span><a href="-retry-delay-supplier/index.html">RetryDelaySupplier</a><span class="token operator"> = </span>ExponentialBackoffRetryDelaySupplier()<span class="token punctuation">, </span></span><span class="parameter ">maxRetries<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a><span class="token operator"> = </span>DEFAULT_MAX_RETRIES<span class="token punctuation">, </span></span><span class="parameter ">logger<span class="token operator">: </span><a href="../com.stripe.android.core/-logger/index.html">Logger</a><span class="token operator"> = </span>Logger.noop()</span></span><span class="token punctuation">)</span> : <a href="-stripe-network-client/index.html">StripeNetworkClient</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="1015144424%2FClasslikes%2F1458831206" anchor-label="ExponentialBackoffRetryDelaySupplier" id="1015144424%2FClasslikes%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-exponential-backoff-retry-delay-supplier/index.html"><span>Exponential</span><wbr><span>Backoff</span><wbr><span>Retry</span><wbr><span>Delay</span><wbr><span><span>Supplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="1015144424%2FClasslikes%2F1458831206"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Singleton///PointingToDeclaration/"><span class="token annotation builtin">Singleton</span></span></div></div><span class="token keyword">class </span><a href="-exponential-backoff-retry-delay-supplier/index.html">ExponentialBackoffRetryDelaySupplier</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">incrementDuration<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-duration/index.html">Duration</a></span></span><span class="token punctuation">)</span> : <a href="-retry-delay-supplier/index.html">RetryDelaySupplier</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -243,6 +258,21 @@
               <div>
                 <div class="title">
                   <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">open </span><span class="token keyword">class </span><a href="-file-upload-request/index.html">FileUploadRequest</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">fileParams<span class="token operator">: </span><a href="../com.stripe.android.core.model/-stripe-file-params/index.html">StripeFileParams</a><span class="token punctuation">, </span></span><span class="parameter ">options<span class="token operator">: </span><a href="-api-request/-options/index.html">ApiRequest.Options</a><span class="token punctuation">, </span></span><span class="parameter ">appInfo<span class="token operator">: </span><a href="../com.stripe.android.core/-app-info/index.html">AppInfo</a><span class="token operator">?</span><span class="token operator"> = </span>null<span class="token punctuation">, </span></span><span class="parameter ">boundary<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token operator"> = </span>createBoundary()</span></span><span class="token punctuation">)</span> : <a href="-stripe-request/index.html">StripeRequest</a></div><div class="brief "><p class="paragraph">A <a href="-stripe-request/index.html">StripeRequest</a> for uploading a file using <a href="-stripe-request/-mime-type/-multipart-form/index.html">MimeType.MultipartForm</a>.</p></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="2031288102%2FClasslikes%2F1458831206" anchor-label="LinearRetryDelaySupplier" id="2031288102%2FClasslikes%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="-linear-retry-delay-supplier/index.html"><span>Linear</span><wbr><span>Retry</span><wbr><span>Delay</span><wbr><span><span>Supplier</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="2031288102%2FClasslikes%2F1458831206"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Singleton///PointingToDeclaration/"><span class="token annotation builtin">Singleton</span></span></div></div><span class="token keyword">class </span><a href="-linear-retry-delay-supplier/index.html">LinearRetryDelaySupplier</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">delay<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.time/-duration/index.html">Duration</a></span></span><span class="token punctuation">)</span> : <a href="-retry-delay-supplier/index.html">RetryDelaySupplier</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -317,7 +347,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="javax.inject/Singleton///PointingToDeclaration/"><span class="token annotation builtin">Singleton</span></span></div></div><span class="token keyword">class </span><a href="-retry-delay-supplier/index.html">RetryDelaySupplier</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">incrementSeconds<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-long/index.html">Long</a></span></span><span class="token punctuation">)</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">interface </span><a href="-retry-delay-supplier/index.html">RetryDelaySupplier</a></div></div></div>
                 </div>
               </div>
             </div>
@@ -666,7 +696,7 @@
   </div>
 </div>
       <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
       </div>
             </div>
         </div>

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.utils
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.delay
@@ -56,7 +57,10 @@ internal class PollingReachedMaxRetriesException(
 ) : StripeException(
     message = "reached max number of retries ${pollingOptions.maxNumberOfRetries}.",
     statusCode = HttpURLConnection.HTTP_ACCEPTED
-)
+) {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override fun analyticsValue(): String = "pollingReachedMaxRetriesError"
+}
 
 /**
  * returns true if exception represents a [HttpURLConnection.HTTP_ACCEPTED] API response.

@@ -3,17 +3,9 @@
     *;
 }
 
-# Without this, MavericksViewModel implementations were missing the MemberClass dalvik annotation
-# which preventedMavericks from finding its companion object which has its factory.
--keep,allowobfuscation class ** extends com.airbnb.mvrx.MavericksViewModel {
-    <clinit>();
-}
-
-# MavericksViewModel companion object factories
--keep,allowobfuscation class ** implements com.airbnb.mvrx.MavericksViewModelFactory
-
--dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
-
+# ------------------------
+#  MvRx Config
+# -----------------------
 
 # MavericksViewModel loads the Companion class via reflection and thus we need to make sure we keep
 # the name of the Companion object.
@@ -27,6 +19,8 @@
 -keepclassmembers,includedescriptorclasses,allowobfuscation class ** implements com.airbnb.mvrx.MavericksState {
    *;
 }
+
+-dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
 
 # The MavericksState object and the names classes that implement the MavericksState interface need to be
 # kept as they are accessed via reflection.

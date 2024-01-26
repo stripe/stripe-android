@@ -20,6 +20,7 @@ internal object TestViewModelFactory {
             linkConfigurationCoordinator = linkConfigurationCoordinator,
             savedStateHandle = savedStateHandle,
             linkAnalyticsComponentBuilder = mock(),
+            linkStore = mock(),
         )
         return viewModelFactory(linkHandler, linkConfigurationCoordinator, savedStateHandle)
     }

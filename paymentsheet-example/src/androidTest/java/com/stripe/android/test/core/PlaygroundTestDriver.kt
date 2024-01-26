@@ -555,7 +555,7 @@ internal class PlaygroundTestDriver(
     private fun waitForScreenToLoad(testParameters: TestParameters) {
         when (testParameters.playgroundSettingsSnapshot[CustomerSettingsDefinition]) {
             is CustomerType.GUEST, is CustomerType.NEW -> {
-                composeTestRule.waitUntil {
+                composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                     composeTestRule.onAllNodesWithText("Card number")
                         .fetchSemanticsNodes()
                         .size == 1
@@ -568,7 +568,7 @@ internal class PlaygroundTestDriver(
                 }
             }
             is CustomerType.Existing, is CustomerType.RETURNING -> {
-                composeTestRule.waitUntil {
+                composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                     composeTestRule.onAllNodesWithTag("AddCard")
                         .fetchSemanticsNodes()
                         .size == 1
@@ -582,7 +582,7 @@ internal class PlaygroundTestDriver(
     }
 
     internal fun pressEdit() {
-        composeTestRule.waitUntil {
+        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
                 .onAllNodesWithText("EDIT")
                 .fetchSemanticsNodes()
@@ -762,7 +762,7 @@ internal class PlaygroundTestDriver(
                         }
 
                         // The text comes after the buy button animation is complete
-                        composeTestRule.waitUntil {
+                        composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
                             runCatching {
                                 composeTestRule
                                     .onNodeWithText(authAction.expectedError)

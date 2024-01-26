@@ -2,6 +2,30 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+* [FIXED][7832](https://github.com/stripe/stripe-android/pull/7832) Fixed an issue with `FlowController` when a custom `ViewModelProvider.Factory` is specified.  
+
+## 20.37.1 - 2024-01-25
+
+### PaymentSheet
+* [FIXED][7822](https://github.com/stripe/stripe-android/pull/7822) Fixed an issue where the SDK was unable to follow URL redirects in some cases.
+
+### Payments
+* [FIXED][7822](https://github.com/stripe/stripe-android/pull/7822) Fixed an issue where the SDK was unable to follow URL redirects in some cases.
+
+## 20.37.0 - 2024-01-22
+
+### Payments
+* [CHANGED][7722](https://github.com/stripe/stripe-android/pull/7722) Added passive hCaptcha on Radar session creation endpoint. In order to enable hCaptcha on this endpoint, you must provide an activity to this method call (see the new optional activity parameter).
+* [FIXED][7777](https://github.com/stripe/stripe-android/pull/7777) Fixed an issue in `PaymentSession` where tapping the `Add card` button stopped working after it was clicked once.
+
+Dependencies updated:
+* [7603](https://github.com/stripe/stripe-android/pull/7603) Bumped compile SDK from 33 to 34.
+
+## 20.36.1 - 2024-01-08
+
+### Identity
+* [FIXED][7757](https://github.com/stripe/stripe-android/pull/7757) Fixed a crash when retrying the selfie scan.
+
 ## 20.36.0 - 2023-12-18
 
 ### PaymentSheet
