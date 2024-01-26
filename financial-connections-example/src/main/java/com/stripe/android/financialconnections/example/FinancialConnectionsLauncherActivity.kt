@@ -159,7 +159,6 @@ class FinancialConnectionsLauncherActivity : AppCompatActivity() {
                     )
                     Spacer(modifier = Modifier.size(16.dp))
                 }
-
             }
         }
 
