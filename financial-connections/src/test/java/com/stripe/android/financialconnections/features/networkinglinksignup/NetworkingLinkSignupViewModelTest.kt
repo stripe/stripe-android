@@ -17,12 +17,14 @@ import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
@@ -65,6 +67,7 @@ class NetworkingLinkSignupViewModelTest {
             businessName = "Business",
             accountholderCustomerEmailAddress = "test@test.com"
         )
+
         whenever(sync()).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
@@ -74,6 +77,7 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getManifest()).thenReturn(manifest)
+        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
         val state = viewModel.awaitState()
