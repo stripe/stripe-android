@@ -26,9 +26,15 @@ private val iconSize = 20.dp
  * @param painter the [Painter] to use for the icon
  */
 @Composable
-internal fun CircleIcon(painter: Painter) {
+internal fun CircleIcon(
+    painter: Painter,
+    contentDescription: String?
+) {
     CircleBox {
-        LocalIcon(painter)
+        LocalIcon(
+            painter = painter,
+            contentDescription = contentDescription
+        )
     }
 }
 
@@ -42,6 +48,7 @@ internal fun CircleIcon(painter: Painter) {
 @Composable
 internal fun CircleIcon(
     url: String,
+    contentDescription: String?,
     errorPainter: Painter? = null
 ) {
     CircleBox {
@@ -50,19 +57,22 @@ internal fun CircleIcon(
             url = url,
             imageLoader = LocalImageLoader.current,
             debugPainter = painterResource(id = R.drawable.stripe_ic_person),
-            contentDescription = "Web Icon",
-            errorContent = { errorPainter?.let { LocalIcon(errorPainter) } },
+            contentDescription = contentDescription,
+            errorContent = { errorPainter?.let { LocalIcon(errorPainter, contentDescription) } },
             contentScale = ContentScale.Crop
         )
     }
 }
 
 @Composable
-private fun LocalIcon(painter: Painter) {
+private fun LocalIcon(
+    painter: Painter,
+    contentDescription: String?
+) {
     Icon(
         painter = painter,
         tint = FinancialConnectionsTheme.v3Colors.iconBrand,
-        contentDescription = "Web Icon",
+        contentDescription = contentDescription,
         modifier = Modifier.size(iconSize),
     )
 }

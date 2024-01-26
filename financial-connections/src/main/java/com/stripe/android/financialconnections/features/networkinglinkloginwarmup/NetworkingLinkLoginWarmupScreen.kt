@@ -128,7 +128,10 @@ private fun NetworkingLinkLoginWarmupLoaded(
             lazyListState = lazyListState,
             body = {
                 item {
-                    CircleIcon(painterResource(id = R.drawable.stripe_ic_person))
+                    CircleIcon(
+                        painter = painterResource(id = R.drawable.stripe_ic_person),
+                        contentDescription = stringResource(R.string.stripe_networking_link_login_warmup_title)
+                    )
                     Spacer(modifier = Modifier.size(16.dp))
                     Text(
                         text = stringResource(R.string.stripe_networking_link_login_warmup_title),

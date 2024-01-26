@@ -32,7 +32,10 @@ internal fun ExitModal(
             .fillMaxWidth()
             .padding(24.dp),
     ) {
-        CircleIcon(painter = painterResource(id = R.drawable.stripe_ic_panel_arrow_right))
+        CircleIcon(
+            painter = painterResource(id = R.drawable.stripe_ic_panel_arrow_right),
+            contentDescription = stringResource(R.string.stripe_exit_modal_title)
+        )
         Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = stringResource(R.string.stripe_exit_modal_title),
