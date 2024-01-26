@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -26,6 +27,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
@@ -102,7 +104,6 @@ fun OTPElementUI(
     focusRequester: FocusRequester = remember { FocusRequester() }
 ) {
     val focusManager = LocalFocusManager.current
-
     Row(
         modifier = modifier.fillMaxWidth(),
     ) {
@@ -119,13 +120,10 @@ fun OTPElementUI(
 
             SectionCard(
                 modifier = Modifier
+                    .alpha(if (enabled) 1f else ContentAlpha.disabled)
                     .weight(1f),
                 shape = boxShape,
-                backgroundColor = if (enabled) {
-                    MaterialTheme.stripeColors.component
-                } else {
-                    MaterialTheme.stripeColors.placeholderText.copy(alpha = 0.1f)
-                },
+                backgroundColor = MaterialTheme.stripeColors.component,
                 border = BorderStroke(
                     width = MaterialTheme.getBorderStrokeWidth(isSelected),
                     color = if (isSelected) {
@@ -202,13 +200,21 @@ private fun OTPInputBox(
     BasicTextField(
         value = TextFieldValue(
             text = value,
-            selection = if (isSelected) { TextRange(value.length) } else { TextRange.Zero }
+            selection = if (isSelected) {
+                TextRange(value.length)
+            } else {
+                TextRange.Zero
+            }
         ),
         onValueChange = {
             // If the OTPInputBox already has a value, it would be the first character of it.text
             // remove it before passing it to the controller.
             val newValue =
-                if (value.isNotBlank() && it.text.isNotBlank()) { it.text.substring(1) } else { it.text }
+                if (value.isNotBlank() && it.text.isNotBlank()) {
+                    it.text.substring(1)
+                } else {
+                    it.text
+                }
             val inputLength = element.controller.onValueChanged(index, newValue)
             (0 until inputLength).forEach { _ -> focusManager.moveFocus(FocusDirection.Next) }
         },
