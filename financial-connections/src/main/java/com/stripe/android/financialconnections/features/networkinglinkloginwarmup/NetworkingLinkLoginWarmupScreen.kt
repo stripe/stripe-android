@@ -223,7 +223,7 @@ internal fun ExistingEmailSection(
                 .background(color = LinkColors.Brand200, shape = CircleShape)
         ) {
             Text(
-                text = email.getOrElse(0) { '🤷' }.uppercaseChar().toString(),
+                text = email.getOrElse(0) { '@' }.uppercaseChar().toString(),
                 style = v3Typography.bodySmall,
                 color = LinkColors.Brand600
             )
