@@ -118,7 +118,7 @@ workflows:
       - _run-connections-e2e-tests
   _run-connections-e2e-tests:
     before_run:
-      - start_emulator
+      - start_connections_emulator
       - prepare_all
     after_run:
       - conclude_all
@@ -146,35 +146,6 @@ workflows:
           inputs:
             - event_description: Android E2E tests failing! $BITRISE_BUILD_URL
             - integration_key: $AUX_PAGERDUTY_INTEGRATION_KEY
-  maestro-edge-financial-connections:
-    before_run:
-      - start_emulator
-      - prepare_all
-    after_run:
-      - conclude_all
-    steps:
-      - wait-for-android-emulator@1:
-          inputs:
-            - boot_timeout: 600
-      - android-build@1:
-          inputs:
-            - arguments: -PSTRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL=$STRIPE_FINANCIAL_CONNECTIONS_EXAMPLE_BACKEND_URL
-            - module: financial-connections-example
-            - variant: debug
-            - build_type: apk
-            - cache_level: all
-      - script@1:
-          title: Execute Maestro tests
-          inputs:
-            - content: |-
-                #!/usr/bin/env bash
-                bash ./scripts/execute_maestro_tests.sh -t edge
-      - slack@3:
-          is_always_run: true
-          inputs:
-            - webhook_url: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-            - webhook_url_on_error: $WEBHOOK_SLACK_CARLOSMUVI_MAESTRO
-      - deploy-to-bitrise-io@2: { }
   maestro-paymentsheet:
     before_run:
       - start_emulator
@@ -370,6 +341,23 @@ workflows:
       - script@1:
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
+  start_connections_emulator:
+    steps:
+      - avd-manager@1:
+          inputs:
+            - profile: "pixel_3a"
+            - abi: "x86_64"
+            - api_level: 32
+            - tag: "google_apis"
+            - start_command_flags: >
+                -camera-back none
+                -camera-front none
+                -netdelay none
+                -netspeed full
+                -memory 2048
+                -no-snapshot
+                -no-audio
+                -no-window
   start_emulator:
     steps:
       - avd-manager@1:
