@@ -5,10 +5,12 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
@@ -36,6 +38,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.theme.SailTheme
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import com.stripe.android.core.R as CoreR
@@ -46,10 +50,12 @@ const val PHONE_NUMBER_TEXT_FIELD_TAG = "PhoneNumberTextField"
 @Preview
 @Composable
 private fun PhoneNumberCollectionPreview() {
-    PhoneNumberCollectionSection(
-        enabled = true,
-        phoneNumberController = PhoneNumberController.createPhoneNumberController("6508989787")
-    )
+    StripeTheme {
+        PhoneNumberCollectionSection(
+            enabled = true,
+            phoneNumberController = PhoneNumberController.createPhoneNumberController()
+        )
+    }
 }
 
 @Composable
@@ -140,7 +146,12 @@ fun PhoneNumberElementUI(
             DropDown(
                 controller = controller.countryDropdownController,
                 enabled = enabled,
-                modifier = Modifier.padding(start = 16.dp, end = 8.dp)
+                modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .background(
+                        color = SailTheme.colors.backgroundOffset,
+                        shape = RoundedCornerShape(8.dp)
+                    ).padding(12.dp)
             )
         },
         visualTransformation = visualTransformation,
