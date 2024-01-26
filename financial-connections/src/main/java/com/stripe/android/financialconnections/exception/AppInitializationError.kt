@@ -11,5 +11,5 @@ class AppInitializationError(message: String) : StripeException(
     stripeError = null
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override fun analyticsValue(): String? = null
+    override fun analyticsValue(): String = "fcInitializationError"
 }

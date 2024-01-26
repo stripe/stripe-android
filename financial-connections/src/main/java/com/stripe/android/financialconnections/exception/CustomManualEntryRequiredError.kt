@@ -9,5 +9,5 @@ import com.stripe.android.core.exception.StripeException
  */
 class CustomManualEntryRequiredError : StripeException() {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    override fun analyticsValue(): String? = null
+    override fun analyticsValue(): String = "fcCustomManualEntryRequiredError"
 }
