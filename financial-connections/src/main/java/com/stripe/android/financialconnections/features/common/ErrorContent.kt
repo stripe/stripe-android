@@ -2,18 +2,16 @@
 
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.intl.Locale
@@ -31,7 +29,8 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.Layout
 import java.text.SimpleDateFormat
 
 @Composable
@@ -40,7 +39,12 @@ internal fun UnclassifiedErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     ErrorContent(
-        null, // TODO show warning icon.
+        iconContent = {
+            CircleIcon(
+                painter = painterResource(id = R.drawable.stripe_ic_warning),
+                contentDescription = null
+            )
+        },
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_generic_desc),
         primaryCta = stringResource(R.string.stripe_error_cta_close) to {
@@ -54,7 +58,12 @@ internal fun InstitutionUnknownErrorContent(
     onSelectAnotherBank: () -> Unit
 ) {
     ErrorContent(
-        iconUrl = null, // TODO show institution icon.
+        iconContent = {
+            CircleIcon(
+                painter = painterResource(id = R.drawable.stripe_ic_warning),
+                contentDescription = null
+            )
+        },
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_unplanned_downtime_desc),
         primaryCta = Pair(
@@ -71,7 +80,9 @@ internal fun InstitutionUnplannedDowntimeErrorContent(
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        iconUrl = exception.institution.icon?.default ?: "",
+        iconContent = {
+            InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
+        },
         title = stringResource(
             R.string.stripe_error_unplanned_downtime_title,
             exception.institution.name
@@ -103,7 +114,9 @@ internal fun InstitutionPlannedDowntimeErrorContent(
         SimpleDateFormat("dd/MM/yyyy HH:mm", javaLocale).format(exception.backUpAt)
     }
     ErrorContent(
-        iconUrl = exception.institution.icon?.default ?: "",
+        iconContent = {
+            InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
+        },
         title = stringResource(
             R.string.stripe_error_planned_downtime_title,
             exception.institution.name
@@ -133,7 +146,9 @@ internal fun NoSupportedPaymentMethodTypeAccountsErrorContent(
     onSelectAnotherBank: () -> Unit
 ) {
     ErrorContent(
-        iconUrl = exception.institution.icon?.default ?: "",
+        iconContent = {
+            InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
+        },
         title = stringResource(
             R.string.stripe_account_picker_error_no_payment_method_title
         ),
@@ -191,7 +206,9 @@ internal fun NoAccountsAvailableErrorContent(
     }
 
     ErrorContent(
-        iconUrl = exception.institution.icon?.default ?: "",
+        iconContent = {
+            InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
+        },
         title = stringResource(
             R.string.stripe_account_picker_error_no_account_available_title,
             exception.institution.name
@@ -209,7 +226,9 @@ internal fun AccountNumberRetrievalErrorContent(
     onEnterDetailsManually: () -> Unit
 ) {
     ErrorContent(
-        iconUrl = exception.institution.icon?.default ?: "",
+        iconContent = {
+            InstitutionIcon(institutionIcon = exception.institution.icon?.default ?: "")
+        },
         title = stringResource(
             R.string.stripe_attachlinkedpaymentaccount_error_title
         ),
@@ -236,62 +255,48 @@ internal fun AccountNumberRetrievalErrorContent(
 
 @Composable
 internal fun ErrorContent(
-    iconUrl: String?,
+    iconContent: @Composable (() -> Unit)?,
     title: String,
     content: String,
     primaryCta: Pair<String, () -> Unit>? = null,
     secondaryCta: Pair<String, () -> Unit>? = null
 ) {
-    val scrollState = rememberScrollState()
-    Column(
-        Modifier
-            .padding(
-                top = 8.dp,
-                start = 24.dp,
-                end = 24.dp,
-                bottom = 24.dp
-            )
-            .fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState)
-        ) {
-            InstitutionIcon(iconUrl)
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(
-                text = title,
-                style = FinancialConnectionsTheme.typography.subtitle
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(
-                text = content,
-                style = FinancialConnectionsTheme.typography.body
-            )
-        }
-        secondaryCta?.let { (text, onClick) ->
-            FinancialConnectionsButton(
-                type = FinancialConnectionsButton.Type.Secondary,
-                onClick = onClick,
-                modifier = Modifier
-                    .fillMaxWidth()
+    Layout(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        body = {
+            iconContent?.let {
+                item { Box(modifier = Modifier.padding(top = 16.dp)) { it() } }
+            }
+            item { Text(title, style = v3Typography.headingXLarge) }
+            item { Text(content, style = v3Typography.bodyMedium) }
+        },
+        footer = {
+            Column(
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Text(text = text)
+                secondaryCta?.let { (text, onClick) ->
+                    FinancialConnectionsButton(
+                        type = FinancialConnectionsButton.Type.Secondary,
+                        onClick = onClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = text)
+                    }
+                }
+                primaryCta?.let { (text, onClick) ->
+                    FinancialConnectionsButton(
+                        type = FinancialConnectionsButton.Type.Primary,
+                        onClick = onClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = text)
+                    }
+                }
             }
         }
-        if (primaryCta != null && secondaryCta != null) Spacer(Modifier.size(8.dp))
-        primaryCta?.let { (text, onClick) ->
-            FinancialConnectionsButton(
-                type = FinancialConnectionsButton.Type.Primary,
-                onClick = onClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = text)
-            }
-        }
-    }
+    )
 }
 
 @Preview(group = "Errors", name = "unclassified error")
