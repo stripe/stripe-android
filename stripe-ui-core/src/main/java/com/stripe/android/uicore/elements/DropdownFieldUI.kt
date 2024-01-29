@@ -69,7 +69,8 @@ private fun DropDownPreview() {
 fun DropDown(
     controller: DropdownFieldController,
     enabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showChevron: Boolean = true
 ) {
     val label by controller.label.collectAsState(null)
     val selectedIndex by controller.selectedIndex.collectAsState(0)
@@ -93,9 +94,10 @@ fun DropDown(
 
     val inputModeManager = LocalInputModeManager.current
     Box(
-        modifier = modifier
+        modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
             .background(MaterialTheme.stripeColors.component)
+            .then(modifier)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
@@ -116,7 +118,7 @@ fun DropDown(
                         selectedItemLabel,
                         color = currentTextColor
                     )
-                    if (!shouldDisableDropdownWithSingleItem) {
+                    if (!shouldDisableDropdownWithSingleItem && showChevron) {
                         Icon(
                             painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
                             contentDescription = null,

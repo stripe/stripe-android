@@ -12,6 +12,7 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -58,6 +59,7 @@ fun PhoneNumberCollectionSection(
     enabled: Boolean,
     phoneNumberController: PhoneNumberController,
     modifier: Modifier = Modifier,
+    countryDropdown: @Composable () -> Unit = { CountryDropdown(phoneNumberController, enabled) },
     isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
     requestFocusWhenShown: Boolean = false,
@@ -81,6 +83,7 @@ fun PhoneNumberCollectionSection(
     ) {
         PhoneNumberElementUI(
             modifier = modifier,
+            countryDropdown = countryDropdown,
             enabled = enabled,
             controller = phoneNumberController,
             requestFocusWhenShown = requestFocusWhenShown,
@@ -97,6 +100,7 @@ fun PhoneNumberElementUI(
     enabled: Boolean,
     controller: PhoneNumberController,
     modifier: Modifier = Modifier,
+    countryDropdown: @Composable () -> Unit = { CountryDropdown(controller, enabled) },
     requestFocusWhenShown: Boolean = false,
     imeAction: ImeAction = ImeAction.Done
 ) {
@@ -114,7 +118,7 @@ fun PhoneNumberElementUI(
     val focusRequester = remember { FocusRequester() }
     var hasFocus by rememberSaveable { mutableStateOf(false) }
 
-    androidx.compose.material.TextField(
+    TextField(
         value = value,
         onValueChange = controller::onValueChange,
         modifier = modifier
@@ -149,13 +153,7 @@ fun PhoneNumberElementUI(
         placeholder = {
             Text(text = placeholder)
         },
-        leadingIcon = {
-            DropDown(
-                controller = controller.countryDropdownController,
-                enabled = enabled,
-                modifier = Modifier.padding(start = 16.dp, end = 8.dp)
-            )
-        },
+        leadingIcon = countryDropdown,
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Phone,
@@ -180,4 +178,17 @@ fun PhoneNumberElementUI(
             }
         }
     }
+}
+
+@Composable
+private fun CountryDropdown(
+    phoneNumberController: PhoneNumberController,
+    enabled: Boolean
+) {
+    DropDown(
+        controller = phoneNumberController.countryDropdownController,
+        enabled = enabled,
+        modifier = Modifier
+            .padding(start = 16.dp, end = 8.dp)
+    )
 }
