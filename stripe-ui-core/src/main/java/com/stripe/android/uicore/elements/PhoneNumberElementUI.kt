@@ -57,6 +57,8 @@ private fun PhoneNumberCollectionPreview() {
 fun PhoneNumberCollectionSection(
     enabled: Boolean,
     phoneNumberController: PhoneNumberController,
+    modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
     requestFocusWhenShown: Boolean = false,
     imeAction: ImeAction = ImeAction.Done
@@ -72,8 +74,18 @@ fun PhoneNumberCollectionSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(sectionTitle, sectionErrorString) {
-        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown, imeAction)
+    Section(
+        title = sectionTitle,
+        error = sectionErrorString,
+        isSelected = isSelected
+    ) {
+        PhoneNumberElementUI(
+            modifier = modifier,
+            enabled = enabled,
+            controller = phoneNumberController,
+            requestFocusWhenShown = requestFocusWhenShown,
+            imeAction = imeAction
+        )
     }
 }
 
@@ -84,6 +96,7 @@ fun PhoneNumberCollectionSection(
 fun PhoneNumberElementUI(
     enabled: Boolean,
     controller: PhoneNumberController,
+    modifier: Modifier = Modifier,
     requestFocusWhenShown: Boolean = false,
     imeAction: ImeAction = ImeAction.Done
 ) {
@@ -104,7 +117,7 @@ fun PhoneNumberElementUI(
     androidx.compose.material.TextField(
         value = value,
         onValueChange = controller::onValueChange,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .bringIntoViewRequester(bringIntoViewRequester)
             .focusRequester(focusRequester)
@@ -169,5 +182,3 @@ fun PhoneNumberElementUI(
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val PHONE_NUMBER_FIELD_TAG = "phone_number"

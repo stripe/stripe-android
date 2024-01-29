@@ -86,10 +86,11 @@ private fun defaultAutofillEventReporter(): (String) -> Unit {
  */
 @Composable
 fun TextFieldSection(
+    modifier: Modifier = Modifier,
     textFieldController: TextFieldController,
     imeAction: ImeAction,
     enabled: Boolean,
-    modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
@@ -104,7 +105,7 @@ fun TextFieldSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(sectionTitle, sectionErrorString) {
+    Section(title = sectionTitle, error = sectionErrorString, isSelected = isSelected) {
         TextField(
             textFieldController = textFieldController,
             enabled = enabled,
@@ -439,9 +440,7 @@ private fun TrailingDropdown(
 
             if (show) {
                 CompositionLocalProvider(
-                    LocalContentColor
-                        provides
-                            MaterialTheme.stripeColors.placeholderText
+                    LocalContentColor provides MaterialTheme.stripeColors.placeholderText
                 ) {
                     TrailingIcon(
                         trailingIcon = TextFieldIcon.Trailing(
