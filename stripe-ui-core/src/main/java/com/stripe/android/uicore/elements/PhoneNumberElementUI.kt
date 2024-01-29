@@ -12,6 +12,7 @@ import androidx.compose.foundation.relocation.bringIntoViewRequester
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -57,6 +58,9 @@ private fun PhoneNumberCollectionPreview() {
 fun PhoneNumberCollectionSection(
     enabled: Boolean,
     phoneNumberController: PhoneNumberController,
+    modifier: Modifier = Modifier,
+    countryDropdown: @Composable () -> Unit = { CountryDropdown(phoneNumberController, enabled) },
+    isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
     requestFocusWhenShown: Boolean = false,
     imeAction: ImeAction = ImeAction.Done
@@ -72,8 +76,19 @@ fun PhoneNumberCollectionSection(
         } ?: stringResource(it.errorMessage)
     }
 
-    Section(sectionTitle, sectionErrorString) {
-        PhoneNumberElementUI(enabled, phoneNumberController, requestFocusWhenShown, imeAction)
+    Section(
+        title = sectionTitle,
+        error = sectionErrorString,
+        isSelected = isSelected
+    ) {
+        PhoneNumberElementUI(
+            modifier = modifier,
+            countryDropdown = countryDropdown,
+            enabled = enabled,
+            controller = phoneNumberController,
+            requestFocusWhenShown = requestFocusWhenShown,
+            imeAction = imeAction
+        )
     }
 }
 
@@ -84,6 +99,8 @@ fun PhoneNumberCollectionSection(
 fun PhoneNumberElementUI(
     enabled: Boolean,
     controller: PhoneNumberController,
+    modifier: Modifier = Modifier,
+    countryDropdown: @Composable () -> Unit = { CountryDropdown(controller, enabled) },
     requestFocusWhenShown: Boolean = false,
     imeAction: ImeAction = ImeAction.Done
 ) {
@@ -101,10 +118,10 @@ fun PhoneNumberElementUI(
     val focusRequester = remember { FocusRequester() }
     var hasFocus by rememberSaveable { mutableStateOf(false) }
 
-    androidx.compose.material.TextField(
+    TextField(
         value = value,
         onValueChange = controller::onValueChange,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .bringIntoViewRequester(bringIntoViewRequester)
             .focusRequester(focusRequester)
@@ -136,13 +153,7 @@ fun PhoneNumberElementUI(
         placeholder = {
             Text(text = placeholder)
         },
-        leadingIcon = {
-            DropDown(
-                controller = controller.countryDropdownController,
-                enabled = enabled,
-                modifier = Modifier.padding(start = 16.dp, end = 8.dp)
-            )
-        },
+        leadingIcon = countryDropdown,
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Phone,
@@ -169,5 +180,15 @@ fun PhoneNumberElementUI(
     }
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-const val PHONE_NUMBER_FIELD_TAG = "phone_number"
+@Composable
+private fun CountryDropdown(
+    phoneNumberController: PhoneNumberController,
+    enabled: Boolean
+) {
+    DropDown(
+        controller = phoneNumberController.countryDropdownController,
+        enabled = enabled,
+        modifier = Modifier
+            .padding(start = 16.dp, end = 8.dp)
+    )
+}
