@@ -93,7 +93,7 @@ fun OTPElementUI(
     element: OTPElement,
     modifier: Modifier = Modifier,
     boxShape: Shape = MaterialTheme.shapes.medium,
-    boxTextStyle: TextStyle = defaultTextStyle(),
+    boxTextStyle: TextStyle = OTPElementUI.defaultTextStyle(),
     boxSpacing: Dp = 8.dp,
     middleSpacing: Dp = 20.dp,
     otpInputPlaceholder: String = "●",
@@ -230,46 +230,59 @@ private fun OTPInputBox(
             onDone = { focusManager.clearFocus(true) }
         ),
         singleLine = true,
-        decorationBox = @Composable { innerTextField ->
-            TextFieldDefaults.TextFieldDecorationBox(
-                value = value,
-                visualTransformation = VisualTransformation.None,
-                innerTextField = innerTextField,
-                placeholder = {
-                    Text(
-                        text = if (!isSelected) placeholder else "",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                },
-                singleLine = true,
-                enabled = enabled,
-                interactionSource = remember { MutableInteractionSource() },
-                colors = TextFieldDefaults.textFieldColors(
-                    textColor = MaterialTheme.stripeColors.onComponent,
-                    backgroundColor = Color.Transparent,
-                    cursorColor = MaterialTheme.stripeColors.textCursor,
-                    focusedIndicatorColor = Color.Transparent,
-                    disabledIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    placeholderColor = colors.placeholder,
-                    disabledPlaceholderColor = colors.placeholder
-                ),
-                // TextField has a default padding, here we are specifying 0.dp padding
-                contentPadding = PaddingValues()
-            )
-        }
+        decorationBox = OTPInputDecorationBox(value, isSelected, placeholder, enabled, colors)
     )
 }
 
 @Composable
-private fun defaultTextStyle() = TextStyle(
-    fontFamily = FontFamily.Default,
-    fontWeight = FontWeight.SemiBold,
-    fontSize = 24.sp,
-    color = MaterialTheme.stripeColors.onComponent,
-    textAlign = TextAlign.Center
-)
+@OptIn(ExperimentalMaterialApi::class)
+private fun OTPInputDecorationBox(
+    value: String,
+    isSelected: Boolean,
+    placeholder: String,
+    enabled: Boolean,
+    colors: OTPElementColors
+) = @Composable { innerTextField: @Composable () -> Unit ->
+    TextFieldDefaults.TextFieldDecorationBox(
+        value = value,
+        visualTransformation = VisualTransformation.None,
+        innerTextField = innerTextField,
+        placeholder = {
+            Text(
+                text = if (!isSelected) placeholder else "",
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center
+            )
+        },
+        singleLine = true,
+        enabled = enabled,
+        interactionSource = remember { MutableInteractionSource() },
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = MaterialTheme.stripeColors.onComponent,
+            backgroundColor = Color.Transparent,
+            cursorColor = MaterialTheme.stripeColors.textCursor,
+            focusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            placeholderColor = colors.placeholder,
+            disabledPlaceholderColor = colors.placeholder
+        ),
+        // TextField has a default padding, here we are specifying 0.dp padding
+        contentPadding = PaddingValues()
+    )
+}
+
+internal object OTPElementUI {
+
+    @Composable
+    fun defaultTextStyle() = TextStyle(
+        fontFamily = FontFamily.Default,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 24.sp,
+        color = MaterialTheme.stripeColors.onComponent,
+        textAlign = TextAlign.Center
+    )
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class OTPElementColors(

@@ -22,7 +22,7 @@ then
   exit 1
 fi
 
-export MAESTRO_VERSION=1.33.1
+export MAESTRO_VERSION=1.35.0
 
 # Retry mechanism for Maestro installation
 MAX_RETRIES=5

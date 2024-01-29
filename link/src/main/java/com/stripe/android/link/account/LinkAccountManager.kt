@@ -41,18 +41,7 @@ internal class LinkAccountManager @Inject constructor(
     @VisibleForTesting
     var consumerPublishableKey: String? = null
 
-    val accountStatus = linkAccount.map { value ->
-        // If we already fetched an account, return its status
-        value?.accountStatus
-            // If a customer email was passed in, lookup the account.
-            ?: config.customerInfo?.email?.let { customerEmail ->
-                lookupConsumer(customerEmail).map {
-                    it?.accountStatus
-                }.getOrElse {
-                    AccountStatus.Error
-                }
-            } ?: AccountStatus.SignedOut
-    }
+    val accountStatus = linkAccount.map { it.fetchAccountStatus() }
 
     /**
      * Retrieves the Link account associated with the email if it exists.
@@ -68,10 +57,8 @@ internal class LinkAccountManager @Inject constructor(
         startSession: Boolean = true,
     ): Result<LinkAccount?> =
         linkRepository.lookupConsumer(email, authSessionCookie)
-            .also {
-                if (it.isFailure) {
-                    linkEventsReporter.onAccountLookupFailure()
-                }
+            .onFailure { error ->
+                linkEventsReporter.onAccountLookupFailure(error)
             }.map { consumerSessionLookup ->
                 consumerSessionLookup.consumerSession?.let { consumerSession ->
                     if (startSession) {
@@ -91,21 +78,64 @@ internal class LinkAccountManager @Inject constructor(
             is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
             }
-
-            is UserInput.SignUp -> signUp(
+            is UserInput.SignUp -> signUpIfValidSessionState(
                 email = userInput.email,
-                phone = userInput.phone,
                 country = userInput.country,
-                name = userInput.name,
-                consentAction = ConsumerSignUpConsentAction.Checkbox
-            ).also {
-                if (it.isSuccess) {
+                phone = userInput.phone,
+                name = userInput.name
+            )
+        }
+
+    /**
+     * Attempts sign up if session is in valid state for sign up
+     */
+    private suspend fun signUpIfValidSessionState(
+        email: String,
+        phone: String,
+        country: String,
+        name: String?
+    ): Result<LinkAccount> {
+        val currentAccount = _linkAccount.value
+        val currentEmail = currentAccount?.email ?: config.customerInfo.email
+
+        return when (val status = currentAccount.fetchAccountStatus()) {
+            AccountStatus.Verified -> {
+                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
+
+                Result.failure(
+                    AlreadyLoggedInLinkException(
+                        email = currentEmail,
+                        accountStatus = status
+                    )
+                )
+            }
+            AccountStatus.NeedsVerification,
+            AccountStatus.VerificationStarted -> {
+                linkEventsReporter.onInvalidSessionState(LinkEventsReporter.SessionState.RequiresVerification)
+
+                Result.failure(
+                    AlreadyLoggedInLinkException(
+                        email = currentEmail,
+                        accountStatus = status
+                    )
+                )
+            }
+            AccountStatus.SignedOut,
+            AccountStatus.Error -> {
+                signUp(
+                    email = email,
+                    phone = phone,
+                    country = country,
+                    name = name,
+                    consentAction = ConsumerSignUpConsentAction.Checkbox
+                ).onSuccess {
                     linkEventsReporter.onSignupCompleted(true)
-                } else {
-                    linkEventsReporter.onSignupFailure(true)
+                }.onFailure { error ->
+                    linkEventsReporter.onSignupFailure(true, error)
                 }
             }
         }
+    }
 
     /**
      * Registers the user for a new Link account.
@@ -207,4 +237,16 @@ internal class LinkAccountManager @Inject constructor(
             }
         }
     }
+
+    private suspend fun LinkAccount?.fetchAccountStatus(): AccountStatus =
+        // If we already fetched an account, return its status
+        this?.accountStatus
+            // If a customer email was passed in, lookup the account.
+            ?: config.customerInfo.email?.let { customerEmail ->
+                lookupConsumer(customerEmail).map {
+                    it?.accountStatus
+                }.getOrElse {
+                    AccountStatus.Error
+                }
+            } ?: AccountStatus.SignedOut
 }

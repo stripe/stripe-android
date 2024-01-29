@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -21,7 +20,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonDefaults.buttonColors
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ButtonElevation
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -37,11 +36,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.theme.Brand400
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
 
 @Composable
@@ -67,34 +68,27 @@ internal fun FinancialConnectionsButton(
                 }
             },
             modifier = modifier,
-            elevation = ButtonDefaults.elevation(
-                defaultElevation = 0.dp,
-                pressedElevation = 0.dp,
-                disabledElevation = 0.dp,
-                hoveredElevation = 0.dp,
-                focusedElevation = 0.dp,
-            ),
+            elevation = type.elevation(),
             enabled = enabled,
             shape = RoundedCornerShape(size = size.radius),
             contentPadding = size.paddingValues(),
             colors = type.buttonColors(),
             content = {
                 ProvideTextStyle(
-                    value = FinancialConnectionsTheme.typography.bodyEmphasized.copy(
+                    value = v3Typography.labelLargeEmphasized.copy(
                         // material button adds letter spacing internally, this removes it.
                         letterSpacing = 0.sp
                     )
                 ) {
                     Row {
                         if (loading) {
-                            CircularProgressIndicator(
-                                strokeWidth = 4.dp,
-                                modifier = Modifier.size(21.dp),
-                                color = colors.textWhite
+                            V3LoadingSpinner(
+                                strokeWidth = 2.dp,
+                                modifier = Modifier.size(24.dp),
                             )
-                            Spacer(modifier = Modifier.size(8.dp))
+                        } else {
+                            content()
                         }
-                        content()
                     }
                 }
             }
@@ -105,9 +99,8 @@ internal fun FinancialConnectionsButton(
 private fun Type.rippleTheme() = object : RippleTheme {
     @Composable
     override fun defaultColor() = when (this@rippleTheme) {
-        Type.Primary -> Color.White
-        Type.Secondary -> colors.textSecondary
-        Type.Critical -> Color.White
+        Type.Primary -> Neutral0
+        Type.Secondary -> v3Colors.textDefault
     }
 
     @Composable
@@ -125,46 +118,43 @@ internal object FinancialConnectionsButton {
         abstract fun buttonColors(): ButtonColors
         abstract fun rippleColor(): Color
 
+        @Composable
+        abstract fun elevation(): ButtonElevation
+
         object Primary : Type() {
             @Composable
-            override fun buttonColors(): ButtonColors {
-                return buttonColors(
-                    backgroundColor = colors.textBrand,
-                    contentColor = colors.textWhite,
-                    disabledBackgroundColor = colors.textBrand,
-                    disabledContentColor = colors.textWhite.copy(alpha = 0.3f)
-                )
-            }
+            override fun buttonColors(): ButtonColors = buttonColors(
+                backgroundColor = v3Colors.iconBrand,
+                contentColor = v3Colors.textWhite,
+                disabledBackgroundColor = v3Colors.iconBrand,
+                disabledContentColor = v3Colors.textWhite.copy(alpha = 0.4f)
+            )
 
             override fun rippleColor(): Color = Brand400
+
+            @Composable
+            override fun elevation(): ButtonElevation = ButtonDefaults.elevation()
         }
 
         object Secondary : Type() {
             @Composable
-            override fun buttonColors(): ButtonColors {
-                return buttonColors(
-                    backgroundColor = colors.backgroundContainer,
-                    contentColor = colors.textPrimary,
-                    disabledBackgroundColor = colors.backgroundContainer,
-                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
-                )
-            }
+            override fun buttonColors(): ButtonColors = buttonColors(
+                backgroundColor = Neutral50,
+                contentColor = v3Colors.textDefault,
+                disabledBackgroundColor = Neutral50,
+                disabledContentColor = v3Colors.textDefault.copy(alpha = 0.4f)
+            )
 
             override fun rippleColor(): Color = Neutral50
-        }
 
-        object Critical : Type() {
             @Composable
-            override fun buttonColors(): ButtonColors {
-                return buttonColors(
-                    backgroundColor = colors.textCritical,
-                    contentColor = colors.textWhite,
-                    disabledBackgroundColor = colors.textCritical.copy(alpha = 0.12f),
-                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
-                )
-            }
-
-            override fun rippleColor(): Color = Neutral50
+            override fun elevation(): ButtonElevation = ButtonDefaults.elevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp,
+                disabledElevation = 0.dp,
+                hoveredElevation = 0.dp,
+                focusedElevation = 0.dp,
+            )
         }
     }
 
@@ -173,18 +163,6 @@ internal object FinancialConnectionsButton {
         @Composable
         abstract fun paddingValues(): PaddingValues
         abstract val radius: Dp
-
-        object Pill : Size() {
-            override val radius: Dp = 4.dp
-
-            @Composable
-            override fun paddingValues(): PaddingValues = PaddingValues(
-                start = 8.dp,
-                top = 4.dp,
-                end = 8.dp,
-                bottom = 4.dp
-            )
-        }
 
         object Regular : Size() {
             override val radius: Dp = 12.dp
@@ -206,7 +184,7 @@ internal fun FinancialConnectionsButtonPreview() {
     FinancialConnectionsPreview {
         Column(
             modifier = Modifier
-                .background(colors.backgroundSurface)
+                .background(v3Colors.backgroundSurface)
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceEvenly

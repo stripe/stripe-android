@@ -79,7 +79,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     ) : PaymentSheetLoadingException() {
 
         override val type: String
-            get() = StripeException.create(cause).analyticsValue() ?: "unknown"
+            get() = StripeException.create(cause).analyticsValue()
 
         override val message: String? = cause.message
 

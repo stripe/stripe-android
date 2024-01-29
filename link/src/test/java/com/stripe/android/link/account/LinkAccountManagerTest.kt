@@ -38,6 +38,7 @@ class LinkAccountManagerTest {
         whenever(state).thenReturn(ConsumerSession.VerificationSession.SessionState.Verified)
     }
     private val mockConsumerSession = mock<ConsumerSession>().apply {
+        whenever(emailAddress).thenReturn(EMAIL)
         whenever(clientSecret).thenReturn(CLIENT_SECRET)
         whenever(verificationSessions).thenReturn(listOf(verifiedSession))
         whenever(publishableKey).thenReturn(PUBLISHABLE_KEY)
@@ -115,7 +116,7 @@ class LinkAccountManagerTest {
 
         accountManager().lookupConsumer(EMAIL, false)
 
-        verify(linkEventsReporter).onAccountLookupFailure()
+        verify(linkEventsReporter).onAccountLookupFailure(any<Exception>())
     }
 
     @Test
@@ -166,6 +167,49 @@ class LinkAccountManagerTest {
         }
 
     @Test
+    fun `signInWithUserInput for new user fails when user is logged in`() =
+        runSuspendTest {
+            val manager = accountManager()
+
+            manager.setAccountNullable(mockConsumerSession)
+
+            val result = manager.signInWithUserInput(
+                UserInput.SignUp(
+                    email = EMAIL,
+                    phone = "phone",
+                    country = "country",
+                    name = "name"
+                )
+            )
+
+            assertThat(result.exceptionOrNull()).isEqualTo(
+                AlreadyLoggedInLinkException(
+                    email = EMAIL,
+                    accountStatus = AccountStatus.Verified
+                )
+            )
+        }
+
+    @Test
+    fun `signInWithUserInput for new user sends event when fails when user is logged in`() =
+        runSuspendTest {
+            val manager = accountManager()
+
+            manager.setAccountNullable(mockConsumerSession)
+
+            manager.signInWithUserInput(
+                UserInput.SignUp(
+                    email = EMAIL,
+                    phone = "phone",
+                    country = "country",
+                    name = "name"
+                )
+            )
+
+            verify(linkEventsReporter).onInvalidSessionState(LinkEventsReporter.SessionState.Verified)
+        }
+
+    @Test
     fun `signInWithUserInput for new user sends analytics event when call fails`() =
         runSuspendTest {
             whenever(
@@ -188,7 +232,7 @@ class LinkAccountManagerTest {
                 )
             )
 
-            verify(linkEventsReporter).onSignupFailure(true)
+            verify(linkEventsReporter).onSignupFailure(eq(true), any<Exception>())
         }
 
     @Test
