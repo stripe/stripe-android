@@ -7,4 +7,16 @@
     <string name="collect_bank_account_for_bank_account_token">Collect bank account for Connect payouts</string>
     <string name="collect_bank_account_for_data_title">Collect Accounts</string>
     <string name="collect_bank_account_for_bank_account_token_title">Collect Bank Account Token</string>
+    <string name="financial_connections_playground_title">Playground</string>
+    <string name="financial_connections_playground_subtitle">Testing playground for Stripe engineers</string>
+    <string name="financial_connections_data_kotlin_title">(Kotlin) Data-powered products</string>
+    <string name="financial_connections_data_compose_title">(Jetpack Compose) Data-powered products</string>
+    <string name="financial_connections_data_java_title">(Java) Data-powered products</string>
+    <string name="financial_connections_data_subtitle">Collect an account to build data-powered products</string>
+    <string name="financial_connections_ach_title">ACH Direct Debit payments</string>
+    <string name="financial_connections_ach_subtitle">Collect a bank account to optimize ACH Direct Debit payments with account data</string>
+    <string name="financial_connections_payouts_title">Connect payouts</string>
+    <string name="financial_connections_payouts_subtitle">Collect a bank account to enhance Connect payouts with account data.</string>
+    <string name="financial_connections_webview_title">Webview API</string>
+    <string name="financial_connections_webview_subtitle">Embed the Financial Connections flow on a webview by manually handling institution authentication and app redirects.</string>
 </resources>
