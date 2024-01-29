@@ -19,7 +19,8 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 
-internal val Neutral50 = Color(0xffF6F8FA)
+internal val Neutral0 = Color(0xffFFFFFF)
+internal val Neutral50 = Color(0xffF5F6F8)
 internal val Neutral150 = Color(0xffE0E6EB)
 internal val Neutral200 = Color(0xffC0C8D2)
 internal val Neutral300 = Color(0xffA3ACBA)
