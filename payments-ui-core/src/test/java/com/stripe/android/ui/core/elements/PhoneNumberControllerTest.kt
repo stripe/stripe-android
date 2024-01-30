@@ -54,7 +54,10 @@ internal class PhoneNumberControllerTest {
 
     @Test
     fun `any input is marked complete if field is optional`() = runTest {
-        val phoneNumberController = PhoneNumberController(showOptionalLabel = true)
+        val phoneNumberController = PhoneNumberController(
+            showOptionalLabel = true,
+            acceptAnyInput = true,
+        )
 
         phoneNumberController.isComplete.test {
             assertThat(awaitItem()).isTrue()

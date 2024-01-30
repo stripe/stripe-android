@@ -60,7 +60,7 @@ internal class DefaultCardNumberController(
     uiContext: CoroutineContext,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
-    initialValue: String?,
+    override val initialValue: String?,
     override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
 ) : CardNumberController() {

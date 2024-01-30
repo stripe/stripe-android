@@ -2,7 +2,6 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.stripe.android.link.ui.inline.LinkSignupField
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.uicore.elements.IdentifierSpec

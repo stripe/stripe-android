@@ -124,13 +124,26 @@ private fun LinkOptionalInlineSignup(
 ) {
     Column(modifier) {
         val bringTermsIntoViewRequester = remember { BringIntoViewRequester() }
-        var didShowAllFields by rememberSaveable { mutableStateOf(false) }
+        val emailFocusRequester = remember { FocusRequester() }
+        val phoneFocusRequester = remember { FocusRequester() }
+        val nameFocusRequester = remember { FocusRequester() }
 
+        var didShowAllFields by rememberSaveable { mutableStateOf(false) }
         val sectionError by sectionController.error.collectAsState(null)
 
         if (signUpState == SignUpState.InputtingRemainingFields) {
             LaunchedEffect(signUpState) {
                 bringTermsIntoViewRequester.bringIntoView()
+
+                val isMissingEmail = emailController.initialValue.isNullOrBlank()
+
+                val nextFocusRequester = if (isShowingPhoneFirst && isMissingEmail) {
+                    emailFocusRequester
+                } else {
+                    nameFocusRequester.takeIf { requiresNameCollection }
+                }
+
+                nextFocusRequester?.requestFocus()
             }
         }
 
@@ -147,6 +160,7 @@ private fun LinkOptionalInlineSignup(
                     } else {
                         ImeAction.Done
                     },
+                    focusRequester = phoneFocusRequester,
                     trailingIcon = { LinkLogo() },
                 )
             } else {
@@ -159,6 +173,7 @@ private fun LinkOptionalInlineSignup(
                     } else {
                         ImeAction.Done
                     },
+                    focusRequester = emailFocusRequester,
                     trailingIcon = { LinkLogo() },
                 )
             }
@@ -198,6 +213,7 @@ private fun LinkOptionalInlineSignup(
                             } else {
                                 ImeAction.Done
                             },
+                            focusRequester = emailFocusRequester,
                         )
                     } else {
                         PhoneNumberElementUI(
@@ -208,7 +224,8 @@ private fun LinkOptionalInlineSignup(
                                 ImeAction.Next
                             } else {
                                 ImeAction.Done
-                            }
+                            },
+                            focusRequester = phoneFocusRequester,
                         )
                     }
 
@@ -225,6 +242,7 @@ private fun LinkOptionalInlineSignup(
                             textFieldController = nameController,
                             imeAction = ImeAction.Done,
                             enabled = enabled,
+                            focusRequester = nameFocusRequester,
                         )
                     }
 
@@ -257,11 +275,10 @@ internal fun EmailCollection(
     emailController: TextFieldController,
     signUpState: SignUpState,
     imeAction: ImeAction,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     requestFocusWhenShown: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
-    val focusRequester = remember { FocusRequester() }
-
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically

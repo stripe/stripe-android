@@ -28,6 +28,7 @@ interface TextFieldController : InputController, SectionFieldComposable {
     fun onFocusChange(newHasFocus: Boolean)
     fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {}
 
+    val initialValue: String?
     val autofillType: AutofillType?
     val debugLabel: String
     val trailingIcon: Flow<TextFieldIcon?>
@@ -121,7 +122,7 @@ sealed class TextFieldIcon {
 class SimpleTextFieldController constructor(
     val textFieldConfig: TextFieldConfig,
     override val showOptionalLabel: Boolean = false,
-    initialValue: String? = null
+    override val initialValue: String? = null
 ) : TextFieldController, SectionFieldErrorController {
     override val trailingIcon: Flow<TextFieldIcon?> = textFieldConfig.trailingIcon
     override val capitalization: KeyboardCapitalization = textFieldConfig.capitalization

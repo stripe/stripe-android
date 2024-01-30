@@ -69,28 +69,14 @@ data class InlineSignupViewState internal constructor(
                 }
             }
 
-            val fieldsToPrefilledValues = fields.associateWith { field ->
-                when (field) {
-                    LinkSignupField.Email -> customer.email
-                    LinkSignupField.Phone -> customer.phone
-                    LinkSignupField.Name -> customer.name
-                }
-            }
-
-            val hasPrefillValuesForAllFields = fieldsToPrefilledValues.all { it.value != null }
-
             val prefillEligibleFields = when (config.signupMode) {
                 LinkSignupMode.InsteadOfSaveForFutureUse -> {
                     fields.toSet()
                 }
                 LinkSignupMode.AlongsideSaveForFutureUse -> {
-                    if (hasPrefillValuesForAllFields) {
-                        // We can't prefill all fields, as this might lead to Link account creation without explicit
-                        // user consent. We don't prefill the first field in this case.
-                        fields.toSet() - fields.first()
-                    } else {
-                        fields.toSet()
-                    }
+                    // We can't prefill all fields, as this might lead to Link account creation without explicit
+                    // user consent. We don't prefill the first field in this case.
+                    fields.toSet() - fields.first()
                 }
                 null -> {
                     emptySet()

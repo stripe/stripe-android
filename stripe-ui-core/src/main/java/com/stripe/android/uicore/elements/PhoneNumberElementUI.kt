@@ -63,6 +63,7 @@ fun PhoneNumberCollectionSection(
     isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
     requestFocusWhenShown: Boolean = false,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     imeAction: ImeAction = ImeAction.Done
 ) {
     val error by phoneNumberController.error.collectAsState(null)
@@ -102,6 +103,7 @@ fun PhoneNumberElementUI(
     modifier: Modifier = Modifier,
     countryDropdown: @Composable () -> Unit = { CountryDropdown(controller, enabled) },
     requestFocusWhenShown: Boolean = false,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     trailingIcon: @Composable (() -> Unit)? = null,
     imeAction: ImeAction = ImeAction.Done,
 ) {
@@ -119,7 +121,6 @@ fun PhoneNumberElementUI(
     val placeholder by controller.placeholder.collectAsState("")
     val visualTransformation by controller.visualTransformation.collectAsState(VisualTransformation.None)
     val colors = TextFieldColors(shouldShowError != null)
-    val focusRequester = remember { FocusRequester() }
     var hasFocus by rememberSaveable { mutableStateOf(false) }
 
     TextField(

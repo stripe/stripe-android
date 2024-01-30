@@ -39,7 +39,9 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
@@ -134,7 +136,8 @@ fun TextField(
     modifier: Modifier = Modifier,
     onTextStateChanged: (TextFieldState?) -> Unit = {},
     nextFocusDirection: FocusDirection = FocusDirection.Next,
-    previousFocusDirection: FocusDirection = FocusDirection.Previous
+    previousFocusDirection: FocusDirection = FocusDirection.Previous,
+    focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
     val focusManager = LocalFocusManager.current
     val value by textFieldController.fieldValue.collectAsState("")
@@ -222,6 +225,7 @@ fun TextField(
                     }
                 }
             }
+            .focusRequester(focusRequester)
             .semantics {
                 this.contentDescription = contentDescription
                 this.editableText = AnnotatedString("")
