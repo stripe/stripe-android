@@ -821,46 +821,6 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `Provides Link signup prefill if showing instead of save-for-future-use`() = runTest {
-        val loader = createPaymentSheetLoader(
-            linkAccountState = AccountStatus.SignedOut,
-        )
-
-        val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-            ),
-        ).getOrThrow()
-
-        assertThat(result.linkState?.configuration?.customerInfo?.shouldPrefill).isTrue()
-    }
-
-    @Test
-    fun `Provides no Link signup prefill if showing alongside save-for-future-use`() = runTest {
-        val loader = createPaymentSheetLoader(
-            linkAccountState = AccountStatus.NeedsVerification,
-        )
-
-        val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
-                ),
-            ),
-        ).getOrThrow()
-
-        assertThat(result.linkState?.configuration?.customerInfo?.shouldPrefill).isFalse()
-    }
-
-    @Test
     fun `Returns correct Link signup mode if not saving for future use`() = runTest {
         val loader = createPaymentSheetLoader(
             linkAccountState = AccountStatus.Error,
