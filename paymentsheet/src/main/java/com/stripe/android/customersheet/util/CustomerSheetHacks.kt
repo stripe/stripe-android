@@ -20,13 +20,13 @@ internal object CustomerSheetHacks {
 
     fun requireAdapter(): CustomerAdapter {
         return requireNotNull(adapter) {
-            "bla"
+            "No adapter set on CustomerSheetHacks"
         }
     }
 
     fun requireConfiguration(): CustomerSheet.Configuration {
         return requireNotNull(configuration) {
-            "bla"
+            "No configuration set on CustomerSheetHacks"
         }
     }
 

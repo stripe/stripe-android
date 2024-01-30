@@ -28,7 +28,7 @@ fun rememberCustomerSheet(
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val activity = rememberActivity {
-        "bla"
+        "CustomerSheet must be created in the context of an Activity"
     }
 
     return remember(configuration) {

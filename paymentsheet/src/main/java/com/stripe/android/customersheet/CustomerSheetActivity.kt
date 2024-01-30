@@ -23,8 +23,7 @@ import com.stripe.android.utils.fadeOut
 internal class CustomerSheetActivity : AppCompatActivity() {
 
     private val args: CustomerSheetContract.Args? by lazy {
-        @Suppress("DEPRECATION")
-        intent.getParcelableExtra("args")
+        CustomerSheetContract.Args.fromIntent(intent)
     }
 
     // TODO (jameswoo) Figure out how to create real view model in CustomerSheetActivityTest
@@ -52,7 +51,11 @@ internal class CustomerSheetActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         if (args == null) {
-            finishWithResult(InternalCustomerSheetResult.Error(IllegalStateException("bla")))
+            finishWithResult(
+                InternalCustomerSheetResult.Error(
+                    exception = IllegalStateException("No CustomerSheetContract.Args provided"),
+                )
+            )
             return
         }
 
