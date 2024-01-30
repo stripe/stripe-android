@@ -546,7 +546,6 @@ private fun defaultLinkConfiguration(
             email = "customer@email.com",
             phone = "1234567890",
             billingCountryCode = "US",
-            shouldPrefill = false,
         ),
         shippingValues = null,
         passthroughModeEnabled = false,

@@ -515,7 +515,6 @@ internal class DefaultPaymentSheetLoaderTest {
                 email = null,
                 phone = null,
                 billingCountryCode = "CA",
-                shouldPrefill = true,
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
