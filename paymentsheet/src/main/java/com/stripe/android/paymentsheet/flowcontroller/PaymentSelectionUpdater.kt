@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import javax.inject.Inject
 
 internal fun interface PaymentSelectionUpdater {

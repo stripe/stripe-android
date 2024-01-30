@@ -11,7 +11,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -21,7 +20,7 @@ import org.junit.runner.RunWith
 internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimations = false) {
 
     private val testParams = TestParameters.create(
-        paymentMethod = LpmRepository.HardcodedCard,
+        paymentMethodCode = "card",
     ).copy(
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,

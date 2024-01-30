@@ -1,10 +1,9 @@
 package com.stripe.android.test.core.ui
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.test.ComposeTimeoutException
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
@@ -14,7 +13,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.TEST_TAG_LIST
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 
-class PaymentSelection(val composeTestRule: ComposeTestRule, @StringRes val label: Int) {
+class PaymentSelection(val composeTestRule: ComposeTestRule, val paymentMethodCode: String) {
     fun click() {
         val resource = InstrumentationRegistry.getInstrumentation().targetContext.resources
 
@@ -30,11 +29,12 @@ class PaymentSelection(val composeTestRule: ComposeTestRule, @StringRes val labe
             return
         }
 
+        val paymentMethodMatcher = hasTestTag(TEST_TAG_LIST + paymentMethodCode)
         composeTestRule.onNodeWithTag(TEST_TAG_LIST, true)
-            .performScrollToNode(hasText(resource.getString(label)))
+            .performScrollToNode(paymentMethodMatcher)
         composeTestRule.waitForIdle()
         composeTestRule
-            .onNodeWithTag(TEST_TAG_LIST + resource.getString(label))
+            .onNode(paymentMethodMatcher)
             .assertIsDisplayed()
             .assertIsEnabled()
             .performClick()

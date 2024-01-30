@@ -1,11 +1,11 @@
 package com.stripe.android.utils
 
-import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodRequirements
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 
-object MockPaymentMethodsFactory {
+internal object MockPaymentMethodsFactory {
 
     fun create(): List<LpmRepository.SupportedPaymentMethod> {
         return listOf(

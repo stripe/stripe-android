@@ -17,7 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Ignore
@@ -33,14 +33,10 @@ internal class PaymentMethodsUITest {
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
     private val bancontactTestTag by lazy {
-        TEST_TAG_LIST + composeTestRule.activity.resources.getString(
-            Bancontact.displayNameResource
-        )
+        TEST_TAG_LIST + Bancontact.code
     }
     private val epsTestTag by lazy {
-        TEST_TAG_LIST + composeTestRule.activity.resources.getString(
-            Eps.displayNameResource
-        )
+        TEST_TAG_LIST + Eps.code
     }
 
     @Test

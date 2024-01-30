@@ -2,6 +2,7 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -16,7 +17,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal sealed class CustomerSheetViewState(
     open val savedPaymentMethods: List<PaymentMethod>,
