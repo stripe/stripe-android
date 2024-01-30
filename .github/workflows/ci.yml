@@ -67,12 +67,3 @@ jobs:
         run: cd scripts && ruby lokalise/check_untranslated_strings.rb
         env:
           LOKALISE_API_TOKEN: ${{ secrets.LOKALISE_API_TOKEN }}
-
-  check-for-transitive-dependency-updates:
-    name: Check for transitive dependency updates
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - uses: actions/checkout@v4
-      - name: Check for transitive dependency updates
-        run: ruby scripts/dependencies/check_transitive_dependencies.rb

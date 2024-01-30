@@ -38,7 +38,7 @@ internal class InlineSignupViewModel @Inject constructor(
 
     private val shouldPrefill = config.customerInfo.shouldPrefill
     private val prefilledEmail = config.customerInfo.email.takeIf { shouldPrefill }
-    private val prefilledPhone = config.customerInfo.phone.takeIf { shouldPrefill }.orEmpty()
+    private val prefilledPhone = config.customerInfo.phone.takeIf { shouldPrefill }
     private val prefilledName = config.customerInfo.name.takeIf { shouldPrefill }
 
     val emailController = EmailConfig.createController(
@@ -47,7 +47,7 @@ internal class InlineSignupViewModel @Inject constructor(
     )
 
     val phoneController = PhoneNumberController.createPhoneNumberController(
-        initialValue = prefilledPhone,
+        initialValue = prefilledPhone.orEmpty(),
         initiallySelectedCountryCode = config.customerInfo.billingCountryCode,
     )
 
@@ -175,13 +175,24 @@ internal class InlineSignupViewModel @Inject constructor(
         phoneNumber: String?,
         name: String?
     ): UserInput? {
-        return if (email != null && phoneNumber != null) {
+        val signUpMode = config.signupMode
+
+        return if (email != null && phoneNumber != null && signUpMode != null) {
             val isNameValid = !requiresNameCollection || !name.isNullOrBlank()
 
             val phone = phoneController.getE164PhoneNumber(phoneNumber)
             val country = phoneController.getCountryCode()
 
-            UserInput.SignUp(email, phone, country, name).takeIf { isNameValid }
+            UserInput.SignUp(
+                email = email,
+                phone = phone,
+                country = country,
+                name = name,
+                consentAction = signUpMode.toConsentAction(
+                    hasPrefilledEmail = prefilledEmail != null,
+                    hasPrefilledPhone = prefilledPhone != null
+                )
+            ).takeIf { isNameValid }
         } else {
             null
         }
@@ -230,6 +241,30 @@ internal class InlineSignupViewModel @Inject constructor(
     private fun onError(error: Throwable) = error.getErrorMessage().let {
         logger.error("Error: ", error)
         _errorMessage.value = it
+    }
+
+    private fun LinkSignupMode.toConsentAction(
+        hasPrefilledEmail: Boolean,
+        hasPrefilledPhone: Boolean
+    ): SignUpConsentAction {
+        return when (this) {
+            LinkSignupMode.AlongsideSaveForFutureUse -> {
+                when (hasPrefilledEmail) {
+                    true -> SignUpConsentAction.ImpliedWithPrefilledEmail
+                    false -> SignUpConsentAction.Implied
+                }
+            }
+            LinkSignupMode.InsteadOfSaveForFutureUse -> {
+                when {
+                    hasPrefilledEmail && hasPrefilledPhone ->
+                        SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
+                    hasPrefilledEmail ->
+                        SignUpConsentAction.CheckboxWithPrefilledEmail
+                    else ->
+                        SignUpConsentAction.Checkbox
+                }
+            }
+        }
     }
 
     internal class Factory(
