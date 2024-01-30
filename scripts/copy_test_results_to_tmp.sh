@@ -22,3 +22,8 @@ copy_test_results ".*/build/reports/androidTests/connected$"
 if [ "$INCLUDE_SCREENSHOT_ON_FAILURE" == "true" ] && [ "$BITRISE_BUILD_STATUS" == 1 ]; then
   copy_test_results ".*/screenshots/debug$"
 fi
+
+# If dependenciesπ were requested, and it's a failure.
+if [ "$INCLUDE_DEPENDENCIES_ON_FAILURE" == "true" ] && [ "$BITRISE_BUILD_STATUS" == 1 ]; then
+  copy_test_results ".*/dependencies$"
+fi

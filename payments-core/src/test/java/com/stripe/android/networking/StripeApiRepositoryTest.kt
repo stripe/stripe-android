@@ -1613,7 +1613,7 @@ internal class StripeApiRepositoryTest {
             val name = "name"
             val locale = Locale.US
             val cookie = "cookie1"
-            val consentAction = ConsumerSignUpConsentAction.Button
+            val consentAction = ConsumerSignUpConsentAction.Implied
             create().consumerSignUp(
                 email,
                 phoneNumber,
@@ -1634,7 +1634,7 @@ internal class StripeApiRepositoryTest {
                 assertEquals(this["country"], country)
                 assertEquals(this["legal_name"], name)
                 assertEquals(this["locale"], locale.toLanguageTag())
-                assertEquals(this["consent_action"], "clicked_button_mobile")
+                assertEquals(this["consent_action"], "implied_consent_withspm_mobile_v0")
                 withNestedParams("cookies") {
                     assertEquals(this["verification_session_client_secrets"], listOf(cookie))
                 }

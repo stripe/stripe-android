@@ -8,6 +8,7 @@ import com.stripe.android.link.injection.LinkScope
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.model.LinkAccount
 import com.stripe.android.link.repositories.LinkRepository
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
@@ -73,7 +74,9 @@ internal class LinkAccountManager @Inject constructor(
      * Use the user input in memory to sign in to an existing account or sign up for a new Link
      * account, starting verification if needed.
      */
-    suspend fun signInWithUserInput(userInput: UserInput): Result<LinkAccount> =
+    suspend fun signInWithUserInput(
+        userInput: UserInput
+    ): Result<LinkAccount> =
         when (userInput) {
             is UserInput.SignIn -> lookupConsumer(userInput.email).mapCatching {
                 requireNotNull(it) { "Error fetching user account" }
@@ -82,7 +85,8 @@ internal class LinkAccountManager @Inject constructor(
                 email = userInput.email,
                 country = userInput.country,
                 phone = userInput.phone,
-                name = userInput.name
+                name = userInput.name,
+                consentAction = userInput.consentAction,
             )
         }
 
@@ -93,7 +97,8 @@ internal class LinkAccountManager @Inject constructor(
         email: String,
         phone: String,
         country: String,
-        name: String?
+        name: String?,
+        consentAction: SignUpConsentAction
     ): Result<LinkAccount> {
         val currentAccount = _linkAccount.value
         val currentEmail = currentAccount?.email ?: config.customerInfo.email
@@ -127,7 +132,7 @@ internal class LinkAccountManager @Inject constructor(
                     phone = phone,
                     country = country,
                     name = name,
-                    consentAction = ConsumerSignUpConsentAction.Checkbox
+                    consentAction = consentAction
                 ).onSuccess {
                     linkEventsReporter.onSignupCompleted(true)
                 }.onFailure { error ->
@@ -145,9 +150,9 @@ internal class LinkAccountManager @Inject constructor(
         phone: String,
         country: String,
         name: String?,
-        consentAction: ConsumerSignUpConsentAction
+        consentAction: SignUpConsentAction
     ): Result<LinkAccount> =
-        linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction)
+        linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction.consumerAction)
             .map { consumerSession ->
                 setAccount(consumerSession)
             }
@@ -239,9 +244,11 @@ internal class LinkAccountManager @Inject constructor(
     }
 
     private suspend fun LinkAccount?.fetchAccountStatus(): AccountStatus =
-        // If we already fetched an account, return its status
+        /**
+         * If we already fetched an account, return its status, otherwise if a customer email was passed in,
+         * lookup the account.
+         */
         this?.accountStatus
-            // If a customer email was passed in, lookup the account.
             ?: config.customerInfo.email?.let { customerEmail ->
                 lookupConsumer(customerEmail).map {
                     it?.accountStatus
@@ -249,4 +256,18 @@ internal class LinkAccountManager @Inject constructor(
                     AccountStatus.Error
                 }
             } ?: AccountStatus.SignedOut
+
+    private val SignUpConsentAction.consumerAction: ConsumerSignUpConsentAction
+        get() = when (this) {
+            SignUpConsentAction.Checkbox ->
+                ConsumerSignUpConsentAction.Checkbox
+            SignUpConsentAction.CheckboxWithPrefilledEmail ->
+                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail
+            SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone ->
+                ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
+            SignUpConsentAction.Implied ->
+                ConsumerSignUpConsentAction.Implied
+            SignUpConsentAction.ImpliedWithPrefilledEmail ->
+                ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail
+        }
 }
