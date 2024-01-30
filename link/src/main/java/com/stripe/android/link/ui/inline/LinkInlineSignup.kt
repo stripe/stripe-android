@@ -23,7 +23,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -68,27 +71,6 @@ import com.stripe.android.uicore.stripeShapes
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 
-@Preview
-@Composable
-private fun Preview() {
-    DefaultLinkTheme {
-        Surface {
-            LinkInlineSignup(
-                merchantName = "Example, Inc.",
-                emailController = EmailConfig.createController("email@me.co"),
-                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
-                nameController = NameConfig.createController("My Name"),
-                signUpState = SignUpState.InputtingPrimaryField,
-                enabled = true,
-                expanded = true,
-                requiresNameCollection = true,
-                errorMessage = null,
-                toggleExpanded = {}
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkInlineSignup(
@@ -111,6 +93,7 @@ fun LinkInlineSignup(
 
         val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
+
         LaunchedEffect(viewState.signUpState) {
             if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
                 focusManager.clearFocus(true)
@@ -149,6 +132,7 @@ internal fun LinkInlineSignup(
     modifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
+    var didShowAllFields by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(expanded) {
         if (expanded) {
@@ -229,8 +213,7 @@ internal fun LinkInlineSignup(
                         )
 
                         AnimatedVisibility(
-                            visible = signUpState != SignUpState.InputtingRemainingFields &&
-                                errorMessage != null
+                            visible = signUpState != SignUpState.InputtingRemainingFields && errorMessage != null
                         ) {
                             ErrorText(
                                 text = errorMessage
@@ -241,14 +224,21 @@ internal fun LinkInlineSignup(
                         }
 
                         AnimatedVisibility(
-                            visible = signUpState == SignUpState.InputtingRemainingFields
+                            visible = if (didShowAllFields) {
+                                signUpState == SignUpState.InputtingRemainingFields || signUpState == SignUpState.VerifyingEmail
+                            } else {
+                                signUpState == SignUpState.InputtingRemainingFields
+                            },
                         ) {
+                            LaunchedEffect(Unit) {
+                                didShowAllFields = true
+                            }
+
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 PhoneNumberCollectionSection(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
-                                    requestFocusWhenShown =
-                                    phoneNumberController.initialPhoneNumber.isEmpty(),
+                                    requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                                     imeAction = if (requiresNameCollection) {
                                         ImeAction.Next
                                     } else {
@@ -320,14 +310,13 @@ private fun EmailCollectionSection(
                 } else {
                     ImeAction.Done
                 },
-                enabled = enabled && signUpState != SignUpState.VerifyingEmail,
+                enabled = enabled,
                 modifier = Modifier
                     .focusRequester(focusRequester)
                     .weight(1f)
             )
             if (signUpState == SignUpState.VerifyingEmail) {
                 CircularProgressIndicator(
-                    progress = 0.7f,
                     modifier = Modifier
                         .size(32.dp)
                         .padding(start = 0.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
@@ -337,18 +326,39 @@ private fun EmailCollectionSection(
                     color = MaterialTheme.linkColors.progressIndicator,
                     strokeWidth = 2.dp
                 )
-            } else {
-                Icon(
-                    painter = painterResource(id = R.drawable.stripe_link_logo),
-                    contentDescription = stringResource(id = R.string.stripe_link),
-                    modifier = Modifier
-                        .padding(end = 12.dp)
-                        .semantics {
-                            testTag = "LinkLogoIcon"
-                        },
-                    tint = MaterialTheme.linkColors.inlineLinkLogo
-                )
             }
+
+            Icon(
+                painter = painterResource(id = R.drawable.stripe_link_logo),
+                contentDescription = stringResource(id = R.string.stripe_link),
+                modifier = Modifier
+                    .padding(end = 12.dp)
+                    .semantics {
+                        testTag = "LinkLogoIcon"
+                    },
+                tint = MaterialTheme.linkColors.inlineLinkLogo
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+    DefaultLinkTheme {
+        Surface {
+            LinkInlineSignup(
+                merchantName = "Example, Inc.",
+                emailController = EmailConfig.createController("email@me.co"),
+                phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
+                nameController = NameConfig.createController("My Name"),
+                signUpState = SignUpState.InputtingPrimaryField,
+                enabled = true,
+                expanded = true,
+                requiresNameCollection = true,
+                errorMessage = null,
+                toggleExpanded = {}
+            )
         }
     }
 }

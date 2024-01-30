@@ -99,7 +99,7 @@ fun LinkOptionalInlineSignup(
             phoneNumberController = viewModel.phoneController,
             nameController = viewModel.nameController,
             signUpState = viewState.signUpState,
-            isShowingPhoneFirst = viewState.fields.first() == LinkSignupField.Phone,
+            isShowingPhoneFirst = viewState.isShowingPhoneFirst,
             enabled = enabled,
             requiresNameCollection = viewModel.requiresNameCollection,
             errorMessage = errorMessage,
@@ -124,7 +124,7 @@ private fun LinkOptionalInlineSignup(
 ) {
     Column(modifier) {
         val bringTermsIntoViewRequester = remember { BringIntoViewRequester() }
-        var showAllFields by rememberSaveable { mutableStateOf(false) }
+        var didShowAllFields by rememberSaveable { mutableStateOf(false) }
 
         val sectionError by sectionController.error.collectAsState(null)
 
@@ -171,9 +171,9 @@ private fun LinkOptionalInlineSignup(
                 )
             }
 
-            AnimatedVisibility(visible = showAllFields || signUpState == SignUpState.InputtingRemainingFields) {
+            AnimatedVisibility(visible = didShowAllFields || signUpState == SignUpState.InputtingRemainingFields) {
                 LaunchedEffect(Unit) {
-                    showAllFields = true
+                    didShowAllFields = true
                 }
 
                 Column(modifier = Modifier.fillMaxWidth()) {
@@ -267,7 +267,7 @@ internal fun EmailCollection(
             } else {
                 ImeAction.Done
             },
-            enabled = enabled && signUpState != SignUpState.VerifyingEmail,
+            enabled = enabled,
             modifier = Modifier
                 .weight(1f)
                 .focusRequester(focusRequester)
@@ -275,7 +275,6 @@ internal fun EmailCollection(
 
         if (signUpState == SignUpState.VerifyingEmail) {
             CircularProgressIndicator(
-//                progress = 0.7f,
                 modifier = Modifier
                     .size(32.dp)
                     .padding(start = 0.dp, top = 8.dp, end = 16.dp, bottom = 8.dp)
@@ -285,9 +284,9 @@ internal fun EmailCollection(
                 color = MaterialTheme.linkColors.progressIndicator,
                 strokeWidth = 2.dp
             )
-        } else {
-            trailingIcon?.invoke()
         }
+
+        trailingIcon?.invoke()
     }
 
     if (requestFocusWhenShown) {
