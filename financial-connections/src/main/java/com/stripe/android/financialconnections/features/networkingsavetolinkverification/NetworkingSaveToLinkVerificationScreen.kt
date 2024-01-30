@@ -177,8 +177,8 @@ private fun Header(payload: Payload) {
 }
 
 @Composable
-@Preview(group = "NetworkingSaveToLinkLinkVerification Pane")
-internal fun NetworkingSaveToLinkVerificationScreenPreview(
+@Preview
+internal fun SaveToLinkVerificationPreview(
     @PreviewParameter(NetworkingSaveToLinkVerificationPreviewParameterProvider::class)
     state: NetworkingSaveToLinkVerificationState
 ) {

@@ -150,8 +150,8 @@ private fun Header(payload: Payload) {
 }
 
 @Composable
-@Preview(group = "NetworkingLinkVerification Pane")
-internal fun NetworkingLinkVerificationScreenPreview(
+@Preview
+internal fun NetworkingLinkVerificationPreview(
     @PreviewParameter(NetworkingLinkVerificationPreviewParameterProvider::class)
     state: NetworkingLinkVerificationState
 ) {

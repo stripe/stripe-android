@@ -197,8 +197,8 @@ private fun ResendCodeSection(
 }
 
 @Composable
-@Preview(group = "LinkStepUpVerification Pane")
-internal fun LinkStepUpVerificationScreenPreview(
+@Preview
+internal fun LinkStepUpVerificationPreview(
     @PreviewParameter(LinkStepUpVerificationPreviewParameterProvider::class) state: LinkStepUpVerificationState
 ) {
     FinancialConnectionsPreview {
