@@ -1,13 +1,18 @@
 package com.stripe.android.financialconnections.features.common
 
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES
+import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -31,6 +36,7 @@ internal fun VerificationSection(
     enabled: Boolean,
     confirmVerificationError: Throwable?,
 ) {
+    val view = LocalView.current
     Column {
         StripeThemeForConnections {
             OTPElementUI(
@@ -45,6 +51,13 @@ internal fun VerificationSection(
                 enabled = enabled,
                 element = otpElement
             )
+        }
+        LaunchedEffect(confirmVerificationError) {
+            if (confirmVerificationError is OTPError) {
+                if (SDK_INT >= VERSION_CODES.R) {
+                    view.performHapticFeedback(HapticFeedbackConstants.REJECT)
+                }
+            }
         }
         if (confirmVerificationError is OTPError) {
             Spacer(modifier = Modifier.size(16.dp))

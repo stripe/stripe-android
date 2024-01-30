@@ -2,6 +2,8 @@
 
 package com.stripe.android.financialconnections.features.common
 
+import android.os.Build
+import android.view.HapticFeedbackConstants.REJECT
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,8 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -261,6 +265,12 @@ internal fun ErrorContent(
     primaryCta: Pair<String, () -> Unit>? = null,
     secondaryCta: Pair<String, () -> Unit>? = null
 ) {
+    val view = LocalView.current
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            view.performHapticFeedback(REJECT)
+        }
+    }
     Layout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         body = {
