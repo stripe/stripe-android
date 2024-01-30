@@ -58,6 +58,7 @@ import java.util.Locale
 @Suppress("LongMethod")
 internal fun AccountItem(
     selected: Boolean,
+    showInstitutionIcon: Boolean = true,
     onAccountClicked: (PartnerAccount) -> Unit,
     account: PartnerAccount,
     networkedAccount: NetworkedAccount? = null,
@@ -89,9 +90,11 @@ internal fun AccountItem(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            account.institution?.icon?.default?.let {
-                InstitutionIcon(institutionIcon = it)
-            }
+            account.institution
+                ?.icon?.default
+                ?.takeIf { showInstitutionIcon }?.let {
+                    InstitutionIcon(institutionIcon = it)
+                }
             Column(
                 Modifier.weight(1f)
             ) {

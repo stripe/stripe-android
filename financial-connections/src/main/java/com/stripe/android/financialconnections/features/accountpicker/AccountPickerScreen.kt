@@ -272,6 +272,7 @@ private fun LazyListScope.loadedContent(
     items(payload.accounts, key = { it.id }) { account ->
         AccountItem(
             selected = state.selectedIds.contains(account.id),
+            showInstitutionIcon = false,
             onAccountClicked = onAccountClicked,
             account = account,
         )
