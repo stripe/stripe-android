@@ -18,7 +18,7 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
     ModalBottomSheetLayout(
         sheetState = sheetState,
         sheetBackgroundColor = v3Colors.backgroundSurface,
-        sheetShape =  RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
+        sheetShape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
         scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = sheetContent,
         content = content

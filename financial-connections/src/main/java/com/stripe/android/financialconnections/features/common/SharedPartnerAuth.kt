@@ -276,8 +276,13 @@ private fun LoadedContent(
     onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
-        is Uninitialized -> when (payload.authSession.isOAuth) {
+        is Uninitialized,
+        is Loading,
+        is Success -> when (payload.authSession.isOAuth) {
             true -> InstitutionalPrePaneContent(
+                // show loading prepane when authenticationStatus
+                // is Loading or Success (completing auth after redirect)
+                loading = authenticationStatus is Loading || authenticationStatus is Success,
                 onContinueClick = onContinueClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
                 onClickableTextClick = onClickableTextClick,
@@ -286,7 +291,6 @@ private fun LoadedContent(
             false -> SharedPartnerLoading()
         }
 
-        is Loading, is Success -> FullScreenGenericLoading()
         is Fail -> {
             // TODO@carlosmuvi translate error type to specific error screen.
             InstitutionUnknownErrorContent(onSelectAnotherBank)
@@ -298,8 +302,9 @@ private fun LoadedContent(
 @Composable
 @Suppress("LongMethod")
 private fun InstitutionalPrePaneContent(
-    onContinueClick: () -> Unit,
     content: OauthPrepane,
+    loading: Boolean,
+    onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
     val title = remember(content.title) {
@@ -384,6 +389,7 @@ private fun InstitutionalPrePaneContent(
         footer = {
             FinancialConnectionsButton(
                 onClick = onContinueClick,
+                loading = loading,
                 modifier = Modifier
                     .semantics { testTagsAsResourceId = true }
                     .testTag("prepane_cta")
