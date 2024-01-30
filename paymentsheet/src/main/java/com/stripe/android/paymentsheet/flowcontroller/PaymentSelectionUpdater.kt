@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.containsVolatileDifferences
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -24,10 +25,10 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
     ): PaymentSelection? {
-        val didConfigChange = previousConfig != newState.config
-
         return currentSelection?.takeIf { selection ->
-            canUseSelection(selection, newState) && !didConfigChange
+            canUseSelection(selection, newState) && previousConfig?.let { previousConfig ->
+                !previousConfig.containsVolatileDifferences(newState.config)
+            } ?: true
         } ?: newState.paymentSelection
     }
 

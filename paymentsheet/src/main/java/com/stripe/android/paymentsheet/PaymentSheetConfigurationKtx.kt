@@ -4,6 +4,8 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
@@ -33,6 +35,12 @@ internal fun PaymentSheet.Configuration.validate() {
             )
         }
     }
+}
+
+internal fun PaymentSheet.Configuration.containsVolatileDifferences(
+    other: PaymentSheet.Configuration
+): Boolean {
+    return toVolatileConfiguration() != other.toVolatileConfiguration()
 }
 
 internal fun PaymentSheet.Appearance.parseAppearance() {
@@ -103,5 +111,44 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
             fontSize = primaryButton.typography.fontSizeSp?.sp
                 ?: (StripeThemeDefaults.typography.largeFontSize * typography.sizeScaleFactor)
         )
+    )
+}
+
+private fun PaymentSheet.Configuration.toVolatileConfiguration(): VolatilePaymentSheetConfiguration {
+    return VolatilePaymentSheetConfiguration(
+        customer = customer,
+        googlePay = googlePay?.toVolatileConfiguration(),
+        defaultBillingDetails = defaultBillingDetails,
+        shippingDetails = shippingDetails,
+        allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+        allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        preferredNetworks = preferredNetworks
+    )
+}
+
+private fun PaymentSheet.GooglePayConfiguration.toVolatileConfiguration():
+    VolatilePaymentSheetConfiguration.GooglePayConfiguration {
+    return VolatilePaymentSheetConfiguration.GooglePayConfiguration(
+        environment = environment,
+        countryCode = countryCode,
+        currencyCode = currencyCode
+    )
+}
+
+private data class VolatilePaymentSheetConfiguration(
+    val customer: PaymentSheet.CustomerConfiguration?,
+    val googlePay: GooglePayConfiguration?,
+    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val shippingDetails: AddressDetails?,
+    val allowsDelayedPaymentMethods: Boolean,
+    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val preferredNetworks: List<CardBrand>,
+) {
+    data class GooglePayConfiguration(
+        val environment: PaymentSheet.GooglePayConfiguration.Environment,
+        val countryCode: String,
+        val currencyCode: String? = null,
     )
 }
