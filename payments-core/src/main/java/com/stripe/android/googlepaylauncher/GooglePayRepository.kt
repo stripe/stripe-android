@@ -69,24 +69,28 @@ internal class DefaultGooglePayRepository(
     override fun isReady(): Flow<Boolean> {
         val isReadyState = MutableStateFlow<Boolean?>(null)
 
-        val request = IsReadyToPayRequest.fromJson(
-            googlePayJsonFactory.createIsReadyToPayRequest(
-                billingAddressParameters = billingAddressParameters,
-                existingPaymentMethodRequired = existingPaymentMethodRequired,
-                allowCreditCards = allowCreditCards
-            ).toString()
-        )
+        runCatching {
+            val request = IsReadyToPayRequest.fromJson(
+                googlePayJsonFactory.createIsReadyToPayRequest(
+                    billingAddressParameters = billingAddressParameters,
+                    existingPaymentMethodRequired = existingPaymentMethodRequired,
+                    allowCreditCards = allowCreditCards
+                ).toString()
+            )
 
-        paymentsClient.isReadyToPay(request)
-            .addOnCompleteListener { task ->
-                val isReady = runCatching {
-                    task.getResult(ApiException::class.java) == true
-                }.onFailure {
-                    logger.error("Google Pay check failed.", it)
-                }.getOrDefault(false)
-                logger.info("Google Pay ready? $isReady")
-                isReadyState.value = isReady
-            }
+            paymentsClient.isReadyToPay(request)
+                .addOnCompleteListener { task ->
+                    val isReady = runCatching {
+                        task.getResult(ApiException::class.java) == true
+                    }.onFailure {
+                        logger.error("Google Pay check failed.", it)
+                    }.getOrDefault(false)
+                    logger.info("Google Pay ready? $isReady")
+                    isReadyState.value = isReady
+                }
+        }.onFailure {
+            isReadyState.value = false
+        }
 
         return isReadyState.filterNotNull()
     }
