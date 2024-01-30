@@ -646,6 +646,7 @@ class LpmRepository(
      * FormSpec is optionally null only because Card is not converted to the
      * compose model.
      */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class SupportedPaymentMethod(
         /**
          * This describes the PaymentMethod Type as described
@@ -699,6 +700,7 @@ class LpmRepository(
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class LpmInitialFormData {
 
         private val codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
@@ -720,6 +722,7 @@ class LpmRepository(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Volatile
         private var INSTANCE: LpmRepository? = null
@@ -776,6 +779,7 @@ class LpmRepository(
             )
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class LpmRepositoryArguments(
         val resources: Resources,
         val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable =
