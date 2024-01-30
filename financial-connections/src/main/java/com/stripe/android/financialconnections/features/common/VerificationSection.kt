@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -35,7 +34,6 @@ internal fun VerificationSection(
     Column {
         StripeThemeForConnections {
             OTPElementUI(
-                boxShape = RoundedCornerShape(12.dp),
                 otpInputPlaceholder = "",
                 boxSpacing = 8.dp,
                 middleSpacing = 8.dp,
