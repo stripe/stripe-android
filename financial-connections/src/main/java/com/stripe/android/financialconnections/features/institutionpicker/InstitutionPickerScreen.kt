@@ -538,7 +538,7 @@ private fun InstitutionResultTile(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = institution.url ?: "",
+                text = institution.formattedUrl,
                 color = v3Colors.textSubdued,
                 style = v3Typography.labelMedium,
                 maxLines = 1,

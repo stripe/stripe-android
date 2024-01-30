@@ -107,7 +107,7 @@ internal class InstitutionPickerPreviewParameterProvider :
             FinancialConnectionsInstitution(
                 id = "1",
                 name = "Very very long institution content does not fit - 1",
-                url = "institution 1 url",
+                url = "https://www.institutionUrl.com/1",
                 featured = false,
                 featuredOrder = null,
                 icon = null,
@@ -117,7 +117,7 @@ internal class InstitutionPickerPreviewParameterProvider :
             FinancialConnectionsInstitution(
                 id = "2",
                 name = "Institution 2",
-                url = "Institution 2 url",
+                url = "otherUrl.com",
                 featured = false,
                 featuredOrder = null,
                 icon = null,
@@ -127,7 +127,7 @@ internal class InstitutionPickerPreviewParameterProvider :
             FinancialConnectionsInstitution(
                 id = "3",
                 name = "Institution 3",
-                url = "Institution 3 url",
+                url = "Unparseable URL",
                 featured = false,
                 featuredOrder = null,
                 icon = null,

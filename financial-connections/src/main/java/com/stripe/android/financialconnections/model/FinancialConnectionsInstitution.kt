@@ -37,4 +37,26 @@ internal data class FinancialConnectionsInstitution(
 
     @SerialName(value = "url") val url: String? = null
 
-) : Parcelable
+) : Parcelable {
+
+    /**
+     * This returns a cleaned up url containing only the root domain.
+     * Works for up to two-part tlds, but falls apart for longer ones e.g. hello.al.sp.gov.br
+     * Once the URLs are cleaned up on the backend, won't need this anymore.
+     */
+    val formattedUrl: String
+        get() = runCatching {
+            // This match would still have subdomains
+            val matchResult = Regex("""^(?:https?://)?(?:www\.|[^@\n]+@)?([^:/\n]+)""")
+                .find(url ?: return "")
+            val rootUrl = matchResult?.groups?.get(1)?.value ?: return ""
+            val parts = rootUrl.split('.')
+            val len = parts.size
+            return if (len > 2 && parts[len - 2].length <= 3 && parts[len - 1].length <= 2) {
+                "${parts[len - 3]}.${parts[len - 2]}.${parts[len - 1]}"
+            } else {
+                "${parts[len - 2]}.${parts[len - 1]}"
+            }
+        }.getOrDefault(url ?: "")
+
+}
