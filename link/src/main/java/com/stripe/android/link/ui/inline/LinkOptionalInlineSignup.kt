@@ -142,7 +142,7 @@ private fun LinkOptionalInlineSignup(
                 PhoneNumberElementUI(
                     enabled = enabled,
                     controller = phoneNumberController,
-                    imeAction = if (requiresNameCollection) {
+                    imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
                         ImeAction.Next
                     } else {
                         ImeAction.Done
@@ -154,8 +154,11 @@ private fun LinkOptionalInlineSignup(
                     enabled = enabled,
                     emailController = emailController,
                     signUpState = signUpState,
-                    hasNextField = signUpState == SignUpState.InputtingRemainingFields,
-                    requestFocusWhenShown = false,
+                    imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
+                        ImeAction.Next
+                    } else {
+                        ImeAction.Done
+                    },
                     trailingIcon = { LinkLogo() },
                 )
             }
@@ -190,8 +193,11 @@ private fun LinkOptionalInlineSignup(
                             enabled = enabled,
                             emailController = emailController,
                             signUpState = signUpState,
-                            hasNextField = requiresNameCollection,
-                            requestFocusWhenShown = true,
+                            imeAction = if (requiresNameCollection) {
+                                ImeAction.Next
+                            } else {
+                                ImeAction.Done
+                            },
                         )
                     } else {
                         PhoneNumberElementUI(
@@ -250,8 +256,8 @@ internal fun EmailCollection(
     enabled: Boolean,
     emailController: TextFieldController,
     signUpState: SignUpState,
-    hasNextField: Boolean,
-    requestFocusWhenShown: Boolean,
+    imeAction: ImeAction,
+    requestFocusWhenShown: Boolean = false,
     trailingIcon: @Composable (() -> Unit)? = null,
 ) {
     val focusRequester = remember { FocusRequester() }
@@ -262,11 +268,7 @@ internal fun EmailCollection(
     ) {
         TextField(
             textFieldController = emailController,
-            imeAction = if (hasNextField) {
-                ImeAction.Next
-            } else {
-                ImeAction.Done
-            },
+            imeAction = imeAction,
             enabled = enabled,
             modifier = Modifier
                 .weight(1f)

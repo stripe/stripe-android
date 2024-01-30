@@ -47,9 +47,9 @@ data class InlineSignupViewState internal constructor(
 
         fun create(config: LinkConfiguration): InlineSignupViewState {
             val isAlternativeFlow = config.signupMode == LinkSignupMode.AlongsideSaveForFutureUse
+            val customer = config.customerInfo
 
             val fields = buildList {
-                val customer = config.customerInfo
                 val hasPrefilledEmail = !customer.email.isNullOrBlank()
 
                 if (isAlternativeFlow && hasPrefilledEmail) {
@@ -69,14 +69,28 @@ data class InlineSignupViewState internal constructor(
                 }
             }
 
+            val fieldsToPrefilledValues = fields.associateWith { field ->
+                when (field) {
+                    LinkSignupField.Email -> customer.email
+                    LinkSignupField.Phone -> customer.phone
+                    LinkSignupField.Name -> customer.name
+                }
+            }
+
+            val hasPrefillValuesForAllFields = fieldsToPrefilledValues.all { it.value != null }
+
             val prefillEligibleFields = when (config.signupMode) {
                 LinkSignupMode.InsteadOfSaveForFutureUse -> {
                     fields.toSet()
                 }
                 LinkSignupMode.AlongsideSaveForFutureUse -> {
-                    // We can't prefill all fields, as this might lead to Link account creation without explicit
-                    // user consent. We don't prefill the first field in this case.
-                    fields.toSet() - fields.first()
+                    if (hasPrefillValuesForAllFields) {
+                        // We can't prefill all fields, as this might lead to Link account creation without explicit
+                        // user consent. We don't prefill the first field in this case.
+                        fields.toSet() - fields.first()
+                    } else {
+                        fields.toSet()
+                    }
                 }
                 null -> {
                     emptySet()
