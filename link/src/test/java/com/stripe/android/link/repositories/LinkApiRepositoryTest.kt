@@ -177,7 +177,7 @@ class LinkApiRepositoryTest {
             "country",
             "name",
             "cookie",
-            ConsumerSignUpConsentAction.Button
+            ConsumerSignUpConsentAction.Implied
         )
 
         assertThat(result.isFailure).isTrue()

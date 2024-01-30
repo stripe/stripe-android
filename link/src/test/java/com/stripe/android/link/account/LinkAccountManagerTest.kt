@@ -9,6 +9,7 @@ import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.repositories.LinkRepository
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConsumerPaymentDetails
@@ -138,7 +139,15 @@ class LinkAccountManagerTest {
             val country = "country"
             val name = "name"
 
-            accountManager.signInWithUserInput(UserInput.SignUp(EMAIL, phone, country, name))
+            accountManager.signInWithUserInput(
+                UserInput.SignUp(
+                    email = EMAIL,
+                    phone = phone,
+                    country = country,
+                    name = name,
+                    consentAction = SignUpConsentAction.Checkbox
+                )
+            )
 
             verify(linkRepository).consumerSignUp(
                 email = eq(EMAIL),
@@ -152,6 +161,56 @@ class LinkAccountManagerTest {
         }
 
     @Test
+    fun `signInWithUserInput sends correct consumer action on 'Checkbox' consent action`() = runSuspendTest {
+        accountManager().signInWithUserInput(createUserInputWithAction(SignUpConsentAction.Checkbox))
+
+        verifyConsumerAction(ConsumerSignUpConsentAction.Checkbox)
+    }
+
+    @Test
+    fun `signInWithUserInput sends correct consumer action on 'CheckboxWithPrefilledEmail' consent action`() =
+        runSuspendTest {
+            accountManager().signInWithUserInput(
+                createUserInputWithAction(
+                    SignUpConsentAction.CheckboxWithPrefilledEmail
+                )
+            )
+
+            verifyConsumerAction(ConsumerSignUpConsentAction.CheckboxWithPrefilledEmail)
+        }
+
+    @Test
+    fun `signInWithUserInput sends correct consumer action on 'CheckboxWithPrefilledEmailAndPhone' consent action`() =
+        runSuspendTest {
+            accountManager().signInWithUserInput(
+                createUserInputWithAction(
+                    SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
+                )
+            )
+
+            verifyConsumerAction(ConsumerSignUpConsentAction.CheckboxWithPrefilledEmailAndPhone)
+        }
+
+    @Test
+    fun `signInWithUserInput sends correct consumer action on 'Implied' consent action`() = runSuspendTest {
+        accountManager().signInWithUserInput(createUserInputWithAction(SignUpConsentAction.Implied))
+
+        verifyConsumerAction(ConsumerSignUpConsentAction.Implied)
+    }
+
+    @Test
+    fun `signInWithUserInput sends correct consumer action on 'ImpliedWithPrefilledEmail' consent action`() =
+        runSuspendTest {
+            accountManager().signInWithUserInput(
+                createUserInputWithAction(
+                    SignUpConsentAction.ImpliedWithPrefilledEmail
+                )
+            )
+
+            verifyConsumerAction(ConsumerSignUpConsentAction.ImpliedWithPrefilledEmail)
+        }
+
+    @Test
     fun `signInWithUserInput for new user sends analytics event when call succeeds`() =
         runSuspendTest {
             accountManager().signInWithUserInput(
@@ -159,7 +218,8 @@ class LinkAccountManagerTest {
                     email = EMAIL,
                     phone = "phone",
                     country = "country",
-                    name = "name"
+                    name = "name",
+                    consentAction = SignUpConsentAction.Checkbox
                 )
             )
 
@@ -178,7 +238,8 @@ class LinkAccountManagerTest {
                     email = EMAIL,
                     phone = "phone",
                     country = "country",
-                    name = "name"
+                    name = "name",
+                    consentAction = SignUpConsentAction.Checkbox
                 )
             )
 
@@ -202,7 +263,8 @@ class LinkAccountManagerTest {
                     email = EMAIL,
                     phone = "phone",
                     country = "country",
-                    name = "name"
+                    name = "name",
+                    consentAction = SignUpConsentAction.Checkbox
                 )
             )
 
@@ -228,7 +290,8 @@ class LinkAccountManagerTest {
                     email = EMAIL,
                     phone = "phone",
                     country = "country",
-                    name = "name"
+                    name = "name",
+                    consentAction = SignUpConsentAction.Checkbox
                 )
             )
 
@@ -389,6 +452,27 @@ class LinkAccountManagerTest {
         linkRepository,
         linkEventsReporter,
     )
+
+    private fun createUserInputWithAction(consentAction: SignUpConsentAction): UserInput.SignUp {
+        return UserInput.SignUp(
+            email = EMAIL,
+            phone = "phone",
+            country = "country",
+            name = "name",
+            consentAction = consentAction
+        )
+    }
+
+    private suspend fun verifyConsumerAction(consumerAction: ConsumerSignUpConsentAction) {
+        verify(linkRepository).consumerSignUp(
+            email = any(),
+            phone = any(),
+            country = any(),
+            name = anyOrNull(),
+            authSessionCookie = anyOrNull(),
+            consentAction = eq(consumerAction)
+        )
+    }
 
     private companion object {
         const val EMAIL = "email@stripe.com"
