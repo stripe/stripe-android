@@ -170,6 +170,12 @@ private val V3Typography = FinancialConnectionsV3Typography(
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W700
     ),
+    headingXLargeSubdued = TextStyle(
+        fontSize = 28.sp,
+        lineHeight = 32.sp,
+        letterSpacing = 0.38.sp,
+        fontWeight = FontWeight.W400
+    ),
     headingLarge = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,

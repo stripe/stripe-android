@@ -1,17 +1,14 @@
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
@@ -21,7 +18,8 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
@@ -36,13 +34,20 @@ internal fun VerificationSection(
     Column {
         StripeThemeForConnections {
             OTPElementUI(
+                otpInputPlaceholder = "",
+                boxSpacing = 8.dp,
+                middleSpacing = 8.dp,
+                boxTextStyle = v3Typography.headingXLargeSubdued.copy(
+                    color = v3Colors.textDefault,
+                    textAlign = TextAlign.Center
+                ),
                 focusRequester = focusRequester,
                 enabled = enabled,
                 element = otpElement
             )
         }
         if (confirmVerificationError is OTPError) {
-            Spacer(modifier = Modifier.size(4.dp))
+            Spacer(modifier = Modifier.size(16.dp))
             VerificationErrorText(
                 error = confirmVerificationError,
             )
@@ -58,32 +63,24 @@ private fun VerificationErrorText(
     error: OTPError,
 ) {
     val uriHandler = LocalUriHandler.current
-    Row {
-        Icon(
-            modifier = Modifier
-                .size(12.dp)
-                .offset(y = 2.dp),
-            painter = painterResource(R.drawable.stripe_ic_warning),
-            contentDescription = "Warning icon",
-            tint = FinancialConnectionsTheme.colors.textCritical
-        )
-        AnnotatedText(
-            modifier = Modifier.padding(horizontal = 4.dp),
-            text = error.toMessage(),
-            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                color = FinancialConnectionsTheme.colors.textCritical
-            ),
-            onClickableTextClick = {
-                uriHandler.openUri(FinancialConnectionsUrlResolver.linkVerificationSupportUrl)
-            },
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.caption.copy(
-                    color = FinancialConnectionsTheme.colors.textCritical,
-                    textDecoration = TextDecoration.Underline
-                ).toSpanStyle()
-            ),
-        )
-    }
+    AnnotatedText(
+        modifier = Modifier.fillMaxWidth(),
+        text = error.toMessage(),
+        defaultStyle = v3Typography.labelMedium.copy(
+            color = v3Colors.textCritical,
+            textAlign = TextAlign.Center
+        ),
+        onClickableTextClick = {
+            uriHandler.openUri(FinancialConnectionsUrlResolver.linkVerificationSupportUrl)
+        },
+        annotationStyles = mapOf(
+            StringAnnotation.CLICKABLE to v3Typography.labelMedium.copy(
+                color = v3Colors.textCritical,
+                textDecoration = TextDecoration.Underline,
+                textAlign = TextAlign.Center
+            ).toSpanStyle()
+        ),
+    )
 }
 
 private fun OTPError.toMessage(): TextResource = TextResource.StringId(

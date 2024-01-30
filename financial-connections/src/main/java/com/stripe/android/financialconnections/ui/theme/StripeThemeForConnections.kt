@@ -18,7 +18,7 @@ internal fun StripeThemeForConnections(
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(
-            cornerRadius = 9f
+            cornerRadius = 12f
         ),
         typography = StripeThemeDefaults.typography
     ) {

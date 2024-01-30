@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -10,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
@@ -25,6 +27,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -67,6 +70,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
@@ -297,6 +301,18 @@ private fun PhoneNumberSection(
         StripeThemeForConnections {
             PhoneNumberCollectionSection(
                 modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                countryDropdown = {
+                    DropDown(
+                        controller = payload.phoneController.countryDropdownController,
+                        enabled = true,
+                        showChevron = false,
+                        modifier = Modifier
+                            .padding(horizontal = 6.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(v3Colors.background)
+                            .padding(vertical = 12.dp, horizontal = 8.dp)
+                    )
+                },
                 isSelected = focused,
                 requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
                 phoneNumberController = payload.phoneController,
