@@ -2,6 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues/>
   <CurrentIssues>
+    <ID>CyclomaticComplexMethod:LinkOptionalInlineSignup.kt$@OptIn(ExperimentalFoundationApi::class) @Composable private fun LinkOptionalInlineSignup( sectionController: SectionController, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, isShowingPhoneFirst: Boolean, signUpState: SignUpState, enabled: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:LinkInlineSignup.kt$@Composable internal fun LinkInlineSignup( merchantName: String, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, signUpState: SignUpState, enabled: Boolean, expanded: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, toggleExpanded: () -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:LinkOptionalInlineSignup.kt$@OptIn(ExperimentalFoundationApi::class) @Composable private fun LinkOptionalInlineSignup( sectionController: SectionController, emailController: TextFieldController, phoneNumberController: PhoneNumberController, nameController: TextFieldController, isShowingPhoneFirst: Boolean, signUpState: SignUpState, enabled: Boolean, requiresNameCollection: Boolean, errorMessage: ErrorMessage?, modifier: Modifier = Modifier )</ID>
     <ID>MatchingDeclarationName:ErrorText.kt$ErrorTextStyle</ID>

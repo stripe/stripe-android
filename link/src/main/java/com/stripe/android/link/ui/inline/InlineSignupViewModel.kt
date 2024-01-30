@@ -202,7 +202,7 @@ internal class InlineSignupViewModel @Inject constructor(
                 name = name,
                 consentAction = signUpMode.toConsentAction(
                     hasPrefilledEmail = prefilledEmail != null,
-                    hasPrefilledPhone = prefilledPhone != null
+                    hasPrefilledPhone = prefilledPhone.isNotBlank(),
                 )
             ).takeIf { isNameValid }
         } else {

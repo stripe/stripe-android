@@ -136,9 +136,12 @@ private fun LinkOptionalInlineSignup(
                 bringTermsIntoViewRequester.bringIntoView()
 
                 val isMissingEmail = emailController.initialValue.isNullOrBlank()
+                val isMissingPhone = emailController.initialValue.isNullOrBlank()
 
                 val nextFocusRequester = if (isShowingPhoneFirst && isMissingEmail) {
                     emailFocusRequester
+                } else if (!isShowingPhoneFirst && isMissingPhone) {
+                    phoneFocusRequester
                 } else {
                     nameFocusRequester.takeIf { requiresNameCollection }
                 }

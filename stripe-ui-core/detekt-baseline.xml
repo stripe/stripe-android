@@ -8,11 +8,11 @@
     <ID>CyclomaticComplexMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
     <ID>CyclomaticComplexMethod:IdentifierSpec.kt$IdentifierSpec.Companion$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX) fun get(value: String)</ID>
     <ID>CyclomaticComplexMethod:StripeTheme.kt$@Composable @ReadOnlyComposable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun StripeTypography.toComposeTypography(): Typography</ID>
-    <ID>CyclomaticComplexMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
+    <ID>CyclomaticComplexMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous, focusRequester: FocusRequester = remember { FocusRequester() }, )</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
     <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
-    <ID>LongMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
+    <ID>LongMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous, focusRequester: FocusRequester = remember { FocusRequester() }, )</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$12</ID>
@@ -44,5 +44,6 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
     <ID>ThrowsCount:UiUtils.kt$@SuppressLint("DiscouragedApi") internal fun Context.getResourceId(uri: Uri): Pair&lt;Resources, Int></ID>
     <ID>TooManyFunctions:StripeTheme.kt$com.stripe.android.uicore.StripeTheme.kt</ID>
+    <ID>UnusedPrivateMember:PhoneNumberElementUI.kt$focusRequester: FocusRequester = remember { FocusRequester() }</ID>
   </CurrentIssues>
 </SmellBaseline>
