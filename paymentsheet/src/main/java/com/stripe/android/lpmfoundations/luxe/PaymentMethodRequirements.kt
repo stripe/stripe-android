@@ -88,42 +88,12 @@ internal val BancontactRequirement = PaymentMethodRequirements(
      * PM will be attached as a SEPA Debit payment method and have the requirements
      * of that PaymentMethod.
      */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
     confirmPMFromCustomer = true,
 )
 
 internal val SofortRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
     siRequirements = setOf(Delayed),
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
 
     /**
      * PM will be attached as a SEPA Debit payment method and have the requirements
@@ -140,66 +110,12 @@ internal val IdealRequirement = PaymentMethodRequirements(
      * PM will be attached as a SEPA Debit payment method and have the requirements
      * of that PaymentMethod.
      */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
-
-    /**
-     * PM will be attached as a SEPA Debit payment method and have the requirements
-     * of that PaymentMethod.
-     */
     confirmPMFromCustomer = true,
 )
 
 internal val SepaDebitRequirement = PaymentMethodRequirements(
     piRequirements = setOf(Delayed),
     siRequirements = setOf(Delayed),
-
-    /**
-     * Here we explain the details
-     * - if PI w/SFU set or SI with a customer, or
-     * - if PI w/SFU set or SI with/out a customer and later attached when used with a webhook
-     * (Note: from the client there is no way to detect if a PI or SI is associated with a customer)
-     *
-     * then, this payment method would be attached to the customer as a SEPA payment method.
-     * (Note: Bancontact, iDEAL, and Sofort require authentication, but SEPA does not.
-     * also Bancontact, iDEAL are not delayed, but Sofort and SEPA are delayed.)
-     *
-     * The SEPA payment method requires a mandate when confirmed.
-     */
-
-    /**
-     * Here we explain the details
-     * - if PI w/SFU set or SI with a customer, or
-     * - if PI w/SFU set or SI with/out a customer and later attached when used with a webhook
-     * (Note: from the client there is no way to detect if a PI or SI is associated with a customer)
-     *
-     * then, this payment method would be attached to the customer as a SEPA payment method.
-     * (Note: Bancontact, iDEAL, and Sofort require authentication, but SEPA does not.
-     * also Bancontact, iDEAL are not delayed, but Sofort and SEPA are delayed.)
-     *
-     * The SEPA payment method requires a mandate when confirmed.
-     */
-
-    /**
-     * Here we explain the details
-     * - if PI w/SFU set or SI with a customer, or
-     * - if PI w/SFU set or SI with/out a customer and later attached when used with a webhook
-     * (Note: from the client there is no way to detect if a PI or SI is associated with a customer)
-     *
-     * then, this payment method would be attached to the customer as a SEPA payment method.
-     * (Note: Bancontact, iDEAL, and Sofort require authentication, but SEPA does not.
-     * also Bancontact, iDEAL are not delayed, but Sofort and SEPA are delayed.)
-     *
-     * The SEPA payment method requires a mandate when confirmed.
-     */
 
     /**
      * Here we explain the details
@@ -229,18 +145,6 @@ internal val P24Requirement = PaymentMethodRequirements(
     /**
      * This cannot be saved to a customer object.
      */
-
-    /**
-     * This cannot be saved to a customer object.
-     */
-
-    /**
-     * This cannot be saved to a customer object.
-     */
-
-    /**
-     * This cannot be saved to a customer object.
-     */
     confirmPMFromCustomer = null
 )
 
@@ -255,18 +159,6 @@ internal val GiropayRequirement = PaymentMethodRequirements(
  */
 internal val AfterpayClearpayRequirement = PaymentMethodRequirements(
     piRequirements = setOf(ShippingAddress),
-    /**
-     * SetupIntents are not supported by this payment method, in addition,
-     * setup intents do not have shipping information
-     */
-    /**
-     * SetupIntents are not supported by this payment method, in addition,
-     * setup intents do not have shipping information
-     */
-    /**
-     * SetupIntents are not supported by this payment method, in addition,
-     * setup intents do not have shipping information
-     */
     /**
      * SetupIntents are not supported by this payment method, in addition,
      * setup intents do not have shipping information
