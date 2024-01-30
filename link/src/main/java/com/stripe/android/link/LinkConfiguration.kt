@@ -2,6 +2,7 @@ package com.stripe.android.link
 
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
+import com.stripe.android.link.ui.inline.LinkSignupField
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -29,6 +30,5 @@ data class LinkConfiguration(
         val email: String?,
         val phone: String?,
         val billingCountryCode: String?,
-        val shouldPrefill: Boolean,
     ) : Parcelable
 }

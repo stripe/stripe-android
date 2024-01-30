@@ -45,7 +45,7 @@ internal class LinkInlineSignupViewTest {
 
     @Test
     fun status_inputting_email_shows_only_email_field() {
-        setContent(signUpState = SignUpState.InputtingEmail)
+        setContent(signUpState = SignUpState.InputtingPrimaryField)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -56,7 +56,7 @@ internal class LinkInlineSignupViewTest {
     @Test
     fun status_inputting_phone_or_name_shows_all_fields_if_name_required() {
         setContent(
-            signUpState = SignUpState.InputtingPhoneOrName,
+            signUpState = SignUpState.InputtingRemainingFields,
             requiresNameCollection = true
         )
 
@@ -71,7 +71,7 @@ internal class LinkInlineSignupViewTest {
 
     @Test
     fun status_inputting_phone_shows_only_phone_field_if_name_not_required() {
-        setContent(signUpState = SignUpState.InputtingPhoneOrName)
+        setContent(signUpState = SignUpState.InputtingRemainingFields)
 
         onEmailField().assertExists()
         onEmailField().assertIsEnabled()
@@ -85,7 +85,7 @@ internal class LinkInlineSignupViewTest {
     fun when_error_message_not_null_in_state_InputtingPhoneOrName_then_it_is_visible() {
         val errorMessage = "Error message"
         setContent(
-            signUpState = SignUpState.InputtingPhoneOrName,
+            signUpState = SignUpState.InputtingRemainingFields,
             errorMessage = ErrorMessage.Raw(errorMessage)
         )
         composeTestRule.onNodeWithText(errorMessage).assertExists()
@@ -95,7 +95,7 @@ internal class LinkInlineSignupViewTest {
     fun when_error_message_not_null_in_state_InputtingEmail_then_it_is_visible() {
         val errorMessage = "Error message"
         setContent(
-            signUpState = SignUpState.InputtingEmail,
+            signUpState = SignUpState.InputtingPrimaryField,
             errorMessage = ErrorMessage.Raw(errorMessage)
         )
         composeTestRule.onNodeWithText(errorMessage).assertExists()
@@ -124,7 +124,7 @@ internal class LinkInlineSignupViewTest {
         phoneController: PhoneNumberController = PhoneNumberController.createPhoneNumberController(),
         nameController: SimpleTextFieldController =
             NameConfig.createController(null),
-        signUpState: SignUpState = SignUpState.InputtingEmail,
+        signUpState: SignUpState = SignUpState.InputtingPrimaryField,
         enabled: Boolean = true,
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,

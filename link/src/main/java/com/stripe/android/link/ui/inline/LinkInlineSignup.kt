@@ -78,7 +78,7 @@ private fun Preview() {
                 emailController = EmailConfig.createController("email@me.co"),
                 phoneNumberController = PhoneNumberController.createPhoneNumberController("5555555555"),
                 nameController = NameConfig.createController("My Name"),
-                signUpState = SignUpState.InputtingEmail,
+                signUpState = SignUpState.InputtingPrimaryField,
                 enabled = true,
                 expanded = true,
                 requiresNameCollection = true,
@@ -112,7 +112,7 @@ fun LinkInlineSignup(
         val focusManager = LocalFocusManager.current
         val keyboardController = LocalSoftwareKeyboardController.current
         LaunchedEffect(viewState.signUpState) {
-            if (viewState.signUpState == SignUpState.InputtingEmail && viewState.userInput != null) {
+            if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
                 focusManager.clearFocus(true)
                 keyboardController?.hide()
             }
@@ -229,7 +229,7 @@ internal fun LinkInlineSignup(
                         )
 
                         AnimatedVisibility(
-                            visible = signUpState != SignUpState.InputtingPhoneOrName &&
+                            visible = signUpState != SignUpState.InputtingRemainingFields &&
                                 errorMessage != null
                         ) {
                             ErrorText(
@@ -241,7 +241,7 @@ internal fun LinkInlineSignup(
                         }
 
                         AnimatedVisibility(
-                            visible = signUpState == SignUpState.InputtingPhoneOrName
+                            visible = signUpState == SignUpState.InputtingRemainingFields
                         ) {
                             Column(modifier = Modifier.fillMaxWidth()) {
                                 PhoneNumberCollectionSection(
@@ -275,6 +275,7 @@ internal fun LinkInlineSignup(
 
                                 LinkTerms(
                                     isOptional = false,
+                                    isShowingPhoneFirst = false,
                                     modifier = Modifier.padding(top = 4.dp),
                                     textAlign = TextAlign.Start,
                                 )
@@ -314,7 +315,7 @@ private fun EmailCollectionSection(
         ) {
             TextField(
                 textFieldController = emailController,
-                imeAction = if (signUpState == SignUpState.InputtingPhoneOrName) {
+                imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
                     ImeAction.Next
                 } else {
                     ImeAction.Done

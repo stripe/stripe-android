@@ -56,7 +56,8 @@ open class AddressElement constructor(
         IdentifierSpec.Phone,
         PhoneNumberController(
             initialPhoneNumber = rawValuesMap[IdentifierSpec.Phone] ?: "",
-            showOptionalLabel = addressType.phoneNumberState == PhoneNumberState.OPTIONAL
+            showOptionalLabel = addressType.phoneNumberState == PhoneNumberState.OPTIONAL,
+            acceptAnyInput = true,
         )
     )
 

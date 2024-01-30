@@ -19,7 +19,8 @@ class PhoneNumberController constructor(
     val initialPhoneNumber: String = "",
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
-    override val showOptionalLabel: Boolean = false
+    override val showOptionalLabel: Boolean = false,
+    private val acceptAnyInput: Boolean = false,
 ) : InputController, SectionFieldComposable {
     override val label = flowOf(CoreR.string.stripe_address_label_phone_number)
 
@@ -73,7 +74,7 @@ class PhoneNumberController constructor(
         formatter.toE164Format(value)
     }
     override val isComplete = combine(fieldValue, phoneNumberMinimumLength) { value, minLength ->
-        value.length >= (minLength ?: 0) || showOptionalLabel
+        value.length >= (minLength ?: 0) || acceptAnyInput
     }
     override val formFieldValue = fieldValue.combine(isComplete) { fieldValue, isComplete ->
         FormFieldEntry(fieldValue, isComplete)
@@ -131,7 +132,8 @@ class PhoneNumberController constructor(
          */
         fun createPhoneNumberController(
             initialValue: String = "",
-            initiallySelectedCountryCode: String? = null
+            initiallySelectedCountryCode: String? = null,
+            showOptionalLabel: Boolean = false,
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
 
@@ -155,11 +157,13 @@ class PhoneNumberController constructor(
                 PhoneNumberController(
                     initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
+                    showOptionalLabel = showOptionalLabel,
                 )
             } else {
                 PhoneNumberController(
                     initialPhoneNumber = initialValue,
-                    initiallySelectedCountryCode = initiallySelectedCountryCode
+                    initiallySelectedCountryCode = initiallySelectedCountryCode,
+                    showOptionalLabel = showOptionalLabel,
                 )
             }
         }

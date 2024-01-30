@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import kotlin.math.absoluteValue
+import kotlin.random.Random
 
 internal object DefaultBillingAddressSettingsDefinition : BooleanSettingsDefinition(
     key = "defaultBillingAddress",
@@ -25,7 +27,7 @@ internal object DefaultBillingAddressSettingsDefinition : BooleanSettingsDefinit
                         postalCode = "94080",
                         country = "US",
                     ),
-                    email = "email@email.com",
+                    email = "email_${Random.nextInt().absoluteValue}@email.com",
                     name = "Jenny Rosen",
                     phone = "+18008675309",
                 )

@@ -1,6 +1,8 @@
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.model.CountryCode
+import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.ui.signup.SignUpState
 
 /**
@@ -17,10 +19,18 @@ data class InlineSignupViewState internal constructor(
     val userInput: UserInput?,
     val merchantName: String,
     val signupMode: LinkSignupMode?,
-    internal val isExpanded: Boolean,
-    internal val apiFailed: Boolean,
-    internal val signUpState: SignUpState
+    val fields: List<LinkSignupField>,
+    val prefillEligibleFields: Set<LinkSignupField>,
+    internal val isExpanded: Boolean = false,
+    internal val apiFailed: Boolean = false,
+    internal val signUpState: SignUpState = SignUpState.InputtingPrimaryField,
 ) {
+
+    val isShowingPhoneFirst: Boolean
+        get() = fields.first() == LinkSignupField.Phone
+
+    val isShowingEmailFirst: Boolean
+        get() = fields.first() == LinkSignupField.Email
 
     /**
      * Whether the view is active and the payment should be processed through Link.
@@ -31,10 +41,68 @@ data class InlineSignupViewState internal constructor(
             LinkSignupMode.InsteadOfSaveForFutureUse -> isExpanded && !apiFailed
             null -> false
         }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+
+        fun create(config: LinkConfiguration): InlineSignupViewState {
+            val isAlternativeFlow = config.signupMode == LinkSignupMode.AlongsideSaveForFutureUse
+
+            val fields = buildList {
+                val customer = config.customerInfo
+                val hasPrefilledEmail = !customer.email.isNullOrBlank()
+
+                if (isAlternativeFlow && hasPrefilledEmail) {
+                    add(LinkSignupField.Phone)
+                    add(LinkSignupField.Email)
+                } else if (isAlternativeFlow) {
+                    add(LinkSignupField.Email)
+                    add(LinkSignupField.Phone)
+                } else {
+                    add(LinkSignupField.Email)
+                    add(LinkSignupField.Phone)
+                }
+
+                val requiresNameCollection = config.stripeIntent.countryCode != CountryCode.US.value
+                if (requiresNameCollection) {
+                    add(LinkSignupField.Name)
+                }
+            }
+
+            val prefillEligibleFields = when (config.signupMode) {
+                LinkSignupMode.InsteadOfSaveForFutureUse -> {
+                    fields.toSet()
+                }
+                LinkSignupMode.AlongsideSaveForFutureUse -> {
+                    // We can't prefill all fields, as this might lead to Link account creation without explicit
+                    // user consent. We don't prefill the first field in this case.
+                    fields.toSet() - fields.first()
+                }
+                null -> {
+                    emptySet()
+                }
+            }
+
+            return InlineSignupViewState(
+                userInput = null,
+                merchantName = config.merchantName,
+                signupMode = config.signupMode!!,
+                fields = fields,
+                prefillEligibleFields = prefillEligibleFields,
+            )
+        }
+    }
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 enum class LinkSignupMode {
     InsteadOfSaveForFutureUse,
     AlongsideSaveForFutureUse,
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+enum class LinkSignupField {
+    Email,
+    Phone,
+    Name,
 }

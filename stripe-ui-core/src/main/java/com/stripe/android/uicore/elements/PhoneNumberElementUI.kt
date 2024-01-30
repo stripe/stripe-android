@@ -102,13 +102,17 @@ fun PhoneNumberElementUI(
     modifier: Modifier = Modifier,
     countryDropdown: @Composable () -> Unit = { CountryDropdown(controller, enabled) },
     requestFocusWhenShown: Boolean = false,
-    imeAction: ImeAction = ImeAction.Done
+    trailingIcon: @Composable (() -> Unit)? = null,
+    imeAction: ImeAction = ImeAction.Done,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
-    val selectedIndex by controller.countryDropdownController.selectedIndex.collectAsState(0)
-    controller.onSelectedCountryIndex(selectedIndex)
+
+    // TODO Check if this is actually needed
+    // val selectedIndex by controller.countryDropdownController.selectedIndex.collectAsState(0)
+    // controller.onSelectedCountryIndex(selectedIndex)
+
     val value by controller.fieldValue.collectAsState("")
     val shouldShowError by controller.error.collectAsState(null)
     val label by controller.label.collectAsState(CoreR.string.stripe_address_label_phone_number)
@@ -154,6 +158,7 @@ fun PhoneNumberElementUI(
             Text(text = placeholder)
         },
         leadingIcon = countryDropdown,
+        trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Phone,

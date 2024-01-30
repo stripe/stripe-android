@@ -303,18 +303,49 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             LinkSignupMode.InsteadOfSaveForFutureUse
         }
 
-        val shouldAutofillBillingDetails = when (linkSignupMode) {
-            LinkSignupMode.InsteadOfSaveForFutureUse -> true
-            LinkSignupMode.AlongsideSaveForFutureUse,
-            null -> false
-        }
+//        val shouldAutofillBillingDetails = when (linkSignupMode) {
+//            LinkSignupMode.InsteadOfSaveForFutureUse -> true
+//            LinkSignupMode.AlongsideSaveForFutureUse, null -> false
+//        }
+
+//        val possibleFields = buildSet {
+//            add(LinkSignupField.Email)
+//            add(LinkSignupField.Phone)
+//
+//            if (stripeIntent.countryCode != CountryCode.US.value) {
+//                add(LinkSignupField.Name)
+//            }
+//        }
+
+//        val fieldsToPrefill = when (linkSignupMode) {
+//            LinkSignupMode.InsteadOfSaveForFutureUse -> {
+//                possibleFields
+//            }
+//            LinkSignupMode.AlongsideSaveForFutureUse -> {
+//                // We can't prefill all fields, as this might lead to Link account creation without explicit
+//                // user consent.
+//                val visibleFields = possibleFields
+//
+//
+//
+//                if (stripeIntent.countryCode != CountryCode.US.value) {
+//                    LinkSignupField.values().toSet()
+//                } else {
+//                    LinkSignupField.values().toSet() - LinkSignupField.Name
+//                }
+//            }
+//            null -> {
+//                emptySet()
+//            }
+//        }
 
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = config.defaultBillingDetails?.name,
             email = customerEmail,
             phone = customerPhone,
             billingCountryCode = config.defaultBillingDetails?.address?.country,
-            shouldPrefill = shouldAutofillBillingDetails,
+//            shouldPrefill = shouldAutofillBillingDetails,
+//            fieldsToPrefill = fieldsToPrefill,
         )
 
         return LinkConfiguration(
