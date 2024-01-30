@@ -125,29 +125,31 @@ private fun LinkStepUpVerificationLoaded(
             error = submitError,
             onCloseFromErrorClick = onCloseFromErrorClick
         )
-    } else Layout(
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        lazyListState = lazyListState,
-        body = {
-            item {
-                HeaderSection(payload.email)
+    } else {
+        Layout(
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            lazyListState = lazyListState,
+            body = {
+                item {
+                    HeaderSection(payload.email)
+                }
+                item {
+                    VerificationSection(
+                        focusRequester = focusRequester,
+                        otpElement = payload.otpElement,
+                        enabled = !submitLoading,
+                        confirmVerificationError = submitError
+                    )
+                }
+                item {
+                    ResendCodeSection(
+                        isLoading = submitLoading,
+                        onClickableTextClick = onClickableTextClick
+                    )
+                }
             }
-            item {
-                VerificationSection(
-                    focusRequester = focusRequester,
-                    otpElement = payload.otpElement,
-                    enabled = !submitLoading,
-                    confirmVerificationError = submitError
-                )
-            }
-            item {
-                ResendCodeSection(
-                    isLoading = submitLoading,
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
-        }
-    )
+        )
+    }
 }
 
 @Composable

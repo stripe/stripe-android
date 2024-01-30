@@ -120,41 +120,43 @@ private fun NetworkingSaveToLinkVerificationLoaded(
             error = confirmVerificationAsync.error,
             onCloseFromErrorClick = onCloseFromErrorClick
         )
-    } else Layout(
-        lazyListState = lazyListState,
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        body = {
-            item { Header(payload) }
-            item {
-                VerificationSection(
-                    focusRequester = focusRequester,
-                    otpElement = payload.otpElement,
-                    enabled = confirmVerificationAsync !is Loading,
-                    confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
-                )
-            }
-            if (confirmVerificationAsync is Loading) {
+    } else {
+        Layout(
+            lazyListState = lazyListState,
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            body = {
+                item { Header(payload) }
                 item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        V3LoadingSpinner(Modifier.size(24.dp))
+                    VerificationSection(
+                        focusRequester = focusRequester,
+                        otpElement = payload.otpElement,
+                        enabled = confirmVerificationAsync !is Loading,
+                        confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
+                    )
+                }
+                if (confirmVerificationAsync is Loading) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            V3LoadingSpinner(Modifier.size(24.dp))
+                        }
                     }
                 }
+            },
+            footer = {
+                FinancialConnectionsButton(
+                    type = FinancialConnectionsButton.Type.Secondary,
+                    onClick = onSkipClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    Text(text = stringResource(R.string.stripe_networking_save_to_link_verification_cta_negative))
+                }
             }
-        },
-        footer = {
-            FinancialConnectionsButton(
-                type = FinancialConnectionsButton.Type.Secondary,
-                onClick = onSkipClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-            ) {
-                Text(text = stringResource(R.string.stripe_networking_save_to_link_verification_cta_negative))
-            }
-        }
-    )
+        )
+    }
 }
 
 @Composable

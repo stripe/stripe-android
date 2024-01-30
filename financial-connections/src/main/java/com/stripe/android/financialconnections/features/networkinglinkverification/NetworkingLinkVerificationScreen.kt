@@ -107,30 +107,32 @@ private fun NetworkingLinkVerificationLoaded(
             error = confirmVerificationAsync.error,
             onCloseFromErrorClick = onCloseFromErrorClick
         )
-    } else Layout(
-        verticalArrangement = Arrangement.spacedBy(24.dp),
-        body = {
-            item { Header(payload) }
-            item {
-                VerificationSection(
-                    focusRequester = focusRequester,
-                    otpElement = payload.otpElement,
-                    enabled = confirmVerificationAsync !is Loading,
-                    confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
-                )
-            }
-            if (confirmVerificationAsync is Loading) {
+    } else {
+        Layout(
+            verticalArrangement = Arrangement.spacedBy(24.dp),
+            body = {
+                item { Header(payload) }
                 item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        V3LoadingSpinner(Modifier.size(24.dp))
+                    VerificationSection(
+                        focusRequester = focusRequester,
+                        otpElement = payload.otpElement,
+                        enabled = confirmVerificationAsync !is Loading,
+                        confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
+                    )
+                }
+                if (confirmVerificationAsync is Loading) {
+                    item {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            V3LoadingSpinner(Modifier.size(24.dp))
+                        }
                     }
                 }
             }
-        }
-    )
+        )
+    }
 }
 
 @Composable
