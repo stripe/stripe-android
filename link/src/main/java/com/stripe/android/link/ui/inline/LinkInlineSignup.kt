@@ -56,6 +56,8 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.link.ui.signup.SignUpState.InputtingRemainingFields
+import com.stripe.android.link.ui.signup.SignUpState.VerifyingEmail
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
@@ -213,7 +215,7 @@ internal fun LinkInlineSignup(
                         )
 
                         AnimatedVisibility(
-                            visible = signUpState != SignUpState.InputtingRemainingFields && errorMessage != null
+                            visible = signUpState != InputtingRemainingFields && errorMessage != null
                         ) {
                             ErrorText(
                                 text = errorMessage
@@ -225,9 +227,9 @@ internal fun LinkInlineSignup(
 
                         AnimatedVisibility(
                             visible = if (didShowAllFields) {
-                                signUpState == SignUpState.InputtingRemainingFields || signUpState == SignUpState.VerifyingEmail
+                                signUpState == InputtingRemainingFields || signUpState == VerifyingEmail
                             } else {
-                                signUpState == SignUpState.InputtingRemainingFields
+                                signUpState == InputtingRemainingFields
                             },
                         ) {
                             LaunchedEffect(Unit) {
@@ -305,7 +307,7 @@ private fun EmailCollectionSection(
         ) {
             TextField(
                 textFieldController = emailController,
-                imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
+                imeAction = if (signUpState == InputtingRemainingFields) {
                     ImeAction.Next
                 } else {
                     ImeAction.Done
@@ -315,7 +317,7 @@ private fun EmailCollectionSection(
                     .focusRequester(focusRequester)
                     .weight(1f)
             )
-            if (signUpState == SignUpState.VerifyingEmail) {
+            if (signUpState == VerifyingEmail) {
                 CircularProgressIndicator(
                     modifier = Modifier
                         .size(32.dp)
