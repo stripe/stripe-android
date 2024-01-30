@@ -834,6 +834,7 @@
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.8.22 (*)
 +--- androidx.activity:activity-ktx:1.7.2 (*)
 +--- androidx.appcompat:appcompat:1.6.1 (*)
++--- androidx.browser:browser:1.5.0 (*)
 +--- androidx.core:core-ktx:1.9.0 -> 1.10.0 (*)
 +--- androidx.lifecycle:lifecycle-runtime-ktx:2.5.1 -> 2.6.1 (*)
 +--- androidx.lifecycle:lifecycle-livedata-ktx:2.5.1 -> 2.6.1 (*)
