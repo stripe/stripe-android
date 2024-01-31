@@ -54,7 +54,7 @@ ext.versions = [
         paparazzi                   : '1.2.0',
         payButtonCompose            : '0.1.3',
         places                      : '3.0.0',
-        playServices                : '1.6.4',
+        playServicesCoroutines      : '1.7.3',
         playServicesTfLite          : '16.0.1',
         playServicesWallet          : '19.2.1',
         retrofit                    : '2.9.0',
@@ -152,7 +152,7 @@ ext.libs = [
         kotlin                              : [
                 coroutines            : "org.jetbrains.kotlinx:kotlinx-coroutines-core:${versions.kotlinCoroutines}",
                 coroutinesAndroid     : "org.jetbrains.kotlinx:kotlinx-coroutines-android:${versions.kotlinCoroutines}",
-                coroutinesPlayServices: "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${versions.playServices}",
+                coroutinesPlayServices: "org.jetbrains.kotlinx:kotlinx-coroutines-play-services:${versions.playServicesCoroutines}",
                 serialization         : "org.jetbrains.kotlinx:kotlinx-serialization-json:${versions.kotlinSerialization}",
         ],
         leakCanary                          : "com.squareup.leakcanary:leakcanary-android:${versions.leakCanary}",
