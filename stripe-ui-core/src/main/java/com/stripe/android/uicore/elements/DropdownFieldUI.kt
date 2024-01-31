@@ -30,6 +30,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -108,12 +109,13 @@ fun DropDown(
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
-            modifier = Modifier.clickable(
-                enabled = shouldEnable,
-                onClickLabel = stringResource(R.string.stripe_change)
-            ) {
-                expanded = true
-            }
+            modifier = Modifier
+                .focusProperties { canFocus = false }
+                .clickable(
+                    enabled = shouldEnable,
+                    onClickLabel = stringResource(R.string.stripe_change),
+                    onClick = { expanded = true },
+                )
         ) {
             if (controller.tinyMode) {
                 TinyDropdownLabel(

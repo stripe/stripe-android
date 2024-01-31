@@ -158,6 +158,7 @@ private fun LinkOptionalInlineSignup(
                 PhoneNumberElementUI(
                     enabled = enabled,
                     controller = phoneNumberController,
+                    moveToNextFieldOnceComplete = true,
                     imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
                         ImeAction.Next
                     } else {
@@ -222,6 +223,7 @@ private fun LinkOptionalInlineSignup(
                         PhoneNumberElementUI(
                             enabled = enabled,
                             controller = phoneNumberController,
+                            moveToNextFieldOnceComplete = requiresNameCollection,
                             requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
                             imeAction = if (requiresNameCollection) {
                                 ImeAction.Next

@@ -241,6 +241,7 @@ internal fun LinkInlineSignup(
                                     enabled = enabled,
                                     phoneNumberController = phoneNumberController,
                                     requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
+                                    moveToNextFieldOnceComplete = requiresNameCollection,
                                     imeAction = if (requiresNameCollection) {
                                         ImeAction.Next
                                     } else {
