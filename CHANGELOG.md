@@ -8,10 +8,10 @@ Dependencies updated in [7718](https://github.com/stripe/stripe-android/pull/771
 * Bumped Kotlin from 1.8.22 to 1.9.21.
 * Bumped Coroutines from 1.6.4 to 1.7.3.
 * Bumped Compose Compiler from 1.4.8 to 1.5.6.
-* Bumped androidxActivity from 1.7.2 to 1.8.2
-* Bumped androidxFragment from 1.5.5 to 1.6.2
-* Bumped androidxLifecycle from 2.6.1 to 1.70
-* Bumped material from 1.8.0 to 1.11.0
+* Bumped AndroidX Activity from 1.7.2 to 1.8.2
+* Bumped AndroidX Fragment from 1.5.5 to 1.6.2
+* Bumped AndroidX Lifecycle from 2.6.1 to 1.70
+* Bumped Material from 1.8.0 to 1.11.0
 
 ## 20.37.1 - 2024-01-25
 
