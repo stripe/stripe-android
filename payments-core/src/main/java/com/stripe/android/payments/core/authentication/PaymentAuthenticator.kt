@@ -4,7 +4,6 @@ import android.app.Activity
 import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.withResumed
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Source
@@ -12,7 +11,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.ActivityResultLauncherHost
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.launch
 
 /**
  * A class to authenticate a [StripeIntent] or [Source].
@@ -34,10 +32,8 @@ abstract class PaymentAuthenticator<Authenticatable> : ActivityResultLauncherHos
     ) {
         val lifecycleOwner = host.lifecycleOwner
 
-        lifecycleOwner.lifecycleScope.launch {
-            lifecycleOwner.awaitResumed()
-            performAuthentication(host, authenticatable, requestOptions)
-        }
+        lifecycleOwner.awaitResumed()
+        performAuthentication(host, authenticatable, requestOptions)
     }
 
     protected abstract suspend fun performAuthentication(
