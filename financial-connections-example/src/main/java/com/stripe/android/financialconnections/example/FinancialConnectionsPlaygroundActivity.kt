@@ -165,11 +165,9 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onSettingsChanged: (PlaygroundSettings) -> Unit,
         onButtonClick: () -> Unit
     ) {
-        val scrollState = rememberScrollState()
         Column(
             modifier = Modifier
                 .fillMaxHeight()
-                .verticalScroll(scrollState)
                 .padding(padding)
                 .padding(16.dp)
         ) {
