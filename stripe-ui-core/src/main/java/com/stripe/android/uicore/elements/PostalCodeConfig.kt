@@ -7,7 +7,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.R
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlin.math.max
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PostalCodeConfig(
@@ -69,13 +68,12 @@ class PostalCodeConfig(
             CountryPostalFormat.US -> userTyped.filter { it.isDigit() }
             CountryPostalFormat.CA -> userTyped.filter { it.isLetterOrDigit() }.uppercase()
             CountryPostalFormat.Other -> userTyped
-        }.dropLast(max(0, userTyped.length - format.maximumLength))
+        }.take(format.maximumLength)
     }
 
     override fun convertToRaw(displayName: String) = displayName
 
-    override fun convertFromRaw(rawValue: String) =
-        rawValue.replace(Regex("\\s+"), "")
+    override fun convertFromRaw(rawValue: String) = rawValue.replace(Regex("\\s+"), "")
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     sealed class CountryPostalFormat(
@@ -84,21 +82,21 @@ class PostalCodeConfig(
         val regexPattern: Regex
     ) {
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        object CA : CountryPostalFormat(
+        data object CA : CountryPostalFormat(
             minimumLength = 6,
             maximumLength = 6,
             regexPattern = Regex("[a-zA-Z]\\d[a-zA-Z][\\s-]?\\d[a-zA-Z]\\d")
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        object US : CountryPostalFormat(
+        data object US : CountryPostalFormat(
             minimumLength = 5,
             maximumLength = 5,
             regexPattern = Regex("\\d+")
         )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        object Other : CountryPostalFormat(
+        data object Other : CountryPostalFormat(
             minimumLength = 1,
             maximumLength = Int.MAX_VALUE,
             regexPattern = Regex(".*")
