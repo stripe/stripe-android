@@ -58,7 +58,7 @@ private val Typography = FinancialConnectionsTypography(
         lineHeight = 32.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
-        ),
+    ),
     subtitleEmphasized = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
