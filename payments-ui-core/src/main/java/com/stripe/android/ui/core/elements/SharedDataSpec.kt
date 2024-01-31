@@ -1,10 +1,12 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-internal data class SharedDataSpec(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class SharedDataSpec(
     @SerialName("type")
     val type: String,
 

@@ -73,6 +73,7 @@ public final class com/stripe/android/model/BankAccount$Status : java/lang/Enum 
 	public static final field Validated Lcom/stripe/android/model/BankAccount$Status;
 	public static final field VerificationFailed Lcom/stripe/android/model/BankAccount$Status;
 	public static final field Verified Lcom/stripe/android/model/BankAccount$Status;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/BankAccount$Status;
 	public static fun values ()[Lcom/stripe/android/model/BankAccount$Status;
@@ -81,6 +82,7 @@ public final class com/stripe/android/model/BankAccount$Status : java/lang/Enum 
 public final class com/stripe/android/model/BankAccount$Type : java/lang/Enum {
 	public static final field Company Lcom/stripe/android/model/BankAccount$Type;
 	public static final field Individual Lcom/stripe/android/model/BankAccount$Type;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/BankAccount$Type;
 	public static fun values ()[Lcom/stripe/android/model/BankAccount$Type;
@@ -88,7 +90,6 @@ public final class com/stripe/android/model/BankAccount$Type : java/lang/Enum {
 
 public final class com/stripe/android/model/Card : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/model/Card$Companion;
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Ljava/lang/String;
@@ -163,6 +164,7 @@ public final class com/stripe/android/model/CardBrand : java/lang/Enum {
 	public final fun getCvcIcon ()I
 	public final fun getCvcLength ()Ljava/util/Set;
 	public final fun getDisplayName ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public final fun getErrorIcon ()I
 	public final fun getIcon ()I
 	public final fun getMaxCvcLength ()I
@@ -179,11 +181,11 @@ public final class com/stripe/android/model/CardBrand$Companion {
 }
 
 public final class com/stripe/android/model/CardFunding : java/lang/Enum {
-	public static final field Companion Lcom/stripe/android/model/CardFunding$Companion;
 	public static final field Credit Lcom/stripe/android/model/CardFunding;
 	public static final field Debit Lcom/stripe/android/model/CardFunding;
 	public static final field Prepaid Lcom/stripe/android/model/CardFunding;
 	public static final field Unknown Lcom/stripe/android/model/CardFunding;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/CardFunding;
 	public static fun values ()[Lcom/stripe/android/model/CardFunding;
 }
@@ -327,6 +329,7 @@ public final class com/stripe/android/model/Token$Type : java/lang/Enum {
 	public static final field CvcUpdate Lcom/stripe/android/model/Token$Type;
 	public static final field Person Lcom/stripe/android/model/Token$Type;
 	public static final field Pii Lcom/stripe/android/model/Token$Type;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/Token$Type;
 	public static fun values ()[Lcom/stripe/android/model/Token$Type;
 }
@@ -340,10 +343,10 @@ public abstract class com/stripe/android/model/TokenParams : android/os/Parcelab
 
 public final class com/stripe/android/model/TokenizationMethod : java/lang/Enum {
 	public static final field ApplePay Lcom/stripe/android/model/TokenizationMethod;
-	public static final field Companion Lcom/stripe/android/model/TokenizationMethod$Companion;
 	public static final field GooglePay Lcom/stripe/android/model/TokenizationMethod;
 	public static final field Masterpass Lcom/stripe/android/model/TokenizationMethod;
 	public static final field VisaCheckout Lcom/stripe/android/model/TokenizationMethod;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/model/TokenizationMethod;
 	public static fun values ()[Lcom/stripe/android/model/TokenizationMethod;
 }

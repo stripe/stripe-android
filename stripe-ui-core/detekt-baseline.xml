@@ -11,9 +11,7 @@
     <ID>CyclomaticComplexMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
     <ID>EmptyFunctionBlock:DrawablePainter.kt$EmptyPainter${}</ID>
     <ID>FunctionParameterNaming:IdentifierSpec.kt$IdentifierSpec.Companion$_value: String</ID>
-    <ID>LongMethod:DropdownFieldUI.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun DropDown( controller: DropdownFieldController, enabled: Boolean, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:Html.kt$@Composable @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun annotatedStringResource( text: String, imageGetter: Map&lt;String, EmbeddableImage> = emptyMap(), urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline) ): AnnotatedString</ID>
-    <ID>LongMethod:OTPElementUI.kt$@Composable @OptIn(ExperimentalMaterialApi::class) private fun OTPInputBox( value: String, isSelected: Boolean, element: OTPElement, index: Int, focusManager: FocusManager, modifier: Modifier, enabled: Boolean, colors: OTPElementColors )</ID>
     <ID>LongMethod:TextFieldUI.kt$@OptIn(ExperimentalComposeUiApi::class) @Composable fun TextField( textFieldController: TextFieldController, enabled: Boolean, imeAction: ImeAction, modifier: Modifier = Modifier, onTextStateChanged: (TextFieldState?) -> Unit = {}, nextFocusDirection: FocusDirection = FocusDirection.Next, previousFocusDirection: FocusDirection = FocusDirection.Previous )</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig$4</ID>
     <ID>MagicNumber:DateConfig.kt$DateConfig.Companion$100</ID>

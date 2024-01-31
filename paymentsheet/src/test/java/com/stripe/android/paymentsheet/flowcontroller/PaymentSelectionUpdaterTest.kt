@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -13,7 +14,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test

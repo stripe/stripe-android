@@ -1,11 +1,11 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal sealed class CustomerSheetViewAction {
     object OnDismissed : CustomerSheetViewAction()
@@ -18,7 +18,7 @@ internal sealed class CustomerSheetViewAction {
     class OnModifyItem(val paymentMethod: PaymentMethod) : CustomerSheetViewAction()
     class OnItemRemoved(val paymentMethod: PaymentMethod) : CustomerSheetViewAction()
     class OnAddPaymentMethodItemChanged(
-        val paymentMethod: LpmRepository.SupportedPaymentMethod,
+        val paymentMethod: SupportedPaymentMethod,
     ) : CustomerSheetViewAction()
     class OnFormFieldValuesCompleted(
         val formFieldValues: FormFieldValues?,

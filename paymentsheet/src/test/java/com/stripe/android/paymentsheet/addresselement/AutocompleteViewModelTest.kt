@@ -132,6 +132,20 @@ class AutocompleteViewModelTest {
 
     @Test
     fun `onEnterAddressManually sets the current address and navigates back`() = runTest(UnconfinedTestDispatcher()) {
+        whenever(mockClient.findAutocompletePredictions(any(), any(), any())).thenReturn(
+            Result.success(
+                FindAutocompletePredictionsResponse(
+                    listOf(
+                        AutocompletePrediction(
+                            primaryText = SpannableString("primaryText"),
+                            secondaryText = SpannableString("secondaryText"),
+                            placeId = "placeId",
+                        )
+                    )
+                )
+            )
+        )
+
         val viewModel = createViewModel()
         val expectedResult = Result.success(
             AddressDetails(

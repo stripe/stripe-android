@@ -12,6 +12,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.googlepaylauncher.GooglePayRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -23,7 +24,6 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.flow.flow

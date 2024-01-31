@@ -2,7 +2,22 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-* [FIXED][7832](https://github.com/stripe/stripe-android/pull/7832) Fixed an issue with `FlowController` when a custom `ViewModelProvider.Factory` is specified.  
+* [FIXED][7832](https://github.com/stripe/stripe-android/pull/7832) Fixed an issue with `FlowController` when a custom `ViewModelProvider.Factory` is specified.
+
+Dependencies updated in [7718](https://github.com/stripe/stripe-android/pull/7718) and [7851](https://github.com/stripe/stripe-android/pull/7851) and [7854](https://github.com/stripe/stripe-android/pull/7854):
+* Bumped AndroidX Activity from 1.7.2 to 1.8.2.
+* Bumped AndroidX Fragment from 1.5.5 to 1.6.2.
+* Bumped AndroidX Lifecycle from 2.6.1 to 1.7.0.
+* Bumped AndroidX Navigation from 2.5.3 to 2.7.6.
+* Bumped AndroidX Preference from 1.2.0 to 1.2.1.
+* Bumped AndroidX RecyclerView from 1.2.1 to 1.3.1.
+* Bumped Compose Compiler from 1.4.8 to 1.5.8.
+* Bumped Compose UI from 1.5.4 to 1.6.0.
+* Bumped Coroutines from 1.6.4 to 1.7.3.
+* Bumped Google Places from 3.0.0 to 3.3.0.
+* Bumped Kotlin from 1.8.22 to 1.9.22.
+* Bumped Material from 1.8.0 to 1.11.0.
+* Bumped Mavericks from 3.0.7 to 3.0.9.
 
 ## 20.37.1 - 2024-01-25
 

@@ -54,6 +54,7 @@ data class AfterpayClearpayHeaderElement(
         const val url = "https://static.afterpay.com/modal/%s.html"
         const val NO_BREAK_SPACE = "\u00A0"
 
-        internal fun isClearpay() = setOf("GB", "ES", "FR", "IT").contains(Locale.current.region)
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isClearpay() = setOf("GB", "ES", "FR", "IT").contains(Locale.current.region)
     }
 }

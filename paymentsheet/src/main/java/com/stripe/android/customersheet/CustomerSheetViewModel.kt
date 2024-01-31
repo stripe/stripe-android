@@ -18,6 +18,8 @@ import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -55,7 +57,6 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -104,10 +105,10 @@ internal class CustomerSheetViewModel @Inject constructor(
     private var isGooglePayReadyAndEnabled: Boolean = false
     private var paymentLauncher: PaymentLauncher? = null
 
-    private var previouslySelectedPaymentMethod: LpmRepository.SupportedPaymentMethod? = null
+    private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var unconfirmedPaymentMethod: PaymentMethod? = null
     private var stripeIntent: StripeIntent? = null
-    private var supportedPaymentMethods = mutableListOf<LpmRepository.SupportedPaymentMethod>()
+    private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
 
     private val card = LpmRepository.hardcodedCardSpec(
         billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
@@ -364,7 +365,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
-    private fun onAddPaymentMethodItemChanged(paymentMethod: LpmRepository.SupportedPaymentMethod) {
+    private fun onAddPaymentMethodItemChanged(paymentMethod: SupportedPaymentMethod) {
         (viewState.value as? CustomerSheetViewState.AddPaymentMethod)?.let {
             if (it.paymentMethodCode == paymentMethod.code) {
                 return

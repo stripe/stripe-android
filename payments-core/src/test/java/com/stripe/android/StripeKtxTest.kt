@@ -14,8 +14,10 @@ import com.stripe.android.model.Source
 import com.stripe.android.model.StripeParamsModel
 import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.testing.CoroutineTestRule
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.JUnit4
@@ -34,6 +36,7 @@ import kotlin.test.assertSame
  */
 @RunWith(JUnit4::class)
 internal class StripeKtxTest {
+
     private val mockApiRepository: StripeApiRepository = mock()
     private val mockPaymentController: PaymentController = mock()
 
@@ -47,6 +50,9 @@ internal class StripeKtxTest {
             TEST_STRIPE_ACCOUNT_ID,
             testDispatcher
         )
+
+    @get:Rule
+    val coroutinesTestRule = CoroutineTestRule(testDispatcher)
 
     @Test
     fun `When repository returns correct value then createPaymentMethod should Succeed`(): Unit =

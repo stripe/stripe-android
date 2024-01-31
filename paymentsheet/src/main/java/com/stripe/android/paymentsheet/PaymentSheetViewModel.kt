@@ -23,6 +23,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -64,7 +65,6 @@ import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope

@@ -7,6 +7,9 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.testIn
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodRequirements
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
@@ -27,7 +30,6 @@ import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -73,7 +75,7 @@ internal class FormViewModelTest {
         val mockLpmRepository = mock<LpmRepository>()
 
         whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
-            LpmRepository.SupportedPaymentMethod(
+            SupportedPaymentMethod(
                 code = paymentMethodType.code,
                 requiresMandate = false,
                 displayNameResource = R.string.stripe_paymentsheet_payment_method_card,

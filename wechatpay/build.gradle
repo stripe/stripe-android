@@ -21,6 +21,14 @@ dependencies {
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
 }
 
+android {
+    testOptions {
+        unitTests {
+            includeAndroidResources = true
+        }
+    }
+}
+
 ext {
     artifactId = "stripe-wechatpay"
     artifactName = "stripe-wechatpay"

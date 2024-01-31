@@ -10,6 +10,8 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -49,7 +51,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -103,7 +104,7 @@ internal abstract class BaseSheetViewModel(
     private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
     internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
 
-    internal var supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = emptyList()
+    internal var supportedPaymentMethods: List<SupportedPaymentMethod> = emptyList()
         set(value) {
             field = value
             _supportedPaymentMethodsFlow.tryEmit(value.map { it.code })
@@ -589,7 +590,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun createFormArguments(
-        selectedItem: LpmRepository.SupportedPaymentMethod,
+        selectedItem: SupportedPaymentMethod,
     ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
         stripeIntent = requireNotNull(stripeIntent.value),

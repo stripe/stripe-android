@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.forms
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -10,12 +11,11 @@ import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 
 internal object FormArgumentsFactory {
 
     fun create(
-        paymentMethod: LpmRepository.SupportedPaymentMethod,
+        paymentMethod: SupportedPaymentMethod,
         stripeIntent: StripeIntent,
         config: PaymentSheet.Configuration,
         merchantName: String,
@@ -77,7 +77,7 @@ internal object FormArgumentsFactory {
 
     @OptIn(ExperimentalCustomerSheetApi::class)
     fun create(
-        paymentMethod: LpmRepository.SupportedPaymentMethod,
+        paymentMethod: SupportedPaymentMethod,
         configuration: CustomerSheet.Configuration,
         merchantName: String,
         cbcEligibility: CardBrandChoiceEligibility,

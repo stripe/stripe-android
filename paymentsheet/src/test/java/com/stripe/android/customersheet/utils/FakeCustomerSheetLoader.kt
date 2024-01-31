@@ -4,12 +4,13 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
@@ -18,7 +19,7 @@ internal class FakeCustomerSheetLoader(
     private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     private val shouldFail: Boolean = false,
     private val customerPaymentMethods: List<PaymentMethod> = emptyList(),
-    private val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod> = listOf(
+    private val supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
         LpmRepository.HardcodedCard,
         LpmRepository.hardCodedUsBankAccount,
     ),

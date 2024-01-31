@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -26,7 +25,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCard() {
         testDriver.confirmNewOrGuestComplete(
             TestParameters.create(
-                paymentMethod = LpmRepository.HardcodedCard,
+                paymentMethodCode = "card",
             ).copy(
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
@@ -38,7 +37,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCardWithCustomBillingDetailsCollection() {
         testDriver.confirmNewOrGuestComplete(
             TestParameters.create(
-                paymentMethod = LpmRepository.HardcodedCard,
+                paymentMethodCode = "card",
             ) { settings ->
                 settings[DefaultBillingAddressSettingsDefinition] = true
                 settings[CollectNameSettingsDefinition] =
@@ -60,7 +59,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testCardInCustomFlow() {
         testDriver.confirmCustom(
             TestParameters.create(
-                paymentMethod = LpmRepository.HardcodedCard,
+                paymentMethodCode = "card",
             ).copy(
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
@@ -77,7 +76,7 @@ internal class TestCard : BasePlaygroundTest() {
     fun testDefaultSavedPaymentMethodUsedAfterSingleSave() {
         val cardNumber = "6011111111111117"
         val testParameters = TestParameters.create(
-            paymentMethod = LpmRepository.HardcodedCard,
+            paymentMethodCode = "card",
         ).copy(
             authorizationAction = null,
             saveForFutureUseCheckboxVisible = true,
@@ -116,7 +115,7 @@ internal class TestCard : BasePlaygroundTest() {
         val secondCardNumber = "6011000990139424"
 
         val testParameters = TestParameters.create(
-            paymentMethod = LpmRepository.HardcodedCard,
+            paymentMethodCode = "card",
         ).copy(
             authorizationAction = null,
             saveForFutureUseCheckboxVisible = true,
@@ -162,7 +161,7 @@ internal class TestCard : BasePlaygroundTest() {
         val cardNumber = "6011111111111117"
 
         val testParameters = TestParameters.create(
-            paymentMethod = LpmRepository.HardcodedCard,
+            paymentMethodCode = "card",
         ).copy(
             authorizationAction = null,
             saveForFutureUseCheckboxVisible = true,
@@ -200,7 +199,7 @@ internal class TestCard : BasePlaygroundTest() {
         val secondCardNumber = "6011000990139424"
 
         val testParameters = TestParameters.create(
-            paymentMethod = LpmRepository.HardcodedCard,
+            paymentMethodCode = "card",
         ).copy(
             authorizationAction = null,
             saveForFutureUseCheckboxVisible = true,

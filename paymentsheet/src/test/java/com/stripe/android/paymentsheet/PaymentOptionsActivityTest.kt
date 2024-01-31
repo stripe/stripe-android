@@ -26,8 +26,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.ui.BottomSheetContentTestTag
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -39,8 +38,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -48,17 +47,14 @@ import com.stripe.android.utils.formViewModelSubcomponentBuilder
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
-import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import kotlin.test.AfterTest
@@ -332,7 +328,7 @@ internal class PaymentOptionsActivityTest {
         runActivityScenario(args) {
             it.onActivity {
                 composeTestRule
-                    .onNodeWithTag(TEST_TAG_LIST + "Cash App Pay")
+                    .onNodeWithTag(TEST_TAG_LIST + PaymentMethod.Type.CashAppPay.code)
                     .performClick()
 
                 composeTestRule.waitForIdle()
@@ -429,9 +425,7 @@ internal class PaymentOptionsActivityTest {
         }
 
         val viewModel = TestViewModelFactory.create(
-            linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
-                onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
-            },
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,

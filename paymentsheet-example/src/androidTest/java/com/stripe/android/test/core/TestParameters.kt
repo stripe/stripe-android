@@ -13,14 +13,15 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippi
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
-import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.utils.initializedLpmRepository
 
 /**
  * This is the data class that represents the parameters used to run the test.
  */
 internal data class TestParameters(
-    val paymentMethod: LpmRepository.SupportedPaymentMethod,
+    val paymentMethodCode: String,
+    val formSpec: LayoutSpec,
     val saveCheckboxValue: Boolean,
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
@@ -39,18 +40,9 @@ internal data class TestParameters(
             paymentMethodCode: String,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
         ): TestParameters {
-            return create(
-                paymentMethod = lpmRepository.fromCode(paymentMethodCode)!!,
-                playgroundSettingsBlock = playgroundSettingsBlock,
-            )
-        }
-
-        fun create(
-            paymentMethod: LpmRepository.SupportedPaymentMethod,
-            playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
-        ): TestParameters {
             return TestParameters(
-                paymentMethod = paymentMethod,
+                paymentMethodCode = paymentMethodCode,
+                formSpec = lpmRepository.fromCode(paymentMethodCode)!!.formSpec,
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = false,
                 authorizationAction = AuthorizeAction.AuthorizePayment,

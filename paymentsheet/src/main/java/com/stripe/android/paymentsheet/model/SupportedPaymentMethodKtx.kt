@@ -1,5 +1,11 @@
 package com.stripe.android.paymentsheet.model
 
+import com.stripe.android.lpmfoundations.luxe.Delayed
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.PIRequirement
+import com.stripe.android.lpmfoundations.luxe.SIRequirement
+import com.stripe.android.lpmfoundations.luxe.ShippingAddress
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -7,13 +13,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.forms.Delayed
-import com.stripe.android.paymentsheet.forms.PIRequirement
-import com.stripe.android.paymentsheet.forms.SIRequirement
-import com.stripe.android.paymentsheet.forms.ShippingAddress
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
-import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 
 /**
  * This file hold functions that extend the functionality of the SupportedPaymentMethod

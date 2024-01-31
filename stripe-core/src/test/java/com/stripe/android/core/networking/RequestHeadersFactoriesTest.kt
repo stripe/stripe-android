@@ -110,8 +110,18 @@ class RequestHeadersFactoriesTest {
         val stripeClientUserAgent = headers[HEADER_STRIPE_CLIENT_USER_AGENT]
             ?: error("Invalid JSON in `$HEADER_STRIPE_CLIENT_USER_AGENT`")
         val stripeClientUserAgentData = JSONObject(stripeClientUserAgent)
-        assertThat(stripeClientUserAgentData.get("application"))
-            .isEqualTo("{name=MyAwesomePlugin, version=1.2.34, url=https://myawesomeplugin.info, partner_id=pp_partner_1234}")
+        val observedAppInfo = stripeClientUserAgentData.getJSONObject("application")
+
+        val expectedAppInfo = JSONObject(
+            mapOf(
+                "name" to "MyAwesomePlugin",
+                "version" to "1.2.34",
+                "url" to "https://myawesomeplugin.info",
+                "partner_id" to "pp_partner_1234",
+            )
+        )
+
+        assertThat(observedAppInfo.toString()).isEqualTo(expectedAppInfo.toString())
     }
 
     @Test

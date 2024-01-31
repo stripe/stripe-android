@@ -42,10 +42,6 @@ public final class com/stripe/android/core/Logger$Companion {
 	public final fun real ()Lcom/stripe/android/core/Logger;
 }
 
-public final class com/stripe/android/core/Logger$DefaultImpls {
-	public static synthetic fun error$default (Lcom/stripe/android/core/Logger;Ljava/lang/String;Ljava/lang/Throwable;ILjava/lang/Object;)V
-}
-
 public final class com/stripe/android/core/StripeError : com/stripe/android/core/model/StripeModel, java/io/Serializable {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final fun component1 ()Ljava/lang/String;
@@ -117,7 +113,6 @@ public final class com/stripe/android/core/exception/RateLimitException : com/st
 }
 
 public abstract class com/stripe/android/core/exception/StripeException : java/lang/Exception {
-	public static final field Companion Lcom/stripe/android/core/exception/StripeException$Companion;
 	public fun <init> ()V
 	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/Throwable;Ljava/lang/String;)V
 	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/Throwable;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -127,15 +122,6 @@ public abstract class com/stripe/android/core/exception/StripeException : java/l
 	public final fun getStripeError ()Lcom/stripe/android/core/StripeError;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/core/injection/InjectWithFallbackKt {
-}
-
-public final class com/stripe/android/core/injection/InjectorKt {
-}
-
-public final class com/stripe/android/core/injection/NamedConstantsKt {
 }
 
 public final class com/stripe/android/core/model/Country$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -178,9 +164,6 @@ public final class com/stripe/android/core/model/CountryCode$Creator : android/o
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/core/model/CountryCode;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/core/model/CountryCodeKt {
 }
 
 public final class com/stripe/android/core/model/StripeFile : com/stripe/android/core/model/StripeModel {
@@ -254,13 +237,13 @@ public final class com/stripe/android/core/model/StripeFileParams$FileLink$Creat
 public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/Enum {
 	public static final field BusinessIcon Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field BusinessLogo Lcom/stripe/android/core/model/StripeFilePurpose;
-	public static final field Companion Lcom/stripe/android/core/model/StripeFilePurpose$Companion;
 	public static final field CustomerSignature Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field DisputeEvidence Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field IdentityDocument Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field IdentityPrivate Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field PciDocument Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field TaxDocumentUserUpload Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static fun values ()[Lcom/stripe/android/core/model/StripeFilePurpose;
 }
@@ -278,15 +261,6 @@ public final class com/stripe/android/core/networking/ApiRequest$Options$Creator
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/core/networking/JsonUtilsKt {
-}
-
-public final class com/stripe/android/core/networking/NetworkConstantsKt {
-}
-
-public final class com/stripe/android/core/networking/ResponseJsonKt {
-}
-
 public final class com/stripe/android/core/networking/StripeConnection$Default : com/stripe/android/core/networking/StripeConnection$AbstractConnection {
 	public synthetic fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/Object;
 	public fun createBodyFromResponseStream (Ljava/io/InputStream;)Ljava/lang/String;
@@ -302,6 +276,7 @@ public final class com/stripe/android/core/networking/StripeRequest$Method : jav
 	public static final field GET Lcom/stripe/android/core/networking/StripeRequest$Method;
 	public static final field POST Lcom/stripe/android/core/networking/StripeRequest$Method;
 	public final fun getCode ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$Method;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$Method;
 }
@@ -311,12 +286,10 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public static final field Json Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static final field MultipartForm Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public final fun getCode ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;
-}
-
-public final class com/stripe/android/core/utils/EncodeKt {
 }
 
 public final class com/stripe/android/core/version/StripeSdkVersion {

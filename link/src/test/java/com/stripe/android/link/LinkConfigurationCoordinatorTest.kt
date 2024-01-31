@@ -40,7 +40,7 @@ class LinkConfigurationCoordinatorTest {
 
     private val linkComponentBuilder: LinkComponent.Builder = mock()
 
-    private var linkConfigurationCoordinator = LinkConfigurationCoordinator(linkComponentBuilder)
+    private var linkConfigurationCoordinator = RealLinkConfigurationCoordinator(linkComponentBuilder)
 
     init {
         FakeAndroidKeyStore.setup()

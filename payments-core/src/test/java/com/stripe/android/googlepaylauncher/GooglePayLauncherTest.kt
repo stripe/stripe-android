@@ -43,7 +43,9 @@ internal class GooglePayLauncherTest {
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),
-                googlePayRepositoryFactory = mock(),
+                googlePayRepositoryFactory = {
+                    FakeGooglePayRepository(value = true)
+                },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

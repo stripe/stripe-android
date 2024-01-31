@@ -18,6 +18,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.link.ui.inline.LinkOptionalInlineSignup
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
@@ -26,7 +27,6 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
@@ -36,12 +36,12 @@ import javax.inject.Provider
 internal fun PaymentElement(
     formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     enabled: Boolean,
-    supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
-    selectedItem: LpmRepository.SupportedPaymentMethod,
+    supportedPaymentMethods: List<SupportedPaymentMethod>,
+    selectedItem: SupportedPaymentMethod,
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     showCheckboxFlow: Flow<Boolean>,
-    onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit,
+    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
