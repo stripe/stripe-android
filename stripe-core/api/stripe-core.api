@@ -261,6 +261,7 @@ public final class com/stripe/android/core/model/StripeFilePurpose : java/lang/E
 	public static final field IdentityPrivate Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field PciDocument Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static final field TaxDocumentUserUpload Lcom/stripe/android/core/model/StripeFilePurpose;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/model/StripeFilePurpose;
 	public static fun values ()[Lcom/stripe/android/core/model/StripeFilePurpose;
 }
@@ -302,6 +303,7 @@ public final class com/stripe/android/core/networking/StripeRequest$Method : jav
 	public static final field GET Lcom/stripe/android/core/networking/StripeRequest$Method;
 	public static final field POST Lcom/stripe/android/core/networking/StripeRequest$Method;
 	public final fun getCode ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$Method;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$Method;
 }
@@ -311,6 +313,7 @@ public final class com/stripe/android/core/networking/StripeRequest$MimeType : j
 	public static final field Json Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static final field MultipartForm Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public final fun getCode ()Ljava/lang/String;
+	public static fun getEntries ()Lkotlin/enums/EnumEntries;
 	public fun toString ()Ljava/lang/String;
 	public static fun valueOf (Ljava/lang/String;)Lcom/stripe/android/core/networking/StripeRequest$MimeType;
 	public static fun values ()[Lcom/stripe/android/core/networking/StripeRequest$MimeType;

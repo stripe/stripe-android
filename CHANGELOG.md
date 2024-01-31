@@ -2,7 +2,12 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-* [FIXED][7832](https://github.com/stripe/stripe-android/pull/7832) Fixed an issue with `FlowController` when a custom `ViewModelProvider.Factory` is specified.  
+* [FIXED][7832](https://github.com/stripe/stripe-android/pull/7832) Fixed an issue with `FlowController` when a custom `ViewModelProvider.Factory` is specified.
+
+Dependencies updated in [7718](https://github.com/stripe/stripe-android/pull/7718):
+* Bumped Kotlin from 1.8.22 to 1.9.21.
+* Bumped Coroutines from 1.6.4 to 1.7.3.
+* Bumped Compose Compiler from 1.4.8 to 1.5.6.
 
 ## 20.37.1 - 2024-01-25
 

@@ -10,20 +10,21 @@ import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentLauncherConfirmationActivityTest {
-    private val viewModel = mock<PaymentLauncherViewModel>().also {
-        whenever(it.internalPaymentResult).thenReturn(mock())
+    private val viewModel = mock<PaymentLauncherViewModel> {
+        on { it.internalPaymentResult } doReturn MutableStateFlow(null)
     }
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
 

@@ -69,7 +69,7 @@ class AnalyticsRequestFactoryTest : TestCase() {
         assertThat(StripeSdkVersion.VERSION_NAME).isEqualTo(params[AnalyticsFields.BINDINGS_VERSION])
         assertThat(mockEvent.eventName).isEqualTo(params[AnalyticsFields.EVENT])
         assertThat(expectedUaName).isEqualTo(params[AnalyticsFields.ANALYTICS_UA])
-        assertThat("unknown_generic_x86_robolectric").isEqualTo(params[AnalyticsFields.DEVICE_TYPE])
+        assertThat("unknown_Android_robolectric").isEqualTo(params[AnalyticsFields.DEVICE_TYPE])
         assertNotNull(params[AnalyticsFields.OS_RELEASE])
         assertNotNull(params[AnalyticsFields.OS_NAME])
         assertNotNull(params[AnalyticsFields.SESSION_ID])

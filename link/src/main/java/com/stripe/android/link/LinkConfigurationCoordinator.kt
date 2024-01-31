@@ -2,9 +2,9 @@ package com.stripe.android.link
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.PaymentMethodCreateParams
-import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.filterNotNull
@@ -15,13 +15,30 @@ import javax.inject.Singleton
 
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkConfigurationCoordinator @Inject internal constructor(
+interface LinkConfigurationCoordinator {
+
+    val component: LinkComponent?
+    val emailFlow: Flow<String?>
+
+    fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
+    suspend fun signInWithUserInput(
+        configuration: LinkConfiguration,
+        userInput: UserInput
+    ): Result<Boolean>
+    suspend fun attachNewCardToAccount(
+        configuration: LinkConfiguration,
+        paymentMethodCreateParams: PaymentMethodCreateParams
+    ): Result<LinkPaymentDetails>
+}
+
+@Singleton
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class RealLinkConfigurationCoordinator @Inject internal constructor(
     private val linkComponentBuilder: LinkComponent.Builder,
-) {
+) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
-    @OptIn(FlowPreview::class)
-    val emailFlow: Flow<String?> = componentFlow
+    override val emailFlow: Flow<String?> = componentFlow
         .filterNotNull()
         .flatMapMerge { it.linkAccountManager.linkAccount }
         .map { it?.email }
@@ -30,24 +47,24 @@ class LinkConfigurationCoordinator @Inject internal constructor(
      * The dependency injector Component for all injectable classes in Link while in an embedded
      * environment.
      */
-    internal val component: LinkComponent?
+    override val component: LinkComponent?
         get() = componentFlow.value
 
     /**
      * Fetch the customer's account status, initializing the dependencies if they haven't been
      * initialized yet.
      */
-    fun getAccountStatusFlow(configuration: LinkConfiguration) =
+    override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> =
         getLinkPaymentLauncherComponent(configuration).linkAccountManager.accountStatus
 
     /**
      * Trigger Link sign in with the input collected from the user inline in PaymentSheet, whether
      * it's a new or existing account.
      */
-    suspend fun signInWithUserInput(
+    override suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
         userInput: UserInput
-    ) = getLinkPaymentLauncherComponent(configuration)
+    ): Result<Boolean> = getLinkPaymentLauncherComponent(configuration)
         .linkAccountManager
         .signInWithUserInput(userInput)
         .map { true }
@@ -58,7 +75,7 @@ class LinkConfigurationCoordinator @Inject internal constructor(
      * @return The parameters needed to confirm the current Stripe Intent using the newly created
      *          PaymentDetails.
      */
-    suspend fun attachNewCardToAccount(
+    override suspend fun attachNewCardToAccount(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> =

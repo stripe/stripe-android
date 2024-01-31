@@ -951,7 +951,7 @@ internal class PaymentSheetActivityTest {
         loadDelay: Duration = Duration.ZERO,
         isGooglePayAvailable: Boolean = false,
         isLinkAvailable: Boolean = false,
-        initialPaymentSelection: PaymentSelection? = null,
+        initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
     ): PaymentSheetViewModel = runBlocking {
         val lpmRepository = LpmRepository(
             arguments = LpmRepository.LpmRepositoryArguments(resources = context.resources),
