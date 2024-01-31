@@ -15,7 +15,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.ui.inline.InlineSignupViewState
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -154,7 +154,7 @@ private val BaseSheetViewModel.initiallySelectedPaymentMethodType: PaymentMethod
     }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(
-    paymentMethod: LpmRepository.SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
@@ -168,7 +168,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
 }
 
 internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
-    paymentMethod: LpmRepository.SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
@@ -179,7 +179,7 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
 }
 
 internal fun FormFieldValues.transformToExtraParams(
-    paymentMethod: LpmRepository.SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod
 ): PaymentMethodExtraParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodExtraParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
@@ -191,7 +191,7 @@ internal fun FormFieldValues.transformToExtraParams(
 
 internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
-    paymentMethod: LpmRepository.SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod
 ): PaymentSelection.New {
     val params = transformToPaymentMethodCreateParams(paymentMethod)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
