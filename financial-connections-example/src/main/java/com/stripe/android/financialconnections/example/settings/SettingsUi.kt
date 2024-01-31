@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.example.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -37,9 +38,11 @@ internal fun SettingsUi(
     playgroundSettings: PlaygroundSettings,
     onSettingsChanged: (PlaygroundSettings) -> Unit,
 ) {
-    Column {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
         for (setting in playgroundSettings.settings) {
-            Row(modifier = Modifier.padding(bottom = 16.dp)) {
+            Row {
                 SingleSelectSetting(setting, playgroundSettings, onSettingsChanged)
             }
         }
@@ -158,6 +161,7 @@ private fun TextSetting(
     onOptionChanged: (String) -> Unit,
 ) {
     OutlinedTextField(
+        singleLine = true,
         placeholder = { Text(text = name) },
         label = { Text(text = name) },
         value = value,

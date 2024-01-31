@@ -16,19 +16,6 @@ public final class com/stripe/android/camera/framework/AnalyzerPool$Companion {
 	public static synthetic fun of$default (Lcom/stripe/android/camera/framework/AnalyzerPool$Companion;Lcom/stripe/android/camera/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public final class com/stripe/android/camera/framework/StatTracker$DefaultImpls {
-	public static synthetic fun trackResult$default (Lcom/stripe/android/camera/framework/StatTracker;Ljava/lang/String;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
-public final class com/stripe/android/camera/framework/image/BitmapExtensionsKt {
-}
-
-public final class com/stripe/android/camera/framework/image/ImageKt {
-}
-
-public final class com/stripe/android/camera/framework/time/ClockKt {
-}
-
 public final class com/stripe/android/camera/framework/time/Duration$Companion {
 	public final fun getINFINITE ()Lcom/stripe/android/camera/framework/time/Duration;
 	public final fun getNEGATIVE_INFINITE ()Lcom/stripe/android/camera/framework/time/Duration;
@@ -76,9 +63,6 @@ public final class com/stripe/android/camera/framework/time/DurationKt {
 	public static final fun getYears (F)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (I)Lcom/stripe/android/camera/framework/time/Duration;
 	public static final fun getYears (J)Lcom/stripe/android/camera/framework/time/Duration;
-}
-
-public final class com/stripe/android/camera/framework/util/LayoutKt {
 }
 
 public final class com/stripe/android/camera/framework/util/MemoizeKt {
@@ -132,10 +116,6 @@ public final class com/stripe/android/camera/framework/util/MemoizeKt {
 	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function4;
 }
 
-public final class com/stripe/android/camera/scanui/SimpleScanStateful$DefaultImpls {
-	public static fun changeScanState (Lcom/stripe/android/camera/scanui/SimpleScanStateful;Lcom/stripe/android/camera/scanui/ScanState;)Z
-}
-
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -145,9 +125,6 @@ public final class com/stripe/android/camera/scanui/ViewFinderBackground : andro
 	public fun setBackgroundColor (I)V
 	public final fun setOnDrawListener (Lkotlin/jvm/functions/Function0;)V
 	public final fun setViewFinderRect (Landroid/graphics/Rect;)V
-}
-
-public final class com/stripe/android/camera/scanui/util/ViewExtensionsKt {
 }
 
 public final class com/stripe/android/camera/scanui/util/ViewUtilsKt {

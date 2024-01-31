@@ -1,9 +1,9 @@
-+--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21
++--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22
 |    +--- org.jetbrains:annotations:13.0 -> 23.0.0
 |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 1.8.20 (c)
-|    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21 (c)
+|    +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.22 (c)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 1.8.20 (c)
-+--- androidx.browser:browser:1.5.0
++--- androidx.browser:browser:1.7.0
 |    +--- androidx.annotation:annotation:1.2.0
 |    +--- androidx.collection:collection:1.1.0
 |    |    \--- androidx.annotation:annotation:1.1.0 -> 1.2.0
@@ -22,7 +22,7 @@
 |    +--- androidx.interpolator:interpolator:1.0.0
 |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.2.0
 |    \--- com.google.guava:listenablefuture:1.0
-+--- com.google.dagger:dagger:2.48
++--- com.google.dagger:dagger:2.50
 |    \--- javax.inject:javax.inject:1
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3
 |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3
@@ -31,31 +31,31 @@
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.7.3 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.20 -> 1.9.21
-|         |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.20 -> 1.9.22
+|         |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 (*)
 |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20
-|              +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20 -> 1.9.21 (*)
+|              +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20 -> 1.9.22 (*)
 |              \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.20
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20 -> 1.9.21 (*)
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib:1.8.20 -> 1.9.22 (*)
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
 |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 (*)
 +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2
 |    \--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.6.2
-|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 -> 1.9.22 (*)
 |         +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.6.2
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.2 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json-jvm:1.6.2 (c)
 |         |    +--- org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.2 (c)
 |         |    \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.6.2 (c)
-|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21 -> 1.9.22 (*)
 |         \--- org.jetbrains.kotlinx:kotlinx-serialization-core:1.6.2
 |              \--- org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.6.2
-|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 (*)
+|                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 -> 1.9.22 (*)
 |                   +--- org.jetbrains.kotlinx:kotlinx-serialization-bom:1.6.2 (*)
-|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21 (*)
-\--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.21
-     +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 (*)
-     \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.9.21
-          \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.21 (*)
+|                   \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.9.21 -> 1.9.22 (*)
+\--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22
+     +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 (*)
+     \--- org.jetbrains.kotlin:kotlin-android-extensions-runtime:1.9.22
+          \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 (*)
