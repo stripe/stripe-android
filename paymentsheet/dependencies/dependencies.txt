@@ -766,7 +766,7 @@
 |    |    +--- androidx.compose.ui:ui-tooling-preview:1.5.4 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 (*)
-|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.4 -> 1.7.3
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3 (*)
 |    |    |    +--- com.google.android.gms:play-services-tasks:16.0.1 -> 18.0.1 (*)
