@@ -17,9 +17,9 @@ class PaymentMethodsUIScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        arrayOf(SystemAppearance.LightTheme),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
-        arrayOf(FontSize.LargeFont),
+        listOf(SystemAppearance.LightTheme),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
+        listOf(FontSize.LargeFont),
     )
 
     private val paymentMethods: List<SupportedPaymentMethod> by lazy {

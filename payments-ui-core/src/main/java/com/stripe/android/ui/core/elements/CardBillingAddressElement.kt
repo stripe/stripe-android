@@ -48,7 +48,7 @@ class CardBillingAddressElement(
         countryDropdownFieldController.rawFieldValue.map { countryCode ->
             when (collectionMode) {
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-                    FieldType.values()
+                    FieldType.entries
                         .map { it.identifierSpec }
                         .toSet()
                 }
@@ -58,7 +58,7 @@ class CardBillingAddressElement(
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
                     when (countryCode) {
                         "US", "GB", "CA" -> {
-                            FieldType.values()
+                            FieldType.entries
                                 // Filtering name causes the field to be hidden even outside
                                 // of this form.
                                 .filterNot { it == FieldType.PostalCode || it == FieldType.Name }
@@ -66,7 +66,7 @@ class CardBillingAddressElement(
                                 .toSet()
                         }
                         else -> {
-                            FieldType.values()
+                            FieldType.entries
                                 // Filtering name causes the field to be hidden even outside
                                 // of this form.
                                 .filterNot { it == FieldType.Name }

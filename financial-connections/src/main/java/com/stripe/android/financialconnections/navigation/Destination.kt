@@ -182,7 +182,7 @@ internal sealed class Destination(
             backStackEntry.arguments
                 ?.getString(KEY_MICRODEPOSITS)
                 ?.let { value ->
-                    MicrodepositVerificationMethod.values().firstOrNull { it.value == value }
+                    MicrodepositVerificationMethod.entries.firstOrNull { it.value == value }
                 } ?: MicrodepositVerificationMethod.UNKNOWN
 
         fun last4(backStackEntry: NavBackStackEntry): String? =
@@ -201,7 +201,7 @@ internal sealed class Destination(
     companion object {
         private fun referrer(entry: NavBackStackEntry): Pane? = entry.arguments
             ?.getString(KEY_REFERRER)
-            ?.let { value -> Pane.values().firstOrNull { it.value == value } }
+            ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 
         const val KEY_REFERRER = "referrer"
         const val KEY_MICRODEPOSITS = "microdeposits"

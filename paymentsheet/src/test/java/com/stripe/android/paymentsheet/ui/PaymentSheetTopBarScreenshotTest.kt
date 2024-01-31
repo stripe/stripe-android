@@ -18,9 +18,9 @@ class PaymentSheetTopBarScreenshotTest {
 
     @get:Rule
     val paparazzi = PaparazziRule(
-        SystemAppearance.values(),
-        FontSize.values(),
-        PaymentSheetAppearance.values(),
+        SystemAppearance.entries,
+        FontSize.entries,
+        PaymentSheetAppearance.entries,
         boxModifier = Modifier.padding(0.dp).fillMaxWidth(),
     )
 

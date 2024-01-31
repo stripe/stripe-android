@@ -165,7 +165,7 @@ internal object CustomerSheetTestHelper {
         ).apply {
             update(
                 PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
                 ),
                 null
             )

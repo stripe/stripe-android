@@ -304,7 +304,7 @@ constructor(
             RateLimitError("rate_limit_error");
 
             internal companion object {
-                fun fromCode(typeCode: String?) = values().firstOrNull { it.code == typeCode }
+                fun fromCode(typeCode: String?) = entries.firstOrNull { it.code == typeCode }
             }
         }
 
@@ -391,7 +391,7 @@ constructor(
         Automatic("automatic");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
@@ -421,7 +421,7 @@ constructor(
         Manual("manual");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code } ?: Automatic
         }
     }
 
@@ -440,7 +440,7 @@ constructor(
         Manual("manual");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code } ?: Automatic
         }
     }
 

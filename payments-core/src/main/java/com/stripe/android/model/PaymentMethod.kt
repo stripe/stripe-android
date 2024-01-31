@@ -419,7 +419,7 @@ constructor(
             // For paymentsheet
             @JvmSynthetic
             fun fromCode(code: String?): Type? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

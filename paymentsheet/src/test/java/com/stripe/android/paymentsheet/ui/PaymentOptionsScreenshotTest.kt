@@ -16,9 +16,9 @@ class PaymentOptionsScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        arrayOf(SystemAppearance.LightTheme),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
-        arrayOf(FontSize.DefaultFont),
+        listOf(SystemAppearance.LightTheme),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
+        listOf(FontSize.DefaultFont),
     )
 
     @Test

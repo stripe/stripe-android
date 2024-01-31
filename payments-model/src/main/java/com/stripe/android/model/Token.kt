@@ -64,7 +64,7 @@ constructor(
         Person("person");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 

@@ -302,7 +302,7 @@ class PaymentMethodsAdapterTest {
         private val PaymentMethodsAdapter.viewTypes: List<PaymentMethodsAdapter.ViewType>
             get() {
                 return (0 until itemCount).map {
-                    PaymentMethodsAdapter.ViewType.values()[getItemViewType(it)]
+                    PaymentMethodsAdapter.ViewType.entries[getItemViewType(it)]
                 }
             }
     }

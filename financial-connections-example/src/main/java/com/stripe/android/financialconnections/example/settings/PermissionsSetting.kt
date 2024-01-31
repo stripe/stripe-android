@@ -8,7 +8,7 @@ data class PermissionsSetting(
     override val key: String = "permissions",
 ) : Saveable<List<Permission>>, MultipleChoiceSetting<Permission>(
     displayName = "Permissions",
-    options = Permission.values().map { Option(it.name, it) },
+    options = Permission.entries.map { Option(it.name, it) },
     selectedOption = selectedOption
 ) {
     override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body.copy(
@@ -40,6 +40,6 @@ enum class Permission(val apiValue: String) {
     PaymentMethod("payment_method");
 
     companion object {
-        fun fromApiValue(value: String): Permission = values().first { it.apiValue == value }
+        fun fromApiValue(value: String): Permission = entries.first { it.apiValue == value }
     }
 }

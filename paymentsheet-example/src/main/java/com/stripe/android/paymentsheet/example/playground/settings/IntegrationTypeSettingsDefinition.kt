@@ -4,7 +4,7 @@ internal object IntegrationTypeSettingsDefinition :
     PlaygroundSettingDefinition<IntegrationType>,
     PlaygroundSettingDefinition.Saveable<IntegrationType> by EnumSaveable(
         key = "integrationType",
-        values = IntegrationType.values(),
+        values = IntegrationType.entries.toTypedArray(),
         defaultValue = IntegrationType.PaymentSheet,
     ),
     PlaygroundSettingDefinition.Displayable<IntegrationType> {

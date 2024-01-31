@@ -129,7 +129,7 @@ private fun CashAppPayScreen(
 ) {
     MdcTheme {
         Column(modifier = Modifier.fillMaxSize()) {
-            for (flowType in CashAppPayFlow.values()) {
+            for (flowType in CashAppPayFlow.entries) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = flow == flowType,

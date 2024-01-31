@@ -45,8 +45,7 @@ internal fun AnnotatedText(
     val resource = annotatedStringResource(
         resource = text,
         spanStyleForAnnotation = { annotation ->
-            val matchingAnnotation = StringAnnotation
-                .values()
+            val matchingAnnotation = StringAnnotation.entries
                 .firstOrNull { it.value == annotation.key }
             val spanStyle = annotationStyles[matchingAnnotation]
             if (pressedAnnotation == annotation.value) {

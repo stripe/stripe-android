@@ -18,7 +18,7 @@ enum class CvcCheck(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromCode(code: String?): CvcCheck {
-            return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
+            return entries.firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
     }
 }

@@ -25,7 +25,7 @@ enum class ManualEntryMode(val value: String) {
 
     internal object Serializer :
         EnumIgnoreUnknownSerializer<ManualEntryMode>(
-            ManualEntryMode.values(),
+            entries.toTypedArray(),
             UNKNOWN
         )
 }

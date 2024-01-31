@@ -224,7 +224,7 @@ data class SetupIntent internal constructor(
 
             internal companion object {
                 internal fun fromCode(typeCode: String?): Type? {
-                    return values().firstOrNull { it.code == typeCode }
+                    return entries.firstOrNull { it.code == typeCode }
                 }
             }
         }
@@ -262,7 +262,7 @@ data class SetupIntent internal constructor(
 
         internal companion object {
             internal fun fromCode(code: String?): CancellationReason? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

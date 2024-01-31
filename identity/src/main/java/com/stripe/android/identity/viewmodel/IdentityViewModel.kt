@@ -1001,12 +1001,11 @@ internal class IdentityViewModel constructor(
 
     private val initialMissings: List<Requirement>
         get() {
-            return _verificationPage.value?.data?.requirements?.missing ?: Requirement.values()
-                .toList()
+            return _verificationPage.value?.data?.requirements?.missing ?: Requirement.entries
                 .also {
                     Log.e(
                         TAG,
-                        "_verificationPage is null, using Requirement.values() as initialMissings"
+                        "_verificationPage is null, using Requirement.entries as initialMissings"
                     )
                 }
         }

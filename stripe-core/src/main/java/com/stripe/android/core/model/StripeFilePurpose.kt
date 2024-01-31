@@ -22,7 +22,7 @@ enum class StripeFilePurpose(@get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) val
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromCode(code: String?): StripeFilePurpose? {
-            return values().firstOrNull { it.code == code }
+            return entries.firstOrNull { it.code == code }
         }
     }
 }

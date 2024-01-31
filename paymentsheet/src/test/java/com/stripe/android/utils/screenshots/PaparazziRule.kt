@@ -18,7 +18,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 class PaparazziRule(
-    vararg configOptions: Array<out PaparazziConfigOption>,
+    vararg configOptions: List<PaparazziConfigOption>,
     private val boxModifier: Modifier = Modifier,
 ) : TestRule {
 
@@ -100,12 +100,12 @@ class PaparazziRule(
     }
 }
 
-private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<TestCase> {
+private fun Array<out List<PaparazziConfigOption>>.toTestCases(): List<TestCase> {
     return createPermutations(this).map { TestCase(it) }
 }
 
 private fun createPermutations(
-    options: Array<out Array<out PaparazziConfigOption>>,
+    options: Array<out List<PaparazziConfigOption>>,
 ): List<List<PaparazziConfigOption>> {
     return (options.toSet()).fold(listOf(listOf())) { acc, set ->
         acc.flatMap { list -> set.map { element -> list + element } }

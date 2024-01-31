@@ -250,7 +250,7 @@ internal data class FinancialConnectionsSessionManifest(
         RESET("reset");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Pane>(Pane.values(), UNEXPECTED_ERROR)
+            EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNEXPECTED_ERROR)
     }
 
     /**
@@ -324,7 +324,7 @@ internal data class FinancialConnectionsSessionManifest(
         UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Product>(Product.values(), UNKNOWN)
+            EnumIgnoreUnknownSerializer<Product>(entries.toTypedArray(), UNKNOWN)
     }
 
     /**
@@ -351,7 +351,7 @@ internal data class FinancialConnectionsSessionManifest(
 
         internal object Serializer :
             EnumIgnoreUnknownSerializer<AccountDisconnectionMethod>(
-                AccountDisconnectionMethod.values(),
+                entries.toTypedArray(),
                 UNKNOWN
             )
     }
@@ -374,7 +374,7 @@ internal data class FinancialConnectionsSessionManifest(
 
         internal object Serializer :
             EnumIgnoreUnknownSerializer<LinkAccountSessionCancellationBehavior>(
-                LinkAccountSessionCancellationBehavior.values(),
+                entries.toTypedArray(),
                 UNKNOWN
             )
     }

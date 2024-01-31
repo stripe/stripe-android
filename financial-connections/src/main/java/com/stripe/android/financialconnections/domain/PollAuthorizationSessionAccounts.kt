@@ -36,7 +36,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
         val activeAuthSession = requireNotNull(manifest.activeAuthSession)
         retryOnException(
             PollTimingOptions(
-                initialDelayMs = Flow.values()
+                initialDelayMs = Flow.entries
                     .firstOrNull { it.value == activeAuthSession.flow }.toPollIntervalMs(),
             ),
             retryCondition = { exception -> exception.shouldRetry }

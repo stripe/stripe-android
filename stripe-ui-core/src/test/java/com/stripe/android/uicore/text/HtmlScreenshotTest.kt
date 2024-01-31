@@ -10,7 +10,7 @@ import org.junit.Test
 class HtmlScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values()
+        SystemAppearance.entries,
     )
 
     @Test

@@ -193,7 +193,7 @@ data class Source internal constructor(
         override fun toString(): String = code
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
@@ -210,7 +210,7 @@ data class Source internal constructor(
         override fun toString(): String = code
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
@@ -227,7 +227,7 @@ data class Source internal constructor(
         override fun toString(): String = code
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
@@ -268,7 +268,7 @@ data class Source internal constructor(
             override fun toString(): String = code
 
             internal companion object {
-                fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+                fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -303,7 +303,7 @@ data class Source internal constructor(
             override fun toString(): String = code
 
             internal companion object {
-                fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+                fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
             }
         }
     }

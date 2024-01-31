@@ -6,7 +6,7 @@ internal object InitializationTypeSettingsDefinition :
     PlaygroundSettingDefinition<InitializationType>,
     PlaygroundSettingDefinition.Saveable<InitializationType> by EnumSaveable(
         key = "initialization",
-        values = InitializationType.values(),
+        values = InitializationType.entries.toTypedArray(),
         defaultValue = InitializationType.Normal,
     ),
     PlaygroundSettingDefinition.Displayable<InitializationType> {

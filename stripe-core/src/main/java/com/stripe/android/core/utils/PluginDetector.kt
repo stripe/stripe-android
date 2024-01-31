@@ -15,7 +15,7 @@ object PluginDetector {
      * return null if none of the class is found.
      */
     val pluginType: String? =
-        PluginType.values().firstOrNull {
+        PluginType.entries.firstOrNull {
             isPlugin(it.className)
         }?.pluginName
 

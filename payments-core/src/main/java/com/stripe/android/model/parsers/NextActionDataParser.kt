@@ -237,7 +237,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
         }
 
         private fun parseMicrodepositType(json: JSONObject): MicrodepositType {
-            return MicrodepositType.values().find {
+            return MicrodepositType.entries.find {
                 it.value == json.optString(MICRODEPOSIT_TYPE)
             } ?: MicrodepositType.UNKNOWN
         }

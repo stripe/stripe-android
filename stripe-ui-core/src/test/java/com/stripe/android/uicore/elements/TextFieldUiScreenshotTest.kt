@@ -15,8 +15,8 @@ import org.junit.Test
 class TextFieldUiScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        FontSize.values(),
+        SystemAppearance.entries,
+        FontSize.entries,
         boxModifier = Modifier
             .padding(horizontal = 16.dp)
             .padding(vertical = 16.dp)
