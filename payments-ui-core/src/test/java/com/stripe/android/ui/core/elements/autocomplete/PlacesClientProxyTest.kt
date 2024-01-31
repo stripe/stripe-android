@@ -12,7 +12,11 @@ import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRe
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsResponse
 import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest
 import com.google.android.libraries.places.api.net.FindCurrentPlaceResponse
+import com.google.android.libraries.places.api.net.IsOpenRequest
+import com.google.android.libraries.places.api.net.IsOpenResponse
 import com.google.android.libraries.places.api.net.PlacesClient
+import com.google.android.libraries.places.api.net.SearchByTextRequest
+import com.google.android.libraries.places.api.net.SearchByTextResponse
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.IsPlacesAvailable
 import kotlinx.coroutines.Dispatchers
@@ -205,6 +209,14 @@ class PlacesClientProxyTest {
             override fun findCurrentPlace(
                 p0: FindCurrentPlaceRequest
             ): Task<FindCurrentPlaceResponse> {
+                return Tasks.forCanceled()
+            }
+
+            override fun isOpen(p0: IsOpenRequest): Task<IsOpenResponse> {
+                return Tasks.forCanceled()
+            }
+
+            override fun searchByText(p0: SearchByTextRequest): Task<SearchByTextResponse> {
                 return Tasks.forCanceled()
             }
         }
