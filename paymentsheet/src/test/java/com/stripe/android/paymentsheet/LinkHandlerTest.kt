@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
 import app.cash.turbine.testIn
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
@@ -497,30 +498,36 @@ private fun runLinkTest(
             whenever(it.build()).thenReturn(component)
         },
     )
-    val processingStateTurbine = handler.processingState.testIn(backgroundScope)
-    val accountStatusTurbine = handler.accountStatus.testIn(backgroundScope)
 
-    whenever(linkConfigurationCoordinator.getAccountStatusFlow(eq(linkConfiguration))).thenReturn(accountStatusFlow)
-    whenever(linkConfigurationCoordinator.attachNewCardToAccount(eq(linkConfiguration), any())).thenReturn(attachNewCardToAccountResult)
+    val testScope = this
+    turbineScope {
+        val processingStateTurbine = handler.processingState.testIn(backgroundScope)
+        val accountStatusTurbine = handler.accountStatus.testIn(backgroundScope)
 
-    with(
-        LinkTestDataImpl(
-            testScope = this,
-            handler = handler,
-            linkLauncher = linkLauncher,
-            linkConfigurationCoordinator = linkConfigurationCoordinator,
-            linkStore = linkStore,
-            savedStateHandle = savedStateHandle,
-            configuration = linkConfiguration,
-            accountStatusFlow = accountStatusFlow,
-            processingStateTurbine = processingStateTurbine,
-            accountStatusTurbine = accountStatusTurbine,
-            linkAnalyticsHelper = linkAnalyticsHelper,
+        whenever(linkConfigurationCoordinator.getAccountStatusFlow(eq(linkConfiguration))).thenReturn(accountStatusFlow)
+        whenever(linkConfigurationCoordinator.attachNewCardToAccount(eq(linkConfiguration), any())).thenReturn(
+            attachNewCardToAccountResult
         )
-    ) {
-        testBlock()
-        processingStateTurbine.ensureAllEventsConsumed()
-        accountStatusTurbine.ensureAllEventsConsumed()
+
+        with(
+            LinkTestDataImpl(
+                testScope = testScope,
+                handler = handler,
+                linkLauncher = linkLauncher,
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                linkStore = linkStore,
+                savedStateHandle = savedStateHandle,
+                configuration = linkConfiguration,
+                accountStatusFlow = accountStatusFlow,
+                processingStateTurbine = processingStateTurbine,
+                accountStatusTurbine = accountStatusTurbine,
+                linkAnalyticsHelper = linkAnalyticsHelper,
+            )
+        ) {
+            testBlock()
+            processingStateTurbine.ensureAllEventsConsumed()
+            accountStatusTurbine.ensureAllEventsConsumed()
+        }
     }
 }
 

@@ -4,7 +4,7 @@ import android.os.Build
 import android.os.Looper.getMainLooper
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
-import app.cash.turbine.testIn
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Blank
 import com.stripe.android.uicore.elements.TextFieldStateConstants.Error.Invalid
@@ -137,24 +137,26 @@ internal class SimpleTextFieldControllerTest {
 
         val controller = createControllerWithState()
 
-        val visibleErrors = controller.visibleError.testIn(backgroundScope)
+        turbineScope {
+            val visibleErrors = controller.visibleError.testIn(backgroundScope)
 
-        val errors = controller.error.testIn(backgroundScope)
+            val errors = controller.error.testIn(backgroundScope)
 
-        assertThat(visibleErrors.awaitItem()).isEqualTo(false)
-        assertThat(errors.awaitItem()).isNull()
+            assertThat(visibleErrors.awaitItem()).isEqualTo(false)
+            assertThat(errors.awaitItem()).isNull()
 
-        controller.onValueChange("invalid")
-        shadowOf(getMainLooper()).idle()
+            controller.onValueChange("invalid")
+            shadowOf(getMainLooper()).idle()
 
-        assertThat(visibleErrors.awaitItem()).isEqualTo(true)
-        assertThat(errors.awaitItem()).isNotNull()
+            assertThat(visibleErrors.awaitItem()).isEqualTo(true)
+            assertThat(errors.awaitItem()).isNotNull()
 
-        controller.onValueChange("full")
-        shadowOf(getMainLooper()).idle()
+            controller.onValueChange("full")
+            shadowOf(getMainLooper()).idle()
 
-        assertThat(visibleErrors.awaitItem()).isEqualTo(false)
-        assertThat(errors.awaitItem()).isNull()
+            assertThat(visibleErrors.awaitItem()).isEqualTo(false)
+            assertThat(errors.awaitItem()).isNull()
+        }
     }
 
     @Test
