@@ -67,7 +67,7 @@ internal fun ConsentLogoHeader(
     Box(modifier = modifier.height(72.dp)) {
         AnimatedVisibility(
             visible = isVisible.value,
-            enter = fadeIn(animationSpec = tween(durationMillis = 1000)), // Customize duration as needed
+            enter = fadeIn(animationSpec = tween(durationMillis = 500)), // Customize duration as needed
             modifier = modifier.matchParentSize()
         ) {
             Row(
@@ -157,7 +157,7 @@ private fun AnimatedDotsWithFixedGradient(
         initialValue = 0f,
         targetValue = with(LocalDensity.current) { 10.dp.toPx() },
         animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 500, easing = LinearEasing),
+            animation = tween(durationMillis = 1000, easing = LinearEasing),
             repeatMode = RepeatMode.Restart
         ),
     )
