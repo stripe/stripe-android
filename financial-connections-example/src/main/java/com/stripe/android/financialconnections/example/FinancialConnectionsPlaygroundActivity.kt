@@ -8,7 +8,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -17,6 +16,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.Divider
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
@@ -41,7 +41,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -165,7 +164,6 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     ) {
         Column(
             modifier = Modifier
-                .fillMaxHeight()
                 .padding(padding)
                 .padding(16.dp)
         ) {
@@ -178,27 +176,26 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
-
+            Divider(Modifier.padding(vertical = 8.dp))
+            Text(
+                text = "backend: ${state.backendUrl}",
+                color = MaterialTheme.colors.secondaryVariant
+            )
+            Text(
+                text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
+                color = MaterialTheme.colors.secondaryVariant
+            )
             Button(
                 modifier = Modifier
-                    .fillMaxWidth()
                     .semantics { testTagsAsResourceId = true }
                     .testTag("connect_accounts"),
                 onClick = onButtonClick,
             ) {
                 Text("Connect Accounts")
             }
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = "API: ${state.backendUrl} [${BuildConfig.TEST_ENVIRONMENT}]",
-                color = MaterialTheme.colors.secondaryVariant,
-                textAlign = TextAlign.Center,
-                fontSize = 10.sp,
-                maxLines = 1
-            )
             LazyColumn {
                 items(state.status) { item ->
-                    Row(verticalAlignment = Alignment.Top) {
+                    Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
                         val primary = MaterialTheme.colors.primary
                         Canvas(
                             modifier = Modifier
@@ -287,7 +284,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                 backendUrl = "http://backend.url",
                 loading = false,
                 publishableKey = "pk",
-                status = listOf("Result: Pending", "Result: Success"),
+                status = listOf("Result: Pending")
             ),
             onButtonClick = {},
             onSettingsChanged = {}
