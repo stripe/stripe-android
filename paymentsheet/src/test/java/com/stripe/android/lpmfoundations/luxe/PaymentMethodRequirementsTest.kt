@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test

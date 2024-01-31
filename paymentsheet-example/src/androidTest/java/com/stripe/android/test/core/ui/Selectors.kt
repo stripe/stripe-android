@@ -55,16 +55,16 @@ internal class Selectors(
 
     val paymentSelection = PaymentSelection(
         composeTestRule,
-        testParameters.paymentMethod.displayNameResource
+        testParameters.paymentMethodCode
     )
 
     val buyButton = BuyButton(
         composeTestRule = composeTestRule,
-        processingCompleteTimeout = if (testParameters.paymentMethod.code == CashAppPay.code) {
+        processingCompleteTimeout = if (testParameters.paymentMethodCode == CashAppPay.code) {
             // We're using a longer timeout for Cash App Pay until we fix an issue where we
             // needlessly poll after a canceled payment attempt.
             15.seconds
-        } else if (testParameters.paymentMethod.code == Blik.code) {
+        } else if (testParameters.paymentMethodCode == Blik.code) {
             30.seconds
         } else {
             5.seconds

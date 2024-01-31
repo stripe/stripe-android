@@ -1,10 +1,10 @@
 package com.stripe.android.utils
 
 import android.content.Context
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

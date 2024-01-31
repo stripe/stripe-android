@@ -4,12 +4,12 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 

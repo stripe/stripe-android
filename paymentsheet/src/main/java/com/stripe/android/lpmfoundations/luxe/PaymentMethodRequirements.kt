@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.forms
+package com.stripe.android.lpmfoundations.luxe
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod

@@ -1,11 +1,10 @@
-package com.stripe.android.ui.core.forms.resources
+package com.stripe.android.lpmfoundations.luxe
 
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -14,47 +13,15 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
-import com.stripe.android.paymentsheet.forms.AffirmRequirement
-import com.stripe.android.paymentsheet.forms.AfterpayClearpayRequirement
-import com.stripe.android.paymentsheet.forms.AlipayRequirement
-import com.stripe.android.paymentsheet.forms.AlmaRequirement
-import com.stripe.android.paymentsheet.forms.AmazonPayRequirement
-import com.stripe.android.paymentsheet.forms.AuBecsDebitRequirement
-import com.stripe.android.paymentsheet.forms.BacsDebitRequirement
-import com.stripe.android.paymentsheet.forms.BancontactRequirement
-import com.stripe.android.paymentsheet.forms.BlikRequirement
-import com.stripe.android.paymentsheet.forms.BoletoRequirement
-import com.stripe.android.paymentsheet.forms.CardRequirement
-import com.stripe.android.paymentsheet.forms.CashAppPayRequirement
-import com.stripe.android.paymentsheet.forms.EpsRequirement
-import com.stripe.android.paymentsheet.forms.FpxRequirement
-import com.stripe.android.paymentsheet.forms.GiropayRequirement
-import com.stripe.android.paymentsheet.forms.GrabPayRequirement
-import com.stripe.android.paymentsheet.forms.IdealRequirement
-import com.stripe.android.paymentsheet.forms.KlarnaRequirement
-import com.stripe.android.paymentsheet.forms.KonbiniRequirement
-import com.stripe.android.paymentsheet.forms.MobilePayRequirement
-import com.stripe.android.paymentsheet.forms.OxxoRequirement
-import com.stripe.android.paymentsheet.forms.P24Requirement
-import com.stripe.android.paymentsheet.forms.PaymentMethodRequirements
-import com.stripe.android.paymentsheet.forms.PaypalRequirement
-import com.stripe.android.paymentsheet.forms.RevolutPayRequirement
-import com.stripe.android.paymentsheet.forms.SepaDebitRequirement
-import com.stripe.android.paymentsheet.forms.SofortRequirement
-import com.stripe.android.paymentsheet.forms.SwishRequirement
-import com.stripe.android.paymentsheet.forms.USBankAccountRequirement
-import com.stripe.android.paymentsheet.forms.UpiRequirement
-import com.stripe.android.paymentsheet.forms.ZipRequirement
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement.Companion.isClearpay
+import com.stripe.android.ui.core.elements.AfterpayClearpayHeaderElement
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
-import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
@@ -65,6 +32,8 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.ui.core.elements.transform
 import com.stripe.android.uicore.elements.IdentifierSpec
 import java.io.InputStream
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * This class is responsible for loading the LPM UI Specification for all LPMs, and returning
@@ -75,12 +44,19 @@ import java.io.InputStream
  * repository is not a singleton.  Additionally every time you create a new
  * form view model a new repository is created and thus needs to be initialized.
  */
+@Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository constructor(
+class LpmRepository(
     private val arguments: LpmRepositoryArguments,
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
-    private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
+    private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance,
 ) {
+
+    @Inject
+    constructor(resources: Resources) : this(
+        arguments = LpmRepositoryArguments(resources),
+    )
+
     fun fromCode(code: PaymentMethodCode?) = lpmInitialFormData.fromCode(code)
 
     fun values(): List<SupportedPaymentMethod> = lpmInitialFormData.values()
@@ -98,7 +74,6 @@ class LpmRepository constructor(
      * Reading the server spec is all or nothing, any error means none will be read
      * so it is important that the json on disk is successful.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun update(
         stripeIntent: StripeIntent,
         serverLpmSpecs: String?,
@@ -169,14 +144,12 @@ class LpmRepository constructor(
     /**
      * This method can be used to initialize the LpmRepository with a given map of payment methods.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun initializeWithPaymentMethods(
         paymentMethods: Map<String, SupportedPaymentMethod>
     ) {
         lpmInitialFormData.putAll(paymentMethods)
     }
 
-    @VisibleForTesting
     fun updateFromDisk(stripeIntent: StripeIntent) {
         update(stripeIntent, readFromDisk())
     }
@@ -240,11 +213,7 @@ class LpmRepository constructor(
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = true,
             requirement = CardRequirement,
-            formSpec = if (sharedDataSpec.fields.isEmpty() || sharedDataSpec.fields == listOf(EmptyFormSpec)) {
-                hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec
-            } else {
-                LayoutSpec(sharedDataSpec.fields)
-            }
+            formSpec = hardcodedCardSpec(billingDetailsCollectionConfiguration).formSpec
         )
         PaymentMethod.Type.Bancontact.code -> SupportedPaymentMethod(
             code = "bancontact",
@@ -343,7 +312,7 @@ class LpmRepository constructor(
         PaymentMethod.Type.AfterpayClearpay.code -> SupportedPaymentMethod(
             code = "afterpay_clearpay",
             requiresMandate = false,
-            displayNameResource = if (isClearpay()) {
+            displayNameResource = if (AfterpayClearpayHeaderElement.isClearpay()) {
                 R.string.stripe_paymentsheet_payment_method_clearpay
             } else {
                 R.string.stripe_paymentsheet_payment_method_afterpay
@@ -677,7 +646,7 @@ class LpmRepository constructor(
      * FormSpec is optionally null only because Card is not converted to the
      * compose model.
      */
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class SupportedPaymentMethod(
         /**
          * This describes the PaymentMethod Type as described
@@ -731,6 +700,7 @@ class LpmRepository constructor(
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class LpmInitialFormData {
 
         private val codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
@@ -752,6 +722,7 @@ class LpmRepository constructor(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Volatile
         private var INSTANCE: LpmRepository? = null
@@ -760,10 +731,8 @@ class LpmRepository constructor(
                 INSTANCE ?: LpmRepository(args).also { INSTANCE = it }
             }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val HardcodedCard = hardcodedCardSpec(BillingDetailsCollectionConfiguration())
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun hardcodedCardSpec(
             billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
         ): SupportedPaymentMethod {
@@ -796,7 +765,6 @@ class LpmRepository constructor(
             )
         }
 
-        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         val hardCodedUsBankAccount: SupportedPaymentMethod =
             SupportedPaymentMethod(
                 code = "us_bank_account",

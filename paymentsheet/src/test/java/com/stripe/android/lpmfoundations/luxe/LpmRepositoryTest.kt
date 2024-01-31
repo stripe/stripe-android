@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.forms.resources
+package com.stripe.android.lpmfoundations.luxe
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
@@ -7,7 +7,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
-import com.stripe.android.paymentsheet.forms.Delayed
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R

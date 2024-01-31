@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core.elements
 
 import android.util.Log
+import androidx.annotation.RestrictTo
 import androidx.annotation.WorkerThread
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.serializer
 
-internal object LpmSerializer {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+object LpmSerializer {
 
     private val format = Json {
         ignoreUnknownKeys = true

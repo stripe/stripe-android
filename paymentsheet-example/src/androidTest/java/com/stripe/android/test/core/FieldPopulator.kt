@@ -35,7 +35,7 @@ internal class FieldPopulator(
     private val verifyCustomLpmFields: () -> Unit = {},
     private val values: Values,
 ) {
-    private val formSpec = testParameters.paymentMethod.formSpec
+    private val formSpec = testParameters.formSpec
 
     fun verifyFields() {
         // Need to verify the value of save for future usage
