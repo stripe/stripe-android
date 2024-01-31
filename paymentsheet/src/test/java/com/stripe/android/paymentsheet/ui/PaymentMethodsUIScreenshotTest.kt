@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.ui.core.R
 import com.stripe.android.utils.MockPaymentMethodsFactory
@@ -22,7 +22,7 @@ class PaymentMethodsUIScreenshotTest {
         arrayOf(FontSize.LargeFont),
     )
 
-    private val paymentMethods: List<LpmRepository.SupportedPaymentMethod> by lazy {
+    private val paymentMethods: List<SupportedPaymentMethod> by lazy {
         MockPaymentMethodsFactory.create()
     }
 

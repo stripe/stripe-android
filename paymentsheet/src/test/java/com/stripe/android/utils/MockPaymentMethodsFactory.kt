@@ -1,13 +1,13 @@
 package com.stripe.android.utils
 
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.PaymentMethodRequirements
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.LayoutSpec
 
 internal object MockPaymentMethodsFactory {
 
-    fun create(): List<LpmRepository.SupportedPaymentMethod> {
+    fun create(): List<SupportedPaymentMethod> {
         return listOf(
             mockPaymentMethod(
                 code = "card",
@@ -38,8 +38,8 @@ internal object MockPaymentMethodsFactory {
         displayNameResource: Int,
         iconResource: Int,
         tintIconOnSelection: Boolean = false
-    ): LpmRepository.SupportedPaymentMethod {
-        return LpmRepository.SupportedPaymentMethod(
+    ): SupportedPaymentMethod {
+        return SupportedPaymentMethod(
             code = code,
             requiresMandate = false,
             displayNameResource = displayNameResource,

@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -157,9 +158,9 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     }
 
     private fun filterSupportedPaymentMethods(
-        supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
+        supportedPaymentMethods: List<SupportedPaymentMethod>,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
-    ): List<LpmRepository.SupportedPaymentMethod> {
+    ): List<SupportedPaymentMethod> {
         val supported = setOfNotNull(
             PaymentMethod.Type.Card.code,
             PaymentMethod.Type.USBankAccount.code.takeIf {

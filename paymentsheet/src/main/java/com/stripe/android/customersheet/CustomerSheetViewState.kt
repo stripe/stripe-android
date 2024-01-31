@@ -2,7 +2,7 @@ package com.stripe.android.customersheet
 
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -85,11 +85,11 @@ internal sealed class CustomerSheetViewState(
 
     data class AddPaymentMethod(
         val paymentMethodCode: PaymentMethodCode,
-        val supportedPaymentMethods: List<LpmRepository.SupportedPaymentMethod>,
+        val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val formViewData: FormViewModel.ViewData,
         val formArguments: FormArguments,
         val usBankAccountFormArguments: USBankAccountFormArguments,
-        val selectedPaymentMethod: LpmRepository.SupportedPaymentMethod,
+        val selectedPaymentMethod: SupportedPaymentMethod,
         val draftPaymentSelection: PaymentSelection?,
         val enabled: Boolean,
         override val isLiveMode: Boolean,

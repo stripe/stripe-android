@@ -2,10 +2,10 @@ package com.stripe.android.paymentsheet.model
 
 import com.stripe.android.lpmfoundations.luxe.Delayed
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.PIRequirement
 import com.stripe.android.lpmfoundations.luxe.SIRequirement
 import com.stripe.android.lpmfoundations.luxe.ShippingAddress
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent

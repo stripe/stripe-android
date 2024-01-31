@@ -18,7 +18,6 @@
     <ID>LargeClass:CustomerSheetViewModelTest.kt$CustomerSheetViewModelTest</ID>
     <ID>LargeClass:DefaultFlowControllerTest.kt$DefaultFlowControllerTest</ID>
     <ID>LargeClass:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest</ID>
-    <ID>LargeClass:PaymentIntentFixtures.kt$PaymentIntentFixtures</ID>
     <ID>LargeClass:PaymentSheetActivityTest.kt$PaymentSheetActivityTest</ID>
     <ID>LargeClass:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest</ID>
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
@@ -32,7 +31,7 @@
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
     <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration, isDeferred: Boolean = false, )</ID>
-    <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>, enabled: Boolean, supportedPaymentMethods: List&lt;LpmRepository.SupportedPaymentMethod>, selectedItem: LpmRepository.SupportedPaymentMethod, linkSignupMode: LinkSignupMode?, linkConfigurationCoordinator: LinkConfigurationCoordinator?, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (LpmRepository.SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit, formArguments: FormArguments, usBankAccountFormArguments: USBankAccountFormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
+    <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>, enabled: Boolean, supportedPaymentMethods: List&lt;SupportedPaymentMethod>, selectedItem: SupportedPaymentMethod, linkSignupMode: LinkSignupMode?, linkConfigurationCoordinator: LinkConfigurationCoordinator?, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit, formArguments: FormArguments, usBankAccountFormArguments: USBankAccountFormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
     <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration, isGooglePayReady: Boolean, ): PaymentSheetState.Full</ID>
@@ -70,7 +69,6 @@
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:LinkHandlerTest.kt$whenever(linkConfigurationCoordinator.attachNewCardToAccount(eq(linkConfiguration), any())).thenReturn(attachNewCardToAccountResult)</ID>
-    <ID>MaxLineLength:LpmRepository.kt$LpmRepository.SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
     <ID>MaxLineLength:LpmRepositoryTest.kt$LpmRepositoryTest$fun</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Address$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.BillingDetails$*</ID>
@@ -82,6 +80,7 @@
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.IntentConfiguration.SetupFutureUse$*</ID>
     <ID>MaxLineLength:PaymentSheetViewModelTest.kt$PaymentSheetViewModelTest$fun</ID>
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
+    <ID>MaxLineLength:SupportedPaymentMethod.kt$SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$* This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput$fun toCsv()</ID>
