@@ -31,7 +31,7 @@ internal object DefaultBillingAddressSettingsDefinition :
     ) {
         val email = when (value) {
             DefaultBillingAddress.On -> "email@email.com"
-            DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID().toString()}@email.com"
+            DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
             DefaultBillingAddress.Off -> null
         }
 

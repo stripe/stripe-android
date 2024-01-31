@@ -10,6 +10,7 @@ import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.test.espresso.Espresso
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -309,7 +310,7 @@ internal class FieldPopulator(
     }
 
     private val defaultBillingAddress: Boolean
-        get() = testParameters.playgroundSettingsSnapshot[DefaultBillingAddressSettingsDefinition]
+        get() = testParameters.playgroundSettingsSnapshot[DefaultBillingAddressSettingsDefinition] != DefaultBillingAddress.Off
 
     private val merchantCountryCode: String
         get() = testParameters.playgroundSettingsSnapshot[CountrySettingsDefinition].value
