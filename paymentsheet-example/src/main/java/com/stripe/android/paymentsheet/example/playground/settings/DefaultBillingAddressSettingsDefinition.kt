@@ -9,7 +9,7 @@ internal object DefaultBillingAddressSettingsDefinition :
     PlaygroundSettingDefinition.Saveable<DefaultBillingAddress> by EnumSaveable(
         key = "defaultBillingAddress",
         values = DefaultBillingAddress.entries.toTypedArray(),
-        defaultValue = DefaultBillingAddress.Off,
+        defaultValue = DefaultBillingAddress.On,
     ),
     PlaygroundSettingDefinition.Displayable<DefaultBillingAddress> {
 
