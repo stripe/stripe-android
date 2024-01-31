@@ -29,6 +29,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.take
 import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
@@ -70,7 +71,7 @@ internal class LinkHandler @Inject constructor(
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
     private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
-    val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
+    private val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
 
     val accountStatus: Flow<AccountStatus> = _linkConfiguration
         .filterNotNull()
@@ -79,7 +80,7 @@ internal class LinkHandler @Inject constructor(
     val linkSignupMode: Flow<LinkSignupMode?> = combine(
         linkConfiguration,
         linkInlineSelection,
-        accountStatus,
+        accountStatus.take(1), // We only care about the initial status, as the status might change during checkout
     ) { linkConfig, linkInlineSelection, linkAccountStatus ->
         val linkInlineSelectionValid = linkInlineSelection != null
         val validFundingSource = linkConfig?.stripeIntent?.linkFundingSources?.contains(Card.code) == true
