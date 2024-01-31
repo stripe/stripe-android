@@ -48,6 +48,30 @@ class PaparazziRule(
         for (testCase in testCases) {
             testCase.initialize()
 
+            val statement = object : Statement() {
+                override fun evaluate() {
+                    val deviceConfig = testCase.apply(defaultDeviceConfig)
+                    if (deviceConfig != defaultDeviceConfig) {
+                        paparazzi.unsafeUpdateConfig(deviceConfig)
+                    }
+
+                    paparazzi.snapshot {
+                        CompositionLocalProvider(LocalInspectionMode provides true) {
+                            StripeTheme {
+                                Surface(color = MaterialTheme.colors.surface) {
+                                    Box(
+                                        contentAlignment = Alignment.Center,
+                                        modifier = boxModifier,
+                                    ) {
+                                        content()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
             // We need to update the entire Description to prevent Paparazzi from converting the
             // name to lowercase.
             val newDescription = Description.createTestDescription(
@@ -55,31 +79,7 @@ class PaparazziRule(
                 description.methodName + testCase.name,
             )
 
-            paparazzi.prepare(newDescription)
-
-            try {
-                val deviceConfig = testCase.apply(defaultDeviceConfig)
-                if (deviceConfig != defaultDeviceConfig) {
-                    paparazzi.unsafeUpdateConfig(deviceConfig)
-                }
-
-                paparazzi.snapshot {
-                    CompositionLocalProvider(LocalInspectionMode provides true) {
-                        StripeTheme {
-                            Surface(color = MaterialTheme.colors.surface) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = boxModifier,
-                                ) {
-                                    content()
-                                }
-                            }
-                        }
-                    }
-                }
-            } finally {
-                paparazzi.close()
-            }
+            paparazzi.apply(statement, newDescription)
         }
     }
 
@@ -93,9 +93,7 @@ class PaparazziRule(
             // Needed to shrink the screenshot to the height of the composable
             renderingMode = SessionParams.RenderingMode.SHRINK,
             showSystemUi = false,
-            environment = detectEnvironment().run {
-                copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
-            },
+            environment = detectEnvironment(),
         )
     }
 }
