@@ -433,6 +433,16 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
+    fun onCancelClick() = viewModelScope.launch {
+        // set loading state while cancelling the active auth session, and navigate back
+        setState { copy(authenticationStatus = Loading()) }
+        runCatching {
+            val authSession = requireNotNull(getOrFetchSync().manifest.activeAuthSession)
+            cancelAuthorizationSession(authSession.id)
+        }
+        navigationManager.tryNavigateBack()
+    }
+
     companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
 
         override fun initialState(viewModelContext: ViewModelContext) =

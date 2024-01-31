@@ -139,6 +139,7 @@
     <string name="stripe_close_dialog_networking_desc_no_business">If you cancel now, your account will be linked to this business but it will not be saved to Link.</string>
     <string name="stripe_exit_modal_cta_accept">Yes</string>
     <string name="stripe_exit_modal_cta_cancel">Cancel</string>
+    <string name="stripe_prepane_cancel_cta">Cancel</string>
     <plurals name="stripe_success_networking_save_to_link_failed">
         <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
         <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>

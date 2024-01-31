@@ -13,8 +13,8 @@ internal fun FinancialConnectionsScaffold(
     content: @Composable (PaddingValues) -> Unit
 ) {
     Scaffold(
-        backgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
-        contentColor = FinancialConnectionsTheme.colors.textPrimary,
+        backgroundColor = FinancialConnectionsTheme.v3Colors.backgroundSurface,
+        contentColor = FinancialConnectionsTheme.v3Colors.textDefault,
         topBar = topBar,
         content = content
     )

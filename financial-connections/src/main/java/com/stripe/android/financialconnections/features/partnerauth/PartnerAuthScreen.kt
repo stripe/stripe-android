@@ -22,6 +22,7 @@ internal fun PartnerAuthScreen() {
         onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onWebAuthFlowFinished = viewModel::onWebAuthFlowFinished,
+        onCancelClick = viewModel::onCancelClick,
         onViewEffectLaunched = viewModel::onViewEffectLaunched
     )
 }

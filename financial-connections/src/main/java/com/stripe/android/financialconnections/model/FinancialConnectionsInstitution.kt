@@ -58,5 +58,4 @@ internal data class FinancialConnectionsInstitution(
                 "${parts[len - 2]}.${parts[len - 1]}"
             }
         }.getOrDefault(url ?: "")
-
 }

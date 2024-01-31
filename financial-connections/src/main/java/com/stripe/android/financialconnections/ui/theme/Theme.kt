@@ -75,7 +75,6 @@ private val V3Colors = FinancialConnectionsV3Colors(
     borderBrand = Color(0xFF675DFF)
 )
 
-
 private val lineHeightStyle = LineHeightStyle(
     alignment = LineHeightStyle.Alignment.Center,
     trim = LineHeightStyle.Trim.None

@@ -36,6 +36,10 @@ internal class TestNavigationManager : NavigationManager {
         )
     }
 
+    override fun tryNavigateBack() {
+        emittedIntents.add(NavigationIntent.NavigateBack)
+    }
+
     fun assertNavigatedTo(
         destination: Destination,
         pane: Pane,

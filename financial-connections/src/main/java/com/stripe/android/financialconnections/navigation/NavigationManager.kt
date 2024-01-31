@@ -14,6 +14,8 @@ internal interface NavigationManager {
         inclusive: Boolean = false,
         isSingleTop: Boolean = true,
     )
+
+    fun tryNavigateBack()
 }
 
 internal sealed class NavigationIntent {
@@ -23,6 +25,8 @@ internal sealed class NavigationIntent {
         val inclusive: Boolean,
         val isSingleTop: Boolean,
     ) : NavigationIntent()
+
+    data object NavigateBack : NavigationIntent()
 }
 
 internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
@@ -44,5 +48,9 @@ internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
                 isSingleTop = isSingleTop,
             )
         )
+    }
+
+    override fun tryNavigateBack() {
+        _navigationFlow.tryEmit(NavigationIntent.NavigateBack)
     }
 }

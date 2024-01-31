@@ -243,6 +243,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                             }
                         }
                     }
+
+                    NavigationIntent.NavigateBack -> {
+                        navHostController.popBackStack()
+                    }
                 }
             }.launchIn(this)
         }

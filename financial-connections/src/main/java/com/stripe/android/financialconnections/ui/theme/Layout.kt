@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -42,6 +43,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 internal fun Layout(
     body: LazyListScope.() -> Unit,
     footer: (@Composable () -> Unit)? = null,
+    bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
@@ -65,7 +67,7 @@ internal fun Layout(
             LazyColumn(
                 state = lazyListState,
                 verticalArrangement = verticalArrangement,
-                modifier = Modifier.padding(horizontal = 24.dp)
+                modifier = Modifier.padding(bodyPadding)
             ) {
                 body()
             }
