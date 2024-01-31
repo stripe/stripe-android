@@ -90,6 +90,7 @@ public final class com/stripe/android/model/BankAccount$Type : java/lang/Enum {
 
 public final class com/stripe/android/model/Card : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripePaymentSource {
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public static final field Companion Lcom/stripe/android/model/Card$Companion;
 	public final fun component1 ()Ljava/lang/Integer;
 	public final fun component10 ()Ljava/lang/String;
 	public final fun component11 ()Ljava/lang/String;
@@ -181,6 +182,7 @@ public final class com/stripe/android/model/CardBrand$Companion {
 }
 
 public final class com/stripe/android/model/CardFunding : java/lang/Enum {
+	public static final field Companion Lcom/stripe/android/model/CardFunding$Companion;
 	public static final field Credit Lcom/stripe/android/model/CardFunding;
 	public static final field Debit Lcom/stripe/android/model/CardFunding;
 	public static final field Prepaid Lcom/stripe/android/model/CardFunding;
@@ -343,6 +345,7 @@ public abstract class com/stripe/android/model/TokenParams : android/os/Parcelab
 
 public final class com/stripe/android/model/TokenizationMethod : java/lang/Enum {
 	public static final field ApplePay Lcom/stripe/android/model/TokenizationMethod;
+	public static final field Companion Lcom/stripe/android/model/TokenizationMethod$Companion;
 	public static final field GooglePay Lcom/stripe/android/model/TokenizationMethod;
 	public static final field Masterpass Lcom/stripe/android/model/TokenizationMethod;
 	public static final field VisaCheckout Lcom/stripe/android/model/TokenizationMethod;
