@@ -12,13 +12,11 @@ import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.financialconnections.getMetadata
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @RunWith(TestParameterInjector::class)
-@Ignore
 class PaparazziSampleScreenshotTest {
 
     object PreviewProvider : TestParameter.TestParameterValuesProvider {
@@ -38,7 +36,9 @@ class PaparazziSampleScreenshotTest {
 
     @get:Rule
     val paparazzi = Paparazzi(
-        environment = detectEnvironment(),
+        environment = detectEnvironment().run {
+            copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
+        },
     )
 
     @Test

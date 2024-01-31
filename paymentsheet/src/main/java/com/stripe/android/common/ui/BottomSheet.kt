@@ -120,7 +120,7 @@ internal fun BottomSheet(
     onDismissed: () -> Unit,
     sheetContent: @Composable () -> Unit,
 ) {
-    val systemUiController = rememberSystemUiController()
+    @Suppress("DEPRECATION") val systemUiController = rememberSystemUiController()
     val scrimColor = ModalBottomSheetDefaults.scrimColor
 
     val isExpanded = state.modalBottomSheetState.targetValue == Expanded
