@@ -1610,10 +1610,6 @@ public final class com/stripe/android/googlepaylauncher/GooglePayRepository$Disa
 	public fun isReady ()Lkotlinx/coroutines/flow/Flow;
 }
 
-public final class com/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory$DefaultImpls {
-	public static synthetic fun create$default (Lcom/stripe/android/googlepaylauncher/injection/GooglePayPaymentMethodLauncherFactory;Lkotlinx/coroutines/CoroutineScope;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Config;Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$ReadyCallback;Landroidx/activity/result/ActivityResultLauncher;ZILjava/lang/Object;)Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher;
-}
-
 public final class com/stripe/android/model/AccountParams : com/stripe/android/model/TokenParams {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -3055,7 +3051,6 @@ public abstract class com/stripe/android/model/MandateDataParams$Type : android/
 public final class com/stripe/android/model/MandateDataParams$Type$Online : com/stripe/android/model/MandateDataParams$Type {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/model/MandateDataParams$Type$Online$Companion;
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
 	public final fun copy (Ljava/lang/String;Ljava/lang/String;Z)Lcom/stripe/android/model/MandateDataParams$Type$Online;
@@ -6697,19 +6692,9 @@ public final class com/stripe/android/networking/FraudDetectionData$Creator : an
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/networking/StripeRepository$DefaultImpls {
-	public static synthetic fun buildPaymentUserAgent$default (Lcom/stripe/android/networking/StripeRepository;Ljava/util/Set;ILjava/lang/Object;)Ljava/lang/String;
-	public static synthetic fun confirmPaymentIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmPaymentIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun confirmSetupIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Lcom/stripe/android/model/ConfirmSetupIntentParams;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun retrievePaymentIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun retrieveSetupIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-	public static synthetic fun retrieveStripeIntent-BWLJW6A$default (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;Lcom/stripe/android/core/networking/ApiRequest$Options;Ljava/util/List;Lkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
-}
-
 public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated : android/os/Parcelable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
-	public static final field Companion Lcom/stripe/android/payments/PaymentFlowResult$Unvalidated$Companion;
 	public fun <init> ()V
 	public fun <init> (Ljava/lang/String;ILcom/stripe/android/core/exception/StripeException;ZLjava/lang/String;Lcom/stripe/android/model/Source;Ljava/lang/String;)V
 	public synthetic fun <init> (Ljava/lang/String;ILcom/stripe/android/core/exception/StripeException;ZLjava/lang/String;Lcom/stripe/android/model/Source;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
@@ -6951,11 +6936,6 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/payments/core/ActivityResultLauncherHost$DefaultImpls {
-	public static fun onLauncherInvalidated (Lcom/stripe/android/payments/core/ActivityResultLauncherHost;)V
-	public static fun onNewActivityResultCaller (Lcom/stripe/android/payments/core/ActivityResultLauncherHost;Landroidx/activity/result/ActivityResultCaller;Landroidx/activity/result/ActivityResultCallback;)V
-}
-
 public final class com/stripe/android/payments/core/authentication/threeds2/Stripe3ds2TransactionContract$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/core/authentication/threeds2/Stripe3ds2TransactionContract$Args;
@@ -7123,7 +7103,6 @@ public final class com/stripe/android/view/ActivityStarter$Args$Companion {
 }
 
 public abstract interface class com/stripe/android/view/ActivityStarter$Result : android/os/Parcelable {
-	public static final field Companion Lcom/stripe/android/view/ActivityStarter$Result$Companion;
 	public static final field EXTRA Ljava/lang/String;
 	public abstract fun toBundle ()Landroid/os/Bundle;
 }
