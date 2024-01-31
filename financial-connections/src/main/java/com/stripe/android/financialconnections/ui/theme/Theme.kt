@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
@@ -72,6 +73,12 @@ private val V3Colors = FinancialConnectionsV3Colors(
     backgroundBrand = Color(0xFFF5F6F8),
     border = Color(0xFFD8DEE4),
     borderBrand = Color(0xFF675DFF)
+)
+
+
+private val lineHeightStyle = LineHeightStyle(
+    alignment = LineHeightStyle.Alignment.Center,
+    trim = LineHeightStyle.Trim.None
 )
 
 @Deprecated("Use V3Typography instead")
@@ -168,65 +175,77 @@ private val V3Typography = FinancialConnectionsV3Typography(
         fontSize = 28.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.38.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
     headingXLargeSubdued = TextStyle(
         fontSize = 28.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.38.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     headingLarge = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.30.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
     headingMedium = TextStyle(
         fontSize = 20.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.30.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
     bodyMediumEmphasized = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     bodyMedium = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     bodySmall = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     labelLargeEmphasized = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     labelLarge = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     labelMediumEmphasized = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     labelMedium = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     labelSmall = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
 )
 
