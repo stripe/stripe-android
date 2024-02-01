@@ -5,6 +5,8 @@ import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -60,12 +62,16 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
         )
         return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
             val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
+            val metadata = PaymentMethodMetadata(
+                stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+                allowsDelayedPaymentMethods = false,
+                financialConnectionsAvailable = isFinancialConnectionsAvailable()
+            )
 
             lpmRepository.update(
-                stripeIntent = elementsSession.stripeIntent,
+                metadata = metadata,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-                isDeferred = true,
             )
 
             elementsSession.requireValidOrThrow()
@@ -124,7 +130,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                 // is not supported
                 val supportedPaymentMethods = elementsSession?.stripeIntent?.paymentMethodTypes?.mapNotNull {
                     lpmRepository.fromCode(it)
-                } ?: listOf(LpmRepository.hardcodedCardSpec(billingDetailsCollectionConfig))
+                } ?: listOf(CardDefinition.hardcodedCardSpec(billingDetailsCollectionConfig))
 
                 val validSupportedPaymentMethods = filterSupportedPaymentMethods(
                     supportedPaymentMethods,

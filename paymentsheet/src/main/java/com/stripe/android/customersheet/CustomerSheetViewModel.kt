@@ -20,6 +20,7 @@ import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -110,7 +111,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     private var stripeIntent: StripeIntent? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
 
-    private val card = LpmRepository.hardcodedCardSpec(
+    private val card = CardDefinition.hardcodedCardSpec(
         billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
     )
 

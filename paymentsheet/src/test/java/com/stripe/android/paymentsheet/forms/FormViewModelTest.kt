@@ -8,8 +8,10 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.PaymentMethodRequirements
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
@@ -549,7 +551,7 @@ internal class FormViewModelTest {
             args,
             createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
-                LpmRepository.HardcodedCard.formSpec,
+                LpmRepositoryTestHelpers.card.formSpec,
             )
         )
 
@@ -589,7 +591,7 @@ internal class FormViewModelTest {
             args,
             createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
-                LpmRepository.HardcodedCard.formSpec,
+                LpmRepositoryTestHelpers.card.formSpec,
             )
         )
 
@@ -629,7 +631,7 @@ internal class FormViewModelTest {
             args,
             createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
-                LpmRepository.HardcodedCard.formSpec,
+                LpmRepositoryTestHelpers.card.formSpec,
             )
         )
 
@@ -748,7 +750,7 @@ internal class FormViewModelTest {
                 args,
                 createLpmRepositorySupportedPaymentMethod(
                     PaymentMethod.Type.Card,
-                    LpmRepository.hardcodedCardSpec(internalBillingDetailsCollectionConfig).formSpec,
+                    CardDefinition.hardcodedCardSpec(internalBillingDetailsCollectionConfig).formSpec,
                 ),
             )
 
@@ -841,7 +843,7 @@ internal class FormViewModelTest {
             ),
             createLpmRepositorySupportedPaymentMethod(
                 PaymentMethod.Type.Card,
-                LpmRepository.HardcodedCard.formSpec,
+                LpmRepositoryTestHelpers.card.formSpec,
             ),
         )
 

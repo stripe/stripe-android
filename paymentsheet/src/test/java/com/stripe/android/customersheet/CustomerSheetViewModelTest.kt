@@ -2,7 +2,6 @@ package com.stripe.android.customersheet
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
-import app.cash.turbine.testIn
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -21,7 +20,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccount
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -1681,7 +1680,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -1710,7 +1709,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -1750,7 +1749,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2169,7 +2168,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                 ),
             ),
         )
@@ -2177,11 +2176,11 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.selectedPaymentMethod)
-                .isEqualTo(LpmRepository.hardCodedUsBankAccount)
+                .isEqualTo(LpmRepositoryTestHelpers.usBankAccount)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2197,7 +2196,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
                         response = mock(),
                     ),
@@ -2220,7 +2219,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = null,
                 ),
             ),
@@ -2251,7 +2250,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
                         response = mock(),
                     ),
@@ -2266,7 +2265,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.HardcodedCard
+                    LpmRepositoryTestHelpers.card
                 )
             )
 
@@ -2276,7 +2275,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2294,7 +2293,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    selectedPaymentMethod = LpmRepository.HardcodedCard,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.card,
                 ),
             ),
         )
@@ -2306,7 +2305,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2327,7 +2326,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.HardcodedCard
+                    LpmRepositoryTestHelpers.card
                 )
             )
 

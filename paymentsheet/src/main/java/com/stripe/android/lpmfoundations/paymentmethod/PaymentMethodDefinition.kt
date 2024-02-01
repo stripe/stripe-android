@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal interface PaymentMethodDefinition {
     /**
@@ -14,5 +16,8 @@ internal interface PaymentMethodDefinition {
      * Or setOf(AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods) if the payment method requires the
      * merchant to provide a PaymentSheet.Configuration with delayed payment methods enabled.
      */
-    fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
+    // Will be added back in a follow up.
+    // fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
+
+    fun supportedPaymentMethod(metadata: PaymentMethodMetadata, sharedDataSpec: SharedDataSpec): SupportedPaymentMethod?
 }

@@ -1,11 +1,11 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -15,12 +15,9 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
-    val merchantName: String,
-    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    val defaultBillingDetails: PaymentSheet.BillingDetails?,
-    val preferredNetworks: List<CardBrand>,
+    val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
-    val financialConnectionsAvailable: Boolean,
+    val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable().invoke(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {

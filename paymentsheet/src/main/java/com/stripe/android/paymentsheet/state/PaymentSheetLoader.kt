@@ -9,11 +9,12 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
@@ -215,11 +216,15 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             val billingDetailsCollectionConfig =
                 configuration.billingDetailsCollectionConfiguration.toInternal()
 
-            val didParseServerResponse = lpmRepository.update(
+            val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration =  billingDetailsCollectionConfig,
+                allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
+            )
+
+            val didParseServerResponse = lpmRepository.update(
+                metadata = metadata,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-                isDeferred = initializationMode is DeferredIntent,
             )
 
             if (!didParseServerResponse) {
@@ -286,7 +291,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config.merchantDisplayName
 
-        val layoutDescriptor = LpmRepository.HardcodedCard.getPMAddForm(stripeIntent, config)
+        val layoutDescriptor = CardDefinition.hardcodedCardSpec(BillingDetailsCollectionConfiguration())
+            .getPMAddForm(stripeIntent, config)
         val hasUsedLink = linkStore.hasUsedLink()
 
         val linkSignupMode = if (hasUsedLink) {
