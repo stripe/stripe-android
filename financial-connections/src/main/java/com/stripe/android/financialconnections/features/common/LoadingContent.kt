@@ -40,17 +40,20 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 
+private const val SHIMMER_SIZE_MULTIPLIER = 0.2f
+private const val SHIMMER_GRADIENT_ALPHA = 0.4f
+
 @Composable
 internal fun LoadingShimmerEffect(
     content: @Composable (Brush) -> Unit
 ) {
     val screenWidthDp = with(LocalConfiguration.current) { screenWidthDp.dp }
     val screenWidth = with(LocalDensity.current) { screenWidthDp.toPx() }
-    val shimmerWidth = screenWidth * 0.2f
+    val shimmerWidth = screenWidth * SHIMMER_SIZE_MULTIPLIER
 
     val gradient = listOf(
         v3Colors.backgroundOffset,
-        Color.White.copy(alpha = 0.4f),
+        Color.White.copy(alpha = SHIMMER_GRADIENT_ALPHA),
         v3Colors.backgroundOffset
     )
     val transition = rememberInfiniteTransition(label = "shimmer_transition")
@@ -154,7 +157,6 @@ internal fun LoadingSpinnerPreview() {
 @Preview(
     group = "Loading",
     name = "Shimmer",
-    widthDp = 3000
 
 )
 @Composable
@@ -185,7 +187,6 @@ internal fun LoadingShimmerPreview() {
                         )
                     }
                 }
-
             }
         )
     }

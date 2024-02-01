@@ -8,6 +8,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingNewConsumer
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingReturningConsumer
@@ -72,8 +73,11 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             NetworkingLinkSignupState.Payload(
                 content = content,
                 merchantName = manifest.getBusinessName(),
-                emailController = EmailConfig
-                    .createController(manifest.accountholderCustomerEmailAddress),
+                emailController = SimpleTextFieldController(
+                    textFieldConfig = EmailConfig(label = R.string.stripe_networking_link_login_warmup_cta_skip),
+                    initialValue = manifest.accountholderCustomerEmailAddress,
+                    showOptionalLabel = false
+                ),
                 phoneController = PhoneNumberController
                     .createPhoneNumberController(manifest.accountholderPhoneNumber ?: ""),
             )
