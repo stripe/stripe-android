@@ -114,10 +114,6 @@ fun PhoneNumberElementUI(
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
 
-    // TODO Check if this is actually needed
-    // val selectedIndex by controller.countryDropdownController.selectedIndex.collectAsState(0)
-    // controller.onSelectedCountryIndex(selectedIndex)
-
     val value by controller.fieldValue.collectAsState("")
     val isComplete by controller.isComplete.collectAsState(false)
     val shouldShowError by controller.error.collectAsState(null)
