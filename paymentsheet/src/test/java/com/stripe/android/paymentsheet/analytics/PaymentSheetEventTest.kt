@@ -9,7 +9,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
@@ -190,7 +189,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             duration = (5L).seconds,
-            savedSelection = SavedSelection.None
+            paymentSelection = null
         )
 
         assertThat(event.eventName).isEqualTo("mc_load_succeeded")
@@ -210,7 +209,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             duration = (5L).seconds,
-            savedSelection = SavedSelection.GooglePay
+            paymentSelection = PaymentSelection.GooglePay
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "google_pay")
@@ -222,7 +221,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             duration = (5L).seconds,
-            savedSelection = SavedSelection.Link
+            paymentSelection = PaymentSelection.Link
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "link")
@@ -234,7 +233,9 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             duration = (5L).seconds,
-            savedSelection = SavedSelection.PaymentMethod(id = "sepa_debit")
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+            )
         )
 
         assertThat(event.params).containsEntry("selected_lpm", "sepa_debit")

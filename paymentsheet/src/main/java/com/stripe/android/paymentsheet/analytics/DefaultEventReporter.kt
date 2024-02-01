@@ -9,10 +9,8 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,7 +51,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onLoadSucceeded(
-        savedSelection: Deferred<SavedSelection>,
+        paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         currency: String?,
     ) {
@@ -62,16 +60,14 @@ internal class DefaultEventReporter @Inject internal constructor(
 
         val duration = durationProvider.end(DurationProvider.Key.Loading)
 
-        CoroutineScope(workContext).launch {
-            executeEvent(
-                PaymentSheetEvent.LoadSucceeded(
-                    savedSelection = savedSelection.await(),
-                    duration = duration,
-                    isDeferred = isDeferred,
-                    linkEnabled = linkEnabled,
-                )
+        fireEvent(
+            PaymentSheetEvent.LoadSucceeded(
+                paymentSelection = paymentSelection,
+                duration = duration,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
             )
-        }
+        )
     }
 
     override fun onLoadFailed(
@@ -320,16 +316,12 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
-            executeEvent(event)
-        }
-    }
-
-    private fun executeEvent(event: PaymentSheetEvent) {
-        analyticsRequestExecutor.executeAsync(
-            paymentAnalyticsRequestFactory.createRequest(
-                event = event,
-                additionalParams = event.params,
+            analyticsRequestExecutor.executeAsync(
+                paymentAnalyticsRequestFactory.createRequest(
+                    event = event,
+                    additionalParams = event.params,
+                )
             )
-        )
+        }
     }
 }

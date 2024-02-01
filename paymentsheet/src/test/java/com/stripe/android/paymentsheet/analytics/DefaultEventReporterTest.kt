@@ -13,10 +13,7 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.utils.FakeDurationProvider
-import kotlinx.coroutines.async
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
 import org.junit.runner.RunWith
@@ -66,7 +63,11 @@ class DefaultEventReporterTest {
     fun `on completed loading operation, should fire analytics request with expected event value`() {
         val eventReporter = createEventReporter(EventReporter.Mode.Complete)
 
-        eventReporter.simulateSuccessfulSetup(SavedSelection.PaymentMethod(id = "card"))
+        eventReporter.simulateSuccessfulSetup(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -432,18 +433,14 @@ class DefaultEventReporterTest {
     }
 
     private fun EventReporter.simulateSuccessfulSetup(
-        savedSelection: SavedSelection = SavedSelection.GooglePay,
+        paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         currency: String? = "usd",
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted()
         onLoadSucceeded(
-            savedSelection = runBlocking {
-                async {
-                    savedSelection
-                }
-            },
+            paymentSelection = paymentSelection,
             linkEnabled = linkEnabled,
             currency = currency
         )
