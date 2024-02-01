@@ -480,7 +480,8 @@ private fun SearchMoreRow(
     ) {
         ShapedIcon(
             backgroundShape = RoundedCornerShape(12.dp),
-            painter = painterResource(R.drawable.stripe_ic_search), contentDescription = "Add icon"
+            painter = painterResource(id = R.drawable.stripe_ic_search),
+            contentDescription = "Add icon"
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(

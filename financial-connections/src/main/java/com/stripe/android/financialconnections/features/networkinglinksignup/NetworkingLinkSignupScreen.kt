@@ -226,27 +226,49 @@ private fun NetworkingLinkSignupLoaded(
             }
         },
         footer = {
-            Column {
-                if (showFullForm) {
-                    SaveToLinkCta(
-                        text = payload.content.cta,
-                        aboveCta = payload.content.aboveCta,
-                        onClickableTextClick = onClickableTextClick,
-                        saveAccountToLinkSync = saveAccountToLinkSync,
-                        validForm = validForm,
-                        onSaveToLink = onSaveToLink
-                    )
-                }
-                Spacer(modifier = Modifier.size(12.dp))
-                SkipCta(payload.content.skipCta, onSkipClick)
-            }
+            NetworkingLinkSignupFooter(
+                payload = payload,
+                onClickableTextClick = onClickableTextClick,
+                saveAccountToLinkSync = saveAccountToLinkSync,
+                validForm = validForm,
+                onSaveToLink = onSaveToLink,
+                onSkipClick = onSkipClick
+            )
         }
     )
 }
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun SkipCta(text: String, onSkipClick: () -> Unit) {
+private fun NetworkingLinkSignupFooter(
+    payload: Payload,
+    onClickableTextClick: (String) -> Unit,
+    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    validForm: Boolean,
+    onSaveToLink: () -> Unit,
+    onSkipClick: () -> Unit
+) = Column {
+    AnnotatedText(
+        modifier = Modifier.fillMaxWidth(),
+        text = TextResource.Text(fromHtml(payload.content.aboveCta)),
+        onClickableTextClick = onClickableTextClick,
+        defaultStyle = v3Typography.labelSmall.copy(
+            textAlign = TextAlign.Center,
+            color = v3Colors.textDefault
+        )
+    )
+    Spacer(modifier = Modifier.size(16.dp))
+    FinancialConnectionsButton(
+        loading = saveAccountToLinkSync is Loading,
+        enabled = validForm,
+        type = FinancialConnectionsButton.Type.Primary,
+        onClick = onSaveToLink,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(text = payload.content.cta)
+    }
+    Spacer(modifier = Modifier.size(8.dp))
     FinancialConnectionsButton(
         type = FinancialConnectionsButton.Type.Secondary,
         onClick = onSkipClick,
@@ -255,40 +277,7 @@ private fun SkipCta(text: String, onSkipClick: () -> Unit) {
             .semantics { testTagsAsResourceId = true }
             .testTag("skip_cta")
     ) {
-        Text(text = text)
-    }
-}
-
-@Composable
-private fun SaveToLinkCta(
-    aboveCta: String,
-    text: String,
-    onClickableTextClick: (String) -> Unit,
-    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
-    validForm: Boolean,
-    onSaveToLink: () -> Unit
-) {
-    Column {
-        AnnotatedText(
-            modifier = Modifier.fillMaxWidth(),
-            text = TextResource.Text(fromHtml(aboveCta)),
-            onClickableTextClick = onClickableTextClick,
-            defaultStyle = v3Typography.labelSmall.copy(
-                textAlign = TextAlign.Center,
-                color = v3Colors.textDefault
-            )
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        FinancialConnectionsButton(
-            loading = saveAccountToLinkSync is Loading,
-            enabled = validForm,
-            type = FinancialConnectionsButton.Type.Primary,
-            onClick = onSaveToLink,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(text = text)
-        }
+        Text(text = payload.content.skipCta)
     }
 }
 
