@@ -31,7 +31,7 @@ data class ConsumerSession(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Serializable
-    data class VerificationSession constructor(
+    data class VerificationSession(
         val type: SessionType,
         val state: SessionState
     ) : StripeModel {
@@ -47,7 +47,7 @@ data class ConsumerSession(
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 fun fromValue(value: String): SessionType =
-                    values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
+                    entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
             }
         }
 
@@ -64,7 +64,7 @@ data class ConsumerSession(
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             companion object {
                 fun fromValue(value: String): SessionState =
-                    values().firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
+                    entries.firstOrNull { it.value.equals(value, ignoreCase = true) } ?: Unknown
             }
         }
     }

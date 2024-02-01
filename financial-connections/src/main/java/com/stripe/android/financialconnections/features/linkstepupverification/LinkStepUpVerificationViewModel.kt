@@ -37,6 +37,7 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,7 +94,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
 
     private fun buildPayload(consumerSession: ConsumerSession) = Payload(
         email = consumerSession.emailAddress,
-        phoneNumber = consumerSession.redactedPhoneNumber,
+        phoneNumber = consumerSession.getRedactedPhoneNumber(),
         consumerSessionClientSecret = consumerSession.clientSecret,
         otpElement = OTPElement(
             IdentifierSpec.Generic("otp"),
