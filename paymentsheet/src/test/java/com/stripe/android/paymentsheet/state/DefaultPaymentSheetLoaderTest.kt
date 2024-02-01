@@ -663,11 +663,46 @@ internal class DefaultPaymentSheetLoaderTest {
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
         )
 
         verify(eventReporter).onLoadStarted()
-        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PAYMENT_METHODS.first()
+            ),
+            linkEnabled = true,
+            currency = "usd",
+        )
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds with saved LPM selection`() = runTest {
+        testSuccessfulLoadSendsEventsCorrectly(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PAYMENT_METHODS.last()
+            )
+        )
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds with saved Google Pay selection`() = runTest {
+        testSuccessfulLoadSendsEventsCorrectly(
+            paymentSelection = PaymentSelection.GooglePay
+        )
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds with saved Link selection`() = runTest {
+        testSuccessfulLoadSendsEventsCorrectly(
+            paymentSelection = PaymentSelection.Link
+        )
     }
 
     @Test
@@ -687,7 +722,11 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         verify(eventReporter).onLoadStarted()
-        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkEnabled = true,
+            currency = "usd",
+        )
     }
 
     @Test
@@ -876,6 +915,30 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState).isNull()
+    }
+
+    private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
+        prefsRepository.savePaymentSelection(paymentSelection)
+
+        val loader = createPaymentSheetLoader()
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
+        )
+
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = paymentSelection,
+            linkEnabled = true,
+            currency = "usd",
+        )
     }
 
     private fun createPaymentSheetLoader(

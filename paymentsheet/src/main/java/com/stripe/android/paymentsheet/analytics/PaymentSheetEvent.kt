@@ -27,6 +27,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class LoadSucceeded(
+        paymentSelection: PaymentSelection?,
         duration: Duration?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -34,7 +35,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
+            FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
         )
+
+        private val PaymentSelection?.defaultAnalyticsValue: String
+            get() = when (this) {
+                is PaymentSelection.GooglePay -> "google_pay"
+                is PaymentSelection.Link -> "link"
+                is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
+                else -> "none"
+            }
     }
 
     class LoadFailed(

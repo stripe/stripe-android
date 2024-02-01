@@ -27,6 +27,7 @@ internal interface EventReporter {
      * rendered.
      */
     fun onLoadSucceeded(
+        paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         currency: String?,
     )

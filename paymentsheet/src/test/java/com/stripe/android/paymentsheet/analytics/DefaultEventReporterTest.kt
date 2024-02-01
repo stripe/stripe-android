@@ -60,6 +60,24 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `on completed loading operation, should fire analytics request with expected event value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["selected_lpm"] == "card"
+            }
+        )
+    }
+
+    @Test
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup()
@@ -415,11 +433,16 @@ class DefaultEventReporterTest {
     }
 
     private fun EventReporter.simulateSuccessfulSetup(
+        paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         currency: String? = "usd",
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted()
-        onLoadSucceeded(linkEnabled, currency)
+        onLoadSucceeded(
+            paymentSelection = paymentSelection,
+            linkEnabled = linkEnabled,
+            currency = currency
+        )
     }
 }

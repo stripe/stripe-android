@@ -51,6 +51,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onLoadSucceeded(
+        paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         currency: String?,
     ) {
@@ -61,6 +62,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
         fireEvent(
             PaymentSheetEvent.LoadSucceeded(
+                paymentSelection = paymentSelection,
                 duration = duration,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
