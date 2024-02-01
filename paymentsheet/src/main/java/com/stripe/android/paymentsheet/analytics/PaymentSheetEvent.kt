@@ -5,6 +5,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -27,6 +28,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class LoadSucceeded(
+        savedSelection: SavedSelection,
         duration: Duration?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -34,7 +36,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
+            FIELD_SELECTED_LPM to savedSelection.defaultAnalyticsValue,
         )
+
+        private val SavedSelection.defaultAnalyticsValue: String
+            get() = when (this) {
+                is SavedSelection.GooglePay -> "google_pay"
+                is SavedSelection.Link -> "link"
+                is SavedSelection.PaymentMethod -> id
+                is SavedSelection.None -> "none"
+            }
     }
 
     class LoadFailed(

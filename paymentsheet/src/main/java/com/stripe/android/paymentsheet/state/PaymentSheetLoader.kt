@@ -28,6 +28,7 @@ import com.stripe.android.paymentsheet.model.requireValidOrThrow
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
@@ -73,15 +74,31 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             configuration = paymentSheetConfiguration,
         )
 
-        reportLoadResult(elementsSessionResult)
-
         elementsSessionResult.mapCatching { elementsSession ->
+            val isGooglePayReady = async {
+                isGooglePayReady(paymentSheetConfiguration, elementsSession)
+            }
+
+            val savedSelection = async {
+                retrieveSavedSelection(
+                    config = paymentSheetConfiguration,
+                    isGooglePayReady = isGooglePayReady.await(),
+                    elementsSession = elementsSession
+                )
+            }
+
+            reportSuccessfulLoad(
+                elementsSession = elementsSession,
+                savedSelection = savedSelection,
+            )
+
             create(
                 elementsSession = elementsSession,
                 config = paymentSheetConfiguration,
-                isGooglePayReady = isGooglePayReady(paymentSheetConfiguration, elementsSession),
+                savedSelection = savedSelection,
+                isGooglePayReady = isGooglePayReady,
             )
-        }
+        }.onFailure(::reportFailedLoad)
     }
 
     private suspend fun isGooglePayReady(
@@ -107,20 +124,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun create(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
-        isGooglePayReady: Boolean,
+        savedSelection: Deferred<SavedSelection>,
+        isGooglePayReady: Deferred<Boolean>,
     ): PaymentSheetState.Full = coroutineScope {
         val customerConfig = config.customer
-        val prefsRepository = prefsRepositoryFactory(customerConfig)
 
         val stripeIntent = elementsSession.stripeIntent
         val merchantCountry = elementsSession.merchantCountry
-
-        val savedSelection = async {
-            prefsRepository.getSavedSelection(
-                isGooglePayAvailable = isGooglePayReady,
-                isLinkAvailable = elementsSession.isLinkEnabled,
-            )
-        }
 
         val paymentMethods = async {
             if (customerConfig != null) {
@@ -135,25 +145,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val sortedPaymentMethods = async {
-            paymentMethods.await().withLastUsedPaymentMethodFirst(
-                savedSelection = savedSelection.await(),
-            )
+            paymentMethods.await().withLastUsedPaymentMethodFirst(savedSelection.await())
         }
 
         val initialPaymentSelection = async {
             val desiredSelection = when (val selection = savedSelection.await()) {
-                is SavedSelection.GooglePay -> {
-                    PaymentSelection.GooglePay
-                }
-                is SavedSelection.Link -> {
-                    PaymentSelection.Link
-                }
+                is SavedSelection.GooglePay -> PaymentSelection.GooglePay
+                is SavedSelection.Link -> PaymentSelection.Link
                 is SavedSelection.PaymentMethod -> {
                     paymentMethods.await().find { it.id == selection.id }?.toPaymentSelection()
                 }
-                is SavedSelection.None -> {
-                    null
-                }
+                is SavedSelection.None -> null
             }
 
             desiredSelection ?: sortedPaymentMethods.await().firstOrNull()?.toPaymentSelection()
@@ -179,7 +181,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 config = config,
                 stripeIntent = stripeIntent,
                 customerPaymentMethods = sortedPaymentMethods.await(),
-                isGooglePayReady = isGooglePayReady,
+                isGooglePayReady = isGooglePayReady.await(),
                 linkState = linkState.await(),
                 isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
                 paymentSelection = initialPaymentSelection.await(),
@@ -333,6 +335,20 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         )
     }
 
+    private suspend fun retrieveSavedSelection(
+        config: PaymentSheet.Configuration,
+        isGooglePayReady: Boolean,
+        elementsSession: ElementsSession
+    ): SavedSelection {
+        val customerConfig = config.customer
+        val prefsRepository = prefsRepositoryFactory(customerConfig)
+
+        return prefsRepository.getSavedSelection(
+            isGooglePayAvailable = isGooglePayReady,
+            isLinkAvailable = elementsSession.isLinkEnabled,
+        )
+    }
+
     private fun warnUnactivatedIfNeeded(stripeIntent: StripeIntent) {
         if (stripeIntent.unactivatedPaymentMethods.isEmpty()) {
             return
@@ -358,24 +374,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         return availableTypes.intersect(requestedTypes).isNotEmpty()
     }
 
-    private fun reportLoadResult(
-        loaderResult: Result<ElementsSession>,
+    private fun reportSuccessfulLoad(
+        elementsSession: ElementsSession,
+        savedSelection: Deferred<SavedSelection>,
     ) {
-        loaderResult.fold(
-            onSuccess = { elementsSession ->
-                elementsSession.sessionsError?.let { sessionsError ->
-                    eventReporter.onElementsSessionLoadFailed(sessionsError)
-                }
-                eventReporter.onLoadSucceeded(
-                    linkEnabled = elementsSession.isLinkEnabled,
-                    currency = elementsSession.stripeIntent.currency,
-                )
-            },
-            onFailure = { error ->
-                logger.error("Failure loading PaymentSheetState", error)
-                eventReporter.onLoadFailed(error)
-            }
+        elementsSession.sessionsError?.let { sessionsError ->
+            eventReporter.onElementsSessionLoadFailed(sessionsError)
+        }
+
+        eventReporter.onLoadSucceeded(
+            linkEnabled = elementsSession.isLinkEnabled,
+            currency = elementsSession.stripeIntent.currency,
+            savedSelection = savedSelection,
         )
+    }
+
+    private fun reportFailedLoad(
+        error: Throwable,
+    ) {
+        logger.error("Failure loading PaymentSheetState", error)
+        eventReporter.onLoadFailed(error)
     }
 }
 

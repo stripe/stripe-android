@@ -9,11 +9,13 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
 @Suppress("LargeClass")
@@ -180,6 +182,62 @@ class PaymentSheetEventTest {
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
         }
+    }
+
+    @Test
+    fun `LoadSucceeded event should return expected toString()`() {
+        val event = PaymentSheetEvent.LoadSucceeded(
+            isDeferred = false,
+            linkEnabled = false,
+            duration = (5L).seconds,
+            savedSelection = SavedSelection.None
+        )
+
+        assertThat(event.eventName).isEqualTo("mc_load_succeeded")
+        assertThat(event.params).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "duration" to 5f,
+                "selected_lpm" to "none"
+            )
+        )
+    }
+
+    @Test
+    fun `LoadSucceeded event should return 'google_pay' for selected lpm when saved selection is Google Pay`() {
+        val event = PaymentSheetEvent.LoadSucceeded(
+            isDeferred = false,
+            linkEnabled = false,
+            duration = (5L).seconds,
+            savedSelection = SavedSelection.GooglePay
+        )
+
+        assertThat(event.params).containsEntry("selected_lpm", "google_pay")
+    }
+
+    @Test
+    fun `LoadSucceeded event should return 'link' for selected lpm when saved selection is Link`() {
+        val event = PaymentSheetEvent.LoadSucceeded(
+            isDeferred = false,
+            linkEnabled = false,
+            duration = (5L).seconds,
+            savedSelection = SavedSelection.Link
+        )
+
+        assertThat(event.params).containsEntry("selected_lpm", "link")
+    }
+
+    @Test
+    fun `LoadSucceeded event should return id for selected lpm when saved selection is a payment method`() {
+        val event = PaymentSheetEvent.LoadSucceeded(
+            isDeferred = false,
+            linkEnabled = false,
+            duration = (5L).seconds,
+            savedSelection = SavedSelection.PaymentMethod(id = "sepa_debit")
+        )
+
+        assertThat(event.params).containsEntry("selected_lpm", "sepa_debit")
     }
 
     @Test

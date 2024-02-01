@@ -6,6 +6,8 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.SavedSelection
+import kotlinx.coroutines.Deferred
 
 internal interface EventReporter {
 
@@ -27,6 +29,7 @@ internal interface EventReporter {
      * rendered.
      */
     fun onLoadSucceeded(
+        savedSelection: Deferred<SavedSelection>,
         linkEnabled: Boolean,
         currency: String?,
     )
