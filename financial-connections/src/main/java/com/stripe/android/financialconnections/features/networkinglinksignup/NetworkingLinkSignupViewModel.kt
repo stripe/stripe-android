@@ -113,6 +113,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             NetworkingLinkSignupState::saveAccountToLink,
             onSuccess = {
                 saveToLinkWithStripeSucceeded.set(true)
+                navigationManager.tryNavigateTo(Success(referrer = PANE))
             },
             onFail = { error ->
                 saveToLinkWithStripeSucceeded.set(false)
@@ -199,9 +200,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 email = state.validEmail!!,
                 phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
                 selectedAccounts = selectedAccounts.map { it.id },
-            ).also {
-                navigationManager.tryNavigateTo(Success(referrer = PANE))
-            }
+            )
         }.execute { copy(saveAccountToLink = it) }
     }
 
