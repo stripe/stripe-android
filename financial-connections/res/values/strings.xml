@@ -123,7 +123,7 @@
     <string name="stripe_link_stepup_verification_title">Confirm your email</string>
     <string name="stripe_link_stepup_verification_desc">Enter the code sent to %1$s. We periodically request this extra step to keep your account safe.</string>
     <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
-    <string name="stripe_networking_save_to_link_verification_title">Sign in to Link</string>
+    <string name="stripe_networking_save_to_link_verification_title">Verify it\'s you</string>
     <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
     <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>
     <string name="stripe_verification.codeExpired">It looks like the verification code you provided is not valid anymore. Get a new code and try again.</string>
