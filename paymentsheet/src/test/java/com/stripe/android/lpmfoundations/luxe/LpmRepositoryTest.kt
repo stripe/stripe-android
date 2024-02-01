@@ -33,8 +33,9 @@ class LpmRepositoryTest {
         Locale.setDefault(Locale.UK)
         val lpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources
-            )
+                ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            LpmRepository.LpmInitialFormData(),
         )
         lpmRepository.updateFromDisk(
             PaymentIntentFactory.create().copy(
