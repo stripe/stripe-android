@@ -54,7 +54,7 @@ class LpmRepository(
      * Reading the server spec is all or nothing, any error means none will be read
      * so it is important that the json on disk is successful.
      */
-    internal fun update(
+    fun update(
         metadata: PaymentMethodMetadata,
         serverLpmSpecs: String?,
     ): Boolean {
