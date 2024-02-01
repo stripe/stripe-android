@@ -176,10 +176,6 @@ public final class com/stripe/android/ui/core/elements/Capitalization$Companion 
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public synthetic class com/stripe/android/ui/core/elements/CardBillingAddressElement$EntriesMappings {
-	public static final synthetic field entries$0 Lkotlin/enums/EnumEntries;
-}
-
 public final class com/stripe/android/ui/core/elements/CardBillingSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/ui/core/elements/CardBillingSpec$$serializer;
