@@ -218,7 +218,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
-                billingDetailsCollectionConfiguration =  billingDetailsCollectionConfig,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
             )
 

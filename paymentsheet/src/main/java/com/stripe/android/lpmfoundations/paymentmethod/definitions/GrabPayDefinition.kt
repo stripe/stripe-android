@@ -9,7 +9,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
-internal object GrabPayDefinition :PaymentMethodDefinition {
+internal object GrabPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.GrabPay
 
     override fun supportedPaymentMethod(
