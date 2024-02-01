@@ -16,7 +16,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -87,7 +86,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
 
@@ -577,10 +575,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch {
-            val stripeIntent = awaitStripeIntent().getOrElse {
-                onFatal(it)
-                return@launch
-            }
+            val stripeIntent = awaitStripeIntent()
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = args.initializationMode,
@@ -612,12 +607,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
         viewModelScope.launch {
-            awaitStripeIntent().fold(
-                onSuccess = { stripeIntent ->
-                    processPayment(stripeIntent, paymentResult)
-                },
-                onFailure = ::onFatal
-            )
+            val stripeIntent = awaitStripeIntent()
+            processPayment(stripeIntent, paymentResult)
         }
     }
 
@@ -797,14 +788,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         savedStateHandle[AwaitingPaymentResultKey] = true
     }
 
-    private suspend fun awaitStripeIntent(timeout: Duration = 10.seconds): Result<StripeIntent> {
-        val stripeIntent = withTimeoutOrNull(timeout) {
-            stripeIntent.filterNotNull().first()
-        }
-
-        return stripeIntent?.let {
-            Result.success(it)
-        } ?: Result.failure(APIConnectionException())
+    private suspend fun awaitStripeIntent(): StripeIntent {
+        return stripeIntent.filterNotNull().first()
     }
 
     internal class Factory(
