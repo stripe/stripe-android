@@ -42,7 +42,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             get() = when (this) {
                 is PaymentSelection.GooglePay -> "google_pay"
                 is PaymentSelection.Link -> "link"
-                is PaymentSelection.Saved -> paymentMethod.type?.code ?: "unknown"
+                is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
                 else -> "none"
             }
     }

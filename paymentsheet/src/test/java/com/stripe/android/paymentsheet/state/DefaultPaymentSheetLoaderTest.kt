@@ -659,15 +659,35 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Emits correct events when loading succeeds for non-deferred intent`() = runTest {
-        testSuccessfulLoadSendsEventsCorrectly(
-            paymentSelection = null
+        val loader = createPaymentSheetLoader()
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
+        )
+
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PAYMENT_METHODS.first()
+            ),
+            linkEnabled = true,
+            currency = "usd",
         )
     }
 
     @Test
     fun `Emits correct events when loading succeeds with saved LPM selection`() = runTest {
         testSuccessfulLoadSendsEventsCorrectly(
-            paymentSelection = PaymentSelection.Link
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PAYMENT_METHODS.last()
+            )
         )
     }
 
@@ -904,7 +924,13 @@ internal class DefaultPaymentSheetLoaderTest {
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
         )
 
         verify(eventReporter).onLoadStarted()
