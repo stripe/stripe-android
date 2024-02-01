@@ -13,7 +13,7 @@ Dependencies updated in [7718](https://github.com/stripe/stripe-android/pull/771
 * Bumped AndroidX RecyclerView from 1.2.1 to 1.3.1.
 * Bumped Coroutines from 1.6.4 to 1.7.3.
 * Bumped Google Places from 3.0.0 to 3.3.0.
-* Bumped Kotlin from 1.8.22 to 1.9.21.
+* Bumped Kotlin from 1.8.22 to 1.9.22.
 * Bumped Material from 1.8.0 to 1.11.0.
 * Bumped Mavericks from 3.0.7 to 3.0.9.
 
