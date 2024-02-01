@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.common
 
-import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
@@ -8,115 +7,76 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ProgressIndicatorDefaults
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 
 @Composable
-@Suppress("MagicNumber")
 internal fun LoadingShimmerEffect(
     content: @Composable (Brush) -> Unit
 ) {
+    val screenWidthDp = with(LocalConfiguration.current) { screenWidthDp.dp }
+    val screenWidth = with(LocalDensity.current) { screenWidthDp.toPx() }
+    val shimmerWidth = screenWidth * 0.2f
+
     val gradient = listOf(
-        FinancialConnectionsTheme.colors.backgroundContainer,
-        FinancialConnectionsTheme.colors.textWhite,
-        FinancialConnectionsTheme.colors.backgroundContainer
+        v3Colors.backgroundOffset,
+        Color.White.copy(alpha = 0.4f),
+        v3Colors.backgroundOffset
     )
     val transition = rememberInfiniteTransition(label = "shimmer_transition")
     val translateAnimation = transition.animateFloat(
         label = "shimmer_translate_animation",
         initialValue = 0f,
-        targetValue = 1000f,
+        targetValue = screenWidth,
         animationSpec = infiniteRepeatable(
             animation = tween(
                 durationMillis = LOADING_SPINNER_ROTATION_MS,
-                easing = FastOutLinearInEasing
+                easing = LinearEasing
             )
         )
     )
     val brush = Brush.linearGradient(
         colors = gradient,
-        start = Offset(200f, 200f),
+        start = Offset(
+            translateAnimation.value - shimmerWidth,
+            translateAnimation.value - shimmerWidth
+        ),
         end = Offset(
-            x = translateAnimation.value,
-            y = translateAnimation.value
+            translateAnimation.value,
+            translateAnimation.value
         )
     )
     content(brush)
-}
-
-@Composable
-internal fun LoadingContent(
-    modifier: Modifier = Modifier,
-    title: String? = null,
-    content: String? = null
-) {
-    Column(
-        modifier = modifier
-            .padding(horizontal = 24.dp)
-    ) {
-        Spacer(modifier = Modifier.size(8.dp))
-        LoadingSpinner()
-        if (title != null) {
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(
-                text = title,
-                style = FinancialConnectionsTheme.typography.subtitle
-            )
-        }
-        if (content != null) {
-            Spacer(modifier = Modifier.size(16.dp))
-            Text(
-                text = content,
-                style = FinancialConnectionsTheme.typography.body
-            )
-        }
-    }
-}
-
-@Composable
-@Deprecated("Use V3LoadingSpinner instead")
-internal fun LoadingSpinner() {
-    val infiniteTransition = rememberInfiniteTransition()
-    val angle by infiniteTransition.animateFloat(
-        initialValue = 0F,
-        targetValue = 360F,
-        animationSpec = infiniteRepeatable(
-            animation = tween(LOADING_SPINNER_ROTATION_MS)
-        )
-    )
-    Image(
-        painter = painterResource(id = R.drawable.stripe_ic_loading_spinner),
-        modifier = Modifier.graphicsLayer { rotationZ = angle },
-        contentDescription = "Loading spinner."
-    )
 }
 
 @Composable
@@ -184,7 +144,49 @@ internal fun LoadingSpinnerPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
             topBar = { FinancialConnectionsTopAppBar(onCloseClick = {}) },
-            content = { FullScreenGenericLoading() }
+            content = {
+                FullScreenGenericLoading()
+            }
+        )
+    }
+}
+
+@Preview(
+    group = "Loading",
+    name = "Shimmer",
+    widthDp = 3000
+
+)
+@Composable
+internal fun LoadingShimmerPreview() {
+    FinancialConnectionsPreview {
+        FinancialConnectionsScaffold(
+            topBar = { FinancialConnectionsTopAppBar(onCloseClick = {}) },
+            content = {
+                Column(
+                    modifier = Modifier.padding(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp),
+                ) {
+                    LoadingShimmerEffect {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(72.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(it)
+                        )
+                    }
+                    LoadingShimmerEffect {
+                        Box(
+                            modifier = Modifier
+                                .size(100.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(it)
+                        )
+                    }
+                }
+
+            }
         )
     }
 }
