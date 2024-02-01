@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogWindowProvider
 import androidx.core.view.WindowCompat
@@ -46,91 +47,113 @@ private val LightColorPalette = FinancialConnectionsColors(
     iconAttention = Attention400
 )
 
+private val lineHeightStyle = LineHeightStyle(
+    alignment = LineHeightStyle.Alignment.Center,
+    trim = LineHeightStyle.Trim.None
+)
+
 private val Typography = FinancialConnectionsTypography(
     subtitle = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
     subtitleEmphasized = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
     heading = TextStyle(
         fontSize = 18.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
     subheading = TextStyle(
         fontSize = 18.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     kicker = TextStyle(
         fontSize = 12.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     body = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     bodyEmphasized = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     detail = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     detailEmphasized = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     caption = TextStyle(
         fontSize = 12.sp,
         lineHeight = 18.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     captionEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 18.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     captionTight = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     captionTightEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.W600
+        fontWeight = FontWeight.W600,
+        lineHeightStyle = lineHeightStyle
     ),
     bodyCode = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     bodyCodeEmphasized = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
     captionCode = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.W400
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
     ),
     captionCodeEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
-        fontWeight = FontWeight.W700
+        fontWeight = FontWeight.W700,
+        lineHeightStyle = lineHeightStyle
     ),
 )
 
