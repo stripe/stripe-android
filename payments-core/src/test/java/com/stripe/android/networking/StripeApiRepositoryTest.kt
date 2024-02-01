@@ -1725,7 +1725,7 @@ internal class StripeApiRepositoryTest {
                 withNestedParams("card") {
                     assertEquals(this["number"], "4242424242424242")
                     assertEquals(this["exp_month"], 1)
-                    assertEquals(this["exp_year"], 2024)
+                    assertEquals(this["exp_year"], 2054)
                 }
             }
         }
