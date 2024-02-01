@@ -502,9 +502,9 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
     }
 
     private sealed class ScreenState {
-        object CustomerCollectionScreen : ScreenState()
-        object VerificationNeededScreen : ScreenState()
-        object VerifyWithMicrodepositsScreen : ScreenState()
+        data object CustomerCollectionScreen : ScreenState()
+        data object VerificationNeededScreen : ScreenState()
+        data object VerifyWithMicrodepositsScreen : ScreenState()
         data class Error(val message: String) : ScreenState()
     }
 }

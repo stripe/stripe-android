@@ -13,7 +13,7 @@ internal sealed class PaymentSheetViewState(
     data class Reset(private val message: BaseSheetViewModel.UserErrorMessage? = null) :
         PaymentSheetViewState(message)
 
-    object StartProcessing : PaymentSheetViewState(null)
+    data object StartProcessing : PaymentSheetViewState(null)
 
     data class FinishProcessing(
         val onComplete: () -> Unit

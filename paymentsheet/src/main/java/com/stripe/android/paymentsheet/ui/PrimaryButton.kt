@@ -257,10 +257,10 @@ internal class PrimaryButton @JvmOverloads constructor(
         /**
          * The label will be applied if the value is not null.
          */
-        object Ready : State(
+        data object Ready : State(
             isProcessing = false
         )
-        object StartProcessing : State(
+        data object StartProcessing : State(
             isProcessing = true
         )
         data class FinishProcessing(

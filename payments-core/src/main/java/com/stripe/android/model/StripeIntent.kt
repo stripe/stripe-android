@@ -295,15 +295,7 @@ sealed interface StripeIntent : StripeModel {
         }
 
         @Parcelize
-        object BlikAuthorize : NextActionData() {
-            override fun hashCode(): Int {
-                return this::class.java.hashCode()
-            }
-
-            override fun equals(other: Any?): Boolean {
-                return this === other
-            }
-        }
+        data object BlikAuthorize : NextActionData()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
@@ -317,15 +309,7 @@ sealed interface StripeIntent : StripeModel {
         ) : NextActionData()
 
         @Parcelize
-        object UpiAwaitNotification : NextActionData() {
-            override fun hashCode(): Int {
-                return this::class.java.hashCode()
-            }
-
-            override fun equals(other: Any?): Boolean {
-                return this === other
-            }
-        }
+        data object UpiAwaitNotification : NextActionData()
 
         /**
          * Contains the authentication URL for redirecting your customer to Cash App.

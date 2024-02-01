@@ -34,7 +34,7 @@ internal sealed class PaymentSelection : Parcelable {
     ): String?
 
     @Parcelize
-    object GooglePay : PaymentSelection() {
+    data object GooglePay : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
@@ -50,7 +50,7 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     @Parcelize
-    object Link : PaymentSelection() {
+    data object Link : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false

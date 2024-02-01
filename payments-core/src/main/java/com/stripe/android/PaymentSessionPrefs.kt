@@ -41,7 +41,7 @@ internal interface PaymentSessionPrefs {
 
     sealed class SelectedPaymentMethod(val stringValue: String) {
         class Saved(paymentMethodId: String) : SelectedPaymentMethod(paymentMethodId)
-        object GooglePay : SelectedPaymentMethod(GOOGLE_PAY)
+        data object GooglePay : SelectedPaymentMethod(GOOGLE_PAY)
 
         companion object {
             fun fromString(value: String?) = when (value) {

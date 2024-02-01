@@ -5,7 +5,7 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.uicore.elements.SingleChoiceDropdownItem
 
-internal data class EditPaymentMethodViewState constructor(
+internal data class EditPaymentMethodViewState(
     val status: Status,
     val last4: String,
     val displayName: String,

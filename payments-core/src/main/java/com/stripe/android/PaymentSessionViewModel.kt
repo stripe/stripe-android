@@ -231,7 +231,7 @@ internal class PaymentSessionViewModel(
     }
 
     sealed class FetchCustomerResult {
-        object Success : FetchCustomerResult()
+        data object Success : FetchCustomerResult()
 
         data class Error(
             val errorCode: Int,

@@ -21,7 +21,7 @@ sealed class FinancialConnectionsSheetResult : Parcelable {
      * The customer canceled the connections session attempt.
      */
     @Parcelize
-    object Canceled : FinancialConnectionsSheetResult()
+    data object Canceled : FinancialConnectionsSheetResult()
 
     /**
      * The connections session attempt failed.
