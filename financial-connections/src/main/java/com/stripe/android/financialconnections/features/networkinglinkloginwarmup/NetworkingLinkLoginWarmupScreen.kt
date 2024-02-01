@@ -40,7 +40,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.CircleIcon
+import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
@@ -147,7 +147,7 @@ private fun HeaderSection() {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        CircleIcon(
+        ShapedIcon(
             painter = painterResource(id = R.drawable.stripe_ic_person),
             contentDescription = stringResource(R.string.stripe_networking_link_login_warmup_title)
         )

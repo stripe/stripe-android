@@ -44,7 +44,7 @@ internal fun UnclassifiedErrorContent(
 ) {
     ErrorContent(
         iconContent = {
-            CircleIcon(
+            ShapedIcon(
                 painter = painterResource(id = R.drawable.stripe_ic_warning),
                 contentDescription = null
             )
@@ -63,7 +63,7 @@ internal fun InstitutionUnknownErrorContent(
 ) {
     ErrorContent(
         iconContent = {
-            CircleIcon(
+            ShapedIcon(
                 painter = painterResource(id = R.drawable.stripe_ic_warning),
                 contentDescription = null
             )

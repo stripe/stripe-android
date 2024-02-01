@@ -135,7 +135,7 @@ private fun ModalBottomSheetContent(
             item {
                 icon?.default?.let {
                     Spacer(modifier = Modifier.size(24.dp))
-                    CircleIcon(url = it, contentDescription = title.toText().toString())
+                    ShapedIcon(url = it, contentDescription = title.toText().toString())
                     Spacer(modifier = Modifier.size(24.dp))
                 }
                 AnnotatedText(

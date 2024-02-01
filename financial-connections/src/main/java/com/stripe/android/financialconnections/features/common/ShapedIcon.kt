@@ -8,6 +8,7 @@ import androidx.compose.material.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -26,11 +27,14 @@ private val iconSize = 20.dp
  * @param painter the [Painter] to use for the icon
  */
 @Composable
-internal fun CircleIcon(
+internal fun ShapedIcon(
     painter: Painter,
+    backgroundShape: Shape = CircleShape,
     contentDescription: String?
 ) {
-    CircleBox {
+    CircleBox(
+        backgroundShape = backgroundShape
+    ) {
         LocalIcon(
             painter = painter,
             contentDescription = contentDescription
@@ -46,12 +50,15 @@ internal fun CircleIcon(
  *        no icon will be rendered inside the circle.
  */
 @Composable
-internal fun CircleIcon(
+internal fun ShapedIcon(
     url: String,
+    backgroundShape: Shape = CircleShape,
     contentDescription: String?,
     errorPainter: Painter? = null
 ) {
-    CircleBox {
+    CircleBox(
+        backgroundShape = backgroundShape,
+    ) {
         StripeImage(
             modifier = Modifier.size(iconSize),
             url = url,
@@ -79,13 +86,14 @@ private fun LocalIcon(
 
 @Composable
 private fun CircleBox(
+    backgroundShape: Shape,
     content: @Composable () -> Unit,
 ) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
             .size(56.dp)
-            .background(color = Brand50, shape = CircleShape)
+            .background(color = Brand50, shape = backgroundShape)
     ) {
         content()
     }

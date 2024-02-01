@@ -27,9 +27,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -46,6 +44,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -66,6 +65,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
+import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
@@ -80,7 +80,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.theme.Brand100
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import kotlinx.coroutines.launch
@@ -381,7 +380,7 @@ private fun SearchRow(
                 .focusRequester(focusRequester),
             leadingIcon = {
                 Icon(
-                    Icons.Filled.Search,
+                    painter = painterResource(id = R.drawable.stripe_ic_search),
                     tint = v3Colors.iconDefault,
                     contentDescription = "Search icon",
                 )
@@ -437,16 +436,12 @@ private fun ManualEntryRow(
             )
             .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
     ) {
-        Icon(
-            imageVector = Icons.Filled.Add,
-            tint = v3Colors.iconBrand,
-            modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(Brand100)
-                .padding(8.dp),
-            contentDescription = "Add icon"
+        ShapedIcon(
+            backgroundShape = RoundedCornerShape(12.dp),
+            painter = painterResource(id = R.drawable.stripe_ic_add),
+            contentDescription = "Manually enter details"
         )
+
         Spacer(modifier = Modifier.size(8.dp))
         Column {
             Text(
@@ -483,15 +478,9 @@ private fun SearchMoreRow(
             )
             .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
     ) {
-        Icon(
-            imageVector = Icons.Filled.Search,
-            tint = v3Colors.iconBrand,
-            modifier = Modifier
-                .size(56.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(Brand100)
-                .padding(8.dp),
-            contentDescription = "Add icon"
+        ShapedIcon(
+            backgroundShape = RoundedCornerShape(12.dp),
+            painter = painterResource(R.drawable.stripe_ic_search), contentDescription = "Add icon"
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(
