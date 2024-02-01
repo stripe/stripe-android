@@ -700,13 +700,11 @@
 |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 (*)
 |    |    \--- com.google.android.gms:play-services-tasks:18.0.1 (*)
 |    +--- com.google.android.instantapps:instantapps:1.1.0
-|    +--- com.stripe:stripe-3ds2-android:6.1.7
-|    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.7.20 -> 1.9.22 (*)
-|    |    +--- androidx.databinding:viewbinding:7.4.2 -> 8.2.2 (*)
-|    |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.20 -> 1.9.10 (*)
-|    |    +--- androidx.appcompat:appcompat:1.5.1 -> 1.6.1 (*)
-|    |    +--- com.google.android.material:material:1.4.0 -> 1.11.0 (*)
-|    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.5.1 -> 2.7.0
+|    +--- com.stripe:stripe-3ds2-android:6.1.8
+|    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.10 -> 1.9.22 (*)
+|    |    +--- androidx.appcompat:appcompat:1.6.1 (*)
+|    |    +--- com.google.android.material:material:1.11.0 (*)
+|    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.7.0
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata:2.7.0 (*)
 |    |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0 (*)
 |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 1.9.22 (*)
@@ -721,14 +719,16 @@
 |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0 (c)
 |    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0 (c)
 |    |    |    \--- androidx.lifecycle:lifecycle-process:2.7.0 (c)
-|    |    +--- androidx.core:core-ktx:1.9.0 -> 1.12.0 (*)
-|    |    +--- androidx.activity:activity-ktx:1.6.1 -> 1.8.2 (*)
-|    |    +--- androidx.fragment:fragment-ktx:1.5.5 -> 1.6.2 (*)
-|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 -> 1.7.3 (*)
-|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 -> 1.7.3 (*)
+|    |    +--- androidx.core:core-ktx:1.12.0 (*)
+|    |    +--- androidx.activity:activity-ktx:1.8.2 (*)
+|    |    +--- androidx.fragment:fragment-ktx:1.6.2 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 (*)
 |    |    +--- org.bouncycastle:bcprov-jdk15to18:1.69
-|    |    \--- com.nimbusds:nimbus-jose-jwt:9.21
-|    |         \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
+|    |    +--- com.nimbusds:nimbus-jose-jwt:9.21
+|    |    |    \--- com.github.stephenc.jcip:jcip-annotations:1.0-1
+|    |    +--- androidx.databinding:viewbinding:8.2.1 -> 8.2.2 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.10 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22 (*)
 +--- junit:junit:4.13.2 (*)
 \--- com.squareup.okhttp3:okhttp-tls:4.12.0
