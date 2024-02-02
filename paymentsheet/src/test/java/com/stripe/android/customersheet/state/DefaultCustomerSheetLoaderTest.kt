@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet.state
 
 import android.app.Application
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.customersheet.CustomerAdapter
@@ -10,6 +11,7 @@ import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -30,8 +32,11 @@ import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FakeElementsSessionRepository
 import com.stripe.android.utils.FeatureFlags
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -40,6 +45,7 @@ import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import kotlin.time.Duration.Companion.milliseconds
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(RobolectricTestRunner::class)
@@ -529,6 +535,42 @@ class DefaultCustomerSheetLoaderTest {
         )
     }
 
+    @Test
+    fun `Awaits CustomerAdapter if CustomerAdapter is provided after loader starts loading`() = runTest {
+        val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
+        val loader = DefaultCustomerSheetLoader(
+            isLiveModeProvider = { false },
+            googlePayRepositoryFactory = { readyGooglePayRepository },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT,
+                error = null,
+                linkSettings = null,
+                isCbcEligible = false,
+            ),
+            lpmRepository = lpmRepository,
+            isFinancialConnectionsAvailable = { false },
+        )
+
+        val completable = CompletableDeferred<Unit>()
+
+        launch {
+            loader.load(configuration)
+            completable.complete(Unit)
+        }
+
+        assertThat(completable.isCompleted).isFalse()
+
+        CustomerSheetHacks.initialize(
+            lifecycleOwner = TestLifecycleOwner(),
+            adapter = FakeCustomerAdapter(),
+            configuration = configuration,
+        )
+
+        withTimeout(100.milliseconds) {
+            completable.await()
+        }
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
@@ -551,7 +593,7 @@ class DefaultCustomerSheetLoaderTest {
             elementsSessionRepository = elementsSessionRepository,
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
-            customerAdapterProvider = { customerAdapter },
+            customerAdapterProvider = CompletableDeferred(customerAdapter),
         )
     }
 
