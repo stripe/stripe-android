@@ -152,7 +152,8 @@ class LpmRepository(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod? {
-        return PaymentMethodRegistry.definitionsByCode[sharedDataSpec.type]?.supportedPaymentMethod(metadata, sharedDataSpec)
+        return PaymentMethodRegistry.definitionsByCode[sharedDataSpec.type]
+            ?.supportedPaymentMethod(metadata, sharedDataSpec)
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
