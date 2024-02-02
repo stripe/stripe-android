@@ -56,7 +56,6 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -341,7 +340,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         if (pendingResult is InternalPaymentResult.Completed) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
             // PaymentSheet and return a `Completed` result to the caller.
-            val usedPaymentMethod = error.asPaymentSheetLoadingException.usedPaymentMethod
+            val usedPaymentMethod = stripeIntent.value?.paymentMethod
             handlePaymentCompleted(usedPaymentMethod, finishImmediately = true)
         } else {
             setStripeIntent(null)
