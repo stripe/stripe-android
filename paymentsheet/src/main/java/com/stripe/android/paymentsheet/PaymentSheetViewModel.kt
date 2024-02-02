@@ -56,7 +56,6 @@ import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -335,21 +334,39 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    private suspend fun handlePaymentSheetStateLoadFailure(error: Throwable) {
+    private fun handlePaymentSheetStateLoadFailure(error: Throwable) {
+        setStripeIntent(null)
+        onFatal(error)
+    }
+
+    private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
+        if (state.validationError != null) {
+            handlePaymentSheetStateLoadedWithInvalidIntent(
+                stripeIntent = state.stripeIntent,
+                error = state.validationError,
+            )
+        } else {
+            initializeWithState(state)
+        }
+    }
+
+    private suspend fun handlePaymentSheetStateLoadedWithInvalidIntent(
+        stripeIntent: StripeIntent,
+        error: Throwable,
+    ) {
         val pendingResult = awaitPaymentResult()
 
         if (pendingResult is InternalPaymentResult.Completed) {
             // If we just received a transaction result after process death, we don't error. Instead, we dismiss
             // PaymentSheet and return a `Completed` result to the caller.
-            val usedPaymentMethod = error.asPaymentSheetLoadingException.usedPaymentMethod
+            val usedPaymentMethod = stripeIntent.paymentMethod
             handlePaymentCompleted(usedPaymentMethod, finishImmediately = true)
         } else {
-            setStripeIntent(null)
-            onFatal(error)
+            handlePaymentSheetStateLoadFailure(error)
         }
     }
 
-    private suspend fun handlePaymentSheetStateLoaded(state: PaymentSheetState.Full) {
+    private suspend fun initializeWithState(state: PaymentSheetState.Full) {
         cbcEligibility = when (state.isEligibleForCardBrandChoice) {
             true -> CardBrandChoiceEligibility.Eligible(
                 preferredNetworks = state.config.preferredNetworks

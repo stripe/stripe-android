@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
-import com.stripe.android.paymentsheet.model.requireValidOrThrow
+import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -173,6 +173,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 linkState = linkState.await(),
                 isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
                 paymentSelection = initialPaymentSelection.await(),
+                validationError = stripeIntent.validate(),
             )
         } else {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
@@ -212,7 +213,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+        return elementsSessionRepository.get(initializationMode).onSuccess { elementsSession ->
             val billingDetailsCollectionConfig =
                 configuration.billingDetailsCollectionConfiguration.toInternal()
 
@@ -230,8 +231,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             if (!didParseServerResponse) {
                 eventReporter.onLpmSpecFailure()
             }
-
-            elementsSession.requireValidOrThrow()
         }
     }
 

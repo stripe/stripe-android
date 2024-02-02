@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.model
 
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Automatic
 import com.stripe.android.model.SetupIntent
@@ -9,10 +8,10 @@ import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.RequiresCapture
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
+import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 
-internal fun ElementsSession.requireValidOrThrow(): ElementsSession {
-    StripeIntentValidator.requireValid(stripeIntent)
-    return this
+internal fun StripeIntent.validate(): PaymentSheetLoadingException? {
+    return runCatching { StripeIntentValidator.requireValid(this) }.exceptionOrNull()?.asPaymentSheetLoadingException
 }
 
 /**
@@ -23,20 +22,18 @@ internal object StripeIntentValidator {
     fun requireValid(
         stripeIntent: StripeIntent
     ): StripeIntent {
-        val paymentMethod = stripeIntent.paymentMethod
-
         val exception = when {
             stripeIntent is PaymentIntent && stripeIntent.confirmationMethod != Automatic -> {
                 PaymentSheetLoadingException.InvalidConfirmationMethod(stripeIntent.confirmationMethod)
             }
             stripeIntent is PaymentIntent && stripeIntent.isInTerminalState -> {
-                PaymentSheetLoadingException.PaymentIntentInTerminalState(paymentMethod, stripeIntent.status)
+                PaymentSheetLoadingException.PaymentIntentInTerminalState(stripeIntent.status)
             }
             stripeIntent is PaymentIntent && (stripeIntent.amount == null || stripeIntent.currency == null) -> {
                 PaymentSheetLoadingException.MissingAmountOrCurrency
             }
             stripeIntent is SetupIntent && stripeIntent.isInTerminalState -> {
-                PaymentSheetLoadingException.SetupIntentInTerminalState(paymentMethod, stripeIntent.status)
+                PaymentSheetLoadingException.SetupIntentInTerminalState(stripeIntent.status)
             }
             else -> {
                 // valid

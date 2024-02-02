@@ -416,6 +416,7 @@ internal class DefaultFlowControllerTest {
                 paymentSelection = null,
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             ),
             statusBarColor = STATUS_BAR_COLOR,
             enableLogging = ENABLE_LOGGING,
@@ -590,6 +591,7 @@ internal class DefaultFlowControllerTest {
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
 
@@ -628,6 +630,7 @@ internal class DefaultFlowControllerTest {
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
 
@@ -669,6 +672,7 @@ internal class DefaultFlowControllerTest {
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
 

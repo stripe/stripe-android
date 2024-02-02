@@ -129,6 +129,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
     }
@@ -163,6 +164,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
     }
@@ -402,7 +404,7 @@ internal class DefaultPaymentSheetLoaderTest {
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         ).exceptionOrNull()
 
-        assertThat(result).isEqualTo(PaymentIntentInTerminalState(paymentMethod, Succeeded))
+        assertThat(result).isEqualTo(PaymentIntentInTerminalState(Succeeded))
     }
 
     @Test
@@ -746,7 +748,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Emits correct events when loading fails for deferred intent`() = runTest {
-        val error = PaymentIntentInTerminalState(usedPaymentMethod = null, status = Canceled)
+        val error = PaymentIntentInTerminalState(Canceled)
         val loader = createPaymentSheetLoader(error = error)
 
         loader.load(

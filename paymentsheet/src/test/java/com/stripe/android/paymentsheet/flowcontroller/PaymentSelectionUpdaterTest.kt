@@ -261,6 +261,7 @@ class PaymentSelectionUpdaterTest {
             linkState = null,
             paymentSelection = paymentSelection,
             isEligibleForCardBrandChoice = false,
+            validationError = null,
         )
     }
 
@@ -282,6 +283,7 @@ class PaymentSelectionUpdaterTest {
             linkState = null,
             paymentSelection = paymentSelection,
             isEligibleForCardBrandChoice = false,
+            validationError = null,
         )
     }
 

@@ -140,6 +140,7 @@ class DefaultCustomerSheetLoaderTest {
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 ),
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                validationError = null,
             )
         )
 
@@ -196,6 +197,7 @@ class DefaultCustomerSheetLoaderTest {
                 isGooglePayReady = false,
                 paymentSelection = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                validationError = null,
             )
         )
     }
@@ -238,6 +240,7 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3")
                 ),
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                validationError = null,
             )
         )
     }
@@ -276,6 +279,7 @@ class DefaultCustomerSheetLoaderTest {
                 isGooglePayReady = false,
                 paymentSelection = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                validationError = null,
             )
         )
     }

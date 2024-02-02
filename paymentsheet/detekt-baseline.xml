@@ -3,7 +3,6 @@
   <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$fun handleViewAction(viewAction: CustomerSheetViewAction)</ID>
-    <ID>CyclomaticComplexMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration, isDeferred: Boolean = false, )</ID>
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
@@ -31,11 +30,10 @@
     <ID>LongMethod:EditPaymentMethod.kt$@Composable internal fun EditPaymentMethodUi( viewState: EditPaymentMethodViewState, viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
-    <ID>LongMethod:LpmRepository.kt$LpmRepository$private fun convertToSupportedPaymentMethod( stripeIntent: StripeIntent, sharedDataSpec: SharedDataSpec, billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration, isDeferred: Boolean = false, )</ID>
     <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>, enabled: Boolean, supportedPaymentMethods: List&lt;SupportedPaymentMethod>, selectedItem: SupportedPaymentMethod, linkSignupMode: LinkSignupMode?, linkConfigurationCoordinator: LinkConfigurationCoordinator?, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit, formArguments: FormArguments, usBankAccountFormArguments: USBankAccountFormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
-    <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration, isGooglePayReady: Boolean, ): PaymentSheetState.Full</ID>
+    <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration, ): PaymentSheetState.Full</ID>
     <ID>LongMethod:PaymentSheetScreen.kt$@Composable internal fun PaymentSheetScreenContent( viewModel: BaseSheetViewModel, type: PaymentSheetFlowType, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt$PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`()</ID>
     <ID>LongMethod:USBankAccountEmitters.kt$@Composable internal fun USBankAccountEmitters( viewModel: USBankAccountFormViewModel, usBankAccountFormArgs: USBankAccountFormArguments, )</ID>
@@ -69,7 +67,6 @@
     <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
-    <ID>MaxLineLength:LinkHandlerTest.kt$whenever(linkConfigurationCoordinator.attachNewCardToAccount(eq(linkConfiguration), any())).thenReturn(attachNewCardToAccountResult)</ID>
     <ID>MaxLineLength:LpmRepositoryTest.kt$LpmRepositoryTest$fun</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Address$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.BillingDetails$*</ID>
