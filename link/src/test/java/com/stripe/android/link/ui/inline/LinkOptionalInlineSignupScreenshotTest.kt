@@ -8,12 +8,14 @@ import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.link.utils.PaparazziRule
 import com.stripe.android.link.utils.screenshots.FontSize
 import com.stripe.android.link.utils.screenshots.SystemAppearance
+import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
 import org.junit.Rule
 import org.junit.Test
+import java.util.Locale
 
 class LinkOptionalInlineSignupScreenshotTest {
 
@@ -26,6 +28,9 @@ class LinkOptionalInlineSignupScreenshotTest {
             .padding(vertical = 16.dp)
             .fillMaxWidth(),
     )
+
+    @get:Rule
+    val localeRule = LocaleTestRule(Locale.US)
 
     @Test
     fun testEmailFirstCollapsed() {
