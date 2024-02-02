@@ -15,7 +15,7 @@ import kotlinx.parcelize.Parcelize
  */
 @Parcelize
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentMethodMetadata(
+data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,

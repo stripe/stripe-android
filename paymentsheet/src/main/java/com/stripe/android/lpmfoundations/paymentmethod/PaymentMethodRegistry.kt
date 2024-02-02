@@ -66,7 +66,7 @@ internal object PaymentMethodRegistry {
         ZipDefinition,
     )
 
-    val map: Map<String, PaymentMethodDefinition> by lazy {
+    val definitionsByCode: Map<String, PaymentMethodDefinition> by lazy {
         all.associateBy { it.type.code }
     }
 }

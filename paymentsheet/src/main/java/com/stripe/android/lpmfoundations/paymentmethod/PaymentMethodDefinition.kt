@@ -16,7 +16,7 @@ internal interface PaymentMethodDefinition {
      * Or setOf(AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods) if the payment method requires the
      * merchant to provide a PaymentSheet.Configuration with delayed payment methods enabled.
      */
-    // Will be added back in a follow up.
+    // TODO(jaynewstrom-stripe): Will be added back in a follow up.
     // fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
 
     fun supportedPaymentMethod(metadata: PaymentMethodMetadata, sharedDataSpec: SharedDataSpec): SupportedPaymentMethod?
