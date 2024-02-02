@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -51,6 +50,7 @@ import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
+import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -110,7 +110,7 @@ fun LinkOptionalInlineSignup(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun LinkOptionalInlineSignup(
+internal fun LinkOptionalInlineSignup(
     sectionController: SectionController,
     emailController: TextFieldController,
     phoneNumberController: PhoneNumberController,

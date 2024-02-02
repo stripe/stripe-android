@@ -58,7 +58,7 @@ internal class InlineSignupViewModel @Inject constructor(
     )
 
     val phoneController = PhoneNumberController.createPhoneNumberController(
-        initialValue = prefilledPhone.orEmpty(),
+        initialValue = prefilledPhone,
         initiallySelectedCountryCode = config.customerInfo.billingCountryCode,
         showOptionalLabel = initialViewState.isShowingPhoneFirst && config.showOptionalLabel,
     )
