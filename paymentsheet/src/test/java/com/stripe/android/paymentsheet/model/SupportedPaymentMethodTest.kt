@@ -72,8 +72,7 @@ class SupportedPaymentMethodTest {
             )
 
             generatePaymentIntentScenarios().mapIndexed { index, testInput ->
-                val formDescriptor =
-                    lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
+                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                 val testOutput = TestOutput.create(
                     supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                         testInput.getIntent(lpm),
@@ -304,7 +303,6 @@ class SupportedPaymentMethodTest {
             updateFromDisk(paymentIntent)
         }
 
-
         assertThat(
             getPMsToAdd(
                 stripeIntent = paymentIntent,
@@ -395,13 +393,10 @@ class SupportedPaymentMethodTest {
         val allowsDelayedPayment: Boolean = true
     ) {
         companion object {
-            fun toCsvHeader() =
-                "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
+            fun toCsvHeader() = "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
         }
 
-        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${
-            intentPMs.joinToString("/")
-        }"
+        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentPMs.joinToString("/")}"
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
@@ -410,7 +405,6 @@ class SupportedPaymentMethodTest {
                     setupFutureUsage = intentSetupFutureUsage,
                     paymentMethodTypes = intentPMs.plus(lpm.code).toList()
                 )
-
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
