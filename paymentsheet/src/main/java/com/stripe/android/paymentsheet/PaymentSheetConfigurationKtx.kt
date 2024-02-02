@@ -114,6 +114,19 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
     )
 }
 
+/**
+ * Creates a subset of the [PaymentSheet.Configuration] of values that affect the functional behavior of
+ * [PaymentSheet]. The items not included mainly affect how [PaymentSheet] will look but not affect what
+ * payment options are available to the customer:
+ * - UI elements in [PaymentSheet.GooglePayConfiguration]:
+ *   - [PaymentSheet.GooglePayConfiguration.amount]
+ *   - [PaymentSheet.GooglePayConfiguration.label]
+ *   - [PaymentSheet.GooglePayConfiguration.buttonType]
+ * - [PaymentSheet.Configuration.merchantDisplayName]
+ * - [PaymentSheet.Configuration.primaryButtonColor]
+ * - [PaymentSheet.Configuration.appearance]
+ * - [PaymentSheet.Configuration.primaryButtonLabel]
+ */
 private fun PaymentSheet.Configuration.toVolatileConfiguration(): VolatilePaymentSheetConfiguration {
     return VolatilePaymentSheetConfiguration(
         customer = customer,
