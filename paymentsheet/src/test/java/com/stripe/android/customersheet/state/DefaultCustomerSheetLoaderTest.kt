@@ -15,7 +15,9 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -60,6 +62,12 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethod.Type.Card.code,
                     PaymentMethod.Type.USBankAccount.code,
                 ),
+            ).copy(
+                shipping = PaymentIntent.Shipping(
+                    name = "Example buyer",
+                    address = Address(line1 = "123 Main st.", country = "US", postalCode = "12345"),
+                ),
+                clientSecret = null,
             ),
             null
         )

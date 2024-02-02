@@ -13,21 +13,18 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object UsBankAccountDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.USBankAccount
 
+    override val supportedAsSavedPaymentMethod: Boolean = true
+
+    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+        AddPaymentMethodRequirement.FinancialConnectionsSdk,
+        AddPaymentMethodRequirement.ValidUsBankVerificationMethod,
+        AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
+    )
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec
-    ): SupportedPaymentMethod? {
-        val requirements = setOf(
-            AddPaymentMethodRequirement.FinancialConnectionsSdk,
-            AddPaymentMethodRequirement.ValidUsBankVerificationMethod,
-        )
-
-        for (requirement in requirements) {
-            if (!requirement.meetsRequirements(metadata)) {
-                return null
-            }
-        }
-
+    ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "us_bank_account",
             requiresMandate = true,

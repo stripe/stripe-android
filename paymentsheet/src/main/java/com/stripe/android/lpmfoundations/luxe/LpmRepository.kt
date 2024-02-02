@@ -5,6 +5,7 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
+import com.stripe.android.lpmfoundations.paymentmethod.isSupported
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
@@ -152,8 +153,13 @@ class LpmRepository(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod? {
-        return PaymentMethodRegistry.definitionsByCode[sharedDataSpec.type]
-            ?.supportedPaymentMethod(metadata, sharedDataSpec)
+        val paymentMethodDefinition = PaymentMethodRegistry.definitionsByCode[sharedDataSpec.type]
+
+        if (paymentMethodDefinition?.isSupported(metadata) == true) {
+            return paymentMethodDefinition.supportedPaymentMethod(metadata, sharedDataSpec)
+        }
+
+        return null
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
