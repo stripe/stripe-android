@@ -44,6 +44,5 @@
     <ID>ThrowingExceptionsWithoutMessageOrCause:TransformAddressToElement.kt$IllegalArgumentException()</ID>
     <ID>ThrowsCount:UiUtils.kt$@SuppressLint("DiscouragedApi") internal fun Context.getResourceId(uri: Uri): Pair&lt;Resources, Int></ID>
     <ID>TooManyFunctions:StripeTheme.kt$com.stripe.android.uicore.StripeTheme.kt</ID>
-    <ID>UnusedPrivateMember:PhoneNumberElementUI.kt$focusRequester: FocusRequester = remember { FocusRequester() }</ID>
   </CurrentIssues>
 </SmellBaseline>

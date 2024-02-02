@@ -90,6 +90,7 @@ fun PhoneNumberCollectionSection(
             controller = phoneNumberController,
             requestFocusWhenShown = requestFocusWhenShown,
             moveToNextFieldOnceComplete = moveToNextFieldOnceComplete,
+            focusRequester = focusRequester,
             imeAction = imeAction
         )
     }
