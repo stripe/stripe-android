@@ -23,7 +23,7 @@ sealed class CollectBankAccountResult : Parcelable {
     ) : CollectBankAccountResult()
 
     @Parcelize
-    object Cancelled : CollectBankAccountResult()
+    data object Cancelled : CollectBankAccountResult()
 }
 
 @Parcelize
@@ -49,7 +49,7 @@ sealed class CollectBankAccountResultInternal : Parcelable {
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Cancelled : CollectBankAccountResultInternal()
+    data object Cancelled : CollectBankAccountResultInternal()
 }
 
 @Parcelize

@@ -67,6 +67,9 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$High;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -82,6 +85,9 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Low;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -97,6 +103,9 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$Medium;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -112,6 +121,9 @@ public final class com/stripe/android/stripecardscan/cardimageverification/CardI
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardimageverification/CardImageVerificationSheet$Configuration$StrictModeFrameCount$None;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -349,14 +361,23 @@ public final class com/stripe/android/stripecardscan/cardscan/CardScanSheetResul
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanState$Correct : com/stripe/android/stripecardscan/cardscan/CardScanState {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$Correct;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanState$Found : com/stripe/android/stripecardscan/cardscan/CardScanState {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$Found;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/CardScanState$NotFound : com/stripe/android/stripecardscan/cardscan/CardScanState {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/cardscan/CardScanState$NotFound;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/cardscan/exception/InvalidStripePublishableKeyException : java/lang/Exception {
@@ -403,6 +424,9 @@ public abstract class com/stripe/android/stripecardscan/payment/card/CardIssuer 
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$AmericanExpress : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$AmericanExpress;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Custom : com/stripe/android/stripecardscan/payment/card/CardIssuer {
@@ -418,30 +442,51 @@ public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Cus
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$DinersClub : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$DinersClub;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Discover : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Discover;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$JCB : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$JCB;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$MasterCard : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$MasterCard;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$UnionPay : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$UnionPay;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Unknown : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Unknown;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/CardIssuer$Visa : com/stripe/android/stripecardscan/payment/card/CardIssuer {
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/payment/card/CardIssuer$Visa;
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 }
 
 public final class com/stripe/android/stripecardscan/payment/card/LengthPanValidator : com/stripe/android/stripecardscan/payment/card/PanValidator {
@@ -499,6 +544,9 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$B
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$Back;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -514,6 +562,9 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$C
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$CameraPermissionDenied;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -529,6 +580,9 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$C
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$Closed;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -544,6 +598,9 @@ public final class com/stripe/android/stripecardscan/scanui/CancellationReason$U
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/stripecardscan/scanui/CancellationReason$UserCannotScan;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 

@@ -44,7 +44,7 @@ internal class IdentityScanViewModel(
     private lateinit var cameraManager: IdentityCameraManager
 
     internal sealed class State {
-        object Initializing : State()
+        data object Initializing : State()
         class Scanning(
             val scanState: IdentityScanState? = null
         ) : State()

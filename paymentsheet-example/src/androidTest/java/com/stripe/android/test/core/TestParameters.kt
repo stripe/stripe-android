@@ -87,13 +87,13 @@ internal sealed interface AuthorizeAction {
 
     val requiresBrowser: Boolean
 
-    object PollingSucceedsAfterDelay : AuthorizeAction {
+    data object PollingSucceedsAfterDelay : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = "POLLING SUCCEEDS AFTER DELAY"
 
         override val requiresBrowser: Boolean = false
     }
 
-    object AuthorizePayment : AuthorizeAction {
+    data object AuthorizePayment : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String {
             return if (checkoutMode == CheckoutMode.SETUP) {
                 "AUTHORIZE TEST SETUP"
@@ -105,7 +105,7 @@ internal sealed interface AuthorizeAction {
         override val requiresBrowser: Boolean = true
     }
 
-    object DisplayQrCode : AuthorizeAction {
+    data object DisplayQrCode : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = "Display QR code"
 
         override val requiresBrowser: Boolean = false
@@ -117,18 +117,18 @@ internal sealed interface AuthorizeAction {
         override val requiresBrowser: Boolean = true
     }
 
-    object Cancel : AuthorizeAction {
+    data object Cancel : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = ""
         override val requiresBrowser: Boolean = true
     }
 
     sealed interface Bacs : AuthorizeAction {
-        object Confirm : Bacs {
+        data object Confirm : Bacs {
             override fun text(checkoutMode: CheckoutMode): String = "Confirm"
             override val requiresBrowser: Boolean = false
         }
 
-        object ModifyDetails : Bacs {
+        data object ModifyDetails : Bacs {
             override fun text(checkoutMode: CheckoutMode): String = "Modify details"
             override val requiresBrowser: Boolean = false
         }

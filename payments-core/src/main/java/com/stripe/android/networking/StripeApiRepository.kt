@@ -1717,7 +1717,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             val originalDnsCacheTtl: String?
         ) : DnsCacheData()
 
-        object Failure : DnsCacheData()
+        data object Failure : DnsCacheData()
     }
 
     internal companion object {

@@ -45,10 +45,10 @@ internal sealed class GooglePayLauncherResult : ActivityStarter.Result {
     ) : GooglePayLauncherResult()
 
     @Parcelize
-    internal object Canceled : GooglePayLauncherResult()
+    internal data object Canceled : GooglePayLauncherResult()
 
     @Parcelize
-    internal object Unavailable : GooglePayLauncherResult()
+    internal data object Unavailable : GooglePayLauncherResult()
 
     internal companion object {
         /**

@@ -359,7 +359,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             ).filterNotNullValues(),
         )
 
-    object ConsentAgree : FinancialConnectionsAnalyticsEvent(
+    data object ConsentAgree : FinancialConnectionsAnalyticsEvent(
         name = "click.agree",
         mapOf("pane" to Pane.CONSENT.value)
     )

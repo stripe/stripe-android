@@ -313,7 +313,7 @@ class GooglePayPaymentMethodLauncher @AssistedInject internal constructor(
          * Represents a transaction that was canceled by the user.
          */
         @Parcelize
-        object Canceled : Result()
+        data object Canceled : Result()
     }
 
     fun interface ReadyCallback {

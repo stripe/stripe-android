@@ -23,7 +23,7 @@ sealed class FinancialConnectionsSheetForTokenResult : Parcelable {
      * The customer canceled the connections session attempt.
      */
     @Parcelize
-    object Canceled : FinancialConnectionsSheetForTokenResult()
+    data object Canceled : FinancialConnectionsSheetForTokenResult()
 
     /**
      * The connections session attempt failed.

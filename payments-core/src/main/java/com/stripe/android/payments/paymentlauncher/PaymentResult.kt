@@ -10,13 +10,13 @@ import kotlinx.parcelize.Parcelize
  */
 sealed class PaymentResult : Parcelable {
     @Parcelize
-    object Completed : PaymentResult()
+    data object Completed : PaymentResult()
 
     @Parcelize
     class Failed(val throwable: Throwable) : PaymentResult()
 
     @Parcelize
-    object Canceled : PaymentResult()
+    data object Canceled : PaymentResult()
 
     @JvmSynthetic
     fun toBundle() = bundleOf(EXTRA to this)

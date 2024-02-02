@@ -21,7 +21,6 @@ import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.DefaultCameraErrorListener
 import com.stripe.android.camera.framework.Stats
 import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
-import com.stripe.android.stripecardscan.R
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -35,16 +34,16 @@ import com.stripe.android.camera.R as CameraR
 sealed interface CancellationReason : Parcelable {
 
     @Parcelize
-    object Closed : CancellationReason
+    data object Closed : CancellationReason
 
     @Parcelize
-    object Back : CancellationReason
+    data object Back : CancellationReason
 
     @Parcelize
-    object UserCannotScan : CancellationReason
+    data object UserCannotScan : CancellationReason
 
     @Parcelize
-    object CameraPermissionDenied : CancellationReason
+    data object CameraPermissionDenied : CancellationReason
 }
 
 internal interface ScanResultListener {

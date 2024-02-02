@@ -119,7 +119,7 @@ private class DelegateDrawable(
     }
 
     override fun getAlpha(): Int {
-        return delegate.getAlpha()
+        return delegate.alpha
     }
 
     override fun setTint(tintColor: Int) {
@@ -140,7 +140,7 @@ private class DelegateDrawable(
     }
 
     override fun getColorFilter(): ColorFilter? {
-        return delegate.getColorFilter()
+        return delegate.colorFilter
     }
 
     override fun clearColorFilter() {
@@ -152,7 +152,7 @@ private class DelegateDrawable(
     }
 
     override fun getState(): IntArray {
-        return delegate.getState()
+        return delegate.state
     }
 
     override fun jumpToCurrentState() {
@@ -172,7 +172,7 @@ private class DelegateDrawable(
     }
 
     override fun getTransparentRegion(): Region? {
-        return delegate.getTransparentRegion()
+        return delegate.transparentRegion
     }
 
     override fun onBoundsChange(bounds: Rect) {
@@ -180,11 +180,11 @@ private class DelegateDrawable(
     }
 
     override fun getMinimumWidth(): Int {
-        return delegate.getMinimumWidth()
+        return delegate.minimumWidth
     }
 
     override fun getMinimumHeight(): Int {
-        return delegate.getMinimumHeight()
+        return delegate.minimumHeight
     }
 
     override fun getPadding(padding: Rect): Boolean {

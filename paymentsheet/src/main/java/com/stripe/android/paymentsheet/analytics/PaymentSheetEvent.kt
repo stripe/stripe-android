@@ -299,7 +299,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
 
         sealed interface Result {
-            object Success : Result
+            data object Success : Result
             data class Failure(val error: PaymentSheetConfirmationError) : Result
 
             val analyticsValue: String

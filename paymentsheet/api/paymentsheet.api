@@ -1153,6 +1153,9 @@ public final class com/stripe/android/paymentsheet/PaymentSheetResult$Canceled :
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1169,6 +1172,9 @@ public final class com/stripe/android/paymentsheet/PaymentSheetResult$Completed 
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/paymentsheet/PaymentSheetResult$Completed;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
