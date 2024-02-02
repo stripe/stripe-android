@@ -203,7 +203,7 @@ internal fun getPMsToAdd(
     stripeIntent: StripeIntent?,
     config: PaymentSheet.Configuration,
     lpmRepository: LpmRepository,
-    isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
+    isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
 ) = stripeIntent?.paymentMethodTypes?.mapNotNull {
     lpmRepository.fromCode(it)
 }?.filter { supportedPaymentMethod ->

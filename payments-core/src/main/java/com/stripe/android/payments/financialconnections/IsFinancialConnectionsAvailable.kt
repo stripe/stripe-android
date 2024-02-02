@@ -8,7 +8,7 @@ fun interface IsFinancialConnectionsAvailable {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class DefaultIsFinancialConnectionsAvailable : IsFinancialConnectionsAvailable {
+object DefaultIsFinancialConnectionsAvailable : IsFinancialConnectionsAvailable {
     override operator fun invoke(): Boolean {
         return try {
             Class.forName("com.stripe.android.financialconnections.FinancialConnectionsSheet")

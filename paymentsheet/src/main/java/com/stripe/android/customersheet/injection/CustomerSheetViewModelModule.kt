@@ -91,7 +91,7 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsAvailable {
-            return DefaultIsFinancialConnectionsAvailable()
+            return DefaultIsFinancialConnectionsAvailable
         }
 
         @Provides

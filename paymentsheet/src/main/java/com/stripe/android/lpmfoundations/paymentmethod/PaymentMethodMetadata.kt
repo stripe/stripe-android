@@ -19,7 +19,7 @@ data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
-    val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable().invoke(),
+    val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
