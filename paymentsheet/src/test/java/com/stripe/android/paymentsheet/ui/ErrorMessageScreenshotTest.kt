@@ -11,9 +11,9 @@ class ErrorMessageScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        FontSize.values(),
-        PaymentSheetAppearance.values(),
+        SystemAppearance.entries,
+        FontSize.entries,
+        PaymentSheetAppearance.entries,
     )
 
     @Test

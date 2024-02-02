@@ -32,9 +32,9 @@ import org.junit.Test
 internal class CustomerSheetScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
-        SystemAppearance.values(),
-        arrayOf(FontSize.DefaultFont),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
+        SystemAppearance.entries,
+        listOf(FontSize.DefaultFont),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),

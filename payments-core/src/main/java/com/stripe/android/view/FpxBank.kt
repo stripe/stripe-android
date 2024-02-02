@@ -126,7 +126,7 @@ internal enum class FpxBank(
          */
         @JvmStatic
         fun get(bankCode: String?): FpxBank? {
-            return values().firstOrNull { it.code == bankCode }
+            return entries.firstOrNull { it.code == bankCode }
         }
     }
 }

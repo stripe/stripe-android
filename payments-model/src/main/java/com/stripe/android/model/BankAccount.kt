@@ -110,7 +110,7 @@ constructor(
         override fun toString(): String = code
 
         internal companion object {
-            internal fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            internal fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
@@ -126,7 +126,7 @@ constructor(
 
         internal companion object {
             internal fun fromCode(code: String?): Status? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

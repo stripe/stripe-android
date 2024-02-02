@@ -93,8 +93,7 @@ enum class HCaptchaError(
          * @throws RuntimeException when no match
          */
         fun fromId(errorId: Int): HCaptchaError {
-            val errors = values()
-            for (error in errors) {
+            for (error in entries) {
                 if (error.errorId == errorId) {
                     return error
                 }

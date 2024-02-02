@@ -411,7 +411,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             }
         } else {
-            val managedUri = SharedPartnerAuthState.ClickableText.values()
+            val managedUri = SharedPartnerAuthState.ClickableText.entries
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
                 SharedPartnerAuthState.ClickableText.DATA -> {

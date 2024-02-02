@@ -17,7 +17,7 @@ class DestinationMappersTest {
 
     @Test
     fun testPaneToDestination() {
-        for (pane in Pane.values()) {
+        for (pane in Pane.entries) {
             if (!nonImplementedPanes.contains(pane)) {
                 assertNotNull("No matching destination for pane: $pane", pane.destination)
             } else {

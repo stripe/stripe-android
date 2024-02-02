@@ -260,7 +260,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         override fun toString(): String = typeName
 
         companion object {
-            fun fromUiTypeCode(uiTypeCode: String?) = values().firstOrNull {
+            fun fromUiTypeCode(uiTypeCode: String?) = entries.firstOrNull {
                 it.code == uiTypeCode
             } ?: None
         }

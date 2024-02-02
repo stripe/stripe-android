@@ -83,7 +83,7 @@ fun Context.getDrawableFromUri(uri: Uri): Drawable? {
 }
 
 internal fun String.isSupportedImageUrl() =
-    ImageType.values().any { imageType ->
+    ImageType.entries.any { imageType ->
         imageType.suffixes.any { suffix ->
             endsWith(suffix, ignoreCase = true)
         }
@@ -108,7 +108,7 @@ internal enum class ImageType(
 
     companion object {
         fun fromUrl(url: String): ImageType? =
-            values()
+            entries
                 .firstOrNull {
                     it.suffixes.any { suffix ->
                         url.endsWith(

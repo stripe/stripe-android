@@ -15,7 +15,7 @@ internal fun initializedLpmRepository(context: Context): LpmRepository {
 
     repository.update(
         stripeIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+            paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
             paymentMethodOptionsJsonString = """
                 {
                     "us_bank_account": {

@@ -92,7 +92,7 @@ internal class ConsentViewModel @Inject constructor(
             if (URLUtil.isNetworkUrl(uri)) {
                 setState { copy(viewEffect = OpenUrl(uri, date.time)) }
             } else {
-                val managedUri = ConsentClickableText.values()
+                val managedUri = ConsentClickableText.entries
                     .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
                 when (managedUri) {
                     ConsentClickableText.DATA -> {

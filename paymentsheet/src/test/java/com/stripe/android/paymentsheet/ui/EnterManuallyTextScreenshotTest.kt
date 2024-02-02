@@ -12,9 +12,9 @@ class EnterManuallyTextScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        PaymentSheetAppearance.values(),
-        FontSize.values(),
+        SystemAppearance.entries,
+        PaymentSheetAppearance.entries,
+        FontSize.entries,
     )
 
     @Test

@@ -36,7 +36,7 @@ class GooglePayPaymentMethodLauncherTest {
     @Test
     fun `init should fire expected event`() {
         runGooglePayPaymentMethodLauncherTest(
-            integrationTypes = arrayOf(LauncherIntegrationType.Activity),
+            integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
             val firedEvents = mutableListOf<String>()

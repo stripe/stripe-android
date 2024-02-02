@@ -107,7 +107,7 @@ sealed interface StripeIntent : StripeModel {
 
         internal companion object {
             internal fun fromCode(code: String?): NextActionType? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -135,7 +135,7 @@ sealed interface StripeIntent : StripeModel {
 
         internal companion object {
             internal fun fromCode(code: String?): Status? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -165,7 +165,7 @@ sealed interface StripeIntent : StripeModel {
 
         internal companion object {
             internal fun fromCode(code: String?): Usage? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

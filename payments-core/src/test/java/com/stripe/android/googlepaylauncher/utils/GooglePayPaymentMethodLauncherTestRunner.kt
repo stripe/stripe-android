@@ -37,7 +37,7 @@ private val defaultConfig = GooglePayPaymentMethodLauncher.Config(
 )
 
 internal fun runGooglePayPaymentMethodLauncherTest(
-    integrationTypes: Array<LauncherIntegrationType> = LauncherIntegrationType.values(),
+    integrationTypes: List<LauncherIntegrationType> = LauncherIntegrationType.entries,
     result: GooglePayPaymentMethodLauncher.Result = Completed(CARD_PAYMENT_METHOD),
     isReady: Boolean = true,
     expectResult: Boolean = true,

@@ -26,7 +26,7 @@ enum class TokenizationMethod(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun fromCode(code: String?): TokenizationMethod? {
-            return values().firstOrNull {
+            return entries.firstOrNull {
                 it.code.contains(code)
             }
         }

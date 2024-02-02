@@ -259,7 +259,7 @@ enum class CardBrand(
             } ?: listOf(Unknown)
         }
 
-        private fun getMatchingCards(cardNumber: String) = values().filter { cardBrand ->
+        private fun getMatchingCards(cardNumber: String) = entries.filter { cardBrand ->
             cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)
                 ?.matches() == true
         }.filter {
@@ -271,11 +271,10 @@ enum class CardBrand(
          * See [PaymentMethod.Card.brand].
          */
         fun fromCode(code: String?): CardBrand {
-            return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
+            return entries.firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
 
-        val orderedBrands = values()
-            .toList()
+        val orderedBrands = entries
             .filter { it.shouldRender }
             .filter { it.renderingOrder > 0 }
             .sortedBy { it.renderingOrder }

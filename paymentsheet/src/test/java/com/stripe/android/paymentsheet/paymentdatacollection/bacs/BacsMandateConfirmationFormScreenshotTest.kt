@@ -12,16 +12,16 @@ import org.junit.Test
 class BacsMandateConfirmationFormScreenshotTest {
     @get:Rule
     val paparazziSingleVariantRule = PaparazziRule(
-        arrayOf(SystemAppearance.LightTheme),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
-        arrayOf(FontSize.LargeFont)
+        listOf(SystemAppearance.LightTheme),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
+        listOf(FontSize.LargeFont)
     )
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        PaymentSheetAppearance.values(),
-        FontSize.values()
+        SystemAppearance.entries,
+        PaymentSheetAppearance.entries,
+        FontSize.entries,
     )
 
     @Test

@@ -6,7 +6,7 @@ import kotlin.test.assertEquals
 class CardFundingTest {
     @Test
     fun fromCode_shouldReturnExpectedValue() {
-        CardFunding.values().forEach {
+        CardFunding.entries.forEach {
             assertEquals(it, CardFunding.fromCode(it.code))
         }
     }

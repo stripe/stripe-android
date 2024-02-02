@@ -68,7 +68,7 @@ sealed class Wallet(
 
         internal companion object {
             internal fun fromCode(code: String?): Type? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

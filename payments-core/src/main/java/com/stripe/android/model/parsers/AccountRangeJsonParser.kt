@@ -14,7 +14,7 @@ internal class AccountRangeJsonParser : ModelJsonParser<AccountRange> {
 
         val brandInfo =
             StripeJsonUtils.optString(json, FIELD_BRAND).let { brandName ->
-                AccountRange.BrandInfo.values().firstOrNull { it.brandName == brandName }
+                AccountRange.BrandInfo.entries.firstOrNull { it.brandName == brandName }
             }
         return if (accountRangeHigh != null &&
             accountRangeLow != null &&

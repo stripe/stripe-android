@@ -8,7 +8,7 @@ import org.junit.Test
 class DropdownScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values()
+        SystemAppearance.entries
     )
 
     @Test
