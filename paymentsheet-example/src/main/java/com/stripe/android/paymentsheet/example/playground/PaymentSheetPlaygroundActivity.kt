@@ -94,6 +94,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
             PlaygroundTheme(
                 content = {
+                    playgroundState?.clientSecret?.let { clientSecret ->
+                        Text(
+                            text = clientSecret,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
+
                     SettingsUi(playgroundSettings = localPlaygroundSettings)
 
                     AppearanceButton()

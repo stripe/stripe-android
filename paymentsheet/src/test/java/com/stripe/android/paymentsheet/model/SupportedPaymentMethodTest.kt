@@ -9,6 +9,8 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.luxe.updateFromDisk
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
@@ -70,7 +72,8 @@ class SupportedPaymentMethodTest {
             )
 
             generatePaymentIntentScenarios().mapIndexed { index, testInput ->
-                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
+                val formDescriptor =
+                    lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                 val testOutput = TestOutput.create(
                     supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                         testInput.getIntent(lpm),
@@ -266,6 +269,69 @@ class SupportedPaymentMethodTest {
         ).isEqualTo(expected)
     }
 
+    @Test
+    fun `Test supported payment method orders payment methods correctly`() {
+        val paymentIntent = PaymentIntentFactory.create(
+            paymentMethodTypes = listOf(
+                "card",
+                "afterpay_clearpay",
+                "alipay",
+                "klarna",
+                "affirm",
+                "cashapp",
+                "paypal",
+                "p24",
+                "eps",
+                "giropay",
+                "sepa_debit",
+                "sofort",
+                "bancontact",
+                "ideal"
+            )
+        ).copy(
+            shipping = PaymentIntent.Shipping(
+                name = "Example buyer",
+                address = Address(line1 = "123 Main st.", country = "US", postalCode = "12345"),
+            )
+        )
+
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+        ).apply {
+            updateFromDisk(paymentIntent)
+        }
+
+
+        assertThat(
+            getPMsToAdd(
+                stripeIntent = paymentIntent,
+                config = PaymentSheet.Configuration("Test", allowsDelayedPaymentMethods = true),
+                lpmRepository = lpmRepository,
+                isFinancialConnectionsAvailable = { true },
+            ).map { it.code }
+        ).isEqualTo(
+            listOf(
+                "card",
+                "afterpay_clearpay",
+                "alipay",
+                "klarna",
+                "affirm",
+                "cashapp",
+                "paypal",
+                "p24",
+                "eps",
+                "giropay",
+                "sepa_debit",
+                "sofort",
+                "bancontact",
+                "ideal"
+            )
+        )
+    }
+
     /**
      * This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states
      */
@@ -329,10 +395,13 @@ class SupportedPaymentMethodTest {
         val allowsDelayedPayment: Boolean = true
     ) {
         companion object {
-            fun toCsvHeader() = "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
+            fun toCsvHeader() =
+                "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
         }
 
-        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentPMs.joinToString("/")}"
+        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${
+            intentPMs.joinToString("/")
+        }"
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
@@ -341,6 +410,7 @@ class SupportedPaymentMethodTest {
                     setupFutureUsage = intentSetupFutureUsage,
                     paymentMethodTypes = intentPMs.plus(lpm.code).toList()
                 )
+
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
