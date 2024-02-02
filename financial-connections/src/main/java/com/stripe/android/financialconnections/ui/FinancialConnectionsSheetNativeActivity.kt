@@ -8,6 +8,7 @@ import androidx.activity.addCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue.Hidden
 import androidx.compose.material.rememberModalBottomSheetState
@@ -17,11 +18,11 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
@@ -30,28 +31,30 @@ import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.ModalBottomSheetLayout
+import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
-import com.stripe.android.financialconnections.features.common.ExitModal
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
+import com.stripe.android.financialconnections.navigation.bottomSheet
 import com.stripe.android.financialconnections.navigation.composable
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
@@ -114,7 +117,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
+    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialNavigationApi::class)
     @Suppress("LongMethod")
     @Composable
     fun NavHost(
@@ -122,13 +125,13 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         reducedBranding: Boolean
     ) {
         val context = LocalContext.current
-        val navController = rememberNavController()
-        val coroutineScope = rememberCoroutineScope()
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
         val bottomState = rememberModalBottomSheetState(initialValue = Hidden)
         val exitModal by viewModel.collectAsState { it.exitModal }
 
+        val bottomSheetNavigator = rememberBottomSheetNavigator()
+        val navController = rememberNavController(bottomSheetNavigator)
         PaneBackgroundEffects(navController)
         NavigationEffects(viewModel.navigationFlow, navController)
         // Show the exit modal when it is not null
@@ -146,42 +149,35 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 viewModel.onBackClick(navController.currentDestination?.pane)
                 if (navController.popBackStack().not()) viewModel.onBackPressed()
             }
-            FinancialConnectionsModalBottomSheetLayout(
-                sheetState = bottomState,
-                sheetContent = {
-                    exitModal?.let {
-                        ExitModal(
-                            loading = it.loading,
-                            description = it.description,
-                            onCancel = { coroutineScope.launch { bottomState.hide() } },
-                            onExit = viewModel::onCloseConfirm
-                        )
-                    }
-                },
-                content = {
-                    NavHost(
-                        navController,
-                        startDestination = initialDestination.fullRoute,
-                    ) {
-                        composable(Destination.Consent)
-                        composable(Destination.ManualEntry)
-                        composable(Destination.PartnerAuth)
-                        composable(Destination.InstitutionPicker)
-                        composable(Destination.AccountPicker)
-                        composable(Destination.Success)
-                        composable(Destination.Reset)
-                        composable(Destination.AttachLinkedPaymentAccount)
-                        composable(Destination.NetworkingLinkSignup)
-                        composable(Destination.NetworkingLinkLoginWarmup)
-                        composable(Destination.NetworkingLinkVerification)
-                        composable(Destination.NetworkingSaveToLinkVerification)
-                        composable(Destination.LinkAccountPicker)
-                        composable(Destination.BankAuthRepair)
-                        composable(Destination.LinkStepUpVerification)
-                        composable(Destination.ManualEntrySuccess)
-                    }
+            ModalBottomSheetLayout(
+                bottomSheetNavigator = bottomSheetNavigator,
+                sheetBackgroundColor = FinancialConnectionsTheme.v3Colors.backgroundSurface,
+                sheetShape = RoundedCornerShape(8.dp),
+                scrimColor = Neutral900.copy(alpha = 0.32f),
+            ) {
+                NavHost(
+                    navController,
+                    startDestination = initialDestination.fullRoute,
+                ) {
+                    composable(Destination.Consent)
+                    composable(Destination.ManualEntry)
+                    composable(Destination.PartnerAuth)
+                    bottomSheet(Destination.PartnerAuthDrawer)
+                    composable(Destination.InstitutionPicker)
+                    composable(Destination.AccountPicker)
+                    composable(Destination.Success)
+                    composable(Destination.Reset)
+                    composable(Destination.AttachLinkedPaymentAccount)
+                    composable(Destination.NetworkingLinkSignup)
+                    composable(Destination.NetworkingLinkLoginWarmup)
+                    composable(Destination.NetworkingLinkVerification)
+                    composable(Destination.NetworkingSaveToLinkVerification)
+                    composable(Destination.LinkAccountPicker)
+                    composable(Destination.BankAuthRepair)
+                    composable(Destination.LinkStepUpVerification)
+                    composable(Destination.ManualEntrySuccess)
                 }
-            )
+            }
         }
     }
 

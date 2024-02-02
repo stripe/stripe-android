@@ -112,8 +112,8 @@ internal fun SharedPartnerAuth(
     }
 
     SharedPartnerAuthContent(
-        bottomSheetState = bottomSheetState,
         state = state,
+        bottomSheetState = bottomSheetState,
         onClickableTextClick = onClickableTextClick,
         onSelectAnotherBank = onSelectAnotherBank,
         onEnterDetailsManually = onEnterDetailsManually,
@@ -126,8 +126,8 @@ internal fun SharedPartnerAuth(
 
 @Composable
 private fun SharedPartnerAuthContent(
-    bottomSheetState: ModalBottomSheetState,
     state: SharedPartnerAuthState,
+    bottomSheetState: ModalBottomSheetState,
     onClickableTextClick: (String) -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -227,10 +227,12 @@ private fun SharedPartnerAuthBody(
 ) {
     FinancialConnectionsScaffold(
         topBar = {
-            FinancialConnectionsTopAppBar(
-                showBack = state.canNavigateBack,
-                onCloseClick = onCloseClick
-            )
+            if (state.payload()?.showInModal == true) {
+                FinancialConnectionsTopAppBar(
+                    showBack = state.canNavigateBack,
+                    onCloseClick = onCloseClick
+                )
+            }
         }
     ) {
         when (val payload = state.payload) {
@@ -296,6 +298,7 @@ private fun LoadedContent(
                 // show loading prepane when authenticationStatus
                 // is Loading or Success (completing auth after redirect)
                 loading = authenticationStatus is Loading || authenticationStatus is Success,
+                showInDrawer = payload.showInModal,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
@@ -320,9 +323,11 @@ private fun PrePaneContent(
     loading: Boolean,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onClickableTextClick: (String) -> Unit
+    onClickableTextClick: (String) -> Unit,
+    showInDrawer: Boolean
 ) {
     Layout(
+        inModal = showInDrawer,
         // Overrides padding values to allow full-span prepane image background
         verticalArrangement = Arrangement.spacedBy(24.dp),
         bodyPadding = PaddingValues(horizontal = 0.dp, vertical = 16.dp),

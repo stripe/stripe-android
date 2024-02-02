@@ -21,14 +21,18 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
+import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
@@ -41,6 +45,8 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class InstitutionPickerViewModel @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
+    private val postAuthorizationSession: PostAuthorizationSession,
+    private val getOrFetchSync: GetOrFetchSync,
     private val searchInstitutions: SearchInstitutions,
     private val featuredInstitutions: FeaturedInstitutions,
     private val getManifest: GetManifest,
@@ -56,7 +62,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             val (featuredInstitutions: InstitutionResponse, duration: Long) = runCatching {
                 measureTimeMillis {
                     featuredInstitutions(
@@ -183,13 +189,28 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
             }
             // navigate to next step
-            navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
+            val authSession = postAuthorizationSession(institution, getOrFetchSync())
+            navigateToPartnerAuth(authSession)
+
+
         }.execute { async ->
             copy(
                 selectedInstitutionId = institution.id.takeIf { async is Loading },
                 selectInstitution = async
             )
         }
+    }
+
+    private fun navigateToPartnerAuth(authSession: FinancialConnectionsAuthorizationSession) {
+        if (authSession.isOAuth) {
+            navigationManager.tryNavigateTo(PartnerAuthDrawer(referrer = Pane.INSTITUTION_PICKER))
+        } else {
+            navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
+        }
+    }
+
+    private fun navigateToPartnerAuth() {
+        navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
     }
 
     fun onManualEntryClick() {
