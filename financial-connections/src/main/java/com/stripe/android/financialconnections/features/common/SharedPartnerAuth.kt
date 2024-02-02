@@ -18,14 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -65,7 +63,6 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
@@ -73,7 +70,6 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.uicore.image.StripeImage
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun SharedPartnerAuth(
@@ -113,7 +109,6 @@ internal fun SharedPartnerAuth(
 
     SharedPartnerAuthContent(
         state = state,
-        bottomSheetState = bottomSheetState,
         onClickableTextClick = onClickableTextClick,
         onSelectAnotherBank = onSelectAnotherBank,
         onEnterDetailsManually = onEnterDetailsManually,
@@ -127,7 +122,6 @@ internal fun SharedPartnerAuth(
 @Composable
 private fun SharedPartnerAuthContent(
     state: SharedPartnerAuthState,
-    bottomSheetState: ModalBottomSheetState,
     onClickableTextClick: (String) -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -136,30 +130,15 @@ private fun SharedPartnerAuthContent(
     onCancelClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    FinancialConnectionsModalBottomSheetLayout(
-        sheetState = bottomSheetState,
-        sheetContent = {
-            state.dataAccess?.let {
-                DataAccessBottomSheetContent(
-                    dataDialog = it,
-                    onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-                    onClickableTextClick = onClickableTextClick
-                )
-            } ?: Spacer(modifier = Modifier.size(16.dp))
-        },
-        content = {
-            SharedPartnerAuthBody(
-                state = state,
-                onCloseClick = onCloseClick,
-                onSelectAnotherBank = onSelectAnotherBank,
-                onEnterDetailsManually = onEnterDetailsManually,
-                onCloseFromErrorClick = onCloseFromErrorClick,
-                onClickableTextClick = onClickableTextClick,
-                onCancelClick = onCancelClick,
-                onContinueClick = onContinueClick,
-            )
-        }
+    SharedPartnerAuthBody(
+        state = state,
+        onCloseClick = onCloseClick,
+        onSelectAnotherBank = onSelectAnotherBank,
+        onEnterDetailsManually = onEnterDetailsManually,
+        onCloseFromErrorClick = onCloseFromErrorClick,
+        onClickableTextClick = onClickableTextClick,
+        onCancelClick = onCancelClick,
+        onContinueClick = onContinueClick,
     )
 }
 
@@ -563,9 +542,6 @@ internal fun PartnerAuthPreview(
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
             state = state,
-            bottomSheetState = rememberModalBottomSheetState(
-                ModalBottomSheetValue.Hidden,
-            ),
             onContinueClick = {},
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
