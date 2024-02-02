@@ -42,7 +42,7 @@ class LinkOptionalInlineSignupScreenshotTest {
             )
         )
 
-        paparazziRule.snapshot { 
+        paparazziRule.snapshot {
             LinkOptionalInlineSignup(
                 sectionController = sectionController,
                 emailController = emailController,
