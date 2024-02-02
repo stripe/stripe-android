@@ -8,6 +8,7 @@ import com.stripe.android.model.wallets.Wallet
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.io.Serializable
 
 typealias PaymentMethodCode = String
 
@@ -143,7 +144,7 @@ constructor(
      * [us_bank_account](https://stripe.com/docs/api/payment_methods/object#payment_method_object-us_bank_account)
      */
     @JvmField val usBankAccount: USBankAccount? = null
-) : StripeModel {
+) : StripeModel, Serializable {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
     fun hasExpectedDetails(): Boolean =
@@ -578,7 +579,7 @@ constructor(
          * [billing_details.phone](https://stripe.com/docs/api/payment_methods/object#payment_method_object-billing_details-phone)
          */
         @JvmField val phone: String? = null
-    ) : StripeModel, StripeParamsModel {
+    ) : StripeModel, StripeParamsModel, Serializable {
 
         fun toBuilder(): Builder {
             return Builder()
@@ -640,6 +641,8 @@ constructor(
         }
 
         internal companion object {
+            private const val serialVersionUID: Long = 3803581706318748612L
+
             internal const val PARAM_ADDRESS = "address"
             internal const val PARAM_EMAIL = "email"
             internal const val PARAM_NAME = "name"
@@ -1066,6 +1069,8 @@ constructor(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 3803581706318748611L
+
         @JvmStatic
         fun fromJson(paymentMethod: JSONObject?): PaymentMethod? {
             return paymentMethod?.let {

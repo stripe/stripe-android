@@ -7,6 +7,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.parsers.AddressJsonParser
 import kotlinx.parcelize.Parcelize
 import org.json.JSONObject
+import java.io.Serializable
 
 /**
  * Model for an owner [address](https://stripe.com/docs/api#source_object-owner-address)
@@ -20,7 +21,7 @@ data class Address @VisibleForTesting constructor(
     val line2: String? = null,
     val postalCode: String? = null,
     val state: String? = null
-) : StripeModel, StripeParamsModel {
+) : StripeModel, StripeParamsModel, Serializable {
     internal val countryCode: CountryCode?
         get() = country?.takeUnless { it.isBlank() }?.let { CountryCode.create(it) }
 
@@ -88,6 +89,8 @@ data class Address @VisibleForTesting constructor(
     }
 
     companion object {
+        private const val serialVersionUID: Long = 3803581706318748613L
+
         private const val PARAM_CITY = "city"
 
         // 2 Character Country Code

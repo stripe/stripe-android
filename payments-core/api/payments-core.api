@@ -1972,7 +1972,7 @@ public final class com/stripe/android/model/AccountRange$Creator : android/os/Pa
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/Address : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel {
+public final class com/stripe/android/model/Address : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel, java/io/Serializable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/Address$Companion;
@@ -3285,7 +3285,7 @@ public final class com/stripe/android/model/PaymentIntent$Shipping$Creator : and
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod : com/stripe/android/core/model/StripeModel {
+public final class com/stripe/android/model/PaymentMethod : com/stripe/android/core/model/StripeModel, java/io/Serializable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/PaymentMethod$Companion;
@@ -3387,7 +3387,7 @@ public final class com/stripe/android/model/PaymentMethod$BacsDebit$Creator : an
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/PaymentMethod$BillingDetails : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel {
+public final class com/stripe/android/model/PaymentMethod$BillingDetails : com/stripe/android/core/model/StripeModel, com/stripe/android/model/StripeParamsModel, java/io/Serializable {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public final field address Lcom/stripe/android/model/Address;
