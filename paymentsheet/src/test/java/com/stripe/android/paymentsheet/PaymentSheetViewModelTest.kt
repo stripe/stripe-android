@@ -137,7 +137,13 @@ internal class PaymentSheetViewModelTest {
                     PaymentMethod.Type.Sofort.code,
                     PaymentMethod.Type.Affirm.code,
                     PaymentMethod.Type.AfterpayClearpay.code,
-                )
+                ),
+            ).copy(
+                shipping = PaymentIntent.Shipping(
+                    name = "Example buyer",
+                    address = Address(line1 = "123 Main st.", country = "US", postalCode = "12345"),
+                ),
+                clientSecret = null,
             ),
             null
         )

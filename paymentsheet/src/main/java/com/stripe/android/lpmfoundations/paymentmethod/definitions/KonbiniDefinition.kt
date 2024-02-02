@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.KonbiniRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
@@ -11,6 +12,13 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object KonbiniDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Konbini
+
+    override val supportedAsSavedPaymentMethod: Boolean = false
+
+    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+        AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
+        AddPaymentMethodRequirement.UnsupportedForSetup,
+    )
 
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,

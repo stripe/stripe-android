@@ -3,6 +3,8 @@ package com.stripe.android.lpmfoundations.luxe
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.model.Address
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
@@ -28,6 +30,15 @@ class LpmRepositoryTest {
         )
     )
 
+    private val paymentIntentWithShipping = PaymentIntentFactory.create(
+        paymentMethodTypes = listOf("card", "afterpay_clearpay", "affirm"),
+    ).copy(
+        shipping = PaymentIntent.Shipping(
+            name = "Example buyer",
+            address = Address(line1 = "123 Main st.", country = "US", postalCode = "12345"),
+        )
+    )
+
     @Test
     fun `Test label for afterpay show correctly when clearpay string`() {
         Locale.setDefault(Locale.UK)
@@ -37,11 +48,7 @@ class LpmRepositoryTest {
             ),
             LpmRepository.LpmInitialFormData(),
         )
-        lpmRepository.updateFromDisk(
-            PaymentIntentFactory.create().copy(
-                paymentMethodTypes = listOf("card", "afterpay_clearpay")
-            )
-        )
+        lpmRepository.updateFromDisk(paymentIntentWithShipping)
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_clearpay)
 
@@ -56,7 +63,7 @@ class LpmRepositoryTest {
                 ApplicationProvider.getApplicationContext<Application>().resources
             )
         )
-        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
+        lpmRepository.updateFromDisk(paymentIntentWithShipping)
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_afterpay)
     }
@@ -64,7 +71,7 @@ class LpmRepositoryTest {
     @Test
     fun `Verify failing to read server schema reads from disk`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = listOf("affirm")),
+            paymentIntentWithShipping,
             """
           [
             {
@@ -80,7 +87,7 @@ class LpmRepositoryTest {
     @Test
     fun `Verify field not found in schema is read from disk`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = listOf("card", "afterpay_clearpay")),
+            paymentIntentWithShipping,
             """
           [
             {
@@ -139,7 +146,7 @@ class LpmRepositoryTest {
     @Test
     fun `Repository will contain LPMs in ordered and schema`() {
         lpmRepository.update(
-            PaymentIntentFactory.create(paymentMethodTypes = listOf("afterpay_clearpay")),
+            paymentIntentWithShipping,
             """
           [
             {
