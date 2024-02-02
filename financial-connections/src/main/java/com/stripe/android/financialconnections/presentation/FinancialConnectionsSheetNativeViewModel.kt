@@ -42,11 +42,13 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.EXIT
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.pane
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.CloseDialog
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.ExitModal
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.ui.TextResource
@@ -71,8 +73,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
+    private val navigationManager: NavigationManager,
     @Named(APPLICATION_ID) private val applicationId: String,
-    navigationManager: NavigationManager,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
@@ -195,6 +197,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     args = listOf(businessName)
                 )
             }
+
             else -> when (businessName) {
                 null -> TextResource.StringId(R.string.stripe_exit_modal_desc_no_business)
                 else -> TextResource.StringId(
@@ -204,7 +207,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             }
         }
         eventTracker.track(ClickNavBarClose(pane))
-        setState { copy(exitModal = CloseDialog(description = description, loading = false)) }
+        setState { copy(exitModal = ExitModal(description = description, loading = false)) }
+        navigationManager.tryNavigateTo(Destination.Exit(referrer = pane))
     }
 
     fun onBackClick(pane: Pane?) {
@@ -324,13 +328,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
-        viewModelScope.launch {
-            eventTracker.track(
-                PaneLaunched(
-                    referrer = referrer,
-                    pane = pane
+        // Do not track pane loaded for exit pane as it is not a real pane.
+        if (pane != EXIT) {
+            viewModelScope.launch {
+                eventTracker.track(
+                    PaneLaunched(
+                        referrer = referrer,
+                        pane = pane
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -383,7 +390,7 @@ internal data class FinancialConnectionsSheetNativeState(
     @PersistState
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
-    val exitModal: CloseDialog?,
+    val exitModal: ExitModal?,
     val reducedBranding: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val completed: Boolean,
@@ -394,7 +401,7 @@ internal data class FinancialConnectionsSheetNativeState(
      * Payload for the close confirmation dialog,
      * which is shown when the user clicks the close button.
      */
-    data class CloseDialog(
+    data class ExitModal(
         val description: TextResource,
         val loading: Boolean
     )

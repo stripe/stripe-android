@@ -8,12 +8,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -21,11 +27,29 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 
 @Composable
-internal fun ExitModal(
-    onExit: () -> Unit = { },
-    onCancel: () -> Unit = { },
+internal fun ExitModal() {
+    val navController = LocalNavHostController.current
+    val viewModel: FinancialConnectionsSheetNativeViewModel = parentViewModel()
+    val exitModal by viewModel.collectAsState { it.exitModal }
+    exitModal?.let {
+        ExitModalContent(
+            description = it.description,
+            loading = it.loading,
+            onExit = viewModel::onCloseConfirm,
+            onCancel = navController::popBackStack
+        )
+    }
+    DisposableEffect(Unit) {
+        onDispose { viewModel.onCloseDismiss() }
+    }
+}
+
+@Composable
+private fun ExitModalContent(
     description: TextResource,
     loading: Boolean,
+    onExit: () -> Unit = { },
+    onCancel: () -> Unit = { },
 ) {
     Column(
         modifier = Modifier
@@ -68,7 +92,7 @@ internal fun ExitModal(
 fun ExitModalPreview() {
     FinancialConnectionsTheme {
         Surface(color = v3Colors.backgroundSurface) {
-            ExitModal(
+            ExitModalContent(
                 description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),
                 loading = false
             )

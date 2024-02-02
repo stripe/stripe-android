@@ -9,9 +9,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue.Hidden
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -117,7 +114,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class, ExperimentalMaterialNavigationApi::class)
+    @OptIn(ExperimentalMaterialNavigationApi::class)
     @Suppress("LongMethod")
     @Composable
     fun NavHost(
@@ -127,17 +124,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val context = LocalContext.current
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
-        val bottomState = rememberModalBottomSheetState(initialValue = Hidden)
-        val exitModal by viewModel.collectAsState { it.exitModal }
 
         val bottomSheetNavigator = rememberBottomSheetNavigator()
         val navController = rememberNavController(bottomSheetNavigator)
         PaneBackgroundEffects(navController)
         NavigationEffects(viewModel.navigationFlow, navController)
-        // Show the exit modal when it is not null
-        LaunchedEffect(exitModal) { if (exitModal != null) bottomState.show() }
-        // Notify modal dismissal when the bottom state is hidden
-        LaunchedEffect(bottomState.currentValue) { if (bottomState.currentValue == Hidden) viewModel.onCloseDismiss() }
 
         CompositionLocalProvider(
             LocalReducedBranding provides reducedBranding,
@@ -163,6 +154,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     composable(Destination.ManualEntry)
                     composable(Destination.PartnerAuth)
                     bottomSheet(Destination.PartnerAuthDrawer)
+                    bottomSheet(Destination.Exit)
                     composable(Destination.InstitutionPicker)
                     composable(Destination.AccountPicker)
                     composable(Destination.Success)

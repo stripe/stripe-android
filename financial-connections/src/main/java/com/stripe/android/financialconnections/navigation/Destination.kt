@@ -17,6 +17,7 @@ import com.google.accompanist.navigation.material.bottomSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
+import com.stripe.android.financialconnections.features.common.ExitModal
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
@@ -165,6 +166,11 @@ internal sealed class Destination(
     object Reset : NoArgumentsDestination(
         route = Pane.RESET.value,
         composable = { ResetScreen() }
+    )
+
+    object Exit : NoArgumentsDestination(
+        route = Pane.EXIT.value,
+        composable = { ExitModal() }
     )
 
     object BankAuthRepair : NoArgumentsDestination(
