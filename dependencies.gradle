@@ -14,7 +14,7 @@ ext.versions = [
         androidxCompose             : '1.5.4',
         androidxComposeCompiler     : '1.5.8',
         androidxComposeRuntime      : '1.5.4',
-        androidxComposeUi           : '1.5.4',
+        androidxComposeUi           : '1.6.0',
         androidxConstraintlayout    : '2.1.4',
         androidxCore                : '1.12.0',
         androidxFragment            : '1.6.2',
