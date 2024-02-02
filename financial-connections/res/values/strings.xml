@@ -140,6 +140,7 @@
     <string name="stripe_exit_modal_cta_accept">Yes</string>
     <string name="stripe_exit_modal_cta_cancel">Cancel</string>
     <string name="stripe_prepane_cancel_cta">Cancel</string>
+    <string name="stripe_networking_signup_email_label">Email address</string>
     <plurals name="stripe_success_networking_save_to_link_failed">
         <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
         <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>

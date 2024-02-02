@@ -74,7 +74,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 content = content,
                 merchantName = manifest.getBusinessName(),
                 emailController = SimpleTextFieldController(
-                    textFieldConfig = EmailConfig(label = R.string.stripe_networking_link_login_warmup_cta_skip),
+                    textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
                     initialValue = manifest.accountholderCustomerEmailAddress,
                     showOptionalLabel = false
                 ),
