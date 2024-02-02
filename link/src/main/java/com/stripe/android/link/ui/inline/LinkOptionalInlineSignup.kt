@@ -45,7 +45,6 @@ import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
-import com.stripe.android.link.theme.linkColors
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
@@ -305,7 +304,7 @@ internal fun EmailCollection(
                     .semantics {
                         testTag = ProgressIndicatorTestTag
                     },
-                color = MaterialTheme.linkColors.progressIndicator,
+                color = MaterialTheme.colors.primary,
                 strokeWidth = 2.dp
             )
         }
@@ -332,7 +331,7 @@ private fun LinkLogo() {
             .semantics {
                 testTag = "LinkLogoIcon"
             },
-        tint = MaterialTheme.linkColors.inlineLinkLogo
+        tint = MaterialTheme.stripeColors.placeholderText,
     )
 }
 

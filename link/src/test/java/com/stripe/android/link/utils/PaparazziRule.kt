@@ -12,8 +12,8 @@ import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.detectEnvironment
 import com.android.ide.common.rendering.api.SessionParams
-import com.stripe.android.link.theme.StripeThemeForLink
 import com.stripe.android.link.utils.screenshots.PaparazziConfigOption
+import com.stripe.android.uicore.StripeTheme
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
@@ -64,7 +64,7 @@ class PaparazziRule(
 
                 paparazzi.snapshot {
                     CompositionLocalProvider(LocalInspectionMode provides true) {
-                        StripeThemeForLink {
+                        StripeTheme {
                             Surface(color = MaterialTheme.colors.surface) {
                                 Box(
                                     contentAlignment = Alignment.Center,
