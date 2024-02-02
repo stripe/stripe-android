@@ -18,12 +18,12 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 import javax.inject.Named
-import javax.inject.Provider
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
@@ -37,7 +37,7 @@ internal class DefaultCustomerSheetLoader(
     private val elementsSessionRepository: ElementsSessionRepository,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
-    private val customerAdapterProvider: Provider<CustomerAdapter>,
+    private val customerAdapterProvider: Deferred<CustomerAdapter>,
 ) : CustomerSheetLoader {
 
     @Inject constructor(
@@ -52,13 +52,12 @@ internal class DefaultCustomerSheetLoader(
         elementsSessionRepository = elementsSessionRepository,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
-        customerAdapterProvider = CustomerSheetHacks::requireAdapter,
+        customerAdapterProvider = CustomerSheetHacks.adapter,
     )
 
-    private val customerAdapter: CustomerAdapter
-        get() = customerAdapterProvider.get()
-
     override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
+        val customerAdapter = customerAdapterProvider.await()
+
         val elementsSession = if (customerAdapter.canCreateSetupIntents) {
             retrieveElementsSession(configuration).getOrElse {
                 return Result.failure(it)
@@ -68,6 +67,7 @@ internal class DefaultCustomerSheetLoader(
         }
 
         return loadPaymentMethods(
+            customerAdapter = customerAdapter,
             configuration = configuration,
             elementsSession = elementsSession,
         )
@@ -98,6 +98,7 @@ internal class DefaultCustomerSheetLoader(
     }
 
     private suspend fun loadPaymentMethods(
+        customerAdapter: CustomerAdapter,
         configuration: CustomerSheet.Configuration?,
         elementsSession: ElementsSession?,
     ) = coroutineScope {

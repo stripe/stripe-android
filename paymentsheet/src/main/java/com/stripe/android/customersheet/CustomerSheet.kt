@@ -98,7 +98,7 @@ class CustomerSheet @Inject internal constructor(
      * a persisted payment option selection.
      */
     suspend fun retrievePaymentOptionSelection(): CustomerSheetResult = coroutineScope {
-        val adapter = CustomerSheetHacks.requireAdapter()
+        val adapter = CustomerSheetHacks.adapter.await()
 
         val selectedPaymentOptionDeferred = async {
             adapter.retrieveSelectedPaymentOption()

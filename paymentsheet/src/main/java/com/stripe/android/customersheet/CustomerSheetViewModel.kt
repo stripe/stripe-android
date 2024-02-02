@@ -62,6 +62,7 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -83,7 +84,7 @@ internal class CustomerSheetViewModel(
     initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
-    private val customerAdapterProvider: Provider<CustomerAdapter>,
+    private val customerAdapterProvider: Deferred<CustomerAdapter>,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val logger: Logger,
@@ -126,7 +127,7 @@ internal class CustomerSheetViewModel(
         initialBackStack = initialBackStack,
         originalPaymentSelection = originalPaymentSelection,
         paymentConfigurationProvider = paymentConfigurationProvider,
-        customerAdapterProvider = CustomerSheetHacks::requireAdapter,
+        customerAdapterProvider = CustomerSheetHacks.adapter,
         resources = resources,
         configuration = configuration,
         logger = logger,
@@ -143,9 +144,6 @@ internal class CustomerSheetViewModel(
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         editInteractorFactory = editInteractorFactory,
     )
-
-    private val customerAdapter: CustomerAdapter
-        get() = customerAdapterProvider.get()
 
     private val backStack = MutableStateFlow(initialBackStack)
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
@@ -491,7 +489,7 @@ internal class CustomerSheetViewModel(
     }
 
     private suspend fun removePaymentMethod(paymentMethod: PaymentMethod): CustomerAdapter.Result<PaymentMethod> {
-        return customerAdapter.detachPaymentMethod(
+        return awaitCustomerAdapter().detachPaymentMethod(
             paymentMethodId = paymentMethod.id!!,
         ).onSuccess {
             eventReporter.onRemovePaymentMethodSucceeded()
@@ -508,7 +506,7 @@ internal class CustomerSheetViewModel(
         paymentMethod: PaymentMethod,
         brand: CardBrand
     ): CustomerAdapter.Result<PaymentMethod> {
-        return customerAdapter.updatePaymentMethod(
+        return awaitCustomerAdapter().updatePaymentMethod(
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
@@ -902,7 +900,7 @@ internal class CustomerSheetViewModel(
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
         viewModelScope.launch {
-            if (customerAdapter.canCreateSetupIntents) {
+            if (awaitCustomerAdapter().canCreateSetupIntents) {
                 attachWithSetupIntent(paymentMethod = paymentMethod)
             } else {
                 attachPaymentMethod(id = paymentMethod.id!!)
@@ -911,7 +909,7 @@ internal class CustomerSheetViewModel(
     }
 
     private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
-        customerAdapter.setupIntentClientSecretForCustomerAttach()
+        awaitCustomerAdapter().setupIntentClientSecretForCustomerAttach()
             .mapCatching { clientSecret ->
                 val intent = stripeRepository.retrieveSetupIntent(
                     clientSecret = clientSecret,
@@ -1056,7 +1054,7 @@ internal class CustomerSheetViewModel(
     }
 
     private suspend fun attachPaymentMethod(id: String) {
-        customerAdapter.attachPaymentMethod(id)
+        awaitCustomerAdapter().attachPaymentMethod(id)
             .onSuccess { attachedPaymentMethod ->
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
@@ -1092,7 +1090,7 @@ internal class CustomerSheetViewModel(
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch {
-            customerAdapter.setSelectedPaymentOption(
+            awaitCustomerAdapter().setSelectedPaymentOption(
                 savedPaymentSelection?.toPaymentOption()
             ).onSuccess {
                 confirmPaymentSelection(
@@ -1112,7 +1110,7 @@ internal class CustomerSheetViewModel(
 
     private fun selectGooglePay() {
         viewModelScope.launch {
-            customerAdapter.setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
+            awaitCustomerAdapter().setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
                 .onSuccess {
                     confirmPaymentSelection(
                         paymentSelection = PaymentSelection.GooglePay,
@@ -1245,6 +1243,10 @@ internal class CustomerSheetViewModel(
                 }
             }
         }
+    }
+
+    private suspend fun awaitCustomerAdapter(): CustomerAdapter {
+        return customerAdapterProvider.await()
     }
 
     private val CustomerSheetViewState.eventReporterScreen: CustomerSheetEventReporter.Screen?

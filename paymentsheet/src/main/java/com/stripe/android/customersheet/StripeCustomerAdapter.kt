@@ -38,9 +38,6 @@ internal class StripeCustomerAdapter @Inject constructor(
     @Volatile
     private var cachedCustomerEphemeralKey: CachedCustomerEphemeralKey? = null
 
-    private val isGooglePayAvailable: Boolean
-        get() = CustomerSheetHacks.requireConfiguration().googlePayEnabled
-
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
 
@@ -148,7 +145,7 @@ internal class StripeCustomerAdapter @Inject constructor(
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             val prefsRepository = prefsRepositoryFactory(customerEphemeralKey)
             val savedSelection = prefsRepository.getSavedSelection(
-                isGooglePayAvailable = isGooglePayAvailable,
+                isGooglePayAvailable = isGooglePayAvailable(),
                 isLinkAvailable = false,
             )
             savedSelection.toPaymentOption()
@@ -184,6 +181,10 @@ internal class StripeCustomerAdapter @Inject constructor(
     private fun shouldRefreshCustomer(cacheDate: Long): Boolean {
         val nowInMillis = timeProvider()
         return cacheDate + CACHED_CUSTOMER_MAX_AGE_MILLIS < nowInMillis
+    }
+
+    private suspend fun isGooglePayAvailable(): Boolean {
+        return CustomerSheetHacks.configuration.await().googlePayEnabled
     }
 
     internal companion object {
