@@ -23,7 +23,32 @@ internal class PartnerAuthPreviewParameterProvider :
     override val values = sequenceOf(
         canonical(),
         prepaneLoading(),
-        browserLoading()
+        browserLoading(),
+        inModal()
+    )
+
+    private fun inModal() = SharedPartnerAuthState(
+        payload = Success(
+            SharedPartnerAuthState.Payload(
+                isStripeDirect = false,
+                institution = FinancialConnectionsInstitution(
+                    id = "id",
+                    name = "name",
+                    url = "url",
+                    featured = true,
+                    icon = null,
+                    logo = null,
+                    featuredOrder = null,
+                    mobileHandoffCapable = false
+                ),
+                authSession = session(),
+                showInModal = true
+            )
+        ),
+        authenticationStatus = Uninitialized,
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
     )
 
     override val count: Int
