@@ -12,6 +12,8 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
+import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
+import com.google.accompanist.navigation.material.bottomSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
@@ -96,6 +98,11 @@ internal sealed class Destination(
     object Consent : NoArgumentsDestination(
         route = Pane.CONSENT.value,
         composable = { ConsentScreen() }
+    )
+
+    object PartnerAuthDrawer : NoArgumentsDestination(
+        route = Pane.PARTNER_AUTH_DRAWER.value,
+        composable = { PartnerAuthScreen() }
     )
 
     object PartnerAuth : NoArgumentsDestination(
@@ -220,6 +227,20 @@ internal fun NavGraphBuilder.composable(
     deepLinks: List<NavDeepLink> = emptyList(),
 ) {
     composable(
+        route = destination.fullRoute,
+        arguments = arguments,
+        deepLinks = deepLinks,
+        content = { destination.Composable(navBackStackEntry = it) }
+    )
+}
+
+@OptIn(ExperimentalMaterialNavigationApi::class)
+internal fun NavGraphBuilder.bottomSheet(
+    destination: Destination,
+    arguments: List<NamedNavArgument> = emptyList(),
+    deepLinks: List<NavDeepLink> = emptyList(),
+) {
+    bottomSheet(
         route = destination.fullRoute,
         arguments = arguments,
         deepLinks = deepLinks,

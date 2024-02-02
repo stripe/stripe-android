@@ -7,6 +7,7 @@ private val paneToDestination = mapOf(
     Pane.INSTITUTION_PICKER to Destination.InstitutionPicker,
     Pane.CONSENT to Destination.Consent,
     Pane.PARTNER_AUTH to Destination.PartnerAuth,
+    Pane.PARTNER_AUTH_DRAWER to Destination.PartnerAuthDrawer,
     Pane.ACCOUNT_PICKER to Destination.AccountPicker,
     Pane.SUCCESS to Destination.Success,
     Pane.MANUAL_ENTRY to Destination.ManualEntry,

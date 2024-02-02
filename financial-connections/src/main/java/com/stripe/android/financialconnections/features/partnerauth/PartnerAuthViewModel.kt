@@ -73,21 +73,15 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     init {
         logErrors()
-        withState {
-            if (it.activeAuthSession == null) {
-                launchBrowserIfNonOauth()
-                createAuthSession()
-            } else {
-                logger.debug("Restoring auth session ${it.activeAuthSession}")
-                restoreAuthSession()
-            }
-        }
+        launchBrowserIfNonOauth()
+        // TODO
+        withState { restoreOrCreateAuthSession() }
     }
 
-    private fun restoreAuthSession() {
+    private fun restoreOrCreateAuthSession() {
         suspend {
-            // if coming from a process kill, there should be a session
-            // re-fetch the manifest and use its active auth session instead of creating a new one
+            // A session should have been created in the previous pane and set as the active auth session in the manifest.
+            // if coming from a process kill, we'll fetch the current manifest from network, that should contain the active auth session.
             val sync: SynchronizeSessionResponse = getOrFetchSync()
             val manifest: FinancialConnectionsSessionManifest = sync.manifest
             val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
@@ -95,9 +89,10 @@ internal class PartnerAuthViewModel @Inject constructor(
                 sync = sync
             )
             Payload(
-                authSession = authSession,
+                isStripeDirect = manifest.isStripeDirect ?: false,
                 institution = requireNotNull(manifest.activeInstitution),
-                isStripeDirect = manifest.isStripeDirect ?: false
+                authSession = authSession,
+                showInModal = authSession.isOAuth
             )
         }.execute { copy(payload = it) }
     }
@@ -114,6 +109,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             logger.debug("Created auth session ${authSession.id}")
             Payload(
                 authSession = authSession,
+                showInModal = authSession.isOAuth,
                 institution = requireNotNull(manifest.activeInstitution),
                 isStripeDirect = manifest.isStripeDirect ?: false
             ).also {
