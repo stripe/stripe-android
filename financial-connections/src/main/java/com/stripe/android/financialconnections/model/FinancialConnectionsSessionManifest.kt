@@ -250,10 +250,13 @@ internal data class FinancialConnectionsSessionManifest(
         NETWORKING_SAVE_TO_LINK_VERIFICATION("networking_save_to_link_verification"),
 
         @SerialName(value = "reset")
-        RESET("reset");
+        RESET("reset"),
+
+        @SerialName(value = "exit")
+        EXIT("exit");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Pane>(Pane.values(), UNEXPECTED_ERROR)
+            EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNEXPECTED_ERROR)
     }
 
     /**

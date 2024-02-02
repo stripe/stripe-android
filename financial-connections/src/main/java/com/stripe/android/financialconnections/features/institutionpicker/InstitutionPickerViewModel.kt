@@ -20,7 +20,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
-import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -49,7 +48,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val searchInstitutions: SearchInstitutions,
     private val featuredInstitutions: FeaturedInstitutions,
-    private val getManifest: GetManifest,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val updateLocalManifest: UpdateLocalManifest,
@@ -191,8 +189,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
             // navigate to next step
             val authSession = postAuthorizationSession(institution, getOrFetchSync())
             navigateToPartnerAuth(authSession)
-
-
         }.execute { async ->
             copy(
                 selectedInstitutionId = institution.id.takeIf { async is Loading },

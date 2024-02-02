@@ -78,54 +78,52 @@ internal class PartnerAuthViewModel @Inject constructor(
         withState { restoreOrCreateAuthSession() }
     }
 
-    private fun restoreOrCreateAuthSession() {
-        suspend {
-            // A session should have been created in the previous pane and set as the active auth session in the manifest.
-            // if coming from a process kill, we'll fetch the current manifest from network, that should contain the active auth session.
-            val sync: SynchronizeSessionResponse = getOrFetchSync()
-            val manifest: FinancialConnectionsSessionManifest = sync.manifest
-            val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
-                institution = requireNotNull(manifest.activeInstitution),
-                sync = sync
-            )
-            Payload(
-                isStripeDirect = manifest.isStripeDirect ?: false,
-                institution = requireNotNull(manifest.activeInstitution),
-                authSession = authSession,
-                showInModal = authSession.isOAuth
-            )
-        }.execute { copy(payload = it) }
-    }
+    private fun restoreOrCreateAuthSession() = suspend {
+        // A session should have been created in the previous pane and set as the active
+        // auth session in the manifest.
+        // if coming from a process kill, we'll fetch the current manifest from network,
+        // that should contain the active auth session.
+        val sync: SynchronizeSessionResponse = getOrFetchSync()
+        val manifest: FinancialConnectionsSessionManifest = sync.manifest
+        val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
+            institution = requireNotNull(manifest.activeInstitution),
+            sync = sync
+        )
+        Payload(
+            isStripeDirect = manifest.isStripeDirect ?: false,
+            institution = requireNotNull(manifest.activeInstitution),
+            authSession = authSession,
+            showInModal = authSession.isOAuth
+        )
+    }.execute { copy(payload = it) }
 
-    private fun createAuthSession() {
-        suspend {
-            val launchedEvent = Launched(Date())
-            val sync: SynchronizeSessionResponse = getOrFetchSync()
-            val manifest: FinancialConnectionsSessionManifest = sync.manifest
-            val authSession = createAuthorizationSession(
-                institution = requireNotNull(manifest.activeInstitution),
-                sync = sync
-            )
-            logger.debug("Created auth session ${authSession.id}")
-            Payload(
-                authSession = authSession,
-                showInModal = authSession.isOAuth,
-                institution = requireNotNull(manifest.activeInstitution),
-                isStripeDirect = manifest.isStripeDirect ?: false
-            ).also {
-                // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
-                val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
-                postAuthSessionEvent(
-                    authSession.id,
-                    listOfNotNull(launchedEvent, loadedEvent)
-                )
-            }
-        }.execute {
-            copy(
-                payload = it,
-                activeAuthSession = it()?.authSession?.id
+    private fun createAuthSession() = suspend {
+        val launchedEvent = Launched(Date())
+        val sync: SynchronizeSessionResponse = getOrFetchSync()
+        val manifest: FinancialConnectionsSessionManifest = sync.manifest
+        val authSession = createAuthorizationSession(
+            institution = requireNotNull(manifest.activeInstitution),
+            sync = sync
+        )
+        logger.debug("Created auth session ${authSession.id}")
+        Payload(
+            authSession = authSession,
+            showInModal = authSession.isOAuth,
+            institution = requireNotNull(manifest.activeInstitution),
+            isStripeDirect = manifest.isStripeDirect ?: false
+        ).also {
+            // just send loaded event on OAuth flows (prepane). Non-OAuth handled by shim.
+            val loadedEvent: Loaded? = Loaded(Date()).takeIf { authSession.isOAuth }
+            postAuthSessionEvent(
+                authSession.id,
+                listOfNotNull(launchedEvent, loadedEvent)
             )
         }
+    }.execute {
+        copy(
+            payload = it,
+            activeAuthSession = it()?.authSession?.id
+        )
     }
 
     private fun launchBrowserIfNonOauth() {
