@@ -25,7 +25,6 @@ class LpmRepositoryTest {
     private val lpmRepository = LpmRepository(
         LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
-            isFinancialConnectionsAvailable = { true },
         )
     )
 
@@ -34,10 +33,15 @@ class LpmRepositoryTest {
         Locale.setDefault(Locale.UK)
         val lpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
-                ApplicationProvider.getApplicationContext<Application>().resources
+                ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            LpmRepository.LpmInitialFormData(),
+        )
+        lpmRepository.updateFromDisk(
+            PaymentIntentFactory.create().copy(
+                paymentMethodTypes = listOf("card", "afterpay_clearpay")
             )
         )
-        lpmRepository.updateFromDisk(PaymentIntentFactory.create())
         assertThat(lpmRepository.fromCode("afterpay_clearpay")?.displayNameResource)
             .isEqualTo(R.string.stripe_paymentsheet_payment_method_clearpay)
 
@@ -169,7 +173,6 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { true }
             )
         )
 
@@ -269,7 +272,6 @@ class LpmRepositoryTest {
                 }
               ]
             """.trimIndent(),
-            isDeferred = false,
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNotNull()
@@ -281,7 +283,6 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { false }
             )
         )
 
@@ -290,7 +291,6 @@ class LpmRepositoryTest {
                 paymentMethodTypes = listOf("us_bank_account")
             ),
             serverLpmSpecs = null,
-            isDeferred = false,
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
@@ -302,16 +302,15 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { false }
             )
         )
 
         lpmRepository.update(
             stripeIntent = PaymentIntentFactory.create(
                 paymentMethodTypes = listOf("us_bank_account")
-            ),
+            ).copy(clientSecret = null),
             serverLpmSpecs = null,
-            isDeferred = true,
+            financialConnectionsAvailable = false,
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNull()
@@ -323,16 +322,14 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { true }
             )
         )
 
         lpmRepository.update(
             stripeIntent = PaymentIntentFactory.create(
                 paymentMethodTypes = listOf("us_bank_account")
-            ),
+            ).copy(clientSecret = null),
             serverLpmSpecs = null,
-            isDeferred = true,
         )
 
         assertThat(lpmRepository.fromCode("us_bank_account")).isNotNull()
@@ -344,7 +341,6 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { false },
             )
         )
 
@@ -365,10 +361,9 @@ class LpmRepositoryTest {
             ),
         )
 
-        val deferredPaymentIntent = PaymentIntentFactory.create(
+        val paymentIntent = PaymentIntentFactory.create(
             paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
         ).copy(
-            clientSecret = null,
             paymentMethodOptionsJsonString = """
                 {
                     "us_bank_account": {
@@ -379,7 +374,7 @@ class LpmRepositoryTest {
         )
 
         lpmRepository.update(
-            stripeIntent = deferredPaymentIntent,
+            stripeIntent = paymentIntent,
             serverLpmSpecs = null,
         )
 
@@ -393,7 +388,6 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { true }
             ),
         )
 
@@ -412,7 +406,6 @@ class LpmRepositoryTest {
         lpmRepository.update(
             stripeIntent = paymentIntent,
             serverLpmSpecs = null,
-            isDeferred = false,
         )
 
         val supportedPaymentMethods = lpmRepository.values().map { it.code }
@@ -425,7 +418,6 @@ class LpmRepositoryTest {
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                isFinancialConnectionsAvailable = { true }
             ),
         )
 
@@ -444,7 +436,6 @@ class LpmRepositoryTest {
         lpmRepository.update(
             stripeIntent = paymentIntent,
             serverLpmSpecs = null,
-            isDeferred = false,
         )
 
         val supportedPaymentMethods = lpmRepository.values().map { it.code }
@@ -506,9 +497,7 @@ class LpmRepositoryTest {
         assertThat(lpmRepository.values()).isEmpty()
         lpmRepository.initializeWithPaymentMethods(
             mapOf(
-                PaymentMethod.Type.Card.code to LpmRepository.hardcodedCardSpec(
-                    BillingDetailsCollectionConfiguration()
-                )
+                PaymentMethod.Type.Card.code to LpmRepositoryTestHelpers.card
             )
         )
         val card = lpmRepository.fromCode("card")

@@ -13,6 +13,8 @@ import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -123,7 +125,7 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethodFixtures.US_BANK_ACCOUNT,
                 ),
                 supportedPaymentMethods = listOf(
-                    LpmRepository.HardcodedCard,
+                    LpmRepositoryTestHelpers.card,
                 ),
                 isGooglePayReady = true,
                 paymentSelection = PaymentSelection.Saved(
@@ -181,7 +183,7 @@ class DefaultCustomerSheetLoaderTest {
                 stripeIntent = null,
                 customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                 supportedPaymentMethods = listOf(
-                    LpmRepository.HardcodedCard,
+                    LpmRepositoryTestHelpers.card,
                 ),
                 isGooglePayReady = false,
                 paymentSelection = null,
@@ -221,7 +223,7 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
                 ),
                 supportedPaymentMethods = listOf(
-                    LpmRepository.HardcodedCard,
+                    LpmRepositoryTestHelpers.card,
                 ),
                 isGooglePayReady = false,
                 paymentSelection = PaymentSelection.Saved(
@@ -261,7 +263,7 @@ class DefaultCustomerSheetLoaderTest {
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
                 ),
                 supportedPaymentMethods = listOf(
-                    LpmRepository.HardcodedCard,
+                    LpmRepositoryTestHelpers.card,
                 ),
                 isGooglePayReady = false,
                 paymentSelection = null,
@@ -275,7 +277,6 @@ class DefaultCustomerSheetLoaderTest {
         val lpmRepository = LpmRepository(
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = CustomerSheetTestHelper.application.resources,
-                isFinancialConnectionsAvailable = { true },
             ),
             lpmInitialFormData = LpmRepository.LpmInitialFormData()
         )
@@ -314,7 +315,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
@@ -339,7 +340,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
@@ -364,7 +365,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
@@ -389,7 +390,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
@@ -414,7 +415,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
@@ -439,7 +440,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
@@ -464,7 +465,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepository.hardCodedUsBankAccount)
+        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
@@ -478,6 +479,7 @@ class DefaultCustomerSheetLoaderTest {
             isFinancialConnectionsAvailable = { true },
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = STRIPE_INTENT.copy(
+                    clientSecret = null,
                     paymentMethodTypes = listOf("card", "us_bank_account")
                 ),
                 error = null,
@@ -489,7 +491,7 @@ class DefaultCustomerSheetLoaderTest {
 
         assertThat(
             loader.load(config).getOrThrow().supportedPaymentMethods
-        ).contains(LpmRepository.hardCodedUsBankAccount)
+        ).contains(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test

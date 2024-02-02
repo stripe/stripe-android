@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -293,7 +294,7 @@ class PaymentSelectionUpdaterTest {
             ),
             lpmInitialFormData = LpmRepository.LpmInitialFormData(),
         ).apply {
-            update(stripeIntent, serverLpmSpecs = null)
+            update(stripeIntent = stripeIntent, serverLpmSpecs = null)
         }
 
         return DefaultPaymentSelectionUpdater(lpmRepository)

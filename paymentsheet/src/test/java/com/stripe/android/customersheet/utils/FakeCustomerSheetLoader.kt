@@ -4,7 +4,7 @@ import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -20,8 +20,8 @@ internal class FakeCustomerSheetLoader(
     private val shouldFail: Boolean = false,
     private val customerPaymentMethods: List<PaymentMethod> = emptyList(),
     private val supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
-        LpmRepository.HardcodedCard,
-        LpmRepository.hardCodedUsBankAccount,
+        LpmRepositoryTestHelpers.card,
+        LpmRepositoryTestHelpers.usBankAccount,
     ),
     private val paymentSelection: PaymentSelection? = null,
     private val isGooglePayAvailable: Boolean = false,

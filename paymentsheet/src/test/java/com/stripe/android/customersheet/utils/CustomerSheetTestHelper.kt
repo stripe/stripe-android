@@ -17,7 +17,9 @@ import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
@@ -102,10 +104,10 @@ internal object CustomerSheetTestHelper {
         ),
         usBankAccountFormArguments = usBankAccountFormArguments,
         supportedPaymentMethods = listOf(
-            LpmRepository.HardcodedCard,
-            LpmRepository.hardCodedUsBankAccount,
+            LpmRepositoryTestHelpers.card,
+            LpmRepositoryTestHelpers.usBankAccount,
         ),
-        selectedPaymentMethod = LpmRepository.HardcodedCard,
+        selectedPaymentMethod = LpmRepositoryTestHelpers.card,
         enabled = true,
         isLiveMode = false,
         isProcessing = false,
@@ -160,7 +162,6 @@ internal object CustomerSheetTestHelper {
         lpmRepository: LpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
                 resources = application.resources,
-                isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             )
         ).apply {
             update(
@@ -180,8 +181,8 @@ internal object CustomerSheetTestHelper {
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
-            LpmRepository.HardcodedCard,
-            LpmRepository.hardCodedUsBankAccount,
+            LpmRepositoryTestHelpers.card,
+            LpmRepositoryTestHelpers.usBankAccount,
         ),
         savedPaymentSelection: PaymentSelection? = null,
         stripeRepository: StripeRepository = FakeStripeRepository(),

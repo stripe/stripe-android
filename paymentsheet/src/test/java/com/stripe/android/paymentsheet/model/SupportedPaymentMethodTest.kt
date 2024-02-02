@@ -6,7 +6,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
@@ -25,12 +27,12 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
-    private val card = LpmRepository.HardcodedCard
+    private val card = LpmRepositoryTestHelpers.card
 
     @Test
     fun `If the intent has SFU set on top level or on LPM`() {
         assertThat(
-            LpmRepository.HardcodedCard
+            card
                 .getSpecWithFullfilledRequirements(
                     PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
                     CONFIG_CUSTOMER
@@ -211,7 +213,7 @@ class SupportedPaymentMethodTest {
             initializeWithPaymentMethods(
                 mapOf(
                     PaymentMethod.Type.Card.code to card,
-                    PaymentMethod.Type.USBankAccount.code to LpmRepository.hardCodedUsBankAccount
+                    PaymentMethod.Type.USBankAccount.code to LpmRepositoryTestHelpers.usBankAccount
                 )
             )
         }
@@ -242,8 +244,8 @@ class SupportedPaymentMethodTest {
         ).apply {
             initializeWithPaymentMethods(
                 mapOf(
-                    PaymentMethod.Type.Card.code to LpmRepository.HardcodedCard,
-                    PaymentMethod.Type.USBankAccount.code to LpmRepository.hardCodedUsBankAccount
+                    PaymentMethod.Type.Card.code to card,
+                    PaymentMethod.Type.USBankAccount.code to LpmRepositoryTestHelpers.usBankAccount,
                 )
             )
         }
@@ -252,7 +254,7 @@ class SupportedPaymentMethodTest {
             paymentMethodTypes = listOf("card", "us_bank_account")
         )
 
-        val expected = listOf(card, LpmRepository.hardCodedUsBankAccount)
+        val expected = listOf(card, LpmRepositoryTestHelpers.usBankAccount)
 
         assertThat(
             getPMsToAdd(

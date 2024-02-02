@@ -20,6 +20,9 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -1247,12 +1250,12 @@ internal class PaymentSheetViewModelTest {
         )
 
         val observedArgs = viewModel.createFormArguments(
-            selectedItem = LpmRepository.HardcodedCard,
+            selectedItem = LpmRepositoryTestHelpers.card,
         )
 
         assertThat(observedArgs).isEqualTo(
             PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = LpmRepository.HardcodedCard.code,
+                paymentMethodCode = CardDefinition.type.code,
                 amount = Amount(
                     value = 1099,
                     currencyCode = "usd",
