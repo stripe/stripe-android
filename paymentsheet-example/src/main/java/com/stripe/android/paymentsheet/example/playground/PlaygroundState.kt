@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
+import android.util.Log
 import androidx.compose.runtime.Stable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
@@ -12,7 +13,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTy
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 
 @Stable
-internal data class PlaygroundState(
+internal data class PlaygroundState constructor(
     private val snapshot: PlaygroundSettings.Snapshot,
     val amount: Long,
     val paymentMethodTypes: List<String>,
@@ -40,6 +41,7 @@ internal data class PlaygroundState(
                     .orEmpty()
                     .split(",")
             }
+            Log.d("PlaygroundState", "Client Secret -- $intentClientSecret")
             return PlaygroundState(
                 snapshot = snapshot,
                 amount = amount,

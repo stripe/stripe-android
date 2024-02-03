@@ -240,7 +240,7 @@ workflows:
             - boot_timeout: 600
       - script@1:
           inputs:
-            - content: mkdir -p /tmp/logcat | adb -e logcat *:W | tee /tmp/logcat/logcat.log > /dev/null 2>&1 &
+            - content: mkdir -p /tmp/logcat | adb -e logcat | tee /tmp/logcat/logcat.log > /dev/null 2>&1 &
       - script@1:
           title: Execute instrumentation tests
           timeout: 1200

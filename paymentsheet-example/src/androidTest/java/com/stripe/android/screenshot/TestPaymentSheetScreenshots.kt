@@ -13,6 +13,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButton
 import com.stripe.android.test.core.TestParameters
 import org.junit.After
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -70,6 +71,8 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             fontSizeSp = 12.0f
         )
     )
+
+    @get:Rule val logNameRule = LogNameRule()
 
     @Before
     @After
