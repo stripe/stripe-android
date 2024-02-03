@@ -103,11 +103,32 @@ internal class CustomerRepositoryTest {
                 Result.success(emptyList())
             )
 
+            val initialCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
             val mockedReturnPaymentMethods = listOf(
-                PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
-                    card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "filtered").card?.copy(
+                initialCard.copy("pm_1"),
+                initialCard.copy(
+                    id = "pm_2",
+                    card = initialCard.card?.copy(
                         wallet = Wallet.GooglePayWallet("3000")
+                    )
+                ),
+                initialCard.copy(
+                    id = "pm_3",
+                    card = initialCard.card?.copy(
+                        wallet = Wallet.SamsungPayWallet("4000")
+                    )
+                ),
+                initialCard.copy(
+                    id = "pm_4",
+                    card = initialCard.card?.copy(
+                        wallet = Wallet.ApplePayWallet("5000")
+                    )
+                ),
+                initialCard.copy(
+                    id = "pm_5",
+                    card = initialCard.card?.copy(
+                        wallet = Wallet.ApplePayWallet("6000")
                     )
                 )
             )
@@ -137,7 +158,7 @@ internal class CustomerRepositoryTest {
             ).getOrThrow()
 
             assertThat(result).hasSize(1)
-            assertThat(result[0].id).isEqualTo("pm_123456789")
+            assertThat(result[0].id).isEqualTo("pm_1")
         }
 
     @Test

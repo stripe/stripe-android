@@ -24,7 +24,9 @@ sealed class Wallet(
     ) : Wallet(Type.AmexExpressCheckout)
 
     @Parcelize
-    data class ApplePayWallet internal constructor(
+    data class ApplePayWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.ApplePay)
 
@@ -44,7 +46,9 @@ sealed class Wallet(
     ) : Wallet(Type.Masterpass)
 
     @Parcelize
-    data class SamsungPayWallet internal constructor(
+    data class SamsungPayWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         val dynamicLast4: String?
     ) : Wallet(Type.SamsungPay)
 
@@ -57,6 +61,13 @@ sealed class Wallet(
         val dynamicLast4: String?
     ) : Wallet(Type.VisaCheckout)
 
+    @Parcelize
+    data class LinkWallet
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
+        val dynamicLast4: String?
+    ) : Wallet(Type.Link)
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class Type(val code: String) {
         AmexExpressCheckout("amex_express_checkout"),
@@ -64,7 +75,8 @@ sealed class Wallet(
         GooglePay("google_pay"),
         Masterpass("master_pass"),
         SamsungPay("samsung_pay"),
-        VisaCheckout("visa_checkout");
+        VisaCheckout("visa_checkout"),
+        Link("link");
 
         internal companion object {
             internal fun fromCode(code: String?): Type? {

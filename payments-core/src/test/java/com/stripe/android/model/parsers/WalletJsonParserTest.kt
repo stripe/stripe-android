@@ -87,6 +87,12 @@ class WalletJsonParserTest {
     }
 
     @Test
+    fun testParseLinkWallet() {
+        val wallet = parse(LINK_WALLET_JSON)
+        assertEquals(Wallet.LinkWallet("1234"), wallet)
+    }
+
+    @Test
     fun testParcelable_shouldBeEqualAfterParcel() {
         val samsungPayWallet = parse(SAMSUNG_PAY_WALLET_JSON) as Wallet.SamsungPayWallet
         assertEquals(Wallet.Type.SamsungPay, samsungPayWallet.walletType)
@@ -187,6 +193,16 @@ class WalletJsonParserTest {
                 "type": "samsung_pay",
                 "dynamic_last4": "1234",
                 "samsung_pay": {}
+            }
+            """.trimIndent()
+        )
+
+        private val LINK_WALLET_JSON = JSONObject(
+            """
+            {
+                "type": "link",
+                "dynamic_last4": "1234",
+                "link": {}
             }
             """.trimIndent()
         )

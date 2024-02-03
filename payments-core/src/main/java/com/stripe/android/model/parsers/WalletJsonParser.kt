@@ -21,6 +21,7 @@ internal class WalletJsonParser : ModelJsonParser<Wallet> {
             Wallet.Type.GooglePay -> Wallet.GooglePayWallet(dynamicLast4)
             Wallet.Type.Masterpass -> parseMasterpassWallet(walletTypeJson)
             Wallet.Type.VisaCheckout -> parseVisaCheckoutWallet(walletTypeJson, dynamicLast4)
+            Wallet.Type.Link -> Wallet.LinkWallet(dynamicLast4)
         }
     }
 
