@@ -390,6 +390,9 @@ workflows:
                -no-snapshot
                -no-audio
                -no-window
+      - script@1:
+          inputs:
+            - content: adb -e logcat *:W | tee /tmp/logcat/logcat.log > /dev/null 2>&1 &
   start_screenshot_emulator:
     steps:
       - avd-manager@1:
