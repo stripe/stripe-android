@@ -239,6 +239,9 @@ workflows:
           inputs:
             - boot_timeout: 600
       - script@1:
+          inputs:
+            - content: adb -e logcat *:W | tee /tmp/logcat/logcat.log > /dev/null 2>&1 &
+      - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
@@ -390,9 +393,6 @@ workflows:
                -no-snapshot
                -no-audio
                -no-window
-      - script@1:
-          inputs:
-            - content: adb -e logcat *:W | tee /tmp/logcat/logcat.log > /dev/null 2>&1 &
   start_screenshot_emulator:
     steps:
       - avd-manager@1:
