@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
@@ -39,7 +40,7 @@ internal class TestCard : BasePlaygroundTest() {
             TestParameters.create(
                 paymentMethodCode = "card",
             ) { settings ->
-                settings[DefaultBillingAddressSettingsDefinition] = true
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectEmailSettingsDefinition] =

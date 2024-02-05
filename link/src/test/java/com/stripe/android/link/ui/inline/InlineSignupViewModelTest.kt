@@ -58,7 +58,6 @@ class InlineSignupViewModelTest {
                         phone = CUSTOMER_PHONE,
                         name = CUSTOMER_NAME,
                         billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
-                        shouldPrefill = true,
                     ),
                     shippingValues = null,
                     signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
@@ -73,8 +72,8 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             viewModel.toggleExpanded()
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 1) // Trigger lookup by waiting for delay.
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1) // Trigger lookup by waiting for delay.
+            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
             assertThat(viewModel.emailController.fieldValue.first()).isEqualTo(CUSTOMER_EMAIL)
             assertThat(viewModel.phoneController.fieldValue.first()).isEqualTo(CUSTOMER_PHONE)
 
@@ -92,7 +91,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.failure(APIConnectionException()))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.useLink).isEqualTo(false)
 
@@ -102,7 +101,7 @@ class InlineSignupViewModelTest {
             viewModel.emailController.onRawValueChange("valid2@email.com")
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.useLink).isEqualTo(true)
         }
@@ -125,7 +124,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(linkAccount))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isEqualTo(UserInput.SignIn(email))
         }
@@ -141,10 +140,10 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isNull()
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
+            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
         }
 
     @Test
@@ -161,7 +160,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isNull()
 
@@ -204,9 +203,9 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
+            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
             verify(linkEventsReporter).onSignupStarted(true)
         }
 
@@ -427,7 +426,6 @@ class InlineSignupViewModelTest {
                 phone = prefilledPhone,
                 name = prefilledName,
                 billingCountryCode = null,
-                shouldPrefill = true,
             ),
             shippingValues = null,
             signupMode = signupMode,

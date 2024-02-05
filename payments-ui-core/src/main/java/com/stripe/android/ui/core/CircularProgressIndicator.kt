@@ -1,5 +1,6 @@
-package com.stripe.android.common.ui
+package com.stripe.android.ui.core
 
+import androidx.annotation.RestrictTo
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
@@ -10,8 +11,9 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.Dp
 import androidx.compose.material.CircularProgressIndicator as MaterialCircularProgressIndicator
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-internal fun CircularProgressIndicator(
+fun CircularProgressIndicator(
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colors.primary,
     strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,

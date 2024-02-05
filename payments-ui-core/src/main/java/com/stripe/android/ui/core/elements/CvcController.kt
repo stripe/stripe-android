@@ -24,7 +24,7 @@ import com.stripe.android.R as StripeR
 class CvcController constructor(
     private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
     cardBrandFlow: Flow<CardBrand>,
-    initialValue: String? = null,
+    override val initialValue: String? = null,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
     override val capitalization: KeyboardCapitalization = cvcTextFieldConfig.capitalization

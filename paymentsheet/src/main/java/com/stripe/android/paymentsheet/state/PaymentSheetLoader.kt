@@ -303,18 +303,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             LinkSignupMode.InsteadOfSaveForFutureUse
         }
 
-        val shouldAutofillBillingDetails = when (linkSignupMode) {
-            LinkSignupMode.InsteadOfSaveForFutureUse -> true
-            LinkSignupMode.AlongsideSaveForFutureUse,
-            null -> false
-        }
-
         val customerInfo = LinkConfiguration.CustomerInfo(
             name = config.defaultBillingDetails?.name,
             email = customerEmail,
             phone = customerPhone,
             billingCountryCode = config.defaultBillingDetails?.address?.country,
-            shouldPrefill = shouldAutofillBillingDetails,
         )
 
         return LinkConfiguration(

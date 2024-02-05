@@ -15,6 +15,7 @@ object PaymentIntentFactory {
         status: StripeIntent.Status = StripeIntent.Status.RequiresConfirmation,
         paymentMethodOptionsJsonString: String? = null,
         linkFundingSources: List<String> = emptyList(),
+        countryCode: String? = null,
     ): PaymentIntent = PaymentIntent(
         created = 500L,
         amount = 1000L,
@@ -23,7 +24,7 @@ object PaymentIntentFactory {
         isLiveMode = false,
         id = "pi_12345",
         currency = "usd",
-        countryCode = null,
+        countryCode = countryCode,
         paymentMethodTypes = paymentMethodTypes,
         status = status,
         unactivatedPaymentMethods = emptyList(),
