@@ -393,4 +393,25 @@ internal class PaymentSheetTest {
 
         page.clickPrimaryButton()
     }
+
+    @Test
+    fun testPaymentIntentReturnsFailureWhenAlreadySucceeded() = activityScenarioRule.runPaymentSheetTest(
+        integrationType = integrationType,
+        resultCallback = ::assertFailed,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-payment_intent_success.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
+    }
 }
