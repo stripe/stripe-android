@@ -5,9 +5,7 @@
   "business_name": "France Merchant",
   "card_brand_choice": {
     "eligible": true,
-    "preferred_networks": [
-      "cartes_bancaires"
-    ]
+    "preferred_networks": ["cartes_bancaires"]
   },
   "experiments_data": {
     "arb_id": "784914c5-226a-45e8-8b95-1fb712128b76",
@@ -130,7 +128,6 @@
     "elements_enable_mx_card_installments": false,
     "elements_enable_passive_captcha": false,
     "elements_enable_payment_element_optimized_sign_up": true,
-    "elements_enable_payment_element_vertical_layout": false,
     "elements_enable_save_last_used_payment_method": true,
     "elements_enable_south_korea_market_underlying_pms": false,
     "elements_enable_use_last_used_payment_method": false,
@@ -171,12 +168,8 @@
     "link_enable_prefill_data_collection": true,
     "link_enable_prefill_data_collection_dryrun": false,
     "link_financial_incentives_experiment_enabled": false,
-    "link_funding_sources": [
-      "CARD"
-    ],
-    "link_funding_sources_onboarding_enabled": [
-      "CARD"
-    ],
+    "link_funding_sources": ["CARD"],
+    "link_funding_sources_onboarding_enabled": ["CARD"],
     "link_funding_sources_onboarding_unavailable_from_holdback": [],
     "link_local_storage_login_enabled": true,
     "link_m2_default_integration_enabled": false,
@@ -802,14 +795,7 @@
           "type": "placeholder"
         },
         {
-          "allowed_country_codes": [
-            "AT",
-            "BE",
-            "DE",
-            "ES",
-            "IT",
-            "NL"
-          ],
+          "allowed_country_codes": ["AT", "BE", "DE", "ES", "IT", "NL"],
           "api_path": {
             "v1": "sofort[country]"
           },
@@ -852,7 +838,5 @@
     "bancontact",
     "ideal"
   ],
-  "unverified_payment_methods_on_domain": [
-    "apple_pay"
-  ]
+  "unverified_payment_methods_on_domain": ["apple_pay"]
 }
