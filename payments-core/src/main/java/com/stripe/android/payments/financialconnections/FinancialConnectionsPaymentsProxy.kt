@@ -29,7 +29,7 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
+            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
             return if (isFinancialConnectionsAvailable()) {
                 provider()
@@ -49,7 +49,7 @@ internal interface FinancialConnectionsPaymentsProxy {
                     )
                 )
             },
-            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable()
+            isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
             return if (isFinancialConnectionsAvailable()) {
                 provider()
