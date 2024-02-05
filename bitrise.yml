@@ -267,6 +267,10 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :paymentsheet:connectedAndroidTest
+    meta:
+      bitrise.io:
+        stack: osx-xcode-14.1.x-ventura
+        machine_type_id: g2-m1-max.10core
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
