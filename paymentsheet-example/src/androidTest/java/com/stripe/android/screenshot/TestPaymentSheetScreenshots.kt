@@ -28,7 +28,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     )
 
     private val colors = PaymentSheet.Colors(
-        primary = Color.MAGENTA,
+        primary = Color.LTGRAY,
         surface = Color.CYAN,
         component = Color.YELLOW,
         componentBorder = Color.RED,
