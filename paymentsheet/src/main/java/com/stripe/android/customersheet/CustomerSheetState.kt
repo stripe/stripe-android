@@ -18,5 +18,6 @@ internal sealed interface CustomerSheetState {
         val isGooglePayReady: Boolean,
         val paymentSelection: PaymentSelection?,
         val cbcEligibility: CardBrandChoiceEligibility,
+        val validationError: Throwable?,
     ) : CustomerSheetState
 }

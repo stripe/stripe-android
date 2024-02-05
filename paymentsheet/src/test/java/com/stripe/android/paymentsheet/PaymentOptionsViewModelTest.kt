@@ -738,6 +738,7 @@ internal class PaymentOptionsViewModelTest {
                 paymentSelection = null,
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,

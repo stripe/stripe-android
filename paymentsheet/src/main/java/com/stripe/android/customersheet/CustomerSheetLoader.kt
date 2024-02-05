@@ -12,7 +12,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.requireValidOrThrow
+import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -60,7 +60,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
             )
         )
-        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+        return elementsSessionRepository.get(initializationMode).onSuccess { elementsSession ->
             val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -73,8 +73,6 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                 metadata = metadata,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             )
-
-            elementsSession.requireValidOrThrow()
         }
     }
 
@@ -154,6 +152,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
                         } else {
                             CardBrandChoiceEligibility.Ineligible
                         },
+                        validationError = elementsSession?.stripeIntent?.validate(),
                     )
                 )
             },

@@ -5,6 +5,7 @@ import android.os.Build
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
@@ -67,6 +68,9 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateDat
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -81,6 +85,7 @@ import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
+import com.stripe.android.utils.RelayingPaymentSheetLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -2175,6 +2180,61 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    @Test
+    fun `Returns payment success after process death if result is returned before state loads`() = runTest {
+        testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult = false)
+    }
+
+    @Test
+    fun `Returns payment success after process death if state is loaded before result is returned`() = runTest {
+        testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult = true)
+    }
+
+    private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
+        val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
+        val savedStateHandle = SavedStateHandle(initialState = mapOf("AwaitingPaymentResult" to true))
+        val paymentSheetLoader = RelayingPaymentSheetLoader()
+
+        val viewModel = createViewModel(
+            stripeIntent = stripeIntent,
+            savedStateHandle = savedStateHandle,
+            paymentSheetLoader = paymentSheetLoader,
+        )
+
+        val resultListener = viewModel.capturePaymentResultListener()
+
+        fun loadState() {
+            paymentSheetLoader.enqueueSuccess(
+                stripeIntent = stripeIntent,
+                validationError = PaymentIntentInTerminalState(StripeIntent.Status.Succeeded),
+            )
+        }
+
+        fun emitPaymentResult() {
+            resultListener.onActivityResult(InternalPaymentResult.Completed(stripeIntent))
+        }
+
+        viewModel.paymentSheetResult.test {
+            expectNoEvents()
+
+            if (loadStateBeforePaymentResult) {
+                loadState()
+            } else {
+                emitPaymentResult()
+            }
+
+            expectNoEvents()
+
+            if (loadStateBeforePaymentResult) {
+                emitPaymentResult()
+            } else {
+                loadState()
+            }
+
+            assertThat(awaitItem()).isEqualTo(PaymentSheetResult.Completed)
+        }
+    }
+
     private suspend fun selectionSavedTest(
         initializationMode: InitializationMode = ARGS_CUSTOMER_WITH_GOOGLEPAY.initializationMode,
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
@@ -2182,23 +2242,15 @@ internal class PaymentSheetViewModelTest {
         shouldSave: Boolean = true
     ) {
         val intent = PAYMENT_INTENT_WITH_PAYMENT_METHOD!!
-        val mockActivityResultCaller = mock<ActivityResultCaller> {
-            on {
-                registerForActivityResult<
-                    PaymentLauncherContract.Args,
-                    InternalPaymentResult
-                    >(any(), any())
-            } doReturn mock()
-        }
 
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
                 initializationMode = initializationMode
             ),
             stripeIntent = PAYMENT_INTENT
-        ).apply {
-            registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
-        }
+        )
+
+        val paymentResultListener = viewModel.capturePaymentResultListener()
 
         val selection = PaymentSelection.New.Card(
             brand = CardBrand.Visa,
@@ -2210,16 +2262,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.updateSelection(selection)
 
-        val onPaymentResult = argumentCaptor<ActivityResultCallback<InternalPaymentResult>>()
-
-        verify(mockActivityResultCaller).registerForActivityResult(
-            any<PaymentLauncherContract>(),
-            onPaymentResult.capture()
-        )
-
-        onPaymentResult.firstValue.onActivityResult(
-            InternalPaymentResult.Completed(intent)
-        )
+        paymentResultListener.onActivityResult(InternalPaymentResult.Completed(intent))
 
         val savedSelection = PaymentSelection.Saved(
             paymentMethod = intent.paymentMethod!!
@@ -2261,25 +2304,30 @@ internal class PaymentSheetViewModelTest {
         initialPaymentSelection: PaymentSelection? =
             customerPaymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
+        validationError: PaymentSheetLoadingException? = null,
+        savedStateHandle: SavedStateHandle = SavedStateHandle(),
+        paymentSheetLoader: PaymentSheetLoader = FakePaymentSheetLoader(
+            stripeIntent = stripeIntent,
+            shouldFail = shouldFailLoad,
+            linkState = linkState,
+            customerPaymentMethods = customerPaymentMethods,
+            delay = delay,
+            isGooglePayAvailable = isGooglePayReady,
+            paymentSelection = initialPaymentSelection,
+            validationError = validationError,
+        ),
     ): PaymentSheetViewModel {
         val paymentConfiguration = PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
         return TestViewModelFactory.create(
             linkConfigurationCoordinator = linkConfigurationCoordinator,
-        ) { linkHandler, linkInteractor, savedStateHandle ->
+            savedStateHandle = savedStateHandle,
+        ) { linkHandler, linkInteractor, thisSavedStateHandle ->
             PaymentSheetViewModel(
                 application = application,
                 args = args,
                 eventReporter = eventReporter,
                 lazyPaymentConfig = { paymentConfiguration },
-                paymentSheetLoader = FakePaymentSheetLoader(
-                    stripeIntent = stripeIntent,
-                    shouldFail = shouldFailLoad,
-                    linkState = linkState,
-                    customerPaymentMethods = customerPaymentMethods,
-                    delay = delay,
-                    isGooglePayAvailable = isGooglePayReady,
-                    paymentSelection = initialPaymentSelection,
-                ),
+                paymentSheetLoader = paymentSheetLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
                 lpmRepository = lpmRepository,
@@ -2288,7 +2336,7 @@ internal class PaymentSheetViewModelTest {
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,
                 logger = Logger.noop(),
                 workContext = testDispatcher,
-                savedStateHandle = savedStateHandle,
+                savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
@@ -2352,6 +2400,25 @@ internal class PaymentSheetViewModelTest {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
         )
+    }
+
+    private fun PaymentSheetViewModel.capturePaymentResultListener(): ActivityResultCallback<InternalPaymentResult> {
+        val mockActivityResultCaller = mock<ActivityResultCaller> {
+            on {
+                registerForActivityResult<PaymentLauncherContract.Args, InternalPaymentResult>(any(), any())
+            } doReturn mock()
+        }
+
+        registerFromActivity(mockActivityResultCaller, TestLifecycleOwner())
+
+        val paymentResultListenerCaptor = argumentCaptor<ActivityResultCallback<InternalPaymentResult>>()
+
+        verify(mockActivityResultCaller).registerForActivityResult(
+            any<PaymentLauncherContract>(),
+            paymentResultListenerCaptor.capture(),
+        )
+
+        return paymentResultListenerCaptor.firstValue
     }
 
     private companion object {

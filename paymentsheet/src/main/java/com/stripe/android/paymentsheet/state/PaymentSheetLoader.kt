@@ -25,7 +25,7 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMAddForm
 import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
-import com.stripe.android.paymentsheet.model.requireValidOrThrow
+import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
@@ -46,7 +46,8 @@ internal interface PaymentSheetLoader {
 
     suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        isReloadingAfterProcessDeath: Boolean = false,
     ): Result<PaymentSheetState.Full>
 }
 
@@ -66,7 +67,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        isReloadingAfterProcessDeath: Boolean,
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
         eventReporter.onLoadStarted()
 
@@ -83,6 +85,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 reportSuccessfulLoad(
                     elementsSession = elementsSession,
                     state = state,
+                    isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
                 )
 
                 return@let state
@@ -173,6 +176,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 linkState = linkState.await(),
                 isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
                 paymentSelection = initialPaymentSelection.await(),
+                validationError = stripeIntent.validate(),
             )
         } else {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
@@ -212,7 +216,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         initializationMode: PaymentSheet.InitializationMode,
         configuration: PaymentSheet.Configuration,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode).mapCatching { elementsSession ->
+        return elementsSessionRepository.get(initializationMode).onSuccess { elementsSession ->
             val billingDetailsCollectionConfig =
                 configuration.billingDetailsCollectionConfiguration.toInternal()
 
@@ -230,8 +234,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             if (!didParseServerResponse) {
                 eventReporter.onLpmSpecFailure()
             }
-
-            elementsSession.requireValidOrThrow()
         }
     }
 
@@ -377,16 +379,23 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private fun reportSuccessfulLoad(
         elementsSession: ElementsSession,
         state: PaymentSheetState.Full,
+        isReloadingAfterProcessDeath: Boolean,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
         }
 
-        eventReporter.onLoadSucceeded(
-            linkEnabled = elementsSession.isLinkEnabled,
-            currency = elementsSession.stripeIntent.currency,
-            paymentSelection = state.paymentSelection,
-        )
+        val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
+
+        if (state.validationError != null && treatValidationErrorAsFailure) {
+            eventReporter.onLoadFailed(state.validationError)
+        } else {
+            eventReporter.onLoadSucceeded(
+                linkEnabled = elementsSession.isLinkEnabled,
+                currency = elementsSession.stripeIntent.currency,
+                paymentSelection = state.paymentSelection,
+            )
+        }
     }
 
     private fun reportFailedLoad(

@@ -111,6 +111,7 @@ internal object PaymentSheetFixtures {
             paymentSelection = null,
             linkState = null,
             isEligibleForCardBrandChoice = false,
+            validationError = null,
         ),
         statusBarColor = STATUS_BAR_COLOR,
         enableLogging = false,

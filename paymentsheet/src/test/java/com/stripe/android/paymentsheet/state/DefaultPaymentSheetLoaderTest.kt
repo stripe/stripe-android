@@ -129,6 +129,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
     }
@@ -163,6 +164,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
     }
@@ -391,7 +393,6 @@ internal class DefaultPaymentSheetLoaderTest {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethod = PaymentMethodFactory.card(),
         )
-        val paymentMethod = paymentIntent.paymentMethod!!
 
         val result = createPaymentSheetLoader(
             stripeIntent = paymentIntent,
@@ -400,9 +401,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ).exceptionOrNull()
+        ).getOrThrow()
 
-        assertThat(result).isEqualTo(PaymentIntentInTerminalState(paymentMethod, Succeeded))
+        assertThat(result.validationError).isEqualTo(PaymentIntentInTerminalState(Succeeded))
     }
 
     @Test
@@ -416,9 +417,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-        ).exceptionOrNull()
+        ).getOrThrow()
 
-        assertThat(result).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
+        assertThat(result.validationError).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
     }
 
     @Test
@@ -745,7 +746,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Emits correct events when loading fails for deferred intent`() = runTest {
-        val error = PaymentIntentInTerminalState(usedPaymentMethod = null, status = Canceled)
+        val error = PaymentIntentInTerminalState(Canceled)
         val loader = createPaymentSheetLoader(error = error)
 
         loader.load(

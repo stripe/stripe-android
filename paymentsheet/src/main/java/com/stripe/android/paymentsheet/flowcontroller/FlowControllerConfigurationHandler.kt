@@ -88,9 +88,13 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         paymentSheetLoader.load(initializationMode, configuration).fold(
             onSuccess = { state ->
-                viewModel.previousConfigureRequest = configureRequest
-                onInitSuccess(state, configureRequest)
-                onConfigured()
+                if (state.validationError != null) {
+                    onConfigured(state.validationError)
+                } else {
+                    viewModel.previousConfigureRequest = configureRequest
+                    onInitSuccess(state, configureRequest)
+                    onConfigured()
+                }
             },
             onFailure = { error ->
                 onConfigured(error = error)

@@ -271,18 +271,24 @@ internal class CustomerSheetViewModel @Inject constructor(
 
         result.fold(
             onSuccess = { state ->
-                supportedPaymentMethods.clear()
-                supportedPaymentMethods.addAll(state.supportedPaymentMethods)
+                if (state.validationError != null) {
+                    _result.update {
+                        InternalCustomerSheetResult.Error(state.validationError)
+                    }
+                } else {
+                    supportedPaymentMethods.clear()
+                    supportedPaymentMethods.addAll(state.supportedPaymentMethods)
 
-                originalPaymentSelection = state.paymentSelection
-                isGooglePayReadyAndEnabled = state.isGooglePayReady
-                stripeIntent = state.stripeIntent
+                    originalPaymentSelection = state.paymentSelection
+                    isGooglePayReadyAndEnabled = state.isGooglePayReady
+                    stripeIntent = state.stripeIntent
 
-                transitionToInitialScreen(
-                    paymentMethods = state.customerPaymentMethods,
-                    paymentSelection = state.paymentSelection,
-                    cbcEligibility = state.cbcEligibility,
-                )
+                    transitionToInitialScreen(
+                        paymentMethods = state.customerPaymentMethods,
+                        paymentSelection = state.paymentSelection,
+                        cbcEligibility = state.cbcEligibility,
+                    )
+                }
             },
             onFailure = { cause ->
                 _result.update {

@@ -43,6 +43,7 @@ internal class FakeCustomerSheetLoader(
                     isGooglePayReady = isGooglePayAvailable,
                     paymentSelection = paymentSelection,
                     cbcEligibility = cbcEligibility,
+                    validationError = null,
                 )
             )
         }
