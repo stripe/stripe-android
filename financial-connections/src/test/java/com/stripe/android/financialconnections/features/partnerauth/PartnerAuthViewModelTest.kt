@@ -34,7 +34,6 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.verifyNoInteractions
@@ -200,6 +199,7 @@ internal class PartnerAuthViewModelTest {
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
+            // An auth session was created on the previous pane, before launching Partner Auth.
             val manifest = sessionManifest().copy(
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution,
@@ -222,8 +222,8 @@ internal class PartnerAuthViewModelTest {
             // stays in partner auth pane
             assertThat(navigationManager.emittedIntents).isEmpty()
 
-            // creates two sessions (initial and retry)
-            verify(createAuthorizationSession, times(2)).invoke(
+            // creates an additional session (cancel triggers a retry)
+            verify(createAuthorizationSession).invoke(
                 eq(activeInstitution),
                 eq(syncResponse)
             )
@@ -240,6 +240,7 @@ internal class PartnerAuthViewModelTest {
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
+            // An auth session was created on the previous pane, before launching Partner Auth.
             val manifest = sessionManifest().copy(
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution
@@ -259,8 +260,8 @@ internal class PartnerAuthViewModelTest {
             // stays in partner auth pane
             assertThat(navigationManager.emittedIntents).isEmpty()
 
-            // creates two sessions (initial and retry)
-            verify(createAuthorizationSession, times(2)).invoke(
+            // creates an additional session (cancel triggers a retry)
+            verify(createAuthorizationSession).invoke(
                 eq(activeInstitution),
                 eq(syncResponse)
             )

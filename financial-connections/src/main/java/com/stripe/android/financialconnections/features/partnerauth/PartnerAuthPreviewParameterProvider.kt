@@ -42,7 +42,6 @@ internal class PartnerAuthPreviewParameterProvider :
                     mobileHandoffCapable = false
                 ),
                 authSession = session(),
-                showInModal = true
             )
         ),
         authenticationStatus = Uninitialized,
@@ -69,7 +68,6 @@ internal class PartnerAuthPreviewParameterProvider :
                     mobileHandoffCapable = false
                 ),
                 authSession = session(),
-                showInModal = false
             )
         ),
         authenticationStatus = Uninitialized,
@@ -101,7 +99,6 @@ internal class PartnerAuthPreviewParameterProvider :
                     mobileHandoffCapable = false
                 ),
                 authSession = session(),
-                showInModal = false
             )
         ),
         // While browser is showing, this Async is loading.

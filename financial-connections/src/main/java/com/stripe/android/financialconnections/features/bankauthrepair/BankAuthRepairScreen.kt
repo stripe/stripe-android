@@ -20,11 +20,12 @@ internal fun BankAuthRepairScreen() {
     SharedPartnerAuth(
         state = state.value,
         onContinueClick = { /*TODO*/ },
+        onCancelClick = { /*TODO*/ },
         onSelectAnotherBank = { /*TODO*/ },
         onClickableTextClick = { /*TODO*/ },
         onEnterDetailsManually = { /*TODO*/ },
         onWebAuthFlowFinished = { /*TODO*/ },
-        onCancelClick = { /*TODO*/ },
-        onViewEffectLaunched = { /*TODO*/ }
+        onViewEffectLaunched = { /*TODO*/ },
+        inModal = false
     )
 }

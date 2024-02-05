@@ -80,7 +80,8 @@ internal fun SharedPartnerAuth(
     onClickableTextClick: (String) -> Unit,
     onEnterDetailsManually: () -> Unit,
     onWebAuthFlowFinished: (WebAuthFlowState) -> Unit,
-    onViewEffectLaunched: () -> Unit
+    onViewEffectLaunched: () -> Unit,
+    inModal: Boolean
 ) {
     val viewModel = parentViewModel()
 
@@ -108,6 +109,7 @@ internal fun SharedPartnerAuth(
     }
 
     SharedPartnerAuthContent(
+        inModal = inModal,
         state = state,
         onClickableTextClick = onClickableTextClick,
         onSelectAnotherBank = onSelectAnotherBank,
@@ -122,6 +124,7 @@ internal fun SharedPartnerAuth(
 @Composable
 private fun SharedPartnerAuthContent(
     state: SharedPartnerAuthState,
+    inModal: Boolean,
     onClickableTextClick: (String) -> Unit,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -131,6 +134,7 @@ private fun SharedPartnerAuthContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     SharedPartnerAuthBody(
+        inModal = inModal,
         state = state,
         onCloseClick = onCloseClick,
         onSelectAnotherBank = onSelectAnotherBank,
@@ -144,12 +148,12 @@ private fun SharedPartnerAuthContent(
 
 @Composable
 @Suppress("MagicNumber")
-private fun SharedPartnerLoading() {
+private fun SharedPartnerLoading(inModal: Boolean) {
     LoadingShimmerEffect { shimmerBrush ->
         Column(
             Modifier.padding(horizontal = 24.dp)
         ) {
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(24.dp))
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -180,7 +184,11 @@ private fun SharedPartnerLoading() {
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
 
             )
-            Spacer(modifier = Modifier.weight(1f))
+            if (inModal) {
+                Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -188,7 +196,15 @@ private fun SharedPartnerLoading() {
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
 
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(shimmerBrush, RoundedCornerShape(8.dp))
+
+            )
+            Spacer(modifier = Modifier.size(24.dp))
         }
     }
 }
@@ -196,6 +212,7 @@ private fun SharedPartnerLoading() {
 @Composable
 private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
+    inModal: Boolean,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
     onSelectAnotherBank: () -> Unit,
@@ -204,18 +221,13 @@ private fun SharedPartnerAuthBody(
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            if (state.payload()?.showInModal == true) {
-                FinancialConnectionsTopAppBar(
-                    showBack = state.canNavigateBack,
-                    onCloseClick = onCloseClick
-                )
-            }
-        }
+    SharedPartnerAuthContentWrapper(
+        inModal = inModal,
+        canNavigateBack = state.canNavigateBack,
+        onCloseClick = onCloseClick
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> SharedPartnerLoading()
+            Uninitialized, is Loading -> SharedPartnerLoading(inModal)
 
             is Fail -> ErrorContent(
                 error = payload.error,
@@ -225,6 +237,7 @@ private fun SharedPartnerAuthBody(
             )
 
             is Success -> LoadedContent(
+                showInModal = inModal,
                 authenticationStatus = state.authenticationStatus,
                 payload = payload(),
                 onClickableTextClick = onClickableTextClick,
@@ -232,6 +245,37 @@ private fun SharedPartnerAuthBody(
                 onCancelClick = onCancelClick,
                 onSelectAnotherBank = onSelectAnotherBank,
             )
+        }
+    }
+}
+
+/**
+ * Wrapper for the content of the partner auth screen, that based on the [inModal] parameter
+ * will render the content in a modal or in a full screen.
+ */
+@Composable
+private fun SharedPartnerAuthContentWrapper(
+    inModal: Boolean,
+    canNavigateBack: Boolean,
+    onCloseClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    if (inModal) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            content()
+        }
+    } else {
+        FinancialConnectionsScaffold(
+            topBar = {
+                FinancialConnectionsTopAppBar(
+                    showBack = canNavigateBack,
+                    onCloseClick = onCloseClick
+                )
+            }
+        ) {
+            content()
         }
     }
 }
@@ -262,6 +306,7 @@ private fun ErrorContent(
 
 @Composable
 private fun LoadedContent(
+    showInModal: Boolean,
     authenticationStatus: Async<String>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
@@ -277,14 +322,14 @@ private fun LoadedContent(
                 // show loading prepane when authenticationStatus
                 // is Loading or Success (completing auth after redirect)
                 loading = authenticationStatus is Loading || authenticationStatus is Success,
-                showInDrawer = payload.showInModal,
+                showInModal = showInModal,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
                 onClickableTextClick = onClickableTextClick,
             )
 
-            false -> SharedPartnerLoading()
+            false -> SharedPartnerLoading(showInModal)
         }
 
         is Fail -> {
@@ -294,22 +339,21 @@ private fun LoadedContent(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @Suppress("LongMethod")
 private fun PrePaneContent(
+    showInModal: Boolean,
     content: OauthPrepane,
     loading: Boolean,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
-    showInDrawer: Boolean
 ) {
     Layout(
-        inModal = showInDrawer,
+        inModal = showInModal,
         // Overrides padding values to allow full-span prepane image background
         verticalArrangement = Arrangement.spacedBy(24.dp),
-        bodyPadding = PaddingValues(horizontal = 0.dp, vertical = 16.dp),
+        bodyPadding = PaddingValues(top = 24.dp),
         body = {
             item {
                 PrepaneHeader(
@@ -532,7 +576,7 @@ private fun GifWebView(
 }
 
 @Preview(
-    group = "Shared Partner Auth"
+    group = "SharedPartnerAuth"
 )
 @Composable
 internal fun PartnerAuthPreview(
@@ -542,14 +586,38 @@ internal fun PartnerAuthPreview(
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
             state = state,
-            onContinueClick = {},
+            inModal = false,
+            onClickableTextClick = {},
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
-            onClickableTextClick = {},
+            onContinueClick = {},
             onCloseClick = {},
-            onCancelClick = {},
-            onCloseFromErrorClick = {}
-        )
+            onCancelClick = {}
+        ) {}
+    }
+}
+
+@Preview(
+    group = "SharedPartnerAuth - Drawer"
+)
+@Composable
+internal fun PartnerAuthDrawerPreview(
+    @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
+    state: SharedPartnerAuthState
+) {
+    FinancialConnectionsPreview {
+        Box(modifier = Modifier.background(Color.White)) {
+            SharedPartnerAuthContent(
+                state = state,
+                inModal = true,
+                onClickableTextClick = {},
+                onSelectAnotherBank = {},
+                onEnterDetailsManually = {},
+                onContinueClick = {},
+                onCloseClick = {},
+                onCancelClick = {}
+            ) {}
+        }
     }
 }
 
