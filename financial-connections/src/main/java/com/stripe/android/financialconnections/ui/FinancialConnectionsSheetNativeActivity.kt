@@ -9,6 +9,8 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
@@ -28,9 +30,9 @@ import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
+import com.google.accompanist.navigation.material.BottomSheetNavigator
 import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
 import com.google.accompanist.navigation.material.ModalBottomSheetLayout
-import com.google.accompanist.navigation.material.rememberBottomSheetNavigator
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
@@ -125,7 +127,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
 
-        val bottomSheetNavigator = rememberBottomSheetNavigator()
+        val sheetState = rememberModalBottomSheetState(
+            ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true
+        )
+        val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }
         val navController = rememberNavController(bottomSheetNavigator)
         PaneBackgroundEffects(navController)
         NavigationEffects(viewModel.navigationFlow, navController)

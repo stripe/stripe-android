@@ -103,12 +103,12 @@ internal sealed class Destination(
 
     object PartnerAuthDrawer : NoArgumentsDestination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
-        composable = { PartnerAuthScreen() }
+        composable = { PartnerAuthScreen(inModal = true) }
     )
 
     object PartnerAuth : NoArgumentsDestination(
         route = Pane.PARTNER_AUTH.value,
-        composable = { PartnerAuthScreen() }
+        composable = { PartnerAuthScreen(inModal = false) }
     )
 
     object AccountPicker : NoArgumentsDestination(

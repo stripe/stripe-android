@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -35,7 +35,7 @@ internal class InstitutionPickerViewModelTest {
 
     private val searchInstitutions = mock<SearchInstitutions>()
     private val featuredInstitutions = mock<FeaturedInstitutions>()
-    private val getManifest = mock<GetManifest>()
+    private val sync = mock<GetOrFetchSync>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val navigationManager = mock<NavigationManager>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -51,11 +51,12 @@ internal class InstitutionPickerViewModelTest {
             configuration = defaultConfiguration,
             searchInstitutions = searchInstitutions,
             featuredInstitutions = featuredInstitutions,
-            getManifest = getManifest,
+            getOrFetchSync = sync,
             navigationManager = navigationManager,
             updateLocalManifest = updateLocalManifest,
             logger = Logger.noop(),
             eventTracker = eventTracker,
+            postAuthorizationSession = mock(),
             initialState = state
         )
     }
@@ -156,7 +157,7 @@ internal class InstitutionPickerViewModelTest {
     }
 
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
-        whenever(getManifest()).thenReturn(manifest)
+        whenever(sync()).thenReturn(ApiKeyFixtures.syncResponse(manifest))
     }
 
     private suspend fun givenSearchInstitutionsReturns(

@@ -93,7 +93,6 @@ internal class PartnerAuthViewModel @Inject constructor(
             isStripeDirect = manifest.isStripeDirect ?: false,
             institution = requireNotNull(manifest.activeInstitution),
             authSession = authSession,
-            showInModal = authSession.isOAuth
         )
     }.execute { copy(payload = it) }
 
@@ -108,7 +107,6 @@ internal class PartnerAuthViewModel @Inject constructor(
         logger.debug("Created auth session ${authSession.id}")
         Payload(
             authSession = authSession,
-            showInModal = authSession.isOAuth,
             institution = requireNotNull(manifest.activeInstitution),
             isStripeDirect = manifest.isStripeDirect ?: false
         ).also {
@@ -152,6 +150,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onLaunchAuthClick() {
+        setState { copy(authenticationStatus = Loading()) }
         viewModelScope.launch {
             awaitState().payload()?.authSession?.let {
                 postAuthSessionEvent(it.id, AuthSessionEvent.OAuthLaunched(Date()))

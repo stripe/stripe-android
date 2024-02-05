@@ -11,11 +11,12 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
 
 @Composable
-internal fun PartnerAuthScreen() {
+internal fun PartnerAuthScreen(inModal: Boolean) {
     val viewModel: PartnerAuthViewModel = mavericksViewModel()
     val state: State<SharedPartnerAuthState> = viewModel.collectAsState()
 
     SharedPartnerAuth(
+        inModal = inModal,
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
