@@ -46,7 +46,8 @@ internal interface PaymentSheetLoader {
 
     suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        isReloadingAfterProcessDeath: Boolean = false,
     ): Result<PaymentSheetState.Full>
 }
 
@@ -66,7 +67,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        isReloadingAfterProcessDeath: Boolean,
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
         eventReporter.onLoadStarted()
 
@@ -83,6 +85,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 reportSuccessfulLoad(
                     elementsSession = elementsSession,
                     state = state,
+                    isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
                 )
 
                 return@let state
@@ -383,16 +386,23 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private fun reportSuccessfulLoad(
         elementsSession: ElementsSession,
         state: PaymentSheetState.Full,
+        isReloadingAfterProcessDeath: Boolean,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
         }
 
-        eventReporter.onLoadSucceeded(
-            linkEnabled = elementsSession.isLinkEnabled,
-            currency = elementsSession.stripeIntent.currency,
-            paymentSelection = state.paymentSelection,
-        )
+        val treatValidationErrorAsFailure = !state.stripeIntent.isConfirmed || isReloadingAfterProcessDeath
+
+        if (state.validationError != null && treatValidationErrorAsFailure) {
+            eventReporter.onLoadFailed(state.validationError)
+        } else {
+            eventReporter.onLoadSucceeded(
+                linkEnabled = elementsSession.isLinkEnabled,
+                currency = elementsSession.stripeIntent.currency,
+                paymentSelection = state.paymentSelection,
+            )
+        }
     }
 
     private fun reportFailedLoad(
