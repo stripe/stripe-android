@@ -30,7 +30,7 @@ ext.versions = [
         diskLruCache                : '2.0.2',
         dokka                       : '1.9.10',
         espresso                    : '3.5.1',
-        firebaseAppDistribution     : '4.0.0',
+        firebaseAppDistribution     : '4.0.1',
         fuel                        : '2.3.1',
         goDaddyColorPicker          : '0.7.0',
         googleServices              : '4.3.15',
