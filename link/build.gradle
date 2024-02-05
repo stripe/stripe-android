@@ -37,6 +37,7 @@ dependencies {
     testImplementation project(':payments-core')
     testImplementation project(':payments-core-testing')
     testImplementation project(':payments-ui-core')
+    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.truth
