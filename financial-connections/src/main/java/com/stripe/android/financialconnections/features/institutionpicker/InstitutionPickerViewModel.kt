@@ -71,7 +71,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 eventTracker.logError(
                     extraMessage = "Error fetching featured institutions",
                     error = it,
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     logger = logger
                 )
             }.getOrElse {
@@ -93,10 +93,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
         onAsync(
             InstitutionPickerState::payload,
             onSuccess = { payload ->
-                eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER))
+                eventTracker.track(PaneLoaded(PANE))
                 eventTracker.track(
                     FeaturedInstitutionsLoaded(
-                        pane = Pane.INSTITUTION_PICKER,
+                        pane = PANE,
                         duration = payload.featuredInstitutionsDuration,
                         institutionIds = payload.featuredInstitutions.data.map { it.id }.toSet()
                     )
@@ -106,7 +106,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 eventTracker.logError(
                     extraMessage = "Error fetching initial payload",
                     error = it,
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     logger = logger
                 )
             }
@@ -117,7 +117,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 eventTracker.logError(
                     extraMessage = "Error searching institutions",
                     error = it,
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     logger = logger
                 )
             }
@@ -128,7 +128,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 eventTracker.logError(
                     extraMessage = "Error selecting institution institutions",
                     error = it,
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     logger = logger
                 )
             }
@@ -147,7 +147,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 }
                 eventTracker.track(
                     SearchSucceeded(
-                        pane = Pane.INSTITUTION_PICKER,
+                        pane = PANE,
                         query = query,
                         duration = millis,
                         resultCount = result.data.count()
@@ -170,7 +170,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         suspend {
             eventTracker.track(
                 InstitutionSelected(
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     fromFeatured = fromFeatured,
                     institutionId = institution.id
                 )
@@ -198,26 +198,24 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     private fun navigateToPartnerAuth(authSession: FinancialConnectionsAuthorizationSession) {
-        if (authSession.isOAuth) {
-            navigationManager.tryNavigateTo(PartnerAuthDrawer(referrer = Pane.INSTITUTION_PICKER))
-        } else {
-            navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
-        }
-    }
-
-    private fun navigateToPartnerAuth() {
-        navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
+        navigationManager.tryNavigateTo(
+            if (authSession.isOAuth) {
+                PartnerAuthDrawer(referrer = PANE)
+            } else {
+                PartnerAuth(referrer = PANE)
+            }
+        )
     }
 
     fun onManualEntryClick() {
-        navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.INSTITUTION_PICKER))
+        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
     }
 
     fun onScrollChanged() {
         viewModelScope.launch {
             eventTracker.track(
                 SearchScroll(
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     institutionIds = awaitState().searchInstitutions()
                         ?.data
                         ?.map { it.id }
@@ -231,6 +229,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         MavericksViewModelFactory<InstitutionPickerViewModel, InstitutionPickerState> {
 
         private const val SEARCH_DEBOUNCE_MS = 300L
+        private val PANE = Pane.INSTITUTION_PICKER
         override fun create(
             viewModelContext: ViewModelContext,
             state: InstitutionPickerState
