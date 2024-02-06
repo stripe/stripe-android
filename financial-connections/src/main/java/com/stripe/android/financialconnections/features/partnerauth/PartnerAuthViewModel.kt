@@ -26,11 +26,14 @@ import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
+import com.stripe.android.financialconnections.domain.ErrorHandler
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
+import com.stripe.android.financialconnections.exception.FinancialConnectionsError
+import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
@@ -41,7 +44,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
-import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
@@ -65,6 +67,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getOrFetchSync: GetOrFetchSync,
     private val browserManager: BrowserManager,
+    private val errorHandler: ErrorHandler,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
@@ -146,15 +149,32 @@ internal class PartnerAuthViewModel @Inject constructor(
         onAsync(
             SharedPartnerAuthState::payload,
             onFail = {
-                eventTracker.logError(
+                errorHandler.handle(
                     extraMessage = "Error fetching payload / posting AuthSession",
                     error = it,
                     logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true
                 )
             },
             onSuccess = { eventTracker.track(PaneLoaded(PANE)) }
         )
+        onAsync(
+            SharedPartnerAuthState::authenticationStatus,
+            onFail = {
+                errorHandler.handle(
+                    extraMessage = "Error with authentication status",
+                    error = it.toPartnerAuthError(),
+                    logger = logger,
+                    pane = PANE,
+                    displayErrorScreen = true
+                )
+            }
+        )
+    }
+
+    private fun Throwable.toPartnerAuthError(): FinancialConnectionsError {
+        return if (this is FinancialConnectionsError) this else PartnerAuthError(this.message)
     }
 
     fun onLaunchAuthClick() {
@@ -389,12 +409,6 @@ internal class PartnerAuthViewModel @Inject constructor(
             setState { copy(authenticationStatus = Fail(it)) }
         }
     }
-
-    fun onEnterDetailsManuallyClick() = navigationManager.tryNavigateTo(
-        ManualEntry(referrer = PANE),
-        popUpToCurrent = true,
-        inclusive = true
-    )
 
     // if clicked uri contains an eventName query param, track click event.
     fun onClickableTextClick(uri: String) = viewModelScope.launch {

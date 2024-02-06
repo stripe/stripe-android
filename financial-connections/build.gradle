@@ -90,7 +90,8 @@ android {
     kotlinOptions {
         freeCompilerArgs += [
                 "-Xopt-in=kotlin.RequiresOptIn",
-                "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi"
+                "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi",
+                "-Xcontext-receivers"
         ]
     }
 

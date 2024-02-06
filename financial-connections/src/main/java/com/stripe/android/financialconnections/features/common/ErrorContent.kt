@@ -321,6 +321,18 @@ internal fun UnclassifiedErrorContentPreview() {
     }
 }
 
+@Preview(group = "Errors", name = "institution unknown error")
+@Composable
+internal fun InstitutionUnknownErrorContentPreview() {
+    FinancialConnectionsPreview {
+        FinancialConnectionsScaffold(
+            topBar = { FinancialConnectionsTopAppBar { } }
+        ) {
+            InstitutionUnknownErrorContent {}
+        }
+    }
+}
+
 @Preview(group = "Errors", name = "institution down planned error")
 @Composable
 internal fun InstitutionPlannedDowntimeErrorContentPreview() {

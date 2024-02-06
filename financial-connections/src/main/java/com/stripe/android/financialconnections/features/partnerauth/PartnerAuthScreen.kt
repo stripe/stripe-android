@@ -19,7 +19,6 @@ internal fun PartnerAuthScreen() {
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
-        onEnterDetailsManually = viewModel::onEnterDetailsManuallyClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onWebAuthFlowFinished = viewModel::onWebAuthFlowFinished,
         onCancelClick = viewModel::onCancelClick,
