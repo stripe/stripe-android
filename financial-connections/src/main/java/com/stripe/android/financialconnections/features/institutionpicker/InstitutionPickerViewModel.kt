@@ -19,7 +19,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.domain.ErrorHandler
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -42,7 +41,6 @@ import javax.inject.Inject
 @Suppress("LongParameterList")
 internal class InstitutionPickerViewModel @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
-    private val errorHandler: ErrorHandler,
     private val searchInstitutions: SearchInstitutions,
     private val featuredInstitutions: FeaturedInstitutions,
     private val getManifest: GetManifest,
@@ -123,11 +121,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
         onAsync(
             InstitutionPickerState::selectInstitution,
             onFail = {
-                errorHandler.handle(
+                eventTracker.logError(
                     extraMessage = "Error selecting institution institutions",
                     error = it,
                     pane = Pane.INSTITUTION_PICKER,
-                    displayErrorScreen = true
+                    logger = logger
                 )
             }
         )
