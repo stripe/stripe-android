@@ -44,7 +44,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
-import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
@@ -214,14 +213,6 @@ internal class PartnerAuthViewModel @Inject constructor(
      */
     private fun FinancialConnectionsAuthorizationSession.browserReadyUrl(): String? =
         url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
-
-    fun onSelectAnotherBank() {
-        navigationManager.tryNavigateTo(
-            Reset(referrer = PANE),
-            popUpToCurrent = true,
-            inclusive = true
-        )
-    }
 
     fun onWebAuthFlowFinished(
         webStatus: WebAuthFlowState
