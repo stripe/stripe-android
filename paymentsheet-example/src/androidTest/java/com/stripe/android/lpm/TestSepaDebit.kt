@@ -46,7 +46,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
-            }
+            },
         ) {
             fillOutIban()
         }
@@ -58,7 +58,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
-            }
+            },
         ) {
             fillOutIban()
         }
@@ -70,15 +70,14 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             testParameters = testParameters,
             populateCustomLpmFields = {
                 fillOutIban()
-            },
-            verifyCustomLpmFields = {
-                rules.compose.onNodeWithText("IBAN").apply {
-                    assertContentDescriptionEquals(
-                        "DE89370400440532013000"
-                    )
-                }
             }
-        )
+        ) {
+            rules.compose.onNodeWithText("IBAN").apply {
+                assertContentDescriptionEquals(
+                    "DE89370400440532013000"
+                )
+            }
+        }
     }
 
     @Test

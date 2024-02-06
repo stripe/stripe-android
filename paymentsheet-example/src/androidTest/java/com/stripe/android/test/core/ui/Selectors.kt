@@ -1,7 +1,6 @@
 package com.stripe.android.test.core.ui
 
 import android.content.pm.PackageManager
-import androidx.annotation.StringRes
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
@@ -223,9 +222,7 @@ internal class Selectors(
         getResourceString(UiCoreR.string.stripe_email)
     )
 
-    fun getName(@StringRes resourceId: Int) = composeTestRule.onNodeWithText(
-        getResourceString(resourceId)
-    )
+    fun getName(labelText: String) = composeTestRule.onNodeWithText(labelText)
 
     fun getLine1() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_address_line1)
@@ -253,6 +250,8 @@ internal class Selectors(
     fun getPostalCode() = composeTestRule.onNodeWithText(
         getResourceString(CoreR.string.stripe_address_label_postal_code)
     )
+
+    fun getPhoneNumber(labelText: String) = composeTestRule.onNodeWithText(labelText)
 
     fun getAuBsb() = composeTestRule.onNodeWithText(
         getResourceString(StripeR.string.stripe_becs_widget_bsb)

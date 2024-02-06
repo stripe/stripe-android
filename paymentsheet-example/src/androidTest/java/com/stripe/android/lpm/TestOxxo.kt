@@ -34,6 +34,10 @@ internal class TestOxxo : BasePlaygroundTest() {
     fun testOxxo() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
+            populateCustomLpmFields = {
+                populateEmail()
+                populateName()
+            }
         )
     }
 
@@ -41,6 +45,10 @@ internal class TestOxxo : BasePlaygroundTest() {
     fun testOxxoInCustomFlow() {
         testDriver.confirmCustom(
             testParameters = testParameters,
+            populateCustomLpmFields = {
+                populateEmail()
+                populateName()
+            }
         )
     }
 }
