@@ -965,6 +965,12 @@
 |    +--- project :stripe-ui-core (*)
 |    +--- project :payments-model (*)
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 (*)
+|    +--- com.google.accompanist:accompanist-navigation-material:0.34.0
+|    |    +--- androidx.compose.foundation:foundation:1.6.0 (*)
+|    |    +--- androidx.compose.material:material:1.6.0 (*)
+|    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 -> 1.7.3 (*)
+|    |    +--- androidx.navigation:navigation-compose:2.7.0-alpha01 -> 2.7.6 (*)
+|    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 (*)
 |    +--- androidx.activity:activity-ktx:1.8.2 (*)
 |    +--- androidx.annotation:annotation:1.7.1 (*)
 |    +--- androidx.appcompat:appcompat:1.6.1 (*)
