@@ -23,12 +23,12 @@ object LpmRepositoryTestHelpers {
     )
 }
 
-fun LpmRepository.updateFromDisk(stripeIntent: StripeIntent) {
+internal fun LpmRepository.updateFromDisk(stripeIntent: StripeIntent) {
     val metadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
     update(metadata = metadata, serverLpmSpecs = null)
 }
 
-fun LpmRepository.update(
+internal fun LpmRepository.update(
     stripeIntent: StripeIntent,
     serverLpmSpecs: String? = null,
     billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
