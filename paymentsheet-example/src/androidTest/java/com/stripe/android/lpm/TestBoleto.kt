@@ -43,6 +43,12 @@ internal class TestBoleto : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
             values = boletoValues,
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBoletoTaxId()
+                fieldPopulator.populateName()
+                fieldPopulator.populateAddress()
+                fieldPopulator.populateEmail()
+            }
         )
     }
 
@@ -53,6 +59,12 @@ internal class TestBoleto : BasePlaygroundTest() {
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             },
             values = boletoValues,
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBoletoTaxId()
+                fieldPopulator.populateName()
+                fieldPopulator.populateAddress()
+                fieldPopulator.populateEmail()
+            }
         )
     }
 
@@ -63,6 +75,12 @@ internal class TestBoleto : BasePlaygroundTest() {
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },
             values = boletoValues,
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBoletoTaxId()
+                fieldPopulator.populateName()
+                fieldPopulator.populateAddress()
+                fieldPopulator.populateEmail()
+            }
         )
     }
 
@@ -71,6 +89,12 @@ internal class TestBoleto : BasePlaygroundTest() {
         testDriver.confirmCustom(
             testParameters = testParameters,
             values = boletoValues,
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBoletoTaxId()
+                fieldPopulator.populateName()
+                fieldPopulator.populateAddress()
+                fieldPopulator.populateEmail()
+            }
         )
     }
 }

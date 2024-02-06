@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -14,8 +13,7 @@ import kotlinx.parcelize.Parcelize
  * The purpose of this is to be able to easily plumb this information into the locations it’s needed.
  */
 @Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class PaymentMethodMetadata(
+internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,

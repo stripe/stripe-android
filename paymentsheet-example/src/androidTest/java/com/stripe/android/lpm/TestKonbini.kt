@@ -34,6 +34,11 @@ internal class TestKonbini : BasePlaygroundTest() {
     fun testKonbini() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateName()
+                fieldPopulator.populateEmail()
+                fieldPopulator.populatePhoneNumber("Phone (optional)")
+            }
         )
     }
 
@@ -41,6 +46,11 @@ internal class TestKonbini : BasePlaygroundTest() {
     fun testKonbiniInCustomFlow() {
         testDriver.confirmCustom(
             testParameters = testParameters,
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateName()
+                fieldPopulator.populateEmail()
+                fieldPopulator.populatePhoneNumber("Phone (optional)")
+            }
         )
     }
 }

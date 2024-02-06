@@ -18,28 +18,40 @@ internal class TestBacs : BasePlaygroundTest() {
     @Test
     fun testBacsWhenConfirmed() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = createTestParameters(AuthorizeAction.Bacs.Confirm)
+            testParameters = createTestParameters(AuthorizeAction.Bacs.Confirm),
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBacs()
+            }
         )
     }
 
     @Test
     fun testBacsWhenCancelled() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = createTestParameters(AuthorizeAction.Bacs.ModifyDetails)
+            testParameters = createTestParameters(AuthorizeAction.Bacs.ModifyDetails),
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBacs()
+            }
         )
     }
 
     @Test
     fun testBacsWhenConfirmedInCustomFlow() {
         testDriver.confirmCustomAndBuy(
-            testParameters = createTestParameters(AuthorizeAction.Bacs.Confirm)
+            testParameters = createTestParameters(AuthorizeAction.Bacs.Confirm),
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBacs()
+            },
         )
     }
 
     @Test
     fun testBacsWhenCancelledInCustomFlow() {
         testDriver.confirmCustomAndBuy(
-            testParameters = createTestParameters(AuthorizeAction.Bacs.ModifyDetails)
+            testParameters = createTestParameters(AuthorizeAction.Bacs.ModifyDetails),
+            populateCustomLpmFields = { fieldPopulator ->
+                fieldPopulator.populateBacs()
+            },
         )
     }
 

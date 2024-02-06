@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import android.content.res.Resources
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
@@ -26,8 +25,7 @@ import javax.inject.Singleton
  * form view model a new repository is created and thus needs to be initialized.
  */
 @Singleton
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LpmRepository(
+internal class LpmRepository(
     private val arguments: LpmRepositoryArguments,
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
     private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance,
@@ -163,7 +161,6 @@ class LpmRepository(
     }
 
     @VisibleForTesting(otherwise = VisibleForTesting.PROTECTED)
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     class LpmInitialFormData {
 
         private val codeToSupportedPaymentMethod = mutableMapOf<String, SupportedPaymentMethod>()
@@ -185,7 +182,6 @@ class LpmRepository(
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Volatile
         private var INSTANCE: LpmRepository? = null
@@ -195,7 +191,6 @@ class LpmRepository(
             }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class LpmRepositoryArguments(
         val resources: Resources,
     )
