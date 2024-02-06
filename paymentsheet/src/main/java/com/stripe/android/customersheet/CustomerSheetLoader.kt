@@ -22,8 +22,11 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
@@ -56,21 +59,27 @@ internal class DefaultCustomerSheetLoader(
     )
 
     override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
-        val customerAdapter = customerAdapterProvider.await()
-
-        val elementsSession = if (customerAdapter.canCreateSetupIntents) {
-            retrieveElementsSession(configuration).getOrElse {
-                return Result.failure(it)
-            }
-        } else {
-            null
-        }
-
-        return loadPaymentMethods(
-            customerAdapter = customerAdapter,
-            configuration = configuration,
-            elementsSession = elementsSession,
+        val customerAdapter = customerAdapterProvider.awaitAsResult(
+            timeout = 5.seconds,
+            error = {
+                "Couldn't find an instance of CustomerAdapter. " +
+                    "Are you instantiating CustomerSheet unconditionally in your app?"
+            },
         )
+
+        return customerAdapter.mapCatching { adapter ->
+            if (adapter.canCreateSetupIntents) {
+                adapter to retrieveElementsSession(configuration).getOrThrow()
+            } else {
+                adapter to null
+            }
+        }.map { (adapter, session) ->
+            loadPaymentMethods(
+                customerAdapter = adapter,
+                configuration = configuration,
+                elementsSession = session,
+            ).getOrThrow()
+        }
     }
 
     private suspend fun retrieveElementsSession(
@@ -197,5 +206,17 @@ internal class DefaultCustomerSheetLoader(
         return supportedPaymentMethods.filter {
             supported.contains(it.code)
         }
+    }
+}
+
+private suspend fun <T> Deferred<T>.awaitAsResult(
+    timeout: Duration,
+    error: () -> String,
+): Result<T> {
+    val result = withTimeoutOrNull(timeout) { await() }
+    return if (result != null) {
+        Result.success(result)
+    } else {
+        Result.failure(IllegalStateException(error()))
     }
 }

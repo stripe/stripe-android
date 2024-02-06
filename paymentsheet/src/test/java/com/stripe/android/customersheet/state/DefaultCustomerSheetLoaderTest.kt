@@ -571,6 +571,27 @@ class DefaultCustomerSheetLoaderTest {
         }
     }
 
+    @Test
+    fun `Fails if awaiting CustomerAdapter times out`() = runTest {
+        val configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
+        val loader = DefaultCustomerSheetLoader(
+            isLiveModeProvider = { false },
+            googlePayRepositoryFactory = { readyGooglePayRepository },
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT,
+                error = null,
+                linkSettings = null,
+                isCbcEligible = false,
+            ),
+            lpmRepository = lpmRepository,
+            isFinancialConnectionsAvailable = { false },
+        )
+
+        val result = loader.load(configuration)
+
+        assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+    }
+
     private fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
