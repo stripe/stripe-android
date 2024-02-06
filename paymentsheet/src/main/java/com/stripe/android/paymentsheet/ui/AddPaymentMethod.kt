@@ -4,7 +4,6 @@ import android.content.res.Resources
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,8 +29,9 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
+import com.stripe.android.ui.core.analytics.PaymentsUiEventReporter
+import com.stripe.android.ui.core.analytics.ReportablePaymentsUi
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.elements.ParameterDestination
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -90,10 +90,24 @@ internal fun AddPaymentMethod(
         sheetViewModel.clearErrorMessages()
     }
 
+    val eventReporter = remember(sheetViewModel) {
+        object : PaymentsUiEventReporter {
+            override fun onCardNumberCompleted() {
+                // TODO(samer-stripe): Connect to base sheet view model
+            }
+
+            override fun onAutofillEvent(type: String) {
+                sheetViewModel.reportAutofillEvent(type)
+            }
+
+            override fun onFieldInteracted() {
+                // TODO(samer-stripe): Connect to base sheet view model
+            }
+        }
+    }
+
     Column(modifier = modifier.fillMaxWidth()) {
-        CompositionLocalProvider(
-            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent
-        ) {
+        ReportablePaymentsUi(eventReporter = eventReporter) {
             val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
                 ?.args
                 ?.initializationMode

@@ -1,9 +1,9 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import com.stripe.android.uicore.stripeColors
 
 @Preview
@@ -89,9 +90,9 @@ fun DropDown(
 
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
+    val (interactionSource) = rememberInteractionReporter()
     var expanded by remember { mutableStateOf(false) }
     val selectedItemLabel = controller.getSelectedItemLabel(selectedIndex)
-    val interactionSource = remember { MutableInteractionSource() }
     val currentTextColor = if (shouldEnable) {
         MaterialTheme.stripeColors.onComponent
     } else {
@@ -113,6 +114,8 @@ fun DropDown(
                 .focusProperties { canFocus = false }
                 .clickable(
                     enabled = shouldEnable,
+                    interactionSource = interactionSource,
+                    indication = LocalIndication.current,
                     onClickLabel = stringResource(R.string.stripe_change),
                     onClick = { expanded = true },
                 )

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -21,6 +22,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -34,6 +36,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElementUI
 import com.stripe.android.uicore.elements.H6Text
@@ -446,6 +449,8 @@ private fun AccountDetailsForm(
     saveForFutureUseElement: SaveForFutureUseElement,
     onRemoveAccount: () -> Unit,
 ) {
+    val (interactionSource) = rememberInteractionReporter()
+
     var openDialog by remember { mutableStateOf(false) }
     val bankIcon = TransformToBankIcon(bankName)
 
@@ -484,10 +489,14 @@ private fun AccountDetailsForm(
                     painter = painterResource(StripeR.drawable.stripe_ic_clear),
                     contentDescription = null,
                     modifier = Modifier
+                        .testTag(US_BANK_ACCOUNT_CLEAR_BUTTON_TEST_TAG)
                         .height(20.dp)
                         .width(20.dp)
                         .alpha(if (isProcessing) 0.5f else 1f)
-                        .clickable {
+                        .clickable(
+                            interactionSource = interactionSource,
+                            indication = LocalIndication.current,
+                        ) {
                             if (!isProcessing) {
                                 openDialog = true
                             }
@@ -530,3 +539,5 @@ private fun AccountDetailsForm(
         )
     }
 }
+
+internal const val US_BANK_ACCOUNT_CLEAR_BUTTON_TEST_TAG = "USBankAccountClearButton"

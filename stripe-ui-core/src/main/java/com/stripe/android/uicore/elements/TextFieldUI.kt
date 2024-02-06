@@ -5,7 +5,9 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -33,7 +35,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -62,23 +63,13 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.stripe.android.core.Logger
-import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.analytics.LocalUiEventReporter
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val LocalAutofillEventReporter = staticCompositionLocalOf(::defaultAutofillEventReporter)
-
-private fun defaultAutofillEventReporter(): (String) -> Unit {
-    return { autofillType ->
-        Logger.getInstance(BuildConfig.DEBUG)
-            .debug("LocalAutofillEventReporter $autofillType event not reported")
-    }
-}
 
 /**
  * This is focused on converting an [TextFieldController] into what is displayed in a section
@@ -140,6 +131,7 @@ fun TextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
     val focusManager = LocalFocusManager.current
+    val eventReporter = LocalUiEventReporter.current
     val value by textFieldController.fieldValue.collectAsState("")
     val trailingIcon by textFieldController.trailingIcon.collectAsState(null)
     val shouldShowError by textFieldController.visibleError.collectAsState(false)
@@ -148,6 +140,7 @@ fun TextField(
     val placeHolder by textFieldController.placeHolder.collectAsState(null)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
+    val (interactionSource, reportInteractionManually) = rememberInteractionReporter()
 
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
@@ -161,14 +154,12 @@ fun TextField(
         }
     }
 
-    val autofillReporter = LocalAutofillEventReporter.current
-
-    val autofillNode = remember {
+    val autofillNode = remember(eventReporter, textFieldController) {
         AutofillNode(
             autofillTypes = listOfNotNull(textFieldController.autofillType),
             onFill = {
                 textFieldController.autofillType?.let { type ->
-                    autofillReporter(type.name)
+                    eventReporter.onAutofillEvent(type.name)
                 }
                 textFieldController.onValueChange(it)
             }
@@ -185,6 +176,8 @@ fun TextField(
         value = value,
         loading = loading,
         onValueChange = { newValue ->
+            reportInteractionManually()
+
             val acceptInput = fieldState.canAcceptInput(value, newValue)
 
             if (acceptInput) {
@@ -231,6 +224,7 @@ fun TextField(
                 this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
+        interactionSource = interactionSource,
         label = label?.let {
             stringResource(it)
         },
@@ -267,6 +261,7 @@ internal fun TextFieldUi(
     shouldShowError: Boolean,
     modifier: Modifier = Modifier,
     visualTransformation: VisualTransformation = VisualTransformation.None,
+    interactionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (value: String) -> Unit = {},
@@ -323,6 +318,7 @@ internal fun TextFieldUi(
             }
         },
         isError = shouldShowError,
+        interactionSource = interactionSource,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
         keyboardActions = keyboardActions,
@@ -415,7 +411,10 @@ internal fun TrailingIcon(
 private fun TrailingDropdown(
     icon: TextFieldIcon.Dropdown,
     loading: Boolean,
-    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit
+    onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit,
+    interactionSource: MutableInteractionSource = remember {
+        MutableInteractionSource()
+    }
 ) {
     var expanded by remember {
         mutableStateOf(false)
@@ -426,7 +425,11 @@ private fun TrailingDropdown(
     Box(
         modifier = Modifier
             .focusProperties { canFocus = false }
-            .clickable(enabled = show) { expanded = true }
+            .clickable(
+                enabled = show,
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
+            ) { expanded = true }
             .testTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG)
     ) {
         Row(

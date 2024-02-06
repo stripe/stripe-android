@@ -37,6 +37,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import com.stripe.android.core.R as CoreR
@@ -114,7 +115,7 @@ fun PhoneNumberElementUI(
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
-
+    val (interactionSource, reportInteractionManually) = rememberInteractionReporter()
     val value by controller.fieldValue.collectAsState("")
     val isComplete by controller.isComplete.collectAsState(false)
     val shouldShowError by controller.error.collectAsState(null)
@@ -134,7 +135,11 @@ fun PhoneNumberElementUI(
 
     TextField(
         value = value,
-        onValueChange = controller::onValueChange,
+        onValueChange = { newValue ->
+            reportInteractionManually()
+
+            controller.onValueChange(newValue)
+        },
         modifier = modifier
             .fillMaxWidth()
             .bringIntoViewRequester(bringIntoViewRequester)
@@ -167,6 +172,7 @@ fun PhoneNumberElementUI(
         placeholder = {
             Text(text = placeholder)
         },
+        interactionSource = interactionSource,
         leadingIcon = countryDropdown,
         trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,

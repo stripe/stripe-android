@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
 
@@ -195,6 +196,8 @@ private fun OTPInputBox(
     colors: OTPElementColors,
     placeholder: String
 ) {
+    val (interactionSource, reportInteractionManually) = rememberInteractionReporter()
+
     // Need to use BasicTextField instead of TextField to be able to customize the
     // internal contentPadding
     BasicTextField(
@@ -207,6 +210,8 @@ private fun OTPInputBox(
             }
         ),
         onValueChange = {
+            reportInteractionManually()
+
             // If the OTPInputBox already has a value, it would be the first character of it.text
             // remove it before passing it to the controller.
             val newValue =
@@ -221,6 +226,7 @@ private fun OTPInputBox(
         modifier = modifier,
         enabled = enabled,
         textStyle = textStyle,
+        interactionSource = interactionSource,
         cursorBrush = SolidColor(MaterialTheme.stripeColors.textCursor),
         keyboardOptions = KeyboardOptions(
             keyboardType = element.controller.keyboardType

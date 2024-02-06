@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,6 +15,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import com.stripe.android.uicore.elements.menu.Checkbox
 import androidx.compose.ui.R as ComposeUiR
 
@@ -27,6 +29,8 @@ fun CheckboxElementUI(
     isEnabled: Boolean = false,
     onValueChange: (Boolean) -> Unit,
 ) {
+    val (interactionSource) = rememberInteractionReporter()
+
     val accessibilityDescription = stringResource(
         if (isChecked) {
             ComposeUiR.string.selected
@@ -44,6 +48,8 @@ fun CheckboxElementUI(
             }
             .toggleable(
                 value = isChecked,
+                interactionSource = interactionSource,
+                indication = LocalIndication.current,
                 role = Role.Checkbox,
                 onValueChange = onValueChange,
                 enabled = isEnabled
@@ -53,6 +59,7 @@ fun CheckboxElementUI(
     ) {
         Checkbox(
             checked = isChecked,
+            interactionSource = interactionSource,
             onCheckedChange = null, // needs to be null for accessibility on row click to work
             enabled = isEnabled
         )

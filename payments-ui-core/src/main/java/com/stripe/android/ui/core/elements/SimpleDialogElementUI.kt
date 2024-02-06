@@ -6,8 +6,10 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import com.stripe.android.uicore.elements.H6Text
 
 @Composable
@@ -17,12 +19,16 @@ fun SimpleDialogElementUI(
     messageText: String?,
     confirmText: String,
     dismissText: String,
+    modifier: Modifier = Modifier,
     destructive: Boolean = false,
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
+    val (interactionSource) = rememberInteractionReporter()
+
     StripeTheme {
         AlertDialog(
+            modifier = modifier,
             onDismissRequest = {
                 onDismissListener()
             },
@@ -36,6 +42,7 @@ fun SimpleDialogElementUI(
             },
             confirmButton = {
                 TextButton(
+                    interactionSource = interactionSource,
                     onClick = {
                         onConfirmListener()
                     }
@@ -52,6 +59,7 @@ fun SimpleDialogElementUI(
             },
             dismissButton = {
                 TextButton(
+                    interactionSource = interactionSource,
                     onClick = {
                         onDismissListener()
                     }

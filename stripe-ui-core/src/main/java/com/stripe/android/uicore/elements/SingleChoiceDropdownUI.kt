@@ -27,6 +27,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.uicore.analytics.rememberInteractionReporter
 import com.stripe.android.uicore.strings.resolve
 
 @Composable
@@ -40,8 +41,12 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
     headerTextColor: Color,
     optionTextColor: Color,
     onDismiss: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
+    val (_, reportInteractionManually) = rememberInteractionReporter()
+
     DropdownMenu(
+        modifier = modifier,
         expanded = expanded,
         onDismissRequest = onDismiss,
     ) {
@@ -58,6 +63,7 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
                 isSelected = choice == currentChoice,
                 currentTextColor = optionTextColor,
                 onClick = {
+                    reportInteractionManually()
                     onChoiceSelected(choice)
                 }
             )
