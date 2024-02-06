@@ -27,7 +27,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 internal fun ErrorScreen() {
     val viewModel: ErrorViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    BackHandler(enabled = false) { }
+    BackHandler(true) { }
     val payload = viewModel.collectAsState { it.payload }
     ErrorContent(
         payload = payload.value,
