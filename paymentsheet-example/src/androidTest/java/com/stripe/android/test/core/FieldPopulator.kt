@@ -20,8 +20,8 @@ import com.stripe.android.core.R as CoreR
 internal class FieldPopulator(
     private val selectors: Selectors,
     private val testParameters: TestParameters,
-    private val populateCustomLpmFields: (FieldPopulator) -> Unit,
-    private val verifyCustomLpmFields: (FieldPopulator) -> Unit,
+    private val populateCustomLpmFields: FieldPopulator.() -> Unit,
+    private val verifyCustomLpmFields: FieldPopulator.() -> Unit,
     private val values: Values,
 ) {
     fun verifyFields() {
@@ -38,11 +38,11 @@ internal class FieldPopulator(
         }
 
         verifyPlatformLpmFields()
-        verifyCustomLpmFields(this)
+        verifyCustomLpmFields()
     }
 
     fun populateFields() {
-        populateCustomLpmFields(this)
+        populateCustomLpmFields()
 
         selectors.composeTestRule.waitForIdle()
         Espresso.onIdle()

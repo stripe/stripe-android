@@ -31,8 +31,8 @@ internal class TestCard : BasePlaygroundTest() {
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
     }
@@ -56,12 +56,12 @@ internal class TestCard : BasePlaygroundTest() {
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
-                fieldPopulator.populateEmail()
-                fieldPopulator.populateName("Name on card")
-                fieldPopulator.populateAddress()
-                fieldPopulator.populatePhoneNumber()
+            populateCustomLpmFields = {
+                populateCardDetails()
+                populateEmail()
+                populateName("Name on card")
+                populateAddress()
+                populatePhoneNumber()
             },
         )
     }
@@ -85,8 +85,8 @@ internal class TestCard : BasePlaygroundTest() {
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
     }
@@ -100,11 +100,11 @@ internal class TestCard : BasePlaygroundTest() {
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
-            verifyCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.verifyCard()
+            verifyCustomLpmFields = {
+                verifyCard()
             }
         )
     }
@@ -130,8 +130,8 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = cardNumber,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
 
@@ -172,8 +172,8 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = firstCardNumber,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
 
@@ -183,8 +183,8 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
 
@@ -224,8 +224,8 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = cardNumber,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
 
@@ -265,8 +265,8 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = cardNumber,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
 
@@ -278,8 +278,8 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
             ),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateCardDetails()
+            populateCustomLpmFields = {
+                populateCardDetails()
             },
         )
 

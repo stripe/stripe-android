@@ -19,8 +19,8 @@ internal class TestBacs : BasePlaygroundTest() {
     fun testBacsWhenConfirmed() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = createTestParameters(AuthorizeAction.Bacs.Confirm),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateBacs()
+            populateCustomLpmFields = {
+                populateBacs()
             }
         )
     }
@@ -29,8 +29,8 @@ internal class TestBacs : BasePlaygroundTest() {
     fun testBacsWhenCancelled() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = createTestParameters(AuthorizeAction.Bacs.ModifyDetails),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateBacs()
+            populateCustomLpmFields = {
+                populateBacs()
             }
         )
     }
@@ -39,8 +39,8 @@ internal class TestBacs : BasePlaygroundTest() {
     fun testBacsWhenConfirmedInCustomFlow() {
         testDriver.confirmCustomAndBuy(
             testParameters = createTestParameters(AuthorizeAction.Bacs.Confirm),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateBacs()
+            populateCustomLpmFields = {
+                populateBacs()
             },
         )
     }
@@ -49,8 +49,8 @@ internal class TestBacs : BasePlaygroundTest() {
     fun testBacsWhenCancelledInCustomFlow() {
         testDriver.confirmCustomAndBuy(
             testParameters = createTestParameters(AuthorizeAction.Bacs.ModifyDetails),
-            populateCustomLpmFields = { fieldPopulator ->
-                fieldPopulator.populateBacs()
+            populateCustomLpmFields = {
+                populateBacs()
             },
         )
     }

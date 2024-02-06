@@ -35,10 +35,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
     fun testSepaDebit() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
-            populateCustomLpmFields = {
-                fillOutIban()
-            },
-        )
+        ) {
+            fillOutIban()
+        }
     }
 
     @Test
@@ -48,10 +47,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             },
-            populateCustomLpmFields = {
-                fillOutIban()
-            },
-        )
+        ) {
+            fillOutIban()
+        }
     }
 
     @Test
@@ -61,10 +59,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },
-            populateCustomLpmFields = {
-                fillOutIban()
-            },
-        )
+        ) {
+            fillOutIban()
+        }
     }
 
     @Test
@@ -73,15 +70,14 @@ internal class TestSepaDebit : BasePlaygroundTest() {
             testParameters = testParameters,
             populateCustomLpmFields = {
                 fillOutIban()
-            },
-            verifyCustomLpmFields = {
-                rules.compose.onNodeWithText("IBAN").apply {
-                    assertContentDescriptionEquals(
-                        "DE89370400440532013000"
-                    )
-                }
             }
-        )
+        ) {
+            rules.compose.onNodeWithText("IBAN").apply {
+                assertContentDescriptionEquals(
+                    "DE89370400440532013000"
+                )
+            }
+        }
     }
 
     @Test
@@ -94,10 +90,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         // Create the payment method and set it as default by going through the whole flow.
         val playgroundState = testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
-            populateCustomLpmFields = {
-                fillOutIban()
-            },
-        )
+        ) {
+            fillOutIban()
+        }
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
             customerId = playgroundState?.customerConfig?.id,
@@ -120,10 +115,9 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         // Create the payment method and set it as default by going through the whole flow.
         val playgroundState = testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
-            populateCustomLpmFields = {
-                fillOutIban()
-            },
-        )
+        ) {
+            fillOutIban()
+        }
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
             customerId = playgroundState?.customerConfig?.id,
