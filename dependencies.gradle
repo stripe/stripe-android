@@ -63,7 +63,7 @@ ext.versions = [
         shot                        : '5.14.1',
         showkase                    : '1.0.0-beta18',
         stripe3ds2                  : '6.1.8',
-        tensorflowLite              : '2.11.0',
+        tensorflowLite              : '2.14.0',
         tensorflowLiteSupport       : '0.4.3',
         testParameterInjector       : '1.12',
         truth                       : '1.1.3',
