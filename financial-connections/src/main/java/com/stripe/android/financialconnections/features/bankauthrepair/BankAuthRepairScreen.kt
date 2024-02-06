@@ -20,10 +20,8 @@ internal fun BankAuthRepairScreen() {
     SharedPartnerAuth(
         state = state.value,
         onContinueClick = { /*TODO*/ },
-        onSelectAnotherBank = { /*TODO*/ },
-        onClickableTextClick = { /*TODO*/ },
-        onWebAuthFlowFinished = { /*TODO*/ },
         onCancelClick = { /*TODO*/ },
-        onViewEffectLaunched = { /*TODO*/ }
-    )
+        onClickableTextClick = { /*TODO*/ },
+        onWebAuthFlowFinished = { /*TODO*/ }
+    ) { /*TODO*/ }
 }

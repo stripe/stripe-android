@@ -78,7 +78,6 @@ internal fun SharedPartnerAuth(
     state: SharedPartnerAuthState,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onWebAuthFlowFinished: (WebAuthFlowState) -> Unit,
     onViewEffectLaunched: () -> Unit
@@ -112,9 +111,8 @@ internal fun SharedPartnerAuth(
         bottomSheetState = bottomSheetState,
         state = state,
         onClickableTextClick = onClickableTextClick,
-        onSelectAnotherBank = onSelectAnotherBank,
-        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onContinueClick = onContinueClick,
+        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onCancelClick = onCancelClick,
     )
 }
@@ -124,7 +122,6 @@ private fun SharedPartnerAuthContent(
     bottomSheetState: ModalBottomSheetState,
     state: SharedPartnerAuthState,
     onClickableTextClick: (String) -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
@@ -145,10 +142,9 @@ private fun SharedPartnerAuthContent(
             SharedPartnerAuthBody(
                 state = state,
                 onCloseClick = onCloseClick,
-                onSelectAnotherBank = onSelectAnotherBank,
-                onClickableTextClick = onClickableTextClick,
                 onCancelClick = onCancelClick,
                 onContinueClick = onContinueClick,
+                onClickableTextClick = onClickableTextClick,
             )
         }
     )
@@ -210,7 +206,6 @@ private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
@@ -222,17 +217,15 @@ private fun SharedPartnerAuthBody(
             )
         }
     ) {
-        when (val payload = state.payload) {
-            Uninitialized, is Loading, is Fail -> SharedPartnerLoading()
-            is Success -> LoadedContent(
+        state.payload()?.let {
+            LoadedContent(
                 authenticationStatus = state.authenticationStatus,
-                payload = payload(),
-                onClickableTextClick = onClickableTextClick,
+                payload = it,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
-                onSelectAnotherBank = onSelectAnotherBank,
+                onClickableTextClick = onClickableTextClick,
             )
-        }
+        } ?: SharedPartnerLoading()
     }
 }
 
@@ -242,7 +235,6 @@ private fun LoadedContent(
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
@@ -510,16 +502,14 @@ internal fun PartnerAuthPreview(
 ) {
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
-            state = state,
             bottomSheetState = rememberModalBottomSheetState(
                 ModalBottomSheetValue.Hidden,
             ),
-            onContinueClick = {},
-            onSelectAnotherBank = {},
+            state = state,
             onClickableTextClick = {},
+            onContinueClick = {},
             onCloseClick = {},
-            onCancelClick = {},
-        )
+        ) {}
     }
 }
 

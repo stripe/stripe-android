@@ -75,7 +75,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 ) : MavericksViewModel<SharedPartnerAuthState>(initialState) {
 
     init {
-        logErrors()
+        handleErrors()
         withState {
             if (it.activeAuthSession == null) {
                 launchBrowserIfNonOauth()
@@ -145,14 +145,13 @@ internal class PartnerAuthViewModel @Inject constructor(
         )
     }
 
-    private fun logErrors() {
+    private fun handleErrors() {
         onAsync(
             SharedPartnerAuthState::payload,
             onFail = {
                 errorHandler.handle(
                     extraMessage = "Error fetching payload / posting AuthSession",
                     error = it,
-                    logger = logger,
                     pane = PANE,
                     displayErrorScreen = true
                 )
@@ -164,17 +163,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             onFail = {
                 errorHandler.handle(
                     extraMessage = "Error with authentication status",
-                    error = it.toPartnerAuthError(),
-                    logger = logger,
+                    error = if (it is FinancialConnectionsError) it else PartnerAuthError(it.message),
                     pane = PANE,
                     displayErrorScreen = true
                 )
             }
         )
-    }
-
-    private fun Throwable.toPartnerAuthError(): FinancialConnectionsError {
-        return if (this is FinancialConnectionsError) this else PartnerAuthError(this.message)
     }
 
     fun onLaunchAuthClick() {

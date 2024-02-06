@@ -18,10 +18,9 @@ internal fun PartnerAuthScreen() {
     SharedPartnerAuth(
         state = state.value,
         onContinueClick = viewModel::onLaunchAuthClick,
-        onSelectAnotherBank = viewModel::onSelectAnotherBank,
+        onCancelClick = viewModel::onCancelClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onWebAuthFlowFinished = viewModel::onWebAuthFlowFinished,
-        onCancelClick = viewModel::onCancelClick,
         onViewEffectLaunched = viewModel::onViewEffectLaunched
     )
 }

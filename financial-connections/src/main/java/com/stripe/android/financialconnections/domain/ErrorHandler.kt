@@ -45,11 +45,7 @@ internal class ErrorHandler @Inject constructor(
         // Navigate to error screen
         if (displayErrorScreen) {
             errorRepository.set(error)
-            navigationManager.tryNavigateTo(
-                route = Destination.Error(referrer = pane),
-                popUpToCurrent = true,
-                inclusive = true
-            )
+            navigationManager.tryNavigateTo(route = Destination.Error(referrer = pane))
         }
     }
 }

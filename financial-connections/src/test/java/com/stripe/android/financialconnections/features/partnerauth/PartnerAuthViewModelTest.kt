@@ -12,9 +12,9 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
+import com.stripe.android.financialconnections.domain.ErrorHandler
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
@@ -58,9 +58,10 @@ internal class PartnerAuthViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
+    private val errorHandler = mock<ErrorHandler>()
 
     @Test
-    fun `init - when creating auth session returns unplanned downtime, error is logged`() =
+    fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
         runTest {
             val unplannedDowntimeError = InstitutionUnplannedDowntimeError(
                 institution = institution(),
@@ -77,12 +78,12 @@ internal class PartnerAuthViewModelTest {
             val viewModel = createViewModel()
 
             withState(viewModel) {
-                verifyBlocking(eventTracker) {
-                    logError(
+                verifyBlocking(errorHandler) {
+                    handle(
                         extraMessage = "Error fetching payload / posting AuthSession",
                         error = unplannedDowntimeError,
-                        logger = logger,
-                        pane = Pane.PARTNER_AUTH
+                        pane = Pane.PARTNER_AUTH,
+                        displayErrorScreen = true
                     )
                 }
             }
@@ -295,6 +296,7 @@ internal class PartnerAuthViewModelTest {
             initialState = initialState,
             browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
+            errorHandler = errorHandler,
             applicationId = applicationId
         )
     }
