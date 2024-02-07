@@ -1808,7 +1808,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.handleConfirmUSBankAccount(newPaymentSelection)
 
-        verify(eventReporter).onPressConfirmButton()
+        verify(eventReporter).onPressConfirmButton(newPaymentSelection)
     }
 
     @Test
@@ -1847,7 +1847,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.checkout()
 
-        verify(eventReporter, never()).onPressConfirmButton()
+        verify(eventReporter, never()).onPressConfirmButton(any())
     }
 
     @Test

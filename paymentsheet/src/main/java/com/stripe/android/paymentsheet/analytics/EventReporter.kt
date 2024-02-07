@@ -75,7 +75,9 @@ internal interface EventReporter {
     /**
      * The customer has pressed the confirm button.
      */
-    fun onPressConfirmButton()
+    fun onPressConfirmButton(
+        paymentSelection: PaymentSelection?,
+    )
 
     /**
      * Payment or setup have succeeded.
