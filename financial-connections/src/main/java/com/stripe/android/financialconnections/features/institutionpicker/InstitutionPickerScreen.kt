@@ -66,7 +66,6 @@ import com.stripe.android.financialconnections.features.common.FullScreenGeneric
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.ShapedIcon
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -101,7 +100,6 @@ internal fun InstitutionPickerScreen() {
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.INSTITUTION_PICKER) },
         onManualEntryClick = viewModel::onManualEntryClick,
         onScrollChanged = viewModel::onScrollChanged,
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
 }
 
@@ -114,7 +112,6 @@ private fun InstitutionPickerContent(
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCloseClick: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit,
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit
 ) {
@@ -127,13 +124,8 @@ private fun InstitutionPickerContent(
     ) {
         when (payload) {
             is Uninitialized,
-            is Loading -> FullScreenGenericLoading()
-
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
-
+            is Loading,
+            is Fail -> FullScreenGenericLoading()
             is Success -> LoadedContent(
                 previewText = previewText,
                 selectedInstitutionId = selectedInstitutionId,
@@ -598,7 +590,6 @@ internal fun InstitutionPickerPreview(
             onInstitutionSelected = { _, _ -> },
             onCloseClick = {},
             onManualEntryClick = {},
-            onCloseFromErrorClick = {},
         ) {}
     }
 }

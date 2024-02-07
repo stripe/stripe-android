@@ -92,7 +92,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         payload = Success(payload()),
         searchInstitutions = Success(institutionResponse()),
         selectedInstitutionId = "2",
-        selectInstitution = Loading(),
+        createSessionForInstitution = Loading(),
     )
 
     private fun payload(manualEntry: Boolean = true) = InstitutionPickerState.Payload(
