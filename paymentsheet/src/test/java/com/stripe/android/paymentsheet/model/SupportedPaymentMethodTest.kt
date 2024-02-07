@@ -337,7 +337,7 @@ class SupportedPaymentMethodTest {
         }
 
         fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${
-            intentPMs.joinToString("/")
+        intentPMs.joinToString("/")
         }"
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
