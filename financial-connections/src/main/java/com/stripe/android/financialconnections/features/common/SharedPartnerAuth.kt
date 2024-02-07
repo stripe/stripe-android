@@ -220,7 +220,6 @@ private fun SharedPartnerAuthBody(
                 onClickableTextClick = onClickableTextClick,
             )
         } ?: SharedPartnerLoading(inModal)
-        }
     }
 }
 
