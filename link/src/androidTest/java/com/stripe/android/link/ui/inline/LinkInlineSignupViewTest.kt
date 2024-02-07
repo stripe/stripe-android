@@ -14,6 +14,7 @@ import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test
@@ -119,31 +120,40 @@ internal class LinkInlineSignupViewTest {
 
     private fun setContent(
         merchantName: String = "Example, Inc.",
-        emailElement: SimpleTextFieldController =
-            EmailConfig.createController("email@me.co"),
+        emailController: SimpleTextFieldController = EmailConfig.createController("email@me.co"),
         phoneController: PhoneNumberController = PhoneNumberController.createPhoneNumberController(),
-        nameController: SimpleTextFieldController =
-            NameConfig.createController(null),
+        nameController: SimpleTextFieldController = NameConfig.createController(null),
         signUpState: SignUpState = SignUpState.InputtingPrimaryField,
         enabled: Boolean = true,
         expanded: Boolean = true,
         requiresNameCollection: Boolean = false,
         errorMessage: ErrorMessage? = null,
         toggleExpanded: () -> Unit = {}
-    ) = composeTestRule.setContent {
-        DefaultLinkTheme {
-            LinkInlineSignup(
-                merchantName,
-                emailElement,
+    ) {
+        val sectionController = SectionController(
+            label = null,
+            sectionFieldErrorControllers = listOf(
+                emailController,
                 phoneController,
                 nameController,
-                signUpState,
-                enabled,
-                expanded,
-                requiresNameCollection,
-                errorMessage,
-                toggleExpanded
-            )
+            ),
+        )
+        composeTestRule.setContent {
+            DefaultLinkTheme {
+                LinkInlineSignup(
+                    merchantName,
+                    sectionController,
+                    emailController,
+                    phoneController,
+                    nameController,
+                    signUpState,
+                    enabled,
+                    expanded,
+                    requiresNameCollection,
+                    errorMessage,
+                    toggleExpanded,
+                )
+            }
         }
     }
 
