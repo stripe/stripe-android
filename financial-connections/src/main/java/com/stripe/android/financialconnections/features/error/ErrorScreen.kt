@@ -122,7 +122,7 @@ private fun ErrorContent(
 }
 
 @Composable
-fun FullScreenError(
+private fun FullScreenError(
     showBack: Boolean,
     onCloseClick: () -> Unit,
     content: @Composable () -> Unit
