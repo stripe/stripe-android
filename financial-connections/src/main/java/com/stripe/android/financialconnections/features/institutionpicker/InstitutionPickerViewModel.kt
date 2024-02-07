@@ -197,6 +197,15 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Navigates to the partner auth screen:
+     *
+     * - If the [authSession] is OAuth, it will navigate to [PartnerAuthDrawer]. The pre-pane will show
+     *   as a bottom sheet, where users can accept which will open the browser with the bank OAuth login.
+     * - If the [authSession] is not-OAuth, it will navigate to [PartnerAuth] (full screen).
+     *   non-OAuth sessions don't have a pre-pane, so partner auth will show a full-screen loading
+     *   and open the browser right away.
+     */
     private fun navigateToPartnerAuth(authSession: FinancialConnectionsAuthorizationSession) {
         navigationManager.tryNavigateTo(
             if (authSession.isOAuth) {
