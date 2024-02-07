@@ -8,12 +8,8 @@ internal interface ErrorSubcomponent {
 
     val viewModel: ErrorViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: ErrorState): Builder
-
-        fun build(): ErrorSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: ErrorState): ErrorSubcomponent
     }
 }

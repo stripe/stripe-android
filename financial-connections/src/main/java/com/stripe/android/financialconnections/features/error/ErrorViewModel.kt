@@ -109,8 +109,7 @@ internal class ErrorViewModel @Inject constructor(
                 .viewModel
                 .activityRetainedComponent
                 .errorSubcomponent
-                .initialState(state)
-                .build()
+                .create(state)
                 .viewModel
         }
 

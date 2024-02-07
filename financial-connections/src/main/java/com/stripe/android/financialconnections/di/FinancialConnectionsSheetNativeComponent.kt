@@ -55,7 +55,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val successSubcomponent: SuccessSubcomponent.Builder
     val attachPaymentSubcomponent: AttachPaymentSubcomponent.Builder
     val resetSubcomponent: ResetSubcomponent.Builder
-    val errorSubcomponent: ErrorSubcomponent.Builder
+    val errorSubcomponent: ErrorSubcomponent.Factory
     val networkingLinkSignupSubcomponent: NetworkingLinkSignupSubcomponent.Builder
     val networkingLinkLoginWarmupSubcomponent: NetworkingLinkLoginWarmupSubcomponent.Builder
     val networkingLinkVerificationSubcomponent: NetworkingLinkVerificationSubcomponent.Builder
