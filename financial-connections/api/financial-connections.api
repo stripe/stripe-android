@@ -419,10 +419,6 @@ public final class com/stripe/android/financialconnections/features/error/Compos
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/financialconnections/features/error/ErrorScreenKt {
-	public static final fun FullScreenError (ZLkotlin/jvm/functions/Function0;Lkotlin/jvm/functions/Function2;Landroidx/compose/runtime/Composer;I)V
-}
-
 public final class com/stripe/android/financialconnections/features/institutionpicker/ComposableSingletons$InstitutionPickerScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/institutionpicker/ComposableSingletons$InstitutionPickerScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
