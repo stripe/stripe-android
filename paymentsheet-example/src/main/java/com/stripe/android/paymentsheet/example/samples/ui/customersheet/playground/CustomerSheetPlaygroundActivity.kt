@@ -141,7 +141,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                                                 configurationState.attachDefaultBillingAddress
                                             )
                                         )
-                                        .build()
+                                            .build()
                                     )
                                 }
                             ) {

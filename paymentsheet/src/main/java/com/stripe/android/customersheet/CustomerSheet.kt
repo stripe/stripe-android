@@ -236,7 +236,7 @@ class CustomerSheet @Inject internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
-            // TODO:(jaynewstrom-stripe) remove before AllowsRemovalOfLastSavedPaymentMethodApi GA.
+            // TODO(jaynewstrom-stripe): remove before AllowsRemovalOfLastSavedPaymentMethodApi Beta.
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {

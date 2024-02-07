@@ -7,5 +7,6 @@ import androidx.annotation.RestrictTo
     message = "This API is under construction. It can be changed or removed at any time (use at your own risk)"
 )
 @Retention(AnnotationRetention.BINARY)
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // TODO:(jaynewstrom-stripe) remove before AllowsRemovalOfLastSavedPaymentMethodApi GA.
+// TODO(jaynewstrom-stripe): remove before AllowsRemovalOfLastSavedPaymentMethodApi Beta.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 annotation class ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
