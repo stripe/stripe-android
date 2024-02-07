@@ -6,9 +6,11 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.tasks.Task
+import com.google.android.gms.common.api.CommonStatusCodes
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
+import com.google.android.gms.wallet.contract.ApiTaskResult
+import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.utils.fadeOut
@@ -58,11 +60,15 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             }
         }
 
+        val googlePayLauncher = registerForActivityResult(GetPaymentDataResult()) {
+            onGooglePayResult(it)
+        }
+
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
                 viewModel.createLoadPaymentDataTask().fold(
                     onSuccess = {
-                        payWithGoogle(it)
+                        googlePayLauncher.launch(it)
                         viewModel.hasLaunched = true
                     },
                     onFailure = {
@@ -80,12 +86,39 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         fadeOut()
     }
 
-    private fun payWithGoogle(task: Task<PaymentData>) {
-        AutoResolveHelper.resolveTask(
-            task,
-            this,
-            LOAD_PAYMENT_DATA_REQUEST_CODE
-        )
+    private fun onGooglePayResult(taskResult: ApiTaskResult<PaymentData>) {
+        when (taskResult.status.statusCode) {
+            CommonStatusCodes.SUCCESS -> {
+                onGooglePayResult(taskResult.result!!)
+            }
+
+            CommonStatusCodes.CANCELED -> {
+                viewModel.updateResult(
+                    GooglePayLauncher.Result.Canceled
+                )
+            }
+
+            AutoResolveHelper.RESULT_ERROR -> {
+                val statusMessage = taskResult.status.statusMessage.orEmpty()
+                viewModel.updateResult(
+                    GooglePayLauncher.Result.Failed(
+                        RuntimeException(
+                            "Google Pay failed with error: $statusMessage"
+                        )
+                    )
+                )
+            }
+
+            else -> {
+                viewModel.updateResult(
+                    GooglePayLauncher.Result.Failed(
+                        RuntimeException(
+                            "Google Pay returned an expected result code."
+                        )
+                    )
+                )
+            }
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -95,58 +128,15 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         data: Intent?
     ) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == LOAD_PAYMENT_DATA_REQUEST_CODE) {
-            when (resultCode) {
-                RESULT_OK -> {
-                    onGooglePayResult(data)
-                }
-                RESULT_CANCELED -> {
-                    viewModel.updateResult(
-                        GooglePayLauncher.Result.Canceled
-                    )
-                }
-                AutoResolveHelper.RESULT_ERROR -> {
-                    val status = AutoResolveHelper.getStatusFromIntent(data)
-                    val statusMessage = status?.statusMessage.orEmpty()
-                    viewModel.updateResult(
-                        GooglePayLauncher.Result.Failed(
-                            RuntimeException(
-                                "Google Pay failed with error: $statusMessage"
-                            )
-                        )
-                    )
-                }
-                else -> {
-                    viewModel.updateResult(
-                        GooglePayLauncher.Result.Failed(
-                            RuntimeException(
-                                "Google Pay returned an expected result code."
-                            )
-                        )
-                    )
-                }
-            }
-        } else {
-            lifecycleScope.launch {
-                viewModel.onConfirmResult(
-                    requestCode,
-                    data ?: Intent()
-                )
-            }
+        lifecycleScope.launch {
+            viewModel.onConfirmResult(
+                requestCode,
+                data ?: Intent()
+            )
         }
     }
 
-    private fun onGooglePayResult(data: Intent?) {
-        val paymentData = data?.let { PaymentData.getFromIntent(it) }
-        if (paymentData == null) {
-            viewModel.updateResult(
-                GooglePayLauncher.Result.Failed(
-                    IllegalArgumentException("Google Pay data was not available")
-                )
-            )
-            return
-        }
-
+    private fun onGooglePayResult(paymentData: PaymentData) {
         val paymentDataJson = JSONObject(paymentData.toJson())
 
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
@@ -165,10 +155,5 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 )
         )
         finish()
-    }
-
-    private companion object {
-        // the value isn't meaningful / is arbitrary
-        private const val LOAD_PAYMENT_DATA_REQUEST_CODE = 4444
     }
 }
