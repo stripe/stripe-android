@@ -12,8 +12,6 @@ import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.google.accompanist.navigation.material.bottomSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
@@ -33,6 +31,7 @@ import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
+import com.stripe.android.financialconnections.navigation.bottomsheet.bottomSheet
 import com.stripe.android.financialconnections.presentation.parentViewModel
 
 internal sealed class Destination(
@@ -240,7 +239,6 @@ internal fun NavGraphBuilder.composable(
     )
 }
 
-@OptIn(ExperimentalMaterialNavigationApi::class)
 internal fun NavGraphBuilder.bottomSheet(
     destination: Destination,
     arguments: List<NamedNavArgument> = emptyList(),

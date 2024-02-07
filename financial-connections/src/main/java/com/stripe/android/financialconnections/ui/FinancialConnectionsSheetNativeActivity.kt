@@ -30,9 +30,6 @@ import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
-import com.google.accompanist.navigation.material.BottomSheetNavigator
-import com.google.accompanist.navigation.material.ExperimentalMaterialNavigationApi
-import com.google.accompanist.navigation.material.ModalBottomSheetLayout
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
@@ -40,6 +37,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.bottomSheet
+import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
+import com.stripe.android.financialconnections.navigation.bottomsheet.ModalBottomSheetLayout
 import com.stripe.android.financialconnections.navigation.composable
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.pane
@@ -116,7 +115,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
-    @OptIn(ExperimentalMaterialNavigationApi::class)
     @Suppress("LongMethod")
     @Composable
     fun NavHost(
