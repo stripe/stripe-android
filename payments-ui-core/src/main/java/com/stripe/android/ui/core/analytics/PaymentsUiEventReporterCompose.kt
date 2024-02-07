@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.compositionLocalOf
-import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.analytics.LocalUiEventReporter
 
@@ -28,18 +27,21 @@ fun ReportablePaymentsUi(
 }
 
 private object EmptyPaymentsUiEventReporter : PaymentsUiEventReporter {
-    private val logger: Logger
-        get() = Logger.getInstance(BuildConfig.DEBUG)
-
     override fun onFieldInteracted() {
-        logger.debug("PaymentsUiEventReporter.onFieldInteracted() event not reported")
+        errorInDebug("PaymentsUiEventReporter.onFieldInteracted() event not reported")
     }
 
     override fun onCardNumberCompleted() {
-        logger.debug("PaymentsUiEventReporter.onCardNumberCompleted() event not reported")
+        errorInDebug("PaymentsUiEventReporter.onCardNumberCompleted() event not reported")
     }
 
     override fun onAutofillEvent(type: String) {
-        logger.debug("PaymentsUiEventReporter.onAutofillEvent(name = $type) event not reported")
+        errorInDebug("PaymentsUiEventReporter.onAutofillEvent(name = $type) event not reported")
+    }
+
+    private fun errorInDebug(message: String) {
+        if (BuildConfig.DEBUG) {
+            error(message)
+        }
     }
 }

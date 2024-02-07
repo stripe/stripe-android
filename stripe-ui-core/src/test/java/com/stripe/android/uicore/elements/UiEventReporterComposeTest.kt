@@ -33,11 +33,11 @@ class UiEventReporterComposeTest {
             CompositionLocalProvider(
                 LocalUiEventReporter provides eventReporter
             ) {
-                val (interactionSource) = rememberInteractionReporter()
+                val reportingElements = rememberInteractionReporter()
 
                 Button(
                     modifier = Modifier.testTag(TEST_TAG),
-                    interactionSource = interactionSource,
+                    interactionSource = reportingElements.interactionSource,
                     onClick = {},
                 ) {
                     Text(text = "Click")
@@ -58,12 +58,12 @@ class UiEventReporterComposeTest {
             CompositionLocalProvider(
                 LocalUiEventReporter provides eventReporter
             ) {
-                val (_, reportManually) = rememberInteractionReporter()
+                val reportingElements = rememberInteractionReporter()
 
                 Button(
                     modifier = Modifier.testTag(TEST_TAG),
                     onClick = {
-                        reportManually()
+                        reportingElements.reportInteractionManually()
                     },
                 ) {
                     Text(text = "Click")
@@ -84,11 +84,11 @@ class UiEventReporterComposeTest {
             CompositionLocalProvider(
                 LocalUiEventReporter provides eventReporter
             ) {
-                val (interactionSource) = rememberInteractionReporter()
+                val reportingElements = rememberInteractionReporter()
 
                 Button(
                     modifier = Modifier.testTag(TEST_TAG),
-                    interactionSource = interactionSource,
+                    interactionSource = reportingElements.interactionSource,
                     onClick = {},
                 ) {
                     Text(text = "Click")
@@ -114,11 +114,11 @@ class UiEventReporterComposeTest {
             CompositionLocalProvider(
                 LocalUiEventReporter provides eventReporter
             ) {
-                val (interactionSource) = rememberInteractionReporter()
+                val reportingElements = rememberInteractionReporter()
 
                 Button(
                     modifier = Modifier.testTag(TEST_TAG),
-                    interactionSource = interactionSource,
+                    interactionSource = reportingElements.interactionSource,
                     onClick = {},
                 ) {
                     Text(text = "Click")

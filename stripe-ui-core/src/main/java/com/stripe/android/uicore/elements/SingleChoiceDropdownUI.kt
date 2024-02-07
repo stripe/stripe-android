@@ -43,7 +43,7 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
     onDismiss: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val (_, reportInteractionManually) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
 
     DropdownMenu(
         modifier = modifier,
@@ -63,7 +63,7 @@ fun <TDropdownChoice : SingleChoiceDropdownItem> SingleChoiceDropdown(
                 isSelected = choice == currentChoice,
                 currentTextColor = optionTextColor,
                 onClick = {
-                    reportInteractionManually()
+                    reportingElements.reportInteractionManually()
                     onChoiceSelected(choice)
                 }
             )

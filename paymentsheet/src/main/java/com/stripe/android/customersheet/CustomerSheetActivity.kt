@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
+import com.stripe.android.ui.core.analytics.ReportablePaymentsUi
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.fadeOut
 
@@ -79,12 +80,16 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     state = bottomSheetState,
                     onDismissed = { viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed) },
                 ) {
-                    CustomerSheetScreen(
-                        viewState = viewState,
-                        viewActionHandler = viewModel::handleViewAction,
-                        paymentMethodNameProvider = viewModel::providePaymentMethodName,
-                        formViewModelSubComponentBuilderProvider = viewModel.formViewModelSubcomponentBuilderProvider,
-                    )
+                    ReportablePaymentsUi(eventReporter = CustomerSheetUiEventReporter) {
+                        val componentProvider = viewModel.formViewModelSubcomponentBuilderProvider
+
+                        CustomerSheetScreen(
+                            viewState = viewState,
+                            viewActionHandler = viewModel::handleViewAction,
+                            paymentMethodNameProvider = viewModel::providePaymentMethodName,
+                            formViewModelSubComponentBuilderProvider = componentProvider,
+                        )
+                    }
                 }
             }
         }

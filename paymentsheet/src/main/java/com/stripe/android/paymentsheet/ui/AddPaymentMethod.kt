@@ -29,8 +29,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.ui.core.analytics.PaymentsUiEventReporter
-import com.stripe.android.ui.core.analytics.ReportablePaymentsUi
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.ParameterDestination
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -90,73 +88,55 @@ internal fun AddPaymentMethod(
         sheetViewModel.clearErrorMessages()
     }
 
-    val eventReporter = remember(sheetViewModel) {
-        object : PaymentsUiEventReporter {
-            override fun onCardNumberCompleted() {
-                // TODO(samer-stripe): Connect to base sheet view model
-            }
-
-            override fun onAutofillEvent(type: String) {
-                sheetViewModel.reportAutofillEvent(type)
-            }
-
-            override fun onFieldInteracted() {
-                // TODO(samer-stripe): Connect to base sheet view model
-            }
-        }
-    }
-
     Column(modifier = modifier.fillMaxWidth()) {
-        ReportablePaymentsUi(eventReporter = eventReporter) {
-            val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
-                ?.args
-                ?.initializationMode
-            val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
-                ?.intentConfiguration
-                ?.onBehalfOf
+        val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
+            ?.args
+            ?.initializationMode
+        val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+            ?.intentConfiguration
+            ?.onBehalfOf
 
-            PaymentElement(
-                formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
-                enabled = !processing,
-                supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
-                selectedItem = selectedItem,
-                linkSignupMode = linkInlineSignupMode,
-                linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
-                showCheckboxFlow = showCheckboxFlow,
-                onItemSelectedListener = { selectedLpm ->
-                    if (selectedItem != selectedLpm) {
-                        selectedPaymentMethodCode = selectedLpm.code
-                        sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
-                    }
-                },
-                onLinkSignupStateChanged = { _, inlineSignupViewState ->
-                    linkSignupState = inlineSignupViewState
-                },
-                formArguments = arguments,
-                usBankAccountFormArguments = USBankAccountFormArguments(
-                    onBehalfOf = onBehalfOf,
-                    isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                    isPaymentFlow = stripeIntent.value is PaymentIntent,
-                    stripeIntentId = stripeIntent.value?.id,
-                    clientSecret = stripeIntent.value?.clientSecret,
-                    shippingDetails = sheetViewModel.config.shippingDetails,
-                    draftPaymentSelection = sheetViewModel.newPaymentSelection,
-                    onMandateTextChanged = sheetViewModel::updateMandateText,
-                    onConfirmUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
-                    onCollectBankAccountResult = null,
-                    onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
-                    onUpdatePrimaryButtonState = sheetViewModel::updatePrimaryButtonState,
-                    onError = sheetViewModel::onError
-                ),
-                onFormFieldValuesChanged = { formValues ->
-                    val newSelection = formValues?.transformToPaymentSelection(
-                        resources = context.resources,
-                        paymentMethod = selectedItem,
-                    )
-                    sheetViewModel.updateSelection(newSelection)
+        PaymentElement(
+            formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
+            enabled = !processing,
+            supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
+            selectedItem = selectedItem,
+            linkSignupMode = linkInlineSignupMode,
+            linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
+            showCheckboxFlow = showCheckboxFlow,
+            onItemSelectedListener = { selectedLpm ->
+                if (selectedItem != selectedLpm) {
+                    selectedPaymentMethodCode = selectedLpm.code
+                    sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
                 }
-            )
-        }
+            },
+            onLinkSignupStateChanged = { _, inlineSignupViewState ->
+                linkSignupState = inlineSignupViewState
+            },
+            formArguments = arguments,
+            usBankAccountFormArguments = USBankAccountFormArguments(
+                onBehalfOf = onBehalfOf,
+                isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
+                isPaymentFlow = stripeIntent.value is PaymentIntent,
+                stripeIntentId = stripeIntent.value?.id,
+                clientSecret = stripeIntent.value?.clientSecret,
+                shippingDetails = sheetViewModel.config.shippingDetails,
+                draftPaymentSelection = sheetViewModel.newPaymentSelection,
+                onMandateTextChanged = sheetViewModel::updateMandateText,
+                onConfirmUSBankAccount = sheetViewModel::handleConfirmUSBankAccount,
+                onCollectBankAccountResult = null,
+                onUpdatePrimaryButtonUIState = sheetViewModel::updateCustomPrimaryButtonUiState,
+                onUpdatePrimaryButtonState = sheetViewModel::updatePrimaryButtonState,
+                onError = sheetViewModel::onError
+            ),
+            onFormFieldValuesChanged = { formValues ->
+                val newSelection = formValues?.transformToPaymentSelection(
+                    resources = context.resources,
+                    paymentMethod = selectedItem,
+                )
+                sheetViewModel.updateSelection(newSelection)
+            }
+        )
     }
 }
 

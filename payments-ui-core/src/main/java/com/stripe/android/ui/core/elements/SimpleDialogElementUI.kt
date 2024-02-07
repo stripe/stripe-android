@@ -24,7 +24,7 @@ fun SimpleDialogElementUI(
     onConfirmListener: () -> Unit,
     onDismissListener: () -> Unit,
 ) {
-    val (interactionSource) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
 
     StripeTheme {
         AlertDialog(
@@ -42,7 +42,7 @@ fun SimpleDialogElementUI(
             },
             confirmButton = {
                 TextButton(
-                    interactionSource = interactionSource,
+                    interactionSource = reportingElements.interactionSource,
                     onClick = {
                         onConfirmListener()
                     }
@@ -59,7 +59,7 @@ fun SimpleDialogElementUI(
             },
             dismissButton = {
                 TextButton(
-                    interactionSource = interactionSource,
+                    interactionSource = reportingElements.interactionSource,
                     onClick = {
                         onDismissListener()
                     }

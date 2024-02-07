@@ -115,7 +115,7 @@ fun PhoneNumberElementUI(
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
-    val (interactionSource, reportInteractionManually) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
     val value by controller.fieldValue.collectAsState("")
     val isComplete by controller.isComplete.collectAsState(false)
     val shouldShowError by controller.error.collectAsState(null)
@@ -136,7 +136,7 @@ fun PhoneNumberElementUI(
     TextField(
         value = value,
         onValueChange = { newValue ->
-            reportInteractionManually()
+            reportingElements.reportInteractionManually()
 
             controller.onValueChange(newValue)
         },
@@ -172,7 +172,7 @@ fun PhoneNumberElementUI(
         placeholder = {
             Text(text = placeholder)
         },
-        interactionSource = interactionSource,
+        interactionSource = reportingElements.interactionSource,
         leadingIcon = countryDropdown,
         trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,

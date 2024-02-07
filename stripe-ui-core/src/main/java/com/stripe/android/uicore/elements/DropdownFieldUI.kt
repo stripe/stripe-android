@@ -90,7 +90,7 @@ fun DropDown(
 
     val shouldEnable = enabled && !shouldDisableDropdownWithSingleItem
 
-    val (interactionSource) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
     var expanded by remember { mutableStateOf(false) }
     val selectedItemLabel = controller.getSelectedItemLabel(selectedIndex)
     val currentTextColor = if (shouldEnable) {
@@ -98,7 +98,11 @@ fun DropDown(
     } else {
         TextFieldDefaults
             .textFieldColors()
-            .indicatorColor(enabled = false, isError = false, interactionSource = interactionSource)
+            .indicatorColor(
+                enabled = false,
+                isError = false,
+                interactionSource = reportingElements.interactionSource
+            )
             .value
     }
 
@@ -114,7 +118,7 @@ fun DropDown(
                 .focusProperties { canFocus = false }
                 .clickable(
                     enabled = shouldEnable,
-                    interactionSource = interactionSource,
+                    interactionSource = reportingElements.interactionSource,
                     indication = LocalIndication.current,
                     onClickLabel = stringResource(R.string.stripe_change),
                     onClick = { expanded = true },

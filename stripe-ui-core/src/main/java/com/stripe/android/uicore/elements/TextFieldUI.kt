@@ -140,7 +140,7 @@ fun TextField(
     val placeHolder by textFieldController.placeHolder.collectAsState(null)
 
     var hasFocus by rememberSaveable { mutableStateOf(false) }
-    val (interactionSource, reportInteractionManually) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
 
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
@@ -176,7 +176,7 @@ fun TextField(
         value = value,
         loading = loading,
         onValueChange = { newValue ->
-            reportInteractionManually()
+            reportingElements.reportInteractionManually()
 
             val acceptInput = fieldState.canAcceptInput(value, newValue)
 
@@ -224,7 +224,7 @@ fun TextField(
                 this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
-        interactionSource = interactionSource,
+        interactionSource = reportingElements.interactionSource,
         label = label?.let {
             stringResource(it)
         },

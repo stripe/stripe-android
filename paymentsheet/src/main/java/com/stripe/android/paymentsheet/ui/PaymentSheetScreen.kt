@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -32,6 +33,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.analytics.ReportablePaymentsUi
 import com.stripe.android.ui.core.elements.H4Text
 
 @Composable
@@ -47,21 +49,27 @@ internal fun PaymentSheetScreen(
 
     DismissKeyboardOnProcessing(processing)
 
-    PaymentSheetScaffold(
-        topBar = {
-            PaymentSheetTopBar(
-                state = topBarState,
-                handleBackPressed = viewModel::handleBackPressed,
-                toggleEditing = viewModel::toggleEditing,
-            )
-        },
-        content = {
-            AnimatedVisibility(visible = contentVisible) {
-                PaymentSheetScreenContent(viewModel, type)
-            }
-        },
-        modifier = modifier,
-    )
+    ReportablePaymentsUi(
+        eventReporter = remember(viewModel) {
+            PaymentSheetUiEventReporter(viewModel)
+        }
+    ) {
+        PaymentSheetScaffold(
+            topBar = {
+                PaymentSheetTopBar(
+                    state = topBarState,
+                    handleBackPressed = viewModel::handleBackPressed,
+                    toggleEditing = viewModel::toggleEditing,
+                )
+            },
+            content = {
+                AnimatedVisibility(visible = contentVisible) {
+                    PaymentSheetScreenContent(viewModel, type)
+                }
+            },
+            modifier = modifier,
+        )
+    }
 }
 
 @OptIn(ExperimentalComposeUiApi::class)

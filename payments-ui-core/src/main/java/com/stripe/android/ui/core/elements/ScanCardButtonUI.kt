@@ -31,7 +31,7 @@ internal fun ScanCardButtonUI(
     onResult: (intent: Intent) -> Unit,
 ) {
     val context = LocalContext.current
-    val (interactionSource) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
 
     val cardScanLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
@@ -42,7 +42,7 @@ internal fun ScanCardButtonUI(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier.clickable(
-            interactionSource = interactionSource,
+            interactionSource = reportingElements.interactionSource,
             indication = LocalIndication.current,
             enabled = enabled,
             onClick = {

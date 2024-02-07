@@ -449,7 +449,7 @@ private fun AccountDetailsForm(
     saveForFutureUseElement: SaveForFutureUseElement,
     onRemoveAccount: () -> Unit,
 ) {
-    val (interactionSource) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
 
     var openDialog by remember { mutableStateOf(false) }
     val bankIcon = TransformToBankIcon(bankName)
@@ -494,7 +494,7 @@ private fun AccountDetailsForm(
                         .width(20.dp)
                         .alpha(if (isProcessing) 0.5f else 1f)
                         .clickable(
-                            interactionSource = interactionSource,
+                            interactionSource = reportingElements.interactionSource,
                             indication = LocalIndication.current,
                         ) {
                             if (!isProcessing) {

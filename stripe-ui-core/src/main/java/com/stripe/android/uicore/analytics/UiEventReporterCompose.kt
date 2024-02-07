@@ -11,7 +11,6 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.staticCompositionLocalOf
-import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.parcelize.Parcelize
@@ -22,17 +21,14 @@ val LocalUiEventReporter = staticCompositionLocalOf<UiEventReporter> {
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class InteractionReporterElements(
-    val mutableInteractionSource: MutableInteractionSource,
+class InteractionReportingElements(
+    val interactionSource: MutableInteractionSource,
     val reportInteractionManually: () -> Unit
-) {
-    operator fun component1() = mutableInteractionSource
-    operator fun component2() = reportInteractionManually
-}
+)
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun rememberInteractionReporter(): InteractionReporterElements {
+fun rememberInteractionReporter(): InteractionReportingElements {
     val reporter = LocalUiEventReporter.current
 
     val interactionSource = remember {
@@ -62,8 +58,8 @@ fun rememberInteractionReporter(): InteractionReporterElements {
     }
 
     return remember(interactionSource, reportManually) {
-        InteractionReporterElements(
-            mutableInteractionSource = interactionSource,
+        InteractionReportingElements(
+            interactionSource = interactionSource,
             reportInteractionManually = reportManually,
         )
     }
@@ -80,14 +76,17 @@ private class Interacted(
 }
 
 private object EmptyUiEventReporter : UiEventReporter {
-    private val logger: Logger
-        get() = Logger.getInstance(BuildConfig.DEBUG)
-
     override fun onFieldInteracted() {
-        logger.debug("UiEventReporter.onFieldInteracted() event not reported")
+        errorInDebug("UiEventReporter.onFieldInteracted() event not reported")
     }
 
     override fun onAutofillEvent(type: String) {
-        logger.debug("UiEventReporter.onAutofillEvent(name = $type) event not reported")
+        errorInDebug("UiEventReporter.onAutofillEvent(name = $type) event not reported")
+    }
+
+    private fun errorInDebug(message: String) {
+        if (BuildConfig.DEBUG) {
+            error(message)
+        }
     }
 }

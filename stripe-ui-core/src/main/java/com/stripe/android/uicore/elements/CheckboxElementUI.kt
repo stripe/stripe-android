@@ -29,7 +29,7 @@ fun CheckboxElementUI(
     isEnabled: Boolean = false,
     onValueChange: (Boolean) -> Unit,
 ) {
-    val (interactionSource) = rememberInteractionReporter()
+    val reportingElements = rememberInteractionReporter()
 
     val accessibilityDescription = stringResource(
         if (isChecked) {
@@ -48,7 +48,7 @@ fun CheckboxElementUI(
             }
             .toggleable(
                 value = isChecked,
-                interactionSource = interactionSource,
+                interactionSource = reportingElements.interactionSource,
                 indication = LocalIndication.current,
                 role = Role.Checkbox,
                 onValueChange = onValueChange,
@@ -59,7 +59,7 @@ fun CheckboxElementUI(
     ) {
         Checkbox(
             checked = isChecked,
-            interactionSource = interactionSource,
+            interactionSource = reportingElements.interactionSource,
             onCheckedChange = null, // needs to be null for accessibility on row click to work
             enabled = isEnabled
         )
