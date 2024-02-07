@@ -104,15 +104,6 @@ internal class LpmRepository(
         lpmInitialFormData.putAll(missingLpmsByType)
     }
 
-    /**
-     * This method can be used to initialize the LpmRepository with a given map of payment methods.
-     */
-    fun initializeWithPaymentMethods(
-        paymentMethods: Map<String, SupportedPaymentMethod>
-    ) {
-        lpmInitialFormData.putAll(paymentMethods)
-    }
-
     private fun readFromDisk(): List<SharedDataSpec> {
         return parseLpms(arguments.resources.assets?.open("lpms.json"))
     }

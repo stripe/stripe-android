@@ -494,15 +494,16 @@ class LpmRepositoryTest {
 
     @Test
     fun `LpmRepository#initializeWithPaymentMethods initializes the LpmRepository`() {
+        val lpmInitialFormData = LpmRepository.LpmInitialFormData()
         val lpmRepository = LpmRepository(
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
+            lpmInitialFormData = lpmInitialFormData,
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
             ),
         )
 
         assertThat(lpmRepository.values()).isEmpty()
-        lpmRepository.initializeWithPaymentMethods(
+        lpmInitialFormData.putAll(
             mapOf(
                 PaymentMethod.Type.Card.code to LpmRepositoryTestHelpers.card
             )
