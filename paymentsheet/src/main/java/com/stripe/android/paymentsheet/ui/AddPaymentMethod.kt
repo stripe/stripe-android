@@ -86,6 +86,8 @@ internal fun AddPaymentMethod(
         } else if (isUsingLinkInline) {
             sheetViewModel.updatePrimaryButtonForLinkInline()
         }
+
+        sheetViewModel.clearErrorMessages()
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
