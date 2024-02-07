@@ -70,7 +70,8 @@ class SupportedPaymentMethodTest {
             )
 
             generatePaymentIntentScenarios().mapIndexed { index, testInput ->
-                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
+                val formDescriptor =
+                    lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                 val testOutput = TestOutput.create(
                     supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                         testInput.getIntent(lpm),
@@ -204,19 +205,20 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method filters us bank account when FC SDK not available`() {
-        val lpmRepository = LpmRepository(
-            arguments = LpmRepository.LpmRepositoryArguments(
-                resources = ApplicationProvider.getApplicationContext<Application>().resources,
-            ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            initializeWithPaymentMethods(
+        val lpmInitialFormData = LpmRepository.LpmInitialFormData().apply {
+            putAll(
                 mapOf(
                     PaymentMethod.Type.Card.code to card,
                     PaymentMethod.Type.USBankAccount.code to LpmRepositoryTestHelpers.usBankAccount
                 )
             )
         }
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+            lpmInitialFormData = lpmInitialFormData,
+        )
 
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodTypes = listOf("card", "us_bank_account")
@@ -236,19 +238,20 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method contains us bank account when FC SDK available`() {
+        val lpmInitialFormData = LpmRepository.LpmInitialFormData().apply {
+            putAll(
+                mapOf(
+                    PaymentMethod.Type.Card.code to card,
+                    PaymentMethod.Type.USBankAccount.code to LpmRepositoryTestHelpers.usBankAccount
+                )
+            )
+        }
         val lpmRepository = LpmRepository(
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
             ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            initializeWithPaymentMethods(
-                mapOf(
-                    PaymentMethod.Type.Card.code to card,
-                    PaymentMethod.Type.USBankAccount.code to LpmRepositoryTestHelpers.usBankAccount,
-                )
-            )
-        }
+            lpmInitialFormData = lpmInitialFormData,
+        )
 
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodTypes = listOf("card", "us_bank_account")
@@ -329,10 +332,13 @@ class SupportedPaymentMethodTest {
         val allowsDelayedPayment: Boolean = true
     ) {
         companion object {
-            fun toCsvHeader() = "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
+            fun toCsvHeader() =
+                "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
         }
 
-        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentPMs.joinToString("/")}"
+        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${
+            intentPMs.joinToString("/")
+        }"
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
@@ -341,6 +347,7 @@ class SupportedPaymentMethodTest {
                     setupFutureUsage = intentSetupFutureUsage,
                     paymentMethodTypes = intentPMs.plus(lpm.code).toList()
                 )
+
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,
