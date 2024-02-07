@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
+import com.stripe.android.financialconnections.features.error.ErrorScreen
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
@@ -158,6 +159,11 @@ internal sealed class Destination(
     object Reset : NoArgumentsDestination(
         route = Pane.RESET.value,
         composable = { ResetScreen() }
+    )
+
+    object Error : NoArgumentsDestination(
+        route = Pane.UNEXPECTED_ERROR.value,
+        composable = { ErrorScreen() }
     )
 
     object BankAuthRepair : NoArgumentsDestination(

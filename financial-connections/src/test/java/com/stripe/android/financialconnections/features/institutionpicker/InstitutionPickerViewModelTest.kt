@@ -46,19 +46,17 @@ internal class InstitutionPickerViewModelTest {
 
     private fun buildViewModel(
         state: InstitutionPickerState
-    ): InstitutionPickerViewModel {
-        return InstitutionPickerViewModel(
-            configuration = defaultConfiguration,
-            searchInstitutions = searchInstitutions,
-            featuredInstitutions = featuredInstitutions,
-            getManifest = getManifest,
-            navigationManager = navigationManager,
-            updateLocalManifest = updateLocalManifest,
-            logger = Logger.noop(),
-            eventTracker = eventTracker,
-            initialState = state
-        )
-    }
+    ) = InstitutionPickerViewModel(
+        configuration = defaultConfiguration,
+        searchInstitutions = searchInstitutions,
+        featuredInstitutions = featuredInstitutions,
+        getManifest = getManifest,
+        navigationManager = navigationManager,
+        updateLocalManifest = updateLocalManifest,
+        logger = Logger.noop(),
+        eventTracker = eventTracker,
+        initialState = state
+    )
 
     @Test
     fun `init - featured institutions are fetched`() = runTest {

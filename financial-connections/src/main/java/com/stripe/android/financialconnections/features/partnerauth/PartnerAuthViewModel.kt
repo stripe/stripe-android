@@ -27,10 +27,13 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
+import com.stripe.android.financialconnections.exception.FinancialConnectionsError
+import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
@@ -41,8 +44,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
-import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
-import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
@@ -65,6 +66,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getOrFetchSync: GetOrFetchSync,
     private val browserManager: BrowserManager,
+    private val handleError: HandleError,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
@@ -72,7 +74,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 ) : MavericksViewModel<SharedPartnerAuthState>(initialState) {
 
     init {
-        logErrors()
+        handleErrors()
         withState {
             if (it.activeAuthSession == null) {
                 launchBrowserIfNonOauth()
@@ -142,18 +144,29 @@ internal class PartnerAuthViewModel @Inject constructor(
         )
     }
 
-    private fun logErrors() {
+    private fun handleErrors() {
         onAsync(
             SharedPartnerAuthState::payload,
             onFail = {
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error fetching payload / posting AuthSession",
                     error = it,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true
                 )
             },
             onSuccess = { eventTracker.track(PaneLoaded(PANE)) }
+        )
+        onAsync(
+            SharedPartnerAuthState::authenticationStatus,
+            onFail = {
+                handleError(
+                    extraMessage = "Error with authentication status",
+                    error = if (it is FinancialConnectionsError) it else PartnerAuthError(it.message),
+                    pane = PANE,
+                    displayErrorScreen = true
+                )
+            }
         )
     }
 
@@ -200,14 +213,6 @@ internal class PartnerAuthViewModel @Inject constructor(
      */
     private fun FinancialConnectionsAuthorizationSession.browserReadyUrl(): String? =
         url?.replaceFirst("stripe-auth://native-redirect/$applicationId/", "")
-
-    fun onSelectAnotherBank() {
-        navigationManager.tryNavigateTo(
-            Reset(referrer = PANE),
-            popUpToCurrent = true,
-            inclusive = true
-        )
-    }
 
     fun onWebAuthFlowFinished(
         webStatus: WebAuthFlowState
@@ -390,12 +395,6 @@ internal class PartnerAuthViewModel @Inject constructor(
         }
     }
 
-    fun onEnterDetailsManuallyClick() = navigationManager.tryNavigateTo(
-        ManualEntry(referrer = PANE),
-        popUpToCurrent = true,
-        inclusive = true
-    )
-
     // if clicked uri contains an eventName query param, track click event.
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
         uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
@@ -411,7 +410,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 )
             }
         } else {
-            val managedUri = SharedPartnerAuthState.ClickableText.values()
+            val managedUri = SharedPartnerAuthState.ClickableText.entries
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
                 SharedPartnerAuthState.ClickableText.DATA -> {

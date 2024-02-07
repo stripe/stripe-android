@@ -50,8 +50,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
@@ -80,9 +78,7 @@ internal fun SharedPartnerAuth(
     state: SharedPartnerAuthState,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit,
-    onEnterDetailsManually: () -> Unit,
     onWebAuthFlowFinished: (WebAuthFlowState) -> Unit,
     onViewEffectLaunched: () -> Unit
 ) {
@@ -115,12 +111,9 @@ internal fun SharedPartnerAuth(
         bottomSheetState = bottomSheetState,
         state = state,
         onClickableTextClick = onClickableTextClick,
-        onSelectAnotherBank = onSelectAnotherBank,
-        onEnterDetailsManually = onEnterDetailsManually,
-        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onContinueClick = onContinueClick,
+        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onCancelClick = onCancelClick,
-        onCloseFromErrorClick = viewModel::onCloseFromErrorClick
     )
 }
 
@@ -129,12 +122,9 @@ private fun SharedPartnerAuthContent(
     bottomSheetState: ModalBottomSheetState,
     state: SharedPartnerAuthState,
     onClickableTextClick: (String) -> Unit,
-    onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     FinancialConnectionsModalBottomSheetLayout(
@@ -152,12 +142,9 @@ private fun SharedPartnerAuthContent(
             SharedPartnerAuthBody(
                 state = state,
                 onCloseClick = onCloseClick,
-                onSelectAnotherBank = onSelectAnotherBank,
-                onEnterDetailsManually = onEnterDetailsManually,
-                onCloseFromErrorClick = onCloseFromErrorClick,
-                onClickableTextClick = onClickableTextClick,
                 onCancelClick = onCancelClick,
                 onContinueClick = onContinueClick,
+                onClickableTextClick = onClickableTextClick,
             )
         }
     )
@@ -219,9 +206,6 @@ private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
@@ -233,49 +217,15 @@ private fun SharedPartnerAuthBody(
             )
         }
     ) {
-        when (val payload = state.payload) {
-            Uninitialized, is Loading -> SharedPartnerLoading()
-
-            is Fail -> ErrorContent(
-                error = payload.error,
-                onSelectAnotherBank = onSelectAnotherBank,
-                onEnterDetailsManually = onEnterDetailsManually,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
-
-            is Success -> LoadedContent(
+        state.payload()?.let {
+            LoadedContent(
                 authenticationStatus = state.authenticationStatus,
-                payload = payload(),
-                onClickableTextClick = onClickableTextClick,
+                payload = it,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
-                onSelectAnotherBank = onSelectAnotherBank,
+                onClickableTextClick = onClickableTextClick,
             )
-        }
-    }
-}
-
-@Composable
-private fun ErrorContent(
-    error: Throwable,
-    onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
-) {
-    when (error) {
-        is InstitutionPlannedDowntimeError -> InstitutionPlannedDowntimeErrorContent(
-            exception = error,
-            onSelectAnotherBank = onSelectAnotherBank,
-            onEnterDetailsManually = onEnterDetailsManually
-        )
-
-        is InstitutionUnplannedDowntimeError -> InstitutionUnplannedDowntimeErrorContent(
-            exception = error,
-            onSelectAnotherBank = onSelectAnotherBank,
-            onEnterDetailsManually = onEnterDetailsManually
-        )
-
-        else -> UnclassifiedErrorContent(error, onCloseFromErrorClick)
+        } ?: SharedPartnerLoading()
     }
 }
 
@@ -285,12 +235,12 @@ private fun LoadedContent(
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
         is Uninitialized,
         is Loading,
+        is Fail,
         is Success -> when (payload.authSession.isOAuth) {
             true -> PrePaneContent(
                 // show loading prepane when authenticationStatus
@@ -303,11 +253,6 @@ private fun LoadedContent(
             )
 
             false -> SharedPartnerLoading()
-        }
-
-        is Fail -> {
-            // TODO@carlosmuvi translate error type to specific error screen.
-            InstitutionUnknownErrorContent(onSelectAnotherBank)
         }
     }
 }
@@ -557,18 +502,14 @@ internal fun PartnerAuthPreview(
 ) {
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
-            state = state,
             bottomSheetState = rememberModalBottomSheetState(
                 ModalBottomSheetValue.Hidden,
             ),
-            onContinueClick = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
+            state = state,
             onClickableTextClick = {},
+            onContinueClick = {},
             onCloseClick = {},
-            onCancelClick = {},
-            onCloseFromErrorClick = {}
-        )
+        ) {}
     }
 }
 
