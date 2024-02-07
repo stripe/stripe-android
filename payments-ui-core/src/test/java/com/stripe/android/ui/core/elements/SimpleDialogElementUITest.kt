@@ -24,7 +24,7 @@ class SimpleDialogElementUITest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `on confirm click, should should report interaction`() {
+    fun `on confirm click, should report interaction`() {
         val eventReporter: UiEventReporter = mock()
 
         composeTestRule.setContent {
@@ -53,7 +53,7 @@ class SimpleDialogElementUITest {
     }
 
     @Test
-    fun `on dismiss click, should should report interaction`() {
+    fun `on dismiss click, should report interaction`() {
         val eventReporter: UiEventReporter = mock()
 
         composeTestRule.setContent {

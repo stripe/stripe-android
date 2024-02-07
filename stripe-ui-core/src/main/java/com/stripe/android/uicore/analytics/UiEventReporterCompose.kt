@@ -6,24 +6,33 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.SaverScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.staticCompositionLocalOf
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.parcelize.Parcelize
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val LocalUiEventReporter = compositionLocalOf<UiEventReporter> {
+val LocalUiEventReporter = staticCompositionLocalOf<UiEventReporter> {
     EmptyUiEventReporter
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class InteractionReporterElements(
+    val mutableInteractionSource: MutableInteractionSource,
+    val reportInteractionManually: () -> Unit
+) {
+    operator fun component1() = mutableInteractionSource
+    operator fun component2() = reportInteractionManually
+}
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-fun rememberInteractionReporter(): Pair<MutableInteractionSource, () -> Unit> {
+fun rememberInteractionReporter(): InteractionReporterElements {
     val reporter = LocalUiEventReporter.current
 
     val interactionSource = remember {
@@ -53,7 +62,10 @@ fun rememberInteractionReporter(): Pair<MutableInteractionSource, () -> Unit> {
     }
 
     return remember(interactionSource, reportManually) {
-        interactionSource to reportManually
+        InteractionReporterElements(
+            mutableInteractionSource = interactionSource,
+            reportInteractionManually = reportManually,
+        )
     }
 }
 

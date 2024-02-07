@@ -22,7 +22,7 @@ class ScanCardButtonUITest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `on click, should should report interaction`() {
+    fun `on click, should report interaction`() {
         val eventReporter: UiEventReporter = mock()
 
         composeTestRule.setContent {
@@ -43,7 +43,7 @@ class ScanCardButtonUITest {
     }
 
     @Test
-    fun `on click and disabled, should should report interaction`() {
+    fun `on click and disabled, should not report interaction`() {
         val eventReporter: UiEventReporter = mock()
 
         composeTestRule.setContent {
