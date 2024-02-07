@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.features.error
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -46,7 +47,11 @@ private fun ErrorContent(
 ) {
     when (payload) {
         Uninitialized,
-        is Loading -> FullScreenGenericLoading()
+        is Loading -> FullScreenError(
+            showBack = false,
+            onCloseClick = { },
+            content = { FullScreenGenericLoading() }
+        )
 
         // Render error successfully retrieved from a previous pane
         is Success -> ErrorContent(
@@ -139,15 +144,14 @@ private fun FullScreenError(
     }
 }
 
-@Preview(
-    group = "Error",
-    name = "Default"
-)
+@Preview
 @Composable
-internal fun ErrorScreenPreview() {
+internal fun ErrorScreenPreview(
+    @PreviewParameter(ErrorPreviewParameterProvider::class) state: ErrorState
+) {
     FinancialConnectionsPreview {
         ErrorContent(
-            payload = Uninitialized,
+            payload = state.payload,
             onSelectBankClick = {},
             onManualEntryClick = {},
             onCloseFromErrorClick = {}
