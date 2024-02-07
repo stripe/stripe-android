@@ -19,7 +19,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 class PaparazziRule(
-    vararg configOptions: List<out PaparazziConfigOption>,
+    vararg configOptions: List<PaparazziConfigOption>,
     private val boxModifier: Modifier = Modifier,
 ) : TestRule {
 
