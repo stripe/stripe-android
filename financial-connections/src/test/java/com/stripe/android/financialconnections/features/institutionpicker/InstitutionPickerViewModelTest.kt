@@ -7,7 +7,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.domain.ErrorHandler
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.SearchInstitutions
@@ -36,7 +36,7 @@ internal class InstitutionPickerViewModelTest {
 
     private val searchInstitutions = mock<SearchInstitutions>()
     private val featuredInstitutions = mock<FeaturedInstitutions>()
-    private val errorHandler = mock<ErrorHandler>()
+    private val handleError = mock<HandleError>()
     private val getManifest = mock<GetManifest>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val navigationManager = mock<NavigationManager>()
@@ -57,7 +57,7 @@ internal class InstitutionPickerViewModelTest {
         updateLocalManifest = updateLocalManifest,
         logger = Logger.noop(),
         eventTracker = eventTracker,
-        errorHandler = errorHandler,
+        errorHandler = handleError,
         initialState = state
     )
 

@@ -26,8 +26,8 @@ import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
-import com.stripe.android.financialconnections.domain.ErrorHandler
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -66,7 +66,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val postAuthSessionEvent: PostAuthSessionEvent,
     private val getOrFetchSync: GetOrFetchSync,
     private val browserManager: BrowserManager,
-    private val errorHandler: ErrorHandler,
+    private val handleError: HandleError,
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
@@ -148,7 +148,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         onAsync(
             SharedPartnerAuthState::payload,
             onFail = {
-                errorHandler.handle(
+                handleError(
                     extraMessage = "Error fetching payload / posting AuthSession",
                     error = it,
                     pane = PANE,
@@ -160,7 +160,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         onAsync(
             SharedPartnerAuthState::authenticationStatus,
             onFail = {
-                errorHandler.handle(
+                handleError(
                     extraMessage = "Error with authentication status",
                     error = if (it is FinancialConnectionsError) it else PartnerAuthError(it.message),
                     pane = PANE,

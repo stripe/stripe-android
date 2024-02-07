@@ -14,8 +14,8 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
-import com.stripe.android.financialconnections.domain.ErrorHandler
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -58,7 +58,7 @@ internal class PartnerAuthViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
-    private val errorHandler = mock<ErrorHandler>()
+    private val handleError = mock<HandleError>()
 
     @Test
     fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
@@ -78,8 +78,8 @@ internal class PartnerAuthViewModelTest {
             val viewModel = createViewModel()
 
             withState(viewModel) {
-                verifyBlocking(errorHandler) {
-                    handle(
+                verifyBlocking(handleError) {
+                    invoke(
                         extraMessage = "Error fetching payload / posting AuthSession",
                         error = unplannedDowntimeError,
                         pane = Pane.PARTNER_AUTH,
@@ -296,7 +296,7 @@ internal class PartnerAuthViewModelTest {
             initialState = initialState,
             browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
-            errorHandler = errorHandler,
+            handleError = handleError,
             applicationId = applicationId
         )
     }
