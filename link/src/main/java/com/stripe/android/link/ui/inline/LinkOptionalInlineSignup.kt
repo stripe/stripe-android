@@ -3,7 +3,6 @@
 package com.stripe.android.link.ui.inline
 
 import androidx.annotation.RestrictTo
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.relocation.BringIntoViewRequester
 import androidx.compose.foundation.relocation.bringIntoViewRequester
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -29,7 +27,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
@@ -46,20 +43,16 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
-import com.stripe.android.link.ui.ErrorText
 import com.stripe.android.link.ui.LinkTerms
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
-import com.stripe.android.uicore.elements.PhoneNumberElementUI
-import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.stripeShapes
 import kotlinx.coroutines.job
 
 @OptIn(ExperimentalComposeUiApi::class)
@@ -149,118 +142,22 @@ internal fun LinkOptionalInlineSignup(
             }
         }
 
-        Section(
-            title = null,
-            error = sectionError?.errorMessage?.let { stringResource(it) },
-        ) {
-            if (isShowingPhoneFirst) {
-                PhoneNumberElementUI(
-                    enabled = enabled,
-                    controller = phoneNumberController,
-                    moveToNextFieldOnceComplete = true,
-                    imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
-                        ImeAction.Next
-                    } else {
-                        ImeAction.Done
-                    },
-                    focusRequester = phoneFocusRequester,
-                    trailingIcon = { LinkLogo() },
-                )
-            } else {
-                EmailCollection(
-                    enabled = enabled,
-                    emailController = emailController,
-                    signUpState = signUpState,
-                    imeAction = if (signUpState == SignUpState.InputtingRemainingFields) {
-                        ImeAction.Next
-                    } else {
-                        ImeAction.Done
-                    },
-                    focusRequester = emailFocusRequester,
-                    trailingIcon = { LinkLogo() },
-                )
-            }
-
-            AnimatedVisibility(
-                visible = signUpState != SignUpState.InputtingRemainingFields && errorMessage != null,
-            ) {
-                ErrorText(
-                    text = errorMessage
-                        ?.getMessage(LocalContext.current.resources)
-                        .orEmpty(),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            }
-
-            AnimatedVisibility(visible = didShowAllFields || signUpState == SignUpState.InputtingRemainingFields) {
-                LaunchedEffect(Unit) {
-                    didShowAllFields = true
-                }
-
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Divider(
-                        color = MaterialTheme.stripeColors.componentDivider,
-                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                        modifier = Modifier.padding(
-                            horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                        )
-                    )
-
-                    if (isShowingPhoneFirst) {
-                        EmailCollection(
-                            enabled = enabled,
-                            emailController = emailController,
-                            signUpState = signUpState,
-                            imeAction = if (requiresNameCollection) {
-                                ImeAction.Next
-                            } else {
-                                ImeAction.Done
-                            },
-                            focusRequester = emailFocusRequester,
-                        )
-                    } else {
-                        PhoneNumberElementUI(
-                            enabled = enabled,
-                            controller = phoneNumberController,
-                            moveToNextFieldOnceComplete = requiresNameCollection,
-                            requestFocusWhenShown = phoneNumberController.initialPhoneNumber.isEmpty(),
-                            imeAction = if (requiresNameCollection) {
-                                ImeAction.Next
-                            } else {
-                                ImeAction.Done
-                            },
-                            focusRequester = phoneFocusRequester,
-                        )
-                    }
-
-                    Divider(
-                        color = MaterialTheme.stripeColors.componentDivider,
-                        thickness = MaterialTheme.stripeShapes.borderStrokeWidth.dp,
-                        modifier = Modifier.padding(
-                            horizontal = MaterialTheme.stripeShapes.borderStrokeWidth.dp
-                        )
-                    )
-
-                    if (requiresNameCollection) {
-                        TextField(
-                            textFieldController = nameController,
-                            imeAction = ImeAction.Done,
-                            enabled = enabled,
-                            focusRequester = nameFocusRequester,
-                        )
-                    }
-
-                    AnimatedVisibility(visible = errorMessage != null) {
-                        ErrorText(
-                            text = errorMessage
-                                ?.getMessage(LocalContext.current.resources)
-                                .orEmpty(),
-                            modifier = Modifier.fillMaxWidth()
-                        )
-                    }
-                }
-            }
-        }
+        LinkInlineSignupFields(
+            sectionError = sectionError?.errorMessage,
+            emailController = emailController,
+            phoneNumberController = phoneNumberController,
+            nameController = nameController,
+            signUpState = signUpState,
+            enabled = enabled,
+            isShowingPhoneFirst = isShowingPhoneFirst,
+            requiresNameCollection = requiresNameCollection,
+            errorMessage = errorMessage,
+            emailFocusRequester = emailFocusRequester,
+            phoneFocusRequester = phoneFocusRequester,
+            nameFocusRequester = nameFocusRequester,
+            didShowAllFields = didShowAllFields,
+            onShowingAllFields = { didShowAllFields = true },
+        )
 
         LinkTerms(
             isOptional = true,
@@ -322,7 +219,7 @@ internal fun EmailCollection(
 }
 
 @Composable
-private fun LinkLogo() {
+internal fun LinkLogo() {
     Icon(
         painter = painterResource(id = R.drawable.stripe_link_logo),
         contentDescription = stringResource(id = R.string.stripe_link),
