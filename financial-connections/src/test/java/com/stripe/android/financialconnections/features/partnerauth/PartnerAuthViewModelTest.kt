@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -24,6 +23,7 @@ import com.stripe.android.financialconnections.exception.InstitutionUnplannedDow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -36,7 +36,6 @@ import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
@@ -58,7 +57,7 @@ internal class PartnerAuthViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
-    private val handleError = mock<HandleError>()
+    private val handleError = TestHandleError()
 
     @Test
     fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
@@ -78,14 +77,12 @@ internal class PartnerAuthViewModelTest {
             val viewModel = createViewModel()
 
             withState(viewModel) {
-                verifyBlocking(handleError) {
-                    invoke(
-                        extraMessage = "Error fetching payload / posting AuthSession",
-                        error = unplannedDowntimeError,
-                        pane = Pane.PARTNER_AUTH,
-                        displayErrorScreen = true
-                    )
-                }
+                handleError.assertError(
+                    extraMessage = "Error fetching payload / posting AuthSession",
+                    error = unplannedDowntimeError,
+                    pane = Pane.PARTNER_AUTH,
+                    displayErrorScreen = true
+                )
             }
         }
 

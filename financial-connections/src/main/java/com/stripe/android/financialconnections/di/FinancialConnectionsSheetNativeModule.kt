@@ -8,6 +8,8 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -60,6 +62,11 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun providesNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
+
+    @Binds
+    fun bindsHandleError(
+        impl: RealHandleError
+    ): HandleError
 
     companion object {
         @Provides

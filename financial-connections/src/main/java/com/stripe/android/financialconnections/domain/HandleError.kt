@@ -9,12 +9,21 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import javax.inject.Inject
 
-internal class HandleError @Inject constructor(
+internal interface HandleError {
+    suspend operator fun invoke(
+        extraMessage: String,
+        error: Throwable,
+        pane: FinancialConnectionsSessionManifest.Pane,
+        displayErrorScreen: Boolean
+    )
+}
+
+internal class RealHandleError @Inject constructor(
     private val errorRepository: FinancialConnectionsErrorRepository,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val navigationManager: NavigationManager
-) {
+) : HandleError {
 
     /**
      * Handle an error by logging it and navigating to the error screen if necessary.
@@ -29,7 +38,7 @@ internal class HandleError @Inject constructor(
      * @param displayErrorScreen whether to navigate to the error screen
      *
      */
-    suspend operator fun invoke(
+    override suspend operator fun invoke(
         extraMessage: String,
         error: Throwable,
         pane: FinancialConnectionsSessionManifest.Pane,
