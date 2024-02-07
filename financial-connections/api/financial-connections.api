@@ -1650,6 +1650,13 @@ public final class com/stripe/android/financialconnections/navigation/Composable
 	public final fun getLambda-9$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/financialconnections/navigation/bottomsheet/ComposableSingletons$BottomSheetNavigationKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/navigation/bottomsheet/ComposableSingletons$BottomSheetNavigationKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function4;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function4;
+}
+
 public final class com/stripe/android/financialconnections/presentation/WebAuthFlowState$Canceled$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/presentation/WebAuthFlowState$Canceled;

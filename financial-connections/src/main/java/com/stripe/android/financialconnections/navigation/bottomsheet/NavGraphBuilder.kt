@@ -18,7 +18,7 @@ import androidx.navigation.get
  * @param content the sheet content at the given destination
  */
 @SuppressLint("NewApi") // b/187418647
-public fun NavGraphBuilder.bottomSheet(
+internal fun NavGraphBuilder.bottomSheet(
     route: String,
     arguments: List<NamedNavArgument> = emptyList(),
     deepLinks: List<NavDeepLink> = emptyList(),

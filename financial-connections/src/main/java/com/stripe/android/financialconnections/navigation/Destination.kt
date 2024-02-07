@@ -206,7 +206,7 @@ internal sealed class Destination(
     companion object {
         private fun referrer(entry: NavBackStackEntry): Pane? = entry.arguments
             ?.getString(KEY_REFERRER)
-            ?.let { value -> Pane.values().firstOrNull { it.value == value } }
+            ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 
         const val KEY_REFERRER = "referrer"
         const val KEY_MICRODEPOSITS = "microdeposits"
