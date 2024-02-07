@@ -8,6 +8,8 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -23,6 +25,7 @@ import com.stripe.android.financialconnections.network.FinancialConnectionsReque
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
@@ -59,6 +62,11 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun providesNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
+
+    @Binds
+    fun bindsHandleError(
+        impl: RealHandleError
+    ): HandleError
 
     companion object {
         @Provides
@@ -147,6 +155,14 @@ internal interface FinancialConnectionsSheetNativeModule {
         fun providesSaveToLinkWithStripeSucceededRepository(
             @IOContext workContext: CoroutineContext
         ) = SaveToLinkWithStripeSucceededRepository(
+            CoroutineScope(SupervisorJob() + workContext)
+        )
+
+        @Singleton
+        @Provides
+        fun providesFinancialConnectionsErrorRepository(
+            @IOContext workContext: CoroutineContext
+        ) = FinancialConnectionsErrorRepository(
             CoroutineScope(SupervisorJob() + workContext)
         )
 

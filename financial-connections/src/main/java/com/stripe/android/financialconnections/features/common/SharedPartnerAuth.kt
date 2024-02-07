@@ -48,8 +48,6 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
-import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
@@ -76,9 +74,7 @@ internal fun SharedPartnerAuth(
     state: SharedPartnerAuthState,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit,
-    onEnterDetailsManually: () -> Unit,
     onWebAuthFlowFinished: (WebAuthFlowState) -> Unit,
     onViewEffectLaunched: () -> Unit,
     inModal: Boolean
@@ -112,12 +108,9 @@ internal fun SharedPartnerAuth(
         inModal = inModal,
         state = state,
         onClickableTextClick = onClickableTextClick,
-        onSelectAnotherBank = onSelectAnotherBank,
-        onEnterDetailsManually = onEnterDetailsManually,
-        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onContinueClick = onContinueClick,
+        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onCancelClick = onCancelClick,
-        onCloseFromErrorClick = viewModel::onCloseFromErrorClick
     )
 }
 
@@ -126,20 +119,14 @@ private fun SharedPartnerAuthContent(
     state: SharedPartnerAuthState,
     inModal: Boolean,
     onClickableTextClick: (String) -> Unit,
-    onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     SharedPartnerAuthBody(
         inModal = inModal,
         state = state,
         onCloseClick = onCloseClick,
-        onSelectAnotherBank = onSelectAnotherBank,
-        onEnterDetailsManually = onEnterDetailsManually,
-        onCloseFromErrorClick = onCloseFromErrorClick,
         onClickableTextClick = onClickableTextClick,
         onCancelClick = onCancelClick,
         onContinueClick = onContinueClick,
@@ -215,9 +202,6 @@ private fun SharedPartnerAuthBody(
     inModal: Boolean,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
@@ -226,25 +210,16 @@ private fun SharedPartnerAuthBody(
         canNavigateBack = state.canNavigateBack,
         onCloseClick = onCloseClick
     ) {
-        when (val payload = state.payload) {
-            Uninitialized, is Loading -> SharedPartnerLoading(inModal)
-
-            is Fail -> ErrorContent(
-                error = payload.error,
-                onSelectAnotherBank = onSelectAnotherBank,
-                onEnterDetailsManually = onEnterDetailsManually,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
-
-            is Success -> LoadedContent(
+        state.payload()?.let {
+            LoadedContent(
                 showInModal = inModal,
                 authenticationStatus = state.authenticationStatus,
-                payload = payload(),
-                onClickableTextClick = onClickableTextClick,
+                payload = it,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
-                onSelectAnotherBank = onSelectAnotherBank,
+                onClickableTextClick = onClickableTextClick,
             )
+        } ?: SharedPartnerLoading(inModal)
         }
     }
 }
@@ -281,42 +256,18 @@ private fun SharedPartnerAuthContentWrapper(
 }
 
 @Composable
-private fun ErrorContent(
-    error: Throwable,
-    onSelectAnotherBank: () -> Unit,
-    onEnterDetailsManually: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
-) {
-    when (error) {
-        is InstitutionPlannedDowntimeError -> InstitutionPlannedDowntimeErrorContent(
-            exception = error,
-            onSelectAnotherBank = onSelectAnotherBank,
-            onEnterDetailsManually = onEnterDetailsManually
-        )
-
-        is InstitutionUnplannedDowntimeError -> InstitutionUnplannedDowntimeErrorContent(
-            exception = error,
-            onSelectAnotherBank = onSelectAnotherBank,
-            onEnterDetailsManually = onEnterDetailsManually
-        )
-
-        else -> UnclassifiedErrorContent(error, onCloseFromErrorClick)
-    }
-}
-
-@Composable
 private fun LoadedContent(
     showInModal: Boolean,
     authenticationStatus: Async<String>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onSelectAnotherBank: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
     when (authenticationStatus) {
         is Uninitialized,
         is Loading,
+        is Fail,
         is Success -> when (payload.authSession.isOAuth) {
             true -> PrePaneContent(
                 // show loading prepane when authenticationStatus
@@ -330,11 +281,6 @@ private fun LoadedContent(
             )
 
             false -> SharedPartnerLoading(showInModal)
-        }
-
-        is Fail -> {
-            // TODO@carlosmuvi translate error type to specific error screen.
-            InstitutionUnknownErrorContent(onSelectAnotherBank)
         }
     }
 }
@@ -588,12 +534,10 @@ internal fun PartnerAuthPreview(
             state = state,
             inModal = false,
             onClickableTextClick = {},
-            onSelectAnotherBank = {},
-            onEnterDetailsManually = {},
             onContinueClick = {},
             onCloseClick = {},
             onCancelClick = {}
-        ) {}
+        )
     }
 }
 
@@ -611,12 +555,10 @@ internal fun PartnerAuthDrawerPreview(
                 state = state,
                 inModal = true,
                 onClickableTextClick = {},
-                onSelectAnotherBank = {},
-                onEnterDetailsManually = {},
                 onContinueClick = {},
                 onCloseClick = {},
                 onCancelClick = {}
-            ) {}
+            )
         }
     }
 }

@@ -93,6 +93,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                     is Message.Complete -> closeAuthFlow(
                         earlyTerminationCause = message.cause
                     )
+
+                    is Message.CloseWithError -> closeAuthFlow(
+                        closeAuthFlowError = message.cause
+                    )
                 }
             }
         }

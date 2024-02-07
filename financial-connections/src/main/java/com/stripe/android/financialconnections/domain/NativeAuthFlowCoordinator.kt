@@ -35,5 +35,12 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
                 USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY("user_initiated_with_custom_manual_entry")
             }
         }
+
+        /**
+         * Triggers a termination of the AuthFlow with an exception.
+         */
+        data class CloseWithError(
+            val cause: Throwable
+        ) : Message
     }
 }
