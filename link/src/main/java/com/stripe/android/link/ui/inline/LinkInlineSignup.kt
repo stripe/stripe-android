@@ -208,7 +208,7 @@ internal fun LinkInlineSignup(
                         LinkTerms(
                             isOptional = false,
                             isShowingPhoneFirst = false,
-                            modifier = Modifier.padding(top = 4.dp),
+                            modifier = Modifier.padding(top = 16.dp),
                             textAlign = TextAlign.Start,
                         )
                     }

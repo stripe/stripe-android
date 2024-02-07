@@ -47,6 +47,7 @@ internal fun LinkInlineSignupFields(
     Section(
         title = null,
         error = sectionError?.let { stringResource(it) },
+        addVerticalPadding = false,
         modifier = modifier,
     ) {
         if (isShowingPhoneFirst) {
