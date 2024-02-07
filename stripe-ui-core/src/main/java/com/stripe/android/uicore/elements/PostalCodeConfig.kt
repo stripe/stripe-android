@@ -7,7 +7,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.R
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlin.math.max
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PostalCodeConfig(
@@ -69,7 +68,7 @@ class PostalCodeConfig(
             CountryPostalFormat.US -> userTyped.filter { it.isDigit() }
             CountryPostalFormat.CA -> userTyped.filter { it.isLetterOrDigit() }.uppercase()
             CountryPostalFormat.Other -> userTyped
-        }.dropLast(max(0, userTyped.length - format.maximumLength))
+        }.take(format.maximumLength)
     }
 
     override fun convertToRaw(displayName: String) = displayName

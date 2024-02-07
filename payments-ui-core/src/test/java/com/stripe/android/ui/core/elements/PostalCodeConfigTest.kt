@@ -101,6 +101,6 @@ class PostalCodeConfigTest {
     }
 
     private fun PostalCodeConfig.determineStateForInput(input: String): TextFieldState {
-        return determineState(filter(convertFromRaw(input)))
+        return determineState(filter(input))
     }
 }
