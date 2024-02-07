@@ -33,7 +33,6 @@ internal class ErrorPreviewParameterProvider :
         ),
     )
 
-
     private fun expectedDowntime() = ErrorState(
         payload = Success(
             ErrorState.Payload(
@@ -74,6 +73,4 @@ internal class ErrorPreviewParameterProvider :
         logo = null,
         mobileHandoffCapable = false
     )
-
-
 }

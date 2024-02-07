@@ -120,7 +120,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     extraMessage = "Error searching institutions",
                     error = it,
                     pane = PANE,
-                    displayErrorScreen = false  // don't show error screen for search errors.
+                    displayErrorScreen = false // don't show error screen for search errors.
                 )
             }
         )
