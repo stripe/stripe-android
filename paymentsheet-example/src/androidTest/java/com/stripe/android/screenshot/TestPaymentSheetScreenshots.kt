@@ -10,6 +10,8 @@ import com.stripe.android.paymentsheet.example.playground.activity.AppearanceSto
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
+import com.stripe.android.paymentsheet.model.defaultSorter
+import com.stripe.android.paymentsheet.model.paymentMethodSorter
 import com.stripe.android.test.core.TestParameters
 import org.junit.After
 import org.junit.Before
@@ -76,6 +78,26 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     fun resetAppearanceStore() {
         AppearanceStore.reset()
         forceLightMode()
+    }
+
+    @Before
+    fun setSort() {
+        paymentMethodSorter = {
+            sortedBy {
+                when (it.code) {
+                    "card" -> 1
+                    "klarna" -> 2
+                    "p24" -> 3
+                    "eps" -> 4
+                    else -> 100
+                }
+            }
+        }
+    }
+
+    @After
+    fun resetSort() {
+        paymentMethodSorter = defaultSorter
     }
 
     @Test
