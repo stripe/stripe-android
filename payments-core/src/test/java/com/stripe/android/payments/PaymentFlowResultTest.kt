@@ -1,7 +1,7 @@
 package com.stripe.android.payments
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.GenericStripeException
 import com.stripe.android.core.exception.StripeException
 import kotlin.test.Test
 import kotlin.test.assertFailsWith
@@ -21,7 +21,7 @@ class PaymentFlowResultTest {
 
     @Test
     fun `validate() should fail if exception is non-null`() {
-        val exception = assertFailsWith<APIException> {
+        val exception = assertFailsWith<GenericStripeException> {
             PaymentFlowResult.Unvalidated(
                 exception = StripeException.create(RuntimeException("failure"))
             ).validate()
