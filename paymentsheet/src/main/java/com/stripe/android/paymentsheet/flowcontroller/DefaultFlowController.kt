@@ -190,6 +190,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     activityResultLaunchers.forEach { it.unregister() }
                     paymentLauncher = null
                     linkLauncher.unregister()
+                    PaymentSheet.FlowController.linkHandler = null
                 }
             }
         )
