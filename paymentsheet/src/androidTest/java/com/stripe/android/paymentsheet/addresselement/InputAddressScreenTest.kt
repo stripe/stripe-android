@@ -1,11 +1,12 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.utils.compose.createPaymentSheetAndroidComposeRule
 import com.stripe.android.uicore.DefaultStripeTheme
 import org.junit.Rule
 import org.junit.Test
@@ -15,7 +16,7 @@ import org.junit.runner.RunWith
 class InputAddressScreenTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createPaymentSheetAndroidComposeRule<ComponentActivity>()
 
     @Test
     fun clicking_primary_button_triggers_callback_when_enabled() {

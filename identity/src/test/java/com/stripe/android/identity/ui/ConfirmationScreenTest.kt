@@ -3,7 +3,6 @@ package com.stripe.android.identity.ui
 import android.os.Build
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.lifecycle.MutableLiveData
@@ -14,6 +13,7 @@ import com.stripe.android.identity.VerificationFlowFinishable
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentTextPage
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +30,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class ConfirmationScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.success).thenReturn(

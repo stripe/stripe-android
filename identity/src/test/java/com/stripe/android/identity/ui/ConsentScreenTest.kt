@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
@@ -22,6 +21,7 @@ import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
 import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -44,7 +44,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class ConsentScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val verificationPageLiveData =
         MutableLiveData<Resource<VerificationPage>>(Resource.idle())

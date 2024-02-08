@@ -1,4 +1,4 @@
-package com.stripe.android.customersheet
+package com.stripe.android.customersheet.analytics
 
 import com.stripe.android.ui.core.analytics.PaymentsUiEventReporter
 

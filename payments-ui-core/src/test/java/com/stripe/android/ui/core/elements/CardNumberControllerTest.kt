@@ -4,7 +4,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
@@ -22,6 +21,7 @@ import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.utils.TestUtils.idleLooper
+import com.stripe.android.utils.createPaymentsUiCoreComposeRule
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -43,7 +43,7 @@ import com.stripe.payments.model.R as PaymentModelR
 internal class CardNumberControllerTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createPaymentsUiCoreComposeRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 

@@ -3,7 +3,6 @@ package com.stripe.android.identity.ui
 import android.content.Context
 import android.os.Build
 import androidx.compose.ui.test.assertTextEquals
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -11,6 +10,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentSelectPage
+import com.stripe.android.identity.utils.createIdentityRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,7 +23,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class DocWarmupScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val onContinueClickMock: () -> Unit = mock()
 

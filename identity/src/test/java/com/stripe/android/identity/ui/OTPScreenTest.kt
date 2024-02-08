@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.MutableLiveData
@@ -20,6 +19,7 @@ import com.stripe.android.identity.networking.models.PhoneParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentOTPPage
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewModelFactoryFor
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.identity.viewmodel.OTPViewModel
@@ -48,7 +48,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class OTPScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val verificationPageOTP = mock<VerificationPage>().also {
         whenever(it.phoneOtp).thenReturn(

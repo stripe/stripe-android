@@ -4,7 +4,6 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -13,6 +12,7 @@ import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.uicore.analytics.LocalUiEventReporter
 import com.stripe.android.uicore.analytics.UiEventReporter
+import com.stripe.android.uicore.utils.createUiCoreComposeTestRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -23,7 +23,7 @@ import org.mockito.kotlin.verifyNoInteractions
 @RunWith(AndroidJUnit4::class)
 class SingleChoiceDropdownUITest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createUiCoreComposeTestRule()
 
     @Test
     fun `on item click, should report interaction`() {

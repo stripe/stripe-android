@@ -6,11 +6,14 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.view.ViewGroup
 import android.widget.FrameLayout
+import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.updateLayoutParams
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -34,6 +37,8 @@ import com.stripe.android.model.CardParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.uicore.analytics.LocalUiEventReporter
+import com.stripe.android.uicore.analytics.UiEventReporter
 import com.stripe.android.utils.CardElementTestHelper
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.createTestActivityRule
@@ -1874,8 +1879,17 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setTheme(R.style.StripeDefaultTheme)
 
-        val layout = FrameLayout(this).apply { addView(cardInputWidget) }
-        setContentView(layout)
+        setContent {
+            CompositionLocalProvider(
+                LocalUiEventReporter provides EmptyPaymentsUiEventReporter
+            ) {
+                AndroidView(
+                    factory = { context ->
+                        FrameLayout(context).apply { addView(cardInputWidget) }
+                    }
+                )
+            }
+        }
     }
 
     fun setWorkContext(workContext: CoroutineContext) {
@@ -1884,5 +1898,15 @@ internal class CardInputWidgetTestActivity : AppCompatActivity() {
 
     companion object {
         const val VIEW_ID = 12345
+
+        object EmptyPaymentsUiEventReporter : UiEventReporter {
+            override fun onAutofillEvent(type: String) {
+                // No-op
+            }
+
+            override fun onFieldInteracted() {
+                // No-op
+            }
+        }
     }
 }

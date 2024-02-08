@@ -5,7 +5,6 @@ import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -21,6 +20,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentIndividualPage
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import com.stripe.android.uicore.elements.PHONE_NUMBER_TEXT_FIELD_TAG
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +42,7 @@ import org.robolectric.annotation.Config
 class IndividualScreenTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val verificationPage = mock<VerificationPage>().also {
         whenever(it.individual).thenReturn(

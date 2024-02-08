@@ -3,10 +3,10 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.unit.dp
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.utils.compose.createPaymentSheetComposeRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +17,7 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class MandateTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createPaymentSheetComposeRule()
 
     @Test
     fun testMandateText() {

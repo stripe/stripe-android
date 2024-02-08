@@ -2,7 +2,6 @@ package com.stripe.android.identity.ui
 
 import android.os.Build
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
@@ -15,6 +14,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -33,7 +33,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class InitialLoadingScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val mockFallbackUrlLauncher = mock<FallbackUrlLauncher>()
 

@@ -16,6 +16,7 @@ import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.customersheet.analytics.CustomerSheetUiEventReporter
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.ui.core.analytics.ReportablePaymentsUi
 import com.stripe.android.uicore.StripeTheme

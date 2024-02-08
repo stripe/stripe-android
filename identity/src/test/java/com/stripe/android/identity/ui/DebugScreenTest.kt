@@ -3,7 +3,6 @@ package com.stripe.android.identity.ui
 import android.os.Build
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
@@ -20,6 +19,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
@@ -40,7 +40,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class DebugScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val verificationPageData = MutableLiveData<Resource<VerificationPage>>()
     private val mockNavController = mock<NavController>()

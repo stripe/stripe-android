@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.analytics.PaymentSheetUiEventReporter
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.navigation.topContentPadding

@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.utils.compose.createPaymentSheetComposeRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit
 @Config(sdk = [Build.VERSION_CODES.Q])
 internal class SepaMandateScreenTest {
     @get:Rule
-    val composeRule = createComposeRule()
+    val composeRule = createPaymentSheetComposeRule()
 
     @Test
     fun testContinueClick() {

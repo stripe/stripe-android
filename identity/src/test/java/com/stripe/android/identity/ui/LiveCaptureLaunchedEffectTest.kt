@@ -3,7 +3,6 @@ package com.stripe.android.identity.ui
 import android.os.Build
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
@@ -17,6 +16,7 @@ import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCapturePage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -38,7 +38,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class LiveCaptureLaunchedEffectTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val mockDocumentCapture = mock<VerificationPageStaticContentDocumentCapturePage> {
         on { requireLiveCapture } doReturn true

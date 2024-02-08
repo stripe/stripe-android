@@ -3,11 +3,11 @@ package com.stripe.android.paymentsheet.ui
 import android.os.Build
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.test.junit4.createComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.utils.compose.createPaymentSheetComposeRule
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Rule
 import org.junit.Test
@@ -20,7 +20,7 @@ import org.robolectric.annotation.Config
 class PaymentMethodFormTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createPaymentSheetComposeRule()
 
     @Test
     fun `Changing payment method emits only form values of newly selected payment method`() {

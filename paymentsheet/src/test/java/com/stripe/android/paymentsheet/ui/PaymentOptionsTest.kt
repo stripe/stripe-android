@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
@@ -10,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
+import com.stripe.android.utils.compose.createPaymentSheetComposeRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -21,7 +21,7 @@ import kotlin.math.roundToInt
 class PaymentOptionsTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createPaymentSheetComposeRule()
 
     @Test
     fun `Navigates to AddAnotherPaymentMethod screen when add card is pressed`() {

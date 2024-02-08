@@ -1,7 +1,6 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -9,6 +8,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavOptionsBuilder
 import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.navigation.SelfieDestination
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -24,7 +24,7 @@ import org.robolectric.annotation.Config
 @Config(application = TestApplication::class, sdk = [Build.VERSION_CODES.Q])
 class SelfieWarmupScreenTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private val mockNavController = mock<NavController>()
     private val mockIdentityViewModel = mock<IdentityViewModel>()

@@ -10,7 +10,6 @@ import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertWidthIsEqualTo
 import androidx.compose.ui.test.hasTestTag
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performScrollToNode
 import androidx.compose.ui.unit.dp
@@ -18,6 +17,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.paymentsheet.utils.compose.createPaymentSheetAndroidComposeRule
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.Ignore
@@ -30,7 +30,7 @@ import org.junit.runner.RunWith
 @Ignore
 internal class PaymentMethodsUITest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val composeTestRule = createPaymentSheetAndroidComposeRule<MainActivity>()
 
     private val bancontactTestTag by lazy {
         TEST_TAG_LIST + Bancontact.code

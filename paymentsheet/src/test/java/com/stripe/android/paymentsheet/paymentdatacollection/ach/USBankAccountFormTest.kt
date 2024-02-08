@@ -1,10 +1,8 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.os.Build
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -13,10 +11,11 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.analytics.PaymentsUiEventReporter
+import com.stripe.android.ui.core.analytics.ReportablePaymentsUi
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.analytics.LocalUiEventReporter
-import com.stripe.android.uicore.analytics.UiEventReporter
 import com.stripe.android.utils.MockPaymentMethodsFactory
+import com.stripe.android.utils.compose.createPaymentSheetComposeRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,16 +28,14 @@ import org.robolectric.annotation.Config
 @Config(sdk = [Build.VERSION_CODES.Q])
 class USBankAccountFormTest {
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createPaymentSheetComposeRule()
 
     @Test
     fun `on clear account button clicked, should report interaction`() {
-        val eventReporter: UiEventReporter = mock()
+        val eventReporter: PaymentsUiEventReporter = mock()
 
         composeTestRule.setContent {
-            CompositionLocalProvider(
-                LocalUiEventReporter provides eventReporter
-            ) {
+            ReportablePaymentsUi(eventReporter = eventReporter) {
                 USBankAccountForm(
                     formArgs = FormArgumentsFactory.create(
                         paymentMethod = MockPaymentMethodsFactory.mockPaymentMethod(

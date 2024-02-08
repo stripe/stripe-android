@@ -21,7 +21,9 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.paymentsheet.addresselement.analytics.AddressElementUiEventReporter
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.ui.core.analytics.ReportablePaymentsUi
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.launch
@@ -73,30 +75,32 @@ internal class AddressElementActivity : ComponentActivity() {
                     onDismissed = viewModel.navigator::dismiss,
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        NavHost(
-                            navController = navController,
-                            startDestination = AddressElementScreen.InputAddress.route,
-                        ) {
-                            composable(AddressElementScreen.InputAddress.route) {
-                                InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
-                            }
-                            composable(
-                                AddressElementScreen.Autocomplete.route,
-                                arguments = listOf(
-                                    navArgument(AddressElementScreen.Autocomplete.countryArg) {
-                                        type = NavType.StringType
-                                    }
-                                )
-                            ) { backStackEntry ->
-                                val country = backStackEntry
-                                    .arguments
-                                    ?.getString(
-                                        AddressElementScreen.Autocomplete.countryArg
+                        ReportablePaymentsUi(eventReporter = AddressElementUiEventReporter) {
+                            NavHost(
+                                navController = navController,
+                                startDestination = AddressElementScreen.InputAddress.route,
+                            ) {
+                                composable(AddressElementScreen.InputAddress.route) {
+                                    InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
+                                }
+                                composable(
+                                    AddressElementScreen.Autocomplete.route,
+                                    arguments = listOf(
+                                        navArgument(AddressElementScreen.Autocomplete.countryArg) {
+                                            type = NavType.StringType
+                                        }
                                     )
-                                AutocompleteScreen(
-                                    viewModel.autoCompleteViewModelSubcomponentBuilderProvider,
-                                    country
-                                )
+                                ) { backStackEntry ->
+                                    val country = backStackEntry
+                                        .arguments
+                                        ?.getString(
+                                            AddressElementScreen.Autocomplete.countryArg
+                                        )
+                                    AutocompleteScreen(
+                                        viewModel.autoCompleteViewModelSubcomponentBuilderProvider,
+                                        country
+                                    )
+                                }
                             }
                         }
                     }

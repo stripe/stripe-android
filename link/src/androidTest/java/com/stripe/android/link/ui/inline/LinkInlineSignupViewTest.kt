@@ -2,7 +2,6 @@ package com.stripe.android.link.ui.inline
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -10,6 +9,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.inline.utils.createLinkAndroidComposeRule
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
@@ -23,7 +23,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class LinkInlineSignupViewTest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createLinkAndroidComposeRule<ComponentActivity>()
 
     @Test
     fun clicking_on_checkbox_triggers_callback() {

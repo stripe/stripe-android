@@ -5,7 +5,6 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
-import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -13,6 +12,7 @@ import com.stripe.android.identity.TestApplication
 import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentBottomSheetLineContent
+import com.stripe.android.identity.utils.createIdentityRule
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
 import org.junit.Rule
 import org.junit.Test
@@ -26,7 +26,7 @@ import org.robolectric.annotation.Config
 internal class BottomSheetTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
+    val composeTestRule = createIdentityRule()
 
     private companion object {
         const val TITLE = "TITLE"
