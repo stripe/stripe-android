@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.intercept
 import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
@@ -63,6 +64,8 @@ import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.utils.AnimationConstants
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -609,8 +612,19 @@ internal class DefaultFlowController @Inject internal constructor(
         onPaymentResult(paymentResult)
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     internal fun onPaymentResult(paymentResult: PaymentResult) {
         logPaymentResult(paymentResult)
+
+        val selection = viewModel.paymentSelection
+
+        if (paymentResult is PaymentResult.Completed && selection != null && selection.isLink) {
+            GlobalScope.launch {
+                // This usage is intentional. We want the request to be sent without regard for the UI lifecycle.
+                PaymentSheet.FlowController.linkHandler?.logOut()
+            }
+        }
+
         viewModelScope.launch {
             paymentResultCallback.onPaymentSheetResult(
                 paymentResult.convertToPaymentSheetResult()
