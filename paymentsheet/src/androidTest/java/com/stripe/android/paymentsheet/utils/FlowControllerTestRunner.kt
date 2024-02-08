@@ -8,6 +8,7 @@ import androidx.test.espresso.IdlingResource
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -65,6 +66,7 @@ private fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
 
     scenario.onActivity {
         PaymentConfiguration.init(it, "pk_test_123")
+        LinkStore(it.applicationContext).clear()
     }
 
     lateinit var flowController: PaymentSheet.FlowController
