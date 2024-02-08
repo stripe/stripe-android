@@ -2,6 +2,7 @@ package com.stripe.android.ui.core.elements.events
 
 import androidx.annotation.RestrictTo
 import androidx.compose.runtime.staticCompositionLocalOf
+import com.stripe.android.uicore.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface CardNumberCompletedEventReporter {
@@ -15,6 +16,8 @@ val LocalCardNumberCompletedEventReporter = staticCompositionLocalOf<CardNumberC
 
 private object EmptyCardEventReporter : CardNumberCompletedEventReporter {
     override fun onCardNumberCompleted() {
-        // No-op
+        if (BuildConfig.DEBUG) {
+            error("CardNumberCompletedEventReporter.onCardNumberCompleted() was not reported")
+        }
     }
 }

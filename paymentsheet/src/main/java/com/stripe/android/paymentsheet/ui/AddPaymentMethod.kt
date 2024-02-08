@@ -93,7 +93,7 @@ internal fun AddPaymentMethod(
     Column(modifier = modifier.fillMaxWidth()) {
         CompositionLocalProvider(
             LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent,
-            LocalCardNumberCompletedEventReporter provides sheetViewModel::reportCardNumberCompleted
+            LocalCardNumberCompletedEventReporter provides sheetViewModel::reportCardNumberCompleted,
         ) {
             val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
                 ?.args
