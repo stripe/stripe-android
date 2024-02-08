@@ -38,6 +38,9 @@ internal class ElementsSessionJsonParser(
         )
         val linkPassthroughModeEnabled = json.optJSONObject(FIELD_LINK_SETTINGS)
             ?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
+        val linkFlags = json.optJSONObject(FIELD_LINK_SETTINGS)?.let { linkSettingsJson ->
+            parseLinkFlags(linkSettingsJson)
+        } ?: emptyMap()
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
@@ -62,6 +65,7 @@ internal class ElementsSessionJsonParser(
                 linkSettings = ElementsSession.LinkSettings(
                     linkFundingSources = jsonArrayToList(linkFundingSources),
                     linkPassthroughModeEnabled = linkPassthroughModeEnabled,
+                    linkFlags = linkFlags,
                 ),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
@@ -136,6 +140,20 @@ internal class ElementsSessionJsonParser(
     private fun parseCardBrandChoiceEligibility(json: JSONObject): Boolean {
         val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return false
         return cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false)
+    }
+
+    private fun parseLinkFlags(json: JSONObject): Map<String, Boolean> {
+        val flags = mutableMapOf<String, Boolean>()
+
+        json.keys().forEach { key ->
+            val value = json.get(key)
+
+            if (value is Boolean) {
+                flags[key] = value
+            }
+        }
+
+        return flags.toMap()
     }
 
     internal companion object {

@@ -39,6 +39,9 @@ internal data class PopupPayload(
 
     @SerialName("paymentObject")
     val paymentObject: String,
+
+    @SerialName("flags")
+    val flags: Map<String, Boolean>,
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -48,9 +51,6 @@ internal data class PopupPayload(
 
     @SerialName("loggerMetadata")
     val loggerMetadata: Map<String, String> = emptyMap()
-
-    @SerialName("flags")
-    val flags: Map<String, String> = emptyMap()
 
     @SerialName("experiments")
     val experiments: Map<String, String> = emptyMap()
@@ -129,6 +129,7 @@ internal data class PopupPayload(
                 locale = context.currentLocale(),
                 paymentUserAgent = paymentUserAgent,
                 paymentObject = paymentObject(),
+                flags = flags,
             )
         }
 

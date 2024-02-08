@@ -519,6 +519,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
+            flags = emptyMap(),
         )
 
         assertThat(result.linkState?.configuration).isEqualTo(expectedLinkConfig)
@@ -551,6 +552,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = emptyList(),
                 linkPassthroughModeEnabled = true,
+                linkFlags = emptyMap(),
             )
         )
 
@@ -560,6 +562,45 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.configuration?.passthroughModeEnabled).isTrue()
+    }
+
+    @Test
+    fun `Populates Link configuration with link flags`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = emptyList(),
+                linkPassthroughModeEnabled = false,
+                linkFlags = mapOf(
+                    "link_authenticated_change_event_enabled" to false,
+                    "link_bank_incentives_enabled" to false,
+                    "link_bank_onboarding_enabled" to false,
+                    "link_email_verification_login_enabled" to false,
+                    "link_financial_incentives_experiment_enabled" to false,
+                    "link_local_storage_login_enabled" to true,
+                    "link_only_for_payment_method_types_enabled" to false,
+                    "link_passthrough_mode_enabled" to true,
+                ),
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(
+            mapOf(
+                "link_authenticated_change_event_enabled" to false,
+                "link_bank_incentives_enabled" to false,
+                "link_bank_onboarding_enabled" to false,
+                "link_email_verification_login_enabled" to false,
+                "link_financial_incentives_experiment_enabled" to false,
+                "link_local_storage_login_enabled" to true,
+                "link_only_for_payment_method_types_enabled" to false,
+                "link_passthrough_mode_enabled" to true,
+            )
+        )
     }
 
     @Test

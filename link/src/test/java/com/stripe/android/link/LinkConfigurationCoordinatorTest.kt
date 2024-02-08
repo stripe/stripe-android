@@ -35,6 +35,7 @@ class LinkConfigurationCoordinatorTest {
         shippingValues = null,
         signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
         passthroughModeEnabled = false,
+        flags = emptyMap(),
     )
 
     private val linkComponentBuilder: LinkComponent.Builder = mock()
