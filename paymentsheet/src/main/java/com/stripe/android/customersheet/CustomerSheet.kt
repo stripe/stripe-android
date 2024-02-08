@@ -3,12 +3,14 @@ package com.stripe.android.customersheet
 import android.app.Application
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.injection.CustomerSheetComponent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -168,6 +170,8 @@ class CustomerSheet @Inject internal constructor(
          * applicable, Stripe will select the network.
          */
         val preferredNetworks: List<CardBrand> = emptyList(),
+
+        internal val allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
     ) {
 
         // Hide no-argument constructor init
@@ -178,15 +182,18 @@ class CustomerSheet @Inject internal constructor(
             defaultBillingDetails = PaymentSheet.BillingDetails(),
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             merchantDisplayName = merchantDisplayName,
+            allowsRemovalOfLastSavedPaymentMethod = true,
         )
 
         fun newBuilder(): Builder {
+            @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
             return Builder(merchantDisplayName)
                 .appearance(appearance)
                 .googlePayEnabled(googlePayEnabled)
                 .headerTextForSelectionScreen(headerTextForSelectionScreen)
                 .defaultBillingDetails(defaultBillingDetails)
                 .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+                .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
         }
 
         @ExperimentalCustomerSheetApi
@@ -199,6 +206,7 @@ class CustomerSheet @Inject internal constructor(
                 PaymentSheet.BillingDetailsCollectionConfiguration =
                     PaymentSheet.BillingDetailsCollectionConfiguration()
             private var preferredNetworks: List<CardBrand> = emptyList()
+            private var allowsRemovalOfLastSavedPaymentMethod: Boolean = true
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -228,6 +236,13 @@ class CustomerSheet @Inject internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
+            // TODO(jaynewstrom-stripe): remove before AllowsRemovalOfLastSavedPaymentMethodApi Beta.
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+            fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
+                this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -236,6 +251,7 @@ class CustomerSheet @Inject internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 merchantDisplayName = merchantDisplayName,
                 preferredNetworks = preferredNetworks,
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
             )
         }
 
