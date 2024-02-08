@@ -261,7 +261,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
         override fun parse(json: JSONObject): StripeIntent.NextActionData.CashAppRedirect {
             return StripeIntent.NextActionData.CashAppRedirect(
-                mobileAuthUrl = json.optString("mobile_auth_url"),
+                HostedInstructionsUrl = json.optString("hosted_instructions_url"),
             )
         }
     }
@@ -271,7 +271,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
 
         override fun parse(json: JSONObject): StripeIntent.NextActionData.SwishRedirect {
             return StripeIntent.NextActionData.SwishRedirect(
-                mobileAuthUrl = json.optString("mobile_auth_url"),
+                HostedInstructionsUrl = json.optString("hosted_instructions_url"),
             )
         }
     }
