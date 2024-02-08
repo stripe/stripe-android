@@ -58,7 +58,7 @@ internal const val CONTINUE_BUTTON_TAG = "Continue"
 internal const val SCAN_TITLE_TAG = "Title"
 internal const val SCAN_MESSAGE_TAG = "Message"
 internal const val CHECK_MARK_TAG = "CheckMark"
-internal const val VIEW_FINDER_ASPECT_RATIO = 1.5f
+internal const val VIEW_FINDER_ASPECT_RATIO = 1f
 
 @Composable
 internal fun DocumentScanScreen(
@@ -285,6 +285,9 @@ private fun CameraViewFinder(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(VIEW_FINDER_ASPECT_RATIO)
+            .padding(
+                horizontal = 2.dp
+            )
             .clip(RoundedCornerShape(dimensionResource(id = R.dimen.stripe_view_finder_corner_radius)))
     ) {
         AndroidView(
