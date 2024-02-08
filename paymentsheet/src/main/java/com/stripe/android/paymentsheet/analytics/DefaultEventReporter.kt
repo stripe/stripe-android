@@ -47,7 +47,6 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadStarted() {
         durationProvider.start(DurationProvider.Key.Loading)
-        durationProvider.start(DurationProvider.Key.ConfirmButtonClicked) // TODO(samer-stripe) move to formShown.
         fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled))
     }
 
@@ -138,6 +137,37 @@ internal class DefaultEventReporter @Inject internal constructor(
                 code = code,
                 isDeferred = isDeferred,
                 currency = currency,
+                linkEnabled = linkEnabled,
+            )
+        )
+    }
+
+    override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
+        durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
+
+        fireEvent(
+            PaymentSheetEvent.ShowPaymentOptionForm(
+                code = code,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+            )
+        )
+    }
+
+    override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        fireEvent(
+            PaymentSheetEvent.PaymentOptionFormInteraction(
+                code = code,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+            )
+        )
+    }
+
+    override fun onCardNumberCompleted() {
+        fireEvent(
+            PaymentSheetEvent.CardNumberCompleted(
+                isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
             )
         )

@@ -600,6 +600,73 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `ShowPaymentOptionForm event should return expected toString()`() {
+        val event = PaymentSheetEvent.ShowPaymentOptionForm(
+            code = "card",
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_form_shown"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "selected_lpm" to "card",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `PaymentOptionFormInteraction event should return expected toString()`() {
+        val event = PaymentSheetEvent.PaymentOptionFormInteraction(
+            code = "card",
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_form_interacted"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "selected_lpm" to "card",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
+    fun `CardNumberCompleted event should return expected toString()`() {
+        val event = PaymentSheetEvent.CardNumberCompleted(
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_card_number_completed"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
+
+    @Test
     fun `ShowEditablePaymentOption event should return expected toString()`() {
         val event = PaymentSheetEvent.ShowEditablePaymentOption(
             isDeferred = false,
