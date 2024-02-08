@@ -308,7 +308,7 @@ internal abstract class BaseSheetViewModel(
     }
 
     protected fun reportConfirmButtonPressed() {
-        eventReporter.onPressConfirmButton()
+        eventReporter.onPressConfirmButton(selection.value)
     }
 
     protected fun setStripeIntent(stripeIntent: StripeIntent?) {

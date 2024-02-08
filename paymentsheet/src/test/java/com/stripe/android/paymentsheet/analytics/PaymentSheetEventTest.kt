@@ -892,4 +892,55 @@ class PaymentSheetEventTest {
             )
         )
     }
+
+    @Test
+    fun `PressConfirmButton event should return expected toString()`() {
+        val event = PaymentSheetEvent.PressConfirmButton(
+            selectedLpm = "card",
+            currency = "USD",
+            duration = 60.seconds,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_confirm_button_tapped"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "selected_lpm" to "card",
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "duration" to 60f,
+                "currency" to "USD",
+            )
+        )
+    }
+
+    @Test
+    fun `PressConfirmButton event should return expected toString() with null values`() {
+        val event = PaymentSheetEvent.PressConfirmButton(
+            selectedLpm = null,
+            currency = null,
+            duration = null,
+            isDeferred = false,
+            linkEnabled = false,
+        )
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_confirm_button_tapped"
+        )
+        assertThat(
+            event.params
+        ).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+            )
+        )
+    }
 }

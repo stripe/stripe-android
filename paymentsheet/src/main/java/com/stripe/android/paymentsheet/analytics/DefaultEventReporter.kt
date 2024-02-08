@@ -47,6 +47,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     override fun onLoadStarted() {
         durationProvider.start(DurationProvider.Key.Loading)
+        durationProvider.start(DurationProvider.Key.ConfirmButtonClicked) // TODO(samer-stripe) move to formShown.
         fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled))
     }
 
@@ -156,10 +157,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onPressConfirmButton() {
+    override fun onPressConfirmButton(paymentSelection: PaymentSelection?,) {
+        val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
+
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
+                duration = duration,
+                selectedLpm = paymentSelection.code(),
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
             )

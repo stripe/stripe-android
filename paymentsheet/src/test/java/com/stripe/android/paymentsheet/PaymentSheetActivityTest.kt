@@ -933,7 +933,7 @@ internal class PaymentSheetActivityTest {
             composeTestRule.waitForIdle()
         }
 
-        verify(eventReporter).onPressConfirmButton()
+        verify(eventReporter).onPressConfirmButton(any())
     }
 
     private fun activityScenario(

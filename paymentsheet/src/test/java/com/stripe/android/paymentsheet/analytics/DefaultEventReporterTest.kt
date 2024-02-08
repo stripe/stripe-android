@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -340,6 +341,32 @@ class DefaultEventReporterTest {
                 req.params["event"] == "mc_update_card_failed" &&
                     req.params["selected_card_brand"] == "cartes_bancaires" &&
                     req.params["error_message"] == "No network available!"
+            }
+        )
+    }
+
+    @Test
+    fun `onPressConfirmButton() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPressConfirmButton(
+            PaymentSelection.New.GenericPaymentMethod(
+                labelResource = "Cash App Pay",
+                iconResource = 0,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_confirm_button_tapped" &&
+                    req.params["selected_lpm"] == "cashapp" &&
+                    req.params["currency"] == "usd"
             }
         )
     }
