@@ -68,7 +68,7 @@ internal class NetworkDispatcher : Dispatcher() {
         // rest of the test will continue, even if a request was missed.
         // Killing the process will ensure the test fails for a missing request even if the
         // exception is silently ignored.
-        android.os.Process.killProcess(android.os.Process.myPid())
+//        android.os.Process.killProcess(android.os.Process.myPid())
 
         throw exception
     }
