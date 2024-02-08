@@ -18,6 +18,7 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentSheetLoader
@@ -49,6 +50,9 @@ class FlowControllerConfigurationHandlerTest {
 
     @get:Rule
     val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
+
+    @get:Rule
+    val sessionRule = SessionTestRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)

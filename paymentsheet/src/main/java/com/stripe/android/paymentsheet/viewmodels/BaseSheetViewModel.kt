@@ -2,9 +2,9 @@ package com.stripe.android.paymentsheet.viewmodels
 
 import android.app.Application
 import androidx.annotation.StringRes
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.analytics.SessionAndroidViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -90,7 +90,7 @@ internal abstract class BaseSheetViewModel(
     private val headerTextFactory: HeaderTextFactory,
     val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
-) : AndroidViewModel(application) {
+) : SessionAndroidViewModel(application, savedStateHandle) {
 
     internal val customerConfig = config.customer
     internal val merchantName = config.merchantDisplayName

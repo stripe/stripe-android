@@ -17,7 +17,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -261,8 +260,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 handleLinkProcessingState(processingState)
             }
         }
-
-        AnalyticsRequestFactory.regenerateSessionId()
 
         val isDeferred = args.initializationMode is PaymentSheet.InitializationMode.DeferredIntent
 
