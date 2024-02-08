@@ -1,6 +1,8 @@
 package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.core.Logger
+import com.stripe.android.link.BuildConfig
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.analytics.LinkEventsReporter
@@ -89,6 +91,21 @@ internal class LinkAccountManager @Inject constructor(
                 consentAction = userInput.consentAction,
             )
         }
+
+    suspend fun logOut(): Result<ConsumerSession> {
+        return runCatching {
+            requireNotNull(linkAccount.value)
+        }.mapCatching { account ->
+            linkRepository.logOut(
+                consumerSessionClientSecret = account.clientSecret,
+                consumerAccountPublishableKey = consumerPublishableKey,
+            ).getOrThrow()
+        }.onSuccess {
+            Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
+        }.onFailure { error ->
+            Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
+        }
+    }
 
     /**
      * Attempts sign up if session is in valid state for sign up

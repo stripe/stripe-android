@@ -1121,6 +1121,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ).map { it.id }
     }
 
+    override suspend fun logOut(
+        consumerSessionClientSecret: String,
+        consumerAccountPublishableKey: String?,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSession> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = logoutConsumerUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ),
+            ),
+            jsonParser = ConsumerSessionJsonParser(),
+        )
+    }
+
     override suspend fun createFinancialConnectionsSessionForDeferredPayments(
         params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
         requestOptions: ApiRequest.Options

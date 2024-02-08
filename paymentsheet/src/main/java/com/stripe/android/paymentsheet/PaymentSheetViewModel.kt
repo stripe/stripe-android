@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
+import com.stripe.android.paymentsheet.model.isLink
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationContract
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncher
@@ -670,20 +671,26 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun handlePaymentCompleted(paymentMethod: PaymentMethod?, finishImmediately: Boolean) {
+        val currentSelection = selection.value
         eventReporter.onPaymentSuccess(
-            paymentSelection = selection.value,
+            paymentSelection = currentSelection,
             deferredIntentConfirmationType = deferredIntentConfirmationType,
         )
 
         // Reset after sending event
         deferredIntentConfirmationType = null
 
+        // Log out of Link to invalidate the token
+        if (currentSelection != null && currentSelection.isLink) {
+            linkHandler.logOut()
+        }
+
         /*
          * Sets current selection as default payment method in future payment sheet usage. New payment
          * methods are only saved if the payment sheet is in setup mode, is in payment intent with setup
          * for usage, or the customer has requested the payment method be saved.
          */
-        when (val currentSelection = selection.value) {
+        when (currentSelection) {
             is PaymentSelection.New -> paymentMethod.takeIf {
                 currentSelection.canSave(args.initializationMode)
             }?.let { method ->

@@ -224,3 +224,12 @@ internal sealed class PaymentSelection : Parcelable {
         ) : New()
     }
 }
+
+internal val PaymentSelection.isLink: Boolean
+    get() = when (this) {
+        is PaymentSelection.GooglePay -> false
+        is PaymentSelection.Link -> true
+        is PaymentSelection.New.LinkInline -> true
+        is PaymentSelection.New -> false
+        is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
+    }
