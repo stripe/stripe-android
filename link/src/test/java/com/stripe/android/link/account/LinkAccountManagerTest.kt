@@ -447,6 +447,7 @@ class LinkAccountManagerTest {
             shippingValues = null,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             passthroughModeEnabled = passthroughModeEnabled,
+            flags = emptyMap(),
         ),
         linkRepository,
         linkEventsReporter,

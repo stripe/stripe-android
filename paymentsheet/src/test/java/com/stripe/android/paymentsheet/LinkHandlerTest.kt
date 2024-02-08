@@ -549,6 +549,7 @@ private fun defaultLinkConfiguration(
         ),
         shippingValues = null,
         passthroughModeEnabled = false,
+        flags = emptyMap(),
     )
 }
 

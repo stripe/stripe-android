@@ -159,6 +159,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     stripeIntent = stripeIntent,
                     merchantCountry = merchantCountry,
                     passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
+                    flags = elementsSession.linkFlags,
                 )
             } else {
                 null
@@ -242,12 +243,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         stripeIntent: StripeIntent,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
+        flags: Map<String, Boolean>,
     ): LinkState {
         val linkConfig = createLinkConfiguration(
             config = config,
             stripeIntent = stripeIntent,
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
+            flags = flags,
         )
 
         val loginState = when (accountStatusProvider(linkConfig)) {
@@ -269,6 +272,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         stripeIntent: StripeIntent,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
+        flags: Map<String, Boolean>,
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = config.shippingDetails
 
@@ -320,6 +324,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             customerInfo = customerInfo,
             shippingValues = shippingAddress,
             passthroughModeEnabled = passthroughModeEnabled,
+            flags = flags,
         )
     }
 
