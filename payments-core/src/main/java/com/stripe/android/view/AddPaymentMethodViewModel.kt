@@ -10,7 +10,7 @@ import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.Stripe
-import com.stripe.android.analytics.SessionViewModel
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -25,12 +25,16 @@ internal class AddPaymentMethodViewModel(
     private val args: AddPaymentMethodActivityStarter.Args,
     private val errorMessageTranslator: ErrorMessageTranslator =
         TranslatorManager.getErrorMessageTranslator()
-) : SessionViewModel(savedStateHandle) {
+) : ViewModel() {
 
     private val productUsage: Set<String> = listOfNotNull(
         AddPaymentMethodActivity.PRODUCT_TOKEN,
         PaymentSession.PRODUCT_TOKEN.takeIf { args.isPaymentSessionActive }
     ).toSet()
+
+    init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+    }
 
     internal suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams

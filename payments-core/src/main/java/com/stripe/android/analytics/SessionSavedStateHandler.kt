@@ -1,9 +1,10 @@
 package com.stripe.android.analytics
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
 import com.stripe.android.core.networking.AnalyticsRequestFactory
-import org.jetbrains.annotations.VisibleForTesting
 import java.util.UUID
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -13,7 +14,28 @@ object SessionSavedStateHandler {
 
     private var sessionLocked: Boolean = false
 
-    fun startSession(savedStateHandle: SavedStateHandle) {
+    /**
+     * Attaches a [Session] to a [ViewModel]'s lifecycle and its provided [SavedStateHandle]. This should be called
+     * in the first line of the `init` call in the [ViewModel].
+     *
+     * @param viewModel used to attach a session to its lifecycle.
+     * @param savedStateHandle used to store & restore [Session] data.
+     *
+     * @return a function for manually restarting the session if needed.
+     */
+    fun attachTo(viewModel: ViewModel, savedStateHandle: SavedStateHandle): () -> Unit {
+        startSession(savedStateHandle)
+
+        viewModel.addCloseable {
+            clearSession(savedStateHandle)
+        }
+
+        return {
+            restartSession(savedStateHandle)
+        }
+    }
+
+    private fun startSession(savedStateHandle: SavedStateHandle) {
         savedStateHandle.get<Session>(SESSION_KEY)?.let { session ->
             session.also { storedSession ->
                 when (storedSession) {
@@ -41,7 +63,7 @@ object SessionSavedStateHandler {
         }
     }
 
-    fun restartSession(savedStateHandle: SavedStateHandle) {
+    private fun restartSession(savedStateHandle: SavedStateHandle) {
         savedStateHandle.get<Session>(SESSION_KEY)?.let { session ->
             session.also { storedSession ->
                 when (storedSession) {
@@ -58,7 +80,7 @@ object SessionSavedStateHandler {
         }
     }
 
-    fun clearSession(savedStateHandle: SavedStateHandle) {
+    private fun clearSession(savedStateHandle: SavedStateHandle) {
         savedStateHandle.get<Session>(SESSION_KEY)?.let { session ->
             session.also { storedSession ->
                 when (storedSession) {
@@ -71,6 +93,7 @@ object SessionSavedStateHandler {
         }
     }
 
+    @VisibleForTesting
     fun clear() {
         sessionLocked = false
     }

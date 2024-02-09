@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -141,6 +142,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     )
 
     init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
             GooglePayState.Available
         } else {

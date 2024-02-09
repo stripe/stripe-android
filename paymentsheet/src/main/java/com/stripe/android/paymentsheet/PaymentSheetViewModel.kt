@@ -14,6 +14,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
@@ -255,6 +256,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var paymentLauncher: StripePaymentLauncher? = null
 
     init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
         viewModelScope.launch {
             linkHandler.processingState.collect { processingState ->
                 handleLinkProcessingState(processingState)
