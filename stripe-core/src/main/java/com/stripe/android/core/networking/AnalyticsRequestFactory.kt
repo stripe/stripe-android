@@ -91,7 +91,6 @@ open class AnalyticsRequestFactory(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Volatile
-        @VisibleForTesting
         var sessionId: UUID = UUID.randomUUID()
             private set
 
@@ -102,6 +101,11 @@ open class AnalyticsRequestFactory(
         private val DEVICE_TYPE: String = "${Build.MANUFACTURER}_${Build.BRAND}_${Build.MODEL}"
 
         const val ANALYTICS_UA = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
+
+        @VisibleForTesting
+        fun setSessionId(id: UUID) {
+            sessionId = id
+        }
 
         fun regenerateSessionId() {
             sessionId = UUID.randomUUID()
