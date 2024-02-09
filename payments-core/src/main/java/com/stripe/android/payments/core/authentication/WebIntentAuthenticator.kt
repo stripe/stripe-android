@@ -104,7 +104,7 @@ internal class WebIntentAuthenticator @Inject constructor(
                 shouldCancelIntentOnUserNavigation = false
             }
             is StripeIntent.NextActionData.SwishRedirect -> {
-                authUrl = nextActionData.mobileAuthUrl
+                authUrl = nextActionData.hostedInstructionUrl
                 returnUrl = defaultReturnUrl.value
                 shouldCancelIntentOnUserNavigation = false
             }

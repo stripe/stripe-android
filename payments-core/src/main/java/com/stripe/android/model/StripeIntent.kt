@@ -324,7 +324,7 @@ sealed interface StripeIntent : StripeModel {
          */
         @Parcelize
         data class SwishRedirect(
-            val mobileAuthUrl: String,
+            val hostedInstructionUrl: String,
         ) : NextActionData()
     }
 }
