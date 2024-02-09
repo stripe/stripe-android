@@ -155,6 +155,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
         }
 
+        // This is bad, but I don't think there's a better option
+        PaymentSheet.FlowController.linkHandler = linkHandler
+
         linkHandler.linkInlineSelection.value = args.state.paymentSelection as? PaymentSelection.New.LinkInline
         linkHandler.setupLink(linkState)
 

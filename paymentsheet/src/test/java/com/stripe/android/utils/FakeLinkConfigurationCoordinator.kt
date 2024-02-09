@@ -8,6 +8,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
@@ -46,6 +47,15 @@ class FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
                 ),
                 paymentMethodCreateParams = mock(),
                 originalParams = mock(),
+            )
+        )
+    }
+
+    override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {
+        return Result.success(
+            ConsumerSession(
+                emailAddress = "email@email.com",
+                redactedPhoneNumber = "+15555555555",
             )
         )
     }

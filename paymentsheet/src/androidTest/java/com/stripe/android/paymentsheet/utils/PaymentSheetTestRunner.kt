@@ -6,6 +6,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -69,6 +70,7 @@ private fun ActivityScenarioRule<MainActivity>.runPaymentSheetTestInternal(
     scenario.moveToState(Lifecycle.State.CREATED)
     scenario.onActivity {
         PaymentConfiguration.init(it, "pk_test_123")
+        LinkStore(it.applicationContext).clear()
     }
 
     lateinit var paymentSheet: PaymentSheet

@@ -32,6 +32,14 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun fillOutLink() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Save your info for secure 1-click checkout with Link")
+        clickViewWithText("Save your info for secure 1-click checkout with Link")
+    }
+
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
