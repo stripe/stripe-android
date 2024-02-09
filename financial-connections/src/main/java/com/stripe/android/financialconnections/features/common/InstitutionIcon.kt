@@ -14,6 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalImageLoader
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -30,7 +31,7 @@ internal fun InstitutionIcon(institutionIcon: String?) {
             contentDescription = null,
             modifier = iconModifier,
             contentScale = ContentScale.Crop,
-            loadingContent = { LoadingShimmerEffect { Box(modifier = iconModifier.background(it)) } },
+            loadingContent = { Box(modifier = iconModifier.background(v3Colors.backgroundOffset)) },
             errorContent = { InstitutionPlaceholder(iconModifier) }
         )
     }
