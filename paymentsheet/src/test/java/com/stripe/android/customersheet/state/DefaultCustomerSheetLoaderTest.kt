@@ -97,6 +97,8 @@ class DefaultCustomerSheetLoaderTest {
                 emit(false)
             }
         )
+
+        CustomerSheetHacks.clear()
     }
 
     @Test
