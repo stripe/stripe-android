@@ -1071,6 +1071,22 @@ public final class com/stripe/android/StripeKtxKt {
 	public static final fun verifySetupIntentWithMicrodeposits (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/analytics/Session$Observer$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/analytics/Session$Observer;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/analytics/Session$Observer;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/analytics/Session$Owner$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/analytics/Session$Owner;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/analytics/Session$Owner;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract interface class com/stripe/android/cards/CardAccountRangeRepository$Factory {
 	public abstract fun create ()Lcom/stripe/android/cards/CardAccountRangeRepository;
 	public abstract fun createWithStripeRepository (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;)Lcom/stripe/android/cards/CardAccountRangeRepository;

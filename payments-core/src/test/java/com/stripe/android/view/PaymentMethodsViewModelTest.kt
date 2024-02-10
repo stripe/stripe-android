@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -28,7 +29,8 @@ class PaymentMethodsViewModelTest {
     private val viewModel = PaymentMethodsViewModel(
         application = ApplicationProvider.getApplicationContext(),
         customerSession = Result.success(customerSession),
-        startedFromPaymentSession = true
+        startedFromPaymentSession = true,
+        savedStateHandle = SavedStateHandle()
     )
 
     @Test
@@ -114,7 +116,8 @@ class PaymentMethodsViewModelTest {
         PaymentMethodsViewModel(
             application = ApplicationProvider.getApplicationContext(),
             customerSession = Result.failure(RuntimeException("failure")),
-            startedFromPaymentSession = true
+            startedFromPaymentSession = true,
+            savedStateHandle = SavedStateHandle()
         ).paymentMethodsData.test {
             assertThat(awaitItem()?.isFailure)
                 .isTrue()

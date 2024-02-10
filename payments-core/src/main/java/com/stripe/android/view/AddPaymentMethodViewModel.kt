@@ -1,12 +1,16 @@
 package com.stripe.android.view
 
 import androidx.annotation.VisibleForTesting
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.ApiResultCallback
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.Stripe
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -16,6 +20,7 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
 internal class AddPaymentMethodViewModel(
+    savedStateHandle: SavedStateHandle,
     private val stripe: Stripe,
     private val args: AddPaymentMethodActivityStarter.Args,
     private val errorMessageTranslator: ErrorMessageTranslator =
@@ -26,6 +31,10 @@ internal class AddPaymentMethodViewModel(
         AddPaymentMethodActivity.PRODUCT_TOKEN,
         PaymentSession.PRODUCT_TOKEN.takeIf { args.isPaymentSessionActive }
     ).toSet()
+
+    init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+    }
 
     internal suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams
@@ -88,8 +97,8 @@ internal class AddPaymentMethodViewModel(
         private val args: AddPaymentMethodActivityStarter.Args
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return AddPaymentMethodViewModel(stripe, args) as T
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            return AddPaymentMethodViewModel(extras.createSavedStateHandle(), stripe, args) as T
         }
     }
 }

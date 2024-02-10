@@ -78,6 +78,7 @@ import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFact
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.PaymentIntentFactory
+import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeCustomerRepository
@@ -119,6 +120,9 @@ import kotlin.time.Duration
 internal class PaymentSheetViewModelTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
+    @get:Rule
+    val sessionRule = SessionTestRule()
 
     @get:Rule
     val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()

@@ -3,12 +3,16 @@ package com.stripe.android.view
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.R
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
@@ -18,6 +22,7 @@ import kotlinx.coroutines.launch
 
 internal class PaymentMethodsViewModel(
     application: Application,
+    savedStateHandle: SavedStateHandle,
     private val customerSession: Result<CustomerSession>,
     internal var selectedPaymentMethodId: String? = null,
     private val startedFromPaymentSession: Boolean
@@ -38,6 +43,8 @@ internal class PaymentMethodsViewModel(
     internal val progressData: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
         getPaymentMethods()
     }
 
@@ -117,9 +124,10 @@ internal class PaymentMethodsViewModel(
         private val startedFromPaymentSession: Boolean
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return PaymentMethodsViewModel(
                 application,
+                extras.createSavedStateHandle(),
                 customerSession,
                 initialPaymentMethodId,
                 startedFromPaymentSession

@@ -1,6 +1,7 @@
 package com.stripe.android.view
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
@@ -124,9 +125,11 @@ class AddPaymentMethodViewModelTest {
         translator: ErrorMessageTranslator = TranslatorManager.getErrorMessageTranslator()
     ): AddPaymentMethodViewModel {
         return AddPaymentMethodViewModel(
+            SavedStateHandle(),
             stripe,
             AddPaymentMethodActivityStarter.Args.Builder().build(),
-            translator
+            translator,
+
         )
     }
 
