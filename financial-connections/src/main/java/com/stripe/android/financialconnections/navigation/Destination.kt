@@ -15,9 +15,9 @@ import androidx.navigation.compose.composable
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
-import com.stripe.android.financialconnections.features.common.ExitModal
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
 import com.stripe.android.financialconnections.features.error.ErrorScreen
+import com.stripe.android.financialconnections.features.exit.ExitModal
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
@@ -56,7 +56,7 @@ internal sealed class Destination(
         if (!paneLaunchedTriggered) {
             LaunchedEffect(Unit) {
                 viewModel.onPaneLaunched(
-                    referrer = referrer(navBackStackEntry),
+                    referrer = referrer(navBackStackEntry.arguments),
                     pane = navBackStackEntry.destination.pane
                 )
                 paneLaunchedTriggered = true
@@ -170,7 +170,7 @@ internal sealed class Destination(
 
     object Exit : NoArgumentsDestination(
         route = Pane.EXIT.value,
-        composable = { ExitModal() }
+        composable = { ExitModal(it) }
     )
 
     object Error : NoArgumentsDestination(
@@ -210,7 +210,7 @@ internal sealed class Destination(
     }
 
     companion object {
-        private fun referrer(entry: NavBackStackEntry): Pane? = entry.arguments
+        internal fun referrer(args: Bundle?): Pane? = args
             ?.getString(KEY_REFERRER)
             ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 

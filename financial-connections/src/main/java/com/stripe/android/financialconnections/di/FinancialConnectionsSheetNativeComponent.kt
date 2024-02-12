@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.features.attachpayment.AttachPaym
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.error.ErrorSubcomponent
+import com.stripe.android.financialconnections.features.exit.ExitSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationSubcomponent
@@ -56,6 +57,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val attachPaymentSubcomponent: AttachPaymentSubcomponent.Builder
     val resetSubcomponent: ResetSubcomponent.Builder
     val errorSubcomponent: ErrorSubcomponent.Factory
+    val exitSubcomponent: ExitSubcomponent.Factory
     val networkingLinkSignupSubcomponent: NetworkingLinkSignupSubcomponent.Builder
     val networkingLinkLoginWarmupSubcomponent: NetworkingLinkLoginWarmupSubcomponent.Builder
     val networkingLinkVerificationSubcomponent: NetworkingLinkVerificationSubcomponent.Builder
