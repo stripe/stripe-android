@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,8 +10,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.input.pointer.PointerEventType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
@@ -46,11 +51,8 @@ internal fun PaymentElement(
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
+    onInteractionEvent: () -> Unit = {},
 ) {
-    // The PaymentMethodForm has a reference to a FormViewModel, which is scoped to a key. This is to ensure that
-    // the FormViewModel is recreated when the PaymentElement is recomposed.
-    val uuid = rememberSaveable { UUID.randomUUID().toString() }
-
     val context = LocalContext.current
     val imageLoader = remember {
         StripeImageLoader(context.applicationContext)
@@ -72,48 +74,112 @@ internal fun PaymentElement(
             )
         }
 
-        Box(modifier = Modifier.animateContentSize()) {
-            if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
-                USBankAccountForm(
-                    formArgs = formArguments,
-                    usBankAccountFormArgs = usBankAccountFormArguments,
-                    modifier = Modifier.padding(horizontal = horizontalPadding),
-                )
-            } else {
-                PaymentMethodForm(
-                    uuid = uuid,
-                    args = formArguments,
+        FormElement(
+            formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+            enabled = enabled,
+            selectedItem = selectedItem,
+            showCheckboxFlow = showCheckboxFlow,
+            formArguments = formArguments,
+            usBankAccountFormArguments = usBankAccountFormArguments,
+            horizontalPadding = horizontalPadding,
+            onFormFieldValuesChanged = onFormFieldValuesChanged,
+            onInteractionEvent = onInteractionEvent,
+        )
+
+        LinkElement(
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            linkSignupMode = linkSignupMode,
+            enabled = enabled,
+            horizontalPadding = horizontalPadding,
+            onLinkSignupStateChanged = onLinkSignupStateChanged,
+        )
+    }
+}
+
+@Composable
+private fun FormElement(
+    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+    enabled: Boolean,
+    selectedItem: SupportedPaymentMethod,
+    showCheckboxFlow: Flow<Boolean>,
+    formArguments: FormArguments,
+    usBankAccountFormArguments: USBankAccountFormArguments,
+    horizontalPadding: Dp,
+    onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
+    onInteractionEvent: () -> Unit,
+) {
+    // The PaymentMethodForm has a reference to a FormViewModel, which is scoped to a key. This is to ensure that
+    // the FormViewModel is recreated when the PaymentElement is recomposed.
+    val uuid = rememberSaveable { UUID.randomUUID().toString() }
+
+    Box(
+        modifier = Modifier
+            .animateContentSize()
+            .pointerInput("AddPaymentMethod") {
+                awaitEachGesture {
+                    val gesture = awaitPointerEvent()
+
+                    when (gesture.type) {
+                        PointerEventType.Release -> onInteractionEvent()
+                        else -> Unit
+                    }
+                }
+            }
+            .onFocusChanged { state ->
+                if (state.hasFocus) {
+                    onInteractionEvent()
+                }
+            }
+    ) {
+        if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
+            USBankAccountForm(
+                formArgs = formArguments,
+                usBankAccountFormArgs = usBankAccountFormArguments,
+                modifier = Modifier.padding(horizontal = horizontalPadding),
+            )
+        } else {
+            PaymentMethodForm(
+                uuid = uuid,
+                args = formArguments,
+                enabled = enabled,
+                onFormFieldValuesChanged = onFormFieldValuesChanged,
+                showCheckboxFlow = showCheckboxFlow,
+                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                modifier = Modifier.padding(horizontal = horizontalPadding)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LinkElement(
+    linkConfigurationCoordinator: LinkConfigurationCoordinator?,
+    linkSignupMode: LinkSignupMode?,
+    enabled: Boolean,
+    horizontalPadding: Dp,
+    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+) {
+    if (linkConfigurationCoordinator != null && linkSignupMode != null) {
+        when (linkSignupMode) {
+            LinkSignupMode.InsteadOfSaveForFutureUse -> {
+                LinkInlineSignup(
+                    linkConfigurationCoordinator = linkConfigurationCoordinator,
                     enabled = enabled,
-                    onFormFieldValuesChanged = onFormFieldValuesChanged,
-                    showCheckboxFlow = showCheckboxFlow,
-                    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
-                    modifier = Modifier.padding(horizontal = horizontalPadding)
+                    onStateChanged = onLinkSignupStateChanged,
+                    modifier = Modifier
+                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                        .fillMaxWidth(),
                 )
             }
-        }
-
-        if (linkConfigurationCoordinator != null && linkSignupMode != null) {
-            when (linkSignupMode) {
-                LinkSignupMode.InsteadOfSaveForFutureUse -> {
-                    LinkInlineSignup(
-                        linkConfigurationCoordinator = linkConfigurationCoordinator,
-                        enabled = enabled,
-                        onStateChanged = onLinkSignupStateChanged,
-                        modifier = Modifier
-                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                            .fillMaxWidth(),
-                    )
-                }
-                LinkSignupMode.AlongsideSaveForFutureUse -> {
-                    LinkOptionalInlineSignup(
-                        linkConfigurationCoordinator = linkConfigurationCoordinator,
-                        enabled = enabled,
-                        onStateChanged = onLinkSignupStateChanged,
-                        modifier = Modifier
-                            .padding(horizontal = horizontalPadding, vertical = 6.dp)
-                            .fillMaxWidth(),
-                    )
-                }
+            LinkSignupMode.AlongsideSaveForFutureUse -> {
+                LinkOptionalInlineSignup(
+                    linkConfigurationCoordinator = linkConfigurationCoordinator,
+                    enabled = enabled,
+                    onStateChanged = onLinkSignupStateChanged,
+                    modifier = Modifier
+                        .padding(horizontal = horizontalPadding, vertical = 6.dp)
+                        .fillMaxWidth(),
+                )
             }
         }
     }

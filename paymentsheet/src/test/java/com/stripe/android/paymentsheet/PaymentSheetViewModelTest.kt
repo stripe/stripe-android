@@ -93,11 +93,13 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.Mockito.atMostOnce
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.atMost
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -106,7 +108,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyNoMoreInteractions
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.io.IOException
@@ -1341,22 +1342,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Sends no event when navigating to AddAnotherPaymentMethod screen`() = runTest {
-        val viewModel = createViewModel(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-            customerPaymentMethods = PaymentMethodFixtures.createCards(1),
-        )
-
-        verify(eventReporter).onInit(configuration = anyOrNull(), isDeferred = any())
-
-        verify(eventReporter).onShowExistingPaymentOptions()
-
-        viewModel.transitionToAddPaymentScreen()
-
-        verifyNoMoreInteractions(eventReporter)
-    }
-
-    @Test
     fun `Sends correct event when navigating to EditPaymentMethod screen`() = runTest {
         val cards = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
@@ -2192,6 +2177,117 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `Returns payment success after process death if state is loaded before result is returned`() = runTest {
         testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult = true)
+    }
+
+    @Test
+    fun `on initial navigation to AddPaymentMethod screen, should report form shown event`() = runTest {
+        createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+            customerPaymentMethods = listOf()
+        )
+
+        verify(eventReporter).onPaymentMethodFormShown("card")
+    }
+
+    @Test
+    fun `on navigate to AddPaymentMethod screen, should report form shown event`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        viewModel.transitionToAddPaymentScreen()
+
+        verify(eventReporter).onPaymentMethodFormShown("card")
+    }
+
+    @Test
+    fun `on payment form changed, should report form shown event`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+            customerPaymentMethods = listOf()
+        )
+
+        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
+
+        verify(eventReporter).onPaymentMethodFormShown("us_bank_account")
+    }
+
+    @Test
+    fun `on form changed to same value, should report form shown event only once`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+            customerPaymentMethods = listOf()
+        )
+
+        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
+        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
+        viewModel.reportPaymentMethodTypeSelected("us_bank_account")
+
+        verify(eventReporter, atMostOnce()).onPaymentMethodFormShown("us_bank_account")
+    }
+
+    @Test
+    fun `on leaving form and returning, should report form shown event on each navigation event`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        viewModel.transitionToAddPaymentScreen()
+        viewModel.handleBackPressed()
+        viewModel.transitionToAddPaymentScreen()
+
+        verify(eventReporter, atMost(2)).onPaymentMethodFormShown("card")
+    }
+
+    @Test
+    fun `on field interaction, should report event`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        viewModel.reportFieldInteraction("card")
+
+        verify(eventReporter).onPaymentMethodFormInteraction("card")
+    }
+
+    @Test
+    fun `on multiple field interactions with same payment form, should report event only once`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        viewModel.reportFieldInteraction("card")
+        viewModel.reportFieldInteraction("card")
+        viewModel.reportFieldInteraction("card")
+
+        verify(eventReporter, atMostOnce()).onPaymentMethodFormInteraction("card")
+    }
+
+    @Test
+    fun `on card number completed event, should report event`() = runTest {
+        val viewModel = createViewModel(
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,
+            isGooglePayReady = true,
+            stripeIntent = SETUP_INTENT,
+        )
+
+        viewModel.reportCardNumberCompleted()
+
+        verify(eventReporter).onCardNumberCompleted()
     }
 
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {

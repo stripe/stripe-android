@@ -241,6 +241,36 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class ShowPaymentOptionForm(
+        code: String,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_form_shown"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to code
+        )
+    }
+
+    class PaymentOptionFormInteraction(
+        code: String,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_form_interacted"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to code
+        )
+    }
+
+    class CardNumberCompleted(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_card_number_completed"
+        override val additionalParams: Map<String, Any?> = mapOf()
+    }
+
     class PressConfirmButton(
         currency: String?,
         duration: Duration?,

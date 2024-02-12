@@ -58,6 +58,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
@@ -178,6 +179,18 @@ internal abstract class BaseSheetViewModel(
         initialValue = null,
     )
 
+    private var previouslyShownForm: PaymentMethodCode?
+        get() = savedStateHandle[PREVIOUSLY_SHOWN_PAYMENT_FORM]
+        set(value) {
+            savedStateHandle[PREVIOUSLY_SHOWN_PAYMENT_FORM] = value
+        }
+
+    private var previouslyInteractedForm: PaymentMethodCode?
+        get() = savedStateHandle[PREVIOUSLY_INTERACTION_PAYMENT_FORM]
+        set(value) {
+            savedStateHandle[PREVIOUSLY_INTERACTION_PAYMENT_FORM] = value
+        }
+
     /**
      * This should be initialized from the starter args, and then from that point forward it will be
      * the last valid new payment method entered by the user.
@@ -242,6 +255,15 @@ internal abstract class BaseSheetViewModel(
         initialValue = null,
     )
 
+    val initiallySelectedPaymentMethodType: PaymentMethodCode
+        get() = when (val selection = newPaymentSelection) {
+            is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
+            is PaymentSelection.New.Card,
+            is PaymentSelection.New.USBankAccount,
+            is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
+            else -> supportedPaymentMethods.first().code
+        }
+
     init {
         viewModelScope.launch {
             paymentMethods.onEach { paymentMethods ->
@@ -249,6 +271,21 @@ internal abstract class BaseSheetViewModel(
                     toggleEditing()
                 }
             }.collect()
+        }
+
+        viewModelScope.launch {
+            currentScreen.collectLatest { screen ->
+                when (screen) {
+                    is AddFirstPaymentMethod, AddAnotherPaymentMethod -> {
+                        reportFormShown(initiallySelectedPaymentMethodType)
+                    }
+                    is PaymentSheetScreen.EditPaymentMethod,
+                    is PaymentSheetScreen.Loading,
+                    is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                        previouslyInteractedForm = null
+                    }
+                }
+            }
         }
 
         viewModelScope.launch {
@@ -329,6 +366,7 @@ internal abstract class BaseSheetViewModel(
 
     fun reportPaymentMethodTypeSelected(code: PaymentMethodCode) {
         eventReporter.onSelectPaymentMethod(code)
+        reportFormShown(code)
     }
 
     abstract fun clearErrorMessages()
@@ -652,8 +690,36 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    fun reportFieldInteraction(code: PaymentMethodCode) {
+        /*
+         * Prevents this event from being reported multiple times on field interactions
+         * on the same payment form. We should have one field interaction event for
+         * every form shown event triggered.
+         */
+        if (previouslyInteractedForm != code) {
+            eventReporter.onPaymentMethodFormInteraction(code)
+            previouslyInteractedForm = code
+        }
+    }
+
     fun reportAutofillEvent(type: String) {
         eventReporter.onAutofill(type)
+    }
+
+    fun reportCardNumberCompleted() {
+        eventReporter.onCardNumberCompleted()
+    }
+
+    private fun reportFormShown(code: String) {
+        /*
+         * Prevents this event from being reported multiple times on the same payment form after process death. We
+         * should only trigger a form shown event when initially shown in the add payment method screen or the user
+         * navigates to a different form.
+         */
+        if (previouslyShownForm != code) {
+            eventReporter.onPaymentMethodFormShown(code)
+            previouslyShownForm = code
+        }
     }
 
     abstract fun onPaymentResult(paymentResult: PaymentResult)
@@ -671,5 +737,7 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
+        internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
+        internal const val PREVIOUSLY_INTERACTION_PAYMENT_FORM = "previously_interacted_payment_form"
     }
 }

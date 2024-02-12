@@ -238,6 +238,57 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentMethodFormShown() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPaymentMethodFormShown(
+            code = "card",
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_form_shown" &&
+                    req.params["selected_lpm"] == "card"
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentMethodFormInteraction() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPaymentMethodFormInteraction(
+            code = "card",
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_form_interacted" &&
+                    req.params["selected_lpm"] == "card"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardNumberCompleted() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onCardNumberCompleted()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_card_number_completed"
+            }
+        )
+    }
+
+    @Test
     fun `onShowEditablePaymentOption() should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()

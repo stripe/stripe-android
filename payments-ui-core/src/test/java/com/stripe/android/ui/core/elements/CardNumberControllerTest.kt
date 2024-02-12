@@ -1,5 +1,10 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.junit4.createComposeRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
@@ -9,6 +14,12 @@ import com.stripe.android.cards.StaticCardAccountRangeSource
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
+import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SimpleTextElement
+import com.stripe.android.uicore.elements.SimpleTextFieldConfig
+import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
@@ -19,14 +30,20 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.After
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.atMostOnce
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
 import com.stripe.payments.model.R as PaymentModelR
 
 @RunWith(RobolectricTestRunner::class)
 internal class CardNumberControllerTest {
+    @get:Rule
+    val composeTestRule = createComposeRule()
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
@@ -381,6 +398,48 @@ internal class CardNumberControllerTest {
         }
     }
 
+    @Test
+    fun `on number completed, should report event`() = runTest {
+        val eventReporter: CardNumberCompletedEventReporter = mock()
+
+        val cardNumberController = DefaultCardNumberController(
+            CardNumberConfig(),
+            FakeCardAccountRangeRepository(),
+            testDispatcher,
+            testDispatcher,
+            initialValue = null,
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(CardBrand.CartesBancaires),
+                initialBrand = null
+            )
+        )
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalCardNumberCompletedEventReporter provides eventReporter
+            ) {
+                cardNumberController.ComposeUI(
+                    enabled = true,
+                    field = SimpleTextElement(
+                        identifier = IdentifierSpec.Name,
+                        controller = SimpleTextFieldController(
+                            textFieldConfig = SimpleTextFieldConfig()
+                        ),
+                    ),
+                    modifier = Modifier.testTag(TEST_TAG),
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                    nextFocusDirection = FocusDirection.Next,
+                    previousFocusDirection = FocusDirection.Next
+                )
+            }
+        }
+
+        cardNumberController.onValueChange("4242424242424242")
+
+        verify(eventReporter, atMostOnce()).onCardNumberCompleted()
+    }
+
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
         private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
         override suspend fun getAccountRange(
@@ -400,5 +459,9 @@ internal class CardNumberControllerTest {
         }
 
         override val loading: Flow<Boolean> = flowOf(false)
+    }
+
+    private companion object {
+        const val TEST_TAG = "CardNumberElement"
     }
 }
