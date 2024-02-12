@@ -102,6 +102,10 @@ internal class AddPaymentMethodCardView @JvmOverloads internal constructor(
         cardMultilineWidget.isEnabled = !communicating
     }
 
+    fun setCardInputListener(listener: CardInputListener?) {
+        cardMultilineWidget.setCardInputListener(listener)
+    }
+
     internal class OnEditorActionListenerImpl(
         private val activity: AddPaymentMethodActivity,
         private val addPaymentMethodCardView: AddPaymentMethodCardView,

@@ -6,12 +6,14 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
+import com.stripe.android.analytics.PaymentSessionEventReporter
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
@@ -23,18 +25,27 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsViewModelTest {
-
-    private val customerSession: CustomerSession = mock()
     private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
-    private val viewModel = PaymentMethodsViewModel(
-        application = ApplicationProvider.getApplicationContext(),
-        customerSession = Result.success(customerSession),
-        startedFromPaymentSession = true,
-        savedStateHandle = SavedStateHandle()
-    )
+
+    @Test
+    fun init_loadStartedEvent_shouldTrigger() {
+        val eventReporter: PaymentSessionEventReporter = mock()
+
+        createViewModel(eventReporter = eventReporter)
+
+        verify(eventReporter).onLoadStarted()
+    }
 
     @Test
     fun paymentMethodsData_whenSuccess_returnsExpectedPaymentMethods() = runTest {
+        val customerSession: CustomerSession = mock()
+        val eventReporter: PaymentSessionEventReporter = mock()
+
+        val viewModel = createViewModel(
+            customerSession = customerSession,
+            eventReporter = eventReporter
+        )
+
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
             isNull(),
@@ -43,6 +54,7 @@ class PaymentMethodsViewModelTest {
             eq(EXPECTED_PRODUCT_USAGE),
             listenerArgumentCaptor.capture()
         )
+
         listenerArgumentCaptor.firstValue.onPaymentMethodsRetrieved(
             listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
@@ -50,11 +62,22 @@ class PaymentMethodsViewModelTest {
         viewModel.paymentMethodsData.test {
             assertThat(awaitItem())
                 .isEqualTo(Result.success(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)))
+
+            verify(eventReporter).onLoadSucceeded()
+            verify(eventReporter).onOptionsShown()
         }
     }
 
     @Test
     fun paymentMethodsData_whenError_returnsExpectedException() = runTest {
+        val customerSession: CustomerSession = mock()
+        val eventReporter: PaymentSessionEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+            customerSession = customerSession
+        )
+
         verify(customerSession).getPaymentMethods(
             eq(PaymentMethod.Type.Card),
             isNull(),
@@ -73,11 +96,17 @@ class PaymentMethodsViewModelTest {
         viewModel.paymentMethodsData.test {
             assertThat(awaitItem()?.exceptionOrNull())
                 .isInstanceOf(APIException::class.java)
+
+            verify(eventReporter).onLoadFailed(any<APIException>())
         }
     }
 
     @Test
     fun onPaymentMethodAdded_shouldUpdateSnackbarData() = runTest {
+        val customerSession: CustomerSession = mock()
+
+        val viewModel = createViewModel(customerSession = customerSession)
+
         viewModel.snackbarData.test {
             assertThat(awaitItem())
                 .isNull()
@@ -100,6 +129,8 @@ class PaymentMethodsViewModelTest {
 
     @Test
     fun onPaymentMethodRemoved_shouldUpdateSnackbarData() = runTest {
+        val viewModel = createViewModel()
+
         viewModel.snackbarData.test {
             assertThat(awaitItem())
                 .isNull()
@@ -117,11 +148,25 @@ class PaymentMethodsViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             customerSession = Result.failure(RuntimeException("failure")),
             startedFromPaymentSession = true,
-            savedStateHandle = SavedStateHandle()
+            savedStateHandle = SavedStateHandle(),
+            eventReporter = mock(),
         ).paymentMethodsData.test {
             assertThat(awaitItem()?.isFailure)
                 .isTrue()
         }
+    }
+
+    private fun createViewModel(
+        customerSession: CustomerSession = mock(),
+        eventReporter: PaymentSessionEventReporter = mock()
+    ): PaymentMethodsViewModel {
+        return PaymentMethodsViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            customerSession = Result.success(customerSession),
+            startedFromPaymentSession = true,
+            savedStateHandle = SavedStateHandle(),
+            eventReporter = eventReporter,
+        )
     }
 
     private companion object {

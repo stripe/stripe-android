@@ -12,6 +12,8 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.R
+import com.stripe.android.analytics.PaymentSessionEventReporter
+import com.stripe.android.analytics.PaymentSessionEventReporterFactory
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
@@ -25,7 +27,9 @@ internal class PaymentMethodsViewModel(
     savedStateHandle: SavedStateHandle,
     private val customerSession: Result<CustomerSession>,
     internal var selectedPaymentMethodId: String? = null,
-    private val startedFromPaymentSession: Boolean
+    private val startedFromPaymentSession: Boolean,
+    private val eventReporter: PaymentSessionEventReporter =
+        PaymentSessionEventReporterFactory.create(application.applicationContext)
 ) : AndroidViewModel(application) {
     private val resources = application.resources
     private val cardDisplayTextFactory = CardDisplayTextFactory(application)
@@ -45,7 +49,7 @@ internal class PaymentMethodsViewModel(
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
 
-        getPaymentMethods()
+        getPaymentMethods(isInitialFetch = true)
     }
 
     internal fun onPaymentMethodAdded(paymentMethod: PaymentMethod) {
@@ -53,7 +57,7 @@ internal class PaymentMethodsViewModel(
             snackbarData.value = it
             snackbarData.value = null
         }
-        getPaymentMethods()
+        getPaymentMethods(isInitialFetch = false)
     }
 
     internal fun onPaymentMethodRemoved(paymentMethod: PaymentMethod) {
@@ -75,8 +79,12 @@ internal class PaymentMethodsViewModel(
         }
     }
 
-    private fun getPaymentMethods() {
+    private fun getPaymentMethods(isInitialFetch: Boolean) {
         paymentMethodsJob?.cancel()
+
+        if (isInitialFetch) {
+            eventReporter.onLoadStarted()
+        }
 
         paymentMethodsJob = viewModelScope.launch {
             progressData.value = true
@@ -88,6 +96,11 @@ internal class PaymentMethodsViewModel(
                         productUsage = productUsage,
                         listener = object : CustomerSession.PaymentMethodsRetrievalListener {
                             override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
+                                if (isInitialFetch) {
+                                    eventReporter.onLoadSucceeded()
+                                    eventReporter.onOptionsShown()
+                                }
+
                                 paymentMethodsData.value = Result.success(paymentMethods)
                                 progressData.value = false
                             }
@@ -97,13 +110,18 @@ internal class PaymentMethodsViewModel(
                                 errorMessage: String,
                                 stripeError: StripeError?
                             ) {
-                                paymentMethodsData.value = Result.failure(
-                                    APIException(
-                                        stripeError = stripeError,
-                                        statusCode = errorCode,
-                                        message = errorMessage
-                                    )
+                                // TODO(samer-stripe): Parse out this error from StripeError
+                                val exception = APIException(
+                                    stripeError = stripeError,
+                                    statusCode = errorCode,
+                                    message = errorMessage
                                 )
+
+                                if (isInitialFetch) {
+                                    eventReporter.onLoadFailed(exception)
+                                }
+
+                                paymentMethodsData.value = Result.failure(exception)
                                 progressData.value = false
                             }
                         }

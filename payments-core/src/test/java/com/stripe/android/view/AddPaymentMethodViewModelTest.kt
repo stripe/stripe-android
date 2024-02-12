@@ -7,7 +7,9 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CustomerSession
 import com.stripe.android.Stripe
+import com.stripe.android.analytics.PaymentSessionEventReporter
 import com.stripe.android.core.StripeError
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
@@ -29,6 +31,68 @@ class AddPaymentMethodViewModelTest {
     private val stripe = Stripe(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
     private val customerSession: CustomerSession = mock()
+
+    @Test
+    fun `on init, should fire onFormShown event`() {
+        val eventReporter: PaymentSessionEventReporter = mock()
+
+        createViewModel(
+            eventReporter = eventReporter,
+            args = AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Fpx)
+                .build()
+        )
+
+        verify(eventReporter).onFormShown("fpx")
+    }
+
+    @Test
+    fun `on form interacted, should fire onFormInteracted event`() {
+        val eventReporter: PaymentSessionEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+            args = AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Fpx)
+                .build()
+        )
+
+        viewModel.onFormInteracted()
+
+        verify(eventReporter).onFormInteracted("fpx")
+    }
+
+    @Test
+    fun `on card number completed, should fire onCardNumberCompleted event`() {
+        val eventReporter: PaymentSessionEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+            args = AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Fpx)
+                .build()
+        )
+
+        viewModel.onCardNumberCompleted()
+
+        verify(eventReporter).onCardNumberCompleted()
+    }
+
+    @Test
+    fun `on save, should fire onDoneButtonTapped event`() {
+        val eventReporter: PaymentSessionEventReporter = mock()
+
+        val viewModel = createViewModel(
+            eventReporter = eventReporter,
+            args = AddPaymentMethodActivityStarter.Args.Builder()
+                .setPaymentMethodType(PaymentMethod.Type.Fpx)
+                .build()
+        )
+
+        viewModel.onSaveClicked()
+
+        verify(eventReporter).onDoneButtonTapped("fpx")
+    }
 
     @Test
     fun `updatedPaymentMethodCreateParams should include expected attribution`() {
@@ -122,14 +186,17 @@ class AddPaymentMethodViewModelTest {
     }
 
     private fun createViewModel(
+        eventReporter: PaymentSessionEventReporter = mock(),
+        args: AddPaymentMethodActivityStarter.Args = AddPaymentMethodActivityStarter.Args.Builder().build(),
         translator: ErrorMessageTranslator = TranslatorManager.getErrorMessageTranslator()
     ): AddPaymentMethodViewModel {
         return AddPaymentMethodViewModel(
+            ApplicationProvider.getApplicationContext(),
             SavedStateHandle(),
             stripe,
-            AddPaymentMethodActivityStarter.Args.Builder().build(),
+            args,
             translator,
-
+            eventReporter
         )
     }
 

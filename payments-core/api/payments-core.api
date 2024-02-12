@@ -7169,6 +7169,7 @@ public final class com/stripe/android/view/AddPaymentMethodActivity : com/stripe
 	public static final field $stable I
 	public fun <init> ()V
 	public fun onActionSave ()V
+	public fun onUserInteraction ()V
 }
 
 public final class com/stripe/android/view/AddPaymentMethodActivityStarter : com/stripe/android/view/ActivityStarter {
