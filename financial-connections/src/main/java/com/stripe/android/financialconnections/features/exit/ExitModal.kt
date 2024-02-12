@@ -46,8 +46,8 @@ internal fun ExitModal(
 private fun ExitModalContent(
     description: TextResource,
     loading: Boolean,
-    onExit: () -> Unit = { },
-    onCancel: () -> Unit = { },
+    onExit: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -92,7 +92,9 @@ internal fun ExitModalPreview() {
         Surface(color = v3Colors.backgroundSurface) {
             ExitModalContent(
                 description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),
-                loading = false
+                loading = false,
+                onExit = {},
+                onCancel = {}
             )
         }
     }
