@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.37.3 - 2024-02-12
+
 ### PaymentSheet
 * [FIXED][7917](https://github.com/stripe/stripe-android/pull/7917) Fixed an issue where `Google Pay` & `Link` were not saved as default payment methods in `FlowController`.
 
