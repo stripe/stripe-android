@@ -76,8 +76,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     init {
         handleErrors()
         launchBrowserIfNonOauth()
-        // TODO
-        withState { restoreOrCreateAuthSession() }
+        restoreOrCreateAuthSession()
     }
 
     private fun restoreOrCreateAuthSession() = suspend {
