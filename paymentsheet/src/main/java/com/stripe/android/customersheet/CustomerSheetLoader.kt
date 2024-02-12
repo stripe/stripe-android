@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
@@ -17,11 +18,15 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 import javax.inject.Named
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
@@ -29,27 +34,52 @@ internal interface CustomerSheetLoader {
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal class DefaultCustomerSheetLoader @Inject constructor(
+internal class DefaultCustomerSheetLoader(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
-    private val customerAdapter: CustomerAdapter,
+    private val customerAdapterProvider: Deferred<CustomerAdapter>,
 ) : CustomerSheetLoader {
-    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
-        val elementsSession = if (customerAdapter.canCreateSetupIntents) {
-            retrieveElementsSession(configuration).getOrElse {
-                return Result.failure(it)
-            }
-        } else {
-            null
-        }
 
-        return loadPaymentMethods(
-            configuration = configuration,
-            elementsSession = elementsSession,
+    @Inject constructor(
+        @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
+        googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
+        elementsSessionRepository: ElementsSessionRepository,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+        lpmRepository: LpmRepository,
+    ) : this(
+        isLiveModeProvider = isLiveModeProvider,
+        googlePayRepositoryFactory = googlePayRepositoryFactory,
+        elementsSessionRepository = elementsSessionRepository,
+        isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+        lpmRepository = lpmRepository,
+        customerAdapterProvider = CustomerSheetHacks.adapter,
+    )
+
+    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
+        val customerAdapter = customerAdapterProvider.awaitAsResult(
+            timeout = 5.seconds,
+            error = {
+                "Couldn't find an instance of CustomerAdapter. " +
+                    "Are you instantiating CustomerSheet unconditionally in your app?"
+            },
         )
+
+        return customerAdapter.mapCatching { adapter ->
+            if (adapter.canCreateSetupIntents) {
+                adapter to retrieveElementsSession(configuration).getOrThrow()
+            } else {
+                adapter to null
+            }
+        }.map { (adapter, session) ->
+            loadPaymentMethods(
+                customerAdapter = adapter,
+                configuration = configuration,
+                elementsSession = session,
+            ).getOrThrow()
+        }
     }
 
     private suspend fun retrieveElementsSession(
@@ -77,6 +107,7 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
     }
 
     private suspend fun loadPaymentMethods(
+        customerAdapter: CustomerAdapter,
         configuration: CustomerSheet.Configuration?,
         elementsSession: ElementsSession?,
     ) = coroutineScope {
@@ -175,5 +206,17 @@ internal class DefaultCustomerSheetLoader @Inject constructor(
         return supportedPaymentMethods.filter {
             supported.contains(it.code)
         }
+    }
+}
+
+private suspend fun <T> Deferred<T>.awaitAsResult(
+    timeout: Duration,
+    error: () -> String,
+): Result<T> {
+    val result = withTimeoutOrNull(timeout) { await() }
+    return if (result != null) {
+        Result.success(result)
+    } else {
+        Result.failure(IllegalStateException(error()))
     }
 }

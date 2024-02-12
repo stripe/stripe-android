@@ -8,6 +8,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
@@ -17,6 +18,8 @@ import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
+import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelComponent
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
@@ -58,6 +61,8 @@ import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.paymentsheet.utils.mapAsStateFlow
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.utils.requireApplication
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -74,18 +79,18 @@ import com.stripe.android.ui.core.R as UiCoreR
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @CustomerSheetViewModelScope
-internal class CustomerSheetViewModel @Inject constructor(
+internal class CustomerSheetViewModel(
     private val application: Application, // TODO (jameswoo) remove application
     initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
     private var originalPaymentSelection: PaymentSelection?,
     private val paymentConfigurationProvider: Provider<PaymentConfiguration>,
+    private val customerAdapterProvider: Deferred<CustomerAdapter>,
     private val resources: Resources,
     private val configuration: CustomerSheet.Configuration,
     private val logger: Logger,
     private val stripeRepository: StripeRepository,
-    private val customerAdapter: CustomerAdapter,
     private val lpmRepository: LpmRepository,
-    private val statusBarColor: () -> Int?,
+    private val statusBarColor: Int?,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
@@ -96,6 +101,49 @@ internal class CustomerSheetViewModel @Inject constructor(
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
 ) : ViewModel() {
+
+    @Inject constructor(
+        application: Application,
+        initialBackStack: @JvmSuppressWildcards List<CustomerSheetViewState>,
+        originalPaymentSelection: PaymentSelection?,
+        paymentConfigurationProvider: Provider<PaymentConfiguration>,
+        resources: Resources,
+        configuration: CustomerSheet.Configuration,
+        logger: Logger,
+        stripeRepository: StripeRepository,
+        lpmRepository: LpmRepository,
+        statusBarColor: Int?,
+        eventReporter: CustomerSheetEventReporter,
+        workContext: CoroutineContext = Dispatchers.IO,
+        @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
+        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
+        paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
+        intentConfirmationInterceptor: IntentConfirmationInterceptor,
+        customerSheetLoader: CustomerSheetLoader,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
+        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    ) : this(
+        application = application,
+        initialBackStack = initialBackStack,
+        originalPaymentSelection = originalPaymentSelection,
+        paymentConfigurationProvider = paymentConfigurationProvider,
+        customerAdapterProvider = CustomerSheetHacks.adapter,
+        resources = resources,
+        configuration = configuration,
+        logger = logger,
+        stripeRepository = stripeRepository,
+        lpmRepository = lpmRepository,
+        statusBarColor = statusBarColor,
+        eventReporter = eventReporter,
+        workContext = workContext,
+        isLiveModeProvider = isLiveModeProvider,
+        formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
+        paymentLauncherFactory = paymentLauncherFactory,
+        intentConfirmationInterceptor = intentConfirmationInterceptor,
+        customerSheetLoader = customerSheetLoader,
+        isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+        editInteractorFactory = editInteractorFactory,
+    )
 
     private val backStack = MutableStateFlow(initialBackStack)
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
@@ -197,7 +245,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         paymentLauncher = paymentLauncherFactory.create(
             publishableKey = { paymentConfigurationProvider.get().publishableKey },
             stripeAccountId = { paymentConfigurationProvider.get().stripeAccountId },
-            statusBarColor = statusBarColor(),
+            statusBarColor = statusBarColor,
             hostActivityLauncher = launcher,
             includePaymentSheetAuthenticators = true,
         )
@@ -441,7 +489,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private suspend fun removePaymentMethod(paymentMethod: PaymentMethod): CustomerAdapter.Result<PaymentMethod> {
-        return customerAdapter.detachPaymentMethod(
+        return awaitCustomerAdapter().detachPaymentMethod(
             paymentMethodId = paymentMethod.id!!,
         ).onSuccess {
             eventReporter.onRemovePaymentMethodSucceeded()
@@ -458,7 +506,7 @@ internal class CustomerSheetViewModel @Inject constructor(
         paymentMethod: PaymentMethod,
         brand: CardBrand
     ): CustomerAdapter.Result<PaymentMethod> {
-        return customerAdapter.updatePaymentMethod(
+        return awaitCustomerAdapter().updatePaymentMethod(
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(
@@ -852,7 +900,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
         viewModelScope.launch {
-            if (customerAdapter.canCreateSetupIntents) {
+            if (awaitCustomerAdapter().canCreateSetupIntents) {
                 attachWithSetupIntent(paymentMethod = paymentMethod)
             } else {
                 attachPaymentMethod(id = paymentMethod.id!!)
@@ -861,7 +909,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private suspend fun attachWithSetupIntent(paymentMethod: PaymentMethod) {
-        customerAdapter.setupIntentClientSecretForCustomerAttach()
+        awaitCustomerAdapter().setupIntentClientSecretForCustomerAttach()
             .mapCatching { clientSecret ->
                 val intent = stripeRepository.retrieveSetupIntent(
                     clientSecret = clientSecret,
@@ -1006,7 +1054,7 @@ internal class CustomerSheetViewModel @Inject constructor(
     }
 
     private suspend fun attachPaymentMethod(id: String) {
-        customerAdapter.attachPaymentMethod(id)
+        awaitCustomerAdapter().attachPaymentMethod(id)
             .onSuccess { attachedPaymentMethod ->
                 eventReporter.onAttachPaymentMethodSucceeded(
                     style = CustomerSheetEventReporter.AddPaymentMethodStyle.CreateAttach
@@ -1042,7 +1090,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
         viewModelScope.launch {
-            customerAdapter.setSelectedPaymentOption(
+            awaitCustomerAdapter().setSelectedPaymentOption(
                 savedPaymentSelection?.toPaymentOption()
             ).onSuccess {
                 confirmPaymentSelection(
@@ -1062,7 +1110,7 @@ internal class CustomerSheetViewModel @Inject constructor(
 
     private fun selectGooglePay() {
         viewModelScope.launch {
-            customerAdapter.setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
+            awaitCustomerAdapter().setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
                 .onSuccess {
                     confirmPaymentSelection(
                         paymentSelection = PaymentSelection.GooglePay,
@@ -1197,6 +1245,10 @@ internal class CustomerSheetViewModel @Inject constructor(
         }
     }
 
+    private suspend fun awaitCustomerAdapter(): CustomerAdapter {
+        return customerAdapterProvider.await()
+    }
+
     private val CustomerSheetViewState.eventReporterScreen: CustomerSheetEventReporter.Screen?
         get() = when (this) {
             is CustomerSheetViewState.AddPaymentMethod -> CustomerSheetEventReporter.Screen.AddPaymentMethod
@@ -1205,12 +1257,19 @@ internal class CustomerSheetViewModel @Inject constructor(
             else -> null
         }
 
-    object Factory : ViewModelProvider.Factory {
+    class Factory(
+        private val args: CustomerSheetContract.Args,
+    ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return CustomerSessionViewModel.component.customerSheetViewModelComponentBuilder
-                .build().viewModel as T
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
+            val component = DaggerCustomerSheetViewModelComponent.builder()
+                .application(extras.requireApplication())
+                .configuration(args.configuration)
+                .statusBarColor(args.statusBarColor)
+                .build()
+
+            return component.viewModel as T
         }
     }
 }

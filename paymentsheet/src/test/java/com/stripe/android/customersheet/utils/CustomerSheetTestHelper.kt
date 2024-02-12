@@ -45,6 +45,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.any
@@ -121,7 +122,7 @@ internal object CustomerSheetTestHelper {
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
-    internal fun mockedFormViewModel(
+    private fun mockedFormViewModel(
         configuration: CustomerSheet.Configuration,
         lpmRepository: LpmRepository,
     ): Provider<FormViewModelSubcomponent.Builder> {
@@ -218,10 +219,10 @@ internal object CustomerSheetTestHelper {
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
+            customerAdapterProvider = CompletableDeferred(customerAdapter),
             formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             resources = application.resources,
             stripeRepository = stripeRepository,
-            customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
@@ -238,7 +239,7 @@ internal object CustomerSheetTestHelper {
                     return mock()
                 }
             },
-            statusBarColor = { null },
+            statusBarColor = null,
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
