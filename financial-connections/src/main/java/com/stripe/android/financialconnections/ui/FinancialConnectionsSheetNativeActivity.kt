@@ -125,7 +125,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
     @Suppress("LongMethod")
     @Composable
     fun NavHost(

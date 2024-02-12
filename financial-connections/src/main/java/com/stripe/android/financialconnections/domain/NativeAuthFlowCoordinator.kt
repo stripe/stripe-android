@@ -23,7 +23,7 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
         /**
          * Ensures partner web auth status gets cleared after the current session is finished.
          */
-        object ClearPartnerWebAuth : Message
+        data object ClearPartnerWebAuth : Message
 
         /**
          * Triggers a termination of the AuthFlow, completing the session in the current state.

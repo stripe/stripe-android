@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.attachpayment
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.mvrx.Async
@@ -41,7 +40,6 @@ internal fun AttachPaymentScreen() {
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun AttachPaymentContent(
     payload: Async<AttachPaymentState.Payload>,

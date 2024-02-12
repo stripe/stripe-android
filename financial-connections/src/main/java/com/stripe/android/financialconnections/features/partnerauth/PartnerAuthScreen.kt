@@ -1,9 +1,7 @@
-@file:OptIn(ExperimentalMaterialApi::class)
 @file:Suppress("LongMethod")
 
 package com.stripe.android.financialconnections.features.partnerauth
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import com.airbnb.mvrx.compose.collectAsState

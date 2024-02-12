@@ -35,77 +35,102 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-@Suppress("unused")
 data class FinancialConnectionsAccount(
 
     @SerialName("category")
     val category: Category = Category.UNKNOWN,
 
-    /* Time at which the object was created. Measured in seconds since the Unix epoch. */
+    /**
+     * Time at which the object was created. Measured in seconds since the Unix epoch.
+     */
     @SerialName("created")
     val created: Int,
 
-    /* Unique identifier for the object. */
+    /**
+     * Unique identifier for the object.
+     */
     @SerialName("id")
     val id: String,
 
-    /* The name of the institution that holds this account. */
+    /**
+     * The name of the institution that holds this account.
+     */
     @SerialName("institution_name")
     val institutionName: String,
 
-    /* Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode. */
+    /**
+     * Has the value `true` if the object exists in live mode or the value `false` if the object exists in test mode.
+     */
     @SerialName("livemode")
     val livemode: Boolean,
 
-    /* The status of the link to the account. */
+    /**
+     * The status of the link to the account.
+     */
     @SerialName("status")
     val status: Status = Status.UNKNOWN,
 
-    /* If `category` is `cash`, one of:   - `checking`  - `savings`  - `other`
-       If `category` is `credit`, one of:   - `mortgage`  - `line_of_credit`  - `credit_card`  - `other`
-       If `category` is `investment` or `other`, this will be `other`.
-    */
+    /**
+     * If `category` is `cash`, one of:   - `checking`  - `savings`  - `other`
+     * If `category` is `credit`, one of:   - `mortgage`  - `line_of_credit`  - `credit_card`  - `other`
+     * If `category` is `investment` or `other`, this will be `other`.
+     */
     @SerialName("subcategory")
     val subcategory: Subcategory = Subcategory.UNKNOWN,
 
-    /* The [PaymentMethod type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)(s)
-     that can be created from this FinancialConnectionsAccount. */
+    /**
+     * The [PaymentMethod type](https://stripe.com/docs/api/payment_methods/object#payment_method_object-type)(s)
+     * that can be created from this FinancialConnectionsAccount.
+     */
     @SerialName("supported_payment_method_types")
     val supportedPaymentMethodTypes: List<SupportedPaymentMethodTypes>,
 
-    /* The most recent information about the account's balance. */
+    /**
+     * The most recent information about the account's balance.
+     */
     @SerialName("balance")
     val balance: Balance? = null,
 
-    /* The state of the most recent attempt to refresh the account balance. */
+    /**
+     * The state of the most recent attempt to refresh the account balance.
+     */
     @SerialName("balance_refresh")
     val balanceRefresh: BalanceRefresh? = null,
 
-    /* A human-readable name that has been assigned to this account,
-    either by the account holder or by the institution. */
+    /**
+     * A human-readable name that has been assigned to this account, either by the account holder or by the institution.
+     */
     @SerialName("display_name")
     val displayName: String? = null,
 
-    /* The last 4 digits of the account number. If present, this will be 4 numeric characters. */
+    /**
+     * The last 4 digits of the account number. If present, this will be 4 numeric characters.
+     */
     @SerialName("last4")
     val last4: String? = null,
 
-    /* The most recent information about the account's owners. */
+    /**
+     * The most recent information about the account's owners.
+     */
     @SerialName("ownership")
     val ownership: String? = null,
 
-    /* The state of the most recent attempt to refresh the account owners. */
+    /**
+     * The state of the most recent attempt to refresh the account owners.
+     */
     @SerialName("ownership_refresh")
     val ownershipRefresh: OwnershipRefresh? = null,
 
-    /* The list of permissions granted by this account. */
+    /**
+     * The list of permissions granted by this account.
+     */
     @SerialName("permissions")
     val permissions: List<Permissions>? = null
 
 ) : StripeModel, Parcelable, PaymentAccount() {
 
     /**
-     *
+     * The category of the account.
      *
      * Values: cash,credit,investment,other
      */

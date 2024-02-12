@@ -24,7 +24,7 @@ sealed class FinancialConnectionsSheetLinkResult : Parcelable {
      */
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Canceled : FinancialConnectionsSheetLinkResult()
+    data object Canceled : FinancialConnectionsSheetLinkResult()
 
     /**
      * The connections session attempt failed.
