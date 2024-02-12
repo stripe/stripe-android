@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.37.3 - 2024-02-12
+
 ### Identity
 * [FIXED][7903](https://github.com/stripe/stripe-android/pull/7903) Fixed an issue where camera fails to start on some devices.
 
