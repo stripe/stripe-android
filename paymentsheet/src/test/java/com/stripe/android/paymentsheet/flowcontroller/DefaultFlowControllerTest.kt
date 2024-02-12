@@ -35,6 +35,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -1663,6 +1664,70 @@ internal class DefaultFlowControllerTest {
                 )
             ) { _, _ -> }
         }
+    }
+
+    @Test
+    fun `On google pay intent result, should save payment selection as google_pay`() = runTest {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!
+        val flowController = createFlowController()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = "pi_12345"
+        ) { _, _ -> }
+
+        flowController.onGooglePayResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                        wallet = Wallet.GooglePayWallet(
+                            dynamicLast4 = "1234"
+                        )
+                    )
+                )
+            )
+        )
+        flowController.onInternalPaymentResult(InternalPaymentResult.Completed(paymentIntent))
+
+        assertThat(
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = true,
+                isLinkAvailable = true
+            )
+        ).isEqualTo(
+            SavedSelection.GooglePay
+        )
+    }
+
+    @Test
+    fun `On link intent result, should save payment selection as link`() = runTest {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!
+        val flowController = createFlowController()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = "pi_12345"
+        ) { _, _ -> }
+
+        flowController.onLinkActivityResult(
+            LinkActivityResult.Completed(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                        wallet = Wallet.LinkWallet(
+                            dynamicLast4 = "1234"
+                        )
+                    )
+                )
+            )
+        )
+        flowController.onInternalPaymentResult(InternalPaymentResult.Completed(paymentIntent))
+
+        assertThat(
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = true,
+                isLinkAvailable = true
+            )
+        ).isEqualTo(
+            SavedSelection.Link
+        )
     }
 
     @Test
