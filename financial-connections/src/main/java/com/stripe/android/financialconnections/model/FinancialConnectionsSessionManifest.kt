@@ -243,14 +243,20 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "link_account_picker")
         LINK_ACCOUNT_PICKER("link_account_picker"),
 
+        @SerialName(value = "partner_auth_drawer")
+        PARTNER_AUTH_DRAWER("partner_auth_drawer"),
+
         @SerialName(value = "networking_save_to_link_verification")
         NETWORKING_SAVE_TO_LINK_VERIFICATION("networking_save_to_link_verification"),
 
         @SerialName(value = "reset")
-        RESET("reset");
+        RESET("reset"),
+
+        @SerialName(value = "exit")
+        EXIT("exit");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Pane>(Pane.values(), UNEXPECTED_ERROR)
+            EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNEXPECTED_ERROR)
     }
 
     /**

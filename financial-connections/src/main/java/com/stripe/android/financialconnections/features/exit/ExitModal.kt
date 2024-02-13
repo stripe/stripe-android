@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features.common
+package com.stripe.android.financialconnections.features.exit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -8,12 +8,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
+import com.airbnb.mvrx.compose.collectAsState
+import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -22,10 +27,27 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun ExitModal(
-    onExit: () -> Unit = { },
-    onCancel: () -> Unit = { },
+    backStackEntry: NavBackStackEntry
+) {
+    val viewModel: ExitViewModel = mavericksViewModel(argsFactory = { backStackEntry.arguments })
+
+    val state by viewModel.collectAsState()
+    state.payload()?.let {
+        ExitModalContent(
+            description = it.description,
+            loading = state.closing,
+            onExit = viewModel::onCloseConfirm,
+            onCancel = viewModel::onCloseDismiss
+        )
+    }
+}
+
+@Composable
+private fun ExitModalContent(
     description: TextResource,
     loading: Boolean,
+    onExit: () -> Unit,
+    onCancel: () -> Unit,
 ) {
     Column(
         modifier = Modifier
@@ -65,12 +87,14 @@ internal fun ExitModal(
 
 @Composable
 @Preview
-fun ExitModalPreview() {
+internal fun ExitModalPreview() {
     FinancialConnectionsTheme {
         Surface(color = v3Colors.backgroundSurface) {
-            ExitModal(
+            ExitModalContent(
                 description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),
-                loading = false
+                loading = false,
+                onExit = {},
+                onCancel = {}
             )
         }
     }

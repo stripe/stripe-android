@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -24,6 +23,7 @@ import com.stripe.android.financialconnections.exception.InstitutionUnplannedDow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -34,9 +34,7 @@ import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
@@ -58,9 +56,10 @@ internal class PartnerAuthViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
+    private val handleError = TestHandleError()
 
     @Test
-    fun `init - when creating auth session returns unplanned downtime, error is logged`() =
+    fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
         runTest {
             val unplannedDowntimeError = InstitutionUnplannedDowntimeError(
                 institution = institution(),
@@ -77,14 +76,12 @@ internal class PartnerAuthViewModelTest {
             val viewModel = createViewModel()
 
             withState(viewModel) {
-                verifyBlocking(eventTracker) {
-                    logError(
-                        extraMessage = "Error fetching payload / posting AuthSession",
-                        error = unplannedDowntimeError,
-                        logger = logger,
-                        pane = Pane.PARTNER_AUTH
-                    )
-                }
+                handleError.assertError(
+                    extraMessage = "Error fetching payload / posting AuthSession",
+                    error = unplannedDowntimeError,
+                    pane = Pane.PARTNER_AUTH,
+                    displayErrorScreen = true
+                )
             }
         }
 
@@ -200,6 +197,7 @@ internal class PartnerAuthViewModelTest {
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
+            // An auth session was created on the previous pane, before launching Partner Auth.
             val manifest = sessionManifest().copy(
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution,
@@ -222,8 +220,8 @@ internal class PartnerAuthViewModelTest {
             // stays in partner auth pane
             assertThat(navigationManager.emittedIntents).isEmpty()
 
-            // creates two sessions (initial and retry)
-            verify(createAuthorizationSession, times(2)).invoke(
+            // creates an additional session (cancel triggers a retry)
+            verify(createAuthorizationSession).invoke(
                 eq(activeInstitution),
                 eq(syncResponse)
             )
@@ -240,6 +238,7 @@ internal class PartnerAuthViewModelTest {
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
+            // An auth session was created on the previous pane, before launching Partner Auth.
             val manifest = sessionManifest().copy(
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution
@@ -259,8 +258,8 @@ internal class PartnerAuthViewModelTest {
             // stays in partner auth pane
             assertThat(navigationManager.emittedIntents).isEmpty()
 
-            // creates two sessions (initial and retry)
-            verify(createAuthorizationSession, times(2)).invoke(
+            // creates an additional session (cancel triggers a retry)
+            verify(createAuthorizationSession).invoke(
                 eq(activeInstitution),
                 eq(syncResponse)
             )
@@ -295,6 +294,7 @@ internal class PartnerAuthViewModelTest {
             initialState = initialState,
             browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
+            handleError = handleError,
             applicationId = applicationId
         )
     }

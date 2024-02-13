@@ -16,6 +16,8 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
+import com.stripe.android.financialconnections.features.error.ErrorScreen
+import com.stripe.android.financialconnections.features.exit.ExitModal
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
@@ -30,6 +32,7 @@ import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
+import com.stripe.android.financialconnections.navigation.bottomsheet.bottomSheet
 import com.stripe.android.financialconnections.presentation.parentViewModel
 
 internal sealed class Destination(
@@ -53,7 +56,7 @@ internal sealed class Destination(
         if (!paneLaunchedTriggered) {
             LaunchedEffect(Unit) {
                 viewModel.onPaneLaunched(
-                    referrer = referrer(navBackStackEntry),
+                    referrer = referrer(navBackStackEntry.arguments),
                     pane = navBackStackEntry.destination.pane
                 )
                 paneLaunchedTriggered = true
@@ -98,9 +101,14 @@ internal sealed class Destination(
         composable = { ConsentScreen() }
     )
 
+    object PartnerAuthDrawer : NoArgumentsDestination(
+        route = Pane.PARTNER_AUTH_DRAWER.value,
+        composable = { PartnerAuthScreen(inModal = true) }
+    )
+
     object PartnerAuth : NoArgumentsDestination(
         route = Pane.PARTNER_AUTH.value,
-        composable = { PartnerAuthScreen() }
+        composable = { PartnerAuthScreen(inModal = false) }
     )
 
     object AccountPicker : NoArgumentsDestination(
@@ -160,6 +168,16 @@ internal sealed class Destination(
         composable = { ResetScreen() }
     )
 
+    object Exit : NoArgumentsDestination(
+        route = Pane.EXIT.value,
+        composable = { ExitModal(it) }
+    )
+
+    object Error : NoArgumentsDestination(
+        route = Pane.UNEXPECTED_ERROR.value,
+        composable = { ErrorScreen() }
+    )
+
     object BankAuthRepair : NoArgumentsDestination(
         route = Pane.BANK_AUTH_REPAIR.value,
         composable = { BankAuthRepairScreen() }
@@ -192,9 +210,9 @@ internal sealed class Destination(
     }
 
     companion object {
-        private fun referrer(entry: NavBackStackEntry): Pane? = entry.arguments
+        internal fun referrer(args: Bundle?): Pane? = args
             ?.getString(KEY_REFERRER)
-            ?.let { value -> Pane.values().firstOrNull { it.value == value } }
+            ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 
         const val KEY_REFERRER = "referrer"
         const val KEY_MICRODEPOSITS = "microdeposits"
@@ -220,6 +238,19 @@ internal fun NavGraphBuilder.composable(
     deepLinks: List<NavDeepLink> = emptyList(),
 ) {
     composable(
+        route = destination.fullRoute,
+        arguments = arguments,
+        deepLinks = deepLinks,
+        content = { destination.Composable(navBackStackEntry = it) }
+    )
+}
+
+internal fun NavGraphBuilder.bottomSheet(
+    destination: Destination,
+    arguments: List<NamedNavArgument> = emptyList(),
+    deepLinks: List<NavDeepLink> = emptyList(),
+) {
+    bottomSheet(
         route = destination.fullRoute,
         arguments = arguments,
         deepLinks = deepLinks,

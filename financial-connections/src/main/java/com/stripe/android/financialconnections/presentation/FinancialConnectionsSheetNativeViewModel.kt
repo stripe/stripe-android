@@ -14,7 +14,6 @@ import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
@@ -27,12 +26,10 @@ import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
-import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -42,14 +39,13 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.EXIT
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.pane
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.CloseDialog
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
-import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -66,13 +62,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    private val getManifest: GetManifest,
     private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
+    private val navigationManager: NavigationManager,
     @Named(APPLICATION_ID) private val applicationId: String,
-    navigationManager: NavigationManager,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
 
@@ -90,6 +85,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
                     is Message.Complete -> closeAuthFlow(
                         earlyTerminationCause = message.cause
+                    )
+
+                    is Message.CloseWithError -> closeAuthFlow(
+                        closeAuthFlowError = message.cause
                     )
                 }
             }
@@ -183,28 +182,8 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 
     fun onCloseWithConfirmationClick(pane: Pane) = viewModelScope.launch {
-        val manifest = kotlin.runCatching { getManifest() }.getOrNull()
-        val businessName = manifest?.getBusinessName()
-        val isNetworkingSignupPane =
-            manifest?.isNetworkingUserFlow == true && pane == NETWORKING_LINK_SIGNUP_PANE
-        val description = when {
-            isNetworkingSignupPane -> when (businessName) {
-                null -> TextResource.StringId(R.string.stripe_close_dialog_networking_desc_no_business)
-                else -> TextResource.StringId(
-                    value = R.string.stripe_close_dialog_networking_desc,
-                    args = listOf(businessName)
-                )
-            }
-            else -> when (businessName) {
-                null -> TextResource.StringId(R.string.stripe_exit_modal_desc_no_business)
-                else -> TextResource.StringId(
-                    value = R.string.stripe_exit_modal_desc,
-                    args = listOf(businessName)
-                )
-            }
-        }
         eventTracker.track(ClickNavBarClose(pane))
-        setState { copy(exitModal = CloseDialog(description = description, loading = false)) }
+        navigationManager.tryNavigateTo(Destination.Exit(referrer = pane))
     }
 
     fun onBackClick(pane: Pane?) {
@@ -223,15 +202,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(
         closeAuthFlowError = error
     )
-
-    fun onCloseConfirm() {
-        withState { state ->
-            state.exitModal?.let { setState { copy(exitModal = it.copy(loading = true)) } }
-        }
-        closeAuthFlow(closeAuthFlowError = null)
-    }
-
-    fun onCloseDismiss() = setState { copy(exitModal = null) }
 
     /**
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
@@ -324,13 +294,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
-        viewModelScope.launch {
-            eventTracker.track(
-                PaneLaunched(
-                    referrer = referrer,
-                    pane = pane
+        // Do not track pane loaded for exit pane as it is not a real pane.
+        if (pane != EXIT) {
+            viewModelScope.launch {
+                eventTracker.track(
+                    PaneLaunched(
+                        referrer = referrer,
+                        pane = pane
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -383,21 +356,11 @@ internal data class FinancialConnectionsSheetNativeState(
     @PersistState
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
-    val exitModal: CloseDialog?,
     val reducedBranding: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val completed: Boolean,
     val initialPane: Pane
 ) : MavericksState {
-
-    /**
-     * Payload for the close confirmation dialog,
-     * which is shown when the user clicks the close button.
-     */
-    data class CloseDialog(
-        val description: TextResource,
-        val loading: Boolean
-    )
 
     /**
      * Used by Mavericks to build initial state based on args.
@@ -410,7 +373,6 @@ internal data class FinancialConnectionsSheetNativeState(
         completed = false,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
-        exitModal = null,
         viewEffect = null
     )
 }

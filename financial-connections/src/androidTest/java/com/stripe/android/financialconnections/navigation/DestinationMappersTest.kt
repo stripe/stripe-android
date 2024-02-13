@@ -9,7 +9,6 @@ class DestinationMappersTest {
 
     // Panes that don't have a matching screen on the Android SDK side
     private val nonImplementedPanes = listOf(
-        Pane.UNEXPECTED_ERROR,
         Pane.AUTH_OPTIONS,
         Pane.LINK_CONSENT,
         Pane.LINK_LOGIN,
@@ -17,7 +16,7 @@ class DestinationMappersTest {
 
     @Test
     fun testPaneToDestination() {
-        for (pane in Pane.values()) {
+        for (pane in Pane.entries) {
             if (!nonImplementedPanes.contains(pane)) {
                 assertNotNull("No matching destination for pane: $pane", pane.destination)
             } else {
