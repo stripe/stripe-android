@@ -12,7 +12,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBank
 internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
     return when (type) {
         PaymentMethod.Type.Card -> {
-            val brand = card?.displayBrand?.type?.takeIf { it != Unknown } ?: card?.brand
+            val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
             brand?.getCardBrandIcon()
         }
         PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
