@@ -249,11 +249,11 @@ private fun SelectNewAccount(
         ) {
             SelectNewAccountIcon(
                 icon = text.icon?.default,
-                contentDescription = text.body ?: "",
+                contentDescription = text.body,
             )
             Spacer(modifier = Modifier.size(16.dp))
             Text(
-                text = text.body ?: "",
+                text = text.body,
                 style = FinancialConnectionsTheme.typography.body,
                 color = FinancialConnectionsTheme.colors.textBrand
             )

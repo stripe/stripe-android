@@ -50,8 +50,7 @@ internal fun Modifier.clickableSingle(
     onClickLabel: String? = null,
     role: Role? = null,
     onClick: () -> Unit
-
-) = composed(
+) = this.composed(
     inspectorInfo = debugInspectorInfo {
         name = "clickable"
         properties["enabled"] = enabled
@@ -59,7 +58,6 @@ internal fun Modifier.clickableSingle(
         properties["role"] = role
         properties["onClick"] = onClick
     },
-
     factory = {
         val multipleEventsCutter = remember { MultipleEventsCutter.get() }
         Modifier.clickable(
@@ -84,8 +82,7 @@ internal fun Modifier.clickableSingle(
     onClickLabel: String? = null,
     role: Role? = null,
     onClick: () -> Unit
-
-) = composed(
+) = this.composed(
     inspectorInfo = debugInspectorInfo {
         name = "clickable"
         properties["enabled"] = enabled
@@ -93,7 +90,6 @@ internal fun Modifier.clickableSingle(
         properties["role"] = role
         properties["onClick"] = onClick
     },
-
     factory = {
         val multipleEventsCutter = remember { MultipleEventsCutter.get() }
         Modifier.clickable(
