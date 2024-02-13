@@ -172,6 +172,9 @@ internal sealed class Destination(
     }
 }
 
+internal val Pane.rendersInBottomSheet: Boolean
+    get() = this in setOf(Pane.PARTNER_AUTH_DRAWER, Pane.NETWORKING_LINK_LOGIN_WARMUP, Pane.EXIT)
+
 internal fun String.appendParamValues(params: List<String>): String {
     return buildString {
         append(this@appendParamValues)
