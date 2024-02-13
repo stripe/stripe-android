@@ -32,11 +32,7 @@ class PaymentMethodJsonParserTest {
                 .card?.displayBrand
 
         assertThat(actualDisplayBrand)
-            .isEqualTo(
-                PaymentMethod.Card.DisplayBrand(
-                    type = CardBrand.CartesBancaires
-                )
-            )
+            .isEqualTo("cartes_bancaires")
     }
 
     @Test
