@@ -159,7 +159,7 @@ class AddPaymentMethodActivityStarter : ActivityStarter<AddPaymentMethodActivity
         ) : Result()
 
         @Parcelize
-        object Canceled : Result()
+        data object Canceled : Result()
 
         companion object {
             /**

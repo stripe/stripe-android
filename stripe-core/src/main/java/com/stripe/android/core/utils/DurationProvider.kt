@@ -15,6 +15,7 @@ interface DurationProvider {
         Loading,
         Checkout,
         LinkSignup,
+        ConfirmButtonClicked,
     }
 }
 

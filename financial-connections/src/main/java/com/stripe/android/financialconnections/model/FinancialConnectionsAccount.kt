@@ -126,7 +126,7 @@ data class FinancialConnectionsAccount(
         UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Category>(Category.values(), UNKNOWN)
+            EnumIgnoreUnknownSerializer<Category>(entries.toTypedArray(), UNKNOWN)
     }
 
     /**
@@ -147,7 +147,7 @@ data class FinancialConnectionsAccount(
 
         UNKNOWN("unknown");
 
-        internal object Serializer : EnumIgnoreUnknownSerializer<Status>(Status.values(), UNKNOWN)
+        internal object Serializer : EnumIgnoreUnknownSerializer<Status>(entries.toTypedArray(), UNKNOWN)
     }
 
     /**
@@ -180,7 +180,7 @@ data class FinancialConnectionsAccount(
         UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Subcategory>(Subcategory.values(), UNKNOWN)
+            EnumIgnoreUnknownSerializer<Subcategory>(entries.toTypedArray(), UNKNOWN)
     }
 
     /**
@@ -200,7 +200,7 @@ data class FinancialConnectionsAccount(
         UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<SupportedPaymentMethodTypes>(values(), UNKNOWN)
+            EnumIgnoreUnknownSerializer<SupportedPaymentMethodTypes>(entries.toTypedArray(), UNKNOWN)
     }
 
     /**
@@ -227,7 +227,7 @@ data class FinancialConnectionsAccount(
 
         UNKNOWN("unknown");
 
-        internal object Serializer : EnumIgnoreUnknownSerializer<Permissions>(values(), UNKNOWN)
+        internal object Serializer : EnumIgnoreUnknownSerializer<Permissions>(entries.toTypedArray(), UNKNOWN)
     }
 
     companion object {

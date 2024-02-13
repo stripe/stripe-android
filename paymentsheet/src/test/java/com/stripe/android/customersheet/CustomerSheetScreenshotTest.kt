@@ -6,7 +6,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -32,9 +32,9 @@ import org.junit.Test
 internal class CustomerSheetScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
-        SystemAppearance.values(),
-        arrayOf(FontSize.DefaultFont),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
+        SystemAppearance.entries,
+        listOf(FontSize.DefaultFont),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
@@ -92,10 +92,10 @@ internal class CustomerSheetScreenshotTest {
         ),
         usBankAccountFormArguments = usBankAccountFormArguments,
         supportedPaymentMethods = listOf(
-            LpmRepository.HardcodedCard,
-            LpmRepository.hardCodedUsBankAccount,
+            LpmRepositoryTestHelpers.card,
+            LpmRepositoryTestHelpers.usBankAccount,
         ),
-        selectedPaymentMethod = LpmRepository.HardcodedCard,
+        selectedPaymentMethod = LpmRepositoryTestHelpers.card,
         enabled = true,
         isLiveMode = false,
         isProcessing = false,

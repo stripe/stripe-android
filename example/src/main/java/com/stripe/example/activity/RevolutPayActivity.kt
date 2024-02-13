@@ -128,7 +128,7 @@ private fun RevolutPayScreen(
 ) {
     MdcTheme {
         Column(modifier = Modifier.fillMaxSize()) {
-            for (flowType in RevolutPayFlow.values()) {
+            for (flowType in RevolutPayFlow.entries) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     RadioButton(
                         selected = flow == flowType,

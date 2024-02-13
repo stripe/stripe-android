@@ -7,8 +7,8 @@ class PaymentAnalyticsEventTest {
 
     @Test
     fun `event codes should be unique`() {
-        val eventCodes = PaymentAnalyticsEvent.values().map { it.code }.distinct()
+        val eventCodes = PaymentAnalyticsEvent.entries.map { it.code }.distinct()
         assertThat(eventCodes)
-            .hasSize(PaymentAnalyticsEvent.values().size)
+            .hasSize(PaymentAnalyticsEvent.entries.size)
     }
 }

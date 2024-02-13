@@ -9,6 +9,6 @@ internal enum class IntegrationType {
 
 internal object IntegrationTypeProvider : TestParameter.TestParameterValuesProvider {
     override fun provideValues(): List<IntegrationType> {
-        return IntegrationType.values().toList()
+        return IntegrationType.entries
     }
 }

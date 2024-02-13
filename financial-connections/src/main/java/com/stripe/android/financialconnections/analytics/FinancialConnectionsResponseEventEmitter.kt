@@ -53,11 +53,11 @@ internal class FinancialConnectionsResponseEventEmitter @Inject constructor(
 
     private fun UserFacingEventResponse.toEvent() = runCatching {
         FinancialConnectionsEvent(
-            name = Name.values().first { it.value == type },
+            name = Name.entries.first { it.value == type },
             metadata = Metadata(
                 errorCode = error?.errorCode
                     ?.let { errorCode ->
-                        ErrorCode.values()
+                        ErrorCode.entries
                             .firstOrNull { it.value == errorCode }
                             ?: ErrorCode.UNEXPECTED_ERROR
                     },

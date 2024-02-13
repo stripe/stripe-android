@@ -123,7 +123,7 @@ internal data class FinancialConnectionsAuthorizationSession(
         UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Flow>(Flow.values(), UNKNOWN)
+            EnumIgnoreUnknownSerializer<Flow>(entries.toTypedArray(), UNKNOWN)
     }
 }
 

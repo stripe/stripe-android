@@ -191,7 +191,7 @@ sealed class RequestHeadersFactory {
      * Factory for [AnalyticsRequest].
      */
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Analytics : RequestHeadersFactory() {
+    data object Analytics : RequestHeadersFactory() {
         override val userAgent = getUserAgent(StripeSdkVersion.VERSION)
         override val extraHeaders = emptyMap<String, String>()
         override val xStripeUserAgent: String

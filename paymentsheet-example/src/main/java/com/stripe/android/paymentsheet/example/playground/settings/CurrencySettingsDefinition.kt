@@ -6,14 +6,14 @@ internal object CurrencySettingsDefinition :
     PlaygroundSettingDefinition<Currency>,
     PlaygroundSettingDefinition.Saveable<Currency> by EnumSaveable(
         key = "currency",
-        values = Currency.values(),
+        values = Currency.entries.toTypedArray(),
         defaultValue = Currency.USD,
     ),
     PlaygroundSettingDefinition.Displayable<Currency> {
     override val displayName: String = "Currency"
 
     override val options: List<PlaygroundSettingDefinition.Displayable.Option<Currency>> =
-        Currency.values().map {
+        Currency.entries.map {
             option(it.displayName, it)
         }
 

@@ -5,12 +5,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
-import app.cash.turbine.testIn
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -573,35 +574,37 @@ internal class PaymentOptionsViewModelTest {
             editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
         )
 
-        val screenTurbine = viewModel.currentScreen.testIn(this)
-        val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
+        turbineScope {
+            val screenTurbine = viewModel.currentScreen.testIn(this)
+            val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-        assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
-        assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
-        assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
+            assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
-        viewModel.modifyPaymentMethod(paymentMethodToRemove)
+            viewModel.modifyPaymentMethod(paymentMethodToRemove)
 
-        val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
-        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+            val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
+            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
 
-        screenTurbine.expectNoEvents()
-        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
+            screenTurbine.expectNoEvents()
+            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
-        assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
-        // The list of payment methods should not be updated until we're back on the SPM screen
-        paymentMethodsTurbine.expectNoEvents()
-        testScheduler.advanceUntilIdle()
+            // The list of payment methods should not be updated until we're back on the SPM screen
+            paymentMethodsTurbine.expectNoEvents()
+            testScheduler.advanceUntilIdle()
 
-        assertThat(paymentMethodsTurbine.awaitItem()).containsExactly(cards[1], cards[2]).inOrder()
+            assertThat(paymentMethodsTurbine.awaitItem()).containsExactly(cards[1], cards[2]).inOrder()
 
-        screenTurbine.ensureAllEventsConsumed()
-        screenTurbine.cancelAndIgnoreRemainingEvents()
+            screenTurbine.ensureAllEventsConsumed()
+            screenTurbine.cancelAndIgnoreRemainingEvents()
 
-        paymentMethodsTurbine.ensureAllEventsConsumed()
-        paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+            paymentMethodsTurbine.ensureAllEventsConsumed()
+            paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -626,26 +629,28 @@ internal class PaymentOptionsViewModelTest {
             editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
         )
 
-        val screenTurbine = viewModel.currentScreen.testIn(this)
-        val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
+        turbineScope {
+            val screenTurbine = viewModel.currentScreen.testIn(this)
+            val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-        assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
-        assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
-        assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
+            assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
-        viewModel.modifyPaymentMethod(paymentMethodToRemove)
+            viewModel.modifyPaymentMethod(paymentMethodToRemove)
 
-        val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
-        editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+            val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
+            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
 
-        testScheduler.advanceUntilIdle()
+            testScheduler.advanceUntilIdle()
 
-        screenTurbine.ensureAllEventsConsumed()
-        screenTurbine.cancelAndIgnoreRemainingEvents()
+            screenTurbine.ensureAllEventsConsumed()
+            screenTurbine.cancelAndIgnoreRemainingEvents()
 
-        paymentMethodsTurbine.ensureAllEventsConsumed()
-        paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+            paymentMethodsTurbine.ensureAllEventsConsumed()
+            paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -733,6 +738,7 @@ internal class PaymentOptionsViewModelTest {
                 paymentSelection = null,
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,

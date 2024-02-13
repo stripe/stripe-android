@@ -34,6 +34,7 @@ import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.fakes.RoboMenuItem
 import org.robolectric.shadows.ShadowAlertDialog
 import java.util.Calendar
 import kotlin.test.BeforeTest
@@ -415,6 +416,55 @@ class AddPaymentMethodActivityTest {
 
                 assertThat(activity.isFinishing)
                     .isTrue()
+            }
+        }
+    }
+
+    @Test
+    fun `when user clicks on save in action menu, should call onSaveClicked() in view model`() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            BASE_CARD_ARGS
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                activity.onOptionsItemSelected(RoboMenuItem(R.id.action_save))
+
+                runBlocking {
+                    verify(viewModel, never()).onSaveClicked()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `on user interaction with form, calls onFormInteracted() in view model`() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            BASE_CARD_ARGS
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                val view: CardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
+
+                view.setCardNumber("4242")
+
+                runBlocking {
+                    verify(viewModel, never()).onFormInteracted()
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `when card number is completely input, should call onCardNumberCompleted() in view model`() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            BASE_CARD_ARGS
+        ).use { activityScenario ->
+            activityScenario.onActivity { activity ->
+                val view: CardMultilineWidget = activity.findViewById(R.id.card_multiline_widget)
+
+                view.setCardNumber("4242424242424242")
+
+                runBlocking {
+                    verify(viewModel, never()).onCardNumberCompleted()
+                }
             }
         }
     }

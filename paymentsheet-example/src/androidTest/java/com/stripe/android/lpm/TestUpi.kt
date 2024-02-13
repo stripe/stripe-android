@@ -26,15 +26,14 @@ internal class TestUpi : BasePlaygroundTest() {
     @Test
     fun testUpi() {
         testDriver.confirmNewOrGuestComplete(
-            testParameters = testParameters,
-            populateCustomLpmFields = {
-                rules.compose.onNodeWithText("UPI ID").apply {
-                    performTextInput(
-                        "payment.success@stripeupi"
-                    )
-                }
+            testParameters = testParameters
+        ) {
+            rules.compose.onNodeWithText("UPI ID").apply {
+                performTextInput(
+                    "payment.success@stripeupi"
+                )
             }
-        )
+        }
     }
 
     @Test

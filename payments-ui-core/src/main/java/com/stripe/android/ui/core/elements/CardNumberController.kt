@@ -2,8 +2,14 @@ package com.stripe.android.ui.core.elements
 
 import android.content.Context
 import androidx.annotation.VisibleForTesting
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.cards.CardAccountRangeRepository
@@ -17,18 +23,25 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 import com.stripe.android.ui.core.asIndividualDigits
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.FieldError
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
+import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
@@ -60,7 +73,7 @@ internal class DefaultCardNumberController(
     uiContext: CoroutineContext,
     workContext: CoroutineContext,
     staticCardAccountRanges: StaticCardAccountRanges = DefaultStaticCardAccountRanges(),
-    initialValue: String?,
+    override val initialValue: String?,
     override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
 ) : CardNumberController() {
@@ -306,6 +319,44 @@ internal class DefaultCardNumberController(
 
     override fun onDropdownItemClicked(item: TextFieldIcon.Dropdown.Item) {
         mostRecentUserSelectedBrand.value = CardBrand.fromCode(item.id)
+    }
+
+    @Composable
+    override fun ComposeUI(
+        enabled: Boolean,
+        field: SectionFieldElement,
+        modifier: Modifier,
+        hiddenIdentifiers: Set<IdentifierSpec>,
+        lastTextFieldIdentifier: IdentifierSpec?,
+        nextFocusDirection: FocusDirection,
+        previousFocusDirection: FocusDirection
+    ) {
+        val scope = rememberCoroutineScope()
+
+        val sharedFieldStateFlow = remember(scope) {
+            fieldState.shareIn(scope, started = SharingStarted.WhileSubscribed())
+        }
+
+        val reporter = LocalCardNumberCompletedEventReporter.current
+
+        LaunchedEffect(sharedFieldStateFlow) {
+            sharedFieldStateFlow.collectLatest { state ->
+                when (state) {
+                    is TextFieldStateConstants.Valid.Full -> reporter.onCardNumberCompleted()
+                    else -> Unit
+                }
+            }
+        }
+
+        super.ComposeUI(
+            enabled,
+            field,
+            modifier,
+            hiddenIdentifiers,
+            lastTextFieldIdentifier,
+            nextFocusDirection,
+            previousFocusDirection
+        )
     }
 
     private companion object {

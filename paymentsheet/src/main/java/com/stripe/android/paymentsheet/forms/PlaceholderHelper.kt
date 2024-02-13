@@ -100,16 +100,16 @@ internal object PlaceholderHelper {
         spec: FormItemSpec
     ) {
         when (spec) {
-            is NameSpec -> placeholderFields.remove(PlaceholderSpec.PlaceholderField.Name)
-            is EmailSpec -> placeholderFields.remove(PlaceholderSpec.PlaceholderField.Email)
-            is PhoneSpec -> placeholderFields.remove(PlaceholderSpec.PlaceholderField.Phone)
+            is NameSpec -> placeholderFields.remove(PlaceholderField.Name)
+            is EmailSpec -> placeholderFields.remove(PlaceholderField.Email)
+            is PhoneSpec -> placeholderFields.remove(PlaceholderField.Phone)
             is AddressSpec ->
-                placeholderFields.remove(PlaceholderSpec.PlaceholderField.BillingAddress)
+                placeholderFields.remove(PlaceholderField.BillingAddress)
 
             is SepaMandateTextSpec -> placeholderFields.remove(PlaceholderField.SepaMandate)
             is PlaceholderSpec -> when (spec.field) {
-                PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
-                    placeholderFields.remove(PlaceholderSpec.PlaceholderField.BillingAddress)
+                PlaceholderField.BillingAddressWithoutCountry ->
+                    placeholderFields.remove(PlaceholderField.BillingAddress)
 
                 else -> placeholderFields.remove(spec.field)
             }
@@ -157,7 +157,7 @@ internal object PlaceholderHelper {
                     )
         }
 
-        PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry ->
+        PlaceholderField.BillingAddressWithoutCountry ->
             AddressSpec(hideCountry = true).takeIf {
                 configuration.address == AddressCollectionMode.Full ||
                     (

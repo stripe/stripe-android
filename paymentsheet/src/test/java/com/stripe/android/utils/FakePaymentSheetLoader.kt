@@ -7,6 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -19,6 +20,7 @@ internal class FakePaymentSheetLoader(
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
     private val linkState: LinkState? = null,
+    private val validationError: PaymentSheetLoadingException? = null,
 ) : PaymentSheetLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
@@ -30,7 +32,8 @@ internal class FakePaymentSheetLoader(
 
     override suspend fun load(
         initializationMode: PaymentSheet.InitializationMode,
-        paymentSheetConfiguration: PaymentSheet.Configuration
+        paymentSheetConfiguration: PaymentSheet.Configuration,
+        isReloadingAfterProcessDeath: Boolean,
     ): Result<PaymentSheetState.Full> {
         delay(delay)
         return if (shouldFail) {
@@ -45,6 +48,7 @@ internal class FakePaymentSheetLoader(
                     linkState = linkState,
                     paymentSelection = paymentSelection,
                     isEligibleForCardBrandChoice = false,
+                    validationError = validationError,
                 )
             )
         }

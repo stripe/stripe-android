@@ -20,6 +20,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -29,6 +31,8 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
@@ -39,25 +43,25 @@ internal class LinkHandler @Inject constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
 ) {
     sealed class ProcessingState {
-        object Ready : ProcessingState()
+        data object Ready : ProcessingState()
 
-        object Launched : ProcessingState()
+        data object Launched : ProcessingState()
 
-        object Started : ProcessingState()
+        data object Started : ProcessingState()
 
-        class PaymentDetailsCollected(
+        data class PaymentDetailsCollected(
             val paymentSelection: PaymentSelection?
         ) : ProcessingState()
 
         data class Error(val message: String?) : ProcessingState()
 
-        object Cancelled : ProcessingState()
+        data object Cancelled : ProcessingState()
 
         data class PaymentMethodCollected(val paymentMethod: PaymentMethod) : ProcessingState()
 
-        class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
+        data class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
 
-        object CompleteWithoutLink : ProcessingState()
+        data object CompleteWithoutLink : ProcessingState()
     }
 
     private val _processingState =
@@ -70,7 +74,7 @@ internal class LinkHandler @Inject constructor(
     val isLinkEnabled: StateFlow<Boolean?> = _isLinkEnabled
 
     private val _linkConfiguration = MutableStateFlow<LinkConfiguration?>(null)
-    val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
+    private val linkConfiguration: StateFlow<LinkConfiguration?> = _linkConfiguration.asStateFlow()
 
     val accountStatus: Flow<AccountStatus> = _linkConfiguration
         .filterNotNull()
@@ -79,7 +83,7 @@ internal class LinkHandler @Inject constructor(
     val linkSignupMode: Flow<LinkSignupMode?> = combine(
         linkConfiguration,
         linkInlineSelection,
-        accountStatus,
+        accountStatus.take(1), // We only care about the initial status, as the status might change during checkout
     ) { linkConfig, linkInlineSelection, linkAccountStatus ->
         val linkInlineSelectionValid = linkInlineSelection != null
         val validFundingSource = linkConfig?.stripeIntent?.linkFundingSources?.contains(Card.code) == true
@@ -230,6 +234,16 @@ internal class LinkHandler @Inject constructor(
             val paymentResult = result.convertToPaymentResult()
             _processingState.tryEmit(ProcessingState.CompletedWithPaymentResult(paymentResult))
             linkStore.markLinkAsUsed()
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun logOut() {
+        val configuration = linkConfiguration.value ?: return
+
+        GlobalScope.launch {
+            // This usage is intentional. We want the request to be sent without regard for the UI lifecycle.
+            linkConfigurationCoordinator.logOut(configuration = configuration)
         }
     }
 

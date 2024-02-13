@@ -1,7 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import app.cash.turbine.test
-import app.cash.turbine.testIn
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.utils.TestUtils.idleLooper
@@ -54,7 +54,10 @@ internal class PhoneNumberControllerTest {
 
     @Test
     fun `any input is marked complete if field is optional`() = runTest {
-        val phoneNumberController = PhoneNumberController(showOptionalLabel = true)
+        val phoneNumberController = PhoneNumberController(
+            showOptionalLabel = true,
+            acceptAnyInput = true,
+        )
 
         phoneNumberController.isComplete.test {
             assertThat(awaitItem()).isTrue()
@@ -118,32 +121,34 @@ internal class PhoneNumberControllerTest {
             initiallySelectedCountryCode = "US"
         )
 
-        val isComplete = phoneNumberController.isComplete.testIn(backgroundScope)
+        turbineScope {
+            val isComplete = phoneNumberController.isComplete.testIn(backgroundScope)
 
-        val error = phoneNumberController.error.testIn(backgroundScope)
+            val error = phoneNumberController.error.testIn(backgroundScope)
 
-        assertThat(isComplete.awaitItem()).isFalse()
-        assertThat(error.awaitItem()).isNull()
+            assertThat(isComplete.awaitItem()).isFalse()
+            assertThat(error.awaitItem()).isNull()
 
-        isComplete.ensureAllEventsConsumed()
-        error.ensureAllEventsConsumed()
+            isComplete.ensureAllEventsConsumed()
+            error.ensureAllEventsConsumed()
 
-        phoneNumberController.onValueChange("1")
-        idleLooper()
-        assertThat(isComplete.awaitItem()).isFalse()
-        error.skipItems(1)
-        assertThat(error.awaitItem()).isNotNull()
+            phoneNumberController.onValueChange("1")
+            idleLooper()
+            assertThat(isComplete.awaitItem()).isFalse()
+            error.skipItems(1)
+            assertThat(error.awaitItem()).isNotNull()
 
-        isComplete.ensureAllEventsConsumed()
-        error.ensureAllEventsConsumed()
+            isComplete.ensureAllEventsConsumed()
+            error.ensureAllEventsConsumed()
 
-        phoneNumberController.onValueChange("1234567891")
-        idleLooper()
-        assertThat(isComplete.awaitItem()).isTrue()
-        error.skipItems(1)
-        assertThat(error.awaitItem()).isNull()
+            phoneNumberController.onValueChange("1234567891")
+            idleLooper()
+            assertThat(isComplete.awaitItem()).isTrue()
+            error.skipItems(1)
+            assertThat(error.awaitItem()).isNull()
 
-        isComplete.ensureAllEventsConsumed()
-        error.ensureAllEventsConsumed()
+            isComplete.ensureAllEventsConsumed()
+            error.ensureAllEventsConsumed()
+        }
     }
 }

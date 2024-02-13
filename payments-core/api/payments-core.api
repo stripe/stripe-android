@@ -1071,6 +1071,22 @@ public final class com/stripe/android/StripeKtxKt {
 	public static final fun verifySetupIntentWithMicrodeposits (Lcom/stripe/android/Stripe;Ljava/lang/String;Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/analytics/Session$Observer$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/analytics/Session$Observer;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/analytics/Session$Observer;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/analytics/Session$Owner$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/analytics/Session$Owner;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/analytics/Session$Owner;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public abstract interface class com/stripe/android/cards/CardAccountRangeRepository$Factory {
 	public abstract fun create ()Lcom/stripe/android/cards/CardAccountRangeRepository;
 	public abstract fun createWithStripeRepository (Lcom/stripe/android/networking/StripeRepository;Ljava/lang/String;)Lcom/stripe/android/cards/CardAccountRangeRepository;
@@ -1214,6 +1230,9 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Result
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Result$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1230,6 +1249,9 @@ public final class com/stripe/android/googlepaylauncher/GooglePayLauncher$Result
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/googlepaylauncher/GooglePayLauncher$Result$Completed;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -1485,6 +1507,9 @@ public final class com/stripe/android/googlepaylauncher/GooglePayPaymentMethodLa
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/googlepaylauncher/GooglePayPaymentMethodLauncher$Result$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -6143,6 +6168,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionData$BlikAuth
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -6366,6 +6392,7 @@ public final class com/stripe/android/model/StripeIntent$NextActionData$UpiAwait
 	public fun describeContents ()I
 	public fun equals (Ljava/lang/Object;)Z
 	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -6601,6 +6628,28 @@ public final class com/stripe/android/model/wallets/Wallet$GooglePayWallet$Creat
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/wallets/Wallet$GooglePayWallet;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/model/wallets/Wallet$GooglePayWallet;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/wallets/Wallet$LinkWallet : com/stripe/android/model/wallets/Wallet {
+	public static final field $stable I
+	public static final field CREATOR Landroid/os/Parcelable$Creator;
+	public final fun component1 ()Ljava/lang/String;
+	public final fun copy (Ljava/lang/String;)Lcom/stripe/android/model/wallets/Wallet$LinkWallet;
+	public static synthetic fun copy$default (Lcom/stripe/android/model/wallets/Wallet$LinkWallet;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/wallets/Wallet$LinkWallet;
+	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public final fun getDynamicLast4 ()Ljava/lang/String;
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
+	public fun writeToParcel (Landroid/os/Parcel;I)V
+}
+
+public final class com/stripe/android/model/wallets/Wallet$LinkWallet$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/wallets/Wallet$LinkWallet;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/wallets/Wallet$LinkWallet;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
@@ -6855,6 +6904,9 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResult$Cancelled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -7046,6 +7098,9 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Can
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/payments/paymentlauncher/PaymentResult$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -7062,6 +7117,9 @@ public final class com/stripe/android/payments/paymentlauncher/PaymentResult$Com
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/payments/paymentlauncher/PaymentResult$Completed;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
@@ -7111,6 +7169,7 @@ public final class com/stripe/android/view/AddPaymentMethodActivity : com/stripe
 	public static final field $stable I
 	public fun <init> ()V
 	public fun onActionSave ()V
+	public fun onUserInteraction ()V
 }
 
 public final class com/stripe/android/view/AddPaymentMethodActivityStarter : com/stripe/android/view/ActivityStarter {
@@ -7167,6 +7226,9 @@ public final class com/stripe/android/view/AddPaymentMethodActivityStarter$Resul
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field INSTANCE Lcom/stripe/android/view/AddPaymentMethodActivityStarter$Result$Canceled;
 	public fun describeContents ()I
+	public fun equals (Ljava/lang/Object;)Z
+	public fun hashCode ()I
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 

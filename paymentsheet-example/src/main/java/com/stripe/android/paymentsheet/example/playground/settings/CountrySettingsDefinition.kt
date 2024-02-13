@@ -8,11 +8,11 @@ internal object CountrySettingsDefinition :
     PlaygroundSettingDefinition<Country>,
     PlaygroundSettingDefinition.Saveable<Country> by EnumSaveable(
         key = "country",
-        values = Country.values(),
+        values = Country.entries.toTypedArray(),
         defaultValue = Country.US,
     ),
     PlaygroundSettingDefinition.Displayable<Country> {
-    private val supportedCountries = Country.values().map { it.value }.toSet()
+    private val supportedCountries = Country.entries.map { it.value }.toSet()
 
     override val displayName: String = "Merchant"
     override val options: List<PlaygroundSettingDefinition.Displayable.Option<Country>> =

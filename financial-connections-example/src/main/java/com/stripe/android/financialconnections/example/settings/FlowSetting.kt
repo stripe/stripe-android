@@ -9,7 +9,7 @@ data class FlowSetting(
     override val key: String = "flow",
 ) : Saveable<Flow>, SingleChoiceSetting<Flow>(
     displayName = "Flow",
-    options = Flow.values().map { Option(it.name, it) },
+    options = Flow.entries.map { Option(it.name, it) },
     selectedOption = selectedOption
 ) {
     override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body

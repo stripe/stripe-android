@@ -12,6 +12,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
@@ -128,6 +129,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
     }
@@ -162,6 +164,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 ),
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
+                validationError = null,
             )
         )
     }
@@ -390,7 +393,6 @@ internal class DefaultPaymentSheetLoaderTest {
         val paymentIntent = PaymentIntentFixtures.PI_SUCCEEDED.copy(
             paymentMethod = PaymentMethodFactory.card(),
         )
-        val paymentMethod = paymentIntent.paymentMethod!!
 
         val result = createPaymentSheetLoader(
             stripeIntent = paymentIntent,
@@ -399,9 +401,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-        ).exceptionOrNull()
+        ).getOrThrow()
 
-        assertThat(result).isEqualTo(PaymentIntentInTerminalState(paymentMethod, Succeeded))
+        assertThat(result.validationError).isEqualTo(PaymentIntentInTerminalState(Succeeded))
     }
 
     @Test
@@ -415,9 +417,9 @@ internal class DefaultPaymentSheetLoaderTest {
                 clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
             ),
             paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
-        ).exceptionOrNull()
+        ).getOrThrow()
 
-        assertThat(result).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
+        assertThat(result.validationError).isEqualTo(PaymentSheetLoadingException.InvalidConfirmationMethod(Manual))
     }
 
     @Test
@@ -514,10 +516,10 @@ internal class DefaultPaymentSheetLoaderTest {
                 email = null,
                 phone = null,
                 billingCountryCode = "CA",
-                shouldPrefill = true,
             ),
             shippingValues = null,
             passthroughModeEnabled = false,
+            flags = emptyMap(),
         )
 
         assertThat(result.linkState?.configuration).isEqualTo(expectedLinkConfig)
@@ -550,6 +552,7 @@ internal class DefaultPaymentSheetLoaderTest {
             linkSettings = ElementsSession.LinkSettings(
                 linkFundingSources = emptyList(),
                 linkPassthroughModeEnabled = true,
+                linkFlags = emptyMap(),
             )
         )
 
@@ -559,6 +562,45 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState?.configuration?.passthroughModeEnabled).isTrue()
+    }
+
+    @Test
+    fun `Populates Link configuration with link flags`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = emptyList(),
+                linkPassthroughModeEnabled = false,
+                linkFlags = mapOf(
+                    "link_authenticated_change_event_enabled" to false,
+                    "link_bank_incentives_enabled" to false,
+                    "link_bank_onboarding_enabled" to false,
+                    "link_email_verification_login_enabled" to false,
+                    "link_financial_incentives_experiment_enabled" to false,
+                    "link_local_storage_login_enabled" to true,
+                    "link_only_for_payment_method_types_enabled" to false,
+                    "link_passthrough_mode_enabled" to true,
+                ),
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.flags).containsExactlyEntriesIn(
+            mapOf(
+                "link_authenticated_change_event_enabled" to false,
+                "link_bank_incentives_enabled" to false,
+                "link_bank_onboarding_enabled" to false,
+                "link_email_verification_login_enabled" to false,
+                "link_financial_incentives_experiment_enabled" to false,
+                "link_local_storage_login_enabled" to true,
+                "link_only_for_payment_method_types_enabled" to false,
+                "link_passthrough_mode_enabled" to true,
+            )
+        )
     }
 
     @Test
@@ -663,11 +705,46 @@ internal class DefaultPaymentSheetLoaderTest {
 
         loader.load(
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
-            paymentSheetConfiguration = PaymentSheet.Configuration("Some Name"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
         )
 
         verify(eventReporter).onLoadStarted()
-        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PAYMENT_METHODS.first()
+            ),
+            linkEnabled = true,
+            currency = "usd",
+        )
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds with saved LPM selection`() = runTest {
+        testSuccessfulLoadSendsEventsCorrectly(
+            paymentSelection = PaymentSelection.Saved(
+                paymentMethod = PAYMENT_METHODS.last()
+            )
+        )
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds with saved Google Pay selection`() = runTest {
+        testSuccessfulLoadSendsEventsCorrectly(
+            paymentSelection = PaymentSelection.GooglePay
+        )
+    }
+
+    @Test
+    fun `Emits correct events when loading succeeds with saved Link selection`() = runTest {
+        testSuccessfulLoadSendsEventsCorrectly(
+            paymentSelection = PaymentSelection.Link
+        )
     }
 
     @Test
@@ -687,7 +764,11 @@ internal class DefaultPaymentSheetLoaderTest {
         )
 
         verify(eventReporter).onLoadStarted()
-        verify(eventReporter).onLoadSucceeded(linkEnabled = true, currency = "usd")
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = null,
+            linkEnabled = true,
+            currency = "usd",
+        )
     }
 
     @Test
@@ -706,7 +787,7 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `Emits correct events when loading fails for deferred intent`() = runTest {
-        val error = PaymentIntentInTerminalState(usedPaymentMethod = null, status = Canceled)
+        val error = PaymentIntentInTerminalState(Canceled)
         val loader = createPaymentSheetLoader(error = error)
 
         loader.load(
@@ -782,46 +863,6 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
-    fun `Provides Link signup prefill if showing instead of save-for-future-use`() = runTest {
-        val loader = createPaymentSheetLoader(
-            linkAccountState = AccountStatus.SignedOut,
-        )
-
-        val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-            ),
-        ).getOrThrow()
-
-        assertThat(result.linkState?.configuration?.customerInfo?.shouldPrefill).isTrue()
-    }
-
-    @Test
-    fun `Provides no Link signup prefill if showing alongside save-for-future-use`() = runTest {
-        val loader = createPaymentSheetLoader(
-            linkAccountState = AccountStatus.NeedsVerification,
-        )
-
-        val result = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Some Name",
-                customer = PaymentSheet.CustomerConfiguration(
-                    id = "cus_123",
-                    ephemeralKeySecret = "some_secret",
-                ),
-            ),
-        ).getOrThrow()
-
-        assertThat(result.linkState?.configuration?.customerInfo?.shouldPrefill).isFalse()
-    }
-
-    @Test
     fun `Returns correct Link signup mode if not saving for future use`() = runTest {
         val loader = createPaymentSheetLoader(
             linkAccountState = AccountStatus.Error,
@@ -876,6 +917,30 @@ internal class DefaultPaymentSheetLoaderTest {
         ).getOrThrow()
 
         assertThat(result.linkState).isNull()
+    }
+
+    private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
+        prefsRepository.savePaymentSelection(paymentSelection)
+
+        val loader = createPaymentSheetLoader()
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Some Name",
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "cus_123",
+                    ephemeralKeySecret = "some_secret",
+                ),
+            ),
+        )
+
+        verify(eventReporter).onLoadStarted()
+        verify(eventReporter).onLoadSucceeded(
+            paymentSelection = paymentSelection,
+            linkEnabled = true,
+            currency = "usd",
+        )
     }
 
     private fun createPaymentSheetLoader(

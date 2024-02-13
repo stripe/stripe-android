@@ -85,7 +85,12 @@ internal class CustomerApiRepository @Inject constructor(
                     }
                 },
                 onSuccess = { customerPaymentMethods ->
-                    val walletTypesToRemove = setOf(Wallet.Type.ApplePay, Wallet.Type.GooglePay, Wallet.Type.SamsungPay)
+                    val walletTypesToRemove = setOf(
+                        Wallet.Type.ApplePay,
+                        Wallet.Type.GooglePay,
+                        Wallet.Type.SamsungPay,
+                        Wallet.Type.Link,
+                    )
                     paymentMethods.addAll(
                         customerPaymentMethods.filter { paymentMethod ->
                             val isCardWithWallet = paymentMethod.type == PaymentMethod.Type.Card &&

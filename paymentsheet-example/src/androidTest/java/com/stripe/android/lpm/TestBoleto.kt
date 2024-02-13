@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.AuthorizeAction
@@ -27,7 +28,7 @@ internal class TestBoleto : BasePlaygroundTest() {
         settings[CountrySettingsDefinition] = Country.BR
         settings[CurrencySettingsDefinition] = Currency.BRL
         settings[DelayedPaymentMethodsSettingsDefinition] = true
-        settings[DefaultBillingAddressSettingsDefinition] = false
+        settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
     }.copy(
         authorizationAction = AuthorizeAction.DisplayQrCode,
     )
@@ -42,6 +43,12 @@ internal class TestBoleto : BasePlaygroundTest() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
             values = boletoValues,
+            populateCustomLpmFields = {
+                populateBoletoTaxId()
+                populateName()
+                populateAddress()
+                populateEmail()
+            }
         )
     }
 
@@ -52,6 +59,12 @@ internal class TestBoleto : BasePlaygroundTest() {
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
             },
             values = boletoValues,
+            populateCustomLpmFields = {
+                populateBoletoTaxId()
+                populateName()
+                populateAddress()
+                populateEmail()
+            }
         )
     }
 
@@ -62,6 +75,12 @@ internal class TestBoleto : BasePlaygroundTest() {
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
             },
             values = boletoValues,
+            populateCustomLpmFields = {
+                populateBoletoTaxId()
+                populateName()
+                populateAddress()
+                populateEmail()
+            }
         )
     }
 
@@ -70,6 +89,12 @@ internal class TestBoleto : BasePlaygroundTest() {
         testDriver.confirmCustom(
             testParameters = testParameters,
             values = boletoValues,
+            populateCustomLpmFields = {
+                populateBoletoTaxId()
+                populateName()
+                populateAddress()
+                populateEmail()
+            }
         )
     }
 }

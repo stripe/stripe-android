@@ -4,7 +4,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.BuildConfig
 import com.stripe.android.core.version.StripeSdkVersion
 import java.util.Locale
@@ -91,7 +90,6 @@ open class AnalyticsRequestFactory(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         @Volatile
-        @VisibleForTesting
         var sessionId: UUID = UUID.randomUUID()
             private set
 
@@ -103,8 +101,8 @@ open class AnalyticsRequestFactory(
 
         const val ANALYTICS_UA = "$ANALYTICS_PREFIX.$ANALYTICS_NAME-$ANALYTICS_VERSION"
 
-        fun regenerateSessionId() {
-            sessionId = UUID.randomUUID()
+        fun setSessionId(id: UUID) {
+            sessionId = id
         }
     }
 }

@@ -15,7 +15,6 @@ import dagger.Subcomponent
 )
 internal interface CustomerSheetComponent {
     val customerSheet: CustomerSheet
-    val sessionComponent: CustomerSessionComponent
 
     @Subcomponent.Builder
     interface Builder {

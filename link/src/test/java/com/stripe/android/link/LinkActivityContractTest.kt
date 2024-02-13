@@ -42,11 +42,11 @@ class LinkActivityContractTest {
                 email = "customer@email.com",
                 phone = "1234567890",
                 billingCountryCode = "US",
-                shouldPrefill = true,
             ),
             shippingValues = null,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             passthroughModeEnabled = false,
+            flags = emptyMap(),
         )
 
         val args = LinkActivityContract.Args(

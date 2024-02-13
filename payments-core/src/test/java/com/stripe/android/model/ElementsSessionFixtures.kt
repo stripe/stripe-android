@@ -672,7 +672,6 @@ internal object ElementsSessionFixtures {
                 "elements_enable_external_payment_method_venmo": false,
                 "elements_enable_mobilepay": false,
                 "elements_enable_mx_card_installments": false,
-                "elements_enable_payment_element_vertical_layout": false,
                 "elements_enable_revolut_pay": false,
                 "elements_link_enable_email_domain_correction": false,
                 "elements_lpm_discoverability_downward_arrow": false,

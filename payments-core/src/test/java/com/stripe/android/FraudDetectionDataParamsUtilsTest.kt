@@ -83,7 +83,7 @@ class FraudDetectionDataParamsUtilsTest {
                     "card" to mapOf(
                         "number" to CardNumberFixtures.VISA_NO_SPACES,
                         "exp_month" to 1,
-                        "exp_year" to 2024,
+                        "exp_year" to 2054,
                         "cvc" to "111"
                     ),
                     "muid" to FRAUD_DETECTION_DATA.muid,

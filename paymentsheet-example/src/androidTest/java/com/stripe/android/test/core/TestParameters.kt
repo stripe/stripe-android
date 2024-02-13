@@ -1,6 +1,5 @@
 package com.stripe.android.test.core
 
-import androidx.test.platform.app.InstrumentationRegistry
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.Country
@@ -13,15 +12,12 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultShippi
 import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.utils.initializedLpmRepository
 
 /**
  * This is the data class that represents the parameters used to run the test.
  */
 internal data class TestParameters(
     val paymentMethodCode: String,
-    val formSpec: LayoutSpec,
     val saveCheckboxValue: Boolean,
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
@@ -42,7 +38,6 @@ internal data class TestParameters(
         ): TestParameters {
             return TestParameters(
                 paymentMethodCode = paymentMethodCode,
-                formSpec = lpmRepository.fromCode(paymentMethodCode)!!.formSpec,
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = false,
                 authorizationAction = AuthorizeAction.AuthorizePayment,
@@ -62,10 +57,6 @@ internal data class TestParameters(
             block(settings)
             return settings
         }
-
-        private val lpmRepository = initializedLpmRepository(
-            context = InstrumentationRegistry.getInstrumentation().targetContext,
-        )
     }
 }
 
@@ -87,13 +78,13 @@ internal sealed interface AuthorizeAction {
 
     val requiresBrowser: Boolean
 
-    object PollingSucceedsAfterDelay : AuthorizeAction {
+    data object PollingSucceedsAfterDelay : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = "POLLING SUCCEEDS AFTER DELAY"
 
         override val requiresBrowser: Boolean = false
     }
 
-    object AuthorizePayment : AuthorizeAction {
+    data object AuthorizePayment : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String {
             return if (checkoutMode == CheckoutMode.SETUP) {
                 "AUTHORIZE TEST SETUP"
@@ -105,7 +96,7 @@ internal sealed interface AuthorizeAction {
         override val requiresBrowser: Boolean = true
     }
 
-    object DisplayQrCode : AuthorizeAction {
+    data object DisplayQrCode : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = "Display QR code"
 
         override val requiresBrowser: Boolean = false
@@ -117,18 +108,18 @@ internal sealed interface AuthorizeAction {
         override val requiresBrowser: Boolean = true
     }
 
-    object Cancel : AuthorizeAction {
+    data object Cancel : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = ""
         override val requiresBrowser: Boolean = true
     }
 
     sealed interface Bacs : AuthorizeAction {
-        object Confirm : Bacs {
+        data object Confirm : Bacs {
             override fun text(checkoutMode: CheckoutMode): String = "Confirm"
             override val requiresBrowser: Boolean = false
         }
 
-        object ModifyDetails : Bacs {
+        data object ModifyDetails : Bacs {
             override fun text(checkoutMode: CheckoutMode): String = "Modify details"
             override val requiresBrowser: Boolean = false
         }

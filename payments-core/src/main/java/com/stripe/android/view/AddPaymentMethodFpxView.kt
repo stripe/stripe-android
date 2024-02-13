@@ -23,7 +23,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
     private val fpxAdapter = AddPaymentMethodListAdapter(
         ThemeConfig(activity),
-        items = FpxBank.values().toList(),
+        items = FpxBank.entries,
         itemSelectedCallback = {
             viewModel.selectedPosition = it
         }
@@ -39,7 +39,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     override val createParams: PaymentMethodCreateParams?
         get() {
             return fpxAdapter.selectedPosition.takeIf { it != RecyclerView.NO_POSITION }?.let {
-                val fpxBank = FpxBank.values()[it]
+                val fpxBank = FpxBank.entries[it]
                 PaymentMethodCreateParams.create(
                     PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
                 )
@@ -83,7 +83,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         this.fpxAdapter.bankStatuses = fpxBankStatuses
 
         // flag offline bank
-        FpxBank.values().indices
+        FpxBank.entries.indices
             .filterNot { position ->
                 fpxBankStatuses.isOnline(getItem(position))
             }
@@ -93,7 +93,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     }
 
     private fun getItem(position: Int): FpxBank {
-        return FpxBank.values()[position]
+        return FpxBank.entries[position]
     }
 
     internal companion object {

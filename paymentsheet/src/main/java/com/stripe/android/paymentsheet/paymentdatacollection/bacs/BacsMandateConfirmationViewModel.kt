@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-internal class BacsMandateConfirmationViewModel constructor(
+internal class BacsMandateConfirmationViewModel(
     args: Args
 ) : ViewModel() {
     private val _result = MutableSharedFlow<BacsMandateConfirmationResult>()

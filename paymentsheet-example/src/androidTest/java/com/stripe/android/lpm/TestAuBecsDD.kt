@@ -30,6 +30,9 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
     fun testAuBecsDD() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
+            populateCustomLpmFields = {
+                populateAuBecs()
+            }
         )
     }
 
@@ -37,6 +40,12 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
     fun testAuBecsDDInCustomFlow() {
         testDriver.confirmCustom(
             testParameters = testParameters,
+            populateCustomLpmFields = {
+                populateAuBecs()
+            },
+            verifyCustomLpmFields = {
+                verifyAuBecs()
+            },
         )
     }
 
@@ -46,6 +55,9 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+            },
+            populateCustomLpmFields = {
+                populateAuBecs()
             }
         )
     }
@@ -56,6 +68,9 @@ internal class TestAuBecsDD : BasePlaygroundTest() {
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[AutomaticPaymentMethodsSettingsDefinition] = true
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+            },
+            populateCustomLpmFields = {
+                populateAuBecs()
             }
         )
     }

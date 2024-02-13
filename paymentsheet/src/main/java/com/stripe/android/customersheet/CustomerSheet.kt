@@ -1,22 +1,26 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.customersheet.injection.CustomerSheetComponent
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.AnimationConstants
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.parcelize.Parcelize
+import java.util.Objects
 import javax.inject.Inject
 
 /**
@@ -32,6 +36,8 @@ class CustomerSheet @Inject internal constructor(
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
+    private val configuration: Configuration,
+    private val statusBarColor: () -> Int?,
 ) {
 
     private val customerSheetActivityLauncher =
@@ -57,7 +63,10 @@ class CustomerSheet @Inject internal constructor(
      * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
-        val args = CustomerSheetContract.Args
+        val args = CustomerSheetContract.Args(
+            configuration = configuration,
+            statusBarColor = statusBarColor(),
+        )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
             application.applicationContext,
@@ -75,7 +84,7 @@ class CustomerSheet @Inject internal constructor(
      * of the box and clearing manually is not required.
      */
     fun resetCustomer() {
-        CustomerSessionViewModel.clear()
+        CustomerSheetHacks.clear()
     }
 
     /**
@@ -83,7 +92,8 @@ class CustomerSheet @Inject internal constructor(
      * a persisted payment option selection.
      */
     suspend fun retrievePaymentOptionSelection(): CustomerSheetResult = coroutineScope {
-        val adapter = CustomerSessionViewModel.component.customerAdapter
+        val adapter = CustomerSheetHacks.adapter.await()
+
         val selectedPaymentOptionDeferred = async {
             adapter.retrieveSelectedPaymentOption()
         }
@@ -121,6 +131,7 @@ class CustomerSheet @Inject internal constructor(
      * Configuration for [CustomerSheet]
      */
     @ExperimentalCustomerSheetApi
+    @Parcelize
     class Configuration internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
@@ -168,7 +179,9 @@ class CustomerSheet @Inject internal constructor(
          * applicable, Stripe will select the network.
          */
         val preferredNetworks: List<CardBrand> = emptyList(),
-    ) {
+
+        internal val allowsRemovalOfLastSavedPaymentMethod: Boolean = true,
+    ) : Parcelable {
 
         // Hide no-argument constructor init
         internal constructor(merchantDisplayName: String) : this(
@@ -178,15 +191,41 @@ class CustomerSheet @Inject internal constructor(
             defaultBillingDetails = PaymentSheet.BillingDetails(),
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             merchantDisplayName = merchantDisplayName,
+            allowsRemovalOfLastSavedPaymentMethod = true,
         )
 
         fun newBuilder(): Builder {
+            @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
             return Builder(merchantDisplayName)
                 .appearance(appearance)
                 .googlePayEnabled(googlePayEnabled)
                 .headerTextForSelectionScreen(headerTextForSelectionScreen)
                 .defaultBillingDetails(defaultBillingDetails)
                 .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+                .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+        }
+
+        override fun hashCode(): Int {
+            return Objects.hash(
+                appearance,
+                googlePayEnabled,
+                headerTextForSelectionScreen,
+                defaultBillingDetails,
+                billingDetailsCollectionConfiguration,
+                merchantDisplayName,
+                preferredNetworks,
+            )
+        }
+
+        override fun equals(other: Any?): Boolean {
+            return other is Configuration &&
+                appearance == other.appearance &&
+                googlePayEnabled == other.googlePayEnabled &&
+                headerTextForSelectionScreen == other.headerTextForSelectionScreen &&
+                defaultBillingDetails == other.defaultBillingDetails &&
+                billingDetailsCollectionConfiguration == other.billingDetailsCollectionConfiguration &&
+                merchantDisplayName == other.merchantDisplayName &&
+                preferredNetworks == other.preferredNetworks
         }
 
         @ExperimentalCustomerSheetApi
@@ -199,6 +238,7 @@ class CustomerSheet @Inject internal constructor(
                 PaymentSheet.BillingDetailsCollectionConfiguration =
                     PaymentSheet.BillingDetailsCollectionConfiguration()
             private var preferredNetworks: List<CardBrand> = emptyList()
+            private var allowsRemovalOfLastSavedPaymentMethod: Boolean = true
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -228,6 +268,13 @@ class CustomerSheet @Inject internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
+            // TODO(jaynewstrom-stripe): remove before AllowsRemovalOfLastSavedPaymentMethodApi Beta.
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+            fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
+                this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -236,6 +283,7 @@ class CustomerSheet @Inject internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 merchantDisplayName = merchantDisplayName,
                 preferredNetworks = preferredNetworks,
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
             )
         }
 
@@ -267,8 +315,8 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                application = activity.application,
                 lifecycleOwner = activity,
-                viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
                 configuration = configuration,
@@ -293,8 +341,8 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                application = fragment.requireActivity().application,
                 lifecycleOwner = fragment,
-                viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
@@ -305,31 +353,32 @@ class CustomerSheet @Inject internal constructor(
         }
 
         internal fun getInstance(
+            application: Application,
             lifecycleOwner: LifecycleOwner,
-            viewModelStoreOwner: ViewModelStoreOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
-            val customerSessionViewModel =
-                ViewModelProvider(viewModelStoreOwner)[CustomerSessionViewModel::class.java]
-
-            val customerSessionComponent = customerSessionViewModel.createCustomerSessionComponent(
+            CustomerSheetHacks.initialize(
+                lifecycleOwner = lifecycleOwner,
+                adapter = customerAdapter,
                 configuration = configuration,
-                customerAdapter = customerAdapter,
-                callback = callback,
-                statusBarColor = statusBarColor,
             )
 
-            val customerSheetComponent: CustomerSheetComponent =
-                customerSessionComponent.customerSheetComponentBuilder
-                    .lifecycleOwner(lifecycleOwner)
-                    .activityResultRegistryOwner(activityResultRegistryOwner)
-                    .build()
-
-            return customerSheetComponent.customerSheet
+            return CustomerSheet(
+                application = application,
+                lifecycleOwner = lifecycleOwner,
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                paymentOptionFactory = PaymentOptionFactory(
+                    resources = application.resources,
+                    imageLoader = StripeImageLoader(application),
+                ),
+                callback = callback,
+                statusBarColor = statusBarColor,
+                configuration = configuration,
+            )
         }
 
         internal fun PaymentSelection?.toPaymentOptionSelection(

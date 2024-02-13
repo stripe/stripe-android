@@ -27,7 +27,7 @@ class CheckboxFieldUIViewScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values()
+        SystemAppearance.entries
     )
 
     @Test

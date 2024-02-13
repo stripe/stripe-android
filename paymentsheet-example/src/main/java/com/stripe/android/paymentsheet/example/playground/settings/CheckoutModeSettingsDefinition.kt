@@ -8,7 +8,7 @@ internal object CheckoutModeSettingsDefinition :
     PlaygroundSettingDefinition<CheckoutMode>,
     PlaygroundSettingDefinition.Saveable<CheckoutMode> by EnumSaveable(
         key = "checkoutMode",
-        values = CheckoutMode.values(),
+        values = CheckoutMode.entries.toTypedArray(),
         defaultValue = CheckoutMode.PAYMENT
     ),
     PlaygroundSettingDefinition.Displayable<CheckoutMode> {

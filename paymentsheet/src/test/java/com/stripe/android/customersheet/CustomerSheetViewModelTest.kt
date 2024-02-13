@@ -2,7 +2,7 @@ package com.stripe.android.customersheet
 
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
-import app.cash.turbine.testIn
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
@@ -20,7 +20,7 @@ import com.stripe.android.customersheet.utils.FakeCustomerSheetLoader
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PaymentAccount
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
@@ -580,15 +580,17 @@ class CustomerSheetViewModelTest {
             customerPaymentMethods = listOf(CARD_PAYMENT_METHOD),
             savedPaymentSelection = PaymentSelection.Saved(CARD_PAYMENT_METHOD),
         )
-        val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
-        val resultTurbine = viewModel.result.testIn(backgroundScope)
+        turbineScope {
+            val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
+            val resultTurbine = viewModel.result.testIn(backgroundScope)
 
-        assertThat(viewStateTurbine.awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
-        assertThat(resultTurbine.awaitItem()).isNull()
+            assertThat(viewStateTurbine.awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            assertThat(resultTurbine.awaitItem()).isNull()
 
-        viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
 
-        assertThat(resultTurbine.awaitItem()).isInstanceOf(InternalCustomerSheetResult.Selected::class.java)
+            assertThat(resultTurbine.awaitItem()).isInstanceOf(InternalCustomerSheetResult.Selected::class.java)
+        }
     }
 
     @Test
@@ -1158,47 +1160,49 @@ class CustomerSheetViewModelTest {
             )
         )
 
-        val resultTurbine = viewModel.result.testIn(this)
-        val viewStateTurbine = viewModel.viewState.testIn(this)
+        turbineScope {
+            val resultTurbine = viewModel.result.testIn(this)
+            val viewStateTurbine = viewModel.viewState.testIn(this)
 
-        assertThat(resultTurbine.awaitItem()).isNull()
+            assertThat(resultTurbine.awaitItem()).isNull()
 
-        assertThat(viewStateTurbine.awaitViewState<SelectPaymentMethod>().paymentSelection)
-            .isEqualTo(
-                PaymentSelection.Saved(
-                    CARD_PAYMENT_METHOD.copy(id = "pm_2"),
-                )
-            )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnItemSelected(
-                PaymentSelection.Saved(
-                    CARD_PAYMENT_METHOD.copy(id = "pm_1"),
-                )
-            )
-        )
-        assertThat(viewStateTurbine.awaitViewState<SelectPaymentMethod>().paymentSelection)
-            .isEqualTo(
-                PaymentSelection.Saved(
-                    CARD_PAYMENT_METHOD.copy(id = "pm_1"),
-                )
-            )
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnDismissed
-        )
-
-        assertThat(resultTurbine.awaitItem())
-            .isEqualTo(
-                InternalCustomerSheetResult.Canceled(
+            assertThat(viewStateTurbine.awaitViewState<SelectPaymentMethod>().paymentSelection)
+                .isEqualTo(
                     PaymentSelection.Saved(
                         CARD_PAYMENT_METHOD.copy(id = "pm_2"),
                     )
                 )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnItemSelected(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                    )
+                )
+            )
+            assertThat(viewStateTurbine.awaitViewState<SelectPaymentMethod>().paymentSelection)
+                .isEqualTo(
+                    PaymentSelection.Saved(
+                        CARD_PAYMENT_METHOD.copy(id = "pm_1"),
+                    )
+                )
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnDismissed
             )
 
-        resultTurbine.cancel()
-        viewStateTurbine.cancel()
+            assertThat(resultTurbine.awaitItem())
+                .isEqualTo(
+                    InternalCustomerSheetResult.Canceled(
+                        PaymentSelection.Saved(
+                            CARD_PAYMENT_METHOD.copy(id = "pm_2"),
+                        )
+                    )
+                )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
+        }
     }
 
     @Test
@@ -1676,7 +1680,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -1705,7 +1709,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -1745,7 +1749,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2037,46 +2041,48 @@ class CustomerSheetViewModelTest {
             ),
         )
 
-        val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
-        val resultTurbine = viewModel.result.testIn(backgroundScope)
+        turbineScope {
+            val viewStateTurbine = viewModel.viewState.testIn(backgroundScope)
+            val resultTurbine = viewModel.result.testIn(backgroundScope)
 
-        assertThat(resultTurbine.awaitItem()).isNull()
+            assertThat(resultTurbine.awaitItem()).isNull()
 
-        var viewState = viewStateTurbine.awaitViewState<AddPaymentMethod>()
-        assertThat(viewState.displayDismissConfirmationModal)
-            .isFalse()
+            var viewState = viewStateTurbine.awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.displayDismissConfirmationModal)
+                .isFalse()
 
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnCollectBankAccountResult(
-                bankAccountResult = mockUSBankAccountResult(
-                    isVerified = true
-                ),
-            )
-        )
-
-        viewState = viewStateTurbine.awaitViewState()
-        assertThat(viewState.displayDismissConfirmationModal)
-            .isFalse()
-
-        viewModel.bottomSheetConfirmStateChange()
-
-        viewState = viewStateTurbine.awaitViewState()
-        assertThat(viewState.displayDismissConfirmationModal)
-            .isTrue()
-
-        viewModel.handleViewAction(
-            CustomerSheetViewAction.OnDismissed
-        )
-
-        viewStateTurbine.expectNoEvents()
-
-        assertThat(resultTurbine.awaitItem())
-            .isEqualTo(
-                InternalCustomerSheetResult.Canceled(null)
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnCollectBankAccountResult(
+                    bankAccountResult = mockUSBankAccountResult(
+                        isVerified = true
+                    ),
+                )
             )
 
-        resultTurbine.cancel()
-        viewStateTurbine.cancel()
+            viewState = viewStateTurbine.awaitViewState()
+            assertThat(viewState.displayDismissConfirmationModal)
+                .isFalse()
+
+            viewModel.bottomSheetConfirmStateChange()
+
+            viewState = viewStateTurbine.awaitViewState()
+            assertThat(viewState.displayDismissConfirmationModal)
+                .isTrue()
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnDismissed
+            )
+
+            viewStateTurbine.expectNoEvents()
+
+            assertThat(resultTurbine.awaitItem())
+                .isEqualTo(
+                    InternalCustomerSheetResult.Canceled(null)
+                )
+
+            resultTurbine.cancel()
+            viewStateTurbine.cancel()
+        }
     }
 
     @Test
@@ -2162,7 +2168,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                 ),
             ),
         )
@@ -2170,11 +2176,11 @@ class CustomerSheetViewModelTest {
         viewModel.viewState.test {
             val viewState = awaitViewState<AddPaymentMethod>()
             assertThat(viewState.selectedPaymentMethod)
-                .isEqualTo(LpmRepository.hardCodedUsBankAccount)
+                .isEqualTo(LpmRepositoryTestHelpers.usBankAccount)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2190,7 +2196,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
                         response = mock(),
                     ),
@@ -2213,7 +2219,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = null,
                 ),
             ),
@@ -2244,7 +2250,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepository.hardCodedUsBankAccount,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
                         response = mock(),
                     ),
@@ -2259,7 +2265,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.HardcodedCard
+                    LpmRepositoryTestHelpers.card
                 )
             )
 
@@ -2269,7 +2275,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2287,7 +2293,7 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    selectedPaymentMethod = LpmRepository.HardcodedCard,
+                    selectedPaymentMethod = LpmRepositoryTestHelpers.card,
                 ),
             ),
         )
@@ -2299,7 +2305,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.hardCodedUsBankAccount
+                    LpmRepositoryTestHelpers.usBankAccount
                 )
             )
 
@@ -2320,7 +2326,7 @@ class CustomerSheetViewModelTest {
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
-                    LpmRepository.HardcodedCard
+                    LpmRepositoryTestHelpers.card
                 )
             )
 

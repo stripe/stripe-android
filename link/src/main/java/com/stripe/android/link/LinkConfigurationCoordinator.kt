@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,14 +22,20 @@ interface LinkConfigurationCoordinator {
     val emailFlow: Flow<String?>
 
     fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
+
     suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
         userInput: UserInput
     ): Result<Boolean>
+
     suspend fun attachNewCardToAccount(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails>
+
+    suspend fun logOut(
+        configuration: LinkConfiguration,
+    ): Result<ConsumerSession>
 }
 
 @Singleton
@@ -82,6 +89,14 @@ class RealLinkConfigurationCoordinator @Inject internal constructor(
         getLinkPaymentLauncherComponent(configuration)
             .linkAccountManager
             .createCardPaymentDetails(paymentMethodCreateParams)
+
+    override suspend fun logOut(
+        configuration: LinkConfiguration,
+    ): Result<ConsumerSession> {
+        return getLinkPaymentLauncherComponent(configuration)
+            .linkAccountManager
+            .logOut()
+    }
 
     /**
      * Create or get the existing [LinkComponent], responsible for injecting all

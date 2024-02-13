@@ -59,6 +59,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -68,6 +69,8 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.fillOutCardDetails()
 
@@ -107,6 +110,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -122,6 +126,8 @@ internal class PaymentSheetAnalyticsTest {
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.fillOutCardDetails()
 

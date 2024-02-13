@@ -4,6 +4,8 @@ import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -146,7 +148,7 @@ class FormArgumentsFactoryTest {
         )
 
         val actualArgs = FormArgumentsFactory.create(
-            paymentMethod = LpmRepository.HardcodedCard,
+            paymentMethod = LpmRepositoryTestHelpers.card,
             stripeIntent = paymentIntent,
             config = config,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,

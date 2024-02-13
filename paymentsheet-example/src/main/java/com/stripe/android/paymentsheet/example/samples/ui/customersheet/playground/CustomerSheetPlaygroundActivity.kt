@@ -44,6 +44,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -55,7 +56,7 @@ import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import java.util.Locale
 
-@OptIn(ExperimentalCustomerSheetApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
 class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CustomerSheetPlaygroundViewModel> {
@@ -126,13 +127,21 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                                 onClick = {
                                     paymentSheet.presentWithPaymentIntent(
                                         paymentIntentClientSecret = state.clientSecret!!,
-                                        configuration = PaymentSheet.Configuration(
-                                            merchantDisplayName = "Test Merchant Inc.",
-                                            customer = PaymentSheet.CustomerConfiguration(
+                                        configuration = PaymentSheet.Configuration.Builder(
+                                            merchantDisplayName = "Test Merchant Inc."
+                                        ).customer(
+                                            PaymentSheet.CustomerConfiguration(
                                                 id = state.currentCustomer!!,
                                                 ephemeralKeySecret = state.ephemeralKey!!
                                             )
+                                        ).allowsRemovalOfLastSavedPaymentMethod(
+                                            configurationState.allowsRemovalOfLastSavedPaymentMethod
+                                        ).defaultBillingDetails(
+                                            viewModel.defaultBillingDetails(
+                                                configurationState.attachDefaultBillingAddress
+                                            )
                                         )
+                                            .build()
                                     )
                                 }
                             ) {
@@ -436,6 +445,24 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                     onCheckedChange = {
                         viewActionHandler(
                             CustomerSheetPlaygroundViewAction.ToggleUseDefaultBillingAddress
+                        )
+                    },
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Allows removal of last SPM",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                Switch(
+                    checked = configurationState.allowsRemovalOfLastSavedPaymentMethod,
+                    onCheckedChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.ToggleAllowsRemovalOfLastSavedPaymentMethod
                         )
                     },
                 )

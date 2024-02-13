@@ -175,7 +175,7 @@ internal class PaymentMethodsAdapter constructor(
         parent: ViewGroup,
         viewType: Int
     ): RecyclerView.ViewHolder {
-        return when (ViewType.values()[viewType]) {
+        return when (ViewType.entries[viewType]) {
             ViewType.Card -> createPaymentMethodViewHolder(parent)
             ViewType.AddCard -> createAddCardPaymentMethodViewHolder(parent)
             ViewType.AddFpx -> createAddFpxPaymentMethodViewHolder(parent)

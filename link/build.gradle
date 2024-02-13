@@ -3,6 +3,7 @@ apply from: configs.androidLibrary
 apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(':payments-core')
@@ -36,6 +37,7 @@ dependencies {
     testImplementation project(':payments-core')
     testImplementation project(':payments-core-testing')
     testImplementation project(':payments-ui-core')
+    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.truth

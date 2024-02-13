@@ -5,6 +5,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.filterNotNullValues
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -27,6 +28,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
     }
 
     class LoadSucceeded(
+        paymentSelection: PaymentSelection?,
         duration: Duration?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -34,7 +36,16 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "mc_load_succeeded"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
+            FIELD_SELECTED_LPM to paymentSelection.defaultAnalyticsValue,
         )
+
+        private val PaymentSelection?.defaultAnalyticsValue: String
+            get() = when (this) {
+                is PaymentSelection.GooglePay -> "google_pay"
+                is PaymentSelection.Link -> "link"
+                is PaymentSelection.Saved -> paymentMethod.type?.code ?: "saved"
+                else -> "none"
+            }
     }
 
     class LoadFailed(
@@ -230,15 +241,49 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class ShowPaymentOptionForm(
+        code: String,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_form_shown"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to code
+        )
+    }
+
+    class PaymentOptionFormInteraction(
+        code: String,
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_form_interacted"
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to code
+        )
+    }
+
+    class CardNumberCompleted(
+        override val isDeferred: Boolean,
+        override val linkEnabled: Boolean,
+    ) : PaymentSheetEvent() {
+        override val eventName: String = "mc_card_number_completed"
+        override val additionalParams: Map<String, Any?> = mapOf()
+    }
+
     class PressConfirmButton(
         currency: String?,
+        duration: Duration?,
+        selectedLpm: String?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_confirm_button_tapped"
         override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_DURATION to duration?.asSeconds,
             FIELD_CURRENCY to currency,
-        )
+            FIELD_SELECTED_LPM to selectedLpm,
+        ).filterNotNullValues()
     }
 
     class Payment(
@@ -259,25 +304,11 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             mapOf(
                 FIELD_DURATION to duration?.asSeconds,
                 FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + selectedPaymentMethodType() + errorMessage()
+            ) + buildDeferredIntentConfirmationType() + paymentSelection.selectedPaymentMethodType() + errorMessage()
 
         private fun buildDeferredIntentConfirmationType(): Map<String, String> {
             return deferredIntentConfirmationType?.let {
                 mapOf(FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE to it.value)
-            }.orEmpty()
-        }
-
-        private fun selectedPaymentMethodType(): Map<String, String> {
-            val code = when (paymentSelection) {
-                is PaymentSelection.GooglePay -> "google_pay"
-                is PaymentSelection.Link -> "link"
-                is PaymentSelection.New -> paymentSelection.paymentMethodCreateParams.typeCode
-                is PaymentSelection.Saved -> paymentSelection.paymentMethod.type?.code
-                null -> null
-            }
-
-            return code?.let {
-                mapOf(FIELD_SELECTED_LPM to it)
             }.orEmpty()
         }
 
@@ -289,7 +320,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         }
 
         sealed interface Result {
-            object Success : Result
+            data object Success : Result
             data class Failure(val error: PaymentSheetConfirmationError) : Result
 
             val analyticsValue: String
@@ -466,3 +497,19 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
 private val Duration.asSeconds: Float
     get() = toDouble(DurationUnit.SECONDS).toFloat()
+
+internal fun PaymentSelection?.code(): String? {
+    return when (this) {
+        is PaymentSelection.GooglePay -> "google_pay"
+        is PaymentSelection.Link -> "link"
+        is PaymentSelection.New -> paymentMethodCreateParams.typeCode
+        is PaymentSelection.Saved -> paymentMethod.type?.code
+        null -> null
+    }
+}
+
+private fun PaymentSelection?.selectedPaymentMethodType(): Map<String, String> {
+    return code()?.let {
+        mapOf(PaymentSheetEvent.FIELD_SELECTED_LPM to it)
+    }.orEmpty()
+}

@@ -51,6 +51,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onLoadSucceeded(
+        paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         currency: String?,
     ) {
@@ -61,6 +62,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
         fireEvent(
             PaymentSheetEvent.LoadSucceeded(
+                paymentSelection = paymentSelection,
                 duration = duration,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
@@ -140,6 +142,37 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
+        durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
+
+        fireEvent(
+            PaymentSheetEvent.ShowPaymentOptionForm(
+                code = code,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+            )
+        )
+    }
+
+    override fun onPaymentMethodFormInteraction(code: PaymentMethodCode) {
+        fireEvent(
+            PaymentSheetEvent.PaymentOptionFormInteraction(
+                code = code,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+            )
+        )
+    }
+
+    override fun onCardNumberCompleted() {
+        fireEvent(
+            PaymentSheetEvent.CardNumberCompleted(
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+            )
+        )
+    }
+
     override fun onSelectPaymentOption(
         paymentSelection: PaymentSelection,
     ) {
@@ -154,10 +187,14 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onPressConfirmButton() {
+    override fun onPressConfirmButton(paymentSelection: PaymentSelection?,) {
+        val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
+
         fireEvent(
             PaymentSheetEvent.PressConfirmButton(
                 currency = currency,
+                duration = duration,
+                selectedLpm = paymentSelection.code(),
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
             )

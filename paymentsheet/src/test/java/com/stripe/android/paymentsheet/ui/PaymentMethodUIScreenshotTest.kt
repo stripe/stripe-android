@@ -16,9 +16,9 @@ import org.mockito.Mockito.mock
 internal class PaymentMethodUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        PaymentSheetAppearance.values(),
-        FontSize.values(),
+        SystemAppearance.entries,
+        PaymentSheetAppearance.entries,
+        FontSize.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )

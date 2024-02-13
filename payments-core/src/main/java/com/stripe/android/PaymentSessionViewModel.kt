@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
@@ -47,6 +48,8 @@ internal class PaymentSessionViewModel(
     val paymentSessionDataStateFlow: SharedFlow<PaymentSessionData> = _paymentSessionDataStateFlow.asSharedFlow()
 
     init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
         // read from saved state handle
         savedStateHandle.get<PaymentSessionData>(KEY_PAYMENT_SESSION_DATA)?.let {
             this.paymentSessionData = it
@@ -231,7 +234,7 @@ internal class PaymentSessionViewModel(
     }
 
     sealed class FetchCustomerResult {
-        object Success : FetchCustomerResult()
+        data object Success : FetchCustomerResult()
 
         data class Error(
             val errorCode: Int,

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -37,6 +38,12 @@ internal class FlowControllerViewModel(
         set(value) {
             handle[KEY_DEFERRED_INTENT_CONFIRMATION_TYPE] = value
         }
+
+    private val restartSession = SessionSavedStateHandler.attachTo(this, handle)
+
+    fun resetSession() {
+        restartSession()
+    }
 
     private companion object {
         private const val STATE_KEY = "state"

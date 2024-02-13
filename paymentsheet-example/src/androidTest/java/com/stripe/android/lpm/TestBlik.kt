@@ -30,13 +30,12 @@ internal class TestBlik : BasePlaygroundTest() {
     fun testBlik() {
         testDriver.confirmNewOrGuestComplete(
             testParameters = testParameters,
-            populateCustomLpmFields = {
-                rules.compose.onNodeWithText("BLIK code").apply {
-                    performTextInput(
-                        "123456"
-                    )
-                }
-            },
-        )
+        ) {
+            rules.compose.onNodeWithText("BLIK code").apply {
+                performTextInput(
+                    "123456"
+                )
+            }
+        }
     }
 }

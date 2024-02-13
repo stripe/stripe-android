@@ -19,7 +19,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -30,6 +29,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.elements.ParameterDestination
@@ -86,11 +86,14 @@ internal fun AddPaymentMethod(
         } else if (isUsingLinkInline) {
             sheetViewModel.updatePrimaryButtonForLinkInline()
         }
+
+        sheetViewModel.clearErrorMessages()
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
         CompositionLocalProvider(
-            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent
+            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent,
+            LocalCardNumberCompletedEventReporter provides sheetViewModel::reportCardNumberCompleted,
         ) {
             val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
                 ?.args
@@ -138,20 +141,14 @@ internal fun AddPaymentMethod(
                         paymentMethod = selectedItem,
                     )
                     sheetViewModel.updateSelection(newSelection)
+                },
+                onInteractionEvent = {
+                    sheetViewModel.reportFieldInteraction(selectedPaymentMethodCode)
                 }
             )
         }
     }
 }
-
-private val BaseSheetViewModel.initiallySelectedPaymentMethodType: PaymentMethodCode
-    get() = when (val selection = newPaymentSelection) {
-        is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
-        is PaymentSelection.New.Card,
-        is PaymentSelection.New.USBankAccount,
-        is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
-        else -> supportedPaymentMethods.first().code
-    }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethod: SupportedPaymentMethod

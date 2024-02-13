@@ -3,6 +3,7 @@ package com.stripe.android.link.serialization
 import android.content.Context
 import android.os.Build
 import android.util.Base64
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -39,6 +40,9 @@ internal data class PopupPayload(
 
     @SerialName("paymentObject")
     val paymentObject: String,
+
+    @SerialName("flags")
+    val flags: Map<String, Boolean>,
 ) {
     @SerialName("path")
     val path: String = "mobile_pay"
@@ -47,10 +51,9 @@ internal data class PopupPayload(
     val integrationType: String = "mobile"
 
     @SerialName("loggerMetadata")
-    val loggerMetadata: Map<String, String> = emptyMap()
-
-    @SerialName("flags")
-    val flags: Map<String, String> = emptyMap()
+    val loggerMetadata: Map<String, String> = mapOf(
+        MOBILE_SESSION_ID_KEY to AnalyticsRequestFactory.sessionId.toString()
+    )
 
     @SerialName("experiments")
     val experiments: Map<String, String> = emptyMap()
@@ -89,6 +92,8 @@ internal data class PopupPayload(
 
     companion object {
         private const val baseUrl: String = "https://checkout.link.com/#"
+
+        private const val MOBILE_SESSION_ID_KEY = "mobile_session_id"
 
         val PopupPayloadJson = Json { encodeDefaults = true }
 
@@ -129,6 +134,7 @@ internal data class PopupPayload(
                 locale = context.currentLocale(),
                 paymentUserAgent = paymentUserAgent,
                 paymentObject = paymentObject(),
+                flags = flags,
             )
         }
 

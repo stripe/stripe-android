@@ -60,7 +60,7 @@ class CardBrandsActivity : AppCompatActivity() {
         }
 
         override fun getItemCount(): Int {
-            return CardBrand.values().size
+            return CardBrand.entries.size
         }
 
         override fun onCreateViewHolder(
@@ -77,7 +77,7 @@ class CardBrandsActivity : AppCompatActivity() {
         }
 
         override fun onBindViewHolder(holder: CardBrandViewHolder, position: Int) {
-            val brand = CardBrand.values()[position]
+            val brand = CardBrand.entries[position]
             holder.viewBinding.brandName.text = brand.displayName
             holder.viewBinding.brandLogo.setImageDrawable(
                 ContextCompat.getDrawable(activity, brand.icon)

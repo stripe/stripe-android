@@ -269,10 +269,10 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     internal class USBankAccountJsonParser : ModelJsonParser<PaymentMethod.USBankAccount> {
         override fun parse(json: JSONObject): PaymentMethod.USBankAccount {
             return PaymentMethod.USBankAccount(
-                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.values().find {
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.entries.find {
                     StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE) == it.value
                 } ?: PaymentMethod.USBankAccount.USBankAccountHolderType.UNKNOWN,
-                accountType = PaymentMethod.USBankAccount.USBankAccountType.values().find {
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.entries.find {
                     StripeJsonUtils.optString(json, FIELD_ACCOUNT_TYPE) == it.value
                 } ?: PaymentMethod.USBankAccount.USBankAccountType.UNKNOWN,
                 bankName = StripeJsonUtils.optString(json, FIELD_BANK_NAME),

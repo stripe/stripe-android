@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 class AddressTextFieldController(
     private val config: TextFieldConfig,
     private val onNavigation: (() -> Unit)? = null,
-    initialValue: String? = null
+    override val initialValue: String? = null
 ) : TextFieldController, InputController, SectionFieldErrorController, SectionFieldComposable {
 
     init {

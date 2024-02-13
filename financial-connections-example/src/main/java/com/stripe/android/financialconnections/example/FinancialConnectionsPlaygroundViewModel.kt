@@ -299,8 +299,7 @@ enum class Merchant(val apiValue: String) {
     Other("other");
 
     companion object {
-        fun fromApiValue(apiValue: String): Merchant =
-            Merchant.values().first { it.apiValue == apiValue }
+        fun fromApiValue(apiValue: String): Merchant = entries.first { it.apiValue == apiValue }
     }
 }
 
@@ -310,8 +309,7 @@ enum class Flow(val apiValue: String) {
     PaymentIntent("PaymentIntent");
 
     companion object {
-        fun fromApiValue(apiValue: String): Flow =
-            Flow.values().first { it.apiValue == apiValue }
+        fun fromApiValue(apiValue: String): Flow = entries.first { it.apiValue == apiValue }
     }
 }
 
@@ -319,8 +317,7 @@ enum class NativeOverride(val apiValue: String) {
     None("none"), Native("native"), Web("web");
 
     companion object {
-        fun fromApiValue(apiValue: String): NativeOverride =
-            NativeOverride.values().first { it.apiValue == apiValue }
+        fun fromApiValue(apiValue: String): NativeOverride = entries.first { it.apiValue == apiValue }
     }
 }
 

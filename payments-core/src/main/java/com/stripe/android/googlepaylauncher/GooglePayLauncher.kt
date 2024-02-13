@@ -281,7 +281,7 @@ class GooglePayLauncher internal constructor(
 
     sealed class Result : Parcelable {
         @Parcelize
-        object Completed : Result()
+        data object Completed : Result()
 
         @Parcelize
         data class Failed(
@@ -289,7 +289,7 @@ class GooglePayLauncher internal constructor(
         ) : Result()
 
         @Parcelize
-        object Canceled : Result()
+        data object Canceled : Result()
     }
 
     fun interface ReadyCallback {

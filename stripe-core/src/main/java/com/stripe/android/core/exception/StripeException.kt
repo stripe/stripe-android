@@ -59,7 +59,7 @@ abstract class StripeException(
                     message = throwable.message,
                     cause = throwable
                 )
-                else -> APIException(throwable)
+                else -> GenericStripeException(throwable)
             }
         }
     }

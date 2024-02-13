@@ -17,6 +17,7 @@ data class LinkConfiguration(
     val customerInfo: CustomerInfo,
     val shippingValues: Map<IdentifierSpec, String?>?,
     val passthroughModeEnabled: Boolean,
+    val flags: Map<String, Boolean>,
 ) : Parcelable {
 
     val showOptionalLabel: Boolean
@@ -29,6 +30,5 @@ data class LinkConfiguration(
         val email: String?,
         val phone: String?,
         val billingCountryCode: String?,
-        val shouldPrefill: Boolean,
     ) : Parcelable
 }

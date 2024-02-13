@@ -17,7 +17,9 @@ import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
@@ -43,6 +45,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
 import org.mockito.kotlin.any
@@ -102,10 +105,10 @@ internal object CustomerSheetTestHelper {
         ),
         usBankAccountFormArguments = usBankAccountFormArguments,
         supportedPaymentMethods = listOf(
-            LpmRepository.HardcodedCard,
-            LpmRepository.hardCodedUsBankAccount,
+            LpmRepositoryTestHelpers.card,
+            LpmRepositoryTestHelpers.usBankAccount,
         ),
-        selectedPaymentMethod = LpmRepository.HardcodedCard,
+        selectedPaymentMethod = LpmRepositoryTestHelpers.card,
         enabled = true,
         isLiveMode = false,
         isProcessing = false,
@@ -119,7 +122,7 @@ internal object CustomerSheetTestHelper {
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
-    internal fun mockedFormViewModel(
+    private fun mockedFormViewModel(
         configuration: CustomerSheet.Configuration,
         lpmRepository: LpmRepository,
     ): Provider<FormViewModelSubcomponent.Builder> {
@@ -160,12 +163,11 @@ internal object CustomerSheetTestHelper {
         lpmRepository: LpmRepository = LpmRepository(
             LpmRepository.LpmRepositoryArguments(
                 resources = application.resources,
-                isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             )
         ).apply {
             update(
                 PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
                 ),
                 null
             )
@@ -180,8 +182,8 @@ internal object CustomerSheetTestHelper {
         isGooglePayAvailable: Boolean = true,
         customerPaymentMethods: List<PaymentMethod> = listOf(CARD_PAYMENT_METHOD),
         supportedPaymentMethods: List<SupportedPaymentMethod> = listOf(
-            LpmRepository.HardcodedCard,
-            LpmRepository.hardCodedUsBankAccount,
+            LpmRepositoryTestHelpers.card,
+            LpmRepositoryTestHelpers.usBankAccount,
         ),
         savedPaymentSelection: PaymentSelection? = null,
         stripeRepository: StripeRepository = FakeStripeRepository(),
@@ -217,10 +219,10 @@ internal object CustomerSheetTestHelper {
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
+            customerAdapterProvider = CompletableDeferred(customerAdapter),
             formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             resources = application.resources,
             stripeRepository = stripeRepository,
-            customerAdapter = customerAdapter,
             lpmRepository = lpmRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
@@ -237,7 +239,7 @@ internal object CustomerSheetTestHelper {
                     return mock()
                 }
             },
-            statusBarColor = { null },
+            statusBarColor = null,
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,

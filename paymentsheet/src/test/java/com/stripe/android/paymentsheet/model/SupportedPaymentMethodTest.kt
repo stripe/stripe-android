@@ -6,7 +6,9 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.google.common.truth.Truth.assertWithMessage
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET
@@ -25,12 +27,12 @@ import java.io.File
 
 @RunWith(AndroidJUnit4::class)
 class SupportedPaymentMethodTest {
-    private val card = LpmRepository.HardcodedCard
+    private val card = LpmRepositoryTestHelpers.card
 
     @Test
     fun `If the intent has SFU set on top level or on LPM`() {
         assertThat(
-            LpmRepository.HardcodedCard
+            card
                 .getSpecWithFullfilledRequirements(
                     PI_REQUIRES_PAYMENT_METHOD_CARD_SFU_SET,
                     CONFIG_CUSTOMER
@@ -52,7 +54,7 @@ class SupportedPaymentMethodTest {
         ).apply {
             this.update(
                 PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
                 ),
                 null
             )
@@ -68,7 +70,8 @@ class SupportedPaymentMethodTest {
             )
 
             generatePaymentIntentScenarios().mapIndexed { index, testInput ->
-                val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
+                val formDescriptor =
+                    lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())
                 val testOutput = TestOutput.create(
                     supportCustomerSavedCard = getSupportedSavedCustomerPMs(
                         testInput.getIntent(lpm),
@@ -110,7 +113,7 @@ class SupportedPaymentMethodTest {
         ).apply {
             this.update(
                 PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
                 ),
                 null
             )
@@ -135,7 +138,7 @@ class SupportedPaymentMethodTest {
         ).apply {
             this.update(
                 PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
                 ),
                 null
             )
@@ -160,7 +163,7 @@ class SupportedPaymentMethodTest {
         ).apply {
             this.update(
                 PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
                 ),
                 null
             )
@@ -185,7 +188,7 @@ class SupportedPaymentMethodTest {
         ).apply {
             this.update(
                 PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.values().map { it.code },
+                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
                 ),
                 null
             )
@@ -202,19 +205,20 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method filters us bank account when FC SDK not available`() {
+        val lpmInitialFormData = LpmRepository.LpmInitialFormData().apply {
+            putAll(
+                mapOf(
+                    PaymentMethod.Type.Card.code to card,
+                    PaymentMethod.Type.USBankAccount.code to LpmRepositoryTestHelpers.usBankAccount
+                )
+            )
+        }
         val lpmRepository = LpmRepository(
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
             ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            initializeWithPaymentMethods(
-                mapOf(
-                    PaymentMethod.Type.Card.code to card,
-                    PaymentMethod.Type.USBankAccount.code to LpmRepository.hardCodedUsBankAccount
-                )
-            )
-        }
+            lpmInitialFormData = lpmInitialFormData,
+        )
 
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodTypes = listOf("card", "us_bank_account")
@@ -234,25 +238,26 @@ class SupportedPaymentMethodTest {
 
     @Test
     fun `Test supported payment method contains us bank account when FC SDK available`() {
+        val lpmInitialFormData = LpmRepository.LpmInitialFormData().apply {
+            putAll(
+                mapOf(
+                    PaymentMethod.Type.Card.code to card,
+                    PaymentMethod.Type.USBankAccount.code to LpmRepositoryTestHelpers.usBankAccount
+                )
+            )
+        }
         val lpmRepository = LpmRepository(
             arguments = LpmRepository.LpmRepositoryArguments(
                 resources = ApplicationProvider.getApplicationContext<Application>().resources,
             ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            initializeWithPaymentMethods(
-                mapOf(
-                    PaymentMethod.Type.Card.code to LpmRepository.HardcodedCard,
-                    PaymentMethod.Type.USBankAccount.code to LpmRepository.hardCodedUsBankAccount
-                )
-            )
-        }
+            lpmInitialFormData = lpmInitialFormData,
+        )
 
         val paymentIntent = PaymentIntentFactory.create(
             paymentMethodTypes = listOf("card", "us_bank_account")
         )
 
-        val expected = listOf(card, LpmRepository.hardCodedUsBankAccount)
+        val expected = listOf(card, LpmRepositoryTestHelpers.usBankAccount)
 
         assertThat(
             getPMsToAdd(
@@ -327,10 +332,13 @@ class SupportedPaymentMethodTest {
         val allowsDelayedPayment: Boolean = true
     ) {
         companion object {
-            fun toCsvHeader() = "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
+            fun toCsvHeader() =
+                "hasCustomer, allowsDelayedPayment, intentSetupFutureUsage, intentHasShipping, intentLpms"
         }
 
-        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${intentPMs.joinToString("/")}"
+        fun toCsv() = "$hasCustomer, $allowsDelayedPayment, $intentSetupFutureUsage, $intentHasShipping, ${
+        intentPMs.joinToString("/")
+        }"
 
         fun getIntent(lpm: SupportedPaymentMethod) = when (intentHasShipping) {
             false ->
@@ -339,6 +347,7 @@ class SupportedPaymentMethodTest {
                     setupFutureUsage = intentSetupFutureUsage,
                     paymentMethodTypes = intentPMs.plus(lpm.code).toList()
                 )
+
             true ->
                 PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                     setupFutureUsage = intentSetupFutureUsage,

@@ -63,6 +63,8 @@ fun PhoneNumberCollectionSection(
     isSelected: Boolean = false,
     @StringRes sectionTitle: Int? = null,
     requestFocusWhenShown: Boolean = false,
+    moveToNextFieldOnceComplete: Boolean = false,
+    focusRequester: FocusRequester = remember { FocusRequester() },
     imeAction: ImeAction = ImeAction.Done
 ) {
     val error by phoneNumberController.error.collectAsState(null)
@@ -87,6 +89,8 @@ fun PhoneNumberCollectionSection(
             enabled = enabled,
             controller = phoneNumberController,
             requestFocusWhenShown = requestFocusWhenShown,
+            moveToNextFieldOnceComplete = moveToNextFieldOnceComplete,
+            focusRequester = focusRequester,
             imeAction = imeAction
         )
     }
@@ -102,21 +106,31 @@ fun PhoneNumberElementUI(
     modifier: Modifier = Modifier,
     countryDropdown: @Composable () -> Unit = { CountryDropdown(controller, enabled) },
     requestFocusWhenShown: Boolean = false,
-    imeAction: ImeAction = ImeAction.Done
+    moveToNextFieldOnceComplete: Boolean = false,
+    focusRequester: FocusRequester = remember { FocusRequester() },
+    trailingIcon: @Composable (() -> Unit)? = null,
+    imeAction: ImeAction = ImeAction.Done,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
-    val selectedIndex by controller.countryDropdownController.selectedIndex.collectAsState(0)
-    controller.onSelectedCountryIndex(selectedIndex)
+
     val value by controller.fieldValue.collectAsState("")
+    val isComplete by controller.isComplete.collectAsState(false)
     val shouldShowError by controller.error.collectAsState(null)
     val label by controller.label.collectAsState(CoreR.string.stripe_address_label_phone_number)
     val placeholder by controller.placeholder.collectAsState("")
     val visualTransformation by controller.visualTransformation.collectAsState(VisualTransformation.None)
     val colors = TextFieldColors(shouldShowError != null)
-    val focusRequester = remember { FocusRequester() }
     var hasFocus by rememberSaveable { mutableStateOf(false) }
+
+    if (moveToNextFieldOnceComplete) {
+        LaunchedEffect(isComplete) {
+            if (isComplete && hasFocus) {
+                focusManager.moveFocus(FocusDirection.Next)
+            }
+        }
+    }
 
     TextField(
         value = value,
@@ -154,6 +168,7 @@ fun PhoneNumberElementUI(
             Text(text = placeholder)
         },
         leadingIcon = countryDropdown,
+        trailingIcon = trailingIcon,
         visualTransformation = visualTransformation,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Phone,

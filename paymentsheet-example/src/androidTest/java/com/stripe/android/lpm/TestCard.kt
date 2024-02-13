@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
@@ -29,7 +30,10 @@ internal class TestCard : BasePlaygroundTest() {
             ).copy(
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
-            )
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
     }
 
@@ -39,7 +43,7 @@ internal class TestCard : BasePlaygroundTest() {
             TestParameters.create(
                 paymentMethodCode = "card",
             ) { settings ->
-                settings[DefaultBillingAddressSettingsDefinition] = true
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
                 settings[CollectNameSettingsDefinition] =
                     PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
                 settings[CollectEmailSettingsDefinition] =
@@ -52,6 +56,38 @@ internal class TestCard : BasePlaygroundTest() {
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
             ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+                populateEmail()
+                populateName("Name on card")
+                populateAddress()
+                populatePhoneNumber()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithCustomBillingDetailsCollectionWithDefaults() {
+        testDriver.confirmNewOrGuestComplete(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
+                settings[CollectNameSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectEmailSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectPhoneSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectAddressSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            }.copy(
+                authorizationAction = null,
+                saveForFutureUseCheckboxVisible = true,
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
     }
 
@@ -63,7 +99,13 @@ internal class TestCard : BasePlaygroundTest() {
             ).copy(
                 authorizationAction = null,
                 saveForFutureUseCheckboxVisible = true,
-            )
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+            verifyCustomLpmFields = {
+                verifyCard()
+            }
         )
     }
 
@@ -88,6 +130,9 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = cardNumber,
             ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
@@ -127,6 +172,9 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = firstCardNumber,
             ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
 
         testDriver.confirmExistingComplete(
@@ -135,6 +183,9 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
             ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
@@ -173,6 +224,9 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = cardNumber,
             ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
@@ -211,6 +265,9 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = cardNumber,
             ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
 
         val customerId = state?.customerConfig?.id
@@ -221,6 +278,9 @@ internal class TestCard : BasePlaygroundTest() {
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
             ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(

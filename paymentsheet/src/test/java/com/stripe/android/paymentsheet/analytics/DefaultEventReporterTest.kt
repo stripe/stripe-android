@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -55,6 +56,24 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_complete_init_customer_googlepay" &&
                     req.params["locale"] == "en_US"
+            }
+        )
+    }
+
+    @Test
+    fun `on completed loading operation, should fire analytics request with expected event value`() {
+        val eventReporter = createEventReporter(EventReporter.Mode.Complete)
+
+        eventReporter.simulateSuccessfulSetup(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_load_succeeded" &&
+                    req.params["selected_lpm"] == "card"
             }
         )
     }
@@ -219,6 +238,57 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPaymentMethodFormShown() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPaymentMethodFormShown(
+            code = "card",
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_form_shown" &&
+                    req.params["selected_lpm"] == "card"
+            }
+        )
+    }
+
+    @Test
+    fun `onPaymentMethodFormInteraction() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPaymentMethodFormInteraction(
+            code = "card",
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_form_interacted" &&
+                    req.params["selected_lpm"] == "card"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardNumberCompleted() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onCardNumberCompleted()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_card_number_completed"
+            }
+        )
+    }
+
+    @Test
     fun `onShowEditablePaymentOption() should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()
@@ -327,6 +397,32 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onPressConfirmButton() should fire analytics request with expected event value`() {
+        val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPressConfirmButton(
+            PaymentSelection.New.GenericPaymentMethod(
+                labelResource = "Cash App Pay",
+                iconResource = 0,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            )
+        )
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_confirm_button_tapped" &&
+                    req.params["selected_lpm"] == "cashapp" &&
+                    req.params["currency"] == "usd"
+            }
+        )
+    }
+
+    @Test
     fun `constructor does not read from PaymentConfiguration`() {
         PaymentConfiguration.clearInstance()
         // Would crash if it tries to read from the uninitialized PaymentConfiguration
@@ -415,11 +511,16 @@ class DefaultEventReporterTest {
     }
 
     private fun EventReporter.simulateSuccessfulSetup(
+        paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
         currency: String? = "usd",
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted()
-        onLoadSucceeded(linkEnabled, currency)
+        onLoadSucceeded(
+            paymentSelection = paymentSelection,
+            linkEnabled = linkEnabled,
+            currency = currency
+        )
     }
 }

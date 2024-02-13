@@ -50,7 +50,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
     }
 }
 
-internal class DefaultEditPaymentMethodViewInteractor constructor(
+internal class DefaultEditPaymentMethodViewInteractor(
     initialPaymentMethod: PaymentMethod,
     displayName: String,
     private val eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,

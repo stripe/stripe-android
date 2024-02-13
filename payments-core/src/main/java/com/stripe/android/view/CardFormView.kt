@@ -197,7 +197,7 @@ class CardFormView @JvmOverloads constructor(
         ) {
             backgroundColorStateList =
                 getColorStateList(R.styleable.StripeCardFormView_backgroundColorStateList)
-            style = Style.values()[getInt(R.styleable.StripeCardFormView_cardFormStyle, 0)]
+            style = Style.entries[getInt(R.styleable.StripeCardFormView_cardFormStyle, 0)]
         }
 
         backgroundColorStateList?.let {
@@ -505,7 +505,7 @@ class CardFormView @JvmOverloads constructor(
     ) {
         errorsMap[field] = errorMessage
 
-        val error = Fields.values()
+        val error = Fields.entries
             .map { errorsMap[it] }
             .firstOrNull { !it.isNullOrBlank() }
 

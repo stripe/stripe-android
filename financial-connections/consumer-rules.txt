@@ -20,8 +20,6 @@
    *;
 }
 
--dontwarn com.google.crypto.tink.subtle.XChaCha20Poly1305
-
 # The MavericksState object and the names classes that implement the MavericksState interface need to be
 # kept as they are accessed via reflection.
 -keepnames class com.airbnb.mvrx.MavericksState

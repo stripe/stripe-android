@@ -61,9 +61,9 @@ internal interface CardScanResultListener : ScanResultListener {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class CardScanState(isFinal: Boolean) : ScanState(isFinal) {
-    object NotFound : CardScanState(isFinal = false)
-    object Found : CardScanState(isFinal = false)
-    object Correct : CardScanState(isFinal = true)
+    data object NotFound : CardScanState(isFinal = false)
+    data object Found : CardScanState(isFinal = false)
+    data object Correct : CardScanState(isFinal = true)
 }
 
 internal class CardScanActivity : ScanActivity(), SimpleScanStateful<CardScanState> {

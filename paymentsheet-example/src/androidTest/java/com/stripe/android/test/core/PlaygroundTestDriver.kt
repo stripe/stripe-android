@@ -87,8 +87,8 @@ internal class PlaygroundTestDriver(
     fun testLinkCustom(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
-        populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
+        verifyCustomLpmFields: FieldPopulator.() -> Unit = {},
     ) {
         setup(testParameters)
         launchCustom()
@@ -170,8 +170,8 @@ internal class PlaygroundTestDriver(
     fun confirmCustom(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
-        populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
+        verifyCustomLpmFields: FieldPopulator.() -> Unit = {},
     ): PlaygroundState? {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
@@ -218,8 +218,7 @@ internal class PlaygroundTestDriver(
     fun confirmCustomAndBuy(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
-        populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
         customerId: String? = null
     ): PlaygroundState? {
         setup(
@@ -244,7 +243,7 @@ internal class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
-            verifyCustomLpmFields,
+            verifyCustomLpmFields = {},
             values,
         )
         fieldPopulator.populateFields()
@@ -317,7 +316,7 @@ internal class PlaygroundTestDriver(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
         afterAuthorization: (Selectors) -> Unit = {},
-        populateCustomLpmFields: () -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
     ): PlaygroundState? {
         setup(testParameters)
         launchComplete()
@@ -328,6 +327,7 @@ internal class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
+            verifyCustomLpmFields = {},
             values = values,
         ).populateFields()
 
@@ -357,7 +357,7 @@ internal class PlaygroundTestDriver(
         values: FieldPopulator.Values = FieldPopulator.Values(),
         beforeBuyAction: (Selectors) -> Unit = {},
         afterBuyAction: (Selectors) -> Unit = {},
-        populateCustomLpmFields: () -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
     ): PlaygroundState? {
         if (customerId == null) {
             fail("No customer id")
@@ -380,6 +380,7 @@ internal class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
+            verifyCustomLpmFields = {},
             values = values,
         ).populateFields()
 
@@ -446,7 +447,7 @@ internal class PlaygroundTestDriver(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
         afterAuthorization: (Selectors) -> Unit = {},
-        populateCustomLpmFields: () -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
     ): PlaygroundState? {
         setup(testParameters)
         launchComplete()
@@ -457,6 +458,7 @@ internal class PlaygroundTestDriver(
             selectors,
             testParameters,
             populateCustomLpmFields,
+            verifyCustomLpmFields = {},
             values = values,
         ).populateFields()
 
@@ -484,8 +486,8 @@ internal class PlaygroundTestDriver(
         testParameters: TestParameters,
         values: FieldPopulator.Values = FieldPopulator.Values(),
         afterAuthorization: (Selectors) -> Unit = {},
-        populateCustomLpmFields: () -> Unit = {},
-        verifyCustomLpmFields: () -> Unit = {},
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
+        verifyCustomLpmFields: FieldPopulator.() -> Unit = {},
     ) {
         setup(
             testParameters.copyPlaygroundSettings { settings ->

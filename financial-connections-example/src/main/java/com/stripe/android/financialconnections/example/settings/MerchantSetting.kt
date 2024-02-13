@@ -9,7 +9,7 @@ data class MerchantSetting(
     override val key: String = "merchant"
 ) : Saveable<Merchant>, SingleChoiceSetting<Merchant>(
     displayName = "Merchant",
-    options = Merchant.values().map { Option(it.name, it) },
+    options = Merchant.entries.map { Option(it.name, it) },
     selectedOption = selectedOption
 ) {
     override fun lasRequest(body: LinkAccountSessionBody): LinkAccountSessionBody = body.copy(

@@ -21,6 +21,7 @@ internal sealed interface PaymentSheetState : Parcelable {
         val linkState: LinkState?,
         val isEligibleForCardBrandChoice: Boolean,
         val paymentSelection: PaymentSelection?,
+        val validationError: PaymentSheetLoadingException?,
     ) : PaymentSheetState {
 
         val showSavedPaymentMethods: Boolean

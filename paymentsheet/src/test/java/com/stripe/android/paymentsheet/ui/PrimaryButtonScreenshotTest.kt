@@ -19,9 +19,9 @@ import org.junit.Test
 class PrimaryButtonScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        PaymentSheetAppearance.values(),
-        FontSize.values(),
+        SystemAppearance.entries,
+        PaymentSheetAppearance.entries,
+        FontSize.entries,
         boxModifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),
@@ -29,9 +29,9 @@ class PrimaryButtonScreenshotTest {
 
     @get:Rule
     val customThemePaparazziRule = PaparazziRule(
-        arrayOf(SystemAppearance.LightTheme),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
-        arrayOf(FontSize.DefaultFont),
+        listOf(SystemAppearance.LightTheme),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
+        listOf(FontSize.DefaultFont),
         boxModifier = Modifier
             .padding(horizontal = 16.dp)
             .padding(vertical = 16.dp)

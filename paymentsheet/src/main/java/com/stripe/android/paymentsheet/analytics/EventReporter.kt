@@ -27,6 +27,7 @@ internal interface EventReporter {
      * rendered.
      */
     fun onLoadSucceeded(
+        paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
         currency: String?,
     )
@@ -65,6 +66,25 @@ internal interface EventReporter {
     )
 
     /**
+     * The form shown in PaymentSheet after a user or system initiated change.
+     */
+    fun onPaymentMethodFormShown(
+        code: PaymentMethodCode,
+    )
+
+    /**
+     * The customer has interacted with the form of an available payment method.
+     */
+    fun onPaymentMethodFormInteraction(
+        code: PaymentMethodCode,
+    )
+
+    /**
+     * The customer has filled in the card number field in the card payment method form.
+     */
+    fun onCardNumberCompleted()
+
+    /**
      * The customer has selected one of their existing payment methods.
      */
     fun onSelectPaymentOption(
@@ -74,7 +94,9 @@ internal interface EventReporter {
     /**
      * The customer has pressed the confirm button.
      */
-    fun onPressConfirmButton()
+    fun onPressConfirmButton(
+        paymentSelection: PaymentSelection?,
+    )
 
     /**
      * Payment or setup have succeeded.

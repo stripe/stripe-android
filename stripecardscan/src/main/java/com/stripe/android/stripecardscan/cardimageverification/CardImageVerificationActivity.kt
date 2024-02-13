@@ -78,10 +78,10 @@ internal data class CardVerificationFlowParameters(
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(isFinal) {
-    object NotFound : CardVerificationScanState(isFinal = false)
-    object Found : CardVerificationScanState(isFinal = false)
-    object Correct : CardVerificationScanState(isFinal = true)
-    object Wrong : CardVerificationScanState(isFinal = false)
+    data object NotFound : CardVerificationScanState(isFinal = false)
+    data object Found : CardVerificationScanState(isFinal = false)
+    data object Correct : CardVerificationScanState(isFinal = true)
+    data object Wrong : CardVerificationScanState(isFinal = false)
 }
 
 @Keep

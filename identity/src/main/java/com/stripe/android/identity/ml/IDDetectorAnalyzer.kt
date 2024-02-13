@@ -157,7 +157,7 @@ internal class IDDetectorAnalyzer(
             INDEX_INVALID
         )
         val INPUT_TENSOR_TYPE: DataType = DataType.FLOAT32
-        val OUTPUT_CATEGORY_TENSOR_SIZE = Category.values().size - 1 // no NO_ID
+        val OUTPUT_CATEGORY_TENSOR_SIZE = Category.entries.size - 1 // no NO_ID
         val INDEX_CATEGORY_MAP = mapOf(
             INDEX_PASSPORT to Category.PASSPORT,
             INDEX_ID_FRONT to Category.ID_FRONT,

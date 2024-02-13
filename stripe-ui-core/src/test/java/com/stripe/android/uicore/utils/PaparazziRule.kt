@@ -7,10 +7,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
@@ -22,7 +20,7 @@ import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
 class PaparazziRule(
-    vararg configOptions: Array<out PaparazziConfigOption>,
+    vararg configOptions: List<PaparazziConfigOption>,
     private val boxModifier: Modifier = Modifier.defaultBoxModifier(),
 ) : TestRule {
 
@@ -68,15 +66,13 @@ class PaparazziRule(
                 }
 
                 paparazzi.snapshot {
-                    CompositionLocalProvider(LocalInspectionMode provides true) {
-                        StripeTheme {
-                            Surface(color = MaterialTheme.colors.surface) {
-                                Box(
-                                    contentAlignment = Alignment.Center,
-                                    modifier = boxModifier,
-                                ) {
-                                    content()
-                                }
+                    StripeTheme {
+                        Surface(color = MaterialTheme.colors.surface) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = boxModifier,
+                            ) {
+                                content()
                             }
                         }
                     }
@@ -109,12 +105,12 @@ private fun Modifier.defaultBoxModifier(): Modifier {
         .fillMaxWidth()
 }
 
-private fun Array<out Array<out PaparazziConfigOption>>.toTestCases(): List<TestCase> {
+private fun Array<out List<PaparazziConfigOption>>.toTestCases(): List<TestCase> {
     return createPermutations(this).map { TestCase(it) }
 }
 
 private fun createPermutations(
-    options: Array<out Array<out PaparazziConfigOption>>,
+    options: Array<out List<PaparazziConfigOption>>,
 ): List<List<PaparazziConfigOption>> {
     return (options.toSet()).fold(listOf(listOf())) { acc, set ->
         acc.flatMap { list -> set.map { element -> list + element } }
