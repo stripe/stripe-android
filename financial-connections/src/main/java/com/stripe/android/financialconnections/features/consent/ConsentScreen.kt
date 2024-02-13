@@ -177,6 +177,7 @@ private fun ConsentMainContent(
             lazyListState = scrollState,
             body = {
                 item {
+                    Spacer(modifier = Modifier.size(8.dp))
                     ConsentLogoHeader(
                         modifier = Modifier.fillMaxWidth(),
                         logos = payload.merchantLogos,
