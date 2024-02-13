@@ -599,6 +599,13 @@ internal class DefaultFlowController @Inject internal constructor(
                     }?.let { method ->
                         PaymentSelection.Saved(method)
                     }
+                    is PaymentSelection.Saved -> {
+                        when (currentSelection.walletType) {
+                            PaymentSelection.Saved.WalletType.GooglePay -> PaymentSelection.GooglePay
+                            PaymentSelection.Saved.WalletType.Link -> PaymentSelection.Link
+                            else -> currentSelection
+                        }
+                    }
                     else -> currentSelection
                 }?.let {
                     prefsRepositoryFactory(viewModel.state?.config?.customer).savePaymentSelection(it)

@@ -4,9 +4,11 @@
 
 ## 20.37.3 - 2024-02-12
 
+### PaymentSheet
+* [FIXED][7917](https://github.com/stripe/stripe-android/pull/7917) Fixed an issue where `Google Pay` & `Link` were not saved as default payment methods in `FlowController`.
+
 ### Identity
 * [FIXED][7903](https://github.com/stripe/stripe-android/pull/7903) Fixed an issue where camera fails to start on some devices.
-
 
 ## 20.37.2 - 2024-02-05
 
