@@ -22,6 +22,8 @@ internal fun BankAuthRepairScreen() {
         onContinueClick = { /*TODO*/ },
         onCancelClick = { /*TODO*/ },
         onClickableTextClick = { /*TODO*/ },
-        onWebAuthFlowFinished = { /*TODO*/ }
-    ) { /*TODO*/ }
+        onWebAuthFlowFinished = { /*TODO*/ },
+        onViewEffectLaunched = { /*TODO*/ },
+        inModal = false
+    )
 }

@@ -18,14 +18,12 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -63,7 +61,6 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
@@ -71,7 +68,6 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.uicore.image.StripeImage
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun SharedPartnerAuth(
@@ -80,7 +76,8 @@ internal fun SharedPartnerAuth(
     onCancelClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onWebAuthFlowFinished: (WebAuthFlowState) -> Unit,
-    onViewEffectLaunched: () -> Unit
+    onViewEffectLaunched: () -> Unit,
+    inModal: Boolean
 ) {
     val viewModel = parentViewModel()
 
@@ -108,7 +105,7 @@ internal fun SharedPartnerAuth(
     }
 
     SharedPartnerAuthContent(
-        bottomSheetState = bottomSheetState,
+        inModal = inModal,
         state = state,
         onClickableTextClick = onClickableTextClick,
         onContinueClick = onContinueClick,
@@ -119,45 +116,31 @@ internal fun SharedPartnerAuth(
 
 @Composable
 private fun SharedPartnerAuthContent(
-    bottomSheetState: ModalBottomSheetState,
     state: SharedPartnerAuthState,
+    inModal: Boolean,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
-    FinancialConnectionsModalBottomSheetLayout(
-        sheetState = bottomSheetState,
-        sheetContent = {
-            state.dataAccess?.let {
-                DataAccessBottomSheetContent(
-                    dataDialog = it,
-                    onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-                    onClickableTextClick = onClickableTextClick
-                )
-            } ?: Spacer(modifier = Modifier.size(16.dp))
-        },
-        content = {
-            SharedPartnerAuthBody(
-                state = state,
-                onCloseClick = onCloseClick,
-                onCancelClick = onCancelClick,
-                onContinueClick = onContinueClick,
-                onClickableTextClick = onClickableTextClick,
-            )
-        }
+    SharedPartnerAuthBody(
+        inModal = inModal,
+        state = state,
+        onCloseClick = onCloseClick,
+        onClickableTextClick = onClickableTextClick,
+        onCancelClick = onCancelClick,
+        onContinueClick = onContinueClick,
     )
 }
 
 @Composable
 @Suppress("MagicNumber")
-private fun SharedPartnerLoading() {
+private fun SharedPartnerLoading(inModal: Boolean) {
     LoadingShimmerEffect { shimmerBrush ->
         Column(
             Modifier.padding(horizontal = 24.dp)
         ) {
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.size(24.dp))
             Box(
                 modifier = Modifier
                     .size(56.dp)
@@ -188,7 +171,11 @@ private fun SharedPartnerLoading() {
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
 
             )
-            Spacer(modifier = Modifier.weight(1f))
+            if (inModal) {
+                Spacer(modifier = Modifier.height(16.dp))
+            } else {
+                Spacer(modifier = Modifier.weight(1f))
+            }
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -196,7 +183,15 @@ private fun SharedPartnerLoading() {
                     .background(shimmerBrush, RoundedCornerShape(8.dp))
 
             )
-            Spacer(modifier = Modifier.size(16.dp))
+            Spacer(modifier = Modifier.height(16.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp)
+                    .background(shimmerBrush, RoundedCornerShape(8.dp))
+
+            )
+            Spacer(modifier = Modifier.size(24.dp))
         }
     }
 }
@@ -204,33 +199,64 @@ private fun SharedPartnerLoading() {
 @Composable
 private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
+    inModal: Boolean,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                showBack = state.canNavigateBack,
-                onCloseClick = onCloseClick
-            )
-        }
+    SharedPartnerAuthContentWrapper(
+        inModal = inModal,
+        canNavigateBack = state.canNavigateBack,
+        onCloseClick = onCloseClick
     ) {
         state.payload()?.let {
             LoadedContent(
+                showInModal = inModal,
                 authenticationStatus = state.authenticationStatus,
                 payload = it,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 onClickableTextClick = onClickableTextClick,
             )
-        } ?: SharedPartnerLoading()
+        } ?: SharedPartnerLoading(inModal)
+    }
+}
+
+/**
+ * Wrapper for the content of the partner auth screen, that based on the [inModal] parameter
+ * will render the content in a modal or in a full screen.
+ */
+@Composable
+private fun SharedPartnerAuthContentWrapper(
+    inModal: Boolean,
+    canNavigateBack: Boolean,
+    onCloseClick: () -> Unit,
+    content: @Composable () -> Unit
+) {
+    if (inModal) {
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            content()
+        }
+    } else {
+        FinancialConnectionsScaffold(
+            topBar = {
+                FinancialConnectionsTopAppBar(
+                    showBack = canNavigateBack,
+                    onCloseClick = onCloseClick
+                )
+            }
+        ) {
+            content()
+        }
     }
 }
 
 @Composable
 private fun LoadedContent(
+    showInModal: Boolean,
     authenticationStatus: Async<String>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
@@ -246,31 +272,33 @@ private fun LoadedContent(
                 // show loading prepane when authenticationStatus
                 // is Loading or Success (completing auth after redirect)
                 loading = authenticationStatus is Loading || authenticationStatus is Success,
+                showInModal = showInModal,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
                 content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
                 onClickableTextClick = onClickableTextClick,
             )
 
-            false -> SharedPartnerLoading()
+            false -> SharedPartnerLoading(showInModal)
         }
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 @Suppress("LongMethod")
 private fun PrePaneContent(
+    showInModal: Boolean,
     content: OauthPrepane,
     loading: Boolean,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    onClickableTextClick: (String) -> Unit
+    onClickableTextClick: (String) -> Unit,
 ) {
     Layout(
+        inModal = showInModal,
         // Overrides padding values to allow full-span prepane image background
         verticalArrangement = Arrangement.spacedBy(24.dp),
-        bodyPadding = PaddingValues(horizontal = 0.dp, vertical = 16.dp),
+        bodyPadding = PaddingValues(top = 24.dp),
         body = {
             item {
                 PrepaneHeader(
@@ -493,7 +521,7 @@ private fun GifWebView(
 }
 
 @Preview(
-    group = "Shared Partner Auth"
+    group = "SharedPartnerAuth"
 )
 @Composable
 internal fun PartnerAuthPreview(
@@ -502,14 +530,35 @@ internal fun PartnerAuthPreview(
 ) {
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
-            bottomSheetState = rememberModalBottomSheetState(
-                ModalBottomSheetValue.Hidden,
-            ),
             state = state,
+            inModal = false,
             onClickableTextClick = {},
             onContinueClick = {},
             onCloseClick = {},
-        ) {}
+            onCancelClick = {}
+        )
+    }
+}
+
+@Preview(
+    group = "SharedPartnerAuth - Drawer"
+)
+@Composable
+internal fun PartnerAuthDrawerPreview(
+    @PreviewParameter(PartnerAuthPreviewParameterProvider::class)
+    state: SharedPartnerAuthState
+) {
+    FinancialConnectionsPreview {
+        Box(modifier = Modifier.background(Color.White)) {
+            SharedPartnerAuthContent(
+                state = state,
+                inModal = true,
+                onClickableTextClick = {},
+                onContinueClick = {},
+                onCloseClick = {},
+                onCancelClick = {}
+            )
+        }
     }
 }
 

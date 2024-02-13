@@ -7,6 +7,7 @@ private val paneToDestination = mapOf(
     Pane.INSTITUTION_PICKER to Destination.InstitutionPicker,
     Pane.CONSENT to Destination.Consent,
     Pane.PARTNER_AUTH to Destination.PartnerAuth,
+    Pane.PARTNER_AUTH_DRAWER to Destination.PartnerAuthDrawer,
     Pane.ACCOUNT_PICKER to Destination.AccountPicker,
     Pane.SUCCESS to Destination.Success,
     Pane.MANUAL_ENTRY to Destination.ManualEntry,
@@ -19,6 +20,7 @@ private val paneToDestination = mapOf(
     Pane.LINK_STEP_UP_VERIFICATION to Destination.LinkStepUpVerification,
     Pane.RESET to Destination.Reset,
     Pane.UNEXPECTED_ERROR to Destination.Error,
+    Pane.EXIT to Destination.Exit,
     Pane.BANK_AUTH_REPAIR to Destination.BankAuthRepair,
     Pane.MANUAL_ENTRY_SUCCESS to Destination.ManualEntrySuccess,
 )

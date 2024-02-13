@@ -31,7 +31,7 @@ internal data class SharedPartnerAuthState(
     data class Payload(
         val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
-        val authSession: FinancialConnectionsAuthorizationSession
+        val authSession: FinancialConnectionsAuthorizationSession,
     )
 
     val canNavigateBack: Boolean

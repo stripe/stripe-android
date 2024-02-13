@@ -309,49 +309,6 @@ internal fun ErrorContent(
     )
 }
 
-@Preview(group = "Errors", name = "unclassified error")
-@Composable
-internal fun UnclassifiedErrorContentPreview() {
-    FinancialConnectionsPreview {
-        FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar { } }
-        ) {
-            UnclassifiedErrorContent(APIException()) {}
-        }
-    }
-}
-
-@Preview(group = "Errors", name = "institution down planned error")
-@Composable
-internal fun InstitutionPlannedDowntimeErrorContentPreview() {
-    FinancialConnectionsPreview {
-        FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar { } }
-        ) {
-            InstitutionPlannedDowntimeErrorContent(
-                exception = InstitutionPlannedDowntimeError(
-                    institution = FinancialConnectionsInstitution(
-                        id = "3",
-                        name = "Random Institution",
-                        url = "Random Institution url",
-                        featured = false,
-                        featuredOrder = null,
-                        icon = null,
-                        logo = null,
-                        mobileHandoffCapable = false
-                    ),
-                    showManualEntry = true,
-                    isToday = true,
-                    backUpAt = 10000L,
-                    stripeException = APIException()
-                ),
-                onEnterDetailsManually = {},
-                onSelectAnotherBank = {}
-            )
-        }
-    }
-}
-
 @Preview(group = "Errors", name = "no accounts available error")
 @Composable
 internal fun NoAccountsAvailableErrorContentPreview() {
