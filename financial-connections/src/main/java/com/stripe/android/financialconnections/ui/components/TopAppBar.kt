@@ -13,10 +13,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.NavHostController
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
@@ -30,9 +37,12 @@ internal fun FinancialConnectionsTopAppBar(
     showBack: Boolean = true,
     onCloseClick: () -> Unit
 ) {
-    val localBackPressed = LocalOnBackPressedDispatcherOwner.current
-        ?.onBackPressedDispatcher
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+    val localBackPressed = onBackPressedDispatcher?.onBackPressedDispatcher
+
     val navController = LocalNavHostController.current
+    val canGoBack by navController.collectCanGoBackAsState()
+
     TopAppBar(
         title = if (hideStripeLogo) {
             { /* Empty content */ }
@@ -45,7 +55,7 @@ internal fun FinancialConnectionsTopAppBar(
             }
         },
         elevation = elevation,
-        navigationIcon = if (navController.previousBackStackEntry != null && showBack) {
+        navigationIcon = if (canGoBack && showBack) {
             {
                 IconButton(onClick = { localBackPressed?.onBackPressed() }) {
                     Icon(
@@ -92,6 +102,21 @@ internal val LazyListState.elevation: Dp
         // If not the first element, always set elevation and show the shadow
         AppBarDefaults.TopAppBarElevation
     }
+
+@Composable
+private fun NavHostController.collectCanGoBackAsState(): State<Boolean> {
+    val canGoBack = remember { mutableStateOf(false) }
+    DisposableEffect(Unit) {
+        val listener = NavController.OnDestinationChangedListener { controller, _, _ ->
+            canGoBack.value = controller.previousBackStackEntry != null
+        }
+        addOnDestinationChangedListener(listener)
+        onDispose {
+            removeOnDestinationChangedListener(listener)
+        }
+    }
+    return canGoBack
+}
 
 @Preview(group = "Components", name = "TopAppBar")
 @Composable
