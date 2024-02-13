@@ -43,11 +43,19 @@ class SavedPaymentMethodIconTest {
         assertThat(
             CARD_PAYMENT_METHOD.copy(
                 card = CARD_PAYMENT_METHOD.card?.copy(
-                    displayBrand = PaymentMethod.Card.DisplayBrand(
-                        type = CardBrand.CartesBancaires
-                    )
+                    displayBrand = "cartes_bancaires"
                 )
             ).getSavedPaymentMethodIcon()
         ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires)
+    }
+    @Test
+    fun `on display brand available for card payment method, a null value defaults back to visa`() {
+        assertThat(
+            CARD_PAYMENT_METHOD.copy(
+                card = CARD_PAYMENT_METHOD.card?.copy(
+                    displayBrand = null
+                )
+            ).getSavedPaymentMethodIcon()
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
     }
 }
