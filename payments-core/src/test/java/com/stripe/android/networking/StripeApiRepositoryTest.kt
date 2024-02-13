@@ -2303,6 +2303,7 @@ internal class StripeApiRepositoryTest {
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = listOf("card", "link"),
+                    paymentMethodConfiguration = "pmc_234",
                     onBehalfOf = null,
                 )
             ),
@@ -2329,6 +2330,7 @@ internal class StripeApiRepositoryTest {
             assertEquals("automatic", this["deferred_intent[capture_method]"])
             assertEquals("card", this["deferred_intent[payment_method_types][0]"])
             assertEquals("link", this["deferred_intent[payment_method_types][1]"])
+            assertEquals("pmc_234", this["deferred_intent[payment_method_configuration][id]"])
         }
     }
 

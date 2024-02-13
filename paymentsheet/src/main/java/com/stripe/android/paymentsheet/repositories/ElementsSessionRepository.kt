@@ -100,6 +100,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
                     mode = intentConfiguration.mode.toElementsSessionParam(),
                     paymentMethodTypes = intentConfiguration.paymentMethodTypes,
                     onBehalfOf = intentConfiguration.onBehalfOf,
+                    paymentMethodConfiguration = intentConfiguration.paymentMethodConfiguration,
                 ),
             )
         }

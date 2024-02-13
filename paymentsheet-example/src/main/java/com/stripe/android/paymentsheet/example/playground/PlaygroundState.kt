@@ -10,6 +10,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CurrencySetti
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodConfigurationSettingsDefinition
 
 @Stable
 internal data class PlaygroundState(
@@ -24,6 +25,7 @@ internal data class PlaygroundState(
     val countryCode = snapshot[CountrySettingsDefinition]
     val checkoutMode = snapshot[CheckoutModeSettingsDefinition]
     val integrationType = snapshot[IntegrationTypeSettingsDefinition]
+    val paymentMethodConfiguration = snapshot[PaymentMethodConfigurationSettingsDefinition]
 
     fun paymentSheetConfiguration(): PaymentSheet.Configuration {
         return snapshot.paymentSheetConfiguration(this)

@@ -24,6 +24,8 @@ class CheckoutRequest private constructor(
     val merchantCountryCode: String?,
     @SerialName("supported_payment_methods")
     val supportedPaymentMethods: List<String>?,
+    @SerialName("payment_method_configuration")
+    val paymentMethodConfiguration: String?,
 ) {
     class Builder {
         private var initialization: String? = null
@@ -35,6 +37,7 @@ class CheckoutRequest private constructor(
         private var useLink: Boolean? = null
         private var merchantCountryCode: String? = null
         private var supportedPaymentMethods: List<String>? = null
+        private var paymentMethodConfiguration: String? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -72,6 +75,10 @@ class CheckoutRequest private constructor(
             this.supportedPaymentMethods = supportedPaymentMethods
         }
 
+        fun paymentMethodConfiguration(paymentMethodConfiguration: String?) = apply {
+            this.paymentMethodConfiguration = paymentMethodConfiguration
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -83,6 +90,7 @@ class CheckoutRequest private constructor(
                 useLink = useLink,
                 merchantCountryCode = merchantCountryCode,
                 supportedPaymentMethods = supportedPaymentMethods,
+                paymentMethodConfiguration = paymentMethodConfiguration,
             )
         }
     }

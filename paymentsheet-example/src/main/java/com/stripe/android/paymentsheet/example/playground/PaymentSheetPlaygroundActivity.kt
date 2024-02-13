@@ -317,6 +317,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
+                    paymentMethodConfiguration = playgroundState.paymentMethodConfiguration
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
@@ -346,6 +347,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
+                    paymentMethodConfiguration = playgroundState.paymentMethodConfiguration
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
