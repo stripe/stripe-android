@@ -47,6 +47,7 @@ class SavedPaymentMethodIconTest {
             ).getSavedPaymentMethodIcon()
         ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires)
     }
+
     @Test
     fun `on display brand available for card payment method, a null value defaults back to visa`() {
         assertThat(

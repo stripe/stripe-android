@@ -2,7 +2,6 @@ package com.stripe.android.model.parsers
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlin.test.Test
