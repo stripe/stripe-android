@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListState
@@ -33,18 +32,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
@@ -77,85 +70,21 @@ private fun NetworkingLinkLoginWarmupContent(
             .background(color = v3Colors.backgroundSurface)
             .padding(top = 24.dp)
     ) {
-        when (val payload = state.payload) {
-            Uninitialized,
-            is Fail,
-            is Loading -> LoadingShimmerContent()
-            is Success -> NetworkingLinkLoginWarmupLoaded(
-                lazyListState = lazyListState,
-                payload = payload(),
-                disableNetworkingAsync = state.disableNetworkingAsync,
-                onSkipClicked = onSkipClicked,
-                onContinueClick = onContinueClick
-            )
-        }
-    }
-}
-
-@Composable
-@Suppress("MagicNumber")
-private fun LoadingShimmerContent() {
-    LoadingShimmerEffect { shimmerBrush ->
-        Column(
-            Modifier.padding(horizontal = 24.dp)
-        ) {
-            Spacer(modifier = Modifier.size(24.dp))
-            Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .background(shimmerBrush, RoundedCornerShape(8.dp))
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(32.dp)
-                    .background(shimmerBrush, RoundedCornerShape(8.dp))
-
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(16.dp)
-                    .background(shimmerBrush, RoundedCornerShape(8.dp))
-            )
-            Spacer(modifier = Modifier.size(8.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(.50f)
-                    .height(16.dp)
-                    .background(shimmerBrush, RoundedCornerShape(8.dp))
-
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(shimmerBrush, RoundedCornerShape(8.dp))
-
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .background(shimmerBrush, RoundedCornerShape(8.dp))
-
-            )
-            Spacer(modifier = Modifier.size(24.dp))
-        }
+        NetworkingLinkLoginWarmupLoaded(
+            lazyListState = lazyListState,
+            payload = state.payload(),
+            loading = state.disableNetworkingAsync is Loading || state.payload() == null,
+            onSkipClicked = onSkipClicked,
+            onContinueClick = onContinueClick
+        )
     }
 }
 
 @Composable
 private fun NetworkingLinkLoginWarmupLoaded(
     lazyListState: LazyListState,
-    payload: Payload,
-    disableNetworkingAsync: Async<FinancialConnectionsSessionManifest>,
+    payload: Payload?,
+    loading: Boolean,
     onSkipClicked: () -> Unit,
     onContinueClick: () -> Unit,
 ) {
@@ -165,13 +94,14 @@ private fun NetworkingLinkLoginWarmupLoaded(
         lazyListState = lazyListState,
         body = {
             item { HeaderSection() }
-            item { ExistingEmailSection(email = payload.email) }
+            item { ExistingEmailSection(email = payload?.email ?: "") }
         },
         footer = {
             Footer(
-                disableNetworkingAsync = disableNetworkingAsync,
+                loading = loading,
                 onContinueClick = onContinueClick,
-                onSkipClicked = onSkipClicked
+                onSkipClicked = onSkipClicked,
+
             )
         }
     )
@@ -200,14 +130,14 @@ private fun HeaderSection() {
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Footer(
-    disableNetworkingAsync: Async<FinancialConnectionsSessionManifest>,
+    loading: Boolean,
     onContinueClick: () -> Unit,
     onSkipClicked: () -> Unit
 ) {
     Column {
         FinancialConnectionsButton(
             loading = false,
-            enabled = disableNetworkingAsync !is Loading,
+            enabled = loading.not(),
             type = Type.Primary,
             onClick = onContinueClick,
             modifier = Modifier
@@ -220,7 +150,7 @@ private fun Footer(
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
             loading = false,
-            enabled = disableNetworkingAsync !is Loading,
+            enabled = loading.not(),
             type = Type.Secondary,
             onClick = { onSkipClicked() },
             modifier = Modifier
