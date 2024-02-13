@@ -18,6 +18,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -29,6 +30,8 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.LocalReducedBranding
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.utils.rememberKeyboardController
+import kotlinx.coroutines.launch
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(
@@ -42,6 +45,9 @@ internal fun FinancialConnectionsTopAppBar(
 
     val navController = LocalNavHostController.current
     val canGoBack by navController.collectCanGoBackAsState()
+
+    val keyboardController = rememberKeyboardController()
+    val scope = rememberCoroutineScope()
 
     TopAppBar(
         title = if (hideStripeLogo) {
@@ -57,7 +63,14 @@ internal fun FinancialConnectionsTopAppBar(
         elevation = elevation,
         navigationIcon = if (canGoBack && showBack) {
             {
-                IconButton(onClick = { localBackPressed?.onBackPressed() }) {
+                IconButton(
+                    onClick = {
+                        scope.launch {
+                            keyboardController.dismiss()
+                            localBackPressed?.onBackPressed()
+                        }
+                    },
+                ) {
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back icon",
@@ -69,7 +82,14 @@ internal fun FinancialConnectionsTopAppBar(
             null
         },
         actions = {
-            IconButton(onClick = onCloseClick) {
+            IconButton(
+                onClick = {
+                    scope.launch {
+                        keyboardController.dismiss()
+                        onCloseClick()
+                    }
+                }
+            ) {
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "Close icon",
