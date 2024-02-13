@@ -8,6 +8,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.get
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.ui.LocalNavHostController
@@ -38,23 +40,12 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
     val navController = LocalNavHostController.current
 
     LaunchedEffect(Unit) {
-        var wasVisible = bottomSheetNavigator.navigatorSheetState.isVisible
-
-        snapshotFlow { bottomSheetNavigator.navigatorSheetState.isVisible }.collect { isVisible ->
-            if (wasVisible && !isVisible) {
-                // The bottom sheet might be dismissed by the user swiping it down.
-                // In this case, we have to manually tell the NavHostController to actually
-                // pop the backstack. Otherwise, an empty overlay stays around and consumes
-                // the next back press.
-                val currentRoute = navController.currentDestination?.route.orEmpty().split("/").firstOrNull()
-                val isBottomSheet = currentRoute in setOf(Pane.EXIT.value, Pane.PARTNER_AUTH_DRAWER.value)
-
-                if (isBottomSheet) {
-                    navController.popBackStack()
-                }
-            }
-            wasVisible = isVisible
-        }
+        navController.registerForBottomSheetDismissalFix(
+            isBottomSheetRoute = { route ->
+                val root = route.split("/").firstOrNull()
+                root in setOf(Pane.EXIT.value, Pane.PARTNER_AUTH_DRAWER.value)
+            },
+        )
     }
 
     com.stripe.android.financialconnections.navigation.bottomsheet.ModalBottomSheetLayout(
@@ -64,4 +55,33 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
         scrimColor = Neutral900.copy(alpha = 0.32f),
         content = content,
     )
+}
+
+private suspend fun NavHostController.registerForBottomSheetDismissalFix(
+    isBottomSheetRoute: (String) -> Boolean,
+) {
+    val bottomSheetNavigator = navigatorProvider[BottomSheetNavigator::class]
+    bottomSheetNavigator.onDismiss {
+        // The bottom sheet might be dismissed by the user swiping it down.
+        // In this case, we have to manually tell the NavHostController to actually
+        // pop the backstack. Otherwise, an empty overlay stays around and consumes
+        // the next back press.
+        val currentRoute = currentDestination?.route.orEmpty()
+        val isBottomSheet = isBottomSheetRoute(currentRoute)
+        if (isBottomSheet) {
+            popBackStack()
+        }
+    }
+}
+
+private suspend fun BottomSheetNavigator.onDismiss(
+    block: () -> Unit,
+) {
+    var wasVisible = navigatorSheetState.isVisible
+    snapshotFlow { navigatorSheetState.isVisible }.collect { isVisible ->
+        if (wasVisible && !isVisible) {
+            block()
+        }
+        wasVisible = isVisible
+    }
 }
