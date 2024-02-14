@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -18,10 +19,14 @@ import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
@@ -76,6 +81,29 @@ class DefaultEventReporterTest {
                     req.params["selected_lpm"] == "card"
             }
         )
+    }
+
+    @Test
+    fun `on completed loading operation, should reset checkout timer`() {
+        val durationProvider = mock<DurationProvider> {
+            on { end(any()) } doReturn Duration.ZERO
+        }
+
+        val eventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+            durationProvider = durationProvider,
+        )
+
+        eventReporter.simulateSuccessfulSetup(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        val inOrder = inOrder(durationProvider)
+
+        inOrder.verify(durationProvider, times(1)).end(DurationProvider.Key.Checkout)
+        inOrder.verify(durationProvider, times(1)).start(DurationProvider.Key.Checkout)
     }
 
     @Test
@@ -253,6 +281,29 @@ class DefaultEventReporterTest {
                     req.params["selected_lpm"] == "card"
             }
         )
+    }
+
+    @Test
+    fun `onPaymentMethodFormShown() should restart duration on call`() {
+        val durationProvider = mock<DurationProvider> {
+            on { end(any()) } doReturn Duration.ZERO
+        }
+
+        val customEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Custom,
+            durationProvider = durationProvider
+        ) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPaymentMethodFormShown(
+            code = "card",
+        )
+
+        val inOrder = inOrder(durationProvider)
+
+        inOrder.verify(durationProvider, times(1)).end(DurationProvider.Key.ConfirmButtonClicked)
+        inOrder.verify(durationProvider, times(1)).start(DurationProvider.Key.ConfirmButtonClicked)
     }
 
     @Test
@@ -496,6 +547,26 @@ class DefaultEventReporterTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
+            workContext = testDispatcher,
+        )
+
+        reporter.configure()
+
+        reset(analyticsRequestExecutor)
+
+        return reporter
+    }
+
+    private fun createEventReporter(
+        mode: EventReporter.Mode,
+        durationProvider: DurationProvider,
+        configure: EventReporter.() -> Unit = {},
+    ): EventReporter {
+        val reporter = DefaultEventReporter(
+            mode = mode,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            durationProvider = durationProvider,
             workContext = testDispatcher,
         )
 

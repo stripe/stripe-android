@@ -4,8 +4,6 @@ import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.autofill.AutofillType
@@ -36,13 +34,11 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.shareIn
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
@@ -332,17 +328,11 @@ internal class DefaultCardNumberController(
         nextFocusDirection: FocusDirection,
         previousFocusDirection: FocusDirection
     ) {
-        val scope = rememberCoroutineScope()
-
-        val sharedFieldStateFlow = remember(scope) {
-            fieldState.shareIn(scope, started = SharingStarted.WhileSubscribed())
-        }
-
         val reporter = LocalCardNumberCompletedEventReporter.current
 
-        LaunchedEffect(sharedFieldStateFlow) {
+        LaunchedEffect(Unit) {
             // Drop the set empty value & initial value
-            sharedFieldStateFlow.drop(2).collectLatest { state ->
+            fieldState.drop(1).collectLatest { state ->
                 when (state) {
                     is TextFieldStateConstants.Valid.Full -> reporter.onCardNumberCompleted()
                     else -> Unit

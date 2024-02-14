@@ -58,6 +58,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         this.currency = currency
         this.linkEnabled = linkEnabled
 
+        durationProvider.end(DurationProvider.Key.Checkout)
+        durationProvider.start(DurationProvider.Key.Checkout)
+
         val duration = durationProvider.end(DurationProvider.Key.Loading)
 
         fireEvent(
@@ -104,8 +107,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowExistingPaymentOptions() {
-        durationProvider.start(DurationProvider.Key.Checkout)
-
         fireEvent(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
@@ -117,8 +118,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onShowNewPaymentOptionForm() {
-        durationProvider.start(DurationProvider.Key.Checkout)
-
         fireEvent(
             PaymentSheetEvent.ShowNewPaymentOptionForm(
                 mode = mode,
@@ -143,6 +142,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
+        durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 
         fireEvent(

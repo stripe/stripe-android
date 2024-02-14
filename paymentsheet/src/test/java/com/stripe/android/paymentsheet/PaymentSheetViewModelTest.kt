@@ -93,7 +93,6 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.runner.RunWith
-import org.mockito.Mockito.atMostOnce
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -2274,7 +2273,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.reportFieldInteraction("card")
         viewModel.reportFieldInteraction("card")
 
-        verify(eventReporter, atMostOnce()).onPaymentMethodFormInteraction("card")
+        verify(eventReporter, times(1)).onPaymentMethodFormInteraction("card")
     }
 
     @Test
