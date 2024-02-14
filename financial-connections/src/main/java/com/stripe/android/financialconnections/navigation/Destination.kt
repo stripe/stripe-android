@@ -220,6 +220,36 @@ internal sealed class Destination(
     }
 }
 
+internal val Pane.rendersInBottomSheet: Boolean
+    get() = when (this) {
+        Pane.EXIT,
+        Pane.PARTNER_AUTH_DRAWER -> {
+            true
+        }
+        Pane.ACCOUNT_PICKER,
+        Pane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+        Pane.AUTH_OPTIONS,
+        Pane.CONSENT,
+        Pane.BANK_AUTH_REPAIR,
+        Pane.INSTITUTION_PICKER,
+        Pane.LINK_CONSENT,
+        Pane.LINK_LOGIN,
+        Pane.MANUAL_ENTRY,
+        Pane.MANUAL_ENTRY_SUCCESS,
+        Pane.NETWORKING_LINK_LOGIN_WARMUP,
+        Pane.NETWORKING_LINK_SIGNUP_PANE,
+        Pane.NETWORKING_LINK_VERIFICATION,
+        Pane.LINK_STEP_UP_VERIFICATION,
+        Pane.PARTNER_AUTH,
+        Pane.SUCCESS,
+        Pane.UNEXPECTED_ERROR,
+        Pane.LINK_ACCOUNT_PICKER,
+        Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION,
+        Pane.RESET -> {
+            false
+        }
+    }
+
 internal fun String.appendParamValues(vararg params: Pair<String, Any?>): String {
     val builder = StringBuilder(this)
 

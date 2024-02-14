@@ -8,10 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.get
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
+import com.stripe.android.financialconnections.navigation.pane
+import com.stripe.android.financialconnections.navigation.rendersInBottomSheet
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.Neutral900
@@ -41,10 +43,7 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
 
     LaunchedEffect(Unit) {
         navController.registerForBottomSheetDismissalFix(
-            isBottomSheetRoute = { route ->
-                val root = route.split("/").firstOrNull()
-                root in setOf(Pane.EXIT.value, Pane.PARTNER_AUTH_DRAWER.value)
-            },
+            rendersInBottomSheet = { it.pane.rendersInBottomSheet },
         )
     }
 
@@ -58,7 +57,7 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
 }
 
 private suspend fun NavHostController.registerForBottomSheetDismissalFix(
-    isBottomSheetRoute: (String) -> Boolean,
+    rendersInBottomSheet: (NavDestination) -> Boolean,
 ) {
     val bottomSheetNavigator = navigatorProvider[BottomSheetNavigator::class]
     bottomSheetNavigator.onDismiss {
@@ -66,8 +65,8 @@ private suspend fun NavHostController.registerForBottomSheetDismissalFix(
         // In this case, we have to manually tell the NavHostController to actually
         // pop the backstack. Otherwise, an empty overlay stays around and consumes
         // the next back press.
-        val currentRoute = currentDestination?.route.orEmpty()
-        val isBottomSheet = isBottomSheetRoute(currentRoute)
+        val destination = currentDestination ?: return@onDismiss
+        val isBottomSheet = rendersInBottomSheet(destination)
         if (isBottomSheet) {
             popBackStack()
         }
