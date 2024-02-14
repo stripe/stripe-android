@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.injection.IS_LIVE_MODE
+import com.stripe.android.core.utils.FeatureFlags.customerSheetACHv2
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -17,7 +18,6 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
