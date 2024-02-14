@@ -40,6 +40,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import kotlin.coroutines.CoroutineContext
@@ -340,7 +341,8 @@ internal class DefaultCardNumberController(
         val reporter = LocalCardNumberCompletedEventReporter.current
 
         LaunchedEffect(sharedFieldStateFlow) {
-            sharedFieldStateFlow.collectLatest { state ->
+            // Drop the set empty value & initial value
+            sharedFieldStateFlow.drop(2).collectLatest { state ->
                 when (state) {
                     is TextFieldStateConstants.Valid.Full -> reporter.onCardNumberCompleted()
                     else -> Unit

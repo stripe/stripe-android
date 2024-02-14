@@ -61,6 +61,11 @@ internal class AddPaymentMethodViewModel(
         }
     }
 
+    // Dummy function to "initialize" view model when context is created
+    internal fun init() {
+        // No-op
+    }
+
     internal suspend fun createPaymentMethod(
         params: PaymentMethodCreateParams
     ): Result<PaymentMethod> = suspendCoroutine { continuation ->

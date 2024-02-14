@@ -16,7 +16,6 @@ import com.stripe.android.analytics.PaymentSessionEventReporter
 import com.stripe.android.analytics.PaymentSessionEventReporterFactory
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -94,10 +93,10 @@ internal class PaymentMethodsViewModel(
                     it.getPaymentMethods(
                         paymentMethodType = PaymentMethod.Type.Card,
                         productUsage = productUsage,
-                        listener = object : CustomerSession.PaymentMethodsRetrievalListener {
+                        listener = object : CustomerSession.PaymentMethodsRetrievalWithExceptionListener() {
                             override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
                                 if (isInitialFetch) {
-                                    eventReporter.onLoadSucceeded()
+                                    eventReporter.onLoadSucceeded(selectedPaymentMethodId)
                                     eventReporter.onOptionsShown()
                                 }
 
@@ -108,20 +107,14 @@ internal class PaymentMethodsViewModel(
                             override fun onError(
                                 errorCode: Int,
                                 errorMessage: String,
-                                stripeError: StripeError?
+                                stripeError: StripeError?,
+                                throwable: Throwable
                             ) {
-                                // TODO(samer-stripe): Parse out this error from StripeError
-                                val exception = APIException(
-                                    stripeError = stripeError,
-                                    statusCode = errorCode,
-                                    message = errorMessage
-                                )
-
                                 if (isInitialFetch) {
-                                    eventReporter.onLoadFailed(exception)
+                                    eventReporter.onLoadFailed(throwable)
                                 }
 
-                                paymentMethodsData.value = Result.failure(exception)
+                                paymentMethodsData.value = Result.failure(throwable)
                                 progressData.value = false
                             }
                         }

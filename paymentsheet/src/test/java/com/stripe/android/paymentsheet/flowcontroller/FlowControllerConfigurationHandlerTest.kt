@@ -1,8 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
@@ -22,7 +21,6 @@ import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentSheetLoader
-import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -59,7 +57,6 @@ class FlowControllerConfigurationHandlerTest {
     private val eventReporter = mock<EventReporter>()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
     private lateinit var viewModel: FlowControllerViewModel
 
     @Before
@@ -67,11 +64,11 @@ class FlowControllerConfigurationHandlerTest {
         Dispatchers.setMain(testDispatcher)
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        val activityScenario = activityScenarioFactory.createAddPaymentMethodActivity()
-        activityScenario.moveToState(Lifecycle.State.CREATED)
-        activityScenario.onActivity { activity ->
-            viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
-        }
+
+        viewModel = FlowControllerViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            handle = SavedStateHandle()
+        )
     }
 
     @After

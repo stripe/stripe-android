@@ -123,10 +123,16 @@ internal class CustomerSessionOperationExecutor(
                 )
 
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.PaymentMethodsRetrievalListener? = getListener(operation.id)
+                    val listener = getListener<CustomerSession.RetrievalListener>(operation.id)
+
                     result.fold(
                         onSuccess = { paymentMethods ->
-                            listener?.onPaymentMethodsRetrieved(paymentMethods)
+                            when (listener) {
+                                is CustomerSession.PaymentMethodsRetrievalListener ->
+                                    listener.onPaymentMethodsRetrieved(paymentMethods)
+                                is CustomerSession.PaymentMethodsRetrievalWithExceptionListener ->
+                                    listener.onPaymentMethodsRetrieved(paymentMethods)
+                            }
                         },
                         onFailure = {
                             onError(listener, it)
@@ -185,21 +191,31 @@ internal class CustomerSessionOperationExecutor(
         listener: CustomerSession.RetrievalListener?,
         error: Throwable
     ) {
-        when (error) {
-            is StripeException -> {
-                listener?.onError(
-                    error.statusCode,
-                    error.message.orEmpty(),
-                    error.stripeError
-                )
-            }
-            else -> {
-                listener?.onError(
-                    0,
-                    error.message.orEmpty(),
-                    null
-                )
-            }
+        val (statusCode, message, stripeError) = when (error) {
+            is StripeException -> Triple(
+                error.statusCode,
+                error.message.orEmpty(),
+                error.stripeError
+            )
+            else -> Triple(
+                0,
+                error.message.orEmpty(),
+                null
+            )
+        }
+
+        when (listener) {
+            is CustomerSession.RetrievalListenerWithException -> listener.onError(
+                statusCode,
+                message,
+                stripeError,
+                error,
+            )
+            is CustomerSession.RetrievalListener -> listener.onError(
+                statusCode,
+                message,
+                stripeError,
+            )
         }
     }
 

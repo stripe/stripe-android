@@ -99,7 +99,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.atMost
 import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
@@ -107,6 +106,7 @@ import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
@@ -2231,7 +2231,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.reportPaymentMethodTypeSelected("us_bank_account")
         viewModel.reportPaymentMethodTypeSelected("us_bank_account")
 
-        verify(eventReporter, atMostOnce()).onPaymentMethodFormShown("us_bank_account")
+        verify(eventReporter, times(1)).onPaymentMethodFormShown("us_bank_account")
     }
 
     @Test
@@ -2246,7 +2246,7 @@ internal class PaymentSheetViewModelTest {
         viewModel.handleBackPressed()
         viewModel.transitionToAddPaymentScreen()
 
-        verify(eventReporter, atMost(2)).onPaymentMethodFormShown("card")
+        verify(eventReporter, times(2)).onPaymentMethodFormShown("card")
     }
 
     @Test

@@ -282,6 +282,7 @@ internal abstract class BaseSheetViewModel(
                     is PaymentSheetScreen.EditPaymentMethod,
                     is PaymentSheetScreen.Loading,
                     is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                        previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
                 }

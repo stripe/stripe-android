@@ -36,6 +36,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.atMostOnce
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
 import com.stripe.payments.model.R as PaymentModelR
@@ -438,6 +439,48 @@ internal class CardNumberControllerTest {
         cardNumberController.onValueChange("4242424242424242")
 
         verify(eventReporter, atMostOnce()).onCardNumberCompleted()
+    }
+
+    @Test
+    fun `on initial number completed, should not report event`() = runTest {
+        val eventReporter: CardNumberCompletedEventReporter = mock()
+
+        val cardNumberController = DefaultCardNumberController(
+            CardNumberConfig(),
+            FakeCardAccountRangeRepository(),
+            testDispatcher,
+            testDispatcher,
+            initialValue = "4242424242424242",
+            cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
+                preferredBrands = listOf(CardBrand.CartesBancaires),
+                initialBrand = null
+            )
+        )
+
+        composeTestRule.setContent {
+            CompositionLocalProvider(
+                LocalCardNumberCompletedEventReporter provides eventReporter
+            ) {
+                cardNumberController.ComposeUI(
+                    enabled = true,
+                    field = SimpleTextElement(
+                        identifier = IdentifierSpec.Name,
+                        controller = SimpleTextFieldController(
+                            textFieldConfig = SimpleTextFieldConfig()
+                        ),
+                    ),
+                    modifier = Modifier.testTag(TEST_TAG),
+                    hiddenIdentifiers = emptySet(),
+                    lastTextFieldIdentifier = null,
+                    nextFocusDirection = FocusDirection.Next,
+                    previousFocusDirection = FocusDirection.Next
+                )
+            }
+        }
+
+        cardNumberController.onValueChange("4242424242424242")
+
+        verifyNoInteractions(eventReporter)
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {

@@ -61,12 +61,26 @@ class CustomerSession @VisibleForTesting internal constructor(
                 }
             }
 
-            override fun onKeyError(operationId: String, errorCode: Int, errorMessage: String) {
-                listeners.remove(operationId)?.onError(
-                    errorCode,
-                    errorMessage,
-                    null
-                )
+            override fun onKeyError(
+                operationId: String,
+                errorCode: Int,
+                errorMessage: String,
+                throwable: Throwable
+            ) {
+                when (val listener = listeners.remove(operationId)) {
+                    is RetrievalListenerWithException -> listener.onError(
+                        errorCode,
+                        errorMessage,
+                        null,
+                        throwable
+                    )
+                    is RetrievalListener -> listener.onError(
+                        errorCode,
+                        errorMessage,
+                        null
+                    )
+                    else -> Unit
+                }
             }
         }
     )
@@ -308,6 +322,28 @@ class CustomerSession @VisibleForTesting internal constructor(
         )
     }
 
+    @JvmSynthetic
+    internal fun getPaymentMethods(
+        paymentMethodType: PaymentMethod.Type,
+        @IntRange(from = 1, to = 100) limit: Int? = null,
+        endingBefore: String? = null,
+        startingAfter: String? = null,
+        productUsage: Set<String>,
+        listener: PaymentMethodsRetrievalWithExceptionListener
+    ) {
+        startOperation(
+            EphemeralOperation.Customer.GetPaymentMethods(
+                type = paymentMethodType,
+                limit = limit,
+                endingBefore = endingBefore,
+                startingAfter = startingAfter,
+                id = operationIdFactory.create(),
+                productUsage = productUsage
+            ),
+            listener
+        )
+    }
+
     fun getPaymentMethods(
         paymentMethodType: PaymentMethod.Type,
         listener: PaymentMethodsRetrievalListener
@@ -420,12 +456,29 @@ class CustomerSession @VisibleForTesting internal constructor(
         fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>)
     }
 
+    internal abstract class PaymentMethodsRetrievalWithExceptionListener : RetrievalListenerWithException() {
+        abstract fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>)
+    }
+
     interface RetrievalListener {
         fun onError(
             errorCode: Int,
             errorMessage: String,
             stripeError: StripeError?
         )
+    }
+
+    internal abstract class RetrievalListenerWithException : RetrievalListener {
+        abstract fun onError(
+            errorCode: Int,
+            errorMessage: String,
+            stripeError: StripeError?,
+            throwable: Throwable
+        )
+
+        final override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+            onError(errorCode, errorMessage, stripeError, Exception(errorMessage))
+        }
     }
 
     companion object {
