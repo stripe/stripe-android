@@ -69,4 +69,10 @@ public class FinancialConnectionsDataExampleActivityJava extends AppCompatActivi
         status.setText(state.getStatus());
         launchConnectionsSheet.setEnabled(!state.getLoading());
     }
+
+    @Override
+    protected void onDestroy() {
+        FinancialConnections.clearEventListener();
+        super.onDestroy();
+    }
 }

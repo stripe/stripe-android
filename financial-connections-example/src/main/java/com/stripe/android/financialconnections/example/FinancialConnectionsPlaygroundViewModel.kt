@@ -274,6 +274,11 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
+    override fun onCleared() {
+        FinancialConnections.clearEventListener()
+        super.onCleared()
+    }
+
     internal class Factory(
         private val applicationSupplier: () -> Application,
         private val uriSupplier: () -> Uri?,
