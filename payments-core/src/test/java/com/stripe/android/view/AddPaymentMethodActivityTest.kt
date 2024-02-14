@@ -78,7 +78,7 @@ class AddPaymentMethodActivityTest {
         ).use { activityScenario ->
             activityScenario.onActivity {
                 runBlocking {
-                    verify(viewModel, never()).init()
+                    verify(viewModel, never()).onFormShown()
                 }
             }
         }

@@ -68,7 +68,7 @@ class CustomerSession @VisibleForTesting internal constructor(
                 throwable: Throwable
             ) {
                 when (val listener = listeners.remove(operationId)) {
-                    is RetrievalListenerWithException -> listener.onError(
+                    is RetrievalWithExceptionListener -> listener.onError(
                         errorCode,
                         errorMessage,
                         null,
@@ -322,28 +322,6 @@ class CustomerSession @VisibleForTesting internal constructor(
         )
     }
 
-    @JvmSynthetic
-    internal fun getPaymentMethods(
-        paymentMethodType: PaymentMethod.Type,
-        @IntRange(from = 1, to = 100) limit: Int? = null,
-        endingBefore: String? = null,
-        startingAfter: String? = null,
-        productUsage: Set<String>,
-        listener: PaymentMethodsRetrievalWithExceptionListener
-    ) {
-        startOperation(
-            EphemeralOperation.Customer.GetPaymentMethods(
-                type = paymentMethodType,
-                limit = limit,
-                endingBefore = endingBefore,
-                startingAfter = startingAfter,
-                id = operationIdFactory.create(),
-                productUsage = productUsage
-            ),
-            listener
-        )
-    }
-
     fun getPaymentMethods(
         paymentMethodType: PaymentMethod.Type,
         listener: PaymentMethodsRetrievalListener
@@ -456,9 +434,9 @@ class CustomerSession @VisibleForTesting internal constructor(
         fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>)
     }
 
-    internal abstract class PaymentMethodsRetrievalWithExceptionListener : RetrievalListenerWithException() {
-        abstract fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>)
-    }
+    internal interface PaymentMethodsRetrievalWithExceptionListener :
+        PaymentMethodsRetrievalListener,
+        RetrievalWithExceptionListener
 
     interface RetrievalListener {
         fun onError(
@@ -468,15 +446,15 @@ class CustomerSession @VisibleForTesting internal constructor(
         )
     }
 
-    internal abstract class RetrievalListenerWithException : RetrievalListener {
-        abstract fun onError(
+    internal interface RetrievalWithExceptionListener : RetrievalListener {
+        fun onError(
             errorCode: Int,
             errorMessage: String,
             stripeError: StripeError?,
             throwable: Throwable
         )
 
-        final override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
+        override fun onError(errorCode: Int, errorMessage: String, stripeError: StripeError?) {
             onError(errorCode, errorMessage, stripeError, Exception(errorMessage))
         }
     }

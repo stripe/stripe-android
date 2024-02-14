@@ -113,7 +113,7 @@ class AddPaymentMethodActivity : StripeActivity() {
         if (argsAreInvalid { args }) {
             return
         }
-        viewModel.init()
+        viewModel.onFormShown()
         configureView(args)
         setResult(
             Activity.RESULT_OK,

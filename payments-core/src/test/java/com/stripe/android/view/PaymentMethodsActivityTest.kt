@@ -35,9 +35,7 @@ import kotlin.test.assertTrue
 class PaymentMethodsActivityTest {
     private val customerSession: CustomerSession = mock()
 
-    private val listenerArgumentCaptor:
-        KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalWithExceptionListener> =
-            argumentCaptor()
+    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val activityScenarioFactory = ActivityScenarioFactory(context)

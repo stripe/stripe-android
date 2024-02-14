@@ -93,7 +93,7 @@ internal class PaymentMethodsViewModel(
                     it.getPaymentMethods(
                         paymentMethodType = PaymentMethod.Type.Card,
                         productUsage = productUsage,
-                        listener = object : CustomerSession.PaymentMethodsRetrievalWithExceptionListener() {
+                        listener = object : CustomerSession.PaymentMethodsRetrievalWithExceptionListener {
                             override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
                                 if (isInitialFetch) {
                                     eventReporter.onLoadSucceeded(selectedPaymentMethodId)
