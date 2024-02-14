@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
 import com.stripe.android.model.CustomerFixtures
+import com.stripe.android.model.ListPaymentMethodsParams
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.Source
@@ -14,6 +15,9 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.mockito.ArgumentMatchers.eq
+import org.mockito.kotlin.argWhere
+import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import kotlin.test.AfterTest
@@ -99,6 +103,81 @@ internal class CustomerSessionOperationExecutorTest {
             0,
             errorMessage,
             null
+        )
+        assertThat(customerCallbacks)
+            .isEmpty()
+    }
+
+    @Test
+    fun `execute with GetPaymentMethods operation should call listener on failure`() = runTest {
+        val listener = mock<CustomerSession.PaymentMethodsRetrievalListener>()
+        listeners[OPERATION_ID] = listener
+
+        val errorMessage = "an error or something"
+
+        val executor = createExecutor(
+            object : AbsFakeStripeRepository() {
+                override suspend fun getPaymentMethods(
+                    listPaymentMethodsParams: ListPaymentMethodsParams,
+                    productUsageTokens: Set<String>,
+                    requestOptions: ApiRequest.Options
+                ): Result<List<PaymentMethod>> {
+                    return Result.failure(RuntimeException(errorMessage))
+                }
+            }
+        )
+        executor.execute(
+            EphemeralKeyFixtures.FIRST,
+            EphemeralOperation.Customer.GetPaymentMethods(
+                type = PaymentMethod.Type.Card,
+                id = OPERATION_ID,
+                productUsage = emptySet()
+            )
+        )
+
+        verify(listener).onError(
+            0,
+            errorMessage,
+            null
+        )
+        assertThat(customerCallbacks)
+            .isEmpty()
+    }
+
+    @Test
+    fun `execute with GetPaymentMethods operation should call exception listener on failure`() = runTest {
+        val listener = mock<CustomerSession.PaymentMethodsRetrievalWithExceptionListener>()
+        listeners[OPERATION_ID] = listener
+
+        val errorMessage = "an error or something"
+
+        val executor = createExecutor(
+            object : AbsFakeStripeRepository() {
+                override suspend fun getPaymentMethods(
+                    listPaymentMethodsParams: ListPaymentMethodsParams,
+                    productUsageTokens: Set<String>,
+                    requestOptions: ApiRequest.Options
+                ): Result<List<PaymentMethod>> {
+                    return Result.failure(RuntimeException(errorMessage))
+                }
+            }
+        )
+        executor.execute(
+            EphemeralKeyFixtures.FIRST,
+            EphemeralOperation.Customer.GetPaymentMethods(
+                type = PaymentMethod.Type.Card,
+                id = OPERATION_ID,
+                productUsage = emptySet()
+            )
+        )
+
+        verify(listener).onError(
+            eq(0),
+            eq(errorMessage) ?: errorMessage,
+            isNull(),
+            argWhere { error ->
+                error is RuntimeException && error.message == errorMessage
+            }
         )
         assertThat(customerCallbacks)
             .isEmpty()

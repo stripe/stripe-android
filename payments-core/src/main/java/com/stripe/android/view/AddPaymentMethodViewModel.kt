@@ -117,6 +117,13 @@ internal class AddPaymentMethodViewModel(
         )
     }
 
+    internal fun onFormShown() {
+        if (!formShownEventReported) {
+            eventReporter.onFormShown(args.paymentMethodType.code)
+            formShownEventReported = true
+        }
+    }
+
     internal fun onFormInteracted() {
         if (!formInteractedEventReported) {
             eventReporter.onFormInteracted(args.paymentMethodType.code)

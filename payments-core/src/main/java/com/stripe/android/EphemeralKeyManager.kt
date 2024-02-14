@@ -51,10 +51,13 @@ internal class EphemeralKeyManager(
         // Key is coming from the user, so even if it's @NonNull annotated we
         // want to double check it
         if (key == null) {
+            val message = "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value"
+
             listener.onKeyError(
                 operation.id,
                 HttpURLConnection.HTTP_INTERNAL_ERROR,
-                "EphemeralKeyUpdateListener.onKeyUpdate was called with a null value"
+                message,
+                IllegalArgumentException(message)
             )
             return
         }
@@ -86,7 +89,8 @@ internal class EphemeralKeyManager(
                 listener.onKeyError(
                     operation.id,
                     HttpURLConnection.HTTP_INTERNAL_ERROR,
-                    errorMessage
+                    errorMessage,
+                    it
                 )
             }
         )
@@ -94,7 +98,7 @@ internal class EphemeralKeyManager(
 
     private fun updateKeyError(operationId: String, errorCode: Int, errorMessage: String) {
         ephemeralKey = null
-        listener.onKeyError(operationId, errorCode, errorMessage)
+        listener.onKeyError(operationId, errorCode, errorMessage, Exception(errorMessage))
     }
 
     internal interface KeyManagerListener {
@@ -106,7 +110,8 @@ internal class EphemeralKeyManager(
         fun onKeyError(
             operationId: String,
             errorCode: Int,
-            errorMessage: String
+            errorMessage: String,
+            throwable: Throwable,
         )
     }
 
