@@ -42,9 +42,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     @Test
     fun `init - payload error navigates to error screen`() = runTest {
         val error = RuntimeException("Failed to fetch manifest")
-        whenever(getManifest()).thenAnswer {
-            throw error
-        }
+        whenever(getManifest()).thenAnswer { throw error }
 
         buildViewModel(NetworkingLinkLoginWarmupState())
 
@@ -55,8 +53,9 @@ class NetworkingLinkLoginWarmupViewModelTest {
             displayErrorScreen = true
         )
     }
+
     @Test
-    fun `onContinueClick - navigates to verification pane`() {
+    fun `onContinueClick - navigates to verification pane`() = runTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
 
         viewModel.onContinueClick()
