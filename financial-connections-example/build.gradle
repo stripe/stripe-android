@@ -5,7 +5,7 @@ apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 
 
-def testEnvironment = System.getenv("test_environment") ?: "edge"
+def testEnvironment = System.getenv("test_environment") ?: "production"
 
 android {
     defaultConfig {
