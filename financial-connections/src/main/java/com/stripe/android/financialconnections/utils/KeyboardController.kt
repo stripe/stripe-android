@@ -37,6 +37,9 @@ internal fun rememberKeyboardController(): KeyboardController {
 
     return KeyboardController(
         dismissKeyboard = {
+            // We're using this method because LocalSoftwareKeyboardController is
+            // still experimental in Compose 1.5. We should switch over once we update
+            // to Compose 1.6, in which the experimental state has been removed.
             textInputService?.hideSoftwareKeyboard()
         },
         isKeyboardVisible = keyboardState,
