@@ -25,7 +25,7 @@ internal data class PlaygroundState(
     val countryCode = snapshot[CountrySettingsDefinition]
     val checkoutMode = snapshot[CheckoutModeSettingsDefinition]
     val integrationType = snapshot[IntegrationTypeSettingsDefinition]
-    val paymentMethodConfiguration = snapshot[PaymentMethodConfigurationSettingsDefinition]
+    val paymentMethodConfigurationId = snapshot[PaymentMethodConfigurationSettingsDefinition]
 
     fun paymentSheetConfiguration(): PaymentSheet.Configuration {
         return snapshot.paymentSheetConfiguration(this)

@@ -8,7 +8,7 @@ internal object PaymentMethodConfigurationSettingsDefinition :
     PlaygroundSettingDefinition<String>,
     PlaygroundSettingDefinition.Saveable<String>,
     PlaygroundSettingDefinition.Displayable<String> {
-    override val key: String = "paymentMethodConfigurationID"
+    override val key: String = "paymentMethodConfigurationId"
     override val displayName: String = "Payment Method Configuration ID"
     override val defaultValue: String = ""
     override val options: List<PlaygroundSettingDefinition.Displayable.Option<String>> = emptyList()
@@ -21,7 +21,7 @@ internal object PaymentMethodConfigurationSettingsDefinition :
         checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
         if (value.isNotEmpty()) {
-            checkoutRequestBuilder.paymentMethodConfiguration(value)
+            checkoutRequestBuilder.paymentMethodConfigurationId(value)
         }
     }
 }

@@ -2303,7 +2303,7 @@ internal class StripeApiRepositoryTest {
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = listOf("card", "link"),
-                    paymentMethodConfiguration = "pmc_234",
+                    paymentMethodConfigurationId = "pmc_234",
                     onBehalfOf = null,
                 )
             ),

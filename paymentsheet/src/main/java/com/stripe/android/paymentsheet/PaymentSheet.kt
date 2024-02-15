@@ -198,7 +198,7 @@ class PaymentSheet internal constructor(
      * @param mode Whether [PaymentSheet] should present a payment or setup flow.
      * @param paymentMethodTypes The payment methods types to display. If empty, we dynamically
      * determine the payment method types using your [Stripe Dashboard settings](https://dashboard.stripe.com/settings/payment_methods).
-     * @param paymentMethodConfiguration The configuration ID (if any) for the selected payment method configuration.
+     * @param paymentMethodConfigurationId The configuration ID (if any) for the selected payment method configuration.
      * See https://stripe.com/docs/payments/multiple-payment-method-configs for more information.
      * @param onBehalfOf The account (if any) for which the funds of the intent are intended. See
      * [our docs](https://stripe.com/docs/api/payment_intents/object#payment_intent_object-on_behalf_of) for more info.
@@ -207,7 +207,7 @@ class PaymentSheet internal constructor(
     class IntentConfiguration @JvmOverloads constructor(
         val mode: Mode,
         val paymentMethodTypes: List<String> = emptyList(),
-        val paymentMethodConfiguration: String? = null,
+        val paymentMethodConfigurationId: String? = null,
         val onBehalfOf: String? = null,
     ) : Parcelable {
 
