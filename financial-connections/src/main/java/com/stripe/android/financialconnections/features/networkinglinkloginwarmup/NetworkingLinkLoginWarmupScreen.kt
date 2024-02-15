@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -37,7 +36,6 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.ShapedIcon
-import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
@@ -64,44 +62,23 @@ private fun NetworkingLinkLoginWarmupContent(
     onSkipClicked: () -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-    Box(
+    Layout(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = v3Colors.backgroundSurface)
-            .padding(top = 24.dp)
-    ) {
-        NetworkingLinkLoginWarmupLoaded(
-            lazyListState = lazyListState,
-            payload = state.payload(),
-            loading = state.disableNetworkingAsync is Loading || state.payload() == null,
-            onSkipClicked = onSkipClicked,
-            onContinueClick = onContinueClick
-        )
-    }
-}
-
-@Composable
-private fun NetworkingLinkLoginWarmupLoaded(
-    lazyListState: LazyListState,
-    payload: Payload?,
-    loading: Boolean,
-    onSkipClicked: () -> Unit,
-    onContinueClick: () -> Unit,
-) {
-    Layout(
+            .padding(top = 24.dp),
         inModal = true,
         verticalArrangement = Arrangement.spacedBy(24.dp),
         lazyListState = lazyListState,
         body = {
             item { HeaderSection() }
-            item { ExistingEmailSection(email = payload?.email ?: "") }
+            item { ExistingEmailSection(email = state.payload()?.email ?: "") }
         },
         footer = {
             Footer(
-                loading = loading,
+                loading = state.disableNetworkingAsync is Loading || state.payload() == null,
                 onContinueClick = onContinueClick,
-                onSkipClicked = onSkipClicked,
-
+                onSkipClicked = onSkipClicked
             )
         }
     )
