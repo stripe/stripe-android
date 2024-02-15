@@ -147,7 +147,6 @@ internal object FinancialConnectionsButton {
 
             override fun rippleColor(): Color = Neutral50
 
-        data object Critical : Type() {
             @Composable
             override fun elevation(): ButtonElevation = ButtonDefaults.elevation(
                 defaultElevation = 0.dp,
