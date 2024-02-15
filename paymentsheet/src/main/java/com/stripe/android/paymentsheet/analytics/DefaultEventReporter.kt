@@ -58,7 +58,6 @@ internal class DefaultEventReporter @Inject internal constructor(
         this.currency = currency
         this.linkEnabled = linkEnabled
 
-        durationProvider.end(DurationProvider.Key.Checkout)
         durationProvider.start(DurationProvider.Key.Checkout)
 
         val duration = durationProvider.end(DurationProvider.Key.Loading)
@@ -142,7 +141,6 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onPaymentMethodFormShown(code: PaymentMethodCode) {
-        durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 
         fireEvent(

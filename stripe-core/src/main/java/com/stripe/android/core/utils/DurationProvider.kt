@@ -7,7 +7,7 @@ import kotlin.time.Duration.Companion.milliseconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface DurationProvider {
-    fun start(key: Key)
+    fun start(key: Key, reset: Boolean = true)
     fun end(key: Key): Duration?
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -24,8 +24,8 @@ class DefaultDurationProvider private constructor() : DurationProvider {
 
     private val store = mutableMapOf<DurationProvider.Key, Long>()
 
-    override fun start(key: DurationProvider.Key) {
-        if (key !in store) {
+    override fun start(key: DurationProvider.Key, reset: Boolean) {
+        if (reset || key !in store) {
             val startTime = SystemClock.uptimeMillis()
             store[key] = startTime
         }

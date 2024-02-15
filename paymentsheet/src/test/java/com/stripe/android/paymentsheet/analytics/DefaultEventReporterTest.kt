@@ -19,14 +19,10 @@ import com.stripe.android.utils.FakeDurationProvider
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.json.JSONException
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.reset
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.io.IOException
@@ -85,9 +81,7 @@ class DefaultEventReporterTest {
 
     @Test
     fun `on completed loading operation, should reset checkout timer`() {
-        val durationProvider = mock<DurationProvider> {
-            on { end(any()) } doReturn Duration.ZERO
-        }
+        val durationProvider = FakeDurationProvider()
 
         val eventReporter = createEventReporter(
             mode = EventReporter.Mode.Complete,
@@ -100,10 +94,14 @@ class DefaultEventReporterTest {
             )
         )
 
-        val inOrder = inOrder(durationProvider)
-
-        inOrder.verify(durationProvider, times(1)).end(DurationProvider.Key.Checkout)
-        inOrder.verify(durationProvider, times(1)).start(DurationProvider.Key.Checkout)
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.Checkout,
+                    reset = true
+                )
+            )
+        ).isTrue()
     }
 
     @Test
@@ -285,9 +283,7 @@ class DefaultEventReporterTest {
 
     @Test
     fun `onPaymentMethodFormShown() should restart duration on call`() {
-        val durationProvider = mock<DurationProvider> {
-            on { end(any()) } doReturn Duration.ZERO
-        }
+        val durationProvider = FakeDurationProvider()
 
         val customEventReporter = createEventReporter(
             mode = EventReporter.Mode.Custom,
@@ -300,10 +296,14 @@ class DefaultEventReporterTest {
             code = "card",
         )
 
-        val inOrder = inOrder(durationProvider)
-
-        inOrder.verify(durationProvider, times(1)).end(DurationProvider.Key.ConfirmButtonClicked)
-        inOrder.verify(durationProvider, times(1)).start(DurationProvider.Key.ConfirmButtonClicked)
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.ConfirmButtonClicked,
+                    reset = true
+                )
+            )
+        ).isTrue()
     }
 
     @Test

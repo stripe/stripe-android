@@ -49,7 +49,6 @@ internal class DefaultPaymentSessionEventReporter @Inject internal constructor(
     }
 
     override fun onFormShown(code: PaymentMethodCode) {
-        durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
         durationProvider.start(DurationProvider.Key.ConfirmButtonClicked)
 
         fireEvent(

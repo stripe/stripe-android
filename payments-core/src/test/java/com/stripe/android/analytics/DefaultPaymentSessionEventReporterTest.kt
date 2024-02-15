@@ -1,6 +1,7 @@
 package com.stripe.android.analytics
 
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
@@ -8,15 +9,10 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.argWhere
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(RobolectricTestRunner::class)
@@ -103,18 +99,20 @@ class DefaultPaymentSessionEventReporterTest {
 
     @Test
     fun `onFormShown() should restart duration on call`() {
-        val durationProvider = mock<DurationProvider> {
-            on { end(any()) } doReturn Duration.ZERO
-        }
+        val durationProvider = FakeDurationProvider()
 
         val eventReporter = createEventReporter(durationProvider)
 
         eventReporter.onFormShown("card")
 
-        val inOrder = inOrder(durationProvider)
-
-        inOrder.verify(durationProvider, times(1)).end(DurationProvider.Key.ConfirmButtonClicked)
-        inOrder.verify(durationProvider, times(1)).start(DurationProvider.Key.ConfirmButtonClicked)
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.ConfirmButtonClicked,
+                    reset = true
+                )
+            )
+        ).isTrue()
     }
 
     @Test
