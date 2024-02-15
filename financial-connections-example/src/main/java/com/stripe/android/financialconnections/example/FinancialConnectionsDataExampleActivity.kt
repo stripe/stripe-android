@@ -67,4 +67,9 @@ class FinancialConnectionsDataExampleActivity : AppCompatActivity() {
         findViewById<View>(R.id.launch_connections_sheet).isEnabled =
             financialConnectionsExampleState.loading.not()
     }
+
+    override fun onDestroy() {
+        FinancialConnections.clearEventListener()
+        super.onDestroy()
+    }
 }

@@ -91,99 +91,99 @@ internal sealed class Destination(
         )
     }
 
-    object InstitutionPicker : NoArgumentsDestination(
+    data object InstitutionPicker : NoArgumentsDestination(
         Pane.INSTITUTION_PICKER.value,
         composable = { InstitutionPickerScreen() }
     )
 
-    object Consent : NoArgumentsDestination(
+    data object Consent : NoArgumentsDestination(
         route = Pane.CONSENT.value,
         composable = { ConsentScreen() }
     )
 
-    object PartnerAuthDrawer : NoArgumentsDestination(
+    data object PartnerAuthDrawer : NoArgumentsDestination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
         composable = { PartnerAuthScreen(inModal = true) }
     )
 
-    object PartnerAuth : NoArgumentsDestination(
+    data object PartnerAuth : NoArgumentsDestination(
         route = Pane.PARTNER_AUTH.value,
         composable = { PartnerAuthScreen(inModal = false) }
     )
 
-    object AccountPicker : NoArgumentsDestination(
+    data object AccountPicker : NoArgumentsDestination(
         route = Pane.ACCOUNT_PICKER.value,
         composable = { AccountPickerScreen() }
     )
 
-    object Success : NoArgumentsDestination(
+    data object Success : NoArgumentsDestination(
         route = Pane.SUCCESS.value,
         composable = { SuccessScreen() }
     )
 
-    object ManualEntry : NoArgumentsDestination(
+    data object ManualEntry : NoArgumentsDestination(
         route = Pane.MANUAL_ENTRY.value,
         composable = { ManualEntryScreen() }
     )
 
-    object AttachLinkedPaymentAccount : NoArgumentsDestination(
+    data object AttachLinkedPaymentAccount : NoArgumentsDestination(
         route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
         composable = { AttachPaymentScreen() }
     )
 
-    object NetworkingLinkSignup : NoArgumentsDestination(
+    data object NetworkingLinkSignup : NoArgumentsDestination(
         route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
         composable = { NetworkingLinkSignupScreen() }
     )
 
-    object NetworkingLinkLoginWarmup : NoArgumentsDestination(
+    data object NetworkingLinkLoginWarmup : NoArgumentsDestination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
         composable = { NetworkingLinkLoginWarmupScreen() }
     )
 
-    object NetworkingLinkVerification : NoArgumentsDestination(
+    data object NetworkingLinkVerification : NoArgumentsDestination(
         route = Pane.NETWORKING_LINK_VERIFICATION.value,
         composable = { NetworkingLinkVerificationScreen() }
     )
 
-    object NetworkingSaveToLinkVerification : NoArgumentsDestination(
+    data object NetworkingSaveToLinkVerification : NoArgumentsDestination(
         route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
         composable = { NetworkingSaveToLinkVerificationScreen() }
     )
 
-    object LinkAccountPicker : NoArgumentsDestination(
+    data object LinkAccountPicker : NoArgumentsDestination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
         composable = {
             LinkAccountPickerScreen()
         },
     )
 
-    object LinkStepUpVerification : NoArgumentsDestination(
+    data object LinkStepUpVerification : NoArgumentsDestination(
         route = Pane.LINK_STEP_UP_VERIFICATION.value,
         composable = { LinkStepUpVerificationScreen() }
     )
 
-    object Reset : NoArgumentsDestination(
+    data object Reset : NoArgumentsDestination(
         route = Pane.RESET.value,
         composable = { ResetScreen() }
     )
 
-    object Exit : NoArgumentsDestination(
+    data object Exit : NoArgumentsDestination(
         route = Pane.EXIT.value,
         composable = { ExitModal(it) }
     )
 
-    object Error : NoArgumentsDestination(
+    data object Error : NoArgumentsDestination(
         route = Pane.UNEXPECTED_ERROR.value,
         composable = { ErrorScreen() }
     )
 
-    object BankAuthRepair : NoArgumentsDestination(
+    data object BankAuthRepair : NoArgumentsDestination(
         route = Pane.BANK_AUTH_REPAIR.value,
         composable = { BankAuthRepairScreen() }
     )
 
-    object ManualEntrySuccess : Destination(
+    data object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
         paramKeys = listOf(KEY_REFERRER, KEY_MICRODEPOSITS, KEY_LAST4),
         screenBuilder = { ManualEntrySuccessScreen(it) }

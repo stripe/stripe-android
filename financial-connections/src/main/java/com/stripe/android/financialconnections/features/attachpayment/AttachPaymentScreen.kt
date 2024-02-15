@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.attachpayment
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail

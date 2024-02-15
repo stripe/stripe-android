@@ -267,7 +267,6 @@ internal data class FinancialConnectionsSessionManifest(
      * OPAL,PAYMENT_FLOWS,RESERVE_APPEALS,STANDARD_ONBOARDING,STRIPE_CARD,SUPPORT_SITE
      */
     @Serializable(with = Product.Serializer::class)
-    @Suppress("unused")
     enum class Product(val value: String) {
         @SerialName(value = "billpay")
         BILLPAY("billpay"),

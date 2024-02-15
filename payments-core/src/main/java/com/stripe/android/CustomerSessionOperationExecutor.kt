@@ -123,7 +123,8 @@ internal class CustomerSessionOperationExecutor(
                 )
 
                 withContext(Dispatchers.Main) {
-                    val listener: CustomerSession.PaymentMethodsRetrievalListener? = getListener(operation.id)
+                    val listener = getListener<CustomerSession.PaymentMethodsRetrievalListener>(operation.id)
+
                     result.fold(
                         onSuccess = { paymentMethods ->
                             listener?.onPaymentMethodsRetrieved(paymentMethods)
@@ -185,21 +186,31 @@ internal class CustomerSessionOperationExecutor(
         listener: CustomerSession.RetrievalListener?,
         error: Throwable
     ) {
-        when (error) {
-            is StripeException -> {
-                listener?.onError(
-                    error.statusCode,
-                    error.message.orEmpty(),
-                    error.stripeError
-                )
-            }
-            else -> {
-                listener?.onError(
-                    0,
-                    error.message.orEmpty(),
-                    null
-                )
-            }
+        val (statusCode, message, stripeError) = when (error) {
+            is StripeException -> Triple(
+                error.statusCode,
+                error.message.orEmpty(),
+                error.stripeError
+            )
+            else -> Triple(
+                0,
+                error.message.orEmpty(),
+                null
+            )
+        }
+
+        when (listener) {
+            is CustomerSession.RetrievalWithExceptionListener -> listener.onError(
+                statusCode,
+                message,
+                stripeError,
+                error,
+            )
+            is CustomerSession.RetrievalListener -> listener.onError(
+                statusCode,
+                message,
+                stripeError,
+            )
         }
     }
 

@@ -121,7 +121,7 @@ internal object FinancialConnectionsButton {
         @Composable
         abstract fun elevation(): ButtonElevation
 
-        object Primary : Type() {
+        data object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
                 backgroundColor = v3Colors.iconBrand,
@@ -136,7 +136,7 @@ internal object FinancialConnectionsButton {
             override fun elevation(): ButtonElevation = ButtonDefaults.elevation()
         }
 
-        object Secondary : Type() {
+        data object Secondary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
                 backgroundColor = Neutral50,
@@ -147,6 +147,7 @@ internal object FinancialConnectionsButton {
 
             override fun rippleColor(): Color = Neutral50
 
+        data object Critical : Type() {
             @Composable
             override fun elevation(): ButtonElevation = ButtonDefaults.elevation(
                 defaultElevation = 0.dp,
@@ -164,7 +165,7 @@ internal object FinancialConnectionsButton {
         abstract fun paddingValues(): PaddingValues
         abstract val radius: Dp
 
-        object Regular : Size() {
+        data object Regular : Size() {
             override val radius: Dp = 12.dp
 
             @Composable

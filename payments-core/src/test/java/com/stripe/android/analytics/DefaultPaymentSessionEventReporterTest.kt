@@ -41,11 +41,12 @@ class DefaultPaymentSessionEventReporterTest {
         val eventReporter = createEventReporter()
 
         eventReporter.onLoadStarted()
-        eventReporter.onLoadSucceeded()
+        eventReporter.onLoadSucceeded("card")
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == "bi_load_succeeded" &&
+                    req.params["selected_lpm"] == "card" &&
                     req.params["duration"] == 2f
             }
         )

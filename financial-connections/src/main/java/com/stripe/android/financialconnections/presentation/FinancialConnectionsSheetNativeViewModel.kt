@@ -387,13 +387,13 @@ internal sealed class WebAuthFlowState : Parcelable {
      * The web browser has not been opened yet.
      */
     @Parcelize
-    object Uninitialized : WebAuthFlowState()
+    data object Uninitialized : WebAuthFlowState()
 
     /**
      * The web browser has been opened and the authentication flow is in progress.
      */
     @Parcelize
-    object InProgress : WebAuthFlowState()
+    data object InProgress : WebAuthFlowState()
 
     /**
      * The web browser has been closed and triggered a deeplink with a success result.

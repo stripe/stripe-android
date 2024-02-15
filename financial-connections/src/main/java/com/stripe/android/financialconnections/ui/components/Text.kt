@@ -133,7 +133,9 @@ private fun annotatedStringResource(
                     start = spanStart,
                     end = spanEnd
                 )
-                spanStyleForAnnotation(it)?.let { resultBuilder.addStyle(it, spanStart, spanEnd) }
+                spanStyleForAnnotation(it)?.let { style ->
+                    resultBuilder.addStyle(style, spanStart, spanEnd)
+                }
             }
         }
     return resultBuilder.toAnnotatedString()

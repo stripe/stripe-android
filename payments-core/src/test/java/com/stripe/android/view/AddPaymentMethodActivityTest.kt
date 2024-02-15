@@ -72,6 +72,19 @@ class AddPaymentMethodActivityTest {
     }
 
     @Test
+    fun testActivityCallsInitOnCreate() {
+        activityScenarioFactory.create<AddPaymentMethodActivity>(
+            BASE_CARD_ARGS
+        ).use { activityScenario ->
+            activityScenario.onActivity {
+                runBlocking {
+                    verify(viewModel, never()).onFormShown()
+                }
+            }
+        }
+    }
+
+    @Test
     fun testActivityIsFinishedWhenNoArgsPassed() {
         activityScenarioFactory.create<AddPaymentMethodActivity>().use { activityScenario ->
             assertThat(activityScenario.state).isEqualTo(Lifecycle.State.DESTROYED)

@@ -24,10 +24,11 @@ internal class DefaultPaymentSessionEventReporter @Inject internal constructor(
         fireEvent(PaymentSessionEvent.LoadStarted())
     }
 
-    override fun onLoadSucceeded() {
+    override fun onLoadSucceeded(code: PaymentMethodCode?) {
         fireEvent(
             PaymentSessionEvent.LoadSucceeded(
-                duration = durationProvider.end(DurationProvider.Key.Loading)
+                duration = durationProvider.end(DurationProvider.Key.Loading),
+                code = code,
             )
         )
     }

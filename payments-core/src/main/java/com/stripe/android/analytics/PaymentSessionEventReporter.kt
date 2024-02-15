@@ -11,7 +11,7 @@ internal interface PaymentSessionEventReporter {
     /**
      * Payment session was successfully loaded.
      */
-    fun onLoadSucceeded()
+    fun onLoadSucceeded(code: PaymentMethodCode?)
 
     /**
      * Payment session failed to load.
