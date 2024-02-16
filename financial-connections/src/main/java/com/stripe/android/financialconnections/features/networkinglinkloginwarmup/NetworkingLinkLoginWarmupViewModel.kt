@@ -6,13 +6,12 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -27,10 +26,10 @@ import javax.inject.Inject
 internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     initialState: NetworkingLinkLoginWarmupState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val handleError: HandleError,
     private val getManifest: GetManifest,
     private val disableNetworking: DisableNetworking,
-    private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val navigationManager: NavigationManager
 ) : MavericksViewModel<NetworkingLinkLoginWarmupState>(initialState) {
 
     init {
@@ -49,21 +48,21 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         onAsync(
             NetworkingLinkLoginWarmupState::payload,
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error fetching payload",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true
                 )
             },
         )
         onAsync(
             NetworkingLinkLoginWarmupState::disableNetworkingAsync,
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error disabling networking",
                     error = error,
-                    logger = logger,
+                    displayErrorScreen = true,
                     pane = PANE
                 )
             },

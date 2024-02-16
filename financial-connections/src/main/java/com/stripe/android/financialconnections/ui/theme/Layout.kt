@@ -32,6 +32,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 /**
  * A layout that contains a body, and an optional, bottom fixed footer.
  *
+ * @param modifier the modifier to apply to the layout.
  * @param body the content of the layout.
  * @param footer the content of the footer.
  * @param inModal whether the layout is being used in a modal or not. If true, the [body] won't expand to fill the
@@ -41,6 +42,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
  */
 @Composable
 internal fun Layout(
+    modifier: Modifier = Modifier,
     body: LazyListScope.() -> Unit,
     footer: (@Composable () -> Unit)? = null,
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
@@ -50,7 +52,7 @@ internal fun Layout(
     lazyListState: LazyListState = rememberLazyListState()
 ) {
     Column(
-        Modifier
+        modifier
             .also { if (inModal.not()) it.fillMaxSize() }
     ) {
         // Box to contain the layout body and an optional footer shadow drawn on top.

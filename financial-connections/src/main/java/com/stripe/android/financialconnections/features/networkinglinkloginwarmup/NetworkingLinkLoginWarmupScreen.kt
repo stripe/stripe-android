@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -32,26 +31,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.ShapedIcon
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupState.Payload
-import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupViewModel.Companion.PANE
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
 import com.stripe.android.financialconnections.ui.theme.Layout
@@ -60,12 +47,9 @@ import com.stripe.android.financialconnections.ui.theme.LinkColors
 @Composable
 internal fun NetworkingLinkLoginWarmupScreen() {
     val viewModel: NetworkingLinkLoginWarmupViewModel = mavericksViewModel()
-    val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     NetworkingLinkLoginWarmupContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onSkipClicked = viewModel::onSkipClicked,
         onContinueClick = viewModel::onContinueClick,
     )
@@ -74,72 +58,30 @@ internal fun NetworkingLinkLoginWarmupScreen() {
 @Composable
 private fun NetworkingLinkLoginWarmupContent(
     state: NetworkingLinkLoginWarmupState,
-    onCloseClick: () -> Unit,
     onContinueClick: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit,
     onSkipClicked: () -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                showBack = true,
-                onCloseClick = onCloseClick
+    Layout(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(color = v3Colors.backgroundSurface)
+            .padding(top = 24.dp),
+        inModal = true,
+        verticalArrangement = Arrangement.spacedBy(24.dp),
+        lazyListState = lazyListState,
+        body = {
+            item { HeaderSection() }
+            item { ExistingEmailSection(email = state.payload()?.email ?: "") }
+        },
+        footer = {
+            Footer(
+                loading = state.disableNetworkingAsync is Loading || state.payload() == null,
+                onContinueClick = onContinueClick,
+                onSkipClicked = onSkipClicked
             )
         }
-    ) {
-        when (val payload = state.payload) {
-            Uninitialized,
-            is Loading -> FullScreenGenericLoading()
-
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
-
-            is Success -> NetworkingLinkLoginWarmupLoaded(
-                lazyListState = lazyListState,
-                payload = payload(),
-                disableNetworkingAsync = state.disableNetworkingAsync,
-                onSkipClicked = onSkipClicked,
-                onCloseFromErrorClick = onCloseFromErrorClick,
-                onContinueClick = onContinueClick
-            )
-        }
-    }
-}
-
-@Composable
-private fun NetworkingLinkLoginWarmupLoaded(
-    lazyListState: LazyListState,
-    payload: Payload,
-    disableNetworkingAsync: Async<FinancialConnectionsSessionManifest>,
-    onCloseFromErrorClick: (Throwable) -> Unit,
-    onSkipClicked: () -> Unit,
-    onContinueClick: () -> Unit,
-) {
-    if (disableNetworkingAsync is Fail) {
-        UnclassifiedErrorContent(
-            error = disableNetworkingAsync.error,
-            onCloseFromErrorClick = onCloseFromErrorClick
-        )
-    } else {
-        Layout(
-            verticalArrangement = Arrangement.spacedBy(24.dp),
-            lazyListState = lazyListState,
-            body = {
-                item { HeaderSection() }
-                item { ExistingEmailSection(email = payload.email) }
-            },
-            footer = {
-                Footer(
-                    disableNetworkingAsync = disableNetworkingAsync,
-                    onContinueClick = onContinueClick,
-                    onSkipClicked = onSkipClicked
-                )
-            }
-        )
-    }
+    )
 }
 
 @Composable
@@ -165,14 +107,14 @@ private fun HeaderSection() {
 @Composable
 @OptIn(ExperimentalComposeUiApi::class)
 private fun Footer(
-    disableNetworkingAsync: Async<FinancialConnectionsSessionManifest>,
+    loading: Boolean,
     onContinueClick: () -> Unit,
     onSkipClicked: () -> Unit
 ) {
     Column {
         FinancialConnectionsButton(
             loading = false,
-            enabled = disableNetworkingAsync !is Loading,
+            enabled = loading.not(),
             type = Type.Primary,
             onClick = onContinueClick,
             modifier = Modifier
@@ -185,7 +127,7 @@ private fun Footer(
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
             loading = false,
-            enabled = disableNetworkingAsync !is Loading,
+            enabled = loading.not(),
             type = Type.Secondary,
             onClick = { onSkipClicked() },
             modifier = Modifier
@@ -248,10 +190,8 @@ internal fun NetworkingLinkLoginWarmupScreenPreview(
     FinancialConnectionsPreview {
         NetworkingLinkLoginWarmupContent(
             state = state,
-            onCloseClick = {},
             onContinueClick = {},
             onSkipClicked = {},
-            onCloseFromErrorClick = {}
         )
     }
 }
