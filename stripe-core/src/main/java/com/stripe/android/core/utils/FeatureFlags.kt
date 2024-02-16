@@ -5,17 +5,20 @@ import com.stripe.android.core.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
-    val customerSheetACHv2 = FeatureFlag()
+    val customerSheetACHv2 = FeatureFlag(enabledInDebugMode = true)
+    val forceAuthFlowV3 = FeatureFlag(enabledInDebugMode = false)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FeatureFlag {
+class FeatureFlag(
+    private val enabledInDebugMode: Boolean,
+) {
 
     private var overrideInTest: Boolean? = null
 
     val isEnabled: Boolean
         get() = if (BuildConfig.DEBUG) {
-            overrideInTest ?: true
+            overrideInTest ?: enabledInDebugMode
         } else {
             false
         }

@@ -6,6 +6,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
 import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -257,14 +258,22 @@ private class FinancialConnectionsManifestRepositoryImpl(
             "expand" to listOf("manifest.active_auth_session"),
             "emit_events" to true,
             "locale" to locale.toLanguageTag(),
-            "mobile" to mapOf(
-                PARAMS_FULLSCREEN to true,
-                PARAMS_HIDE_CLOSE_BUTTON to true,
-                NetworkConstants.PARAMS_APPLICATION_ID to applicationId
-            ),
+            "mobile" to mobileParams(applicationId),
             NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
         )
     )
+
+    private fun mobileParams(applicationId: String): Map<String, *> {
+        return buildMap {
+            put(PARAMS_FULLSCREEN, true)
+            put(PARAMS_HIDE_CLOSE_BUTTON, true)
+            put(NetworkConstants.PARAMS_APPLICATION_ID, applicationId)
+
+            if (FeatureFlags.forceAuthFlowV3.isEnabled) {
+                put(PARAMS_FORCED_AUTHFLOW_VERSION, "v3")
+            }
+        }
+    }
 
     override suspend fun markConsentAcquired(
         clientSecret: String
@@ -548,6 +557,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
     companion object {
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
+        internal const val PARAMS_FORCED_AUTHFLOW_VERSION = "forced_authflow_version"
 
         internal const val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
