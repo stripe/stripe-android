@@ -16,6 +16,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
@@ -42,7 +43,9 @@ import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.BottomSheetDismissalController
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
+import com.stripe.android.financialconnections.ui.components.rememberBottomSheetDismissalController
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.argsOrNull
@@ -132,6 +135,16 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }
         val navController = rememberNavController(bottomSheetNavigator)
         val keyboardController = rememberKeyboardController()
+
+        val bottomSheetDismissalController = rememberBottomSheetDismissalController(
+            navController = navController,
+        )
+
+        LaunchedEffect(bottomSheetDismissalController) {
+            bottomSheetDismissalController.onDismissedBySwipe {
+                navController.popBackStack()
+            }
+        }
 
         PaneBackgroundEffects(navController)
         NavigationEffects(viewModel.navigationFlow, navController, keyboardController)
