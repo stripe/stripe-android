@@ -22,6 +22,10 @@ internal fun rememberBottomSheetDismissalController(
     }
 }
 
+/**
+ * This class helps fix an issue with bottom sheets where the NavController's current
+ * destination isn't updated when the sheet is dismissed by swiping or tapping the scrim.
+ */
 internal class BottomSheetDismissalController(
     private val isBottomSheetVisibleFlow: Flow<Boolean>,
     private val currentPaneFlow: Flow<FinancialConnectionsSessionManifest.Pane>,
