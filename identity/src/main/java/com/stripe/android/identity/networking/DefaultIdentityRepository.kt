@@ -60,7 +60,6 @@ internal class DefaultIdentityRepository @Inject constructor(
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             ),
-            // TODO add this
 //            params = mapOf(
 //                APP_IDENTIFIER to context.packageName
 //            )
