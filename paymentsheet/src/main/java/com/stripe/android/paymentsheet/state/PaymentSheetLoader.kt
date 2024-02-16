@@ -86,6 +86,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     elementsSession = elementsSession,
                     state = state,
                     isReloadingAfterProcessDeath = isReloadingAfterProcessDeath,
+                    isGooglePaySupported = isGooglePaySupported(),
                 )
 
                 return@let state
@@ -111,6 +112,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 }
             )
         }?.isReady()?.first() ?: false
+    }
+
+    private suspend fun isGooglePaySupported(): Boolean {
+        return googlePayRepositoryFactory(GooglePayEnvironment.Production).isReady().first()
     }
 
     private suspend fun create(
@@ -385,6 +390,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         elementsSession: ElementsSession,
         state: PaymentSheetState.Full,
         isReloadingAfterProcessDeath: Boolean,
+        isGooglePaySupported: Boolean,
     ) {
         elementsSession.sessionsError?.let { sessionsError ->
             eventReporter.onElementsSessionLoadFailed(sessionsError)
@@ -397,6 +403,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         } else {
             eventReporter.onLoadSucceeded(
                 linkEnabled = elementsSession.isLinkEnabled,
+                googlePaySupported = isGooglePaySupported,
                 currency = elementsSession.stripeIntent.currency,
                 paymentSelection = state.paymentSelection,
             )

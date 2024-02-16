@@ -27,6 +27,7 @@ class PaymentSheetEventTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
 
         assertThat(
@@ -69,6 +70,7 @@ class PaymentSheetEventTest {
 
         assertThat(event.params).run {
             containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
         }
@@ -83,6 +85,7 @@ class PaymentSheetEventTest {
             ),
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
 
         assertThat(
@@ -124,6 +127,8 @@ class PaymentSheetEventTest {
         )
 
         assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
         }
@@ -136,6 +141,7 @@ class PaymentSheetEventTest {
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
 
         assertThat(
@@ -178,6 +184,7 @@ class PaymentSheetEventTest {
 
         assertThat(event.params).run {
             containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
             containsEntry("is_decoupled", false)
             containsEntry("mpe_config", expectedConfig)
         }
@@ -188,6 +195,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.LoadSucceeded(
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             duration = (5L).seconds,
             paymentSelection = null
         )
@@ -197,6 +205,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "duration" to 5f,
                 "selected_lpm" to "none"
             )
@@ -208,6 +217,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.LoadSucceeded(
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             duration = (5L).seconds,
             paymentSelection = PaymentSelection.GooglePay
         )
@@ -220,6 +230,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.LoadSucceeded(
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             duration = (5L).seconds,
             paymentSelection = PaymentSelection.Link
         )
@@ -232,6 +243,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.LoadSucceeded(
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             duration = (5L).seconds,
             paymentSelection = PaymentSelection.Saved(
                 paymentMethod = PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
@@ -255,6 +267,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -270,6 +283,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
             )
         )
@@ -285,6 +299,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -300,6 +315,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
             )
         )
@@ -315,6 +331,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -330,6 +347,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "google_pay",
             )
         )
@@ -345,6 +363,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -360,6 +379,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "link",
             )
         )
@@ -381,6 +401,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -396,6 +417,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -416,6 +438,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -431,6 +454,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
                 "error_message" to "apiError",
             )
@@ -449,6 +473,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -464,6 +489,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "card",
                 "error_message" to "apiError",
             )
@@ -482,6 +508,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -497,6 +524,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "google_pay",
                 "error_message" to "apiError",
             )
@@ -515,6 +543,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -530,6 +559,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "selected_lpm" to "link",
                 "error_message" to "apiError",
             )
@@ -554,6 +584,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
             deferredIntentConfirmationType = null,
         )
         assertThat(
@@ -569,6 +600,7 @@ class PaymentSheetEventTest {
                 "duration" to 0.001F,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "error_message" to "apiError",
             )
         )
@@ -582,6 +614,7 @@ class PaymentSheetEventTest {
             currency = "usd",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -595,6 +628,7 @@ class PaymentSheetEventTest {
                 "currency" to "usd",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -605,6 +639,7 @@ class PaymentSheetEventTest {
             code = "card",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -618,6 +653,7 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "card",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -628,6 +664,7 @@ class PaymentSheetEventTest {
             code = "card",
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -641,6 +678,7 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "card",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -650,6 +688,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.CardNumberCompleted(
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -662,6 +701,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -671,6 +711,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.ShowEditablePaymentOption(
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -683,6 +724,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -692,6 +734,7 @@ class PaymentSheetEventTest {
         val event = PaymentSheetEvent.HideEditablePaymentOption(
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -704,6 +747,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -715,6 +759,7 @@ class PaymentSheetEventTest {
             source = PaymentSheetEvent.ShowPaymentOptionBrands.Source.Edit,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -729,6 +774,7 @@ class PaymentSheetEventTest {
                 "selected_card_brand" to "visa",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -740,6 +786,7 @@ class PaymentSheetEventTest {
             source = PaymentSheetEvent.ShowPaymentOptionBrands.Source.Add,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -754,6 +801,7 @@ class PaymentSheetEventTest {
                 "selected_card_brand" to "visa",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -765,6 +813,7 @@ class PaymentSheetEventTest {
             source = PaymentSheetEvent.HidePaymentOptionBrands.Source.Add,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -779,6 +828,7 @@ class PaymentSheetEventTest {
                 "selected_card_brand" to "cartes_bancaires",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -790,6 +840,7 @@ class PaymentSheetEventTest {
             source = PaymentSheetEvent.HidePaymentOptionBrands.Source.Edit,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -804,6 +855,7 @@ class PaymentSheetEventTest {
                 "selected_card_brand" to "cartes_bancaires",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -814,6 +866,7 @@ class PaymentSheetEventTest {
             selectedBrand = CardBrand.CartesBancaires,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -827,6 +880,7 @@ class PaymentSheetEventTest {
                 "selected_card_brand" to "cartes_bancaires",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -838,6 +892,7 @@ class PaymentSheetEventTest {
             error = Exception("No network available!"),
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -852,6 +907,7 @@ class PaymentSheetEventTest {
                 "error_message" to "No network available!",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -898,12 +954,14 @@ class PaymentSheetEventTest {
                 configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
                 isDeferred = false,
                 linkEnabled = false,
+                googlePaySupported = false,
             ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -950,12 +1008,14 @@ class PaymentSheetEventTest {
                 configuration = PaymentSheetFixtures.CONFIG_WITH_EVERYTHING,
                 isDeferred = false,
                 linkEnabled = false,
+                googlePaySupported = false,
             ).params
         ).isEqualTo(
             mapOf(
                 "mpe_config" to expectedConfigMap,
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }
@@ -968,6 +1028,7 @@ class PaymentSheetEventTest {
             duration = 60.seconds,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -981,6 +1042,7 @@ class PaymentSheetEventTest {
                 "selected_lpm" to "card",
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
                 "duration" to 60f,
                 "currency" to "USD",
             )
@@ -995,6 +1057,7 @@ class PaymentSheetEventTest {
             duration = null,
             isDeferred = false,
             linkEnabled = false,
+            googlePaySupported = false,
         )
         assertThat(
             event.eventName
@@ -1007,6 +1070,7 @@ class PaymentSheetEventTest {
             mapOf(
                 "is_decoupled" to false,
                 "link_enabled" to false,
+                "google_pay_enabled" to false,
             )
         )
     }

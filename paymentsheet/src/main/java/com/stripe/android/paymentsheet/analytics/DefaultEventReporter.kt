@@ -27,6 +27,7 @@ internal class DefaultEventReporter @Inject internal constructor(
 
     private var isDeferred: Boolean = false
     private var linkEnabled: Boolean = false
+    private var googlePaySupported: Boolean = false
     private var currency: String? = null
 
     override fun onInit(
@@ -41,22 +42,25 @@ internal class DefaultEventReporter @Inject internal constructor(
                 configuration = configuration,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
 
     override fun onLoadStarted() {
         durationProvider.start(DurationProvider.Key.Loading)
-        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled))
+        fireEvent(PaymentSheetEvent.LoadStarted(isDeferred, linkEnabled, googlePaySupported))
     }
 
     override fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
+        googlePaySupported: Boolean,
         currency: String?,
     ) {
         this.currency = currency
         this.linkEnabled = linkEnabled
+        this.googlePaySupported = googlePaySupported
 
         durationProvider.start(DurationProvider.Key.Checkout)
 
@@ -68,6 +72,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 duration = duration,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -82,6 +87,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 error = error.asPaymentSheetLoadingException.type,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -92,6 +98,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 error = error.asPaymentSheetLoadingException.type,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -101,6 +108,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.Dismiss(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -110,6 +118,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ShowExistingPaymentOptions(
                 mode = mode,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
                 currency = currency,
                 isDeferred = isDeferred,
             )
@@ -121,6 +130,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ShowNewPaymentOptionForm(
                 mode = mode,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
                 currency = currency,
                 isDeferred = isDeferred,
             )
@@ -136,6 +146,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 isDeferred = isDeferred,
                 currency = currency,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -148,6 +159,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 code = code,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -158,6 +170,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 code = code,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -167,6 +180,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.CardNumberCompleted(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -181,6 +195,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 currency = currency,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -195,6 +210,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 selectedLpm = paymentSelection.code(),
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -219,6 +235,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 currency = currency,
                 isDeferred = deferredIntentConfirmationType != null,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
                 deferredIntentConfirmationType = deferredIntentConfirmationType,
             )
         )
@@ -239,6 +256,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 currency = currency,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
                 deferredIntentConfirmationType = null,
             )
         )
@@ -249,6 +267,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.LpmSerializeFailureEvent(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -261,6 +280,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 type = type,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -270,6 +290,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.ShowEditablePaymentOption(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -279,6 +300,7 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.HideEditablePaymentOption(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -298,6 +320,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 },
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -317,6 +340,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 },
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -329,6 +353,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 selectedBrand = selectedBrand,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
@@ -343,6 +368,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 error = error,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
             )
         )
     }
