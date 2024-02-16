@@ -98,7 +98,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         )
     }.execute { copy(payload = it) }
 
-    private fun createAuthSession() = suspend {
+    private fun recreateAuthSession() = suspend {
         val launchedEvent = Launched(Date())
         val sync: SynchronizeSessionResponse = getOrFetchSync()
         val manifest: FinancialConnectionsSessionManifest = sync.manifest
@@ -119,7 +119,10 @@ internal class PartnerAuthViewModel @Inject constructor(
                 listOfNotNull(launchedEvent, loadedEvent)
             )
         }
-    }.execute {
+    }.execute(
+        // keeps existing payload to prevent showing full-screen loading.
+        retainValue = SharedPartnerAuthState::payload
+    ) {
         copy(
             payload = it,
             activeAuthSession = it()?.authSession?.id
@@ -277,7 +280,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private suspend fun onAuthCancelled(url: String?) {
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
-            setState { copy(authenticationStatus = Loading(Action.CANCELLING)) }
+            setState { copy(authenticationStatus = Loading(Action.AUTHENTICATING)) }
             val manifest = getOrFetchSync().manifest
             val authSession = manifest.activeAuthSession
             eventTracker.track(
@@ -337,7 +340,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             // for OAuth institutions, we remain on the pre-pane,
             // but create a brand new auth session
             setState { copy(authenticationStatus = Uninitialized) }
-            createAuthSession()
+            recreateAuthSession()
         } else {
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
