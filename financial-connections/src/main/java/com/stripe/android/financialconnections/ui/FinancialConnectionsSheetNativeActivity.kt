@@ -44,7 +44,9 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.argsOrNull
+import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
@@ -126,10 +128,13 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             ModalBottomSheetValue.Hidden,
             skipHalfExpanded = true
         )
+
         val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }
         val navController = rememberNavController(bottomSheetNavigator)
+        val keyboardController = rememberKeyboardController()
+
         PaneBackgroundEffects(navController)
-        NavigationEffects(viewModel.navigationFlow, navController)
+        NavigationEffects(viewModel.navigationFlow, navController, keyboardController)
 
         CompositionLocalProvider(
             LocalReducedBranding provides reducedBranding,
@@ -208,7 +213,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Composable
     fun NavigationEffects(
         navigationChannel: SharedFlow<NavigationIntent>,
-        navHostController: NavHostController
+        navHostController: NavHostController,
+        keyboardController: KeyboardController,
     ) {
         val activity = (LocalContext.current as? Activity)
         LaunchedEffect(activity, navHostController, navigationChannel) {
@@ -216,6 +222,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 if (activity?.isFinishing == true) {
                     return@onEach
                 }
+
+                keyboardController.dismiss()
+
                 when (intent) {
                     is NavigationIntent.NavigateTo -> {
                         val from: String? = navHostController.currentDestination?.route
