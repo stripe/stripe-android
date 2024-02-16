@@ -192,6 +192,7 @@ internal class WebIntentAuthenticator @Inject constructor(
 private fun URL.resolveRedirectUrl(): String? {
     return runCatching {
         val connection = (openConnection() as HttpURLConnection).apply {
+            connectTimeout = WeChatPayRedirectTimeoutInMillis
             readTimeout = WeChatPayRedirectTimeoutInMillis
         }
 

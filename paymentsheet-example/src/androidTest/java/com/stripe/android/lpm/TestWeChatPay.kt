@@ -31,4 +31,11 @@ internal class TestWeChatPay : BasePlaygroundTest() {
             testParameters = testParameters,
         )
     }
+
+    @Test
+    fun testWeChatPayInCustomFlow() {
+        testDriver.confirmCustom(
+            testParameters = testParameters,
+        )
+    }
 }

@@ -78,11 +78,13 @@ internal sealed interface AuthorizeAction {
     fun text(checkoutMode: CheckoutMode): String
 
     val requiresBrowser: Boolean
+    val isConsideredDone: Boolean
 
     data object PollingSucceedsAfterDelay : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = "POLLING SUCCEEDS AFTER DELAY"
 
         override val requiresBrowser: Boolean = false
+        override val isConsideredDone: Boolean = true
     }
 
     data class AuthorizePayment(
@@ -95,34 +97,40 @@ internal sealed interface AuthorizeAction {
                 "AUTHORIZE TEST PAYMENT"
             }
         }
+        override val isConsideredDone: Boolean = true
     }
 
     data object DisplayQrCode : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = "Display QR code"
 
         override val requiresBrowser: Boolean = false
+        override val isConsideredDone: Boolean = true
     }
 
     data class Fail(val expectedError: String) : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = "FAIL TEST PAYMENT"
 
         override val requiresBrowser: Boolean = true
+        override val isConsideredDone: Boolean = false
     }
 
     data object Cancel : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String = ""
         override val requiresBrowser: Boolean = true
+        override val isConsideredDone: Boolean = false
     }
 
     sealed interface Bacs : AuthorizeAction {
         data object Confirm : Bacs {
             override fun text(checkoutMode: CheckoutMode): String = "Confirm"
             override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = false
         }
 
         data object ModifyDetails : Bacs {
             override fun text(checkoutMode: CheckoutMode): String = "Modify details"
             override val requiresBrowser: Boolean = false
+            override val isConsideredDone: Boolean = false
         }
     }
 }

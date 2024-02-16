@@ -289,9 +289,6 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     }
 }
 
-private val PaymentMethod.Type.shouldRefreshIfIntentRequiresAction: Boolean
-    get() = this in setOf(PaymentMethod.Type.CashAppPay, PaymentMethod.Type.Swish, PaymentMethod.Type.WeChatPay)
-
 /**
  * Processes the result of a [PaymentIntent] confirmation.
  */
