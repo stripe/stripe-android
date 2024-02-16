@@ -1,6 +1,6 @@
 package com.stripe.android.testing
 
-import com.stripe.android.utils.FeatureFlag
+import com.stripe.android.core.utils.FeatureFlag
 import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement

@@ -1,7 +1,7 @@
-package com.stripe.android.utils
+package com.stripe.android.core.utils
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.BuildConfig
+import com.stripe.android.core.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
