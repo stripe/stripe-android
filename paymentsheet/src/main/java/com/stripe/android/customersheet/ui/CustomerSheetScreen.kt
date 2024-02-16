@@ -12,6 +12,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.common.ui.PrimaryButton
+import com.stripe.android.core.utils.FeatureFlags.customerSheetACHv2
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
@@ -31,7 +32,6 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.strings.resolve
-import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Provider
 import com.stripe.android.R as PaymentsCoreR

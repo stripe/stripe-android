@@ -8,6 +8,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -48,7 +49,6 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
