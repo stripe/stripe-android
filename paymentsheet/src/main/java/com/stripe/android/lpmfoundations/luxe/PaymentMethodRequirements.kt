@@ -310,3 +310,9 @@ internal val SwishRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = false,
 )
+
+internal val WeChatPayRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)

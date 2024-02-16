@@ -25,7 +25,12 @@ internal class PaymentAuthWebViewActivityViewModel(
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory
 ) : ViewModel() {
     val extraHeaders: Map<String, String> by lazy {
-        StripeClientUserAgentHeaderFactory().create(Stripe.appInfo)
+        val referrer = buildMap {
+            if (args.referrer != null) {
+                put("Referer", args.referrer)
+            }
+        }
+        StripeClientUserAgentHeaderFactory().create(Stripe.appInfo) + referrer
     }
 
     @JvmSynthetic

@@ -4,10 +4,12 @@ import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -15,6 +17,8 @@ import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
+import java.net.HttpURLConnection
+import java.net.URL
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -30,6 +34,7 @@ internal class WebIntentAuthenticator @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
+    @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -46,6 +51,9 @@ internal class WebIntentAuthenticator @Inject constructor(
         val returnUrl: String?
         var shouldCancelSource = false
         var shouldCancelIntentOnUserNavigation = true
+
+        var referrer: String? = null
+        var forceInAppWebView = false
 
         when (val nextActionData = authenticatable.nextActionData) {
             // can only triggered when `use_stripe_sdk=true`
@@ -67,8 +75,22 @@ internal class WebIntentAuthenticator @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
                 )
-                authUrl = nextActionData.url.toString()
+
                 returnUrl = nextActionData.returnUrl
+
+                if (authenticatable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
+                    val originalUrl = nextActionData.url.toString()
+                    val resolvedUrl = URL(originalUrl).resolveRedirectUrl()
+
+                    authUrl = resolvedUrl ?: originalUrl
+                    referrer = originalUrl
+
+                    // This is crucial so that we can set the "Referer" field in the web view activity.
+                    // WeChat will otherwise fail with an error indicating an incorrect configuration.
+                    forceInAppWebView = true
+                } else {
+                    authUrl = nextActionData.url.toString()
+                }
             }
             is StripeIntent.NextActionData.AlipayRedirect -> {
                 analyticsRequestExecutor.executeAsync(
@@ -114,16 +136,35 @@ internal class WebIntentAuthenticator @Inject constructor(
         }
 
         beginWebAuth(
-            host,
-            authenticatable,
-            StripePaymentController.getRequestCode(authenticatable),
-            authenticatable.clientSecret.orEmpty(),
-            authUrl,
-            requestOptions.stripeAccount,
+            host = host,
+            stripeIntent = authenticatable,
+            requestCode = StripePaymentController.getRequestCode(authenticatable),
+            clientSecret = authenticatable.clientSecret.orEmpty(),
+            authUrl = authUrl,
+            stripeAccount = requestOptions.stripeAccount,
             returnUrl = returnUrl,
             shouldCancelSource = shouldCancelSource,
-            shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
+            shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
+            referrer = referrer,
+            forceInAppWebView = forceInAppWebView,
         )
+    }
+
+    private suspend fun followRedirect(url: String): String = withContext(workContext) {
+        val redirectUrl = runCatching {
+            val connection = (URL(url).openConnection() as HttpURLConnection).apply {
+                readTimeout = 5_000
+            }
+
+            // Seems like we need to call getResponseCode() so that HttpURLConnection internally
+            // follows the redirect. If we didn't call this method, connection.url would be the
+            // same as the provided url, making this method redundant.
+            connection.responseCode
+
+            connection.url.toString()
+        }.getOrNull()
+
+        redirectUrl ?: url
     }
 
     private suspend fun beginWebAuth(
@@ -135,7 +176,9 @@ internal class WebIntentAuthenticator @Inject constructor(
         stripeAccount: String?,
         returnUrl: String? = null,
         shouldCancelSource: Boolean = false,
-        shouldCancelIntentOnUserNavigation: Boolean = true
+        shouldCancelIntentOnUserNavigation: Boolean = true,
+        referrer: String?,
+        forceInAppWebView: Boolean,
     ) = withContext(uiContext) {
         val paymentBrowserWebStarter = paymentBrowserAuthStarterFactory(host)
         paymentBrowserWebStarter.start(
@@ -151,8 +194,25 @@ internal class WebIntentAuthenticator @Inject constructor(
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
                 statusBarColor = host.statusBarColor,
                 publishableKey = publishableKeyProvider(),
-                isInstantApp = isInstantApp
+                isInstantApp = isInstantApp,
+                referrer = referrer,
+                forceInAppWebView = forceInAppWebView,
             )
         )
     }
+}
+
+private fun URL.resolveRedirectUrl(): String? {
+    return runCatching {
+        val connection = (openConnection() as HttpURLConnection).apply {
+            readTimeout = 10_000
+        }
+
+        // Seems like we need to call getResponseCode() so that HttpURLConnection internally
+        // follows the redirect. If we didn't call this method, connection.url would be the
+        // same as the provided url, making this method redundant.
+        connection.responseCode
+
+        connection.url.toString()
+    }.getOrNull()
 }

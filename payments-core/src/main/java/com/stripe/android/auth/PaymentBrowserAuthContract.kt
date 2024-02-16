@@ -24,8 +24,8 @@ internal class PaymentBrowserAuthContract :
         input: Args
     ): Intent {
         val defaultReturnUrl = DefaultReturnUrl.create(context)
-        val shouldUseBrowser =
-            input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp
+        val shouldUseBrowser = !input.forceInAppWebView &&
+            (input.hasDefaultReturnUrl(defaultReturnUrl) || input.isInstantApp)
 
         val extras = input.toBundle()
 
@@ -75,11 +75,13 @@ internal class PaymentBrowserAuthContract :
 
         val statusBarColor: Int?,
         val publishableKey: String,
-        val isInstantApp: Boolean
+        val isInstantApp: Boolean,
+        val referrer: String? = null,
+        val forceInAppWebView: Boolean = false,
     ) : Parcelable {
 
         /**
-         * We are using the default generated parcelable with the addition of settting null strings
+         * We are using the default generated parcelable with the addition of setting null strings
          * to empty so that if StripeBrowserProxyReturnActivity is called from an unexpected
          * external source that it doesn't crash the app.
          */
@@ -96,7 +98,9 @@ internal class PaymentBrowserAuthContract :
             parcel.readByte() != 0.toByte(),
             parcel.readValue(Int::class.java.classLoader) as? Int,
             parcel.readString() ?: "",
-            parcel.readByte() != 0.toByte()
+            parcel.readByte() != 0.toByte(),
+            parcel.readString(),
+            parcel.readByte() != 0.toByte(),
         )
 
         /**
@@ -110,6 +114,7 @@ internal class PaymentBrowserAuthContract :
         }
 
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
+
         override fun writeToParcel(parcel: Parcel, flags: Int) {
             parcel.writeString(objectId)
             parcel.writeInt(requestCode)
@@ -124,6 +129,8 @@ internal class PaymentBrowserAuthContract :
             parcel.writeValue(statusBarColor)
             parcel.writeString(publishableKey)
             parcel.writeByte(if (isInstantApp) 1 else 0)
+            parcel.writeString(referrer)
+            parcel.writeByte(if (forceInAppWebView) 1 else 0)
         }
 
         override fun describeContents(): Int {
