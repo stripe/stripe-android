@@ -25,6 +25,9 @@ data class ElementsSession(
     val linkFlags: Map<String, Boolean>
         get() = linkSettings?.linkFlags ?: emptyMap()
 
+    val disableLinkSignup: Boolean
+        get() = linkSettings?.disableLinkSignup ?: false
+
     val isLinkEnabled: Boolean
         get() {
             val allowsLink = Link.code in stripeIntent.paymentMethodTypes
@@ -38,6 +41,7 @@ data class ElementsSession(
         val linkFundingSources: List<String>,
         val linkPassthroughModeEnabled: Boolean,
         val linkFlags: Map<String, Boolean>,
+        val disableLinkSignup: Boolean,
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

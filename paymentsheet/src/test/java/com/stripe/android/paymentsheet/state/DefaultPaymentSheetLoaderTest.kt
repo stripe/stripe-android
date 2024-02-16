@@ -560,6 +560,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 linkFundingSources = emptyList(),
                 linkPassthroughModeEnabled = true,
                 linkFlags = emptyMap(),
+                disableLinkSignup = false,
             )
         )
 
@@ -588,6 +589,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     "link_only_for_payment_method_types_enabled" to false,
                     "link_passthrough_mode_enabled" to true,
                 ),
+                disableLinkSignup = false,
             )
         )
 
@@ -608,6 +610,26 @@ internal class DefaultPaymentSheetLoaderTest {
                 "link_passthrough_mode_enabled" to true,
             )
         )
+    }
+
+    @Test
+    fun `Disables link sign up when settings have it disabled`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = emptyList(),
+                linkPassthroughModeEnabled = false,
+                linkFlags = mapOf(),
+                disableLinkSignup = true,
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.signupMode).isNull()
     }
 
     @Test

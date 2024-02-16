@@ -104,6 +104,20 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun parsePaymentIntent_shouldDisableLinkSignUp() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test"
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_SIGNUP_DISABLED_JSON
+        )!!
+
+        assertThat(elementsSession.linkSettings?.disableLinkSignup).isTrue()
+    }
+
+    @Test
     fun parseSetupIntent_shouldCreateObjectLinkFundingSources() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.SetupIntentType(
