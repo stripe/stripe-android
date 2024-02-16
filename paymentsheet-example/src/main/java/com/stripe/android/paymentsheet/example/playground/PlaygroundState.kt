@@ -25,6 +25,9 @@ internal data class PlaygroundState(
     val checkoutMode = snapshot[CheckoutModeSettingsDefinition]
     val integrationType = snapshot[IntegrationTypeSettingsDefinition]
 
+    val stripeIntentId: String
+        get() = clientSecret.substringBefore("_secret_")
+
     fun paymentSheetConfiguration(): PaymentSheet.Configuration {
         return snapshot.paymentSheetConfiguration(this)
     }
