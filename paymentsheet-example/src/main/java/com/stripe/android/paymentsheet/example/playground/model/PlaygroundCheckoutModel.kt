@@ -5,6 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Suppress("TooManyFunctions")
 class CheckoutRequest private constructor(
     @SerialName("initialization")
     val initialization: String?,

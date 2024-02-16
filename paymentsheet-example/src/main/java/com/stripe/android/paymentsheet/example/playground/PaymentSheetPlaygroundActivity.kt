@@ -300,14 +300,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
     }
 
     private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState) {
-        val intentConfig = PaymentSheet.IntentConfiguration(
-            mode = PaymentSheet.IntentConfiguration.Mode.Payment(
-                amount = 1099,
-                currency = "usd",
-            ),
-            paymentMethodConfigurationId = "pmc_234",
-            // Other configuration options...
-        )
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
