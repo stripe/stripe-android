@@ -1,8 +1,10 @@
 package com.stripe.android.analytics
 
 import androidx.test.core.app.ApplicationProvider
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
@@ -96,6 +98,24 @@ class DefaultPaymentSessionEventReporterTest {
     }
 
     @Test
+    fun `onFormShown() should restart duration on call`() {
+        val durationProvider = FakeDurationProvider()
+
+        val eventReporter = createEventReporter(durationProvider)
+
+        eventReporter.onFormShown("card")
+
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.ConfirmButtonClicked,
+                    reset = true
+                )
+            )
+        ).isTrue()
+    }
+
+    @Test
     fun `onFormInteracted() should fire analytics request with expected event value`() {
         val eventReporter = createEventReporter()
 
@@ -137,7 +157,9 @@ class DefaultPaymentSessionEventReporterTest {
         )
     }
 
-    private fun createEventReporter(): PaymentSessionEventReporter {
+    private fun createEventReporter(
+        durationProvider: DurationProvider = this.durationProvider,
+    ): PaymentSessionEventReporter {
         return DefaultPaymentSessionEventReporter(
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,

@@ -255,12 +255,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
             val paymentMethodType =
                 confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
                     ?: confirmPaymentIntentParams.sourceParams?.type
-            val errorMessage = result.exceptionOrNull()?.safeAnalyticsMessage
 
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createPaymentIntentConfirmation(
                     paymentMethodType = paymentMethodType,
-                    errorMessage = errorMessage,
+                    errorMessage = result.errorMessage,
                 )
             )
         }
@@ -398,12 +397,10 @@ class StripeApiRepository @JvmOverloads internal constructor(
             ),
             SetupIntentJsonParser()
         ) { result ->
-            val errorMessage = result.exceptionOrNull()?.safeAnalyticsMessage
-
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createSetupIntentConfirmation(
                     paymentMethodType = confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
-                    errorMessage = errorMessage,
+                    errorMessage = result.errorMessage,
                 )
             )
         }
@@ -1557,7 +1554,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>,
-        onResponse: (result: Result<*>) -> Unit = {},
+        onResponse: (result: Result<StripeResponse<String>>) -> Unit = {},
     ): Result<ModelType> {
         return runCatching {
             val response = makeApiRequest(apiRequest, onResponse).responseJson()
@@ -1577,7 +1574,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     )
     internal suspend fun makeApiRequest(
         apiRequest: ApiRequest,
-        onResponse: (result: Result<*>) -> Unit
+        onResponse: (result: Result<StripeResponse<String>>) -> Unit
     ): StripeResponse<String> {
         val dnsCacheData = disableDnsCache()
 
@@ -1738,6 +1735,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
             )
         }
     }
+
+    private val Result<StripeResponse<String>>.errorMessage: String?
+        get() {
+            val response = getOrNull()
+            val resultError = exceptionOrNull()
+
+            return when {
+                resultError != null -> resultError.safeAnalyticsMessage
+                response != null && response.isError -> {
+                    runCatching {
+                        handleApiError(response)
+                    }.let { errorResult ->
+                        errorResult.exceptionOrNull()?.safeAnalyticsMessage
+                    }
+                }
+
+                else -> null
+            }
+        }
 
     private sealed class DnsCacheData {
         data class Success(

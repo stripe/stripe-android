@@ -162,6 +162,8 @@ internal class PaymentOptionsViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
+            verify(eventReporter).onShowNewPaymentOptionForm()
+
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
@@ -302,6 +304,8 @@ internal class PaymentOptionsViewModelTest {
 
             viewModel.currentScreen.test {
                 assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+                verify(eventReporter).onShowExistingPaymentOptions()
             }
         }
 

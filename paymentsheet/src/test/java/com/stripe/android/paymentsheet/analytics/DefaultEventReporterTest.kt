@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -76,6 +77,31 @@ class DefaultEventReporterTest {
                     req.params["selected_lpm"] == "card"
             }
         )
+    }
+
+    @Test
+    fun `on completed loading operation, should reset checkout timer`() {
+        val durationProvider = FakeDurationProvider()
+
+        val eventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+            durationProvider = durationProvider,
+        )
+
+        eventReporter.simulateSuccessfulSetup(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.Checkout,
+                    reset = true
+                )
+            )
+        ).isTrue()
     }
 
     @Test
@@ -253,6 +279,31 @@ class DefaultEventReporterTest {
                     req.params["selected_lpm"] == "card"
             }
         )
+    }
+
+    @Test
+    fun `onPaymentMethodFormShown() should restart duration on call`() {
+        val durationProvider = FakeDurationProvider()
+
+        val customEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Custom,
+            durationProvider = durationProvider
+        ) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPaymentMethodFormShown(
+            code = "card",
+        )
+
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.ConfirmButtonClicked,
+                    reset = true
+                )
+            )
+        ).isTrue()
     }
 
     @Test
@@ -496,6 +547,26 @@ class DefaultEventReporterTest {
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             durationProvider = FakeDurationProvider(duration),
+            workContext = testDispatcher,
+        )
+
+        reporter.configure()
+
+        reset(analyticsRequestExecutor)
+
+        return reporter
+    }
+
+    private fun createEventReporter(
+        mode: EventReporter.Mode,
+        durationProvider: DurationProvider,
+        configure: EventReporter.() -> Unit = {},
+    ): EventReporter {
+        val reporter = DefaultEventReporter(
+            mode = mode,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            durationProvider = durationProvider,
             workContext = testDispatcher,
         )
 

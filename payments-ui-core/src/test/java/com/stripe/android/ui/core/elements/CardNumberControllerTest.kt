@@ -33,9 +33,9 @@ import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.atMostOnce
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
@@ -438,7 +438,7 @@ internal class CardNumberControllerTest {
 
         cardNumberController.onValueChange("4242424242424242")
 
-        verify(eventReporter, atMostOnce()).onCardNumberCompleted()
+        verify(eventReporter, times(1)).onCardNumberCompleted()
     }
 
     @Test
@@ -477,8 +477,6 @@ internal class CardNumberControllerTest {
                 )
             }
         }
-
-        cardNumberController.onValueChange("4242424242424242")
 
         verifyNoInteractions(eventReporter)
     }
