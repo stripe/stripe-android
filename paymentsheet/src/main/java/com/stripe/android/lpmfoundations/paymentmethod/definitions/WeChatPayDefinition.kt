@@ -15,7 +15,9 @@ internal object WeChatPayDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = emptySet()
+    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+        AddPaymentMethodRequirement.UnsupportedForSetup,
+    )
 
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
