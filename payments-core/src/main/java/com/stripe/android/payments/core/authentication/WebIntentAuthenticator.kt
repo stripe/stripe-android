@@ -24,6 +24,8 @@ import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+private const val WeChatPayRedirectTimeoutInMillis = 10_000
+
 /**
  * [PaymentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
  */
@@ -80,7 +82,9 @@ internal class WebIntentAuthenticator @Inject constructor(
 
                 if (authenticatable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
                     val originalUrl = nextActionData.url.toString()
-                    val resolvedUrl = URL(originalUrl).resolveRedirectUrl()
+                    val resolvedUrl = withContext(workContext) {
+                        URL(originalUrl).resolveRedirectUrl()
+                    }
 
                     authUrl = resolvedUrl ?: originalUrl
                     referrer = originalUrl
@@ -150,23 +154,6 @@ internal class WebIntentAuthenticator @Inject constructor(
         )
     }
 
-    private suspend fun followRedirect(url: String): String = withContext(workContext) {
-        val redirectUrl = runCatching {
-            val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-                readTimeout = 5_000
-            }
-
-            // Seems like we need to call getResponseCode() so that HttpURLConnection internally
-            // follows the redirect. If we didn't call this method, connection.url would be the
-            // same as the provided url, making this method redundant.
-            connection.responseCode
-
-            connection.url.toString()
-        }.getOrNull()
-
-        redirectUrl ?: url
-    }
-
     private suspend fun beginWebAuth(
         host: AuthActivityStarterHost,
         stripeIntent: StripeIntent,
@@ -205,7 +192,7 @@ internal class WebIntentAuthenticator @Inject constructor(
 private fun URL.resolveRedirectUrl(): String? {
     return runCatching {
         val connection = (openConnection() as HttpURLConnection).apply {
-            readTimeout = 10_000
+            readTimeout = WeChatPayRedirectTimeoutInMillis
         }
 
         // Seems like we need to call getResponseCode() so that HttpURLConnection internally
