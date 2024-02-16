@@ -34,13 +34,14 @@ internal data class TestParameters(
     companion object {
         fun create(
             paymentMethodCode: String,
+            requiresBrowser: Boolean = true,
             playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
         ): TestParameters {
             return TestParameters(
                 paymentMethodCode = paymentMethodCode,
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = false,
-                authorizationAction = AuthorizeAction.AuthorizePayment,
+                authorizationAction = AuthorizeAction.AuthorizePayment(requiresBrowser),
                 playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
             )
         }
@@ -84,7 +85,9 @@ internal sealed interface AuthorizeAction {
         override val requiresBrowser: Boolean = false
     }
 
-    data object AuthorizePayment : AuthorizeAction {
+    data class AuthorizePayment(
+        override val requiresBrowser: Boolean = true,
+    ) : AuthorizeAction {
         override fun text(checkoutMode: CheckoutMode): String {
             return if (checkoutMode == CheckoutMode.SETUP) {
                 "AUTHORIZE TEST SETUP"
@@ -92,8 +95,6 @@ internal sealed interface AuthorizeAction {
                 "AUTHORIZE TEST PAYMENT"
             }
         }
-
-        override val requiresBrowser: Boolean = true
     }
 
     data object DisplayQrCode : AuthorizeAction {
