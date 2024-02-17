@@ -3,6 +3,7 @@ package com.stripe.android.payments.core.authentication
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
+import javax.net.ssl.HttpsURLConnection
 
 private const val RedirectTimeoutInMillis = 10_000
 
@@ -10,13 +11,24 @@ internal fun interface RedirectResolver {
     suspend operator fun invoke(url: String): String
 }
 
-internal class RealRedirectResolver @Inject constructor() : RedirectResolver {
+internal typealias ConfigureSslHandler = HttpsURLConnection.() -> Unit
+
+internal class RealRedirectResolver(
+    private val configureSSL: ConfigureSslHandler,
+) : RedirectResolver {
+
+    @Inject
+    constructor() : this(configureSSL = {})
 
     override suspend fun invoke(url: String): String {
         return runCatching {
             val connection = (URL(url).openConnection() as HttpURLConnection).apply {
                 connectTimeout = RedirectTimeoutInMillis
                 readTimeout = RedirectTimeoutInMillis
+
+                if (this is HttpsURLConnection) {
+                    configureSSL()
+                }
             }
 
             // Seems like we need to call getResponseCode() so that HttpURLConnection internally
@@ -25,6 +37,8 @@ internal class RealRedirectResolver @Inject constructor() : RedirectResolver {
             connection.responseCode
 
             connection.url.toString()
-        }.getOrNull() ?: url
+        }.getOrElse {
+            url
+        }
     }
 }
