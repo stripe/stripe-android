@@ -19,11 +19,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -102,7 +101,6 @@ private fun LinkStepUpVerificationContent(
 }
 
 @Composable
-@OptIn(ExperimentalComposeUiApi::class)
 private fun LinkStepUpVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
     resendOtpAsync: Async<Unit>,
@@ -113,11 +111,12 @@ private fun LinkStepUpVerificationLoaded(
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val textInputService = LocalTextInputService.current
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {
             focusManager.clearFocus(true)
-            keyboardController?.hide()
+            @Suppress("DEPRECATION")
+            textInputService?.hideSoftwareKeyboard()
         }
     }
     Column(
