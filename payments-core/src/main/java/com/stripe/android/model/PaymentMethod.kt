@@ -414,7 +414,7 @@ constructor(
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false,,
+            hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = true,
         ),
         Boleto(

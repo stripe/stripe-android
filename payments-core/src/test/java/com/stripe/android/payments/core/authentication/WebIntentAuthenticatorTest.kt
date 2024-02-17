@@ -59,19 +59,6 @@ class WebIntentAuthenticatorTest {
 
     private var threeDs1IntentReturnUrlMap = mutableMapOf<String, String>()
 
-    private val authenticator = WebIntentAuthenticator(
-        paymentBrowserAuthStarterFactory = paymentBrowserAuthStarterFactory,
-        analyticsRequestExecutor = analyticsRequestExecutor,
-        paymentAnalyticsRequestFactory = analyticsRequestFactory,
-        enableLogging = false,
-        uiContext = testDispatcher,
-        workContext = testDispatcher,
-        threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
-        publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-        isInstantApp = false,
-        defaultReturnUrl = DefaultReturnUrl("some_package_name"),
-    )
-
     @Before
     fun setUp() {
         threeDs1IntentReturnUrlMap[PAYMENT_INTENT_ID_FOR_3DS1] = RETURN_URL_FOR_3DS1
@@ -148,14 +135,48 @@ class WebIntentAuthenticatorTest {
         )
     }
 
+    @Test
+    fun authenticate_whenRedirectingToWeChatPay() {
+        val mockResolvedUrl = "https://resolved_url.wow"
+
+        verifyAuthenticate(
+            stripeIntent = PaymentIntentFixtures.WECHAT_PAY_REQUIRES_ACTION,
+            expectedUrl = mockResolvedUrl,
+            expectedReferrer = "pm-redirects.stripe.com/wechat_payment",
+            expectedForceInAppWebView = true,
+            expectedReturnUrl = "stripesdk://payment_return_url/some_package_name",
+            expectedRequestCode = PAYMENT_REQUEST_CODE,
+            expectedAnalyticsEvent = null,
+            expectedShouldCancelIntentOnUserNavigation = false,
+            redirectResolver = { mockResolvedUrl },
+        )
+    }
+
     private fun verifyAuthenticate(
+        redirectResolver: RedirectResolver = RealRedirectResolver(),
         stripeIntent: StripeIntent,
         expectedUrl: String,
+        expectedReferrer: String? = null,
+        expectedForceInAppWebView: Boolean = false,
         expectedReturnUrl: String?,
         expectedRequestCode: Int,
         expectedShouldCancelIntentOnUserNavigation: Boolean = true,
         expectedAnalyticsEvent: PaymentAnalyticsEvent?
     ) = runTest {
+        val authenticator = WebIntentAuthenticator(
+            paymentBrowserAuthStarterFactory = paymentBrowserAuthStarterFactory,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            enableLogging = false,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+            threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
+            publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
+            isInstantApp = false,
+            defaultReturnUrl = DefaultReturnUrl("some_package_name"),
+            redirectResolver = redirectResolver,
+        )
+
         authenticator.authenticate(
             host,
             stripeIntent,
@@ -170,10 +191,12 @@ class WebIntentAuthenticatorTest {
 
         assertThat(args.requestCode).isEqualTo(expectedRequestCode)
         assertThat(args.url).isEqualTo(expectedUrl)
+        assertThat(args.referrer).isEqualTo(expectedReferrer)
         assertThat(args.returnUrl).isEqualTo(expectedReturnUrl)
         assertThat(args.shouldCancelIntentOnUserNavigation).isEqualTo(
             expectedShouldCancelIntentOnUserNavigation
         )
+        assertThat(args.forceInAppWebView).isEqualTo(expectedForceInAppWebView)
 
         expectedAnalyticsEvent?.let {
             verifyAnalytics(it)

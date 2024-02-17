@@ -42,6 +42,7 @@ internal class WebIntentAuthenticator @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
+    private val redirectResolver: RedirectResolver,
 ) : PaymentAuthenticator<StripeIntent>() {
 
     override suspend fun performAuthentication(
@@ -82,11 +83,9 @@ internal class WebIntentAuthenticator @Inject constructor(
 
                 if (authenticatable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
                     val originalUrl = nextActionData.url.toString()
-                    val resolvedUrl = withContext(workContext) {
-                        URL(originalUrl).resolveRedirectUrl()
-                    }
 
-                    authUrl = resolvedUrl ?: originalUrl
+                    authUrl = redirectResolver(originalUrl)
+                    shouldCancelIntentOnUserNavigation = false
                     referrer = originalUrl
 
                     // This is crucial so that we can set the "Referer" field in the web view activity.
