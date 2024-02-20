@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -51,7 +51,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import kotlinx.coroutines.delay
 
 private const val ENTER_TRANSITION_DURATION_MS = 1000
@@ -160,7 +160,7 @@ private fun SpinnerToSuccessAnimation(
             enter = enterTransition,
             exit = exitTransition,
         ) {
-            V3LoadingSpinner(
+            LoadingSpinner(
                 modifier = Modifier.size(56.dp)
             )
         }
@@ -194,7 +194,7 @@ private fun SuccessCompletedContent(
             contentAlignment = Alignment.Center,
             modifier = Modifier
                 .size(56.dp)
-                .background(FinancialConnectionsTheme.v3Colors.iconBrand, CircleShape)
+                .background(FinancialConnectionsTheme.colors.iconBrand, CircleShape)
         ) {
             Icon(
                 modifier = Modifier.graphicsLayer { alpha = checkAlpha },
@@ -205,7 +205,7 @@ private fun SuccessCompletedContent(
         }
         Text(
             stringResource(id = R.string.stripe_success_pane_title),
-            style = v3Typography.headingXLarge,
+            style = typography.headingXLarge,
             textAlign = TextAlign.Center
         )
         AnnotatedText(
@@ -214,11 +214,11 @@ private fun SuccessCompletedContent(
                 count = accountsCount,
                 args = emptyList()
             ),
-            defaultStyle = v3Typography.bodyMedium.copy(
+            defaultStyle = typography.bodyMedium.copy(
                 textAlign = TextAlign.Center
             ),
             annotationStyles = mapOf(
-                StringAnnotation.BOLD to v3Typography.bodyMediumEmphasized.copy(
+                StringAnnotation.BOLD to typography.bodyMediumEmphasized.copy(
                     textAlign = TextAlign.Center,
                 ).toSpanStyle()
             ),

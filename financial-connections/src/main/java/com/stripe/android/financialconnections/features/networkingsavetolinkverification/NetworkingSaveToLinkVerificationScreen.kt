@@ -33,8 +33,8 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationState.Payload
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationViewModel.Companion.PANE
@@ -139,7 +139,7 @@ private fun NetworkingSaveToLinkVerificationLoaded(
                             modifier = Modifier.fillMaxWidth(),
                             contentAlignment = Alignment.Center
                         ) {
-                            V3LoadingSpinner(Modifier.size(24.dp))
+                            LoadingSpinner(Modifier.size(24.dp))
                         }
                     }
                 }
@@ -165,14 +165,14 @@ private fun Header(payload: Payload) {
     ) {
         Text(
             text = stringResource(R.string.stripe_networking_save_to_link_verification_title),
-            style = FinancialConnectionsTheme.v3Typography.headingXLarge,
+            style = FinancialConnectionsTheme.typography.headingXLarge,
         )
         Text(
             text = stringResource(
                 R.string.stripe_networking_verification_desc,
                 payload.phoneNumber
             ),
-            style = FinancialConnectionsTheme.v3Typography.bodyMedium,
+            style = FinancialConnectionsTheme.typography.bodyMedium,
         )
     }
 }

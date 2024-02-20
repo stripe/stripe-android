@@ -72,8 +72,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.components.elevation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.uicore.image.StripeImage
@@ -142,7 +142,7 @@ private fun LinkAccountPickerContent(
     val scope = rememberCoroutineScope()
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
-        sheetBackgroundColor = v3Colors.backgroundSurface,
+        sheetBackgroundColor = colors.backgroundSurface,
         sheetShape = RoundedCornerShape(8.dp),
         scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = {
@@ -272,7 +272,7 @@ private fun LazyListScope.loadedContent(
     item {
         AnnotatedText(
             text = TextResource.Text(payload.title),
-            defaultStyle = v3Typography.headingXLarge,
+            defaultStyle = typography.headingXLarge,
             onClickableTextClick = {}
         )
         Spacer(modifier = Modifier.size(8.dp))
@@ -302,7 +302,7 @@ private fun LazyListScope.loadingContent() {
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = "Retrieving accounts",
-            style = v3Typography.headingXLarge
+            style = typography.headingXLarge
         )
         Spacer(modifier = Modifier.size(8.dp))
     }
@@ -346,7 +346,7 @@ private fun SelectNewAccount(
             .clip(shape)
             .border(
                 width = 1.dp,
-                color = v3Colors.border,
+                color = colors.border,
                 shape = shape
             )
             .padding(16.dp)
@@ -362,8 +362,8 @@ private fun SelectNewAccount(
             Spacer(modifier = Modifier.size(16.dp))
             Text(
                 text = text.body,
-                style = v3Typography.labelLargeEmphasized,
-                color = v3Colors.textDefault
+                style = typography.labelLargeEmphasized,
+                color = colors.textDefault
             )
         }
     }
@@ -379,14 +379,14 @@ fun SelectNewAccountIcon(
         modifier = Modifier
             .size(56.dp)
             .clip(RoundedCornerShape(12.dp))
-            .background(v3Colors.backgroundOffset)
+            .background(colors.backgroundOffset)
     ) {
         val iconModifier = Modifier.size(20.dp)
         val placeholderImage = @Composable {
             Image(
                 painter = painterResource(R.drawable.stripe_ic_add),
                 modifier = iconModifier,
-                colorFilter = ColorFilter.tint(v3Colors.textBrand),
+                colorFilter = ColorFilter.tint(colors.textBrand),
                 contentDescription = contentDescription
             )
         }

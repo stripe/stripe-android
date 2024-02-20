@@ -66,8 +66,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.uicore.image.StripeImage
 
@@ -316,7 +316,7 @@ private fun PrePaneContent(
                         modifier = Modifier.padding(horizontal = 24.dp),
                         text = TextResource.Text(fromHtml(bodyItem.content)),
                         onClickableTextClick = onClickableTextClick,
-                        defaultStyle = v3Typography.bodyMedium
+                        defaultStyle = typography.bodyMedium
                     )
                 }
             }
@@ -346,8 +346,8 @@ private fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            v3Colors.backgroundOffset,
-                            v3Colors.border,
+                            colors.backgroundOffset,
+                            colors.border,
                         ),
                     )
                 )
@@ -358,7 +358,7 @@ private fun PrepaneImage(bodyItem: Entry.Image) {
         // left separator
         Box(
             modifier = Modifier
-                .background(color = v3Colors.backgroundOffset)
+                .background(color = colors.backgroundOffset)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -372,7 +372,7 @@ private fun PrepaneImage(bodyItem: Entry.Image) {
         // right separator
         Box(
             modifier = Modifier
-                .background(color = v3Colors.backgroundOffset)
+                .background(color = colors.backgroundOffset)
                 .width(8.dp)
                 .fillMaxHeight()
         )
@@ -382,8 +382,8 @@ private fun PrepaneImage(bodyItem: Entry.Image) {
                 .background(
                     brush = Brush.horizontalGradient(
                         colors = listOf(
-                            v3Colors.border,
-                            v3Colors.backgroundOffset,
+                            colors.border,
+                            colors.backgroundOffset,
                         ),
                     )
                 )
@@ -467,15 +467,15 @@ private fun PrepaneHeader(
         AnnotatedText(
             text = title,
             onClickableTextClick = { },
-            defaultStyle = v3Typography.headingLarge.copy(
-                color = v3Colors.textDefault
+            defaultStyle = typography.headingLarge.copy(
+                color = colors.textDefault
             ),
         )
         AnnotatedText(
             text = subtitle,
             onClickableTextClick = { },
-            defaultStyle = v3Typography.bodyMedium.copy(
-                color = v3Colors.textDefault
+            defaultStyle = typography.bodyMedium.copy(
+                color = colors.textDefault
             ),
         )
     }
@@ -495,7 +495,7 @@ private fun GifWebView(
             append("</body></html>")
         }
     }
-    val backgroundColor = v3Colors.backgroundOffset.toArgb()
+    val backgroundColor = colors.backgroundOffset.toArgb()
     AndroidView(
         modifier = modifier.background(Color.Transparent),
         factory = {

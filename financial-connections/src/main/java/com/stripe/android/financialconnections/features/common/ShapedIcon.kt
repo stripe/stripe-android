@@ -78,7 +78,7 @@ private fun LocalIcon(
 ) {
     Icon(
         painter = painter,
-        tint = FinancialConnectionsTheme.v3Colors.iconBrand,
+        tint = FinancialConnectionsTheme.colors.iconBrand,
         contentDescription = contentDescription,
         modifier = Modifier.size(iconSize),
     )

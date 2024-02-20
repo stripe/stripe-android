@@ -39,8 +39,8 @@ import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.LinkColors
 
@@ -65,7 +65,7 @@ private fun NetworkingLinkLoginWarmupContent(
     Layout(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = v3Colors.backgroundSurface)
+            .background(color = colors.backgroundSurface)
             .padding(top = 24.dp),
         inModal = true,
         verticalArrangement = Arrangement.spacedBy(24.dp),
@@ -95,11 +95,11 @@ private fun HeaderSection() {
         )
         Text(
             text = stringResource(R.string.stripe_networking_link_login_warmup_title),
-            style = v3Typography.headingLarge,
+            style = typography.headingLarge,
         )
         Text(
             text = stringResource(R.string.stripe_networking_link_login_warmup_description),
-            style = v3Typography.bodyMedium,
+            style = typography.bodyMedium,
         )
     }
 }
@@ -153,7 +153,7 @@ internal fun ExistingEmailSection(
             .clip(RoundedCornerShape(12.dp))
             .border(
                 width = 1.dp,
-                color = v3Colors.border,
+                color = colors.border,
                 shape = RoundedCornerShape(12.dp)
             )
             .padding(horizontal = 16.dp, vertical = 12.dp)
@@ -166,7 +166,7 @@ internal fun ExistingEmailSection(
         ) {
             Text(
                 text = email.getOrElse(0) { '@' }.uppercaseChar().toString(),
-                style = v3Typography.bodySmall,
+                style = typography.bodySmall,
                 color = LinkColors.Brand600
             )
         }
@@ -176,8 +176,8 @@ internal fun ExistingEmailSection(
             text = email,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            style = v3Typography.bodySmall,
-            color = v3Colors.textDefault
+            style = typography.bodySmall,
+            color = colors.textDefault
         )
     }
 }

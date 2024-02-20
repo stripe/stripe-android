@@ -44,8 +44,8 @@ internal fun MerchantDataAccessText(
         onClickableTextClick = {
             onLearnMoreClick()
         },
-        defaultStyle = FinancialConnectionsTheme.v3Typography.labelSmall.copy(
-            color = FinancialConnectionsTheme.v3Colors.textDefault,
+        defaultStyle = FinancialConnectionsTheme.typography.labelSmall.copy(
+            color = FinancialConnectionsTheme.colors.textDefault,
             textAlign = TextAlign.Center
         ),
     )

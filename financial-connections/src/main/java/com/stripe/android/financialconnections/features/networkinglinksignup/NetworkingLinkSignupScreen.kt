@@ -65,8 +65,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
@@ -252,9 +252,9 @@ private fun NetworkingLinkSignupFooter(
         modifier = Modifier.fillMaxWidth(),
         text = TextResource.Text(fromHtml(payload.content.aboveCta)),
         onClickableTextClick = onClickableTextClick,
-        defaultStyle = v3Typography.labelSmall.copy(
+        defaultStyle = typography.labelSmall.copy(
             textAlign = TextAlign.Center,
-            color = v3Colors.textDefault
+            color = colors.textDefault
         )
     )
     Spacer(modifier = Modifier.size(16.dp))
@@ -298,7 +298,7 @@ private fun PhoneNumberSection(
                         modifier = Modifier
                             .padding(horizontal = 6.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(v3Colors.background)
+                            .background(colors.background)
                             .padding(vertical = 12.dp, horizontal = 8.dp)
                     )
                 },
@@ -316,7 +316,7 @@ private fun PhoneNumberSection(
 private fun Title(title: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(title)),
-        defaultStyle = v3Typography.headingXLarge,
+        defaultStyle = typography.headingXLarge,
         onClickableTextClick = {},
     )
 }
@@ -353,7 +353,7 @@ internal fun EmailSection(
                             end = 16.dp,
                             bottom = 8.dp
                         ),
-                    color = v3Colors.iconBrand,
+                    color = colors.iconBrand,
                     strokeWidth = 2.dp
                 )
             }

@@ -7,7 +7,7 @@ import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.Neutral900
 
 @Composable
@@ -18,7 +18,7 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
 ) {
     ModalBottomSheetLayout(
         sheetState = sheetState,
-        sheetBackgroundColor = v3Colors.backgroundSurface,
+        sheetBackgroundColor = colors.backgroundSurface,
         sheetShape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
         scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = sheetContent,
@@ -33,7 +33,7 @@ internal fun FinancialConnectionsModalBottomSheetLayout(
 ) {
     com.stripe.android.financialconnections.navigation.bottomsheet.ModalBottomSheetLayout(
         bottomSheetNavigator = bottomSheetNavigator,
-        sheetBackgroundColor = v3Colors.backgroundSurface,
+        sheetBackgroundColor = colors.backgroundSurface,
         sheetShape = RoundedCornerShape(20.dp, 20.dp, 0.dp, 0.dp),
         scrimColor = Neutral900.copy(alpha = 0.32f),
         content = content,

@@ -23,7 +23,7 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -33,20 +33,20 @@ internal fun ListItem(
 ) {
     val firstText = bullet.title ?: bullet.content ?: TextResource.Text("")
     val secondText = remember(firstText) { bullet.content?.takeIf { bullet.title != null } }
-    val titleStyle = if (secondText != null) v3Typography.bodyMediumEmphasized else v3Typography.bodyMedium
+    val titleStyle = if (secondText != null) typography.bodyMediumEmphasized else typography.bodyMedium
     Row {
         ListItemIcon(icon = bullet.imageResource)
         Spacer(modifier = Modifier.size(16.dp))
         Column {
             AnnotatedText(
                 text = firstText,
-                defaultStyle = titleStyle.copy(color = FinancialConnectionsTheme.v3Colors.textDefault),
+                defaultStyle = titleStyle.copy(color = FinancialConnectionsTheme.colors.textDefault),
                 onClickableTextClick = onClickableTextClick
             )
             secondText?.let {
                 AnnotatedText(
                     text = requireNotNull(bullet.content),
-                    defaultStyle = v3Typography.bodySmall.copy(color = FinancialConnectionsTheme.v3Colors.textSubdued),
+                    defaultStyle = typography.bodySmall.copy(color = FinancialConnectionsTheme.colors.textSubdued),
                     onClickableTextClick = onClickableTextClick
                 )
             }
@@ -56,7 +56,7 @@ internal fun ListItem(
 
 @Composable
 private fun ListItemIcon(icon: ImageResource?) {
-    val bulletColor = FinancialConnectionsTheme.v3Colors.iconDefault
+    val bulletColor = FinancialConnectionsTheme.colors.iconDefault
     val iconSize = 20.dp
     val modifier = Modifier
         .size(iconSize)

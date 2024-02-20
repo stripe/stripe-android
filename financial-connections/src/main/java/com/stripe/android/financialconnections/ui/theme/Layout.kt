@@ -27,7 +27,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.elevation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 /**
  * A layout that contains a body, and an optional, bottom fixed footer.
@@ -132,7 +132,7 @@ internal fun LayoutPreview() {
                         item {
                             Text(
                                 "Title",
-                                style = v3Typography.headingXLarge
+                                style = typography.headingXLarge
                             )
                         }
                         for (it in 1..50) {

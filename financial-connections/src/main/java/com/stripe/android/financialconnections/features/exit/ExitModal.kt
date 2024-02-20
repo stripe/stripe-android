@@ -22,8 +22,8 @@ import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 @Composable
 internal fun ExitModal(
@@ -61,7 +61,7 @@ private fun ExitModalContent(
         Spacer(modifier = Modifier.size(16.dp))
         Text(
             text = stringResource(R.string.stripe_exit_modal_title),
-            style = v3Typography.headingMedium,
+            style = typography.headingMedium,
         )
         Spacer(modifier = Modifier.size(8.dp))
         Text(text = description.toText().toString())
@@ -89,7 +89,7 @@ private fun ExitModalContent(
 @Preview
 internal fun ExitModalPreview() {
     FinancialConnectionsTheme {
-        Surface(color = v3Colors.backgroundSurface) {
+        Surface(color = colors.backgroundSurface) {
             ExitModalContent(
                 description = TextResource.StringId(R.string.stripe_exit_modal_desc, listOf("MerchantName")),
                 loading = false,

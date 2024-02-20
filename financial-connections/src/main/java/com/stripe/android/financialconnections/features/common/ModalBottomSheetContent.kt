@@ -25,8 +25,8 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
@@ -99,19 +99,19 @@ internal fun LegalDetailsBottomSheetContent(
         onConfirmModalClick = onConfirmModalClick
     ) {
         itemsIndexed(links) { index, link ->
-            Divider(color = v3Colors.border, modifier = Modifier.padding(bottom = 16.dp))
+            Divider(color = colors.border, modifier = Modifier.padding(bottom = 16.dp))
             AnnotatedText(
                 modifier = Modifier.padding(bottom = 16.dp),
                 text = link,
-                defaultStyle = v3Typography.labelLargeEmphasized.copy(
-                    color = v3Colors.textBrand
+                defaultStyle = typography.labelLargeEmphasized.copy(
+                    color = colors.textBrand
                 ),
                 // remove annotation styles to avoid link underline (the default)
                 annotationStyles = emptyMap(),
                 onClickableTextClick = onClickableTextClick,
             )
             if (links.lastIndex == index) {
-                Divider(color = v3Colors.border)
+                Divider(color = colors.border)
             }
         }
     }
@@ -140,8 +140,8 @@ private fun ModalBottomSheetContent(
                 }
                 AnnotatedText(
                     text = title,
-                    defaultStyle = v3Typography.headingMedium.copy(
-                        color = v3Colors.textDefault
+                    defaultStyle = typography.headingMedium.copy(
+                        color = colors.textDefault
                     ),
                     onClickableTextClick = onClickableTextClick
                 )
@@ -149,8 +149,8 @@ private fun ModalBottomSheetContent(
                     Spacer(modifier = Modifier.size(16.dp))
                     AnnotatedText(
                         text = it,
-                        defaultStyle = v3Typography.bodyMedium.copy(
-                            color = v3Colors.textDefault
+                        defaultStyle = typography.bodyMedium.copy(
+                            color = colors.textDefault
                         ),
                         onClickableTextClick = onClickableTextClick
                     )
@@ -185,8 +185,8 @@ private fun ModalBottomSheetFooter(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             text = it,
             onClickableTextClick = onClickableTextClick,
-            defaultStyle = v3Typography.labelSmall.copy(
-                color = v3Colors.textDefault,
+            defaultStyle = typography.labelSmall.copy(
+                color = colors.textDefault,
                 textAlign = TextAlign.Center
             ),
         )
@@ -197,8 +197,8 @@ private fun ModalBottomSheetFooter(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             text = it,
             onClickableTextClick = onClickableTextClick,
-            defaultStyle = v3Typography.labelSmall.copy(
-                color = v3Colors.textDefault,
+            defaultStyle = typography.labelSmall.copy(
+                color = colors.textDefault,
                 textAlign = TextAlign.Center
             ),
         )
