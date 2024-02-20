@@ -17,10 +17,10 @@ import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.AnimationConstants
+import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.parcelize.Parcelize
-import java.util.Objects
 import javax.inject.Inject
 
 /**
@@ -132,6 +132,7 @@ class CustomerSheet @Inject internal constructor(
      */
     @ExperimentalCustomerSheetApi
     @Parcelize
+    @Poko
     class Configuration internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
@@ -203,29 +204,6 @@ class CustomerSheet @Inject internal constructor(
                 .defaultBillingDetails(defaultBillingDetails)
                 .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
                 .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
-        }
-
-        override fun hashCode(): Int {
-            return Objects.hash(
-                appearance,
-                googlePayEnabled,
-                headerTextForSelectionScreen,
-                defaultBillingDetails,
-                billingDetailsCollectionConfiguration,
-                merchantDisplayName,
-                preferredNetworks,
-            )
-        }
-
-        override fun equals(other: Any?): Boolean {
-            return other is Configuration &&
-                appearance == other.appearance &&
-                googlePayEnabled == other.googlePayEnabled &&
-                headerTextForSelectionScreen == other.headerTextForSelectionScreen &&
-                defaultBillingDetails == other.defaultBillingDetails &&
-                billingDetailsCollectionConfiguration == other.billingDetailsCollectionConfiguration &&
-                merchantDisplayName == other.merchantDisplayName &&
-                preferredNetworks == other.preferredNetworks
         }
 
         @ExperimentalCustomerSheetApi
