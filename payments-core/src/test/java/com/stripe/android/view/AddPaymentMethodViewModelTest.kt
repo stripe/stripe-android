@@ -33,15 +33,17 @@ class AddPaymentMethodViewModelTest {
     private val customerSession: CustomerSession = mock()
 
     @Test
-    fun `on init, should fire onFormShown event`() {
+    fun `on form shown, should fire onFormShown event`() {
         val eventReporter: PaymentSessionEventReporter = mock()
 
-        createViewModel(
+        val viewModel = createViewModel(
             eventReporter = eventReporter,
             args = AddPaymentMethodActivityStarter.Args.Builder()
                 .setPaymentMethodType(PaymentMethod.Type.Fpx)
                 .build()
         )
+
+        viewModel.onFormShown()
 
         verify(eventReporter).onFormShown("fpx")
     }

@@ -117,7 +117,7 @@ internal object FinancialConnectionsButton {
         abstract fun buttonColors(): ButtonColors
         abstract fun rippleColor(): Color
 
-        object Primary : Type() {
+        data object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors {
                 return buttonColors(
@@ -131,7 +131,7 @@ internal object FinancialConnectionsButton {
             override fun rippleColor(): Color = Brand400
         }
 
-        object Secondary : Type() {
+        data object Secondary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors {
                 return buttonColors(
@@ -145,7 +145,7 @@ internal object FinancialConnectionsButton {
             override fun rippleColor(): Color = Neutral50
         }
 
-        object Critical : Type() {
+        data object Critical : Type() {
             @Composable
             override fun buttonColors(): ButtonColors {
                 return buttonColors(
@@ -166,7 +166,7 @@ internal object FinancialConnectionsButton {
         abstract fun paddingValues(): PaddingValues
         abstract val radius: Dp
 
-        object Pill : Size() {
+        data object Pill : Size() {
             override val radius: Dp = 4.dp
 
             @Composable
@@ -178,7 +178,7 @@ internal object FinancialConnectionsButton {
             )
         }
 
-        object Regular : Size() {
+        data object Regular : Size() {
             override val radius: Dp = 12.dp
 
             @Composable

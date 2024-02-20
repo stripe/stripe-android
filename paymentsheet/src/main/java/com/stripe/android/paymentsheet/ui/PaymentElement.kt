@@ -120,7 +120,7 @@ private fun FormElement(
                     val gesture = awaitPointerEvent()
 
                     when (gesture.type) {
-                        PointerEventType.Release -> onInteractionEvent()
+                        PointerEventType.Press -> onInteractionEvent()
                         else -> Unit
                     }
                 }

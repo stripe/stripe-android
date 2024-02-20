@@ -2,6 +2,7 @@ package com.stripe.android
 
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testharness.TestEphemeralKeyProvider
+import org.json.JSONException
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
@@ -172,8 +173,14 @@ class EphemeralKeyManagerTest {
             )
         )
 
-        verify(keyManagerListener)
-            .onKeyError(operationId, 404, errorMessage)
+        verify(keyManagerListener).onKeyError(
+            eq(operationId),
+            eq(404),
+            eq(errorMessage),
+            argWhere { error ->
+                error.message == errorMessage
+            }
+        )
         verifyNoMoreInteractions(keyManagerListener)
     }
 
@@ -198,6 +205,9 @@ class EphemeralKeyManagerTest {
                 errorMessage.startsWith(
                     "Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."
                 )
+            },
+            argWhere { error ->
+                error is JSONException
             }
         )
     }
@@ -222,6 +232,9 @@ class EphemeralKeyManagerTest {
                 errorMessage.startsWith(
                     "Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."
                 )
+            },
+            argWhere { error ->
+                error is JSONException
             }
         )
     }
@@ -246,6 +259,9 @@ class EphemeralKeyManagerTest {
                 errorMessage.startsWith(
                     "Received an ephemeral key that could not be parsed. See https://stripe.com/docs/mobile/android/basic for more details."
                 )
+            },
+            argWhere { error ->
+                error is JSONException
             }
         )
     }

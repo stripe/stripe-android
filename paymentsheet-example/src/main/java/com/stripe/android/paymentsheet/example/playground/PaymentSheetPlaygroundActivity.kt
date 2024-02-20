@@ -94,6 +94,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
             PlaygroundTheme(
                 content = {
+                    playgroundState?.stripeIntentId?.let { stripeIntentId ->
+                        Text(
+                            text = stripeIntentId,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
+
                     SettingsUi(playgroundSettings = localPlaygroundSettings)
 
                     AppearanceButton()

@@ -282,6 +282,7 @@ internal abstract class BaseSheetViewModel(
                     is PaymentSheetScreen.EditPaymentMethod,
                     is PaymentSheetScreen.Loading,
                     is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+                        previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
                 }
@@ -305,7 +306,7 @@ internal abstract class BaseSheetViewModel(
     protected fun transitionToFirstScreen() {
         val initialBackStack = determineInitialBackStack()
         resetTo(initialBackStack)
-        reportPaymentSheetShown(initialBackStack.first())
+        reportPaymentSheetShown(initialBackStack.last())
     }
 
     abstract fun determineInitialBackStack(): List<PaymentSheetScreen>
@@ -321,13 +322,13 @@ internal abstract class BaseSheetViewModel(
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            is PaymentSheetScreen.Loading, AddAnotherPaymentMethod, is PaymentSheetScreen.EditPaymentMethod -> {
+            is PaymentSheetScreen.Loading, is PaymentSheetScreen.EditPaymentMethod -> {
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions()
             }
-            is AddFirstPaymentMethod -> {
+            is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
                 eventReporter.onShowNewPaymentOptionForm()
             }
         }

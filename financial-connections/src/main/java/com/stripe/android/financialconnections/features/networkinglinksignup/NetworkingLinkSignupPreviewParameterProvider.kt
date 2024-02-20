@@ -37,7 +37,7 @@ internal class NetworkingLinkSignupPreviewParameterProvider :
         )
     }
 
-    internal fun emailEntered(): NetworkingLinkSignupState {
+    private fun emailEntered(): NetworkingLinkSignupState {
         return NetworkingLinkSignupState(
             payload = Success(
                 NetworkingLinkSignupState.Payload(

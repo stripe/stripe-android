@@ -15,12 +15,14 @@ internal sealed class PaymentSessionEvent : AnalyticsEvent {
     }
 
     class LoadSucceeded(
+        code: String?,
         duration: Duration?,
     ) : PaymentSessionEvent() {
         override val eventName: String = "bi_load_succeeded"
 
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
+            FIELD_SELECTED_LPM to code,
         )
     }
 

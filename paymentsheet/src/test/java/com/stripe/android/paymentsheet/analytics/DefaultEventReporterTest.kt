@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -79,6 +80,31 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `on completed loading operation, should reset checkout timer`() {
+        val durationProvider = FakeDurationProvider()
+
+        val eventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+            durationProvider = durationProvider,
+        )
+
+        eventReporter.simulateSuccessfulSetup(
+            PaymentSelection.Saved(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+            )
+        )
+
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.Checkout,
+                    reset = true
+                )
+            )
+        ).isTrue()
+    }
+
+    @Test
     fun `onShowExistingPaymentOptions() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
             simulateSuccessfulSetup()
@@ -90,6 +116,7 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_savedpm_show" &&
                     req.params["link_enabled"] == true &&
+                    req.params["google_pay_enabled"] == true &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -99,7 +126,7 @@ class DefaultEventReporterTest {
     @Test
     fun `onShowNewPaymentOptionForm() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(EventReporter.Mode.Complete) {
-            simulateSuccessfulSetup(linkEnabled = false)
+            simulateSuccessfulSetup(linkEnabled = false, googlePayReady = false)
         }
 
         completeEventReporter.onShowNewPaymentOptionForm()
@@ -108,6 +135,7 @@ class DefaultEventReporterTest {
             argWhere { req ->
                 req.params["event"] == "mc_complete_sheet_newpm_show" &&
                     req.params["link_enabled"] == false &&
+                    req.params["google_pay_enabled"] == false &&
                     req.params["currency"] == "usd" &&
                     req.params["locale"] == "en_US"
             }
@@ -253,6 +281,31 @@ class DefaultEventReporterTest {
                     req.params["selected_lpm"] == "card"
             }
         )
+    }
+
+    @Test
+    fun `onPaymentMethodFormShown() should restart duration on call`() {
+        val durationProvider = FakeDurationProvider()
+
+        val customEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Custom,
+            durationProvider = durationProvider
+        ) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onPaymentMethodFormShown(
+            code = "card",
+        )
+
+        assertThat(
+            durationProvider.has(
+                FakeDurationProvider.Call.Start(
+                    key = DurationProvider.Key.ConfirmButtonClicked,
+                    reset = true
+                )
+            )
+        ).isTrue()
     }
 
     @Test
@@ -506,6 +559,26 @@ class DefaultEventReporterTest {
         return reporter
     }
 
+    private fun createEventReporter(
+        mode: EventReporter.Mode,
+        durationProvider: DurationProvider,
+        configure: EventReporter.() -> Unit = {},
+    ): EventReporter {
+        val reporter = DefaultEventReporter(
+            mode = mode,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+            paymentAnalyticsRequestFactory = analyticsRequestFactory,
+            durationProvider = durationProvider,
+            workContext = testDispatcher,
+        )
+
+        reporter.configure()
+
+        reset(analyticsRequestExecutor)
+
+        return reporter
+    }
+
     private fun EventReporter.simulateInit() {
         onInit(configuration, isDeferred = false)
     }
@@ -513,12 +586,14 @@ class DefaultEventReporterTest {
     private fun EventReporter.simulateSuccessfulSetup(
         paymentSelection: PaymentSelection = PaymentSelection.GooglePay,
         linkEnabled: Boolean = true,
+        googlePayReady: Boolean = true,
         currency: String? = "usd",
     ) {
         onInit(configuration, isDeferred = false)
         onLoadStarted()
         onLoadSucceeded(
             paymentSelection = paymentSelection,
+            googlePaySupported = googlePayReady,
             linkEnabled = linkEnabled,
             currency = currency
         )

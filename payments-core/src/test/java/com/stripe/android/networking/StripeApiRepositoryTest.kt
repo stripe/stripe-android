@@ -650,6 +650,40 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun confirmPaymentIntent_sendsErrorMessageAnalyticForResponseError() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "pi_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    StripeResponse(
+                        code = 500,
+                        body = "An internal error has occurred"
+                    )
+                }
+
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmPaymentIntent(
+                    confirmPaymentIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.PaymentIntentConfirm,
+                productUsage = listOf(productUsage),
+                errorMessage = "apiError",
+            )
+        }
+
+    @Test
     fun confirmPaymentIntent_withSourceAttribution_setsCorrectPaymentUserAgent() =
         runTest {
             // put a private key here to simulate the backend
@@ -837,6 +871,42 @@ internal class StripeApiRepositoryTest {
                 event = PaymentAnalyticsEvent.SetupIntentConfirm,
                 productUsage = listOf(productUsage),
                 errorMessage = "ioException",
+            )
+        }
+
+    @Test
+    fun confirmSetupIntent_sendsErrorMessageAnalyticForResponseError() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "seti_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    StripeResponse(
+                        code = 500,
+                        body = "An internal error has occurred"
+                    )
+                }
+
+            val confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmSetupIntent(
+                    confirmSetupIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.SetupIntentConfirm,
+                productUsage = listOf(productUsage),
+                errorMessage = "apiError",
             )
         }
 

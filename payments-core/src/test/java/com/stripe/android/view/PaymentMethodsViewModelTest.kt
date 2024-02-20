@@ -7,7 +7,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.analytics.PaymentSessionEventReporter
-import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.test.runTest
@@ -25,7 +25,9 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentMethodsViewModelTest {
-    private val listenerArgumentCaptor: KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()
+    private val listenerArgumentCaptor:
+        KArgumentCaptor<CustomerSession.PaymentMethodsRetrievalWithExceptionListener> =
+            argumentCaptor()
 
     @Test
     fun init_loadStartedEvent_shouldTrigger() {
@@ -43,7 +45,8 @@ class PaymentMethodsViewModelTest {
 
         val viewModel = createViewModel(
             customerSession = customerSession,
-            eventReporter = eventReporter
+            eventReporter = eventReporter,
+            selectedPaymentMethodId = "fpx"
         )
 
         verify(customerSession).getPaymentMethods(
@@ -63,7 +66,7 @@ class PaymentMethodsViewModelTest {
             assertThat(awaitItem())
                 .isEqualTo(Result.success(listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)))
 
-            verify(eventReporter).onLoadSucceeded()
+            verify(eventReporter).onLoadSucceeded("fpx")
             verify(eventReporter).onOptionsShown()
         }
     }
@@ -90,14 +93,15 @@ class PaymentMethodsViewModelTest {
         listenerArgumentCaptor.firstValue.onError(
             404,
             "error!",
-            null
+            null,
+            InvalidRequestException()
         )
 
         viewModel.paymentMethodsData.test {
             assertThat(awaitItem()?.exceptionOrNull())
-                .isInstanceOf(APIException::class.java)
+                .isInstanceOf(InvalidRequestException::class.java)
 
-            verify(eventReporter).onLoadFailed(any<APIException>())
+            verify(eventReporter).onLoadFailed(any<InvalidRequestException>())
         }
     }
 
@@ -158,7 +162,8 @@ class PaymentMethodsViewModelTest {
 
     private fun createViewModel(
         customerSession: CustomerSession = mock(),
-        eventReporter: PaymentSessionEventReporter = mock()
+        eventReporter: PaymentSessionEventReporter = mock(),
+        selectedPaymentMethodId: String? = null,
     ): PaymentMethodsViewModel {
         return PaymentMethodsViewModel(
             application = ApplicationProvider.getApplicationContext(),
@@ -166,6 +171,7 @@ class PaymentMethodsViewModelTest {
             startedFromPaymentSession = true,
             savedStateHandle = SavedStateHandle(),
             eventReporter = eventReporter,
+            selectedPaymentMethodId = selectedPaymentMethodId,
         )
     }
 

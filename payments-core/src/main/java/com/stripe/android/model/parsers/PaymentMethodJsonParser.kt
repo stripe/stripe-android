@@ -139,9 +139,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 networks = json.optJSONObject(FIELD_NETWORKS)?.let {
                     NetworksJsonParser().parse(it)
                 },
-                displayBrand = json.optJSONObject(FIELD_DISPLAY_BRAND)?.let {
-                    DisplayBrandParser.parse(it)
-                }
+                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND)
             )
         }
 
@@ -174,16 +172,6 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
 
             private companion object {
                 private const val FIELD_IS_SUPPORTED = "supported"
-            }
-        }
-
-        internal object DisplayBrandParser : ModelJsonParser<PaymentMethod.Card.DisplayBrand> {
-            private const val FIELD_TYPE = "type"
-
-            override fun parse(json: JSONObject): PaymentMethod.Card.DisplayBrand {
-                return PaymentMethod.Card.DisplayBrand(
-                    type = CardBrand.fromCode(json.getString(FIELD_TYPE))
-                )
             }
         }
 
