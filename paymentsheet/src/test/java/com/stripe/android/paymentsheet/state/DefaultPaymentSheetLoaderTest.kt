@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
@@ -613,6 +614,29 @@ internal class DefaultPaymentSheetLoaderTest {
     }
 
     @Test
+    fun `Disables link sign up if used before`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            linkSettings = ElementsSession.LinkSettings(
+                linkFundingSources = emptyList(),
+                linkPassthroughModeEnabled = false,
+                linkFlags = mapOf(),
+                disableLinkSignup = false,
+            ),
+            linkStore = mock {
+                on { hasUsedLink() } doReturn true
+            }
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(),
+        ).getOrThrow()
+
+        assertThat(result.linkState?.configuration?.signupMode).isNull()
+    }
+
+    @Test
     fun `Disables link sign up when settings have it disabled`() = runTest {
         val loader = createPaymentSheetLoader(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
@@ -985,6 +1009,7 @@ internal class DefaultPaymentSheetLoaderTest {
         isGooglePayEnabledFromBackend: Boolean = true,
         fallbackError: Throwable? = null,
         isCbcEligible: Boolean = false,
+        linkStore: LinkStore = mock(),
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -1005,7 +1030,7 @@ internal class DefaultPaymentSheetLoaderTest {
             eventReporter = eventReporter,
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
-            linkStore = mock(),
+            linkStore = linkStore,
         )
     }
 
