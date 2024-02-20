@@ -258,6 +258,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             "emit_events" to true,
             "locale" to locale.toLanguageTag(),
             "mobile" to mapOf(
+                //TODO REMOVE BEFORE MERGING INTEGRATION BRANCH
+                "forced_authflow_version" to "v3",
                 PARAMS_FULLSCREEN to true,
                 PARAMS_HIDE_CLOSE_BUTTON to true,
                 NetworkConstants.PARAMS_APPLICATION_ID to applicationId
