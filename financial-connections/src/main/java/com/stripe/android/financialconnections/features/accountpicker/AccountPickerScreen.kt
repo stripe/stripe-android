@@ -122,7 +122,7 @@ private fun AccountPickerContent(
     val lazyListState = rememberLazyListState()
     ModalBottomSheetLayout(
         sheetState = bottomSheetState,
-        sheetBackgroundColor = FinancialConnectionsTheme.v3Colors.backgroundSurface,
+        sheetBackgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
         sheetShape = RoundedCornerShape(8.dp),
         scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = {
@@ -266,7 +266,7 @@ private fun LazyListScope.loadedContent(
                     SelectionMode.Multiple -> R.string.stripe_account_picker_multiselect_account
                 }
             ),
-            style = FinancialConnectionsTheme.v3Typography.headingXLarge
+            style = FinancialConnectionsTheme.typography.headingXLarge
         )
     }
     items(payload.accounts, key = { it.id }) { account ->
@@ -285,7 +285,7 @@ private fun LazyListScope.loadingContent() {
         Text(
             modifier = Modifier.fillMaxWidth(),
             text = "Retrieving accounts",
-            style = FinancialConnectionsTheme.v3Typography.headingXLarge
+            style = FinancialConnectionsTheme.typography.headingXLarge
         )
     }
     items(3) {

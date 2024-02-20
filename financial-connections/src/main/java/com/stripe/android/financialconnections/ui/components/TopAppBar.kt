@@ -74,7 +74,7 @@ internal fun FinancialConnectionsTopAppBar(
                     Icon(
                         imageVector = Icons.Filled.ArrowBack,
                         contentDescription = "Back icon",
-                        tint = FinancialConnectionsTheme.colors.textSecondary
+                        tint = FinancialConnectionsTheme.colors.iconDefault
                     )
                 }
             }
@@ -93,7 +93,7 @@ internal fun FinancialConnectionsTopAppBar(
                 Icon(
                     imageVector = Icons.Filled.Close,
                     contentDescription = "Close icon",
-                    tint = FinancialConnectionsTheme.colors.textSecondary
+                    tint = FinancialConnectionsTheme.colors.iconDefault
                 )
             }
         },

@@ -157,16 +157,16 @@ private fun ManualEntryLoaded(
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.stripe_manualentry_title),
-                color = FinancialConnectionsTheme.v3Colors.textDefault,
-                style = FinancialConnectionsTheme.v3Typography.headingXLarge
+                color = FinancialConnectionsTheme.colors.textDefault,
+                style = FinancialConnectionsTheme.typography.headingXLarge
             )
             Spacer(modifier = Modifier.size(16.dp))
             if (payload.verifyWithMicrodeposits) {
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = stringResource(R.string.stripe_manualentry_microdeposits_desc),
-                    color = FinancialConnectionsTheme.v3Colors.textDefault,
-                    style = FinancialConnectionsTheme.v3Typography.bodyMedium
+                    color = FinancialConnectionsTheme.colors.textDefault,
+                    style = FinancialConnectionsTheme.typography.bodyMedium
                 )
             }
             Spacer(modifier = Modifier.size(8.dp))
@@ -198,8 +198,8 @@ private fun ManualEntryLoaded(
                     textAlign = TextAlign.Center,
                     text = (linkPaymentAccountStatus.error as? StripeException)?.message
                         ?: stringResource(R.string.stripe_error_generic_title),
-                    style = FinancialConnectionsTheme.v3Typography.bodyMedium,
-                    color = FinancialConnectionsTheme.v3Colors.textCritical,
+                    style = FinancialConnectionsTheme.typography.bodyMedium,
+                    color = FinancialConnectionsTheme.colors.textCritical,
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -246,8 +246,8 @@ private fun InputWithError(
         placeholder = {
             Text(
                 text = stringResource(id = label),
-                style = FinancialConnectionsTheme.v3Typography.labelLarge,
-                color = FinancialConnectionsTheme.v3Colors.textSubdued
+                style = FinancialConnectionsTheme.typography.labelLarge,
+                color = FinancialConnectionsTheme.colors.textSubdued
             )
         },
         isError = inputWithError.second != null,
@@ -263,8 +263,8 @@ private fun InputWithError(
         Spacer(modifier = Modifier.size(4.dp))
         Text(
             text = stringResource(id = inputWithError.second!!),
-            color = FinancialConnectionsTheme.v3Colors.textCritical,
-            style = FinancialConnectionsTheme.v3Typography.labelSmall,
+            color = FinancialConnectionsTheme.colors.textCritical,
+            style = FinancialConnectionsTheme.typography.labelSmall,
         )
     }
 }

@@ -34,7 +34,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -46,8 +46,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
@@ -160,11 +160,11 @@ private fun HeaderSection(
     ) {
         Text(
             text = stringResource(R.string.stripe_link_stepup_verification_title),
-            style = v3Typography.headingXLarge,
+            style = typography.headingXLarge,
         )
         Text(
             text = stringResource(id = R.string.stripe_link_stepup_verification_desc, email),
-            style = v3Typography.bodyMedium,
+            style = typography.bodyMedium,
         )
     }
 }
@@ -180,16 +180,16 @@ private fun ResendCodeSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isLoading) {
-            V3LoadingSpinner(modifier = Modifier.size(24.dp),)
+            LoadingSpinner(modifier = Modifier.size(24.dp),)
         } else {
             AnnotatedText(
                 text = TextResource.StringId(R.string.stripe_link_stepup_verification_resend_code),
                 maxLines = 1,
-                defaultStyle = v3Typography.labelMedium,
+                defaultStyle = typography.labelMedium,
                 annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to v3Typography.labelMediumEmphasized
+                    StringAnnotation.CLICKABLE to typography.labelMediumEmphasized
                         .toSpanStyle()
-                        .copy(color = v3Colors.textBrand),
+                        .copy(color = colors.textBrand),
                 ),
                 onClickableTextClick = onClickableTextClick,
             )

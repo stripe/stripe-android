@@ -63,8 +63,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import kotlinx.coroutines.launch
 
@@ -187,7 +187,7 @@ private fun ConsentMainContent(
                     AnnotatedText(
                         text = title,
                         onClickableTextClick = { onClickableTextClick(it) },
-                        defaultStyle = v3Typography.headingXLarge.copy(
+                        defaultStyle = typography.headingXLarge.copy(
                             textAlign = TextAlign.Center
                         )
                     )
@@ -274,9 +274,9 @@ private fun ConsentFooter(
             modifier = Modifier.fillMaxWidth(),
             text = aboveCta,
             onClickableTextClick = onClickableTextClick,
-            defaultStyle = v3Typography.labelSmall.copy(
+            defaultStyle = typography.labelSmall.copy(
                 textAlign = TextAlign.Center,
-                color = v3Colors.textDefault
+                color = colors.textDefault
             )
         )
         Spacer(modifier = Modifier.size(16.dp))
@@ -296,9 +296,9 @@ private fun ConsentFooter(
                 modifier = Modifier.fillMaxWidth(),
                 text = belowCta,
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = v3Typography.labelSmall.copy(
+                defaultStyle = typography.labelSmall.copy(
                     textAlign = TextAlign.Center,
-                    color = v3Colors.textDefault
+                    color = colors.textDefault
                 )
             )
         }

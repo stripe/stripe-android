@@ -40,8 +40,8 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.clickableSingle
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.text.MiddleEllipsisText
 import java.util.Locale
@@ -74,8 +74,8 @@ internal fun AccountItem(
             .border(
                 width = if (selected) 2.dp else 1.dp,
                 color = when {
-                    selected -> v3Colors.borderBrand
-                    else -> v3Colors.border
+                    selected -> colors.borderBrand
+                    else -> colors.border
                 },
                 shape = shape
             )
@@ -102,8 +102,8 @@ internal fun AccountItem(
                     text = account.name,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
-                    color = v3Colors.textDefault,
-                    style = v3Typography.labelLargeEmphasized
+                    color = colors.textDefault,
+                    style = typography.labelLargeEmphasized
                 )
                 AccountSubtitle(selectable, account, networkedAccount)
             }
@@ -112,7 +112,7 @@ internal fun AccountItem(
                     .size(16.dp)
                     .alpha(if (selected) 1f else 0f),
                 imageVector = Icons.Default.Check,
-                tint = v3Colors.iconBrand,
+                tint = colors.iconBrand,
                 contentDescription = "Selected"
             )
         }
@@ -131,8 +131,8 @@ private fun AccountSubtitle(
     ) {
         MiddleEllipsisText(
             text = subtitle ?: account.redactedAccountNumbers,
-            color = v3Colors.textSubdued,
-            style = v3Typography.labelMedium
+            color = colors.textSubdued,
+            style = typography.labelMedium
         )
         account.getFormattedBalance()
             // Only show balance if there is no custom subtitle (e.g. "Account unavailable, Repair account, etc")
@@ -141,11 +141,11 @@ private fun AccountSubtitle(
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
                     text = it,
-                    color = v3Colors.textSubdued,
-                    style = v3Typography.labelSmall,
+                    color = colors.textSubdued,
+                    style = typography.labelSmall,
                     modifier = Modifier
                         .background(
-                            color = v3Colors.backgroundOffset,
+                            color = colors.backgroundOffset,
                             shape = RoundedCornerShape(4.dp)
                         )
                         .padding(horizontal = 6.dp, vertical = 4.dp)

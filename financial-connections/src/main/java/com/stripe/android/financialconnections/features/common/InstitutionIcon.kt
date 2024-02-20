@@ -14,7 +14,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.ui.LocalImageLoader
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -31,7 +31,7 @@ internal fun InstitutionIcon(institutionIcon: String?) {
             contentDescription = null,
             modifier = iconModifier,
             contentScale = ContentScale.Crop,
-            loadingContent = { Box(modifier = iconModifier.background(v3Colors.backgroundOffset)) },
+            loadingContent = { Box(modifier = iconModifier.background(colors.backgroundOffset)) },
             errorContent = { InstitutionPlaceholder(iconModifier) }
         )
     }

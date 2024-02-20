@@ -36,12 +36,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.theme.Brand400
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
 
@@ -75,14 +75,14 @@ internal fun FinancialConnectionsButton(
             colors = type.buttonColors(),
             content = {
                 ProvideTextStyle(
-                    value = v3Typography.labelLargeEmphasized.copy(
+                    value = typography.labelLargeEmphasized.copy(
                         // material button adds letter spacing internally, this removes it.
                         letterSpacing = 0.sp
                     )
                 ) {
                     Row {
                         if (loading) {
-                            V3LoadingSpinner(
+                            LoadingSpinner(
                                 strokeWidth = 2.dp,
                                 modifier = Modifier.size(24.dp),
                             )
@@ -100,7 +100,7 @@ private fun Type.rippleTheme() = object : RippleTheme {
     @Composable
     override fun defaultColor() = when (this@rippleTheme) {
         Type.Primary -> Neutral0
-        Type.Secondary -> v3Colors.textDefault
+        Type.Secondary -> colors.textDefault
     }
 
     @Composable
@@ -124,10 +124,10 @@ internal object FinancialConnectionsButton {
         data object Primary : Type() {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
-                backgroundColor = v3Colors.iconBrand,
-                contentColor = v3Colors.textWhite,
-                disabledBackgroundColor = v3Colors.iconBrand,
-                disabledContentColor = v3Colors.textWhite.copy(alpha = 0.4f)
+                backgroundColor = colors.iconBrand,
+                contentColor = colors.textWhite,
+                disabledBackgroundColor = colors.iconBrand,
+                disabledContentColor = colors.textWhite.copy(alpha = 0.4f)
             )
 
             override fun rippleColor(): Color = Brand400
@@ -140,9 +140,9 @@ internal object FinancialConnectionsButton {
             @Composable
             override fun buttonColors(): ButtonColors = buttonColors(
                 backgroundColor = Neutral50,
-                contentColor = v3Colors.textDefault,
+                contentColor = colors.textDefault,
                 disabledBackgroundColor = Neutral50,
-                disabledContentColor = v3Colors.textDefault.copy(alpha = 0.4f)
+                disabledContentColor = colors.textDefault.copy(alpha = 0.4f)
             )
 
             override fun rippleColor(): Color = Neutral50
@@ -184,7 +184,7 @@ internal fun FinancialConnectionsButtonPreview() {
     FinancialConnectionsPreview {
         Column(
             modifier = Modifier
-                .background(v3Colors.backgroundSurface)
+                .background(colors.backgroundSurface)
                 .fillMaxSize()
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceEvenly

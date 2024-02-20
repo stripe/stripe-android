@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 
 private const val SHIMMER_SIZE_MULTIPLIER = 0.2f
 private const val SHIMMER_GRADIENT_ALPHA = 0.4f
@@ -52,9 +52,9 @@ internal fun LoadingShimmerEffect(
     val shimmerWidth = screenWidth * SHIMMER_SIZE_MULTIPLIER
 
     val gradient = listOf(
-        v3Colors.backgroundOffset,
+        colors.backgroundOffset,
         Color.White.copy(alpha = SHIMMER_GRADIENT_ALPHA),
-        v3Colors.backgroundOffset
+        colors.backgroundOffset
     )
     val transition = rememberInfiniteTransition(label = "shimmer_transition")
     val translateAnimation = transition.animateFloat(
@@ -85,15 +85,15 @@ internal fun LoadingShimmerEffect(
 @Composable
 internal fun FullScreenGenericLoading() {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        V3LoadingSpinner(Modifier.size(52.dp))
+        LoadingSpinner(Modifier.size(52.dp))
     }
 }
 
 @Composable
-internal fun V3LoadingSpinner(
+internal fun LoadingSpinner(
     modifier: Modifier = Modifier,
     strokeWidth: Dp = ProgressIndicatorDefaults.StrokeWidth,
-    gradient: Brush = Brush.sweepGradient(listOf(v3Colors.iconWhite, v3Colors.borderBrand))
+    gradient: Brush = Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "loading_transition")
     val angle by infiniteTransition.animateFloat(

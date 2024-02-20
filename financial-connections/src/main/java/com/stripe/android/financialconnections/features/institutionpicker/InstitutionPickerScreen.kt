@@ -66,7 +66,7 @@ import com.stripe.android.financialconnections.features.common.FullScreenGeneric
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.ShapedIcon
-import com.stripe.android.financialconnections.features.common.V3LoadingSpinner
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -79,8 +79,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import kotlinx.coroutines.launch
 
 @Composable
@@ -319,7 +319,7 @@ private fun NoResultsTile(
     ) {
         Text(
             text = stringResource(id = R.string.stripe_institutionpicker_pane_error_title),
-            style = v3Typography.headingLarge
+            style = typography.headingLarge
         )
         Spacer(modifier = Modifier.height(16.dp))
         AnnotatedText(
@@ -328,12 +328,12 @@ private fun NoResultsTile(
                 false -> TextResource.StringId(R.string.stripe_institutionpicker_pane_error_desc)
             },
             onClickableTextClick = { onManualEntryClick() },
-            defaultStyle = v3Typography.bodyMedium.copy(
+            defaultStyle = typography.bodyMedium.copy(
                 textAlign = TextAlign.Center,
             ),
             annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to v3Typography.bodyMediumEmphasized.toSpanStyle().copy(
-                    color = v3Colors.textBrand,
+                StringAnnotation.CLICKABLE to typography.bodyMediumEmphasized.toSpanStyle().copy(
+                    color = colors.textBrand,
                 )
             ),
         )
@@ -345,7 +345,7 @@ private fun SearchTitle(modifier: Modifier = Modifier) {
     Text(
         modifier = modifier.fillMaxWidth(),
         text = stringResource(R.string.stripe_institutionpicker_pane_select_bank),
-        style = v3Typography.headingXLarge
+        style = typography.headingXLarge
     )
 }
 
@@ -363,7 +363,7 @@ private fun SearchRow(
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
                 .height(12.dp)
-                .background(v3Colors.backgroundSurface)
+                .background(colors.backgroundSurface)
         )
         FinancialConnectionsOutlinedTextField(
             modifier = modifier
@@ -373,7 +373,7 @@ private fun SearchRow(
             leadingIcon = {
                 Icon(
                     painter = painterResource(id = R.drawable.stripe_ic_search),
-                    tint = v3Colors.iconDefault,
+                    tint = colors.iconDefault,
                     contentDescription = "Search icon",
                 )
             },
@@ -384,14 +384,14 @@ private fun SearchRow(
                             .size(16.dp)
                             .clickable { onQueryChanged(TextFieldValue("")) }
                             .background(
-                                color = v3Colors.border,
+                                color = colors.border,
                                 shape = CircleShape
                             )
                             .padding(2.dp)
                     ) {
                         Icon(
                             Icons.Filled.Clear,
-                            tint = v3Colors.backgroundSurface,
+                            tint = colors.backgroundSurface,
                             contentDescription = "Clear search",
                         )
                     }
@@ -400,8 +400,8 @@ private fun SearchRow(
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.stripe_search),
-                    style = v3Typography.labelLarge,
-                    color = v3Colors.textSubdued
+                    style = typography.labelLarge,
+                    color = colors.textSubdued
                 )
             },
             value = query,
@@ -438,13 +438,13 @@ private fun ManualEntryRow(
         Column {
             Text(
                 text = stringResource(R.string.stripe_institutionpicker_manual_entry_title),
-                color = v3Colors.textDefault,
-                style = v3Typography.labelLargeEmphasized,
+                color = colors.textDefault,
+                style = typography.labelLargeEmphasized,
             )
             Text(
                 text = stringResource(R.string.stripe_institutionpicker_manual_entry_desc),
-                color = v3Colors.textSubdued,
-                style = v3Typography.labelMedium,
+                color = colors.textSubdued,
+                style = typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -478,8 +478,8 @@ private fun SearchMoreRow(
         Spacer(modifier = Modifier.size(8.dp))
         Text(
             text = stringResource(R.string.stripe_institutionpicker_search_more_title),
-            color = v3Colors.textDefault,
-            style = v3Typography.labelLargeEmphasized,
+            color = colors.textDefault,
+            style = typography.labelLargeEmphasized,
         )
     }
 }
@@ -515,14 +515,14 @@ private fun InstitutionResultTile(
             Text(
                 text = institution.name,
                 maxLines = 1,
-                color = v3Colors.textDefault,
-                style = v3Typography.labelLargeEmphasized,
+                color = colors.textDefault,
+                style = typography.labelLargeEmphasized,
                 overflow = TextOverflow.Ellipsis
             )
             Text(
                 text = institution.formattedUrl,
-                color = v3Colors.textSubdued,
-                style = v3Typography.labelMedium,
+                color = colors.textSubdued,
+                style = typography.labelMedium,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
             )
@@ -530,7 +530,7 @@ private fun InstitutionResultTile(
         // add a trailing icon if this is the manual entry row
         if (loading) {
             Spacer(modifier = Modifier.size(8.dp))
-            V3LoadingSpinner(modifier = Modifier.size(24.dp))
+            LoadingSpinner(modifier = Modifier.size(24.dp))
         }
     }
 }

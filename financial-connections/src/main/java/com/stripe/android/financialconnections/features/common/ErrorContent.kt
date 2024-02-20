@@ -33,7 +33,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
 import java.text.SimpleDateFormat
 
@@ -277,8 +277,8 @@ internal fun ErrorContent(
             iconContent?.let {
                 item { Box(modifier = Modifier.padding(top = 16.dp)) { it() } }
             }
-            item { Text(title, style = v3Typography.headingXLarge) }
-            item { Text(content, style = v3Typography.bodyMedium) }
+            item { Text(title, style = typography.headingXLarge) }
+            item { Text(content, style = typography.bodyMedium) }
         },
         footer = {
             Column(

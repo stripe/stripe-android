@@ -41,7 +41,7 @@ internal fun AnnotatedText(
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip
 ) {
-    val pressedColor = FinancialConnectionsTheme.colors.textPrimary
+    val pressedColor = FinancialConnectionsTheme.colors.textDefault
     var pressedAnnotation: String? by remember { mutableStateOf(null) }
     val resource = annotatedStringResource(
         resource = text,

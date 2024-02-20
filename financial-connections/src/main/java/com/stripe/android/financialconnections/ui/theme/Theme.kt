@@ -27,30 +27,7 @@ import androidx.core.view.WindowCompat
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 
-@Deprecated("Use V3Colors instead")
 private val Colors = FinancialConnectionsColors(
-    backgroundSurface = Color.White,
-    backgroundContainer = Neutral50,
-    backgroundBackdrop = Neutral200.copy(alpha = .70f),
-    borderDefault = Neutral150,
-    borderFocus = Blue400.copy(alpha = .36f),
-    borderInvalid = Red500,
-    textPrimary = Neutral800,
-    textSecondary = Neutral500,
-    textDisabled = Neutral300,
-    textWhite = Color.White,
-    textBrand = Brand500,
-    textInfo = Blue500,
-    textSuccess = Green500,
-    textAttention = Attention500,
-    textCritical = Red500,
-    iconBrand = Brand400,
-    iconInfo = Blue400,
-    iconSuccess = Green400,
-    iconAttention = Attention400
-)
-
-private val V3Colors = FinancialConnectionsV3Colors(
     textDefault = Color(0xFF353A44),
     textSubdued = Color(0xFF596171),
     textDisabled = Color(0xFF818DA0),
@@ -80,96 +57,7 @@ private val lineHeightStyle = LineHeightStyle(
     trim = LineHeightStyle.Trim.None
 )
 
-@Deprecated("Use V3Typography instead")
 private val Typography = FinancialConnectionsTypography(
-    subtitle = TextStyle(
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
-        fontWeight = FontWeight.W700
-    ),
-    subtitleEmphasized = TextStyle(
-        fontSize = 24.sp,
-        lineHeight = 32.sp,
-        fontWeight = FontWeight.W700
-    ),
-    heading = TextStyle(
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
-        fontWeight = FontWeight.W700
-    ),
-    subheading = TextStyle(
-        fontSize = 18.sp,
-        lineHeight = 24.sp,
-        fontWeight = FontWeight.W600
-    ),
-    kicker = TextStyle(
-        fontSize = 12.sp,
-        lineHeight = 20.sp,
-        fontWeight = FontWeight.W600
-    ),
-    body = TextStyle(
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        fontWeight = FontWeight.W400
-    ),
-    bodyEmphasized = TextStyle(
-        fontSize = 16.sp,
-        lineHeight = 24.sp,
-        fontWeight = FontWeight.W600
-    ),
-    detail = TextStyle(
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        fontWeight = FontWeight.W400
-    ),
-    detailEmphasized = TextStyle(
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        fontWeight = FontWeight.W600
-    ),
-    caption = TextStyle(
-        fontSize = 12.sp,
-        lineHeight = 18.sp,
-        fontWeight = FontWeight.W400
-    ),
-    captionEmphasized = TextStyle(
-        fontSize = 12.sp,
-        lineHeight = 18.sp,
-        fontWeight = FontWeight.W600
-    ),
-    captionTight = TextStyle(
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        fontWeight = FontWeight.W400
-    ),
-    captionTightEmphasized = TextStyle(
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        fontWeight = FontWeight.W600
-    ),
-    bodyCode = TextStyle(
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        fontWeight = FontWeight.W400
-    ),
-    bodyCodeEmphasized = TextStyle(
-        fontSize = 14.sp,
-        lineHeight = 20.sp,
-        fontWeight = FontWeight.W700
-    ),
-    captionCode = TextStyle(
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        fontWeight = FontWeight.W400
-    ),
-    captionCodeEmphasized = TextStyle(
-        fontSize = 12.sp,
-        lineHeight = 16.sp,
-        fontWeight = FontWeight.W700
-    ),
-)
-
-private val V3Typography = FinancialConnectionsV3Typography(
     headingXLarge = TextStyle(
         fontSize = 28.sp,
         lineHeight = 32.sp,
@@ -249,21 +137,21 @@ private val V3Typography = FinancialConnectionsV3Typography(
 )
 
 private val TextSelectionColors = TextSelectionColors(
-    handleColor = V3Colors.textBrand,
-    backgroundColor = V3Colors.textBrand.copy(alpha = 0.4f)
+    handleColor = Colors.textBrand,
+    backgroundColor = Colors.textBrand.copy(alpha = 0.4f)
 )
 
 @Immutable
 private object FinancialConnectionsRippleTheme : RippleTheme {
     @Composable
     override fun defaultColor() = RippleTheme.defaultRippleColor(
-        contentColor = V3Colors.textBrand,
+        contentColor = Colors.textBrand,
         lightTheme = MaterialTheme.colors.isLight
     )
 
     @Composable
     override fun rippleAlpha() = RippleTheme.defaultRippleAlpha(
-        contentColor = V3Colors.textBrand,
+        contentColor = Colors.textBrand,
         lightTheme = MaterialTheme.colors.isLight
     )
 }
@@ -271,15 +159,13 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 @Composable
 internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
     CompositionLocalProvider(
-        LocalFinancialConnectionsTypography provides Typography,
         LocalNavHostController provides rememberNavController(),
-        LocalV3Typography provides V3Typography,
-        LocalFinancialConnectionsColors provides Colors,
-        LocalV3Colors provides V3Colors
+        LocalTypography provides Typography,
+        LocalColors provides Colors
     ) {
         val view = LocalView.current
         val window = findWindow()
-        val barColor = FinancialConnectionsTheme.colors.borderDefault
+        val barColor = FinancialConnectionsTheme.colors.border
         if (!view.isInEditMode) {
             SideEffect {
                 window?.let { window ->
@@ -317,42 +203,23 @@ private tailrec fun Context.findWindow(): Window? =
         else -> null
     }
 
-private val LocalFinancialConnectionsTypography =
+private val LocalTypography =
     staticCompositionLocalOf<FinancialConnectionsTypography> {
-        error("no FinancialConnectionsTypography provided")
+        error("no Typography provided")
     }
 
-private val LocalV3Typography =
-    staticCompositionLocalOf<FinancialConnectionsV3Typography> {
-        error("no V3Typography provided")
+private val LocalColors =
+    staticCompositionLocalOf<FinancialConnectionsColors> {
+        error("no Colors provided")
     }
-
-private val LocalV3Colors =
-    staticCompositionLocalOf<FinancialConnectionsV3Colors> {
-        error("no V3Colors provided")
-    }
-
-private val LocalFinancialConnectionsColors = staticCompositionLocalOf<FinancialConnectionsColors> {
-    error("No FinancialConnectionsColors provided")
-}
 
 internal object FinancialConnectionsTheme {
-
-    @Deprecated("Use v3Colors instead")
-    val colors: FinancialConnectionsColors
+    val typography
         @Composable
-        get() = LocalFinancialConnectionsColors.current
-
-    @Deprecated("Use v3Typography instead")
-    val typography: FinancialConnectionsTypography
+        get() = LocalTypography.current
+    val colors
         @Composable
-        get() = LocalFinancialConnectionsTypography.current
-    val v3Typography
-        @Composable
-        get() = LocalV3Typography.current
-    val v3Colors
-        @Composable
-        get() = LocalV3Colors.current
+        get() = LocalColors.current
 }
 
 /**

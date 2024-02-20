@@ -23,8 +23,8 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Colors
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
@@ -43,8 +43,8 @@ internal fun VerificationSection(
                 otpInputPlaceholder = "",
                 boxSpacing = 8.dp,
                 middleSpacing = 8.dp,
-                boxTextStyle = v3Typography.headingXLargeSubdued.copy(
-                    color = v3Colors.textDefault,
+                boxTextStyle = typography.headingXLargeSubdued.copy(
+                    color = colors.textDefault,
                     textAlign = TextAlign.Center
                 ),
                 focusRequester = focusRequester,
@@ -79,16 +79,16 @@ private fun VerificationErrorText(
     AnnotatedText(
         modifier = Modifier.fillMaxWidth(),
         text = error.toMessage(),
-        defaultStyle = v3Typography.labelMedium.copy(
-            color = v3Colors.textCritical,
+        defaultStyle = typography.labelMedium.copy(
+            color = colors.textCritical,
             textAlign = TextAlign.Center
         ),
         onClickableTextClick = {
             uriHandler.openUri(FinancialConnectionsUrlResolver.linkVerificationSupportUrl)
         },
         annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to v3Typography.labelMedium.copy(
-                color = v3Colors.textCritical,
+            StringAnnotation.CLICKABLE to typography.labelMedium.copy(
+                color = colors.textCritical,
                 textDecoration = TextDecoration.Underline,
                 textAlign = TextAlign.Center
             ).toSpanStyle()

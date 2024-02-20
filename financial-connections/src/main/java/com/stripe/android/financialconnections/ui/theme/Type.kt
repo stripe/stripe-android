@@ -13,32 +13,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.v3Typography
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 @Immutable
-@Deprecated("Use FinancialConnectionsV3Typography instead")
 internal data class FinancialConnectionsTypography(
-    val subtitle: TextStyle,
-    val subtitleEmphasized: TextStyle,
-    val heading: TextStyle,
-    val subheading: TextStyle,
-    val kicker: TextStyle,
-    val body: TextStyle,
-    val bodyEmphasized: TextStyle,
-    val detail: TextStyle,
-    val detailEmphasized: TextStyle,
-    val caption: TextStyle,
-    val captionEmphasized: TextStyle,
-    val captionTight: TextStyle,
-    val captionTightEmphasized: TextStyle,
-    val bodyCode: TextStyle,
-    val bodyCodeEmphasized: TextStyle,
-    val captionCode: TextStyle,
-    val captionCodeEmphasized: TextStyle
-)
-
-@Immutable
-internal data class FinancialConnectionsV3Typography(
     val headingXLarge: TextStyle,
     val headingXLargeSubdued: TextStyle,
     val headingLarge: TextStyle,
@@ -62,53 +40,53 @@ internal fun TypePreview() {
         ) {
             Text(
                 text = "Heading XLarge",
-                style = v3Typography.headingXLarge
+                style = typography.headingXLarge
             )
             Text(
                 text = "Heading XLarge Subdued",
-                style = v3Typography.headingXLargeSubdued
+                style = typography.headingXLargeSubdued
             )
             Text(
                 text = "Heading Large",
-                style = v3Typography.headingLarge
+                style = typography.headingLarge
             )
             Text(
                 text = "Heading Medium",
-                style = v3Typography.headingMedium
+                style = typography.headingMedium
             )
             Divider()
             Text(
                 text = "Body Medium Emphasized",
-                style = v3Typography.bodyMediumEmphasized
+                style = typography.bodyMediumEmphasized
             )
             Text(
                 text = "Body Medium",
-                style = v3Typography.bodyMedium
+                style = typography.bodyMedium
             )
             Text(
                 text = "Body Small",
-                style = v3Typography.bodySmall
+                style = typography.bodySmall
             )
             Divider()
             Text(
                 text = "Label Large Emphasized",
-                style = v3Typography.labelLargeEmphasized
+                style = typography.labelLargeEmphasized
             )
             Text(
                 text = "Label Large",
-                style = v3Typography.labelLarge
+                style = typography.labelLarge
             )
             Text(
                 text = "Label Medium Emphasized",
-                style = v3Typography.labelMediumEmphasized
+                style = typography.labelMediumEmphasized
             )
             Text(
                 text = "Label Medium",
-                style = v3Typography.labelMedium
+                style = typography.labelMedium
             )
             Text(
                 text = "Label Small",
-                style = v3Typography.labelSmall
+                style = typography.labelSmall
             )
         }
     }
