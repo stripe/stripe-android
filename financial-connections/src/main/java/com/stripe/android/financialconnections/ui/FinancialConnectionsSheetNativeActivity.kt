@@ -266,7 +266,7 @@ internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
 }
 
 internal val LocalTestMode = staticCompositionLocalOf<Boolean> {
-    error("No ReducedBranding provided")
+    error("No TestMode provided")
 }
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
