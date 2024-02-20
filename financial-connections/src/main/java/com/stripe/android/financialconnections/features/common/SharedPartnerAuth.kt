@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
@@ -50,6 +50,8 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus.Action
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
@@ -257,7 +259,7 @@ private fun SharedPartnerAuthContentWrapper(
 @Composable
 private fun LoadedContent(
     showInModal: Boolean,
-    authenticationStatus: Async<String>,
+    authenticationStatus: Async<AuthenticationStatus>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
@@ -271,7 +273,7 @@ private fun LoadedContent(
             true -> PrePaneContent(
                 // show loading prepane when authenticationStatus
                 // is Loading or Success (completing auth after redirect)
-                loading = authenticationStatus is Loading || authenticationStatus is Success,
+                authenticationStatus = authenticationStatus,
                 showInModal = showInModal,
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
@@ -289,7 +291,7 @@ private fun LoadedContent(
 private fun PrePaneContent(
     showInModal: Boolean,
     content: OauthPrepane,
-    loading: Boolean,
+    authenticationStatus: Async<AuthenticationStatus>,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
@@ -306,7 +308,7 @@ private fun PrePaneContent(
                     content = content
                 )
             }
-            itemsIndexed(content.body.entries) { index, bodyItem ->
+            items(content.body.entries) { bodyItem ->
                 when (bodyItem) {
                     is Entry.Image -> PrepaneImage(bodyItem)
 
@@ -323,7 +325,7 @@ private fun PrePaneContent(
             PrepaneFooter(
                 onContinueClick = onContinueClick,
                 onCancelClick = onCancelClick,
-                loading = loading,
+                status = authenticationStatus,
                 oAuthPrepane = content
             )
         }
@@ -396,7 +398,7 @@ private fun PrepaneImage(bodyItem: Entry.Image) {
 private fun PrepaneFooter(
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    loading: Boolean,
+    status: Async<AuthenticationStatus>,
     oAuthPrepane: OauthPrepane
 ) {
     Column(
@@ -405,7 +407,8 @@ private fun PrepaneFooter(
         FinancialConnectionsButton(
             onClick = onContinueClick,
             type = Type.Primary,
-            loading = loading,
+            loading = status is Loading && status()?.action == Action.AUTHENTICATING,
+            enabled = status !is Loading,
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }
                 .testTag("prepane_cta")
@@ -433,7 +436,7 @@ private fun PrepaneFooter(
         FinancialConnectionsButton(
             onClick = onCancelClick,
             type = Type.Secondary,
-            enabled = loading.not(),
+            enabled = status !is Loading,
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }
                 .testTag("cancel_cta")

@@ -36,6 +36,7 @@ import com.stripe.android.financialconnections.exception.FinancialConnectionsErr
 import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus.Action
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
@@ -53,6 +54,7 @@ import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Named
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus as Status
 
 @Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
@@ -97,7 +99,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         )
     }.execute { copy(payload = it) }
 
-    private fun createAuthSession() = suspend {
+    private fun recreateAuthSession() = suspend {
         val launchedEvent = Launched(Date())
         val sync: SynchronizeSessionResponse = getOrFetchSync()
         val manifest: FinancialConnectionsSessionManifest = sync.manifest
@@ -118,7 +120,10 @@ internal class PartnerAuthViewModel @Inject constructor(
                 listOfNotNull(launchedEvent, loadedEvent)
             )
         }
-    }.execute {
+    }.execute(
+        // keeps existing payload to prevent showing full-screen loading.
+        retainValue = SharedPartnerAuthState::payload
+    ) {
         copy(
             payload = it,
             activeAuthSession = it()?.authSession?.id
@@ -162,7 +167,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     }
 
     fun onLaunchAuthClick() {
-        setState { copy(authenticationStatus = Loading()) }
+        setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
         viewModelScope.launch {
             awaitState().payload()?.authSession?.let {
                 postAuthSessionEvent(it.id, AuthSessionEvent.OAuthLaunched(Date()))
@@ -221,7 +226,11 @@ internal class PartnerAuthViewModel @Inject constructor(
                 }
 
                 WebAuthFlowState.InProgress -> {
-                    setState { copy(authenticationStatus = Loading()) }
+                    setState {
+                        copy(
+                            authenticationStatus = Loading(Status(Action.AUTHENTICATING))
+                        )
+                    }
                 }
 
                 is WebAuthFlowState.Success -> {
@@ -276,7 +285,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private suspend fun onAuthCancelled(url: String?) {
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
-            setState { copy(authenticationStatus = Loading()) }
+            setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
             val manifest = getOrFetchSync().manifest
             val authSession = manifest.activeAuthSession
             eventTracker.track(
@@ -336,7 +345,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             // for OAuth institutions, we remain on the pre-pane,
             // but create a brand new auth session
             setState { copy(authenticationStatus = Uninitialized) }
-            createAuthSession()
+            recreateAuthSession()
         } else {
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
@@ -350,7 +359,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private suspend fun completeAuthorizationSession(url: String) {
         kotlin.runCatching {
-            setState { copy(authenticationStatus = Loading()) }
+            setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
@@ -426,7 +435,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     fun onCancelClick() = viewModelScope.launch {
         // set loading state while cancelling the active auth session, and navigate back
-        setState { copy(authenticationStatus = Loading()) }
+        setState { copy(authenticationStatus = Loading(value = Status(Action.CANCELLING))) }
         runCatching {
             val authSession = requireNotNull(getOrFetchSync().manifest.activeAuthSession)
             cancelAuthorizationSession(authSession.id)
