@@ -2833,6 +2833,20 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When card number input is completed, should report event`() = runTest(testDispatcher) {
+        val eventReporter = mock<CustomerSheetEventReporter>()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnCardNumberInputCompleted)
+
+        verify(eventReporter).onCardNumberCompleted()
+    }
+
     private fun mockUSBankAccountResult(
         isVerified: Boolean
     ): CollectBankAccountResultInternal.Completed {

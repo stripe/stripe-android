@@ -177,6 +177,7 @@ internal class CustomerSheetViewModel(
         when (viewAction) {
             is CustomerSheetViewAction.OnDismissed -> onDismissed()
             is CustomerSheetViewAction.OnAddCardPressed -> onAddCardPressed()
+            is CustomerSheetViewAction.OnCardNumberInputCompleted -> onCardNumberInputCompleted()
             is CustomerSheetViewAction.OnBackPressed -> onBackPressed()
             is CustomerSheetViewAction.OnEditPressed -> onEditPressed()
             is CustomerSheetViewAction.OnItemRemoved -> onItemRemoved(viewAction.paymentMethod)
@@ -868,6 +869,10 @@ internal class CustomerSheetViewModel(
 
     private fun onConfirmUSBankAccount(usBankAccount: PaymentSelection.New.USBankAccount) {
         createAndAttach(usBankAccount.paymentMethodCreateParams)
+    }
+
+    private fun onCardNumberInputCompleted() {
+        eventReporter.onCardNumberCompleted()
     }
 
     private fun onFormError(error: String?) {

@@ -155,6 +155,12 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CardNumberCompleted : CustomerSheetEvent() {
+        override val eventName: String = CS_CARD_NUMBER_COMPLETED
+
+        override val additionalParams: Map<String, Any?> = mapOf()
+    }
+
     internal companion object {
         const val CS_ADD_PAYMENT_METHOD_SCREEN_PRESENTED =
             "cs_add_payment_method_screen_presented"
@@ -165,6 +171,9 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
             "cs_select_payment_method_screen_confirmed_savedpm_success"
         const val CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED =
             "cs_select_payment_method_screen_confirmed_savedpm_failure"
+
+        const val CS_CARD_NUMBER_COMPLETED =
+            "cs_card_number_completed"
 
         const val CS_SELECT_PAYMENT_METHOD_EDIT_TAPPED =
             "cs_select_payment_method_screen_edit_tapped"
