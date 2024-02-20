@@ -40,6 +40,31 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
                     displayName = "Card",
+                    canRemove = true,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `on init, view state should be initialized with canRemove=False`() = runTest {
+        val interactor = createInteractor(canRemove = false)
+
+        interactor.viewState.test {
+            val state = awaitItem()
+
+            assertThat(state).isEqualTo(
+                EditPaymentMethodViewState(
+                    status = EditPaymentMethodViewState.Status.Idle,
+                    last4 = "4242",
+                    canUpdate = false,
+                    selectedBrand = CARTES_BANCAIRES_BRAND_CHOICE,
+                    availableBrands = listOf(
+                        VISA_BRAND_CHOICE,
+                        CARTES_BANCAIRES_BRAND_CHOICE
+                    ),
+                    displayName = "Card",
+                    canRemove = false,
                 )
             )
         }
@@ -98,6 +123,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                             CARTES_BANCAIRES_BRAND_CHOICE
                         ),
                         displayName = "Card",
+                        canRemove = true,
                     )
                 )
             }
@@ -129,6 +155,7 @@ class DefaultEditPaymentMethodViewInteractorTest {
                         CARTES_BANCAIRES_BRAND_CHOICE
                     ),
                     displayName = "Card",
+                    canRemove = true,
                 )
             )
         }
@@ -263,7 +290,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
         eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit = {},
         onRemove: PaymentMethodRemoveOperation = { null },
         onUpdate: PaymentMethodUpdateOperation = { _, _ -> Result.success(CARD_WITH_NETWORKS_PAYMENT_METHOD) },
-        workContext: CoroutineContext = UnconfinedTestDispatcher()
+        workContext: CoroutineContext = UnconfinedTestDispatcher(),
+        canRemove: Boolean = true,
     ): DefaultEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD,
@@ -272,7 +300,8 @@ class DefaultEditPaymentMethodViewInteractorTest {
             removeExecutor = onRemove,
             updateExecutor = onUpdate,
             viewStateSharingStarted = SharingStarted.Eagerly,
-            workContext = workContext
+            workContext = workContext,
+            canRemove = canRemove,
         )
     }
 

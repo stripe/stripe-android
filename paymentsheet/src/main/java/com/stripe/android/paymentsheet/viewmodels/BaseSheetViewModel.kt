@@ -286,13 +286,14 @@ internal abstract class BaseSheetViewModel(
             canEdit.collect { canEdit ->
                 if (!canEdit && editing.value) {
                     toggleEditing()
+                }
+            }
+        }
 
-                    // If nothing is selected, select the first available item.
-                    val state = paymentOptionsState.value
-                    val paymentMethods = state.items
-                    if (state.selectedItem !in paymentMethods && paymentMethods.isNotEmpty()) {
-                        updateSelection(paymentMethods.first().toPaymentSelection())
-                    }
+        viewModelScope.launch {
+            paymentMethods.collect { paymentMethods ->
+                if (paymentMethods.isNullOrEmpty() && editing.value) {
+                    toggleEditing()
                 }
             }
         }
