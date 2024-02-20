@@ -107,6 +107,14 @@ sealed class PaymentMethodOptionsParams(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    object WeChatPayH5 : PaymentMethodOptionsParams(PaymentMethod.Type.WeChatPay) {
+        override fun createTypeParams(): List<Pair<String, Any?>> {
+            return listOf("client" to "mobile_web")
+        }
+    }
+
     @Parcelize
     data class USBankAccount(
         var setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null
