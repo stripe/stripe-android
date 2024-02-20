@@ -14,6 +14,7 @@
     <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$@Source.SourceType private fun asSourceType(sourceType: String?): String</ID>
     <ID>CyclomaticComplexMethod:SourceJsonParser.kt$SourceJsonParser.Companion$private inline fun &lt;reified T : StripeModel> optStripeJsonModel( jsonObject: JSONObject, @Size(min = 1) key: String ): T?</ID>
     <ID>CyclomaticComplexMethod:StripeErrorMapping.kt$internal fun Context.mapErrorCodeToLocalizedMessage(code: String?): String?</ID>
+    <ID>CyclomaticComplexMethod:WebIntentAuthenticator.kt$WebIntentAuthenticator$override suspend fun performAuthentication( host: AuthActivityStarterHost, authenticatable: StripeIntent, requestOptions: ApiRequest.Options )</ID>
     <ID>EmptyFunctionBlock:CardWidgetProgressView.kt$CardWidgetProgressView.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:CustomerSessionTest.kt$CustomerSessionTest.&lt;no name provided>${ }</ID>
     <ID>EmptyFunctionBlock:DeletePaymentMethodDialogFactory.kt$DeletePaymentMethodDialogFactory.PaymentMethodDeleteListener${ }</ID>
@@ -161,7 +162,6 @@
     <ID>MaxLineLength:PaymentMethodMessageJsonParserTest.kt$PaymentMethodMessageJsonParserTest$.</ID>
     <ID>MaxLineLength:PaymentMethodsActivityStarter.kt$PaymentMethodsActivityStarter.Args.Builder$*</ID>
     <ID>MaxLineLength:PaymentMethodsActivityTest.kt$PaymentMethodsActivityTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>
-    <ID>MaxLineLength:PaymentMethodsViewModelTest.kt$PaymentMethodsViewModelTest$private val listenerArgumentCaptor: KArgumentCaptor&lt;CustomerSession.PaymentMethodsRetrievalListener> = argumentCaptor()</ID>
     <ID>MaxLineLength:PaymentRelayContract.kt$PaymentRelayContract$internal</ID>
     <ID>MaxLineLength:PaymentSessionConfig.kt$PaymentSessionConfig.Builder$*</ID>
     <ID>MaxLineLength:PaymentSessionConfigTest.kt$PaymentSessionConfigTest$fun</ID>

@@ -11,6 +11,8 @@ import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticat
 import com.stripe.android.payments.core.authentication.KonbiniAuthenticator
 import com.stripe.android.payments.core.authentication.OxxoAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.payments.core.authentication.RealRedirectResolver
+import com.stripe.android.payments.core.authentication.RedirectResolver
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Binds
@@ -89,6 +91,9 @@ internal abstract class AuthenticationModule {
     abstract fun bindsSwishRedirectAuthenticator(
         webIntentAuthenticator: WebIntentAuthenticator
     ): PaymentAuthenticator<StripeIntent>
+
+    @Binds
+    abstract fun bindsRedirectResolver(impl: RealRedirectResolver): RedirectResolver
 
     companion object {
         @Provides

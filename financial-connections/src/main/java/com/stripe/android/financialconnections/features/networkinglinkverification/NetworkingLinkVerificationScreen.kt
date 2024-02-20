@@ -13,11 +13,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -86,7 +85,6 @@ private fun NetworkingLinkVerificationContent(
 }
 
 @Composable
-@OptIn(ExperimentalComposeUiApi::class)
 private fun NetworkingLinkVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
     payload: Payload,
@@ -95,11 +93,12 @@ private fun NetworkingLinkVerificationLoaded(
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val textInputService = LocalTextInputService.current
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {
             focusManager.clearFocus(true)
-            keyboardController?.hide()
+            @Suppress()
+            textInputService?.hideSoftwareKeyboard()
         }
     }
     if (confirmVerificationAsync is Fail && confirmVerificationAsync.error !is OTPError) {

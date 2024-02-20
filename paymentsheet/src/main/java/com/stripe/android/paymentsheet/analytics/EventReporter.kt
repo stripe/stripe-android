@@ -29,6 +29,7 @@ internal interface EventReporter {
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
+        googlePaySupported: Boolean,
         currency: String?,
     )
 

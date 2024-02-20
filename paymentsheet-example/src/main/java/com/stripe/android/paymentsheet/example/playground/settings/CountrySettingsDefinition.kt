@@ -15,8 +15,9 @@ internal object CountrySettingsDefinition :
     private val supportedCountries = Country.entries.map { it.value }.toSet()
 
     override val displayName: String = "Merchant"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<Country>> =
-        CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
+
+    override val options: List<PlaygroundSettingDefinition.Displayable.Option<Country>>
+        get() = CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
             country.code.value in supportedCountries
         }.map { country ->
             option(country.name, convertToValue(country.code.value))
@@ -40,6 +41,7 @@ internal object CountrySettingsDefinition :
             Country.MX -> Currency.MXN
             Country.BR -> Currency.BRL
             Country.JP -> Currency.JPY
+            Country.CN -> Currency.CNY
         }.let { currency ->
             playgroundSettings[CurrencySettingsDefinition] = currency
         }
@@ -57,4 +59,5 @@ enum class Country(override val value: String) : ValueEnum {
     MX("MX"),
     BR("BR"),
     JP("JP"),
+    CN("CN"),
 }

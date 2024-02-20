@@ -2,13 +2,12 @@ package com.stripe.android.paymentsheet.ui
 
 import android.os.Build
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.ui.ExperimentalComposeUiApi
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.SoftwareKeyboardController
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.text.input.TextInputService
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
@@ -30,15 +29,14 @@ class PaymentSheetTopBarTest {
     @get:Rule
     val composeTestRule = createComposeRule()
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun `Handles navigation icon press correctly`() {
-        val mockKeyboardController = mock<SoftwareKeyboardController>()
+        val mockTextInputService = mock<TextInputService>()
         var didCallOnNavigationIconPressed = false
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalSoftwareKeyboardController provides mockKeyboardController,
+                LocalTextInputService provides mockTextInputService,
             ) {
                 PaymentSheetTopBar(
                     state = mockState(isEnabled = true),
@@ -53,19 +51,19 @@ class PaymentSheetTopBarTest {
             .onNodeWithContentDescription("Back")
             .performClick()
 
-        verify(mockKeyboardController).hide()
+        @Suppress("DEPRECATION")
+        verify(mockTextInputService).hideSoftwareKeyboard()
         assertThat(didCallOnNavigationIconPressed).isTrue()
     }
 
-    @OptIn(ExperimentalComposeUiApi::class)
     @Test
     fun `Ignores navigation icon press if not enabled`() {
-        val mockKeyboardController = mock<SoftwareKeyboardController>()
+        val mockTextInputService = mock<TextInputService>()
         var didCallOnNavigationIconPressed = false
 
         composeTestRule.setContent {
             CompositionLocalProvider(
-                LocalSoftwareKeyboardController provides mockKeyboardController,
+                LocalTextInputService provides mockTextInputService,
             ) {
                 PaymentSheetTopBar(
                     state = mockState(isEnabled = false),
@@ -79,8 +77,8 @@ class PaymentSheetTopBarTest {
         composeTestRule
             .onNodeWithContentDescription("Back")
             .performClick()
-
-        verify(mockKeyboardController, never()).hide()
+        @Suppress("DEPRECATION")
+        verify(mockTextInputService, never()).hideSoftwareKeyboard()
         assertThat(didCallOnNavigationIconPressed).isFalse()
     }
 

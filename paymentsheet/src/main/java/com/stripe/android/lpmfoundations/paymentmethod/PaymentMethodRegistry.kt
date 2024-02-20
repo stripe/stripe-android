@@ -29,6 +29,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SofortDefinit
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
 
 internal object PaymentMethodRegistry {
@@ -63,6 +64,7 @@ internal object PaymentMethodRegistry {
         SwishDefinition,
         UpiDefinition,
         UsBankAccountDefinition,
+        WeChatPayDefinition,
         ZipDefinition,
     )
 
