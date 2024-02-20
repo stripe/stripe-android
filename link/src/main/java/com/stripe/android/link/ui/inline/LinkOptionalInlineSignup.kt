@@ -23,12 +23,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
@@ -55,7 +54,6 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.job
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkOptionalInlineSignup(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -76,12 +74,13 @@ fun LinkOptionalInlineSignup(
         }
 
         val focusManager = LocalFocusManager.current
-        val keyboardController = LocalSoftwareKeyboardController.current
+        val textInputService = LocalTextInputService.current
 
         LaunchedEffect(viewState.signUpState) {
             if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
                 focusManager.clearFocus(true)
-                keyboardController?.hide()
+                @Suppress("DEPRECATION")
+                textInputService?.hideSoftwareKeyboard()
             }
         }
 
