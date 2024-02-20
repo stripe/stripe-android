@@ -50,7 +50,8 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
-import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Action
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus.Action
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
@@ -258,7 +259,7 @@ private fun SharedPartnerAuthContentWrapper(
 @Composable
 private fun LoadedContent(
     showInModal: Boolean,
-    authenticationStatus: Async<Action>,
+    authenticationStatus: Async<AuthenticationStatus>,
     payload: SharedPartnerAuthState.Payload,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
@@ -290,7 +291,7 @@ private fun LoadedContent(
 private fun PrePaneContent(
     showInModal: Boolean,
     content: OauthPrepane,
-    authenticationStatus: Async<Action>,
+    authenticationStatus: Async<AuthenticationStatus>,
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
@@ -397,7 +398,7 @@ private fun PrepaneImage(bodyItem: Entry.Image) {
 private fun PrepaneFooter(
     onContinueClick: () -> Unit,
     onCancelClick: () -> Unit,
-    status: Async<Action>,
+    status: Async<AuthenticationStatus>,
     oAuthPrepane: OauthPrepane
 ) {
     Column(
@@ -406,7 +407,7 @@ private fun PrepaneFooter(
         FinancialConnectionsButton(
             onClick = onContinueClick,
             type = Type.Primary,
-            loading = status is Loading && status() == Action.AUTHENTICATING,
+            loading = status is Loading && status()?.action == Action.AUTHENTICATING,
             enabled = status !is Loading,
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }

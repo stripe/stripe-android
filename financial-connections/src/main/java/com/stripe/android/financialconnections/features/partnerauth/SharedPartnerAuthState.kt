@@ -19,22 +19,25 @@ internal data class SharedPartnerAuthState(
     @PersistState
     val activeAuthSession: String? = null,
     val pane: FinancialConnectionsSessionManifest.Pane,
-    val cancelling: Boolean = false,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
-    val authenticationStatus: Async<Action> = Uninitialized,
+    val authenticationStatus: Async<AuthenticationStatus> = Uninitialized,
 ) : MavericksState {
-
-    enum class Action {
-        CANCELLING,
-        AUTHENTICATING
-    }
 
     data class Payload(
         val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
         val authSession: FinancialConnectionsAuthorizationSession,
     )
+
+    data class AuthenticationStatus(
+        val action: Action,
+    ) {
+        enum class Action {
+            CANCELLING,
+            AUTHENTICATING
+        }
+    }
 
     val canNavigateBack: Boolean
         get() =
