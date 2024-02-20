@@ -2,8 +2,10 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-## 20.37.4 - 2024-02-20
+### PaymentSheet
+* [Added] Added support for [payment method configurations](https://docs.stripe.com/payments/multiple-payment-method-configs) when using the deferred intent integration path.
 
+## 20.37.4 - 2024-02-20
 * [FIXED][7953](https://github.com/stripe/stripe-android/pull/7953) Improved font rendering in `PaymentSheet`, `CustomerSheet`, and `FinancialConnectionsSheet` when used in Compose 1.6 and above.
 
 ## 20.37.3 - 2024-02-12

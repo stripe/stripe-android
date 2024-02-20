@@ -281,6 +281,7 @@ class ElementsSessionJsonParserTest {
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 )
             ),
@@ -321,6 +322,7 @@ class ElementsSessionJsonParserTest {
                         setupFutureUsage = StripeIntent.Usage.OffSession,
                     ),
                     paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 )
             ),
