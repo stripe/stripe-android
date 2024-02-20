@@ -4,7 +4,6 @@ import com.stripe.android.PaymentBrowserAuthStarter
 import com.stripe.android.StripePaymentController
 import com.stripe.android.auth.PaymentBrowserAuthContract
 import com.stripe.android.core.injection.ENABLE_LOGGING
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
@@ -17,14 +16,10 @@ import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.injection.IS_INSTANT_APP
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.withContext
-import java.net.HttpURLConnection
-import java.net.URL
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
-
-private const val WeChatPayRedirectTimeoutInMillis = 10_000
 
 /**
  * [PaymentAuthenticator] implementation to redirect to a URL through [PaymentBrowserAuthStarter].
@@ -36,7 +31,6 @@ internal class WebIntentAuthenticator @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
     @Named(ENABLE_LOGGING) private val enableLogging: Boolean,
-    @IOContext private val workContext: CoroutineContext,
     @UIContext private val uiContext: CoroutineContext,
     private val threeDs1IntentReturnUrlMap: MutableMap<String, String>,
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
@@ -186,20 +180,4 @@ internal class WebIntentAuthenticator @Inject constructor(
             )
         )
     }
-}
-
-private fun URL.resolveRedirectUrl(): String? {
-    return runCatching {
-        val connection = (openConnection() as HttpURLConnection).apply {
-            connectTimeout = WeChatPayRedirectTimeoutInMillis
-            readTimeout = WeChatPayRedirectTimeoutInMillis
-        }
-
-        // Seems like we need to call getResponseCode() so that HttpURLConnection internally
-        // follows the redirect. If we didn't call this method, connection.url would be the
-        // same as the provided url, making this method redundant.
-        connection.responseCode
-
-        connection.url.toString()
-    }.getOrNull()
 }

@@ -169,7 +169,6 @@ class WebIntentAuthenticatorTest {
             paymentAnalyticsRequestFactory = analyticsRequestFactory,
             enableLogging = false,
             uiContext = testDispatcher,
-            workContext = testDispatcher,
             threeDs1IntentReturnUrlMap = threeDs1IntentReturnUrlMap,
             publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
             isInstantApp = false,
