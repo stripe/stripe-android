@@ -4,6 +4,8 @@
 
 ## 20.37.4 - 2024-02-20
 
+* [FIXED][7953](https://github.com/stripe/stripe-android/pull/7953) Improved font rendering in `PaymentSheet`, `CustomerSheet`, `FinancialConnectionsSheet` when used in Compose 1.6 and above.
+
 ## 20.37.3 - 2024-02-12
 
 ### PaymentSheet
