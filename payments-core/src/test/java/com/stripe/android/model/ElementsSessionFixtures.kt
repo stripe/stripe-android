@@ -437,7 +437,7 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
-    val EXPANDED_SETUP_INTENT_WITH_SIGNUP_DISABLED_JSON = JSONObject(
+    val EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_JSON = JSONObject(
         """
         {
           "business_name": "Mybusiness",

@@ -111,7 +111,7 @@ class ElementsSessionJsonParserTest {
             ),
             apiKey = "test"
         ).parse(
-            ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_SIGNUP_DISABLED_JSON
+            ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_JSON
         )!!
 
         assertThat(elementsSession.linkSettings?.disableLinkSignup).isTrue()
