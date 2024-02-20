@@ -357,6 +357,7 @@ internal data class FinancialConnectionsSheetNativeState(
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
     val reducedBranding: Boolean,
+    val testMode: Boolean,
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val completed: Boolean,
     val initialPane: Pane
@@ -369,6 +370,7 @@ internal data class FinancialConnectionsSheetNativeState(
     constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
         webAuthFlow = WebAuthFlowState.Uninitialized,
         reducedBranding = args.initialSyncResponse.visual.reducedBranding,
+        testMode = args.initialSyncResponse.manifest.livemode.not(),
         firstInit = true,
         completed = false,
         initialPane = args.initialSyncResponse.manifest.nextPane,

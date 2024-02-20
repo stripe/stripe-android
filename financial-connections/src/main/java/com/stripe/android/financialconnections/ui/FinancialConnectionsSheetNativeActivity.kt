@@ -81,8 +81,10 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 FinancialConnectionsTheme {
                     val firstPane by viewModel.collectAsState { it.initialPane }
                     val reducedBranding by viewModel.collectAsState { it.reducedBranding }
+                    val testMode by viewModel.collectAsState { it.testMode }
                     NavHost(
                         initialPane = firstPane,
+                        testMode = testMode,
                         reducedBranding = reducedBranding
                     )
                 }
@@ -118,6 +120,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Composable
     fun NavHost(
         initialPane: Pane,
+        testMode: Boolean,
         reducedBranding: Boolean
     ) {
         val context = LocalContext.current
@@ -138,6 +141,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
         CompositionLocalProvider(
             LocalReducedBranding provides reducedBranding,
+            LocalTestMode provides testMode,
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
             LocalUriHandler provides uriHandler
@@ -258,6 +262,10 @@ internal val LocalNavHostController = staticCompositionLocalOf<NavHostController
 }
 
 internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
+    error("No ReducedBranding provided")
+}
+
+internal val LocalTestMode = staticCompositionLocalOf<Boolean> {
     error("No ReducedBranding provided")
 }
 
