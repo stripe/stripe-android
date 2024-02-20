@@ -24,13 +24,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -57,7 +56,6 @@ import com.stripe.android.uicore.stripeShapes
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun LinkInlineSignup(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -78,12 +76,13 @@ fun LinkInlineSignup(
         }
 
         val focusManager = LocalFocusManager.current
-        val keyboardController = LocalSoftwareKeyboardController.current
+        val textInputService = LocalTextInputService.current
 
         LaunchedEffect(viewState.signUpState) {
             if (viewState.signUpState == SignUpState.InputtingPrimaryField && viewState.userInput != null) {
                 focusManager.clearFocus(true)
-                keyboardController?.hide()
+                @Suppress("DEPRECATION")
+                textInputService?.hideSoftwareKeyboard()
             }
         }
 

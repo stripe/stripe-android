@@ -151,18 +151,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
             stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
 
-        // For Cash App Pay, the intent status can still be `requires_action` by the time the user
+        // For some payment method types, the intent status can still be `requires_action` by the time the user
         // gets back to the merchant app. We poll until it's succeeded.
-        val shouldRefreshForCashApp = stripeIntent.requiresAction() &&
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.CashAppPay
+        val shouldRefresh = stripeIntent.requiresAction() &&
+            stripeIntent.paymentMethod?.type?.shouldRefreshIfIntentRequiresAction == true
 
-        // For Swish, the intent status can still be `requires_action` by the time the user
-        // gets back to the merchant app. We poll until it's succeeded.
-        val shouldRefreshForSwish = stripeIntent.requiresAction() &&
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.Swish
-
-        return succeededMaybeRefresh || cancelledMaybeRefresh ||
-            actionNotProcessedMaybeRefresh || shouldRefreshForCashApp || shouldRefreshForSwish
+        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh || shouldRefresh
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
@@ -251,10 +245,10 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             remainingRetries--
         }
 
-        if (shouldThrowException(stripeIntentResult)) {
-            return Result.failure(MaxRetryReachedException())
+        return if (shouldThrowException(stripeIntentResult)) {
+            Result.failure(MaxRetryReachedException())
         } else {
-            return stripeIntentResult
+            stripeIntentResult
         }
     }
 

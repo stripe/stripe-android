@@ -792,12 +792,8 @@ internal class PlaygroundTestDriver(
             }
         }
 
-        val isDone = testParameters.authorizationAction in setOf(
-            AuthorizeAction.AuthorizePayment,
-            AuthorizeAction.PollingSucceedsAfterDelay,
-            AuthorizeAction.DisplayQrCode,
-            null
-        )
+        val authAction = testParameters.authorizationAction
+        val isDone = authAction == null || authAction.isConsideredDone
 
         if (isDone) {
             waitForPlaygroundActivity()

@@ -16,14 +16,14 @@ internal class TestAuthorization : BasePlaygroundTest() {
         saveCheckboxValue = false,
         saveForFutureUseCheckboxVisible = false,
         useBrowser = Browser.Chrome,
-        authorizationAction = AuthorizeAction.AuthorizePayment,
+        authorizationAction = AuthorizeAction.AuthorizePayment(),
     )
 
     @Test
     fun testAuthorizeSuccess() {
         testDriver.confirmNewOrGuestComplete(
             testParameters.copy(
-                authorizationAction = AuthorizeAction.AuthorizePayment,
+                authorizationAction = AuthorizeAction.AuthorizePayment(),
             )
         )
     }

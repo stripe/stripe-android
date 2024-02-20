@@ -3,6 +3,7 @@ package com.stripe.android.networktesting
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.ConnectionFactory
 import com.stripe.android.core.networking.StripeRequest
+import okhttp3.HttpUrl
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.mockwebserver.MockResponse
 import org.junit.rules.TestRule
@@ -12,11 +13,15 @@ import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
+import javax.net.ssl.SSLSocketFactory
 
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
 ) : TestRule {
     private val mockWebServer = TestMockWebServer()
+
+    val baseUrl: HttpUrl
+        get() = mockWebServer.baseUrl
 
     constructor(
         hostsToTrack: List<String> = listOf(ApiRequest.API_HOST)
@@ -29,6 +34,10 @@ class NetworkRule private constructor(
             mockWebServer,
             hostsToTrack,
         )
+    }
+
+    fun clientSocketFactory(trustAll: Boolean = false): SSLSocketFactory {
+        return mockWebServer.clientSocketFactory(trustAll)
     }
 
     fun enqueue(

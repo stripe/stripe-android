@@ -102,6 +102,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$Configuration 
 	public final fun getPreferredNetworks ()Ljava/util/List;
 	public fun hashCode ()I
 	public final fun newBuilder ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
+	public fun toString ()Ljava/lang/String;
 	public fun writeToParcel (Landroid/os/Parcel;I)V
 }
 
