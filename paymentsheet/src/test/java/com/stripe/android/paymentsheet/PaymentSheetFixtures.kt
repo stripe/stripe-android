@@ -3,7 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
-import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -104,7 +104,6 @@ internal object PaymentSheetFixtures {
 
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             customerPaymentMethods = emptyList(),
             config = CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
@@ -112,6 +111,7 @@ internal object PaymentSheetFixtures {
             linkState = null,
             isEligibleForCardBrandChoice = false,
             validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
         ),
         statusBarColor = STATUS_BAR_COLOR,
         enableLogging = false,
@@ -130,10 +130,10 @@ internal object PaymentSheetFixtures {
             state = state.copy(
                 customerPaymentMethods = paymentMethods,
                 isGooglePayReady = isGooglePayReady,
-                stripeIntent = stripeIntent,
                 config = config,
                 paymentSelection = paymentSelection,
                 linkState = linkState,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent)
             ),
         )
     }

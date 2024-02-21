@@ -12,6 +12,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -523,7 +524,11 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
         val deferredIntentArgs = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(stripeIntent = DEFERRED_PAYMENT_INTENT),
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                paymentMethodMetadata = PAYMENT_OPTION_CONTRACT_ARGS.state.paymentMethodMetadata.copy(
+                    stripeIntent = DEFERRED_PAYMENT_INTENT,
+                )
+            ),
         )
 
         val viewModel = createViewModel(args = deferredIntentArgs)
@@ -540,11 +545,13 @@ internal class PaymentOptionsViewModelTest {
                 ),
                 isGooglePayReady = false,
                 customerPaymentMethods = emptyList(),
-                stripeIntent = PAYMENT_INTENT.copy(
-                    paymentMethodTypes = listOf(
-                        PaymentMethod.Type.Card.code,
-                        PaymentMethod.Type.AuBecsDebit.code,
-                    ),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PAYMENT_INTENT.copy(
+                        paymentMethodTypes = listOf(
+                            PaymentMethod.Type.Card.code,
+                            PaymentMethod.Type.AuBecsDebit.code,
+                        ),
+                    )
                 )
             ),
         )
@@ -735,7 +742,6 @@ internal class PaymentOptionsViewModelTest {
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                stripeIntent = PAYMENT_INTENT,
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 isGooglePayReady = true,
@@ -743,6 +749,7 @@ internal class PaymentOptionsViewModelTest {
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = PAYMENT_INTENT),
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,
