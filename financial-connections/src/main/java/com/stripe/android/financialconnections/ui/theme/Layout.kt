@@ -69,7 +69,7 @@ internal fun Layout(
             LazyColumn(
                 state = lazyListState,
                 verticalArrangement = verticalArrangement,
-                modifier = Modifier.padding(bodyPadding)
+                contentPadding = bodyPadding,
             ) {
                 body()
             }
