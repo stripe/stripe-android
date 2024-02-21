@@ -5,8 +5,10 @@ package com.stripe.android.financialconnections.ui.components
 import android.os.Build.VERSION.SDK_INT
 import android.os.Build.VERSION_CODES.R
 import android.view.HapticFeedbackConstants.CONFIRM
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -28,9 +30,16 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
@@ -45,6 +54,8 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
 
+private val DefaultSpinnerHeight = 24.dp
+
 @Composable
 internal fun FinancialConnectionsButton(
     onClick: () -> Unit,
@@ -56,7 +67,16 @@ internal fun FinancialConnectionsButton(
     content: @Composable (RowScope.() -> Unit)
 ) {
     val view = LocalView.current
+    val density = LocalDensity.current
+
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+    var spinnerHeight by remember { mutableStateOf(DefaultSpinnerHeight) }
+
+    val loadingIndicatorAlpha by animateFloatAsState(
+        targetValue = if (loading) 1f else 0f,
+        label = "LoadingIndicatorAlpha",
+    )
+
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
             onClick = {
@@ -71,7 +91,7 @@ internal fun FinancialConnectionsButton(
             elevation = type.elevation(),
             enabled = enabled,
             shape = RoundedCornerShape(size = size.radius),
-            contentPadding = size.paddingValues(),
+            contentPadding = PaddingValues(0.dp),
             colors = type.buttonColors(),
             content = {
                 ProvideTextStyle(
@@ -80,15 +100,25 @@ internal fun FinancialConnectionsButton(
                         letterSpacing = 0.sp
                     )
                 ) {
-                    Row {
-                        if (loading) {
-                            LoadingSpinner(
-                                strokeWidth = 2.dp,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        } else {
-                            content()
-                        }
+                    Box(contentAlignment = Alignment.Center) {
+                        Row(
+                            modifier = Modifier
+                                .alpha(1f - loadingIndicatorAlpha)
+                                .padding(size.paddingValues())
+                                .onSizeChanged {
+                                    // Set the spinner to the same height as the label,
+                                    // so we avoid visual jitter.
+                                    spinnerHeight = with(density) { it.height.toDp() }
+                                },
+                            content = content,
+                        )
+
+                        LoadingSpinner(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier
+                                .size(spinnerHeight)
+                                .alpha(loadingIndicatorAlpha),
+                        )
                     }
                 }
             }
