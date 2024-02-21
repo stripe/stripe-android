@@ -111,10 +111,8 @@ internal abstract class BaseSheetViewModel(
             _supportedPaymentMethodsFlow.tryEmit(value.map { it.code })
         }
 
-    private val _supportedPaymentMethodsFlow =
-        MutableStateFlow<List<PaymentMethodCode>>(emptyList())
-    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> =
-        _supportedPaymentMethodsFlow
+    private val _supportedPaymentMethodsFlow = MutableStateFlow<List<PaymentMethodCode>>(emptyList())
+    val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = _supportedPaymentMethodsFlow
 
     /**
      * The list of saved payment methods for the current customer.
@@ -261,7 +259,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSelection.New.Card,
             is PaymentSelection.New.USBankAccount,
             is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
-            else -> supportedPaymentMethods.first().code
+            else -> _supportedPaymentMethodsFlow.value.first()
         }
 
     init {
