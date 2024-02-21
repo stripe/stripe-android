@@ -24,6 +24,9 @@ internal interface PaymentMethodDefinition {
 }
 
 internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata): Boolean {
+    if (type.code !in metadata.stripeIntent.paymentMethodTypes) {
+        return false
+    }
     val requirements = addRequirement(metadata.hasIntentToSetup())
     for (requirement in requirements) {
         if (!requirement.meetsRequirements(metadata)) {
