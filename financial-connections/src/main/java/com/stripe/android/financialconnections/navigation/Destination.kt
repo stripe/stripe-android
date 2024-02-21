@@ -223,6 +223,7 @@ internal sealed class Destination(
 internal val Pane.rendersInBottomSheet: Boolean
     get() = when (this) {
         Pane.EXIT,
+        Pane.NETWORKING_LINK_LOGIN_WARMUP,
         Pane.PARTNER_AUTH_DRAWER -> {
             true
         }
@@ -236,7 +237,6 @@ internal val Pane.rendersInBottomSheet: Boolean
         Pane.LINK_LOGIN,
         Pane.MANUAL_ENTRY,
         Pane.MANUAL_ENTRY_SUCCESS,
-        Pane.NETWORKING_LINK_LOGIN_WARMUP,
         Pane.NETWORKING_LINK_SIGNUP_PANE,
         Pane.NETWORKING_LINK_VERIFICATION,
         Pane.LINK_STEP_UP_VERIFICATION,
