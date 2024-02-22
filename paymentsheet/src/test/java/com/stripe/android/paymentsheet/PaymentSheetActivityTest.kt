@@ -28,6 +28,7 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
@@ -52,6 +53,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -574,16 +576,16 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
             var finishProcessingCalled = false
             viewModel.viewState.value = PaymentSheetViewState.FinishProcessing {
                 finishProcessingCalled = true
             }
 
-            composeTestRule.waitForIdle()
-
-            assertThat(finishProcessingCalled).isTrue()
+            composeTestRule.waitUntil(timeoutMillis = 5000L) {
+                finishProcessingCalled
+            }
         }
     }
 
@@ -593,7 +595,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
             composeTestRule
                 .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
@@ -601,10 +603,48 @@ internal class PaymentSheetActivityTest {
 
             composeTestRule.waitForIdle()
 
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
             assertThat(viewModel.contentVisible.value).isEqualTo(false)
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHODS.first()))
+
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
             assertThat(viewModel.contentVisible.value).isEqualTo(true)
+
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
+                WalletsProcessingState.Completed::class.java
+            )
+            assertThat(viewModel.contentVisible.value).isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun `link flow updates the payment sheet before and after`() {
+        val viewModel = createViewModel(isLinkAvailable = true)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
+
+            composeTestRule
+                .onNodeWithTag(LinkButtonTestTag)
+                .performClick()
+
+            composeTestRule.waitForIdle()
+
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
+
+            viewModel.linkHandler.onLinkActivityResult(LinkActivityResult.Completed(PAYMENT_METHODS.first()))
+
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
+
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
+                WalletsProcessingState.Completed::class.java
+            )
         }
     }
 
@@ -679,7 +719,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(errorMessage)
                 .assertDoesNotExist()
 
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
@@ -713,7 +753,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(errorMessage)
                 .assertDoesNotExist()
 
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
