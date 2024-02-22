@@ -19,7 +19,6 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -454,11 +453,7 @@ private fun runLinkInlineTest(
         LinkPaymentDetails.New(
             paymentDetails = ConsumerPaymentDetails.Card(
                 id = "pm_123",
-                expiryYear = 2050,
-                expiryMonth = 4,
-                brand = CardBrand.Visa,
                 last4 = "4242",
-                cvcCheck = CvcCheck.Pass,
             ),
             paymentMethodCreateParams = mock(),
             originalParams = mock(),
