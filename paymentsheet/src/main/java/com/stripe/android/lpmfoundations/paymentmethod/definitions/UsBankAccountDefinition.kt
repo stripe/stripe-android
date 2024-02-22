@@ -15,7 +15,7 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = true
 
-    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+    override fun addRequirements(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.FinancialConnectionsSdk,
         AddPaymentMethodRequirement.ValidUsBankVerificationMethod,
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,

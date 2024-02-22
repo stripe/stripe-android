@@ -16,7 +16,7 @@ internal object BancontactDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = true
 
-    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOfNotNull(
+    override fun addRequirements(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOfNotNull(
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.takeIf { hasIntentToSetup },
     )
 

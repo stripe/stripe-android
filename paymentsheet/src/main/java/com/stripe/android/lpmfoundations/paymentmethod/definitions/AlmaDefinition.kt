@@ -15,7 +15,7 @@ internal object AlmaDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+    override fun addRequirements(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
