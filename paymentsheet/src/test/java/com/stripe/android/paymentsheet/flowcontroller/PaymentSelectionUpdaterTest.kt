@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -253,15 +254,17 @@ class PaymentSelectionUpdaterTest {
 
         return PaymentSheetState.Full(
             config = config,
-            stripeIntent = intent.copy(
-                paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
-            ),
             customerPaymentMethods = customerPaymentMethods,
             isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
             isEligibleForCardBrandChoice = false,
             validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = intent.copy(
+                    paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
+                )
+            ),
         )
     }
 
@@ -275,15 +278,17 @@ class PaymentSelectionUpdaterTest {
 
         return PaymentSheetState.Full(
             config = config,
-            stripeIntent = intent.copy(
-                paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
-            ),
             customerPaymentMethods = customerPaymentMethods,
             isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
             isEligibleForCardBrandChoice = false,
             validationError = null,
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = intent.copy(
+                    paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
+                )
+            ),
         )
     }
 

@@ -13,6 +13,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUs
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.PaymentIntentFixtures
@@ -121,7 +122,6 @@ internal class DefaultPaymentSheetLoaderTest {
         ).isEqualTo(
             PaymentSheetState.Full(
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = true,
                 paymentSelection = PaymentSelection.Saved(
@@ -130,6 +130,10 @@ internal class DefaultPaymentSheetLoaderTest {
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                    allowsDelayedPaymentMethods = false,
+                ),
             )
         )
     }
@@ -156,7 +160,6 @@ internal class DefaultPaymentSheetLoaderTest {
         ).isEqualTo(
             PaymentSheetState.Full(
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
                 paymentSelection = PaymentSelection.Saved(
@@ -165,6 +168,10 @@ internal class DefaultPaymentSheetLoaderTest {
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+                    allowsDelayedPaymentMethods = false,
+                ),
             )
         )
     }
