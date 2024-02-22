@@ -18,7 +18,7 @@ internal interface PaymentMethodDefinition {
      * Or setOf(AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods) if the payment method requires the
      * merchant to provide a PaymentSheet.Configuration with delayed payment methods enabled.
      */
-    fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
+    fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
 
     fun supportedPaymentMethod(metadata: PaymentMethodMetadata, sharedDataSpec: SharedDataSpec): SupportedPaymentMethod
 }
@@ -27,11 +27,7 @@ internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata
     if (type.code !in metadata.stripeIntent.paymentMethodTypes) {
         return false
     }
-    val requirements = addRequirement(metadata.hasIntentToSetup())
-    for (requirement in requirements) {
-        if (!requirement.meetsRequirements(metadata)) {
-            return false
-        }
+    return requirementsToBeUsedAsNewPaymentMethod(metadata.hasIntentToSetup()).all { requirement ->
+        requirement.isMetBy(metadata)
     }
-    return true
 }
