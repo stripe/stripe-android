@@ -16,7 +16,9 @@ internal object AfterpayClearpayDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override fun addRequirements(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+    override fun requirementsToBeUsedAsNewPaymentMethod(
+        hasIntentToSetup: Boolean
+    ): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.ShippingAddress,
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
