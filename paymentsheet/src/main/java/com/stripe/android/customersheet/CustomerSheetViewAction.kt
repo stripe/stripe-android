@@ -11,6 +11,7 @@ internal sealed class CustomerSheetViewAction {
     object OnDismissed : CustomerSheetViewAction()
     object OnBackPressed : CustomerSheetViewAction()
     object OnEditPressed : CustomerSheetViewAction()
+    object OnCardNumberInputCompleted : CustomerSheetViewAction()
     object OnAddCardPressed : CustomerSheetViewAction()
     object OnPrimaryButtonPressed : CustomerSheetViewAction()
     object OnCancelClose : CustomerSheetViewAction()
