@@ -9,6 +9,7 @@ import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVE
 import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVENT_NAME
 import com.stripe.android.core.networking.StripeRequest.MimeType
 import com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME
+import kotlinx.serialization.Serializable
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
@@ -33,14 +34,16 @@ import kotlin.time.DurationUnit.SECONDS
  * Additional params can be passed as constructor parameters.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class AnalyticsRequestV2(
+@Serializable
+class AnalyticsRequestV2 private constructor(
     @get:VisibleForTesting
     val eventName: String,
     private val clientId: String,
-    origin: String,
+    private val origin: String,
     @get:VisibleForTesting
-    val params: Map<String, *>
+    val params: Map<String, String>
 ) : StripeRequest() {
+
     // Note: nested params are calculated as a json string, which is different from other requests
     // that uses form encoding.
     // E.g for a nested map with value {"key", {"nestedKey1" -> "value1", "nestedKey2" -> "value2"}}
@@ -142,11 +145,12 @@ class AnalyticsRequestV2(
         }
     }
 
-    override val headers = mapOf(
+    override val headers: Map<String, String> = mapOf(
         HEADER_CONTENT_TYPE to "${MimeType.Form.code}; charset=${Charsets.UTF_8.name()}",
         HEADER_ORIGIN to origin, // required by r.stripe.com
         HEADER_USER_AGENT to "Stripe/v1 android/$VERSION_NAME" // required by r.stripe.com
     )
+
     override val method: Method = Method.POST
 
     override val mimeType: MimeType = MimeType.Form
@@ -165,5 +169,31 @@ class AnalyticsRequestV2(
         internal const val PARAM_EVENT_ID = "event_id"
 
         private const val INDENTATION = "  "
+
+        fun create(
+            eventName: String,
+            clientId: String,
+            origin: String,
+            params: Map<String, *>,
+        ): AnalyticsRequestV2 {
+            return AnalyticsRequestV2(
+                eventName = eventName,
+                clientId = clientId,
+                origin = origin,
+                params = params.toMapWithStringValues(),
+            )
+        }
     }
+}
+
+private fun Map<String, *>.toMapWithStringValues(): Map<String, String> {
+    val result = mutableMapOf<String, String>()
+
+    for ((key, value) in this) {
+        if (value != null) {
+            result[key] = value.toString()
+        }
+    }
+
+    return result
 }
