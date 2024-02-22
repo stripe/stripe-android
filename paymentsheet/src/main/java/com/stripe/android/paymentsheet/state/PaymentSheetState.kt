@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import android.os.Parcelable
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -15,16 +16,19 @@ internal sealed interface PaymentSheetState : Parcelable {
     @Parcelize
     data class Full(
         val config: PaymentSheet.Configuration,
-        val stripeIntent: StripeIntent,
         val customerPaymentMethods: List<PaymentMethod>,
         val isGooglePayReady: Boolean,
         val linkState: LinkState?,
         val isEligibleForCardBrandChoice: Boolean,
         val paymentSelection: PaymentSelection?,
         val validationError: PaymentSheetLoadingException?,
+        val paymentMethodMetadata: PaymentMethodMetadata,
     ) : PaymentSheetState {
 
         val showSavedPaymentMethods: Boolean
             get() = customerPaymentMethods.isNotEmpty() || isGooglePayReady
+
+        val stripeIntent: StripeIntent
+            get() = paymentMethodMetadata.stripeIntent
     }
 }

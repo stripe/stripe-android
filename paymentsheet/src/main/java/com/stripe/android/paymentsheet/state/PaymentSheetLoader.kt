@@ -74,13 +74,31 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
-            configuration = paymentSheetConfiguration,
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
+            val billingDetailsCollectionConfig =
+                paymentSheetConfiguration.billingDetailsCollectionConfiguration.toInternal()
+
+            val metadata = PaymentMethodMetadata(
+                stripeIntent = elementsSession.stripeIntent,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
+                allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
+            )
+
+            val didParseServerResponse = lpmRepository.update(
+                metadata = metadata,
+                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            )
+
+            if (!didParseServerResponse) {
+                eventReporter.onLpmSpecFailure()
+            }
+
             create(
                 elementsSession = elementsSession,
                 config = paymentSheetConfiguration,
+                metadata = metadata,
             ).let { state ->
                 reportSuccessfulLoad(
                     elementsSession = elementsSession,
@@ -121,6 +139,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private suspend fun create(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
+        metadata: PaymentMethodMetadata,
     ): PaymentSheetState.Full = coroutineScope {
         val stripeIntent = elementsSession.stripeIntent
         val merchantCountry = elementsSession.merchantCountry
@@ -176,13 +195,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         if (supportsIntent(stripeIntent, config)) {
             PaymentSheetState.Full(
                 config = config,
-                stripeIntent = stripeIntent,
                 customerPaymentMethods = sortedPaymentMethods.await(),
                 isGooglePayReady = isGooglePayReady.await(),
                 linkState = linkState.await(),
                 isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
                 paymentSelection = initialPaymentSelection.await(),
                 validationError = stripeIntent.validate(),
+                paymentMethodMetadata = metadata,
             )
         } else {
             val requested = stripeIntent.paymentMethodTypes.joinToString(separator = ", ")
@@ -220,27 +239,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode).onSuccess { elementsSession ->
-            val billingDetailsCollectionConfig =
-                configuration.billingDetailsCollectionConfiguration.toInternal()
-
-            val metadata = PaymentMethodMetadata(
-                stripeIntent = elementsSession.stripeIntent,
-                billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-                allowsDelayedPaymentMethods = configuration.allowsDelayedPaymentMethods,
-            )
-
-            val didParseServerResponse = lpmRepository.update(
-                metadata = metadata,
-                serverLpmSpecs = elementsSession.paymentMethodSpecs,
-            )
-
-            if (!didParseServerResponse) {
-                eventReporter.onLpmSpecFailure()
-            }
-        }
+        return elementsSessionRepository.get(initializationMode)
     }
 
     private suspend fun loadLinkState(
