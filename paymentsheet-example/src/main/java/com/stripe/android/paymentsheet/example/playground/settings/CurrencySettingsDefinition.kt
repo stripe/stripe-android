@@ -36,4 +36,5 @@ enum class Currency(val displayName: String, override val value: String) : Value
     JPY("JPY", "jpy"),
     SEK("SEK", "sek"),
     CNY("CNY", "cny"),
+    CHF("CHF", "chf"),
 }
