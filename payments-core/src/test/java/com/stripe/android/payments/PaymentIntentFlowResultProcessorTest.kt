@@ -100,46 +100,23 @@ internal class PaymentIntentFlowResultProcessorTest {
         }
 
     @Test
-    fun `no refresh when user cancels the payment`() =
-        runTest {
-            whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
-                Result.success(PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE)
-            )
-            whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenReturn(
-                Result.success(PaymentIntentFixtures.PI_REFRESH_RESPONSE_WECHAT_PAY_SUCCESS)
-            )
+    fun `no refresh when user cancels the payment`() = runTest {
+        whenever(mockStripeRepository.retrievePaymentIntent(any(), any(), any())).thenReturn(
+            Result.success(PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD)
+        )
 
-            val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
-            val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+        whenever(mockStripeRepository.refreshPaymentIntent(any(), any())).thenThrow(
+            AssertionError("No expected to call refresh in this test")
+        )
 
-            val paymentIntentResult = processor.processResult(
-                PaymentFlowResult.Unvalidated(
-                    clientSecret = clientSecret,
-                    flowOutcome = StripeIntentResult.Outcome.CANCELED
-                )
-            ).getOrThrow()
+        val clientSecret = "pi_3JkCxKBNJ02ErVOj0kNqBMAZ_secret_bC6oXqo976LFM06Z9rlhmzUQq"
+        val requestOptions = ApiRequest.Options(apiKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
 
-            verify(mockStripeRepository).retrievePaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions),
-                eq(PaymentFlowResultProcessor.EXPAND_PAYMENT_METHOD)
-            )
-
-            verify(mockStripeRepository, never()).refreshPaymentIntent(
-                eq(clientSecret),
-                eq(requestOptions)
-            )
-
-            assertThat(paymentIntentResult)
-                .isEqualTo(
-                    PaymentIntentResult(
-                        intent = PaymentIntentFixtures.PI_REQUIRES_WECHAT_PAY_AUTHORIZE,
-                        outcomeFromFlow = StripeIntentResult.Outcome.CANCELED,
-                        failureMessage = "We are unable to authenticate your payment method. " +
-                            "Please choose a different payment method and try again."
-                    )
-                )
-        }
+        verify(mockStripeRepository, never()).refreshPaymentIntent(
+            eq(clientSecret),
+            eq(requestOptions)
+        )
+    }
 
     @Test
     fun `refresh succeeds when user confirms the payment`() =

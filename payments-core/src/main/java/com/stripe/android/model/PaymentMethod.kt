@@ -166,217 +166,248 @@ constructor(
         @JvmField val isReusable: Boolean,
         @JvmField val isVoucher: Boolean,
         @JvmField val requiresMandate: Boolean,
-        private val hasDelayedSettlement: Boolean
+        private val hasDelayedSettlement: Boolean,
+        internal val shouldRefreshIfIntentRequiresAction: Boolean,
     ) : Parcelable {
         Link(
             "link",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Card(
             "card",
             isReusable = true,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         CardPresent(
             "card_present",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Fpx(
             "fpx",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Ideal(
             "ideal",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         SepaDebit(
             "sepa_debit",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         AuBecsDebit(
             "au_becs_debit",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         BacsDebit(
             "bacs_debit",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Sofort(
             "sofort",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Upi(
             "upi",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         P24(
             "p24",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Bancontact(
             "bancontact",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Giropay(
             "giropay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Eps(
             "eps",
             isReusable = false,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Oxxo(
             "oxxo",
             isReusable = false,
             isVoucher = true,
             requiresMandate = false,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Alipay(
             "alipay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         GrabPay(
             "grabpay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         PayPal(
             "paypal",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         AfterpayClearpay(
             "afterpay_clearpay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Netbanking(
             "netbanking",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Blik(
             "blik",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         WeChatPay(
             "wechat_pay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = true,
         ),
         Klarna(
             "klarna",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Affirm(
             "affirm",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         RevolutPay(
             "revolut_pay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         AmazonPay(
             "amazon_pay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Alma(
             "alma",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         MobilePay(
             "mobilepay",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Zip(
             "zip",
             isReusable = false,
             isVoucher = false,
             requiresMandate = false,
-            hasDelayedSettlement = false
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         USBankAccount(
             code = "us_bank_account",
             isReusable = true,
             isVoucher = false,
             requiresMandate = true,
-            hasDelayedSettlement = true
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         CashAppPay(
             code = "cashapp",
@@ -384,6 +415,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = true,
         ),
         Boleto(
             code = "boleto",
@@ -391,6 +423,7 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Konbini(
             code = "konbini",
@@ -398,6 +431,7 @@ constructor(
             isVoucher = true,
             requiresMandate = false,
             hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
         ),
         Swish(
             code = "swish",
@@ -405,6 +439,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = true,
         ),
         Twint(
             code = "twint",
@@ -412,6 +447,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

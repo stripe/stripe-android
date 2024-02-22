@@ -7,6 +7,7 @@ import android.view.Window
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Colors
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
@@ -18,6 +19,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
@@ -51,87 +53,87 @@ private val Typography = FinancialConnectionsTypography(
         fontSize = 24.sp,
         lineHeight = 32.sp,
         fontWeight = FontWeight.W700
-    ),
+    ).toCompat(),
     subtitleEmphasized = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
         fontWeight = FontWeight.W700
-    ),
+    ).toCompat(),
     heading = TextStyle(
         fontSize = 18.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W700
-    ),
+    ).toCompat(),
     subheading = TextStyle(
         fontSize = 18.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W600
-    ),
+    ).toCompat(),
     kicker = TextStyle(
         fontSize = 12.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W600
-    ),
+    ).toCompat(),
     body = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W400
-    ),
+    ).toCompat(),
     bodyEmphasized = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W600
-    ),
+    ).toCompat(),
     detail = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W400
-    ),
+    ).toCompat(),
     detailEmphasized = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W600
-    ),
+    ).toCompat(),
     caption = TextStyle(
         fontSize = 12.sp,
         lineHeight = 18.sp,
         fontWeight = FontWeight.W400
-    ),
+    ).toCompat(),
     captionEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 18.sp,
         fontWeight = FontWeight.W600
-    ),
+    ).toCompat(),
     captionTight = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         fontWeight = FontWeight.W400
-    ),
+    ).toCompat(),
     captionTightEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         fontWeight = FontWeight.W600
-    ),
+    ).toCompat(),
     bodyCode = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W400
-    ),
+    ).toCompat(),
     bodyCodeEmphasized = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W700
-    ),
+    ).toCompat(),
     captionCode = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         fontWeight = FontWeight.W400
-    ),
+    ).toCompat(),
     captionCodeEmphasized = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         fontWeight = FontWeight.W700
-    ),
+    ).toCompat(),
 )
 
 private val TextSelectionColors = TextSelectionColors(
@@ -179,6 +181,7 @@ internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
             content = {
                 CompositionLocalProvider(
                     LocalTextSelectionColors provides TextSelectionColors,
+                    LocalTextStyle provides LocalTextStyle.current.toCompat(useDefaultLineHeight = true),
                     LocalRippleTheme provides FinancialConnectionsRippleTheme
                 ) {
                     content()
@@ -216,6 +219,18 @@ internal object FinancialConnectionsTheme {
     val typography: FinancialConnectionsTypography
         @Composable
         get() = LocalFinancialConnectionsTypography.current
+}
+
+private fun TextStyle.toCompat(useDefaultLineHeight: Boolean = false): TextStyle {
+    return copy(
+        lineHeight = if (useDefaultLineHeight) {
+            TextStyle.Default.lineHeight
+        } else {
+            lineHeight
+        },
+        lineHeightStyle = TextStyle.Default.lineHeightStyle,
+        platformStyle = PlatformTextStyle(includeFontPadding = true),
+    )
 }
 
 /**

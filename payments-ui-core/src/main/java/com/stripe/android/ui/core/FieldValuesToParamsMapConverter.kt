@@ -47,20 +47,26 @@ class FieldValuesToParamsMapConverter {
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
         ): PaymentMethodOptionsParams? {
-            if (code == PaymentMethod.Type.Blik.code) {
-                val blikCode = fieldValuePairs[IdentifierSpec.BlikCode]?.value
-                if (blikCode != null) {
-                    return PaymentMethodOptionsParams.Blik(
-                        blikCode
-                    )
+            return when (code) {
+                PaymentMethod.Type.Blik.code -> {
+                    val blikCode = fieldValuePairs[IdentifierSpec.BlikCode]?.value
+                    blikCode?.let {
+                        PaymentMethodOptionsParams.Blik(it)
+                    }
                 }
-            } else if (code == PaymentMethod.Type.Konbini.code) {
-                val confirmationNumber = fieldValuePairs[IdentifierSpec.KonbiniConfirmationNumber]?.value
-                if (confirmationNumber != null) {
-                    return PaymentMethodOptionsParams.Konbini(confirmationNumber)
+                PaymentMethod.Type.Konbini.code -> {
+                    val confirmationNumber = fieldValuePairs[IdentifierSpec.KonbiniConfirmationNumber]?.value
+                    confirmationNumber?.let {
+                        PaymentMethodOptionsParams.Konbini(confirmationNumber)
+                    }
+                }
+                PaymentMethod.Type.WeChatPay.code -> {
+                    PaymentMethodOptionsParams.WeChatPayH5
+                }
+                else -> {
+                    null
                 }
             }
-            return null
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

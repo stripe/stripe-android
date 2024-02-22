@@ -7,7 +7,10 @@ import com.stripe.android.model.DeferredIntentParams
 import com.stripe.android.model.DeferredIntentParams.Mode
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.CaptureMethod
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
@@ -65,8 +68,11 @@ internal class RealElementsSessionRepository @Inject constructor(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
                     expandFields = listOf("payment_method")
-                ).map {
-                    ElementsSession.createFromFallback(it, elementsSessionFailure)
+                ).map { intent ->
+                    ElementsSession.createFromFallback(
+                        stripeIntent = intent.withoutWeChatPay(),
+                        sessionsError = elementsSessionFailure,
+                    )
                 }
             }
             is ElementsSessionParams.SetupIntentType -> {
@@ -74,8 +80,11 @@ internal class RealElementsSessionRepository @Inject constructor(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
                     expandFields = listOf("payment_method")
-                ).map {
-                    ElementsSession.createFromFallback(it, elementsSessionFailure)
+                ).map { intent ->
+                    ElementsSession.createFromFallback(
+                        stripeIntent = intent.withoutWeChatPay(),
+                        sessionsError = elementsSessionFailure,
+                    )
                 }
             }
             is ElementsSessionParams.DeferredIntentType -> {
@@ -83,6 +92,15 @@ internal class RealElementsSessionRepository @Inject constructor(
                 Result.failure(elementsSessionFailure)
             }
         }
+    }
+}
+
+private fun StripeIntent.withoutWeChatPay(): StripeIntent {
+    // We don't know if the merchant is eligible for H5 payments, so we filter out WeChat Pay.
+    val filteredPaymentMethodTypes = paymentMethodTypes.filter { it != PaymentMethod.Type.WeChatPay.code }
+    return when (this) {
+        is PaymentIntent -> copy(paymentMethodTypes = filteredPaymentMethodTypes)
+        is SetupIntent -> copy(paymentMethodTypes = filteredPaymentMethodTypes)
     }
 }
 
@@ -100,6 +118,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
                     mode = intentConfiguration.mode.toElementsSessionParam(),
                     paymentMethodTypes = intentConfiguration.paymentMethodTypes,
                     onBehalfOf = intentConfiguration.onBehalfOf,
+                    paymentMethodConfigurationId = intentConfiguration.paymentMethodConfigurationId,
                 ),
             )
         }

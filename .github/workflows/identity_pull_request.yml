@@ -1,11 +1,6 @@
 name: identity-example size diff
 on:
   pull_request:
-    paths:
-      - 'identity/**'
-      - 'stripe-core/**'
-      - 'camera-core/**'
-      - 'dependencies.gradle'
 jobs:
   # Checkout base branch and build the APK
   build-base:

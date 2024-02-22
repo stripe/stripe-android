@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AfterpayClearpayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AlipayDefinition
@@ -30,7 +31,9 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefiniti
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
+import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object PaymentMethodRegistry {
 
@@ -65,10 +68,27 @@ internal object PaymentMethodRegistry {
         TwintDefinition,
         UpiDefinition,
         UsBankAccountDefinition,
+        WeChatPayDefinition,
         ZipDefinition,
     )
 
     val definitionsByCode: Map<String, PaymentMethodDefinition> by lazy {
         all.associateBy { it.type.code }
+    }
+
+    fun filterSupportedPaymentMethods(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpecs: List<SharedDataSpec>,
+    ): List<SupportedPaymentMethod> {
+        return all.filter {
+            it.isSupported(metadata)
+        }.mapNotNull { paymentMethodDefinition ->
+            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code }
+            if (sharedDataSpec != null) {
+                paymentMethodDefinition.supportedPaymentMethod(metadata, sharedDataSpec)
+            } else {
+                null
+            }
+        }
     }
 }
