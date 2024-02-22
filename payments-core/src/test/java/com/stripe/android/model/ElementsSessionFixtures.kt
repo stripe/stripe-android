@@ -514,6 +514,83 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
+    val EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_FLAG_FALSE_JSON = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_authenticated_change_event_enabled": false,
+            "link_bank_incentives_enabled": false,
+            "link_bank_onboarding_enabled": false,
+            "link_email_verification_login_enabled": false,
+            "link_financial_incentives_experiment_enabled": false,
+            "link_funding_sources": [
+              "CARD", "BANK_ACCOUNT"
+            ],
+            "link_local_storage_login_enabled": true,
+            "link_mobile_disable_signup": false,
+            "link_only_for_payment_method_types_enabled": false,
+            "link_passthrough_mode_enabled": true
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card",
+              "ideal",
+              "sepa_debit",
+              "bancontact",
+              "sofort"
+            ],
+            "payment_intent": {
+              "id": "pi_3JTDhYIyGgrkZxL71IDUGKps",
+              "object": "payment_intent",
+              "amount": 973,
+              "canceled_at": null,
+              "cancellation_reason": null,
+              "capture_method": "automatic",
+              "client_secret": "pi_3JTDhYIyGgrkZxL71IDUGKps_secret_aWuzwD4JvF1HM8XJTdUsXG6Za",
+              "confirmation_method": "automatic",
+              "created": 1630103948,
+              "currency": "eur",
+              "description": null,
+              "last_payment_error": null,
+              "livemode": false,
+              "next_action": null,
+              "payment_method": null,
+              "payment_method_types": [
+                "bancontact",
+                "card",
+                "sepa_debit",
+                "sofort",
+                "ideal"
+              ],
+              "receipt_email": null,
+              "setup_future_usage": null,
+              "shipping": {
+                "address": {
+                  "city": "San Francisco",
+                  "country": "US",
+                  "line1": "510 Townsend St",
+                  "line2": null,
+                  "postal_code": "94102",
+                  "state": "California"
+                },
+                "carrier": null,
+                "name": "Bruno",
+                "phone": null,
+                "tracking_number": null
+              },
+              "source": null,
+              "status": "requires_payment_method"
+            },
+            "type": "payment_intent"
+          }
+        }
+        """.trimIndent()
+    )
+
     val PI_WITH_CARD_AFTERPAY_AU_BECS by lazy {
         """
             {
