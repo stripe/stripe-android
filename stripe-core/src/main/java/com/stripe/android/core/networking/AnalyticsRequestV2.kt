@@ -10,6 +10,10 @@ import com.stripe.android.core.networking.AnalyticsRequestV2.Companion.PARAM_EVE
 import com.stripe.android.core.networking.StripeRequest.MimeType
 import com.stripe.android.core.version.StripeSdkVersion.VERSION_NAME
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import java.io.OutputStream
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
@@ -40,8 +44,7 @@ class AnalyticsRequestV2 private constructor(
     val eventName: String,
     private val clientId: String,
     private val origin: String,
-    @get:VisibleForTesting
-    val params: Map<String, String>
+    private val params: JsonElement,
 ) : StripeRequest() {
 
     // Note: nested params are calculated as a json string, which is different from other requests
@@ -55,7 +58,7 @@ class AnalyticsRequestV2 private constructor(
     // As opposed to
     // key[nestedKey1]="value1"&key[nestedKey2]="value2"
     @VisibleForTesting
-    internal val postParameters: String = createParams(params + analyticParams())
+    internal val postParameters: String = createPostParams()
 
     private val postBodyBytes: ByteArray
         @Throws(UnsupportedEncodingException::class)
@@ -81,9 +84,10 @@ class AnalyticsRequestV2 private constructor(
         }
     }
 
-    private fun createParams(map: Map<String, *>): String {
+    private fun createPostParams(): String {
+        val postParams = params.toMap() + analyticParams()
         val paramList = mutableListOf<Parameter>()
-        QueryStringFactory.compactParams(map).forEach { (key, value) ->
+        QueryStringFactory.compactParams(postParams).forEach { (key, value) ->
             when (value) {
                 is Map<*, *> -> {
                     paramList.add(Parameter(key, encodeMapParam(value)))
@@ -180,20 +184,34 @@ class AnalyticsRequestV2 private constructor(
                 eventName = eventName,
                 clientId = clientId,
                 origin = origin,
-                params = params.toMapWithStringValues(),
+                params = params.toJsonElement(),
             )
         }
     }
 }
 
-private fun Map<String, *>.toMapWithStringValues(): Map<String, String> {
-    val result = mutableMapOf<String, String>()
-
-    for ((key, value) in this) {
-        if (value != null) {
-            result[key] = value.toString()
+private fun List<*>.toJsonElement(): JsonElement {
+    val list: MutableList<JsonElement> = mutableListOf()
+    filterNotNull().forEach { value ->
+        when (value) {
+            is Map<*, *> -> list.add((value).toJsonElement())
+            is List<*> -> list.add(value.toJsonElement())
+            else -> list.add(JsonPrimitive(value.toString()))
         }
     }
+    return JsonArray(list)
+}
 
-    return result
+private fun Map<*, *>.toJsonElement(): JsonElement {
+    val map: MutableMap<String, JsonElement> = mutableMapOf()
+    this.forEach { entry ->
+        val key = entry.key as? String ?: return@forEach
+        val value = entry.value ?: return@forEach
+        when (value) {
+            is Map<*, *> -> map[key] = (value).toJsonElement()
+            is List<*> -> map[key] = value.toJsonElement()
+            else -> map[key] = JsonPrimitive(value.toString())
+        }
+    }
+    return JsonObject(map)
 }
