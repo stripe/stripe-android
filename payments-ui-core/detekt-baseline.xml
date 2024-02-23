@@ -53,8 +53,6 @@
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424242", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424242"))</ID>
     <ID>MaxLineLength:CardNumberConfigTest.kt$CardNumberConfigTest$val state = cardNumberConfig.determineState(CardBrand.Visa, "4242424242424243", CardBrand.Visa.getMaxLengthForCardNumber("4242424242424243"))</ID>
     <ID>MaxLineLength:CardNumberControllerTest.kt$CardNumberControllerTest$fun</ID>
-    <ID>MaxLineLength:NextActionSpec.kt$PostConfirmHandlingPiStatusSpecsSerializer$override</ID>
-    <ID>MaximumLineLength:com.stripe.android.ui.core.elements.NextActionSpec.kt:63</ID>
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:MandateTextUI.kt$(element.stringResId, *element.args.toTypedArray())</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>

@@ -36,7 +36,6 @@ class SharedDataSpecParcelerTest {
     ) : Parcelable
 }
 
-
 private inline fun <reified R : Parcelable> R.testParcel(): R {
     val bytes = marshallParcelable(this)
     return unmarshallParcelable(bytes)
