@@ -1,5 +1,3 @@
-@file:Suppress("TooManyFunctions")
-
 package com.stripe.android.financialconnections.features.manualentry
 
 import androidx.compose.foundation.ScrollState
@@ -125,7 +123,6 @@ private fun ManualEntryContent(
 }
 
 @Composable
-@Suppress("LongMethod")
 private fun ManualEntryLoaded(
     scrollState: ScrollState,
     payload: Payload,

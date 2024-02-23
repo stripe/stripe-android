@@ -20,7 +20,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-@Suppress("ConstructorParameterNaming")
 internal data class FinancialConnectionsAuthorizationSession(
 
     @SerialName(value = "id")

@@ -1,5 +1,3 @@
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.linkstepupverification
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider

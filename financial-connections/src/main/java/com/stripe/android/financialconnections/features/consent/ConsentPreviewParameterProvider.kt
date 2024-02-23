@@ -118,7 +118,6 @@ internal class ConsentPreviewParameterProvider :
         )
     )
 
-    @Suppress("LongMethod")
     private fun sampleConsent(): ConsentPane = ConsentPane(
         title = "Goldilocks uses Stripe to link your accounts",
         body = ConsentPaneBody(

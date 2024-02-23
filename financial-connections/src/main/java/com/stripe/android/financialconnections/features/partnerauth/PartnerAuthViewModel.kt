@@ -56,7 +56,6 @@ import javax.inject.Inject
 import javax.inject.Named
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus as Status
 
-@Suppress("LongParameterList")
 internal class PartnerAuthViewModel @Inject constructor(
     private val completeAuthorizationSession: CompleteAuthorizationSession,
     private val createAuthorizationSession: PostAuthorizationSession,

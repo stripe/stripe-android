@@ -1,5 +1,3 @@
-@file:Suppress("TooManyFunctions", "LongMethod")
-
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -211,7 +209,6 @@ private fun LoadedContent(
     }
 }
 
-@Suppress("MagicNumber", "NestedBlockDepth")
 private fun LazyListScope.searchResults(
     isInputEmpty: Boolean,
     payload: Payload,
@@ -536,7 +533,6 @@ private fun InstitutionResultTile(
 }
 
 @Composable
-@Suppress("MagicNumber")
 private fun InstitutionResultShimmer(modifier: Modifier) {
     LoadingShimmerEffect { shimmer ->
         Row(

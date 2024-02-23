@@ -23,7 +23,6 @@ import java.util.Locale
  * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
  * of the current flow.
  */
-@Suppress("TooManyFunctions")
 internal interface FinancialConnectionsManifestRepository {
 
     /**
@@ -199,7 +198,6 @@ internal interface FinancialConnectionsManifestRepository {
     }
 }
 
-@Suppress("TooManyFunctions")
 private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
