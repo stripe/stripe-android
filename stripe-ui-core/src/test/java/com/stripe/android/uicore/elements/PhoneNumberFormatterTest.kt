@@ -104,6 +104,24 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.toE164Format("0137111222")).isEqualTo("+44137111222")
     }
 
+    @Test
+    fun `When pattern is empty, there is no formatting`() {
+        val pattern = ""
+        val formatter = PhoneNumberFormatter.WithRegion(
+            PhoneNumberFormatter.Metadata(
+                "prefix",
+                "regionCode",
+                pattern
+            )
+        )
+
+        // visualTransformation prepends a space to the output string
+        assertThat(formatter.format("123")).isEqualTo(" 123")
+        assertThat(formatter.format("1234567")).isEqualTo(" 1234567")
+        assertThat(formatter.format("123456789012")).isEqualTo(" 123456789012")
+        assertThat(formatter.format("123456789012456")).isEqualTo(" 123456789012456")
+    }
+
     private fun PhoneNumberFormatter.format(input: String) =
         visualTransformation.filter(AnnotatedString(userInputFilter(input))).text.text
 }
