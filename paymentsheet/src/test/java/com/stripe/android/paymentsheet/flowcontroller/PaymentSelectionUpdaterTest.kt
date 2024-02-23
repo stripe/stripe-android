@@ -1,24 +1,20 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -32,7 +28,7 @@ class PaymentSelectionUpdaterTest {
     @Test
     fun `Uses new payment selection if there's no existing one`() {
         val newState = mockPaymentSheetStateWithPaymentIntent(paymentSelection = PaymentSelection.GooglePay)
-        val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
+        val updater = createUpdater()
         val result = updater(
             currentSelection = null,
             previousConfig = null,
@@ -60,11 +56,7 @@ class PaymentSelectionUpdaterTest {
             )
         )
 
-        val updater = createUpdater(
-            stripeIntent = PAYMENT_INTENT.copy(
-                paymentMethodTypes = PAYMENT_INTENT.paymentMethodTypes + "sofort",
-            ),
-        )
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -86,7 +78,7 @@ class PaymentSelectionUpdaterTest {
             paymentMethodTypes = listOf("card", "cashapp"),
             customerPaymentMethods = PaymentMethodFixtures.createCards(3) + paymentMethod,
         )
-        val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -100,7 +92,7 @@ class PaymentSelectionUpdaterTest {
     fun `Can't use existing saved payment method if it's no longer allowed`() {
         val existing = PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD)
         val newState = mockPaymentSheetStateWithPaymentIntent(paymentMethodTypes = listOf("card", "cashapp"))
-        val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existing,
@@ -116,7 +108,7 @@ class PaymentSelectionUpdaterTest {
         val existing = PaymentSelection.Saved(PaymentMethodFactory.cashAppPay())
 
         val newState = mockPaymentSheetStateWithPaymentIntent(paymentMethodTypes = listOf("card", "cashapp"))
-        val updater = createUpdater(stripeIntent = SETUP_INTENT)
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existing,
@@ -135,7 +127,7 @@ class PaymentSelectionUpdaterTest {
             paymentMethodTypes = listOf("card", "cashapp"),
             customerPaymentMethods = PaymentMethodFixtures.createCards(3),
         )
-        val updater = createUpdater(stripeIntent = PAYMENT_INTENT)
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -162,12 +154,7 @@ class PaymentSelectionUpdaterTest {
             customerPaymentMethods = PaymentMethodFixtures.createCards(3),
         )
 
-        val updater = createUpdater(
-            stripeIntent = SETUP_INTENT.copy(
-                countryCode = "de",
-                paymentMethodTypes = SETUP_INTENT.paymentMethodTypes + "paypal",
-            ),
-        )
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -197,11 +184,7 @@ class PaymentSelectionUpdaterTest {
             customerPaymentMethods = PaymentMethodFixtures.createCards(3),
         )
 
-        val updater = createUpdater(
-            stripeIntent = PAYMENT_INTENT.copy(
-                paymentMethodTypes = PAYMENT_INTENT.paymentMethodTypes + "paypal",
-            ),
-        )
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -231,12 +214,7 @@ class PaymentSelectionUpdaterTest {
             customerPaymentMethods = PaymentMethodFixtures.createCards(3),
         )
 
-        val updater = createUpdater(
-            stripeIntent = SETUP_INTENT.copy(
-                countryCode = "de",
-                paymentMethodTypes = PAYMENT_INTENT.paymentMethodTypes + "paypal",
-            ),
-        )
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -269,7 +247,7 @@ class PaymentSelectionUpdaterTest {
             )
         )
 
-        val updater = createUpdater(PAYMENT_INTENT)
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -302,7 +280,7 @@ class PaymentSelectionUpdaterTest {
             )
         )
 
-        val updater = createUpdater(PAYMENT_INTENT)
+        val updater = createUpdater()
 
         val result = updater(
             currentSelection = existingSelection,
@@ -319,7 +297,7 @@ class PaymentSelectionUpdaterTest {
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
         config: PaymentSheet.Configuration = defaultPaymentSheetConfiguration,
     ): PaymentSheetState.Full {
-        val intent = PAYMENT_INTENT
+        val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
         return PaymentSheetState.Full(
             config = config,
@@ -332,6 +310,11 @@ class PaymentSelectionUpdaterTest {
             paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = intent.copy(
                     paymentMethodTypes = paymentMethodTypes ?: intent.paymentMethodTypes,
+                ),
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("card"),
+                    SharedDataSpec("paypal"),
+                    SharedDataSpec("sofort"),
                 )
             ),
         )
@@ -343,7 +326,7 @@ class PaymentSelectionUpdaterTest {
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
         config: PaymentSheet.Configuration = defaultPaymentSheetConfiguration,
     ): PaymentSheetState.Full {
-        val intent = SETUP_INTENT
+        val intent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
 
         return PaymentSheetState.Full(
             config = config,
@@ -361,23 +344,7 @@ class PaymentSelectionUpdaterTest {
         )
     }
 
-    private fun createUpdater(
-        stripeIntent: StripeIntent,
-    ): PaymentSelectionUpdater {
-        val lpmRepository = LpmRepository(
-            arguments = LpmRepository.LpmRepositoryArguments(
-                resources = ApplicationProvider.getApplicationContext<Context>().resources,
-            ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            update(stripeIntent = stripeIntent, serverLpmSpecs = null)
-        }
-
-        return DefaultPaymentSelectionUpdater(lpmRepository)
-    }
-
-    private companion object {
-        val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
-        val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+    private fun createUpdater(): PaymentSelectionUpdater {
+        return DefaultPaymentSelectionUpdater()
     }
 }
