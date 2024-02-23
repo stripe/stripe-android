@@ -2,12 +2,14 @@
 
 package com.stripe.android.financialconnections.features.common
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
@@ -18,13 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.model.DataAccessNotice
-import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.sdui.rememberHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
@@ -35,31 +37,42 @@ internal fun DataAccessBottomSheetContent(
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
-    val title = remember(dataDialog.title) {
-        TextResource.Text(fromHtml(dataDialog.title))
-    }
-    val subtitle = remember(dataDialog.subtitle) {
-        dataDialog.subtitle?.let { TextResource.Text(fromHtml(it)) }
-    }
-    val disclaimer = remember(dataDialog.disclaimer) {
-        dataDialog.disclaimer?.let { TextResource.Text(fromHtml(it)) }
-    }
-    val connectedAccountNotice = remember(dataDialog.connectedAccountNotice) {
-        dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
-    }
+    val title = rememberHtml(dataDialog.title)
+    val subtitle = dataDialog.subtitle?.let { rememberHtml(it) }
+    val disclaimer = dataDialog.disclaimer?.let { rememberHtml(it) }
     val bullets = remember(dataDialog.body.bullets) {
         dataDialog.body.bullets.map { BulletUI.from(it) }
     }
     ModalBottomSheetContent(
-        icon = dataDialog.icon,
-        title = title,
-        subtitle = subtitle,
         onClickableTextClick = onClickableTextClick,
-        connectedAccountNotice = connectedAccountNotice,
         cta = dataDialog.cta,
         disclaimer = disclaimer,
         onConfirmModalClick = onConfirmModalClick,
         content = {
+            dataDialog.icon?.default?.let {
+                item {
+                    ShapedIcon(url = it, contentDescription = "Icon")
+                }
+            }
+            item {
+                Title(title, onClickableTextClick)
+            }
+            // FOR CONNECTED ACCOUNTS: Permissions granted to Stripe by the connected account
+            dataDialog.connectedAccountNotice?.let {
+                item {
+                    Subtitle(rememberHtml(it.subtitle), onClickableTextClick)
+                }
+                items(it.body.bullets) { bullet ->
+                    ListItem(
+                        bullet = BulletUI.from(bullet),
+                        onClickableTextClick = onClickableTextClick
+                    )
+                }
+            }
+            // FOR ALL MERCHANTS: Permissions granted to Stripe by the merchant
+            subtitle?.let {
+                item { Subtitle(it, onClickableTextClick) }
+            }
             itemsIndexed(bullets) { index, bullet ->
                 ListItem(
                     bullet = bullet,
@@ -79,36 +92,47 @@ internal fun LegalDetailsBottomSheetContent(
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
-    val title = remember(legalDetails.title) {
-        TextResource.Text(fromHtml(legalDetails.title))
-    }
-    val learnMore = remember(legalDetails.disclaimer) {
-        legalDetails.disclaimer?.let { TextResource.Text(fromHtml(it)) }
-    }
-    val links = remember(legalDetails.body.links) {
-        legalDetails.body.links.map { TextResource.Text(fromHtml(it.title)) }
+    val title = rememberHtml(legalDetails.title)
+    val subtitle = legalDetails.subtitle?.let { rememberHtml(it) }
+    val learnMore = legalDetails.disclaimer?.let { rememberHtml(it) }
+    val links = remember(legalDetails.body.links) { legalDetails.body.links.map { TextResource.Text(fromHtml(it.title)) }
     }
     ModalBottomSheetContent(
-        icon = legalDetails.icon,
-        title = title,
-        subtitle = null,
         onClickableTextClick = onClickableTextClick,
-        connectedAccountNotice = null,
         cta = legalDetails.cta,
         disclaimer = learnMore,
         onConfirmModalClick = onConfirmModalClick
     ) {
-        itemsIndexed(links) { index, link ->
-            Divider(color = colors.border, modifier = Modifier.padding(bottom = 16.dp))
+        legalDetails.icon?.default?.let {
+            item { ShapedIcon(url = it, contentDescription = "Icon") }
+        }
+
+        item { Title(title, onClickableTextClick) }
+
+        subtitle?.let {
+            item { Subtitle(it, onClickableTextClick) }
+        }
+
+        item { Links(links) }
+    }
+}
+
+@Composable
+private fun Links(
+    links: List<TextResource.Text>,
+) {
+    Column {
+        links.forEachIndexed { index, link ->
+            Divider(color = colors.border)
             AnnotatedText(
-                modifier = Modifier.padding(bottom = 16.dp),
+                modifier = Modifier.padding(vertical = 16.dp),
                 text = link,
                 defaultStyle = typography.labelLargeEmphasized.copy(
                     color = colors.textBrand
                 ),
                 // remove annotation styles to avoid link underline (the default)
                 annotationStyles = emptyMap(),
-                onClickableTextClick = onClickableTextClick,
+                onClickableTextClick = {},
             )
             if (links.lastIndex == index) {
                 Divider(color = colors.border)
@@ -118,50 +142,34 @@ internal fun LegalDetailsBottomSheetContent(
 }
 
 @Composable
+private fun Title(
+    title: TextResource.Text,
+    onClickableTextClick: (String) -> Unit
+) {
+    AnnotatedText(
+        text = title,
+        defaultStyle = typography.headingMedium.copy(
+            color = colors.textDefault
+        ),
+        onClickableTextClick = onClickableTextClick
+    )
+}
+
+@Composable
 private fun ModalBottomSheetContent(
-    icon: Image?,
-    title: TextResource,
-    subtitle: TextResource?,
     onClickableTextClick: (String) -> Unit,
-    connectedAccountNotice: TextResource?,
     cta: String,
     disclaimer: TextResource?,
     onConfirmModalClick: () -> Unit,
     content: LazyListScope.() -> Unit,
 ) {
     Layout(
+        modifier = Modifier.padding(top = 32.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
         inModal = true,
-        body = {
-            item {
-                icon?.default?.let {
-                    Spacer(modifier = Modifier.size(24.dp))
-                    ShapedIcon(url = it, contentDescription = title.toText().toString())
-                    Spacer(modifier = Modifier.size(24.dp))
-                }
-                AnnotatedText(
-                    text = title,
-                    defaultStyle = typography.headingMedium.copy(
-                        color = colors.textDefault
-                    ),
-                    onClickableTextClick = onClickableTextClick
-                )
-                subtitle?.let {
-                    Spacer(modifier = Modifier.size(16.dp))
-                    AnnotatedText(
-                        text = it,
-                        defaultStyle = typography.bodyMedium.copy(
-                            color = colors.textDefault
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                Spacer(modifier = Modifier.size(24.dp))
-            }
-            content()
-        },
+        body = { content() },
         footer = {
             ModalBottomSheetFooter(
-                connectedAccountNotice = connectedAccountNotice,
                 onClickableTextClick = onClickableTextClick,
                 disclaimer = disclaimer,
                 onConfirmModalClick = onConfirmModalClick,
@@ -172,25 +180,26 @@ private fun ModalBottomSheetContent(
 }
 
 @Composable
+private fun Subtitle(
+    text: TextResource,
+    onClickableTextClick: (String) -> Unit
+) {
+    AnnotatedText(
+        text = text,
+        defaultStyle = typography.bodyMedium.copy(
+            color = colors.textDefault
+        ),
+        onClickableTextClick = onClickableTextClick
+    )
+}
+
+@Composable
 private fun ModalBottomSheetFooter(
-    connectedAccountNotice: TextResource?,
     onClickableTextClick: (String) -> Unit,
     disclaimer: TextResource?,
     onConfirmModalClick: () -> Unit,
     cta: String
 ) = Column {
-    connectedAccountNotice?.let {
-        Spacer(modifier = Modifier.size(16.dp))
-        AnnotatedText(
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            text = it,
-            onClickableTextClick = onClickableTextClick,
-            defaultStyle = typography.labelSmall.copy(
-                color = colors.textDefault,
-                textAlign = TextAlign.Center
-            ),
-        )
-    }
     disclaimer?.let {
         Spacer(modifier = Modifier.size(16.dp))
         AnnotatedText(

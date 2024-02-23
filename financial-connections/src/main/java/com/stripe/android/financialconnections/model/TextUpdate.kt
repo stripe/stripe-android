@@ -181,14 +181,23 @@ internal data class DataAccessNotice(
     @SerialName("body")
     val body: DataAccessNoticeBody,
     @SerialName("connected_account_notice")
-    @Serializable(with = MarkdownToHtmlSerializer::class)
-    val connectedAccountNotice: String? = null,
+    val connectedAccountNotice: ConnectedAccessNotice? = null,
     @SerialName("disclaimer")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val disclaimer: String? = null,
     @SerialName("cta")
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class ConnectedAccessNotice(
+    @SerialName("subtitle")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val subtitle: String,
+    @SerialName("body")
+    val body: DataAccessNoticeBody
 ) : Parcelable
 
 @Serializable
