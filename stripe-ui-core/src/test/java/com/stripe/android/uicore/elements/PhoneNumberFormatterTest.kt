@@ -61,6 +61,39 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.format("123456789012456")).isEqualTo("(123)-456+78901!2")
     }
 
+    @Test
+    fun `WithRegion doesn't format when pattern is missing`() {
+        val pattern = ""
+        val formatter = PhoneNumberFormatter.WithRegion(
+            PhoneNumberFormatter.Metadata(
+                "prefix",
+                "regionCode",
+                pattern
+            )
+        )
+
+        // visualTransformation appends a space to the beginning of the filter string
+        assertThat(formatter.format("123")).isEqualTo(" 123")
+        assertThat(formatter.format("1234567")).isEqualTo(" 1234567")
+        assertThat(formatter.format("123456789012")).isEqualTo(" 123456789012")
+        assertThat(formatter.format("123456789012456")).isEqualTo(" 123456789012456")
+    }
+
+    @Test
+    fun `WithRegion removes chars when pattern is missing`() {
+        val pattern = ""
+        val formatter = PhoneNumberFormatter.WithRegion(
+            PhoneNumberFormatter.Metadata(
+                "prefix",
+                "regionCode",
+                pattern
+            )
+        )
+
+        // visualTransformation appends a space to the beginning of the filter string
+        assertThat(formatter.format("123ABC")).isEqualTo(" 123")
+    }
+
     private fun PhoneNumberFormatter.format(input: String) =
         visualTransformation.filter(AnnotatedString(userInputFilter(input))).text.text
 }
