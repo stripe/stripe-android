@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
+import android.content.res.ColorStateList
+import android.graphics.Color
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.model.CountryCode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -244,11 +247,77 @@ class PaymentSelectionUpdaterTest {
         assertThat(result).isEqualTo(existingSelection)
     }
 
+    @Test
+    fun `PaymentSelection is preserved when config changes are not volatile`() {
+        val existingSelection = PaymentSelection.GooglePay
+
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            config = defaultPaymentSheetConfiguration.copy(
+                merchantDisplayName = "Some other change",
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = CountryCode.US.value,
+                    amount = 5099,
+                    currencyCode = "USD",
+                    label = "Some product",
+                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Checkout,
+                ),
+                primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
+                appearance = PaymentSheet.Appearance(
+                    colorsLight = PaymentSheet.Colors.defaultDark
+                )
+            )
+        )
+
+        val updater = createUpdater(PAYMENT_INTENT)
+
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = defaultPaymentSheetConfiguration.copy(
+                googlePay = PaymentSheet.GooglePayConfiguration(
+                    environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
+                    countryCode = CountryCode.US.value,
+                    amount = 5099,
+                    currencyCode = "USD",
+                    label = "A product",
+                    buttonType = PaymentSheet.GooglePayConfiguration.ButtonType.Plain,
+                )
+            ),
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(existingSelection)
+    }
+
+    @Test
+    fun `PaymentSelection is not preserved when config changes are volatile`() {
+        val existingSelection = PaymentSelection.GooglePay
+
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            config = defaultPaymentSheetConfiguration.copy(
+                customer = PaymentSheet.CustomerConfiguration(
+                    id = "id1",
+                    ephemeralKeySecret = "000"
+                )
+            )
+        )
+
+        val updater = createUpdater(PAYMENT_INTENT)
+
+        val result = updater(
+            currentSelection = existingSelection,
+            previousConfig = defaultPaymentSheetConfiguration,
+            newState = newState,
+        )
+
+        assertThat(result).isEqualTo(null)
+    }
+
     private fun mockPaymentSheetStateWithPaymentIntent(
         paymentMethodTypes: List<String>? = null,
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
-        config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some name"),
+        config: PaymentSheet.Configuration = defaultPaymentSheetConfiguration,
     ): PaymentSheetState.Full {
         val intent = PAYMENT_INTENT
 
