@@ -61,6 +61,15 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.format("123456789012456")).isEqualTo("(123)-456+78901!2")
     }
 
+    @Test
+    fun `Leading zeros should be stripped in E164 format`() {
+        val formatter = PhoneNumberFormatter.forCountry("GB")
+
+        assertThat(formatter.toE164Format("01371112")).isEqualTo("+441371112")
+        assertThat(formatter.toE164Format("013711122")).isEqualTo("+4413711122")
+        assertThat(formatter.toE164Format("0137111222")).isEqualTo("+44137111222")
+    }
+
     private fun PhoneNumberFormatter.format(input: String) =
         visualTransformation.filter(AnnotatedString(userInputFilter(input))).text.text
 }

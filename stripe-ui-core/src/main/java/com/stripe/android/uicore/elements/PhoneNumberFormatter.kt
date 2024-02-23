@@ -62,7 +62,7 @@ internal sealed class PhoneNumberFormatter {
                 substring(0, min(length, maxSubscriberDigits))
             }
 
-        override fun toE164Format(input: String) = "${prefix}${userInputFilter(input)}"
+        override fun toE164Format(input: String) = "${prefix}${userInputFilter(input).trimStart('0')}"
 
         override val visualTransformation = object : VisualTransformation {
             override fun filter(text: AnnotatedString): TransformedText {
@@ -161,7 +161,7 @@ internal sealed class PhoneNumberFormatter {
                 substring(0, min(length, E164_MAX_DIGITS))
             }
 
-        override fun toE164Format(input: String) = "+${userInputFilter(input)}"
+        override fun toE164Format(input: String) = "+${userInputFilter(input).trimStart('0')}"
 
         override val visualTransformation =
             VisualTransformation { text ->
