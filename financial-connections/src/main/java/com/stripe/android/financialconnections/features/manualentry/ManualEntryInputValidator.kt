@@ -45,6 +45,6 @@ internal object ManualEntryInputValidator {
         }
     }
 
-    private const val ROUTING_NUMBER_LENGTH = 9
-    private const val ACCOUNT_NUMBER_MAX_LENGTH = 17
+    const val ROUTING_NUMBER_LENGTH = 9
+    const val ACCOUNT_NUMBER_MAX_LENGTH = 17
 }

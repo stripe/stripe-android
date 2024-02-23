@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -21,10 +22,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection.Companion.Next
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -42,6 +46,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.InputState
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -52,7 +57,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.elevation
-import com.stripe.android.financialconnections.ui.components.filtered
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 
 @Composable
@@ -61,9 +65,9 @@ internal fun ManualEntryScreen() {
     val parentViewModel = parentViewModel()
     val state: State<ManualEntryState> = viewModel.collectAsState()
     ManualEntryContent(
-        routing = state.value.routing to state.value.routingError,
-        account = state.value.account to state.value.accountError,
-        accountConfirm = state.value.accountConfirm to state.value.accountConfirmError,
+        routing = state.value.routing,
+        account = state.value.account,
+        accountConfirm = state.value.accountConfirm,
         isValidForm = state.value.isValidForm,
         payload = state.value.payload,
         linkPaymentAccountStatus = state.value.linkPaymentAccount,
@@ -76,9 +80,9 @@ internal fun ManualEntryScreen() {
 
 @Composable
 private fun ManualEntryContent(
-    routing: Pair<String?, Int?>,
-    account: Pair<String?, Int?>,
-    accountConfirm: Pair<String?, Int?>,
+    routing: InputState,
+    account: InputState,
+    accountConfirm: InputState,
     isValidForm: Boolean,
     payload: Async<Payload>,
     linkPaymentAccountStatus: Async<LinkAccountSessionPaymentAccount>,
@@ -130,11 +134,11 @@ private fun ManualEntryLoaded(
     scrollState: ScrollState,
     payload: Payload,
     linkPaymentAccountStatus: Async<LinkAccountSessionPaymentAccount>,
-    routing: Pair<String?, Int?>,
+    routing: InputState,
     onRoutingEntered: (String) -> Unit,
-    account: Pair<String?, Int?>,
+    account: InputState,
     onAccountEntered: (String) -> Unit,
-    accountConfirm: Pair<String?, Int?>,
+    accountConfirm: InputState,
     onAccountConfirmEntered: (String) -> Unit,
     isValidForm: Boolean,
     onSubmit: () -> Unit
@@ -173,22 +177,25 @@ private fun ManualEntryLoaded(
 
             InputWithError(
                 label = R.string.stripe_manualentry_routing,
-                inputWithError = routing,
+                inputState = routing,
                 testTag = "RoutingInput",
+                imeAction = ImeAction.Next,
                 onInputChanged = onRoutingEntered,
             )
             Spacer(modifier = Modifier.size(16.dp))
             InputWithError(
                 label = R.string.stripe_manualentry_account,
-                inputWithError = account,
+                inputState = account,
                 testTag = "AccountInput",
+                imeAction = ImeAction.Next,
                 onInputChanged = onAccountEntered,
             )
             Spacer(modifier = Modifier.size(16.dp))
             InputWithError(
                 label = R.string.stripe_manualentry_accountconfirm,
-                inputWithError = accountConfirm,
+                inputState = accountConfirm,
                 testTag = "ConfirmAccountInput",
+                imeAction = ImeAction.Done,
                 onInputChanged = onAccountConfirmEntered,
             )
             if (linkPaymentAccountStatus is Fail) {
@@ -231,17 +238,25 @@ private fun ManualEntryFooter(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InputWithError(
-    inputWithError: Pair<String?, Int?>,
+    inputState: InputState,
     label: Int,
     testTag: String,
+    imeAction: ImeAction,
     onInputChanged: (String) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     var textValue by remember { mutableStateOf(TextFieldValue()) }
+
     Spacer(modifier = Modifier.size(4.dp))
     FinancialConnectionsOutlinedTextField(
         value = textValue,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,
+            imeAction = imeAction,
+        ),
+        keyboardActions = KeyboardActions(
+            onNext = { focusManager.moveFocus(Next) },
+            onDone = { focusManager.clearFocus() },
         ),
         placeholder = {
             Text(
@@ -250,19 +265,19 @@ private fun InputWithError(
                 color = FinancialConnectionsTheme.colors.textSubdued
             )
         },
-        isError = inputWithError.second != null,
+        isError = inputState.error != null,
         onValueChange = { text ->
-            textValue = text.filtered { it.isDigit() }
+            textValue = inputState.filter(text)
             onInputChanged(textValue.text)
         },
         modifier = Modifier
             .semantics { testTagsAsResourceId = true }
             .testTag(testTag)
     )
-    if (inputWithError.second != null) {
+    if (inputState.error != null) {
         Spacer(modifier = Modifier.size(4.dp))
         Text(
-            text = stringResource(id = inputWithError.second!!),
+            text = stringResource(id = inputState.error),
             color = FinancialConnectionsTheme.colors.textCritical,
             style = FinancialConnectionsTheme.typography.labelSmall,
         )
@@ -278,9 +293,9 @@ internal fun ManualEntryPreview(
 ) {
     FinancialConnectionsPreview {
         ManualEntryContent(
-            routing = state.routing to state.routingError,
-            account = state.account to state.accountError,
-            accountConfirm = state.accountConfirm to state.accountConfirmError,
+            routing = state.routing,
+            account = state.account,
+            accountConfirm = state.accountConfirm,
             isValidForm = true,
             payload = state.payload,
             linkPaymentAccountStatus = state.linkPaymentAccount,

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldColors
@@ -31,6 +32,7 @@ internal fun FinancialConnectionsOutlinedTextField(
     readOnly: Boolean = false,
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     placeholder: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -49,6 +51,7 @@ internal fun FinancialConnectionsOutlinedTextField(
         maxLines = 1,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         readOnly = readOnly,
         isError = isError,
         value = value,
@@ -72,10 +75,16 @@ internal fun FinancialConnectionsOutlinedTextField(
     )
 }
 
-internal fun TextFieldValue.filtered(predicate: (Char) -> Boolean): TextFieldValue = copy(
+internal fun TextFieldValue.filter(predicate: (Char) -> Boolean): TextFieldValue = copy(
     text = text.filter(predicate),
     selection = selection.adjustForFilter(text, predicate),
     composition = composition?.adjustForFilter(text, predicate),
+)
+
+internal fun TextFieldValue.take(n: Int): TextFieldValue = copy(
+    text = text.take(n),
+    selection = selection.adjustForLimit(n),
+    composition = composition?.adjustForLimit(n),
 )
 
 private fun TextRange.adjustForFilter(
@@ -84,6 +93,13 @@ private fun TextRange.adjustForFilter(
 ): TextRange = TextRange(
     start = text.subSequence(0, start).count(predicate),
     end = text.subSequence(0, end).count(predicate),
+)
+
+private fun TextRange.adjustForLimit(
+    limit: Int,
+): TextRange = TextRange(
+    start = minOf(start, limit),
+    end = minOf(end, limit),
 )
 
 @Preview(group = "Components", name = "TextField - idle")

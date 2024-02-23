@@ -40,12 +40,21 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
     )
 
     private fun fieldFailure() = ManualEntryState(
-        routing = "123456789",
-        routingError = R.string.stripe_validation_no_us_routing,
-        account = "123456789",
-        accountError = R.string.stripe_validation_no_us_routing,
-        accountConfirm = "123456789",
-        accountConfirmError = R.string.stripe_validation_no_us_routing,
+        routing = ManualEntryState.InputState(
+            maxLength = 9,
+            value = "123456789",
+            error = R.string.stripe_validation_no_us_routing,
+        ),
+        account = ManualEntryState.InputState(
+            maxLength = 17,
+            value = "123456789",
+            error = R.string.stripe_validation_no_us_routing,
+        ),
+        accountConfirm = ManualEntryState.InputState(
+            maxLength = 17,
+            value = "123456789",
+            error = R.string.stripe_validation_no_us_routing,
+        ),
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
