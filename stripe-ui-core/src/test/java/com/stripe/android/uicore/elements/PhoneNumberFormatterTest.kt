@@ -72,7 +72,7 @@ internal class PhoneNumberFormatterTest {
             )
         )
 
-        // visualTransformation appends a space to the beginning of the filtered string
+        // visualTransformation appends a space to the beginning of the filter string
         assertThat(formatter.format("123")).isEqualTo(" 123")
         assertThat(formatter.format("1234567")).isEqualTo(" 1234567")
         assertThat(formatter.format("123456789012")).isEqualTo(" 123456789012")
@@ -90,7 +90,7 @@ internal class PhoneNumberFormatterTest {
             )
         )
 
-        // visualTransformation appends a space to the beginning of the filtered string
+        // visualTransformation appends a space to the beginning of the filter string
         assertThat(formatter.format("123ABC")).isEqualTo(" 123")
     }
 
