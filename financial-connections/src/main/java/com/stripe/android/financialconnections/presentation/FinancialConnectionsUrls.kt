@@ -1,5 +1,3 @@
-@file:Suppress("MaxLineLength", "MaximumLineLength")
-
 package com.stripe.android.financialconnections.presentation
 
 internal object FinancialConnectionsUrls {

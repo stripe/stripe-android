@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.ui.TextResource.StringId
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
 internal class ManualEntrySuccessViewModel @Inject constructor(
     initialState: ManualEntrySuccessState,
     private val getManifest: GetManifest,

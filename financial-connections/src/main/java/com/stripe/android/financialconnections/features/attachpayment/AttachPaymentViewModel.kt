@@ -26,7 +26,6 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,

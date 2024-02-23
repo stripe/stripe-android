@@ -97,7 +97,7 @@ private fun NetworkingLinkVerificationLoaded(
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {
             focusManager.clearFocus(true)
-            @Suppress()
+            @Suppress("DEPRECATION")
             textInputService?.hideSoftwareKeyboard()
         }
     }

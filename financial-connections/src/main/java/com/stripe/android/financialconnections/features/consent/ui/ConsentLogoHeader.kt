@@ -47,7 +47,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 
 @Composable
-@Suppress("MagicNumber")
 internal fun ConsentLogoHeader(
     modifier: Modifier = Modifier,
     logos: List<String>
@@ -221,7 +220,6 @@ private fun Logo(imageBitmap: ImageBitmap) {
  *
  * @param startSide whether the quarter is the start or end of the bitmap
  */
-@Suppress("MagicNumber")
 private fun getPrevalentColorCloseToDots(bitmap: Bitmap, startSide: Boolean): Color {
     val colorMap = HashMap<Int, Int>()
     val width = bitmap.width

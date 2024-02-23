@@ -26,7 +26,6 @@ internal object ManualEntryInputValidator {
         else -> null
     }
 
-    @Suppress("MagicNumber")
     private fun String.isUSRoutingNumber(): Boolean {
         val usRoutingFactor: (Int) -> Int = {
             when (it % 3) {

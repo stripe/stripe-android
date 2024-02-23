@@ -40,7 +40,6 @@ import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
-@Suppress("LongParameterList", "TooManyFunctions")
 internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
