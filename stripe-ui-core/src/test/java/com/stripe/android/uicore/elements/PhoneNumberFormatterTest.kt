@@ -115,11 +115,10 @@ internal class PhoneNumberFormatterTest {
             )
         )
 
-        // visualTransformation prepends a space to the output string
-        assertThat(formatter.format("123")).isEqualTo(" 123")
-        assertThat(formatter.format("1234567")).isEqualTo(" 1234567")
-        assertThat(formatter.format("123456789012")).isEqualTo(" 123456789012")
-        assertThat(formatter.format("123456789012456")).isEqualTo(" 123456789012456")
+        assertThat(formatter.format("123")).isEqualTo("123")
+        assertThat(formatter.format("1234567")).isEqualTo("1234567")
+        assertThat(formatter.format("123456789012")).isEqualTo("123456789012")
+        assertThat(formatter.format("123456789012456")).isEqualTo("123456789012456")
     }
 
     private fun PhoneNumberFormatter.format(input: String) =

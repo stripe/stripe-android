@@ -71,6 +71,8 @@ internal sealed class PhoneNumberFormatter {
                     AnnotatedString(formatted),
                     object : OffsetMapping {
                         override fun originalToTransformed(offset: Int): Int {
+                            if (metadata.pattern.isEmpty()) return offset
+
                             metadata.pattern.let {
                                 if (offset == 0) return 0
 
@@ -95,7 +97,9 @@ internal sealed class PhoneNumberFormatter {
                         }
 
                         override fun transformedToOriginal(offset: Int): Int {
-                            return if (offset == 0) {
+                            return if (metadata.pattern.isEmpty()) {
+                                offset
+                            } else if (offset == 0) {
                                 0
                             } else {
                                 metadata.pattern.let {
@@ -121,6 +125,10 @@ internal sealed class PhoneNumberFormatter {
          * for invalid characters and the numbers of characters limited based on E.164 spec.
          */
         fun formatNumberNational(filteredInput: String): String {
+            if (metadata.pattern.isEmpty()) {
+                // If there's no pattern to format on, return early.
+                return filteredInput
+            }
             var inputIndex = 0
             val formatted = StringBuilder()
             metadata.pattern.forEach {
