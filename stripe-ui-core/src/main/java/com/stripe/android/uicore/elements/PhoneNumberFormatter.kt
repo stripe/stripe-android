@@ -55,14 +55,11 @@ internal sealed class PhoneNumberFormatter {
         override val placeholder = metadata.pattern.replace('#', '5')
         override val countryCode = metadata.regionCode
 
+        private val maxSubscriberDigits = metadata.pattern.count { it == '#' }
+
         override fun userInputFilter(input: String) =
             input.filter { VALID_INPUT_RANGE.contains(it) }.run {
-                if (metadata.pattern.isEmpty()) {
-                    this
-                } else {
-                    val maxSubscriberDigits = metadata.pattern.count { it == '#' }
-                    substring(0, min(length, maxSubscriberDigits))
-                }
+                substring(0, min(length, maxSubscriberDigits))
             }
 
         override fun toE164Format(input: String) = "${prefix}${userInputFilter(input)}"
@@ -153,7 +150,7 @@ internal sealed class PhoneNumberFormatter {
     }
 
     /**
-     * Phone number formatter for an unknown region.
+     * Phone number formatter for an ubknown region.
      */
     class UnknownRegion(override val countryCode: String) : PhoneNumberFormatter() {
         override val prefix = ""
