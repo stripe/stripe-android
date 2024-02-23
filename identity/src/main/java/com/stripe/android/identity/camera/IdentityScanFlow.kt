@@ -3,6 +3,7 @@ package com.stripe.android.identity.camera
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
+import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.AggregateResultListener
@@ -10,11 +11,13 @@ import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.scanui.ScanFlow
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
@@ -37,7 +40,9 @@ internal class IdentityScanFlow(
     private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage,
     private val modelPerformanceTracker: ModelPerformanceTracker,
-    private val laplacianBlurDetector: LaplacianBlurDetector
+    private val laplacianBlurDetector: LaplacianBlurDetector,
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    private val identityRepository: IdentityRepository
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
 
@@ -103,10 +108,14 @@ internal class IdentityScanFlow(
                         )
                     } else {
                         IDDetectorAnalyzer.Factory(
+                            context,
                             idDetectorModelFile,
                             verificationPage.documentCapture.models.idDetectorMinScore,
+                            verificationPage.documentCapture.mbSettings,
                             modelPerformanceTracker,
-                            laplacianBlurDetector
+                            laplacianBlurDetector,
+                            identityAnalyticsRequestFactory,
+                            identityRepository
                         )
                     }
                 )

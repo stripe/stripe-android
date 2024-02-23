@@ -1,13 +1,18 @@
 package com.stripe.android.identity.ml
 
+import android.content.Context
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
+import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureMBSettings
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
+import com.stripe.android.identity.states.MBDetector
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
@@ -27,6 +32,9 @@ internal class IDDetectorAnalyzer(
     private val idDetectorMinScore: Float,
     private val modelPerformanceTracker: ModelPerformanceTracker,
     private val laplacianBlurDetector: LaplacianBlurDetector,
+    private val mbDetector: MBDetector?,
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    private val identityRepository: IdentityRepository
 ) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
@@ -97,7 +105,27 @@ internal class IDDetectorAnalyzer(
         }
         val bestCategory = INDEX_CATEGORY_MAP[bestCategoryIndex] ?: Category.INVALID
         val bestBoundingBox = boundingBoxes[bestIndex]
-        return IDDetectorOutput(
+
+        val categoriesMapping = LIST_OF_INDICES.map {
+            categories[bestIndex][it].roundToMaxDecimals(2)
+        }
+
+        return runCatching {
+            mbDetector?.let {
+                // try invoke mb result
+                IDDetectorOutput.Modern(
+                    bestCategory,
+                    bestScore,
+                    categoriesMapping,
+                    mbOutput = it.analyze(data)
+                )
+            }
+        }.onFailure {
+            identityRepository.sendAnalyticsRequest(
+                identityAnalyticsRequestFactory.mbError(it.message, it.stackTraceToString())
+            )
+        }.getOrNull() ?: IDDetectorOutput.Legacy(
+            // Return Legacy output if mbDetector is not available
             BoundingBox(
                 bestBoundingBox[0],
                 bestBoundingBox[1],
@@ -111,25 +139,38 @@ internal class IDDetectorAnalyzer(
             },
             laplacianBlurDetector.calculateBlurOutput(croppedImage)
         )
+
     }
 
     internal class Factory(
+        private val context: Context,
         private val modelFile: File,
         private val idDetectorMinScore: Float,
+        private val mbSettings: VerificationPageStaticContentDocumentCaptureMBSettings?,
         private val modelPerformanceTracker: ModelPerformanceTracker,
-        private val laplacianBlurDetector: LaplacianBlurDetector
+        private val laplacianBlurDetector: LaplacianBlurDetector,
+        private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+        private val identityRepository: IdentityRepository
     ) : AnalyzerFactory<
-            AnalyzerInput,
-            IdentityScanState,
-            AnalyzerOutput,
-            Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
-            > {
+        AnalyzerInput,
+        IdentityScanState,
+        AnalyzerOutput,
+        Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput>
+        > {
         override suspend fun newInstance(): Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
             return IDDetectorAnalyzer(
                 modelFile,
                 idDetectorMinScore,
                 modelPerformanceTracker,
-                laplacianBlurDetector
+                laplacianBlurDetector,
+                MBDetector.maybeCreateMBInstance(
+                    context,
+                    mbSettings,
+                    identityAnalyticsRequestFactory,
+                    identityRepository
+                ),
+                identityAnalyticsRequestFactory,
+                identityRepository
             )
         }
     }

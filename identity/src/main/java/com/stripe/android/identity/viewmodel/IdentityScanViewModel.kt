@@ -30,7 +30,7 @@ internal class IdentityScanViewModel(
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector
 ) :
-    CameraViewModel(modelPerformanceTracker, laplacianBlurDetector) {
+    CameraViewModel(modelPerformanceTracker, laplacianBlurDetector, identityRepository, identityAnalyticsRequestFactory) {
 
     private val _scannerState: MutableStateFlow<State> = MutableStateFlow(State.Initializing)
 

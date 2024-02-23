@@ -1,5 +1,6 @@
 package com.stripe.android.identity.states
 
+import androidx.annotation.IntegerRes
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.scanui.ScanState
@@ -56,13 +57,16 @@ internal sealed class IdentityScanState(
     internal class Found(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
-        internal var reachedStateAt: ClockMark = Clock.markNow()
+        internal var reachedStateAt: ClockMark = Clock.markNow(),
+        @IntegerRes val feedbackRes: Int? = null,
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
             analyzerOutput: AnalyzerOutput
         ) =
             transitioner.transitionFromFound(this, analyzerInput, analyzerOutput)
+
+        fun withFeedback(@IntegerRes feedbackRes: Int?) = Found(type, transitioner, reachedStateAt, feedbackRes)
     }
 
     /**

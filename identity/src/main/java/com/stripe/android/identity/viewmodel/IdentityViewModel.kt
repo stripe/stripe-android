@@ -82,6 +82,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.MBDetector
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
@@ -411,7 +412,7 @@ internal class IdentityViewModel constructor(
         verificationPage: VerificationPage
     ) {
         when (result.result) {
-            is IDDetectorOutput -> {
+            is IDDetectorOutput.Legacy -> {
                 val originalBitmap = result.frame.cameraPreviewImage.image
                 val boundingBox = result.result.boundingBox
                 val scores = result.result.allScores
@@ -440,26 +441,84 @@ internal class IdentityViewModel constructor(
                         throw IllegalStateException("incorrect targetScanType: ${result.result.category}")
                     }
                 }
+
                 // upload high res
-                processDocumentScanResultAndUpload(
-                    originalBitmap,
-                    boundingBox,
-                    verificationPage.documentCapture,
+                processAndUploadBitmap(
+                    bitmapToUpload = identityIO.cropAndPadBitmap(
+                        originalBitmap,
+                        boundingBox,
+                        originalBitmap.longerEdge() * verificationPage.documentCapture.highResImageCropPadding
+                    ),
+                    docCapturePage = verificationPage.documentCapture,
                     isHighRes = true,
                     isFront = isFront,
-                    scores,
-                    targetScanType
+                    scores = scores,
+                    targetScanType = targetScanType,
+                    capturedByMb = false
                 )
 
                 // upload low res
-                processDocumentScanResultAndUpload(
-                    originalBitmap,
-                    boundingBox,
-                    verificationPage.documentCapture,
+                processAndUploadBitmap(
+                    bitmapToUpload = originalBitmap,
+                    docCapturePage = verificationPage.documentCapture,
                     isHighRes = false,
                     isFront = isFront,
-                    scores,
-                    targetScanType
+                    scores = scores,
+                    targetScanType = targetScanType,
+                    capturedByMb = false
+                )
+            }
+
+            is IDDetectorOutput.Modern -> {
+                val scores = result.result.allScores
+                val isFront: Boolean
+                val targetScanType: IdentityScanState.ScanType
+
+                when (result.result.category) {
+                    Category.PASSPORT -> {
+                        isFront = true
+                        targetScanType = IdentityScanState.ScanType.DOC_FRONT
+                    }
+
+                    Category.ID_FRONT -> {
+                        isFront = true
+                        targetScanType = IdentityScanState.ScanType.DOC_FRONT
+                    }
+
+                    Category.ID_BACK -> {
+                        isFront = false
+                        targetScanType = IdentityScanState.ScanType.DOC_BACK
+                    }
+
+                    else -> {
+                        Log.e(TAG, "incorrect category: ${result.result.category}")
+                        throw IllegalStateException("incorrect targetScanType: ${result.result.category}")
+                    }
+                }
+
+
+                require(result.result.mbOutput is MBDetector.DetectorResult.Captured) {
+                    "Final MBOutput result is not Captured"
+                }
+
+                processAndUploadBitmap(
+                    bitmapToUpload = result.result.mbOutput.transformed,
+                    docCapturePage = verificationPage.documentCapture,
+                    isHighRes = true,
+                    isFront = isFront,
+                    scores = scores,
+                    targetScanType = targetScanType,
+                    capturedByMb = true
+                )
+
+                processAndUploadBitmap(
+                    bitmapToUpload = result.result.mbOutput.original,
+                    docCapturePage = verificationPage.documentCapture,
+                    isHighRes = false,
+                    isFront = isFront,
+                    scores = scores,
+                    targetScanType = targetScanType,
+                    capturedByMb = true
                 )
             }
 
@@ -494,27 +553,50 @@ internal class IdentityViewModel constructor(
      * Processes document scan result by cropping and padding the bitmap if necessary,
      * then upload the processed file.
      */
+//    @VisibleForTesting
+//    internal fun processDocumentScanResultAndUpload(
+//        originalBitmap: Bitmap,
+//        boundingBox: BoundingBox,
+//        docCapturePage: VerificationPageStaticContentDocumentCapturePage,
+//        isHighRes: Boolean,
+//        isFront: Boolean,
+//        scores: List<Float>,
+//        targetScanType: IdentityScanState.ScanType
+//    ) {
+//        processAndUploadBitmap(
+//            bitmapToUpload = if (isHighRes) {
+//                identityIO.cropAndPadBitmap(
+//                    originalBitmap,
+//                    boundingBox,
+//                    originalBitmap.longerEdge() * docCapturePage.highResImageCropPadding
+//                )
+//            } else {
+//                originalBitmap
+//            },
+//            docCapturePage = docCapturePage,
+//            isHighRes = isHighRes,
+//            isFront = isFront,
+//            scores = scores,
+//            targetScanType = targetScanType
+//        )
+//    }
+
+    /**
+     * Processes document scan result by cropping and padding the bitmap if necessary,
+     * then upload the processed file.
+     */
     @VisibleForTesting
-    internal fun processDocumentScanResultAndUpload(
-        originalBitmap: Bitmap,
-        boundingBox: BoundingBox,
+    internal fun processAndUploadBitmap(
+        bitmapToUpload: Bitmap,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         isHighRes: Boolean,
         isFront: Boolean,
         scores: List<Float>,
-        targetScanType: IdentityScanState.ScanType
+        targetScanType: IdentityScanState.ScanType,
+        capturedByMb: Boolean
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
-            bitmap =
-            if (isHighRes) {
-                identityIO.cropAndPadBitmap(
-                    originalBitmap,
-                    boundingBox,
-                    originalBitmap.longerEdge() * docCapturePage.highResImageCropPadding
-                )
-            } else {
-                originalBitmap
-            },
+            bitmap = bitmapToUpload,
             verificationId = verificationArgs.verificationSessionId,
             fileName =
             StringBuilder().also { nameBuilder ->
@@ -553,7 +635,8 @@ internal class IdentityViewModel constructor(
                     docCapturePage.highResImageCompressionQuality
                 } else {
                     docCapturePage.lowResImageCompressionQuality
-                }
+                },
+                capturedByMb = capturedByMb
             )
         }
     }
@@ -576,7 +659,8 @@ internal class IdentityViewModel constructor(
         isHighRes: Boolean,
         isFront: Boolean,
         scanType: IdentityScanState.ScanType,
-        compressionQuality: Float
+        compressionQuality: Float,
+        capturedByMb: Boolean? = null
     ) {
         viewModelScope.launch {
             if (isFront) {
@@ -630,8 +714,9 @@ internal class IdentityViewModel constructor(
                             newResult = UploadedResult(
                                 fileTimePair.first,
                                 scores,
-                                uploadMethod
-                            )
+                                uploadMethod,
+                                capturedByMb
+                            ),
                         )
                     }
                 },
@@ -844,13 +929,13 @@ internal class IdentityViewModel constructor(
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
                                 verificationArgs.ephemeralKeySecret
                             ).let { msg ->
-                            _verificationPage.postValue(
-                                Resource.error(
-                                    msg,
-                                    IllegalStateException(msg, it)
+                                _verificationPage.postValue(
+                                    Resource.error(
+                                        msg,
+                                        IllegalStateException(msg, it)
+                                    )
                                 )
-                            )
-                        }
+                            }
                 }
             )
         }

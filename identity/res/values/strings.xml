@@ -199,4 +199,24 @@
   <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
+  <!-- Instructional text when user needs to rotate the document to align with camera -->
+  <string name="stripe_rotate_document">Kee ID level</string>
+  <!-- Instructional text when user needs remove anything blocking the document -->
+  <string name="stripe_keep_fully_visible">Details not visible</string>
+  <!-- Instructional text when user needs to align the edge with camera -->
+  <string name="stripe_align_document">Keep ID level</string>
+  <!-- Instructional text when environment is too dark -->
+  <string name="stripe_increase_lighting">Move to a well-lit area</string>
+  <!-- Instructional text when environment is too bright -->
+  <string name="stripe_decrease_lighting">Details not visible</string>
+  <!-- Instructional text when the document has too much glare -->
+  <string name="stripe_reduce_glare">Details not visible</string>
+  <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">ID not in focus</string>
+  <!-- Instructional text when there is no document in camera frame -->
+  <string name="stripe_point_camera_to_document">No document detected</string>
+  <!-- Instructional text when camera is too far from a document -->
+  <string name="stripe_move_closer">Move ID closer</string>
+  <!-- Instructional text when camera is too close to a document -->
+  <string name="stripe_move_farther">Move ID farther back</string>
 </resources>
