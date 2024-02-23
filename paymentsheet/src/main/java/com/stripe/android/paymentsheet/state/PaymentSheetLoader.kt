@@ -87,6 +87,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
+                allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
+                    .allowsPaymentMethodsRequiringShippingAddress,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 

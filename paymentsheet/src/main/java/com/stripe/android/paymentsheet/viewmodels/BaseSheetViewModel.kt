@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -32,7 +33,6 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
-import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
@@ -349,9 +349,12 @@ internal abstract class BaseSheetViewModel(
         eventReporter.onPressConfirmButton(selection.value)
     }
 
-    protected fun setStripeIntent(stripeIntent: StripeIntent?) {
+    protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
+        val stripeIntent = paymentMethodMetadata?.stripeIntent
         _stripeIntent.value = stripeIntent
-        supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
+        supportedPaymentMethods = paymentMethodMetadata?.supportedPaymentMethodDefinitions()?.mapNotNull {
+            paymentMethodMetadata.supportedPaymentMethodForCode(it.type.code)
+        } ?: emptyList()
 
         if (stripeIntent is PaymentIntent) {
             _amount.value = Amount(

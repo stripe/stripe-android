@@ -19,6 +19,7 @@ internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
+    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {

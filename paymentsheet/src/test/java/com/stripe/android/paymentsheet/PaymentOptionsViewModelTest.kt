@@ -551,7 +551,8 @@ internal class PaymentOptionsViewModelTest {
                             PaymentMethod.Type.Card.code,
                             PaymentMethod.Type.AuBecsDebit.code,
                         ),
-                    )
+                    ),
+                    allowsDelayedPaymentMethods = false,
                 )
             ),
         )

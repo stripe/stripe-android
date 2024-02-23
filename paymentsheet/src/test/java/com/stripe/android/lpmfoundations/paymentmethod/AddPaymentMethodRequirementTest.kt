@@ -57,6 +57,17 @@ internal class AddPaymentMethodRequirementTest {
     }
 
     @Test
+    fun testShippingAddressReturnsTrueWhenMetadataAllowsPaymentMethodsRequiringShippingAddress() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                shipping = null
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+        )
+        assertThat(AddPaymentMethodRequirement.ShippingAddress.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
     fun testShippingAddressReturnsFalseWithNullName() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

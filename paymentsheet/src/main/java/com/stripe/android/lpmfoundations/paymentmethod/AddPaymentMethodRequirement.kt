@@ -19,6 +19,10 @@ internal enum class AddPaymentMethodRequirement {
     /** Indicates that a payment method requires shipping information. */
     ShippingAddress {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+            if (metadata.allowsPaymentMethodsRequiringShippingAddress) {
+                return true
+            }
+
             val shipping = (metadata.stripeIntent as? PaymentIntent)?.shipping
             return shipping?.name != null &&
                 shipping.address.line1 != null &&
