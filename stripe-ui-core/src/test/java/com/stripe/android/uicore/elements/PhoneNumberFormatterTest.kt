@@ -15,9 +15,25 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.format("123456")).isEqualTo("(123) 456")
         assertThat(formatter.format("1234567")).isEqualTo("(123) 456-7")
         assertThat(formatter.format("1234567890")).isEqualTo("(123) 456-7890")
-        // prefix has 1 digit so full number must be at most 14 digits
-        assertThat(formatter.format("12345asdfg678901234567890"))
-            .isEqualTo("(123) 456-7890")
+    }
+
+    @Test
+    fun `Can add more than minimum length for phone numbers`() {
+        val usFilteredNumber = PhoneNumberFormatter.forCountry("US")
+            .userInputFilter("123456789012")
+
+        assertThat(usFilteredNumber).isEqualTo("123456789012")
+        assertThat(usFilteredNumber.length).isGreaterThan(
+            PhoneNumberFormatter.lengthForCountry("US")
+        )
+
+        val gbFilteredNumber = PhoneNumberFormatter.forCountry("GB")
+            .userInputFilter("01234567890123")
+
+        assertThat(gbFilteredNumber).isEqualTo("01234567890123")
+        assertThat(gbFilteredNumber.length).isGreaterThan(
+            PhoneNumberFormatter.lengthForCountry("GB")
+        )
     }
 
     @Test
@@ -28,10 +44,6 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.format("1234")).isEqualTo("12 34")
         assertThat(formatter.format("123456")).isEqualTo("12 345 6")
         assertThat(formatter.format("1234567")).isEqualTo("12 345 67")
-        assertThat(formatter.format("1234567890")).isEqualTo("12 345 67 89")
-        // prefix has 3 digits so full number must be at most 12 digits
-        assertThat(formatter.format("12345asdfg678901234567890"))
-            .isEqualTo("12 345 67 89")
     }
 
     @Test
@@ -58,7 +70,29 @@ internal class PhoneNumberFormatterTest {
         assertThat(formatter.format("123")).isEqualTo("(123")
         assertThat(formatter.format("1234567")).isEqualTo("(123)-456+7")
         assertThat(formatter.format("123456789012")).isEqualTo("(123)-456+78901!2")
-        assertThat(formatter.format("123456789012456")).isEqualTo("(123)-456+78901!2")
+    }
+
+    @Test
+    fun `Should filter out digits past E164 defined maximum digits`() {
+        val withRegionFormatter = PhoneNumberFormatter.WithRegion(
+            PhoneNumberFormatter.Metadata(
+                prefix = "prefix",
+                regionCode = "regionCode",
+                pattern = "(###)-###+#####!#"
+            )
+        )
+
+        assertThat(
+            withRegionFormatter.userInputFilter("1234567890123456789")
+        ).isEqualTo("123456789012345")
+
+        val unknownRegionFormatter = PhoneNumberFormatter.UnknownRegion(
+            countryCode = "ZZ"
+        )
+
+        assertThat(
+            unknownRegionFormatter.userInputFilter("1234567890123456789")
+        ).isEqualTo("123456789012345")
     }
 
     @Test
