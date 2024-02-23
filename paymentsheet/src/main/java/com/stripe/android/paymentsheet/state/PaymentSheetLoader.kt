@@ -184,6 +184,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     stripeIntent = stripeIntent,
                     merchantCountry = merchantCountry,
                     passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
+                    linkSignUpDisabled = elementsSession.disableLinkSignup,
                     flags = elementsSession.linkFlags,
                 )
             } else {
@@ -249,6 +250,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         stripeIntent: StripeIntent,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
+        linkSignUpDisabled: Boolean,
         flags: Map<String, Boolean>,
     ): LinkState {
         val linkConfig = createLinkConfiguration(
@@ -256,7 +258,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             stripeIntent = stripeIntent,
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
+
             flags = flags,
+            linkSignUpDisabled = linkSignUpDisabled,
         )
 
         val loginState = when (accountStatusProvider(linkConfig)) {
@@ -278,6 +282,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         stripeIntent: StripeIntent,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
+        linkSignUpDisabled: Boolean,
         flags: Map<String, Boolean>,
     ): LinkConfiguration {
         val shippingDetails: AddressDetails? = config.shippingDetails
@@ -307,7 +312,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             .getPMAddForm(stripeIntent, config)
         val hasUsedLink = linkStore.hasUsedLink()
 
-        val linkSignupMode = if (hasUsedLink) {
+        val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
             null
         } else if (layoutDescriptor.showCheckbox) {
             LinkSignupMode.AlongsideSaveForFutureUse
