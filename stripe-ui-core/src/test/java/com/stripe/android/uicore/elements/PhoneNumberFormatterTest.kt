@@ -108,9 +108,9 @@ internal class PhoneNumberFormatterTest {
     fun `When pattern is missing, there is no formatting`() {
         val formatter = PhoneNumberFormatter.WithRegion(
             PhoneNumberFormatter.Metadata(
-                "prefix",
-                "regionCode",
-                // no pattern specified
+                prefix = "prefix",
+                regionCode = "regionCode",
+                pattern = null
             )
         )
 
