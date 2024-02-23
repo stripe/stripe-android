@@ -1,5 +1,3 @@
-@file:Suppress("MatchingDeclarationName")
-
 package com.stripe.android.financialconnections.ui.components
 
 import android.graphics.Typeface

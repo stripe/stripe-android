@@ -55,7 +55,6 @@ import java.util.Locale
  * @param networkedAccount For networked accounts, extra info to display
  */
 @Composable
-@Suppress("LongMethod")
 internal fun AccountItem(
     selected: Boolean,
     showInstitutionIcon: Boolean = true,
@@ -181,7 +180,6 @@ private fun PartnerAccount.getFormattedBalance(): String? {
     }
 }
 
-@Suppress("LongMethod")
 @Composable
 @Preview
 internal fun AccountItemPreview() {

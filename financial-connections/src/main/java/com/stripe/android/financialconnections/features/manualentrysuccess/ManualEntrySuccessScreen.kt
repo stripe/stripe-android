@@ -1,5 +1,3 @@
-@file:Suppress("TooManyFunctions", "LongMethod")
-
 package com.stripe.android.financialconnections.features.manualentrysuccess
 
 import androidx.activity.compose.BackHandler

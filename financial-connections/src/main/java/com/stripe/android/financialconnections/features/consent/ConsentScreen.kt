@@ -1,9 +1,3 @@
-@file:OptIn(
-    ExperimentalMaterialApi::class,
-    ExperimentalComposeUiApi::class
-)
-@file:Suppress("LongMethod", "TooManyFunctions")
-
 package com.stripe.android.financialconnections.features.consent
 
 import androidx.activity.compose.BackHandler

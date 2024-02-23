@@ -1,5 +1,3 @@
-@file:Suppress("MatchingDeclarationName", "ktlint:filename")
-
 package com.stripe.android.financialconnections.ui.theme
 
 import androidx.compose.foundation.background

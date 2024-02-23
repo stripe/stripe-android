@@ -56,7 +56,7 @@ internal class PollAuthorizationSessionAccounts @Inject constructor(
                 accounts
             }
         }
-    } catch (@Suppress("SwallowedException") e: StripeException) {
+    } catch (e: StripeException) {
         throw e.toDomainException(
             institution = sync.manifest.activeInstitution,
             businessName = sync.manifest.getBusinessName(),

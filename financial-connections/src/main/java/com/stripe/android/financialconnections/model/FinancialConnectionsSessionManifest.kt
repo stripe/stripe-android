@@ -47,7 +47,6 @@ import kotlinx.serialization.Serializable
  * @param paymentMethodType
  * @param successUrl
  */
-@Suppress("MaxLineLength")
 @Serializable
 @Parcelize
 internal data class FinancialConnectionsSessionManifest(

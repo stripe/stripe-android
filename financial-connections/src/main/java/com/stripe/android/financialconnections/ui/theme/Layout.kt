@@ -90,7 +90,6 @@ internal fun Layout(
 }
 
 @Composable
-@Suppress("MagicNumber")
 private fun BoxScope.FooterTopShadow() {
     val shadowSize = 4
     Box(
@@ -112,7 +111,6 @@ private fun BoxScope.FooterTopShadow() {
 }
 
 @Preview(showBackground = true)
-@Suppress("MagicNumber")
 @Composable
 internal fun LayoutPreview() {
     FinancialConnectionsTheme {
