@@ -5,15 +5,13 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.Test
 
-internal class PaymentMethodRegistryTest {
-    private val cardSharedDataSpecs = listOf(SharedDataSpec("card"))
-
+internal class PaymentMethodMetadataTest {
     @Test
     fun `filterSupportedPaymentMethods removes unsupported paymentMethodTypes`() {
         val metadata = PaymentMethodMetadataFactory.create()
-        val supportedPaymentMethods = PaymentMethodRegistry.filterSupportedPaymentMethods(metadata, cardSharedDataSpecs)
+        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first().code).isEqualTo("card")
+        assertThat(supportedPaymentMethods.first().type.code).isEqualTo("card")
     }
 
     @Test
@@ -23,9 +21,9 @@ internal class PaymentMethodRegistryTest {
                 paymentMethodTypes = listOf("card", "klarna")
             )
         )
-        val supportedPaymentMethods = PaymentMethodRegistry.filterSupportedPaymentMethods(metadata, cardSharedDataSpecs)
+        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first().code).isEqualTo("card")
+        assertThat(supportedPaymentMethods.first().type.code).isEqualTo("card")
     }
 
     @Test
@@ -33,12 +31,12 @@ internal class PaymentMethodRegistryTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
-            )
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
-        val sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna"))
-        val supportedPaymentMethods = PaymentMethodRegistry.filterSupportedPaymentMethods(metadata, sharedDataSpecs)
+        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
         assertThat(supportedPaymentMethods).hasSize(2)
-        assertThat(supportedPaymentMethods[0].code).isEqualTo("card")
-        assertThat(supportedPaymentMethods[1].code).isEqualTo("klarna")
+        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
     }
 }

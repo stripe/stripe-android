@@ -57,7 +57,7 @@ internal class LpmRepository(
         metadata: PaymentMethodMetadata,
         serverLpmSpecs: String?,
     ): Boolean {
-        val sharedDataSpecsResult: Result = getSharedDataSpecs(metadata, serverLpmSpecs)
+        val sharedDataSpecsResult: Result = getSharedDataSpecs(metadata.stripeIntent, serverLpmSpecs)
 
         update(
             metadata = metadata,
@@ -68,10 +68,10 @@ internal class LpmRepository(
     }
 
     fun getSharedDataSpecs(
-        metadata: PaymentMethodMetadata,
+        stripeIntent: StripeIntent,
         serverLpmSpecs: String?,
     ): Result {
-        val expectedLpms = metadata.stripeIntent.paymentMethodTypes
+        val expectedLpms = stripeIntent.paymentMethodTypes
         var failedToParseServerResponse = false
 
         val sharedDataSpecs: MutableList<SharedDataSpec> = mutableListOf()

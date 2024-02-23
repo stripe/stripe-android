@@ -3,7 +3,6 @@ package com.stripe.android.lpmfoundations.luxe
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -540,12 +539,10 @@ class LpmRepositoryTest {
                 }
             ]
         """.trimIndent()
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "cashapp")
-            )
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
         )
-        val result = lpmRepository.getSharedDataSpecs(metadata, serverSpecs)
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, serverSpecs)
         assertThat(result.failedToParseServerResponse).isFalse()
         val sharedDataSpecs = result.sharedDataSpecs
         assertThat(sharedDataSpecs).hasSize(2)
@@ -572,12 +569,10 @@ class LpmRepositoryTest {
                 }
             ]
         """.trimIndent()
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "cashapp")
-            )
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
         )
-        val result = lpmRepository.getSharedDataSpecs(metadata, serverSpecs)
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, serverSpecs)
         assertThat(result.failedToParseServerResponse).isFalse()
         val sharedDataSpecs = result.sharedDataSpecs
         assertThat(sharedDataSpecs).hasSize(2)
@@ -593,12 +588,10 @@ class LpmRepositoryTest {
             ),
         )
 
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "cashapp")
-            )
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
         )
-        val result = lpmRepository.getSharedDataSpecs(metadata, null)
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, null)
         assertThat(result.failedToParseServerResponse).isFalse()
         val sharedDataSpecs = result.sharedDataSpecs
         assertThat(sharedDataSpecs).hasSize(2)
@@ -614,12 +607,10 @@ class LpmRepositoryTest {
             ),
         )
 
-        val metadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "cashapp")
-            )
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
         )
-        val result = lpmRepository.getSharedDataSpecs(metadata, "{[]}")
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, "{[]}")
         assertThat(result.failedToParseServerResponse).isTrue()
         val sharedDataSpecs = result.sharedDataSpecs
         assertThat(sharedDataSpecs).hasSize(2)

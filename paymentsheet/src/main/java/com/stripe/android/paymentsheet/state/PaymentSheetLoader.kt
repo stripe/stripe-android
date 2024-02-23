@@ -10,7 +10,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -29,7 +28,6 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -81,13 +79,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             val billingDetailsCollectionConfig =
                 paymentSheetConfiguration.billingDetailsCollectionConfiguration.toInternal()
 
+            val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
+                stripeIntent = elementsSession.stripeIntent,
+                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            )
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
+                sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 
-            val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(metadata, elementsSession.paymentMethodSpecs)
             lpmRepository.update(metadata, sharedDataSpecsResult.sharedDataSpecs)
 
             if (sharedDataSpecsResult.failedToParseServerResponse) {
@@ -98,7 +100,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 elementsSession = elementsSession,
                 config = paymentSheetConfiguration,
                 metadata = metadata,
-                sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             ).let { state ->
                 reportSuccessfulLoad(
                     elementsSession = elementsSession,
@@ -140,7 +141,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
         metadata: PaymentMethodMetadata,
-        sharedDataSpecs: List<SharedDataSpec>,
     ): PaymentSheetState.Full = coroutineScope {
         val stripeIntent = elementsSession.stripeIntent
         val merchantCountry = elementsSession.merchantCountry
@@ -193,7 +193,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         warnUnactivatedIfNeeded(stripeIntent)
 
-        if (supportsIntent(metadata, sharedDataSpecs)) {
+        if (supportsIntent(metadata)) {
             PaymentSheetState.Full(
                 config = config,
                 customerPaymentMethods = sortedPaymentMethods.await(),
@@ -379,9 +379,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private fun supportsIntent(
         metadata: PaymentMethodMetadata,
-        sharedDataSpecs: List<SharedDataSpec>,
     ): Boolean {
-        return PaymentMethodRegistry.filterSupportedPaymentMethods(metadata, sharedDataSpecs).isNotEmpty()
+        return metadata.supportedPaymentMethodDefinitions().isNotEmpty()
     }
 
     private fun reportSuccessfulLoad(

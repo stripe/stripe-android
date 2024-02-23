@@ -1,9 +1,11 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import com.stripe.android.StripeIntentResult
 import com.stripe.android.model.LuxePostConfirmActionCreator
 import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.StripeIntent
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -13,9 +15,10 @@ import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable(with = ConfirmResponseStatusSpecsSerializer::class)
-sealed class ConfirmResponseStatusSpecs {
+sealed class ConfirmResponseStatusSpecs : Parcelable {
     @Serializable
     @SerialName("redirect_to_url")
+    @Parcelize
     data class RedirectNextActionSpec(
         @SerialName("url_path")
         val urlPath: String = "next_action[redirect_to_url][url]",
@@ -25,11 +28,13 @@ sealed class ConfirmResponseStatusSpecs {
 
     @Serializable
     @SerialName("finished")
-    object FinishedSpec : ConfirmResponseStatusSpecs()
+    @Parcelize
+    data object FinishedSpec : ConfirmResponseStatusSpecs()
 
     @Serializable
     @SerialName("canceled")
-    object CanceledSpec : ConfirmResponseStatusSpecs()
+    @Parcelize
+    data object CanceledSpec : ConfirmResponseStatusSpecs()
 }
 
 object ConfirmResponseStatusSpecsSerializer :
@@ -45,15 +50,17 @@ object ConfirmResponseStatusSpecsSerializer :
 }
 
 @Serializable(with = PostConfirmHandlingPiStatusSpecsSerializer::class)
-sealed class PostConfirmHandlingPiStatusSpecs {
+sealed class PostConfirmHandlingPiStatusSpecs : Parcelable {
 
     @Serializable
     @SerialName("finished")
-    object FinishedSpec : PostConfirmHandlingPiStatusSpecs()
+    @Parcelize
+    data object FinishedSpec : PostConfirmHandlingPiStatusSpecs()
 
     @Serializable
     @SerialName("canceled")
-    object CanceledSpec : PostConfirmHandlingPiStatusSpecs()
+    @Parcelize
+    data object CanceledSpec : PostConfirmHandlingPiStatusSpecs()
 }
 
 object PostConfirmHandlingPiStatusSpecsSerializer :
@@ -73,6 +80,7 @@ fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
     mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
 
 @Serializable
+@Parcelize
 data class ConfirmStatusSpecAssociation(
     @SerialName("requires_payment_method")
     val requiresPaymentMethod: ConfirmResponseStatusSpecs? = null,
@@ -86,7 +94,7 @@ data class ConfirmStatusSpecAssociation(
     val succeeded: ConfirmResponseStatusSpecs? = ConfirmResponseStatusSpecs.FinishedSpec,
     @SerialName("canceled")
     val canceled: ConfirmResponseStatusSpecs? = null
-) {
+) : Parcelable {
     fun getMap() =
         mapOf(
             StripeIntent.Status.RequiresPaymentMethod to requiresPaymentMethod,
@@ -99,6 +107,7 @@ data class ConfirmStatusSpecAssociation(
 }
 
 @Serializable
+@Parcelize
 data class PostConfirmStatusSpecAssociation(
     @SerialName("requires_payment_method")
     val requiresPaymentMethod: PostConfirmHandlingPiStatusSpecs? = null,
@@ -112,7 +121,7 @@ data class PostConfirmStatusSpecAssociation(
     val succeeded: PostConfirmHandlingPiStatusSpecs? = null,
     @SerialName("canceled")
     val canceled: PostConfirmHandlingPiStatusSpecs? = null
-) {
+) : Parcelable {
     fun getMap() = mapOf(
         StripeIntent.Status.RequiresPaymentMethod to requiresPaymentMethod,
         StripeIntent.Status.RequiresConfirmation to requiresConfirmation,
@@ -125,13 +134,14 @@ data class PostConfirmStatusSpecAssociation(
 
 @Serializable
 @SerialName("next_action_spec")
+@Parcelize
 data class NextActionSpec(
     @SerialName("confirm_response_status_specs")
     val confirmResponseStatusSpecs: ConfirmStatusSpecAssociation? = null,
 
     @SerialName("post_confirm_handling_pi_status_specs")
     val postConfirmHandlingPiStatusSpecs: PostConfirmStatusSpecAssociation? = null
-)
+) : Parcelable
 
 fun NextActionSpec?.transform() =
     if (this == null) {

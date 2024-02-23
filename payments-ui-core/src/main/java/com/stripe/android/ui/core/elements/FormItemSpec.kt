@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -17,7 +18,7 @@ import kotlinx.serialization.json.jsonPrimitive
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable(with = FormItemSpecSerializer::class)
-sealed class FormItemSpec {
+sealed class FormItemSpec : Parcelable {
     @SerialName("api_path")
     abstract val apiPath: IdentifierSpec
 
