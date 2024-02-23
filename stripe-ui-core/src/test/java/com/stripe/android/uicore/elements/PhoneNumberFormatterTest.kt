@@ -105,13 +105,12 @@ internal class PhoneNumberFormatterTest {
     }
 
     @Test
-    fun `When pattern is empty, there is no formatting`() {
-        val pattern = ""
+    fun `When pattern is missing, there is no formatting`() {
         val formatter = PhoneNumberFormatter.WithRegion(
             PhoneNumberFormatter.Metadata(
                 "prefix",
                 "regionCode",
-                pattern
+                // no pattern specified
             )
         )
 
