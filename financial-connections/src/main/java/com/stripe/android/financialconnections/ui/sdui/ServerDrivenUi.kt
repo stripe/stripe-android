@@ -6,6 +6,7 @@ import android.os.Build
 import android.text.Html
 import android.text.Spanned
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.ui.ImageResource
 import com.stripe.android.financialconnections.ui.TextResource
@@ -37,4 +38,4 @@ internal fun fromHtml(source: String): Spanned {
 }
 
 @Composable
-internal fun rememberHtml(html: String): TextResource.Text = TextResource.Text(fromHtml(html))
+internal fun rememberHtml(html: String): TextResource.Text = remember(html) { TextResource.Text(fromHtml(html)) }

@@ -23,7 +23,8 @@ internal class ConsentPreviewParameterProvider :
         ModalBottomSheetValue.Hidden to withConnectedAccountLogos(),
         ModalBottomSheetValue.Hidden to manualEntryPlusMicrodeposits(),
         ModalBottomSheetValue.Expanded to withDataBottomSheet(),
-        ModalBottomSheetValue.Expanded to withLegalDetailsBottomSheet()
+        ModalBottomSheetValue.Expanded to withLegalDetailsBottomSheet(),
+        ModalBottomSheetValue.Expanded to withDataBottomSheetAndConnectedAccount()
     )
 
     override val count: Int
@@ -72,6 +73,25 @@ internal class ConsentPreviewParameterProvider :
     )
 
     private fun withDataBottomSheet() = ConsentState(
+        currentBottomSheet = ConsentState.BottomSheetContent.DATA,
+        consent = Success(
+            ConsentState.Payload(
+                consent = sampleConsent().copy(
+                    dataAccessNotice = sampleConsent().dataAccessNotice.copy(
+                        connectedAccountNotice = null
+                    )
+                ),
+                merchantLogos = listOf(
+                    "www.logo1.com",
+                    "www.logo2.com"
+                ),
+                shouldShowMerchantLogos = false
+            )
+        )
+    )
+
+
+    private fun withDataBottomSheetAndConnectedAccount() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.DATA,
         consent = Success(
             ConsentState.Payload(

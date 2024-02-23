@@ -55,12 +55,12 @@ internal fun DataAccessBottomSheetContent(
                 }
             }
             item {
-                Title(title, onClickableTextClick)
+                Title(title = title, onClickableTextClick = onClickableTextClick)
             }
             // FOR CONNECTED ACCOUNTS: Permissions granted to Stripe by the connected account
             dataDialog.connectedAccountNotice?.let {
                 item {
-                    Subtitle(rememberHtml(it.subtitle), onClickableTextClick)
+                    Subtitle(text = rememberHtml(it.subtitle), onClickableTextClick = onClickableTextClick)
                 }
                 items(it.body.bullets) { bullet ->
                     ListItem(
@@ -95,7 +95,8 @@ internal fun LegalDetailsBottomSheetContent(
     val title = rememberHtml(legalDetails.title)
     val subtitle = legalDetails.subtitle?.let { rememberHtml(it) }
     val learnMore = legalDetails.disclaimer?.let { rememberHtml(it) }
-    val links = remember(legalDetails.body.links) { legalDetails.body.links.map { TextResource.Text(fromHtml(it.title)) }
+    val links = remember(legalDetails.body.links) {
+        legalDetails.body.links.map { TextResource.Text(fromHtml(it.title)) }
     }
     ModalBottomSheetContent(
         onClickableTextClick = onClickableTextClick,
@@ -104,13 +105,13 @@ internal fun LegalDetailsBottomSheetContent(
         onConfirmModalClick = onConfirmModalClick
     ) {
         legalDetails.icon?.default?.let {
-            item { ShapedIcon(url = it, contentDescription = "Icon") }
+            item { ShapedIcon(it, contentDescription = "legal details icon") }
         }
 
-        item { Title(title, onClickableTextClick) }
+        item { Title(title = title, onClickableTextClick = onClickableTextClick) }
 
         subtitle?.let {
-            item { Subtitle(it, onClickableTextClick) }
+            item { Subtitle(text = it, onClickableTextClick = onClickableTextClick) }
         }
 
         item { Links(links) }
