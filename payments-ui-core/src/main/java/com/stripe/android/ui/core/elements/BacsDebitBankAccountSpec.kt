@@ -15,6 +15,7 @@ import kotlinx.serialization.Serializable
 class BacsDebitBankAccountSpec : FormItemSpec() {
     @IgnoredOnParcel
     private val sortCodeIdentifier = IdentifierSpec.Generic(SORT_CODE_API_PATH)
+
     @IgnoredOnParcel
     private val accountNumberIdentifier = IdentifierSpec.Generic(ACCOUNT_NUMBER_API_PATH)
 
