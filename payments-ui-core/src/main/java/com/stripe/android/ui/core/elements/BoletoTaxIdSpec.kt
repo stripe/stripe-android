@@ -4,16 +4,20 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
 @Serializable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
+@Parcelize
 data class BoletoTaxIdSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("boleto[tax_id]")
 ) : FormItemSpec() {
+    @IgnoredOnParcel
     @Transient
     private val simpleTextSpec =
         SimpleTextSpec(

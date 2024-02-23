@@ -92,16 +92,21 @@ internal class DefaultCustomerSheetLoader(
         )
         return elementsSessionRepository.get(initializationMode).onSuccess { elementsSession ->
             val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
+            val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
+                stripeIntent = elementsSession.stripeIntent,
+                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+            ).sharedDataSpecs
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = false,
+                sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )
 
             lpmRepository.update(
                 metadata = metadata,
-                serverLpmSpecs = elementsSession.paymentMethodSpecs,
+                specs = sharedDataSpecs,
             )
         }
     }
