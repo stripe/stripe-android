@@ -64,6 +64,30 @@ class PaymentSheetConfigurationKtxTest {
         )
 
         assertThat(configuration.containsVolatileDifferences(configWithBillingConfigChanges)).isTrue()
+
+        val configWithAllowsDelayedPaymentMethodChanges = configuration.copy(
+            allowsDelayedPaymentMethods = true,
+        )
+
+        assertThat(
+            configuration.containsVolatileDifferences(configWithAllowsDelayedPaymentMethodChanges)
+        ).isTrue()
+
+        val configWithAllowsPaymentMethodsRequiringShippingAddressChanges = configuration.copy(
+            allowsPaymentMethodsRequiringShippingAddress = true,
+        )
+
+        assertThat(
+            configuration.containsVolatileDifferences(configWithAllowsPaymentMethodsRequiringShippingAddressChanges)
+        ).isTrue()
+
+        val configWithAllowRemovalOfLastPaymentMethodChanges = configuration.copy(
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        )
+
+        assertThat(
+            configuration.containsVolatileDifferences(configWithAllowRemovalOfLastPaymentMethodChanges)
+        ).isTrue()
     }
 
     private companion object {

@@ -136,7 +136,8 @@ private fun PaymentSheet.Configuration.toVolatileConfiguration(): VolatilePaymen
         allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
         allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
         billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        preferredNetworks = preferredNetworks
+        preferredNetworks = preferredNetworks,
+        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
     )
 }
 
@@ -145,7 +146,7 @@ private fun PaymentSheet.GooglePayConfiguration.toVolatileConfiguration():
     return VolatilePaymentSheetConfiguration.GooglePayConfiguration(
         environment = environment,
         countryCode = countryCode,
-        currencyCode = currencyCode
+        currencyCode = currencyCode,
     )
 }
 
@@ -158,6 +159,7 @@ private data class VolatilePaymentSheetConfiguration(
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
     val preferredNetworks: List<CardBrand>,
+    val allowsRemovalOfLastSavedPaymentMethod: Boolean,
 ) {
     data class GooglePayConfiguration(
         val environment: PaymentSheet.GooglePayConfiguration.Environment,
