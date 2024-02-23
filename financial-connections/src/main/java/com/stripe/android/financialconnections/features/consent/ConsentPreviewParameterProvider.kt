@@ -90,7 +90,6 @@ internal class ConsentPreviewParameterProvider :
         )
     )
 
-
     private fun withDataBottomSheetAndConnectedAccount() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.DATA,
         consent = Success(
