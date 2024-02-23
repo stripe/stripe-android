@@ -57,58 +57,53 @@ internal class LpmRepository(
         metadata: PaymentMethodMetadata,
         serverLpmSpecs: String?,
     ): Boolean {
+        val sharedDataSpecsResult: Result = getSharedDataSpecs(metadata, serverLpmSpecs)
+
+        update(
+            metadata = metadata,
+            specs = sharedDataSpecsResult.sharedDataSpecs,
+        )
+
+        return !sharedDataSpecsResult.failedToParseServerResponse
+    }
+
+    fun getSharedDataSpecs(
+        metadata: PaymentMethodMetadata,
+        serverLpmSpecs: String?,
+    ): Result {
         val expectedLpms = metadata.stripeIntent.paymentMethodTypes
         var failedToParseServerResponse = false
+
+        val sharedDataSpecs: MutableList<SharedDataSpec> = mutableListOf()
 
         if (!serverLpmSpecs.isNullOrEmpty()) {
             val deserializationResult = LpmSerializer.deserializeList(serverLpmSpecs)
             failedToParseServerResponse = deserializationResult.isFailure
-            val serverLpmObjects = deserializationResult.getOrElse { emptyList() }
-            update(
-                metadata = metadata,
-                specs = serverLpmObjects,
-            )
+            sharedDataSpecs += deserializationResult.getOrElse { emptyList() }
         }
 
         // If the server does not return specs, or they are not parsed successfully
         // we will use the LPM on disk if found
+        val sharedDataSpecTypes = sharedDataSpecs.map { it.type }.toSet()
         val lpmsNotParsedFromServerSpec = expectedLpms.filter { lpm ->
-            !lpmInitialFormData.containsKey(lpm)
+            lpm !in sharedDataSpecTypes
         }
 
         if (lpmsNotParsedFromServerSpec.isNotEmpty()) {
-            parseMissingLpmsFromDisk(
-                missingLpms = lpmsNotParsedFromServerSpec,
-                metadata = metadata,
-            )
+            sharedDataSpecs += readFromDisk().filter { it.type in lpmsNotParsedFromServerSpec }
         }
 
-        return !failedToParseServerResponse
-    }
-
-    private fun parseMissingLpmsFromDisk(
-        missingLpms: List<String>,
-        metadata: PaymentMethodMetadata,
-    ) {
-        val missingSpecsOnDisk = readFromDisk().filter { it.type in missingLpms }
-
-        val missingLpmsByType = missingSpecsOnDisk.mapNotNull { spec ->
-            convertToSupportedPaymentMethod(
-                metadata = metadata,
-                sharedDataSpec = spec,
-            )
-        }.associateBy {
-            it.code
-        }
-
-        lpmInitialFormData.putAll(missingLpmsByType)
+        return Result(
+            sharedDataSpecs = sharedDataSpecs,
+            failedToParseServerResponse = failedToParseServerResponse,
+        )
     }
 
     private fun readFromDisk(): List<SharedDataSpec> {
         return parseLpms(arguments.resources.assets?.open("lpms.json"))
     }
 
-    private fun update(
+    fun update(
         metadata: PaymentMethodMetadata,
         specs: List<SharedDataSpec>,
     ) {
@@ -184,5 +179,10 @@ internal class LpmRepository(
 
     data class LpmRepositoryArguments(
         val resources: Resources,
+    )
+
+    data class Result(
+        val sharedDataSpecs: List<SharedDataSpec>,
+        val failedToParseServerResponse: Boolean,
     )
 }

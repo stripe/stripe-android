@@ -10,6 +10,7 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
@@ -23,12 +24,12 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.getPMAddForm
-import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -86,12 +87,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
             )
 
-            val didParseServerResponse = lpmRepository.update(
-                metadata = metadata,
-                serverLpmSpecs = elementsSession.paymentMethodSpecs,
-            )
+            val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(metadata, elementsSession.paymentMethodSpecs)
+            lpmRepository.update(metadata, sharedDataSpecsResult.sharedDataSpecs)
 
-            if (!didParseServerResponse) {
+            if (sharedDataSpecsResult.failedToParseServerResponse) {
                 eventReporter.onLpmSpecFailure()
             }
 
@@ -99,6 +98,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 elementsSession = elementsSession,
                 config = paymentSheetConfiguration,
                 metadata = metadata,
+                sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             ).let { state ->
                 reportSuccessfulLoad(
                     elementsSession = elementsSession,
@@ -140,6 +140,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         elementsSession: ElementsSession,
         config: PaymentSheet.Configuration,
         metadata: PaymentMethodMetadata,
+        sharedDataSpecs: List<SharedDataSpec>,
     ): PaymentSheetState.Full = coroutineScope {
         val stripeIntent = elementsSession.stripeIntent
         val merchantCountry = elementsSession.merchantCountry
@@ -192,7 +193,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         warnUnactivatedIfNeeded(stripeIntent)
 
-        if (supportsIntent(stripeIntent, config)) {
+        if (supportsIntent(metadata, sharedDataSpecs)) {
             PaymentSheetState.Full(
                 config = config,
                 customerPaymentMethods = sortedPaymentMethods.await(),
@@ -377,13 +378,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private fun supportsIntent(
-        stripeIntent: StripeIntent,
-        config: PaymentSheet.Configuration,
+        metadata: PaymentMethodMetadata,
+        sharedDataSpecs: List<SharedDataSpec>,
     ): Boolean {
-        val availablePaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
-        val requestedTypes = stripeIntent.paymentMethodTypes.toSet()
-        val availableTypes = availablePaymentMethods.map { it.code }.toSet()
-        return availableTypes.intersect(requestedTypes).isNotEmpty()
+        return PaymentMethodRegistry.filterSupportedPaymentMethods(metadata, sharedDataSpecs).isNotEmpty()
     }
 
     private fun reportSuccessfulLoad(

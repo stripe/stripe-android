@@ -55,11 +55,6 @@
     <ID>MaxLineLength:CardNumberControllerTest.kt$CardNumberControllerTest$fun</ID>
     <ID>MaxLineLength:NextActionSpec.kt$PostConfirmHandlingPiStatusSpecsSerializer$override</ID>
     <ID>MaximumLineLength:com.stripe.android.ui.core.elements.NextActionSpec.kt:63</ID>
-    <ID>ReturnCount:AuBankAccountNumberConfig.kt$AuBankAccountNumberConfig$override fun determineState(input: String): TextFieldState</ID>
-    <ID>ReturnCount:BsbConfig.kt$BsbConfig$override fun determineState(input: String): TextFieldState</ID>
-    <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
-    <ID>ReturnCount:CardNumberVisualTransformation.kt$CardNumberVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
-    <ID>ReturnCount:IbanConfig.kt$IbanConfig$override fun determineState(input: String): TextFieldState</ID>
     <ID>SpreadOperator:BsbElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:MandateTextUI.kt$(element.stringResId, *element.args.toTypedArray())</ID>
     <ID>TooGenericExceptionCaught:PlacesClientProxy.kt$DefaultPlacesClientProxy$e: Exception</ID>

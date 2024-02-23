@@ -197,11 +197,6 @@
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"</ID>
     <ID>MaxLineLength:WebIntentAuthenticatorTest.kt$WebIntentAuthenticatorTest$expectedUrl = "https://pm-redirects.stripe.com/authorize/acct_1HvTI7Lu5o3P18Zp/pa_nonce_NC1mezV544wpYmFaXyJpnleeurKO3TZ"</ID>
     <ID>MaximumLineLength:com.stripe.android.PaymentRelayContract.kt:9</ID>
-    <ID>ReturnCount:DateUtils.kt$DateUtils$@VisibleForTesting @JvmStatic fun isExpiryDataValid(expiryMonth: Int, expiryYear: Int, calendar: Calendar): Boolean</ID>
-    <ID>ReturnCount:DefaultPaymentAuthenticatorRegistry.kt$DefaultPaymentAuthenticatorRegistry$@Suppress("UNCHECKED_CAST") override fun &lt;Authenticatable> getAuthenticator( authenticatable: Authenticatable ): PaymentAuthenticator&lt;Authenticatable></ID>
-    <ID>ReturnCount:FraudDetectionDataJsonParser.kt$FraudDetectionDataJsonParser$override fun parse(json: JSONObject): FraudDetectionData?</ID>
-    <ID>ReturnCount:PaymentAuthWebViewClient.kt$PaymentAuthWebViewClient$private fun isReturnUrl(uri: Uri): Boolean</ID>
-    <ID>ReturnCount:WalletJsonParser.kt$WalletJsonParser$override fun parse(json: JSONObject): Wallet?</ID>
     <ID>SwallowedException:ActivityUtils.kt$e: IllegalArgumentException</ID>
     <ID>SwallowedException:DefaultPaymentAuthenticatorRegistry.kt$e: Exception</ID>
     <ID>SwallowedException:PaymentUtils.kt$PaymentUtils$e: ClassCastException</ID>
