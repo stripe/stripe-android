@@ -19,6 +19,7 @@ internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
+    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
@@ -30,7 +31,9 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
-        return PaymentMethodRegistry.all.filter {
+        return stripeIntent.paymentMethodTypes.mapNotNull {
+            PaymentMethodRegistry.definitionsByCode[it]
+        }.filter {
             it.isSupported(this)
         }.filter { paymentMethodDefinition ->
             sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null

@@ -353,7 +353,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun handlePaymentSheetStateLoadFailure(error: Throwable) {
-        setStripeIntent(null)
+        setPaymentMethodMetadata(null)
         onFatal(error)
     }
 
@@ -401,7 +401,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             GooglePayState.NotAvailable
         }
 
-        setStripeIntent(state.stripeIntent)
+        setPaymentMethodMetadata(state.paymentMethodMetadata)
 
         val linkState = state.linkState
 

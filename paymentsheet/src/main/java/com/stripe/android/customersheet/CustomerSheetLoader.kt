@@ -100,6 +100,7 @@ internal class DefaultCustomerSheetLoader(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = false,
+                allowsPaymentMethodsRequiringShippingAddress = false,
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )

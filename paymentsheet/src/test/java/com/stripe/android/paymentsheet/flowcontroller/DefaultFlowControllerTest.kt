@@ -418,7 +418,7 @@ internal class DefaultFlowControllerTest {
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
             statusBarColor = STATUS_BAR_COLOR,
             enableLogging = ENABLE_LOGGING,

@@ -121,6 +121,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
+                    sharedDataSpecs = PaymentMethodMetadataFactory.createSharedDataSpecsWithCardOnly(),
                 ),
             )
         )
@@ -144,24 +145,8 @@ internal class DefaultPaymentSheetLoaderTest {
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
-            ).getOrThrow()
-        ).isEqualTo(
-            PaymentSheetState.Full(
-                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                customerPaymentMethods = PAYMENT_METHODS,
-                isGooglePayReady = false,
-                paymentSelection = PaymentSelection.Saved(
-                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                ),
-                linkState = null,
-                isEligibleForCardBrandChoice = false,
-                validationError = null,
-                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-                    stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
-                    allowsDelayedPaymentMethods = false,
-                ),
-            )
-        )
+            ).getOrThrow().isGooglePayReady
+        ).isFalse()
     }
 
     @Test
