@@ -59,11 +59,10 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
         GlobalScope.launch(dispatcher) {
             runCatching {
                 networkClient.executeRequest(request)
-                logger.debug("EVENT: ${request.eventName}: ${request.params}")
+                logger.debug("EVENT: ${request.eventName}")
             }.onFailure {
                 logger.error("Exception while making analytics request", it)
             }
         }
     }
 }
-
