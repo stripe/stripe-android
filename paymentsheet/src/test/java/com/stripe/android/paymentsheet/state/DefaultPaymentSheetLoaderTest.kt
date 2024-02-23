@@ -13,7 +13,6 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode.AlongsideSaveForFutureUse
 import com.stripe.android.link.ui.inline.LinkSignupMode.InsteadOfSaveForFutureUse
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
@@ -32,7 +31,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
@@ -65,18 +63,7 @@ internal class DefaultPaymentSheetLoaderTest {
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
         ),
         lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-    ).apply {
-        this.update(
-            PaymentIntentFactory.create(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.USBankAccount.code,
-                    PaymentMethod.Type.CashAppPay.code,
-                ),
-            ),
-            null
-        )
-    }
+    )
 
     private val prefsRepository = FakePrefsRepository()
 
@@ -747,7 +734,6 @@ internal class DefaultPaymentSheetLoaderTest {
         assertThat(result).isEqualTo(
             PaymentSheetLoadingException.NoPaymentMethodTypesAvailable(
                 requested = "gold, silver, bronze",
-                supported = "card, cashapp",
             )
         )
     }
