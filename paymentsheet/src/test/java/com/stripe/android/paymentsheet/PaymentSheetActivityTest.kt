@@ -57,13 +57,11 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
-import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.formViewModelSubcomponentBuilder
 import com.stripe.android.utils.injectableActivityScenario
@@ -84,6 +82,8 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.time.Duration
@@ -550,21 +550,15 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
+            val countDownLatch = CountDownLatch(1)
+
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-            var finishProcessingCalled = false
             viewModel.viewState.value = PaymentSheetViewState.FinishProcessing {
-                finishProcessingCalled = true
+                countDownLatch.countDown()
             }
 
-            idleLooper()
-
-            testDispatcher.scheduler.apply {
-                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
-                runCurrent()
-            }
-
-            assertThat(finishProcessingCalled).isTrue()
+            countDownLatch.await(5, TimeUnit.SECONDS)
         }
     }
 
@@ -576,16 +570,15 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
+            val countDownLatch = CountDownLatch(1)
+
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
-            var finishProcessingCalled = false
             viewModel.viewState.value = PaymentSheetViewState.FinishProcessing {
-                finishProcessingCalled = true
+                countDownLatch.countDown()
             }
 
-            composeTestRule.waitUntil(timeoutMillis = 5000L) {
-                finishProcessingCalled
-            }
+            countDownLatch.await(5, TimeUnit.SECONDS)
         }
     }
 

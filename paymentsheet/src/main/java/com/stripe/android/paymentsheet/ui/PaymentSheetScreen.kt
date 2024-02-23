@@ -135,18 +135,16 @@ internal fun PaymentSheetScreenContent(
     val mandateText by viewModel.mandateText.collectAsState()
 
     Column(modifier) {
-        Box {
-            PaymentSheetContent(
-                viewModel = viewModel,
-                type = type,
-                headerText = headerText,
-                walletsState = walletsState,
-                walletsProcessingState = walletsProcessingState,
-                error = error,
-                currentScreen = currentScreen,
-                mandateText = mandateText,
-            )
-        }
+        PaymentSheetContent(
+            viewModel = viewModel,
+            type = type,
+            headerText = headerText,
+            walletsState = walletsState,
+            walletsProcessingState = walletsProcessingState,
+            error = error,
+            currentScreen = currentScreen,
+            mandateText = mandateText,
+        )
 
         PaymentSheetContentPadding()
     }
@@ -194,62 +192,59 @@ private fun PaymentSheetContent(
     error: String?,
     currentScreen: PaymentSheetScreen,
     mandateText: MandateText?,
-    modifier: Modifier = Modifier,
 ) {
-    Column(modifier) {
-        val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-        headerText?.let { text ->
-            H4Text(
-                text = stringResource(text),
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .padding(horizontal = horizontalPadding),
-            )
-        }
+    headerText?.let { text ->
+        H4Text(
+            text = stringResource(text),
+            modifier = Modifier
+                .padding(bottom = 16.dp)
+                .padding(horizontal = horizontalPadding),
+        )
+    }
 
-        walletsState?.let { state ->
-            val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
-            Wallet(
-                state = state,
-                processingState = walletsProcessingState,
-                onGooglePayPressed = state.onGooglePayPressed,
-                onLinkPressed = state.onLinkPressed,
-                modifier = Modifier.padding(bottom = bottomSpacing),
-            )
-        }
+    walletsState?.let { state ->
+        val bottomSpacing = WalletDividerSpacing - currentScreen.topContentPadding
+        Wallet(
+            state = state,
+            processingState = walletsProcessingState,
+            onGooglePayPressed = state.onGooglePayPressed,
+            onLinkPressed = state.onLinkPressed,
+            modifier = Modifier.padding(bottom = bottomSpacing),
+        )
+    }
 
-        Box(modifier = Modifier.animateContentSize()) {
-            currentScreen.Content(
-                viewModel = viewModel,
-                modifier = Modifier.padding(bottom = 8.dp),
-            )
-        }
+    Box(modifier = Modifier.animateContentSize()) {
+        currentScreen.Content(
+            viewModel = viewModel,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+    }
 
-        if (mandateText?.showAbovePrimaryButton == true) {
-            Mandate(
-                mandateText = mandateText.text,
-                modifier = Modifier.padding(horizontal = horizontalPadding),
-            )
-        }
+    if (mandateText?.showAbovePrimaryButton == true) {
+        Mandate(
+            mandateText = mandateText.text,
+            modifier = Modifier.padding(horizontal = horizontalPadding),
+        )
+    }
 
-        error?.let {
-            ErrorMessage(
-                error = it,
-                modifier = Modifier.padding(vertical = 2.dp, horizontal = horizontalPadding),
-            )
-        }
+    error?.let {
+        ErrorMessage(
+            error = it,
+            modifier = Modifier.padding(vertical = 2.dp, horizontal = horizontalPadding),
+        )
+    }
 
-        PrimaryButton(type)
+    PrimaryButton(type)
 
-        if (mandateText?.showAbovePrimaryButton == false) {
-            Mandate(
-                mandateText = mandateText.text,
-                modifier = Modifier
-                    .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
-            )
-        }
+    if (mandateText?.showAbovePrimaryButton == false) {
+        Mandate(
+            mandateText = mandateText.text,
+            modifier = Modifier
+                .padding(top = 8.dp)
+                .padding(horizontal = horizontalPadding),
+        )
     }
 }
 
