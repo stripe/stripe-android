@@ -18,8 +18,15 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkActivityResult
+import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.ui.inline.InlineSignupViewState
+import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.inline.SignUpConsentAction
+import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.update
@@ -71,6 +78,7 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
+import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -597,27 +605,27 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Google Pay checkout cancelled returns to Ready state`() = runTest {
+    fun `Google Pay checkout cancelled returns to Idle state`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.checkoutWithGooglePay()
 
         turbineScope {
-            val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+            val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
             val processingTurbine = viewModel.processing.testIn(this)
 
-            assertThat(googlePayButtonTurbine.awaitItem())
-                .isEqualTo(PaymentSheetViewState.StartProcessing)
+            assertThat(walletsProcessingStateTurbine.awaitItem())
+                .isEqualTo(WalletsProcessingState.Processing)
             assertThat(processingTurbine.awaitItem()).isTrue()
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
             assertThat(viewModel.contentVisible.value).isTrue()
 
-            assertThat(googlePayButtonTurbine.awaitItem())
-                .isEqualTo(PaymentSheetViewState.Reset(null))
+            assertThat(walletsProcessingStateTurbine.awaitItem())
+                .isEqualTo(WalletsProcessingState.Idle(null))
             assertThat(processingTurbine.awaitItem()).isFalse()
 
-            googlePayButtonTurbine.cancel()
+            walletsProcessingStateTurbine.cancel()
             processingTurbine.cancel()
         }
     }
@@ -625,38 +633,41 @@ internal class PaymentSheetViewModelTest {
     @Test
     fun `On checkout clear the previous view state error`() = runTest {
         val viewModel = createViewModel()
-        viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+        viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
         turbineScope {
-            val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+            val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
             val buyButtonTurbine = viewModel.buyButtonState.testIn(this)
 
-            assertThat(googlePayButtonTurbine.awaitItem())
-                .isEqualTo(PaymentSheetViewState.Reset(null))
+            assertThat(walletsProcessingStateTurbine.awaitItem())
+                .isEqualTo(WalletsProcessingState.Idle(null))
+            assertThat(buyButtonTurbine.awaitItem())
+                .isEqualTo(null)
 
             viewModel.checkout()
 
-            googlePayButtonTurbine.expectNoEvents()
+            assertThat(walletsProcessingStateTurbine.awaitItem())
+                .isEqualTo(null)
             assertThat(buyButtonTurbine.awaitItem())
                 .isEqualTo(PaymentSheetViewState.StartProcessing)
 
-            googlePayButtonTurbine.cancel()
+            walletsProcessingStateTurbine.cancel()
             buyButtonTurbine.cancel()
         }
     }
 
     @Test
-    fun `Google Pay checkout failed returns to Ready state and shows error`() = runTest {
+    fun `Google Pay checkout failed returns to Idle state and shows error`() = runTest {
         val viewModel = createViewModel()
 
         viewModel.checkoutWithGooglePay()
 
         turbineScope {
-            val googlePayButtonTurbine = viewModel.googlePayButtonState.testIn(this)
+            val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
             val processingTurbine = viewModel.processing.testIn(this)
 
-            assertThat(googlePayButtonTurbine.awaitItem())
-                .isEqualTo(PaymentSheetViewState.StartProcessing)
+            assertThat(walletsProcessingStateTurbine.awaitItem())
+                .isEqualTo(WalletsProcessingState.Processing)
             assertThat(processingTurbine.awaitItem()).isTrue()
 
             viewModel.onGooglePayResult(
@@ -667,12 +678,140 @@ internal class PaymentSheetViewModelTest {
             )
 
             assertThat(viewModel.contentVisible.value).isTrue()
-            assertThat(googlePayButtonTurbine.awaitItem())
-                .isEqualTo(PaymentSheetViewState.Reset(UserErrorMessage("An internal error occurred.")))
+            assertThat(walletsProcessingStateTurbine.awaitItem())
+                .isEqualTo(WalletsProcessingState.Idle(resolvableString("An internal error occurred.")))
             assertThat(processingTurbine.awaitItem()).isFalse()
 
-            googlePayButtonTurbine.cancel()
+            walletsProcessingStateTurbine.cancel()
             processingTurbine.cancel()
+        }
+    }
+
+    @Test
+    fun `On inline link payment, should process with primary button`() = runTest {
+        val linkConfiguration = LinkConfiguration(
+            stripeIntent = mock {
+                on { linkFundingSources } doReturn listOf(
+                    PaymentMethod.Type.Card.code
+                )
+            },
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
+            flags = mapOf(),
+            merchantName = "Test merchant inc.",
+            merchantCountryCode = "US",
+            passthroughModeEnabled = false,
+            shippingValues = mapOf(),
+        )
+
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = linkConfiguration,
+                loginState = LinkState.LoginState.LoggedOut
+            )
+        )
+
+        turbineScope {
+            val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
+            val buyButtonStateTurbine = viewModel.buyButtonState.testIn(this)
+
+            assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(null)
+            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(
+                PaymentSheetViewState.Reset(null)
+            )
+
+            viewModel.updateSelection(
+                PaymentSelection.New.Card(
+                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    brand = CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                )
+            )
+
+            viewModel.updatePrimaryButtonForLinkSignup(
+                InlineSignupViewState.create(
+                    config = linkConfiguration
+                ).copy(
+                    userInput = UserInput.SignUp(
+                        name = "John Doe",
+                        email = "email@email.com",
+                        phone = "+11234567890",
+                        consentAction = SignUpConsentAction.Checkbox,
+                        country = "CA",
+                    )
+                )
+            )
+
+            viewModel.checkout()
+
+            walletsProcessingStateTurbine.expectNoEvents()
+
+            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(PaymentSheetViewState.StartProcessing)
+
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+            assertThat(buyButtonStateTurbine.awaitItem()).isInstanceOf(
+                PaymentSheetViewState.FinishProcessing::class.java
+            )
+
+            buyButtonStateTurbine.cancel()
+            walletsProcessingStateTurbine.cancel()
+        }
+    }
+
+    @Test
+    fun `On link payment through launcher, should process with wallets processing state`() = runTest {
+        val linkConfiguration = LinkConfiguration(
+            stripeIntent = mock {
+                on { linkFundingSources } doReturn listOf(
+                    PaymentMethod.Type.Card.code
+                )
+            },
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
+            flags = mapOf(),
+            merchantName = "Test merchant inc.",
+            merchantCountryCode = "US",
+            passthroughModeEnabled = false,
+            shippingValues = mapOf(),
+        )
+
+        val viewModel = createViewModel(
+            linkState = LinkState(
+                configuration = linkConfiguration,
+                loginState = LinkState.LoginState.LoggedOut
+            )
+        )
+
+        turbineScope {
+            val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
+            val buyButtonStateTurbine = viewModel.buyButtonState.testIn(this)
+
+            assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(null)
+            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(
+                PaymentSheetViewState.Reset(null)
+            )
+
+            viewModel.linkHandler.launchLink()
+
+            assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(WalletsProcessingState.Processing)
+            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(null)
+
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+            viewModel.linkHandler.onLinkActivityResult(
+                LinkActivityResult.Completed(
+                    paymentMethod = CARD_WITH_NETWORKS_PAYMENT_METHOD
+                )
+            )
+
+            assertThat(walletsProcessingStateTurbine.awaitItem()).isInstanceOf(
+                WalletsProcessingState.Completed::class.java
+            )
+            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(null)
+
+            buyButtonStateTurbine.cancel()
+            walletsProcessingStateTurbine.cancel()
         }
     }
 

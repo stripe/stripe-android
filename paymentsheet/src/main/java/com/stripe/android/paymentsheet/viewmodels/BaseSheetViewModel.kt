@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
@@ -111,10 +112,8 @@ internal abstract class BaseSheetViewModel(
             _supportedPaymentMethodsFlow.tryEmit(value.map { it.code })
         }
 
-    private val _supportedPaymentMethodsFlow =
-        MutableStateFlow<List<PaymentMethodCode>>(emptyList())
-    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> =
-        _supportedPaymentMethodsFlow
+    private val _supportedPaymentMethodsFlow = MutableStateFlow<List<PaymentMethodCode>>(emptyList())
+    val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = _supportedPaymentMethodsFlow
 
     /**
      * The list of saved payment methods for the current customer.
@@ -139,6 +138,7 @@ internal abstract class BaseSheetViewModel(
         )
 
     abstract val walletsState: StateFlow<WalletsState?>
+    abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
 
     internal val headerText: Flow<Int?> by lazy {
         combine(
@@ -261,7 +261,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSelection.New.Card,
             is PaymentSelection.New.USBankAccount,
             is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
-            else -> supportedPaymentMethods.first().code
+            else -> _supportedPaymentMethodsFlow.value.first()
         }
 
     init {

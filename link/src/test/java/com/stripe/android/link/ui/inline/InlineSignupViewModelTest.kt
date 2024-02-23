@@ -464,7 +464,7 @@ class InlineSignupViewModelTest {
         val canada = countryDropdownController.displayItems.indexOfFirst {
             it.contains("Canada")
         }
-        onSelectedCountryIndex(canada)
+        countryDropdownController.onValueChange(canada)
     }
 
     private companion object {

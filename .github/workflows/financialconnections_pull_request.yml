@@ -1,12 +1,6 @@
 name: financial-connections-pr
 on:
   pull_request:
-    paths:
-      - 'financial-connections/**'
-      - 'financial-connections-example/**'
-      - 'stripe-core/**'
-      - 'payments-model/**'
-      - 'dependencies.gradle'
 jobs:
   # Use emerge tools to analyze the example app size
   apk-size-analysis:

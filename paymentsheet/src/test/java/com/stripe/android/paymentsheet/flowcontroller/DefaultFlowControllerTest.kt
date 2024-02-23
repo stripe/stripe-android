@@ -23,6 +23,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -410,7 +411,6 @@ internal class DefaultFlowControllerTest {
 
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
                 isGooglePayReady = false,
@@ -418,6 +418,7 @@ internal class DefaultFlowControllerTest {
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             ),
             statusBarColor = STATUS_BAR_COLOR,
             enableLogging = ENABLE_LOGGING,
@@ -586,13 +587,13 @@ internal class DefaultFlowControllerTest {
             NEW_CARD_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
         )
 
@@ -625,13 +626,13 @@ internal class DefaultFlowControllerTest {
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
         )
 
@@ -667,13 +668,13 @@ internal class DefaultFlowControllerTest {
             paymentSelection,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
         )
 

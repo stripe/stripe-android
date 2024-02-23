@@ -1,11 +1,13 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -17,6 +19,7 @@ internal data class PaymentMethodMetadata(
     val stripeIntent: StripeIntent,
     val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
+    val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
@@ -24,5 +27,19 @@ internal data class PaymentMethodMetadata(
             is PaymentIntent -> stripeIntent.setupFutureUsage != null
             is SetupIntent -> true
         }
+    }
+
+    fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
+        return PaymentMethodRegistry.all.filter {
+            it.isSupported(this)
+        }.filter { paymentMethodDefinition ->
+            sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null
+        }
+    }
+
+    fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod? {
+        val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+        val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
+        return definition.supportedPaymentMethod(this, sharedDataSpec)
     }
 }

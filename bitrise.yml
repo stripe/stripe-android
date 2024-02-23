@@ -334,12 +334,15 @@ workflows:
       - conclude_all
     steps:
       - script@1:
+          timeout: 1200
           inputs:
             - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
       - script@1:
+          timeout: 120
           inputs:
             - content: pip3 install requests_toolbelt requests
       - script@1:
+          timeout: 2400
           inputs:
             - content: python3 scripts/browserstack.py --test --apk paymentsheet-example/build/outputs/apk/debug/paymentsheet-example-debug.apk --espresso paymentsheet-example/build/outputs/apk/androidTest/debug/paymentsheet-example-debug-androidTest.apk
   check-dependencies:

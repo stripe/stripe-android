@@ -94,6 +94,12 @@ internal interface CustomerSheetEventReporter {
         error: Throwable,
     )
 
+    /**
+     * User completed entering their card number for a card
+     * payment method.
+     */
+    fun onCardNumberCompleted()
+
     enum class Screen(val value: String) {
         AddPaymentMethod("add_payment_method"),
         SelectPaymentMethod("select_payment_method"),
