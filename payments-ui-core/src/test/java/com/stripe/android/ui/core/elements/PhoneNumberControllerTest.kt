@@ -1,10 +1,12 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.compose.ui.text.AnnotatedString
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.utils.TestUtils.idleLooper
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -18,26 +20,50 @@ internal class PhoneNumberControllerTest {
     fun `when new country is selected then phoneNumberFormatter is updated`() = runTest {
         val phoneNumberController = PhoneNumberController(
             initiallySelectedCountryCode = "US",
-            overrideCountryCodes = setOf("US", "BR")
+            overrideCountryCodes = setOf("US", "BR"),
+            workContext = UnconfinedTestDispatcher(),
         )
 
-        phoneNumberController.rawFieldValue.test {
-            assertThat(awaitItem()).isEqualTo("+1")
+        turbineScope {
+            val rawFieldValue = phoneNumberController.rawFieldValue.testIn(this)
+            val fieldValue = phoneNumberController.fieldValue.testIn(this)
+            val transformation = phoneNumberController.visualTransformation.testIn(this)
+
+            val usTransformation = transformation.awaitItem()
+
+            assertThat(rawFieldValue.awaitItem()).isEqualTo("+1")
+            assertThat(fieldValue.awaitItem()).isEqualTo("")
 
             phoneNumberController.onValueChange("1234567890")
-            idleLooper()
-            assertThat(awaitItem()).isEqualTo("+11234567890")
 
-            phoneNumberController.onSelectedCountryIndex(1)
-            idleLooper()
-            // Input value remains the same, but now with country code +55
-            assertThat(awaitItem()).isEqualTo("+551234567890")
+            assertThat(rawFieldValue.awaitItem()).isEqualTo("+11234567890")
+
+            val currentFieldValue = fieldValue.awaitItem()
+
+            assertThat(currentFieldValue).isEqualTo("1234567890")
+            assertThat(usTransformation.filter(AnnotatedString(currentFieldValue)).text.text)
+                .isEqualTo("(123) 456-7890")
+
+            phoneNumberController.countryDropdownController.onValueChange(1)
+
+            assertThat(rawFieldValue.awaitItem()).isEqualTo("+551234567890")
+
+            val brTransformation = transformation.awaitItem()
+
+            assertThat(brTransformation.filter(AnnotatedString(currentFieldValue)).text.text)
+                .isEqualTo("12 34567-890")
+
+            rawFieldValue.cancel()
+            fieldValue.cancel()
+            transformation.cancel()
         }
     }
 
     @Test
     fun `when any number was input then isComplete is true`() = runTest {
-        val phoneNumberController = PhoneNumberController()
+        val phoneNumberController = PhoneNumberController(
+            workContext = UnconfinedTestDispatcher(),
+        )
 
         phoneNumberController.isComplete.test {
             assertThat(awaitItem()).isFalse()
@@ -57,6 +83,7 @@ internal class PhoneNumberControllerTest {
         val phoneNumberController = PhoneNumberController(
             showOptionalLabel = true,
             acceptAnyInput = true,
+            workContext = UnconfinedTestDispatcher(),
         )
 
         phoneNumberController.isComplete.test {
@@ -75,7 +102,8 @@ internal class PhoneNumberControllerTest {
     @Test
     fun `when initial number is in E164 format then initial country is set`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-            initialValue = "+491234567890"
+            initialValue = "+491234567890",
+            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("DE")
@@ -86,7 +114,8 @@ internal class PhoneNumberControllerTest {
     fun `when initial country is set then prefix is removed from initial number`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "+441234567890",
-            initiallySelectedCountryCode = "JE"
+            initiallySelectedCountryCode = "JE",
+            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("JE")
@@ -97,7 +126,8 @@ internal class PhoneNumberControllerTest {
     @Config(qualifiers = "fr-rCA")
     fun `when initial number is in E164 format with multiple regions then locale is used`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-            initialValue = "+11234567890"
+            initialValue = "+11234567890",
+            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("CA")
@@ -108,7 +138,8 @@ internal class PhoneNumberControllerTest {
     @Config(qualifiers = "fr-rCA")
     fun `when initial number is not in E164 format then locale is used`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-            initialValue = "1234567890"
+            initialValue = "1234567890",
+            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("CA")
@@ -118,7 +149,8 @@ internal class PhoneNumberControllerTest {
     @Test
     fun `when phone number is less than expected length error is emitted`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
-            initiallySelectedCountryCode = "US"
+            initiallySelectedCountryCode = "US",
+            workContext = UnconfinedTestDispatcher(),
         )
 
         turbineScope {
