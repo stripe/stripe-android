@@ -190,7 +190,9 @@ internal sealed class PhoneNumberFormatter {
         val pattern: String? = null
     ) {
         init {
-            require(pattern == null || pattern.isNotEmpty()) { "Pattern should not be empty. Set it to null if it's missing." }
+            require(pattern == null || pattern.isNotEmpty()) {
+                "Pattern should not be empty. Set it to null if it's missing."
+            }
         }
     }
 
