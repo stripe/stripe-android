@@ -1,0 +1,6 @@
+{
+  "object": "list",
+  "data": [],
+  "has_more": false,
+  "url": "/v1/payment_methods"
+}

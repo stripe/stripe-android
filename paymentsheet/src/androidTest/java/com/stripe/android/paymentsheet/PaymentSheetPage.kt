@@ -40,6 +40,32 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun clickOnLinkCheckbox() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Save your info for secure 1-click checkout with Link")
+        clickViewWithText("Save your info for secure 1-click checkout with Link")
+    }
+
+    fun fillOutLinkEmail(optionalLabel: Boolean = false) {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        val label = if (optionalLabel) "Email (optional)" else "Email"
+
+        waitForText(label)
+        replaceText(label, "email@email.com")
+    }
+
+    fun fillOutLinkPhone() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Phone number")
+        replaceText("Phone number", "+12113526421")
+    }
+
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
