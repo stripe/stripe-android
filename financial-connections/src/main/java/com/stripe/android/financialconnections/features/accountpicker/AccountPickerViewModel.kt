@@ -10,6 +10,8 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsAutoSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsSubmitted
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLinkAccounts
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
@@ -109,23 +111,40 @@ internal class AccountPickerViewModel @Inject constructor(
                 // If account selection has to be skipped, submit all selectable accounts.
                 payload.skipAccountSelection -> submitAccounts(
                     selectedIds = payload.selectableAccounts.map { it.id }.toSet(),
-                    updateLocalCache = false
+                    updateLocalCache = false,
+                    isSkipAccountSelection = true
                 )
                 // the user saw an OAuth account selection screen and selected
                 // just one to send back in a single-account context. treat these as if
                 // we had done account selection, and submit.
                 payload.userSelectedSingleAccountInInstitution -> submitAccounts(
                     selectedIds = setOf(payload.accounts.first().id),
-                    updateLocalCache = true
+                    updateLocalCache = true,
+                    isSkipAccountSelection = true
                 )
 
-                // Auto-select the first selectable account.
-                payload.selectionMode == SelectionMode.Single -> setState {
-                    copy(
-                        selectedIds = setOfNotNull(
-                            payload.selectableAccounts.firstOrNull()?.id
+                // Auto-select the first selectable account and log.
+                payload.selectionMode == SelectionMode.Single -> {
+                    val selectedId = setOfNotNull(payload.selectableAccounts.firstOrNull()?.id)
+                    eventTracker.track(
+                        AccountsAutoSelected(
+                            isSingleAccount = true,
+                            accountIds = selectedId
                         )
                     )
+                    setState { copy(selectedIds = selectedId) }
+                }
+
+                // Auto-select all selectable accounts and log.
+                payload.selectionMode == SelectionMode.Multiple -> {
+                    val selectedIds = payload.selectableAccounts.map { it.id }.toSet()
+                    eventTracker.track(
+                        AccountsAutoSelected(
+                            isSingleAccount = false,
+                            accountIds = selectedIds
+                        )
+                    )
+                    setState { copy(selectedIds = selectedIds) }
                 }
             }
         })
@@ -214,7 +233,11 @@ internal class AccountPickerViewModel @Inject constructor(
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
         withState { state ->
             state.payload()?.let {
-                submitAccounts(state.selectedIds, updateLocalCache = true)
+                submitAccounts(
+                    selectedIds = state.selectedIds,
+                    updateLocalCache = true,
+                    isSkipAccountSelection = false
+                )
             } ?: run {
                 logger.error("account clicked without available payload.")
             }
@@ -223,9 +246,16 @@ internal class AccountPickerViewModel @Inject constructor(
 
     private fun submitAccounts(
         selectedIds: Set<String>,
-        updateLocalCache: Boolean
+        updateLocalCache: Boolean,
+        isSkipAccountSelection: Boolean
     ) {
         suspend {
+            eventTracker.track(
+                AccountsSubmitted(
+                    accountIds = selectedIds,
+                    isSkipAccountSelection = isSkipAccountSelection
+                )
+            )
             val manifest = getOrFetchSync().manifest
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
