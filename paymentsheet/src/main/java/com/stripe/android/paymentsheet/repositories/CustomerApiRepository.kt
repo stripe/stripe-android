@@ -69,9 +69,12 @@ internal class CustomerApiRepository @Inject constructor(
                     requestOptions = ApiRequest.Options(
                         apiKey = customerConfig.ephemeralKeySecret,
                         stripeAccount = lazyPaymentConfig.get().stripeAccountId,
-                    ),
+                    )
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
+                    if (!silentlyFail) {
+                        return@async Result.failure(it)
+                    }
                 }
             }
         }
