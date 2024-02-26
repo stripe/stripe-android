@@ -2,10 +2,39 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.Test
 
 internal class PaymentMethodMetadataTest {
+    @Test
+    fun `hasIntentToSetup returns true for setup_intent`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+        )
+        assertThat(metadata.hasIntentToSetup()).isTrue()
+    }
+
+    @Test
+    fun `hasIntentToSetup returns true for payment_intent with setup_future_usage`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                setupFutureUsage = StripeIntent.Usage.OnSession,
+            ),
+        )
+        assertThat(metadata.hasIntentToSetup()).isTrue()
+    }
+
+    @Test
+    fun `hasIntentToSetup returns false for payment_intent`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+        )
+        assertThat(metadata.hasIntentToSetup()).isFalse()
+    }
+
     @Test
     fun `filterSupportedPaymentMethods removes unsupported paymentMethodTypes`() {
         val metadata = PaymentMethodMetadataFactory.create()
