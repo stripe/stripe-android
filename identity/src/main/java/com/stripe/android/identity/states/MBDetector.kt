@@ -23,7 +23,6 @@ import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.networking.IdentityRepository
-import java.util.Random
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureMBSettings as MBSettings
@@ -98,11 +97,7 @@ internal class MBDetector private constructor(settings: MBSettings) {
 
     private fun Bitmap.toFullRect() = Rect(0, 0, width, height)
 
-    val rand = Random()
     suspend fun analyze(data: AnalyzerInput): DetectorResult = suspendCoroutine { continuation ->
-        if(rand.nextBoolean()) {
-            throw IllegalStateException()
-        }
         val mbInputImage = InputImage.createFromBitmap(
             data.cameraPreviewImage.image,
             ImageRotation.ROTATION_0, // bitmap already rotated
