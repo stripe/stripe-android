@@ -72,9 +72,6 @@ internal class CustomerApiRepository @Inject constructor(
                     )
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
-                    if (!silentlyFail) {
-                        return@async Result.failure(it)
-                    }
                 }
             }
         }
