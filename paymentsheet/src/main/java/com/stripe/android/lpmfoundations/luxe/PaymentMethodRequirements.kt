@@ -316,3 +316,9 @@ internal val WeChatPayRequirement = PaymentMethodRequirements(
     siRequirements = null,
     confirmPMFromCustomer = false,
 )
+
+internal val TwintRequirement = PaymentMethodRequirements(
+    piRequirements = emptySet(),
+    siRequirements = null,
+    confirmPMFromCustomer = false,
+)

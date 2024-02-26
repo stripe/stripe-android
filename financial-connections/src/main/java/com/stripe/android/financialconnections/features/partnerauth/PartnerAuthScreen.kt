@@ -1,5 +1,3 @@
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.runtime.Composable

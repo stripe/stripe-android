@@ -63,9 +63,6 @@
     <ID>NestedBlockDepth:Network.kt$@Throws(IOException::class) private fun downloadFile( url: URL, outputFile: File )</ID>
     <ID>NestedBlockDepth:SSD.kt$internal fun rearrangeOCRArray( locations: Array&lt;FloatArray>, featureMapSizes: OcrFeatureMapSizes, numberOfPriors: Int, locationsPerPrior: Int ): Array&lt;FloatArray></ID>
     <ID>NestedBlockDepth:Yolo.kt$internal fun processYoloLayer( layer: Array&lt;Array&lt;FloatArray>>, anchors: Array&lt;Pair&lt;Int, Int>>, imageSize: Size, numClasses: Int, confidenceThreshold: Float ): List&lt;DetectionBox></ID>
-    <ID>ReturnCount:CardExpiry.kt$internal fun isValidExpiry(day: String?, month: String, year: String): Boolean</ID>
-    <ID>ReturnCount:RequiresMatchingCard.kt$RequiresMatchingCard$fun compareToRequiredCard(pan: String?): CardMatchResult</ID>
-    <ID>ReturnCount:SSD.kt$internal fun determineLayoutAndFilter( detectedBoxes: List&lt;DetectionBox>, verticalOffset: Float ): List&lt;DetectionBox></ID>
     <ID>SwallowedException:Device.kt$t: Throwable</ID>
     <ID>SwallowedException:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
     <ID>SwallowedException:File.kt$t: Throwable</ID>

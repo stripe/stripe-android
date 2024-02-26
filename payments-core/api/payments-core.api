@@ -3789,6 +3789,7 @@ public final class com/stripe/android/model/PaymentMethod$Type : java/lang/Enum,
 	public static final field SepaDebit Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Sofort Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Swish Lcom/stripe/android/model/PaymentMethod$Type;
+	public static final field Twint Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field USBankAccount Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field Upi Lcom/stripe/android/model/PaymentMethod$Type;
 	public static final field WeChatPay Lcom/stripe/android/model/PaymentMethod$Type;

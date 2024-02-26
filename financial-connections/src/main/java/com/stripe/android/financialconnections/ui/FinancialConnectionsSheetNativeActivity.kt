@@ -116,7 +116,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
-    @Suppress("LongMethod")
     @Composable
     fun NavHost(
         initialPane: Pane,

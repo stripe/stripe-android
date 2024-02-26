@@ -1,9 +1,3 @@
-@file:OptIn(
-    ExperimentalMaterialApi::class,
-    ExperimentalComposeUiApi::class
-)
-@file:Suppress("LongMethod", "TooManyFunctions")
-
 package com.stripe.android.financialconnections.features.consent
 
 import androidx.activity.compose.BackHandler
@@ -177,6 +171,7 @@ private fun ConsentMainContent(
             lazyListState = scrollState,
             body = {
                 item {
+                    Spacer(modifier = Modifier.size(8.dp))
                     ConsentLogoHeader(
                         modifier = Modifier.fillMaxWidth(),
                         logos = payload.merchantLogos,

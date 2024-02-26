@@ -6,10 +6,8 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
-import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
@@ -39,11 +37,7 @@ class FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
             LinkPaymentDetails.New(
                 paymentDetails = ConsumerPaymentDetails.Card(
                     id = "pm_123",
-                    expiryYear = 2050,
-                    expiryMonth = 4,
-                    brand = CardBrand.Visa,
                     last4 = "4242",
-                    cvcCheck = CvcCheck.Pass,
                 ),
                 paymentMethodCreateParams = mock(),
                 originalParams = mock(),

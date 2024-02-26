@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Dodaj način plaćanja</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Sačuvaj moje podatke za sigurno plaćanje pomoću 1 klika</string>
+  <string name="stripe_inline_sign_up_header">Spremite svoje podatke za sigurno plaćanje jednim klikom putem Linka</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odjavite se s Linka</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Platite brže kod %s i tisuća drugih trgovaca.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Prisupanjem u Link, prihvaćate <terms>Uvjete</terms> i <privacy>Pravila privatnosti</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Navođenjem svoje adrese e-pošte pristajete na izradu Link računa i spremanje podataka o plaćanju na Link, u skladu s <terms>Uvjetima</terms> i <privacy>Pravilima o privatnosti</privacy> Linka.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Navođenjem svog telefonskog broja pristajete na izradu Link računa i spremanje podataka o plaćanju na Link, u skladu s <terms>Uvjetima</terms> i <privacy>Pravilima o privatnosti</privacy> Linka.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Izmijeni e-poštu</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

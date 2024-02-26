@@ -40,9 +40,7 @@ internal class PollAttachPaymentAccount @Inject constructor(
                     paymentAccount = params,
                     consumerSessionClientSecret = consumerSessionClientSecret
                 )
-            } catch (
-                @Suppress("SwallowedException") e: StripeException
-            ) {
+            } catch (e: StripeException) {
                 throw e.toDomainException(
                     activeInstitution,
                     sync.showManualEntryInErrors()

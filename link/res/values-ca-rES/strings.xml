@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Afegeix un mètode de pagament</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Desa la informació per al pagament segur amb 1 clic</string>
+  <string name="stripe_inline_sign_up_header">Deseu la vostra informació per al pagament segur amb 1 clic amb Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Tanca la sessió a Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Paga més ràpidament a %s i a milers de comerciants.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Quan t\'incorpores a Link, acceptes els <terms>Termes</terms> i la <privacy>Política de privacitat</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[En proporcionar el correu electrònic, accepteu crear un compte de Link i desar la vostra informació de pagament a Link d\'acord amb els <terms>Termes</terms> i <privacy>Política de privadesa</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[En proporcionar el número de telèfon, accepteu crear un compte de Link i desar la vostra informació de pagament a Link d\'acord amb els <terms>Termes</terms> i <privacy>Política de privadesa</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Canvia el correu</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

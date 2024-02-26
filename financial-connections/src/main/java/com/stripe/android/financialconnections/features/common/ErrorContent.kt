@@ -1,5 +1,3 @@
-@file:Suppress("TooManyFunctions")
-
 package com.stripe.android.financialconnections.features.common
 
 import android.os.Build

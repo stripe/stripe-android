@@ -7,11 +7,16 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlin.coroutines.CoroutineContext
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -21,6 +26,7 @@ class PhoneNumberController constructor(
     overrideCountryCodes: Set<String> = emptySet(),
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
+    workContext: CoroutineContext = Dispatchers.Default
 ) : InputController, SectionFieldComposable {
     override val label = flowOf(CoreR.string.stripe_address_label_phone_number)
 
@@ -55,8 +61,14 @@ class PhoneNumberController constructor(
         initiallySelectedCountryCode
     )
 
-    private val phoneNumberFormatter = MutableStateFlow(
+    private val phoneNumberFormatter = countryDropdownController.selectedIndex.map {
         PhoneNumberFormatter.forCountry(
+            countryConfig.countries[it].code.value
+        )
+    }.stateIn(
+        scope = CoroutineScope(workContext),
+        started = SharingStarted.Eagerly,
+        initialValue = PhoneNumberFormatter.forCountry(
             countryConfig.countries[countryDropdownController.selectedIndex.value].code.value
         )
     )
@@ -103,13 +115,6 @@ class PhoneNumberController constructor(
 
     fun getLocalNumber() = _fieldValue.value.removePrefix(phoneNumberFormatter.value.prefix)
 
-    fun onSelectedCountryIndex(index: Int) = countryConfig.countries[index].takeIf {
-        it.code.value != phoneNumberFormatter.value.countryCode
-    }?.let {
-        phoneNumberFormatter.value =
-            PhoneNumberFormatter.forCountry(it.code.value)
-    }
-
     fun onValueChange(displayFormatted: String) {
         _fieldValue.value = phoneNumberFormatter.value.userInputFilter(displayFormatted)
     }
@@ -134,6 +139,7 @@ class PhoneNumberController constructor(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null,
             showOptionalLabel: Boolean = false,
+            workContext: CoroutineContext = Dispatchers.Default,
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
 
@@ -158,12 +164,14 @@ class PhoneNumberController constructor(
                     initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
                     showOptionalLabel = showOptionalLabel,
+                    workContext = workContext,
                 )
             } else {
                 PhoneNumberController(
                     initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode,
                     showOptionalLabel = showOptionalLabel,
+                    workContext = workContext,
                 )
             }
         }

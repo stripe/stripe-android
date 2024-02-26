@@ -1,5 +1,3 @@
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
@@ -8,6 +6,7 @@ import com.airbnb.mvrx.Success
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.Bullet
+import com.stripe.android.financialconnections.model.ConnectedAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -192,22 +191,29 @@ internal class LinkAccountPickerPreviewParameterProvider :
         title = "Goldilocks uses Stripe to link your accounts",
         subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
         body = DataAccessNoticeBody(
-            bullets = listOf(
-                Bullet(
-                    icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                    title = "Account details",
-                    content = "Account number, routing number, account type, account nickname."
-                ),
-                Bullet(
-                    icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-                    title = "Account details",
-                    content = "Account number, routing number, account type, account nickname."
-                ),
-            )
+            bullets = bullets()
         ),
         disclaimer = "Learn more about data access",
-        connectedAccountNotice = "Connected account placeholder",
+        connectedAccountNotice = ConnectedAccessNotice(
+            subtitle = "Connected account placeholder",
+            body = DataAccessNoticeBody(
+                bullets = bullets()
+            )
+        ),
         cta = "OK"
+    )
+
+    private fun bullets() = listOf(
+        Bullet(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+            title = "Account details",
+            content = "Account number, routing number, account type, account nickname."
+        ),
+        Bullet(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+            title = "Account details",
+            content = "Account number, routing number, account type, account nickname."
+        ),
     )
 
     private fun accessibleCallout() = MerchantDataAccessModel(

@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
@@ -31,6 +33,8 @@ import com.stripe.android.ui.core.FormUI
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
 import kotlinx.coroutines.flow.flowOf
 import javax.inject.Provider
@@ -254,26 +258,34 @@ internal fun AddPaymentMethodWithPaymentElement(
                 .padding(horizontal = horizontalPadding)
         )
 
+        val eventReporter = remember(viewActionHandler) {
+            DefaultCardNumberCompletedEventReporter(viewActionHandler)
+        }
+
         formViewModelSubComponentBuilderProvider?.let {
-            PaymentElement(
-                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
-                enabled = viewState.enabled,
-                supportedPaymentMethods = viewState.supportedPaymentMethods,
-                selectedItem = viewState.selectedPaymentMethod,
-                linkSignupMode = null,
-                linkConfigurationCoordinator = null,
-                showCheckboxFlow = flowOf(false),
-                onItemSelectedListener = {
-                    viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
-                },
-                onLinkSignupStateChanged = { _, _ -> },
-                formArguments = viewState.formArguments,
-                usBankAccountFormArguments = viewState.usBankAccountFormArguments,
-                onFormFieldValuesChanged = {
-                    // This only gets emitted if form field values are complete
-                    viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
-                }
-            )
+            CompositionLocalProvider(
+                LocalCardNumberCompletedEventReporter provides eventReporter
+            ) {
+                PaymentElement(
+                    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                    enabled = viewState.enabled,
+                    supportedPaymentMethods = viewState.supportedPaymentMethods,
+                    selectedItem = viewState.selectedPaymentMethod,
+                    linkSignupMode = null,
+                    linkConfigurationCoordinator = null,
+                    showCheckboxFlow = flowOf(false),
+                    onItemSelectedListener = {
+                        viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
+                    },
+                    onLinkSignupStateChanged = { _, _ -> },
+                    formArguments = viewState.formArguments,
+                    usBankAccountFormArguments = viewState.usBankAccountFormArguments,
+                    onFormFieldValuesChanged = {
+                        // This only gets emitted if form field values are complete
+                        viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
+                    }
+                )
+            }
         }
 
         AnimatedVisibility(visible = viewState.errorMessage != null) {
@@ -339,5 +351,13 @@ private fun EditPaymentMethod(
             interactor = viewState.editPaymentMethodInteractor,
             modifier = modifier,
         )
+    }
+}
+
+private class DefaultCardNumberCompletedEventReporter(
+    private val viewActionHandler: (CustomerSheetViewAction) -> Unit
+) : CardNumberCompletedEventReporter {
+    override fun onCardNumberCompleted() {
+        viewActionHandler.invoke(CustomerSheetViewAction.OnCardNumberInputCompleted)
     }
 }

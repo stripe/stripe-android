@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Aggiungi una modalità di pagamento</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Salva i miei dati per pagamenti sicuri con un clic</string>
+  <string name="stripe_inline_sign_up_header">Salva i tuoi dati per pagamenti sicuri con un clic con Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Esci da Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Paga più velocemente con %s e migliaia di esercenti.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Creando un account Link, accetti i <terms>Termini</terms> e l\'<privacy>Informativa sulla privacy</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Fornendo il tuo indirizzo email, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link </privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Fornendo il tuo numero di telefono, accetti di creare un account Link e salvare i tuoi dati di pagamento su Link conformemente ai <terms>Termini</terms> e all\'<privacy>Informativa sulla privacy di Link</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Cambia email</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

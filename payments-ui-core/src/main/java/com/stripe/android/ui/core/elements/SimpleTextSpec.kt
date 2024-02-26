@@ -7,6 +7,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -54,6 +55,7 @@ enum class KeyboardType {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
+@Parcelize
 data class SimpleTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec,

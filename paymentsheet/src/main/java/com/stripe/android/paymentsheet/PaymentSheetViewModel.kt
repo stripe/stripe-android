@@ -18,6 +18,7 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -56,10 +57,10 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -75,7 +76,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -153,16 +153,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-    val googlePayButtonState: StateFlow<PaymentSheetViewState?> = viewState.filter {
-        checkoutIdentifier == CheckoutIdentifier.SheetTopGooglePay
-    }.stateIn(
-        scope = CoroutineScope(workContext),
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
-
-    val buyButtonState: Flow<PaymentSheetViewState?> = viewState.filter {
-        checkoutIdentifier == CheckoutIdentifier.SheetBottomBuy
+    val buyButtonState: Flow<PaymentSheetViewState?> = viewState.map { viewState ->
+        mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetBottomBuy)
     }
 
     internal val isProcessingPaymentIntent
@@ -232,16 +224,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         linkHandler.isLinkEnabled,
         linkEmailFlow,
         googlePayState,
-        googlePayButtonState,
         buttonsEnabled,
         supportedPaymentMethodsFlow,
         backStack,
-    ) { isLinkAvailable, linkEmail, googlePayState, googlePayButtonState, buttonsEnabled, paymentMethodTypes, stack ->
+    ) { isLinkAvailable, linkEmail, googlePayState, buttonsEnabled, paymentMethodTypes, stack ->
         WalletsState.create(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
             googlePayState = googlePayState,
-            googlePayButtonState = googlePayButtonState,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = googlePayLauncherConfig,
@@ -252,6 +242,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             onLinkPressed = linkHandler::launchLink,
         )
     }
+
+    override val walletsProcessingState: StateFlow<WalletsProcessingState?> = viewState.map { viewState ->
+        mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetTopWallet)
+    }.map { viewState ->
+        when (viewState) {
+            null -> null
+            is PaymentSheetViewState.Reset -> WalletsProcessingState.Idle(
+                error = viewState.errorMessage?.message?.let { message ->
+                    resolvableString(message)
+                }
+            )
+            is PaymentSheetViewState.StartProcessing -> WalletsProcessingState.Processing
+            is PaymentSheetViewState.FinishProcessing -> WalletsProcessingState.Completed(viewState.onComplete)
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
@@ -290,7 +299,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         walletType = PaymentSelection.Saved.WalletType.Link,
                     )
                 )
-                checkout()
+                checkout(selection.value, CheckoutIdentifier.SheetTopWallet)
             }
             is LinkHandler.ProcessingState.CompletedWithPaymentResult -> {
                 onPaymentResult(processingState.result)
@@ -299,7 +308,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 onError(processingState.message)
             }
             LinkHandler.ProcessingState.Launched -> {
-                startProcessing(CheckoutIdentifier.SheetBottomBuy)
+                startProcessing(CheckoutIdentifier.SheetTopWallet)
             }
             is LinkHandler.ProcessingState.PaymentDetailsCollected -> {
                 processingState.paymentSelection?.let {
@@ -313,10 +322,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
             LinkHandler.ProcessingState.Ready -> {
-                updatePrimaryButtonState(PrimaryButton.State.Ready)
+                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
+                viewState.value = PaymentSheetViewState.Reset()
             }
             LinkHandler.ProcessingState.Started -> {
-                updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+                this.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
+                viewState.value = PaymentSheetViewState.StartProcessing
             }
             LinkHandler.ProcessingState.CompleteWithoutLink -> {
                 checkout()
@@ -342,7 +353,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun handlePaymentSheetStateLoadFailure(error: Throwable) {
-        setStripeIntent(null)
+        setPaymentMethodMetadata(null)
         onFatal(error)
     }
 
@@ -390,7 +401,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             GooglePayState.NotAvailable
         }
 
-        setStripeIntent(state.stripeIntent)
+        setPaymentMethodMetadata(state.paymentMethodMetadata)
 
         val linkState = state.linkState
 
@@ -425,11 +436,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun startProcessing(checkoutIdentifier: CheckoutIdentifier) {
-        if (this.checkoutIdentifier != checkoutIdentifier) {
-            // Clear out any previous errors before setting the new button to get updates.
-            viewState.value = PaymentSheetViewState.Reset()
-        }
-
         this.checkoutIdentifier = checkoutIdentifier
         savedStateHandle[SAVE_PROCESSING] = true
         viewState.value = PaymentSheetViewState.StartProcessing
@@ -442,7 +448,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     fun checkoutWithGooglePay() {
         setContentVisible(false)
-        checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopGooglePay)
+        checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
     }
 
     private fun checkout(
@@ -822,6 +828,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         return stripeIntent.filterNotNull().first()
     }
 
+    private fun mapViewStateToCheckoutIdentifier(
+        viewState: PaymentSheetViewState?,
+        checkoutIdentifier: CheckoutIdentifier
+    ): PaymentSheetViewState? {
+        return if (this.checkoutIdentifier != checkoutIdentifier) {
+            null
+        } else {
+            viewState
+        }
+    }
+
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentSheetContractV2.Args,
     ) : ViewModelProvider.Factory {
@@ -849,7 +866,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
      * the observables of [viewState] to get state events related to it.
      */
     internal enum class CheckoutIdentifier {
-        SheetTopGooglePay,
+        SheetTopWallet,
         SheetBottomBuy,
         None
     }

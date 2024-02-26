@@ -24,7 +24,6 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
@@ -124,7 +123,6 @@ internal class ManualEntryViewModel @Inject constructor(
         }
     }
 
-    @Suppress("MagicNumber")
     fun onSubmit() {
         suspend {
             val state = awaitState()

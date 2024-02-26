@@ -136,7 +136,6 @@ private fun SharedPartnerAuthContent(
 }
 
 @Composable
-@Suppress("MagicNumber")
 private fun SharedPartnerLoading(inModal: Boolean) {
     LoadingShimmerEffect { shimmerBrush ->
         Column(
@@ -287,7 +286,6 @@ private fun LoadedContent(
 }
 
 @Composable
-@Suppress("LongMethod")
 private fun PrePaneContent(
     showInModal: Boolean,
     content: OauthPrepane,

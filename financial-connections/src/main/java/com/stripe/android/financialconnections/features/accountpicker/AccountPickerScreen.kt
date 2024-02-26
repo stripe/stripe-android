@@ -1,5 +1,3 @@
-@file:Suppress("TooManyFunctions", "LongMethod")
-
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.activity.compose.BackHandler
@@ -279,7 +277,6 @@ private fun LazyListScope.loadedContent(
     }
 }
 
-@Suppress("MagicNumber")
 private fun LazyListScope.loadingContent() {
     item {
         Text(

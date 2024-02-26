@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:filename")
-
 package com.stripe.android.financialconnections.ui.components
 
 import androidx.activity.OnBackPressedDispatcher

@@ -12,6 +12,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -32,13 +33,13 @@ import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
-import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.toPaymentSelection
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
@@ -111,10 +112,8 @@ internal abstract class BaseSheetViewModel(
             _supportedPaymentMethodsFlow.tryEmit(value.map { it.code })
         }
 
-    private val _supportedPaymentMethodsFlow =
-        MutableStateFlow<List<PaymentMethodCode>>(emptyList())
-    protected val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> =
-        _supportedPaymentMethodsFlow
+    private val _supportedPaymentMethodsFlow = MutableStateFlow<List<PaymentMethodCode>>(emptyList())
+    val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = _supportedPaymentMethodsFlow
 
     /**
      * The list of saved payment methods for the current customer.
@@ -139,6 +138,7 @@ internal abstract class BaseSheetViewModel(
         )
 
     abstract val walletsState: StateFlow<WalletsState?>
+    abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
 
     internal val headerText: Flow<Int?> by lazy {
         combine(
@@ -261,7 +261,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSelection.New.Card,
             is PaymentSelection.New.USBankAccount,
             is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
-            else -> supportedPaymentMethods.first().code
+            else -> _supportedPaymentMethodsFlow.value.first()
         }
 
     init {
@@ -349,9 +349,12 @@ internal abstract class BaseSheetViewModel(
         eventReporter.onPressConfirmButton(selection.value)
     }
 
-    protected fun setStripeIntent(stripeIntent: StripeIntent?) {
+    protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
+        val stripeIntent = paymentMethodMetadata?.stripeIntent
         _stripeIntent.value = stripeIntent
-        supportedPaymentMethods = getPMsToAdd(stripeIntent, config, lpmRepository)
+        supportedPaymentMethods = paymentMethodMetadata?.supportedPaymentMethodDefinitions()?.mapNotNull {
+            paymentMethodMetadata.supportedPaymentMethodForCode(it.type.code)
+        } ?: emptyList()
 
         if (stripeIntent is PaymentIntent) {
             _amount.value = Amount(

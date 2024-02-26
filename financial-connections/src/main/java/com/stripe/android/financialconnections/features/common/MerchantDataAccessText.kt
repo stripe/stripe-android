@@ -1,5 +1,3 @@
-@file:Suppress("TooManyFunctions", "LongMethod")
-
 package com.stripe.android.financialconnections.features.common
 
 import androidx.compose.foundation.layout.Arrangement

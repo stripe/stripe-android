@@ -11,6 +11,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -27,6 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.robolectric.annotation.Config
 import java.util.Stack
 
@@ -209,15 +211,32 @@ internal class CustomerSheetActivityTest {
         }
     }
 
+    @Test
+    fun `When card number is completed, should execute event`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        runActivityScenario(
+            viewState = createAddPaymentMethodViewState(),
+            eventReporter = eventReporter,
+        ) {
+            page.waitForText("Card number")
+            page.inputText("Card number", "4242424242424242")
+
+            verify(eventReporter).onCardNumberCompleted()
+        }
+    }
+
     private fun activityScenario(
         viewState: CustomerSheetViewState,
         savedPaymentSelection: PaymentSelection?,
+        eventReporter: CustomerSheetEventReporter = mock(),
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = createViewModel(
             initialBackStack = Stack<CustomerSheetViewState>().apply {
                 push(viewState)
             },
             savedPaymentSelection = savedPaymentSelection,
+            eventReporter = eventReporter
         )
 
         return injectableActivityScenario {
@@ -232,11 +251,13 @@ internal class CustomerSheetActivityTest {
             isLiveMode = false,
         ),
         savedPaymentSelection: PaymentSelection? = null,
+        eventReporter: CustomerSheetEventReporter = mock(),
         testBlock: CustomerSheetTestData.() -> Unit,
     ) {
         activityScenario(
             viewState = viewState,
             savedPaymentSelection = savedPaymentSelection,
+            eventReporter = eventReporter,
         )
             .launchForResult(intent)
             .use { injectableActivityScenario ->

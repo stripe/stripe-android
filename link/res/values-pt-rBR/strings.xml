@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Adicionar forma de pagamento</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Salvar meus dados para um checkout seguro com 1 clique</string>
+  <string name="stripe_inline_sign_up_header">Salve seus dados para fazer checkout seguro em 1 clique com o Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Sair do Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Pague mais rápido em %s e milhares de estabelecimentos comerciais.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Ao entrar no Link, você concorda com os <terms>Termos</terms> e <privacy>Política de Privacidade</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Ao informar seu e-mail, você concorda em criar uma conta do Link e salvar seus dados de pagamento no Link, segundo os <terms>Termos</terms> e a <privacy>Política de Privacidade do Link</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Ao informar seu número de telefone, você concorda em criar uma conta do Link e salvar seus dados de pagamento no Link, segundo os <terms>Termos</terms> e a <privacy>Política de Privacidade do Link</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Alterar e-mail</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

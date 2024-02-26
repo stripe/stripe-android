@@ -38,6 +38,8 @@ internal class ElementsSessionJsonParser(
         )
         val linkPassthroughModeEnabled = json.optJSONObject(FIELD_LINK_SETTINGS)
             ?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
+        val disableLinkSignup = json.optJSONObject(FIELD_LINK_SETTINGS)
+            ?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
         val linkFlags = json.optJSONObject(FIELD_LINK_SETTINGS)?.let { linkSettingsJson ->
             parseLinkFlags(linkSettingsJson)
         } ?: emptyMap()
@@ -66,6 +68,7 @@ internal class ElementsSessionJsonParser(
                     linkFundingSources = jsonArrayToList(linkFundingSources),
                     linkPassthroughModeEnabled = linkPassthroughModeEnabled,
                     linkFlags = linkFlags,
+                    disableLinkSignup = disableLinkSignup,
                 ),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
@@ -165,6 +168,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
+        private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"

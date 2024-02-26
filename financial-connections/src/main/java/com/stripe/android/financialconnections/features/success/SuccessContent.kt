@@ -255,7 +255,6 @@ private fun SuccessFooter(
     group = "Success",
     name = "Loading"
 )
-@Suppress("LongMethod")
 @Composable
 internal fun SuccessScreenPreview(
     @PreviewParameter(SuccessPreviewParameterProvider::class) state: SuccessState
@@ -275,7 +274,6 @@ internal fun SuccessScreenPreview(
     group = "Success",
     name = "Animation completed"
 )
-@Suppress("LongMethod")
 @Composable
 internal fun SuccessScreenAnimationCompletedPreview(
     @PreviewParameter(SuccessPreviewParameterProvider::class) state: SuccessState

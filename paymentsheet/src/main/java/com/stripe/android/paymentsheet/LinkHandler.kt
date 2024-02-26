@@ -152,9 +152,7 @@ internal class LinkHandler @Inject constructor(
                                 )
                             },
                             onFailure = {
-                                _processingState.emit(ProcessingState.Error(it.localizedMessage))
-                                savedStateHandle[SAVE_PROCESSING] = false
-                                _processingState.emit(ProcessingState.Ready)
+                                _processingState.emit(ProcessingState.CompleteWithoutLink)
                             }
                         )
                     } ?: run {

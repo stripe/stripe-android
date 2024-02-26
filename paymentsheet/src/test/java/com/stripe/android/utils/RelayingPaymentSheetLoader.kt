@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -19,7 +20,6 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
         enqueue(
             Result.success(
                 PaymentSheetState.Full(
-                    stripeIntent = stripeIntent,
                     customerPaymentMethods = emptyList(),
                     config = PaymentSheet.Configuration("Example"),
                     isGooglePayReady = false,
@@ -27,6 +27,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
                     linkState = null,
                     isEligibleForCardBrandChoice = false,
                     validationError = validationError,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent),
                 ),
             )
         )

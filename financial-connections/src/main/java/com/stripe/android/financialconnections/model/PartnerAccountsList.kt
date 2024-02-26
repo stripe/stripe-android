@@ -43,7 +43,6 @@ internal data class PartnerAccountsList(
  */
 @Serializable
 @Parcelize
-@Suppress("ConstructorParameterNaming")
 internal data class PartnerAccount(
 
     @SerialName(value = "authorization") @Required val authorization: String,

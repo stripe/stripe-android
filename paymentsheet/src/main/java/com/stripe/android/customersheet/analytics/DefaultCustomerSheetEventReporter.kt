@@ -161,6 +161,10 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         )
     }
 
+    override fun onCardNumberCompleted() {
+        fireEvent(CustomerSheetEvent.CardNumberCompleted())
+    }
+
     private fun fireEvent(event: CustomerSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

@@ -15,7 +15,9 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = true
 
-    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+    override fun requirementsToBeUsedAsNewPaymentMethod(
+        hasIntentToSetup: Boolean
+    ): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )
 

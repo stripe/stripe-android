@@ -5,6 +5,7 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
+@Suppress("TooManyFunctions")
 class CheckoutRequest private constructor(
     @SerialName("initialization")
     val initialization: String?,
@@ -24,6 +25,8 @@ class CheckoutRequest private constructor(
     val merchantCountryCode: String?,
     @SerialName("supported_payment_methods")
     val supportedPaymentMethods: List<String>?,
+    @SerialName("payment_method_configuration")
+    val paymentMethodConfigurationId: String?,
 ) {
     class Builder {
         private var initialization: String? = null
@@ -35,6 +38,7 @@ class CheckoutRequest private constructor(
         private var useLink: Boolean? = null
         private var merchantCountryCode: String? = null
         private var supportedPaymentMethods: List<String>? = null
+        private var paymentMethodConfigurationId: String? = null
 
         fun initialization(initialization: String?) = apply {
             this.initialization = initialization
@@ -72,6 +76,10 @@ class CheckoutRequest private constructor(
             this.supportedPaymentMethods = supportedPaymentMethods
         }
 
+        fun paymentMethodConfigurationId(paymentMethodConfigurationId: String?) = apply {
+            this.paymentMethodConfigurationId = paymentMethodConfigurationId
+        }
+
         fun build(): CheckoutRequest {
             return CheckoutRequest(
                 initialization = initialization,
@@ -83,6 +91,7 @@ class CheckoutRequest private constructor(
                 useLink = useLink,
                 merchantCountryCode = merchantCountryCode,
                 supportedPaymentMethods = supportedPaymentMethods,
+                paymentMethodConfigurationId = paymentMethodConfigurationId,
             )
         }
     }

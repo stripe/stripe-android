@@ -7,6 +7,7 @@ import android.view.Window
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.Colors
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleTheme
@@ -18,6 +19,7 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.LineHeightStyle
@@ -64,76 +66,76 @@ private val Typography = FinancialConnectionsTypography(
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     headingXLargeSubdued = TextStyle(
         fontSize = 28.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.38.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     headingLarge = TextStyle(
         fontSize = 24.sp,
         lineHeight = 32.sp,
         letterSpacing = 0.30.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     headingMedium = TextStyle(
         fontSize = 20.sp,
         lineHeight = 28.sp,
         letterSpacing = 0.30.sp,
         fontWeight = FontWeight.W700,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     bodyMediumEmphasized = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W600,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     bodyMedium = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     bodySmall = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     labelLargeEmphasized = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W600,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     labelLarge = TextStyle(
         fontSize = 16.sp,
         lineHeight = 24.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     labelMediumEmphasized = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W600,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     labelMedium = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
     labelSmall = TextStyle(
         fontSize = 12.sp,
         lineHeight = 16.sp,
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
-    ),
+    ).toCompat(),
 )
 
 private val TextSelectionColors = TextSelectionColors(
@@ -182,6 +184,7 @@ internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
             content = {
                 CompositionLocalProvider(
                     LocalTextSelectionColors provides TextSelectionColors,
+                    LocalTextStyle provides LocalTextStyle.current.toCompat(useDefaultLineHeight = true),
                     LocalRippleTheme provides FinancialConnectionsRippleTheme
                 ) {
                     content()
@@ -220,6 +223,18 @@ internal object FinancialConnectionsTheme {
     val colors
         @Composable
         get() = LocalColors.current
+}
+
+private fun TextStyle.toCompat(useDefaultLineHeight: Boolean = false): TextStyle {
+    return copy(
+        lineHeight = if (useDefaultLineHeight) {
+            TextStyle.Default.lineHeight
+        } else {
+            lineHeight
+        },
+        lineHeightStyle = TextStyle.Default.lineHeightStyle,
+        platformStyle = PlatformTextStyle(includeFontPadding = true),
+    )
 }
 
 /**
