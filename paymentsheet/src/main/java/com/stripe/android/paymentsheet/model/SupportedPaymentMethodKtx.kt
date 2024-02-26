@@ -7,11 +7,8 @@ import com.stripe.android.lpmfoundations.luxe.SIRequirement
 import com.stripe.android.lpmfoundations.luxe.ShippingAddress
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.LayoutFormDescriptor
 
@@ -197,24 +194,4 @@ internal fun getSupportedSavedCustomerPMs(
 }?.filter { paymentMethod ->
     paymentMethod.supportsCustomerSavedPM() &&
         paymentMethod.getSpecWithFullfilledRequirements(stripeIntent, config) != null
-} ?: emptyList()
-
-internal fun getPMsToAdd(
-    stripeIntent: StripeIntent?,
-    config: PaymentSheet.Configuration,
-    lpmRepository: LpmRepository,
-    isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
-) = stripeIntent?.paymentMethodTypes?.mapNotNull {
-    lpmRepository.fromCode(it)
-}?.filter { supportedPaymentMethod ->
-    supportedPaymentMethod.getSpecWithFullfilledRequirements(
-        stripeIntent,
-        config
-    ) != null
-}?.filterNot { supportedPaymentMethod ->
-    stripeIntent.isLiveMode &&
-        stripeIntent.unactivatedPaymentMethods.contains(supportedPaymentMethod.code)
-}?.filterNot { supportedPaymentMethod ->
-    !isFinancialConnectionsAvailable() &&
-        supportedPaymentMethod.code == PaymentMethod.Type.USBankAccount.code
 } ?: emptyList()
