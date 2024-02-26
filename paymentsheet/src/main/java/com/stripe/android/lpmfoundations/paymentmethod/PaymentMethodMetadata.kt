@@ -35,6 +35,9 @@ internal data class PaymentMethodMetadata(
             PaymentMethodRegistry.definitionsByCode[it]
         }.filter {
             it.isSupported(this)
+        }.filterNot {
+            stripeIntent.isLiveMode &&
+                stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
             sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null
         }

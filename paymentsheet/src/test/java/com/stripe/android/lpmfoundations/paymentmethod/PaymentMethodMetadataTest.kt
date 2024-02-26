@@ -39,4 +39,35 @@ internal class PaymentMethodMetadataTest {
         assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
         assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
     }
+
+    @Test
+    fun `filterSupportedPaymentMethods filters unactivated payment methods in live mode`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+                unactivatedPaymentMethods = listOf("klarna"),
+                isLiveMode = true,
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
+        )
+        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        assertThat(supportedPaymentMethods).hasSize(1)
+        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
+    }
+
+    @Test
+    fun `filterSupportedPaymentMethods does not filter unactivated payment methods in test mode`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna"),
+                unactivatedPaymentMethods = listOf("klarna"),
+                isLiveMode = false,
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
+        )
+        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        assertThat(supportedPaymentMethods).hasSize(2)
+        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
+    }
 }
