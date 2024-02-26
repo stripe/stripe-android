@@ -96,7 +96,7 @@ open class FileUploadRequest(
     protected companion object {
         const val LINE_BREAK = "\r\n"
 
-        private const val HOST = "https://aywang-upload.tunnel.stripe.me/v1/files"
+        private const val HOST = "https://files.stripe.com/v1/files"
 
         private fun createBoundary(): String {
             return Random.Default.nextLong(0, Long.MAX_VALUE).toString()
