@@ -7,7 +7,9 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
+import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.composite
 import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -477,6 +479,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation()
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -545,6 +548,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation())
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -598,11 +602,10 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation())
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
-
-        composeTestRule.waitForIdle()
 
         page.clickPrimaryButton()
     }
@@ -638,6 +641,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation())
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -711,6 +715,7 @@ internal class PaymentSheetTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation()
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -723,5 +728,22 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
+    }
+
+    private fun linkInformation(): RequestMatcher {
+        return composite(
+            bodyPart(
+                name = "payment_method_data%5Blink%5D%5Bcard%5D%5Bcvc%5D",
+                value = "123"
+            ),
+            bodyPart(
+                name = "payment_method_data%5Blink%5D%5Bpayment_details_id%5D",
+                value = "QAAAKJ6"
+            ),
+            bodyPart(
+                name = "payment_method_data%5Blink%5D%5Bcredentials%5D%5Bconsumer_session_client_secret%5D",
+                value = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND"
+            ),
+        )
     }
 }
