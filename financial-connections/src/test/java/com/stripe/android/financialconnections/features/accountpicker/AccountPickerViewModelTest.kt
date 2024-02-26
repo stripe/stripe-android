@@ -147,6 +147,48 @@ internal class AccountPickerViewModelTest {
         withState(viewModel) { state ->
             assertThat(state.selectedIds).isEqualTo(setOf("selectable"))
         }
+
+        eventTracker.assertContainsEvent(
+            "linked_accounts.account_picker.accounts_auto_selected",
+            mapOf(
+                "account_ids" to "selectable",
+                "is_single_account" to "true",
+            )
+        )
+    }
+
+    @Test
+    fun `init - if not singleAccount, pre-selects first available account`() = runTest {
+        givenManifestReturns(
+            sessionManifest().copy(
+                singleAccount = false,
+                activeAuthSession = authorizationSession()
+            )
+        )
+
+        givenPollAccountsReturns(
+            partnerAccountList().copy(
+                data = listOf(
+                    partnerAccount().copy(id = "unelectable", _allowSelection = false),
+                    partnerAccount().copy(id = "selectable_1"),
+                    partnerAccount().copy(id = "selectable_2")
+                )
+            )
+        )
+
+        val viewModel = buildViewModel(AccountPickerState())
+
+        withState(viewModel) { state ->
+            assertThat(state.selectedIds).isEqualTo(setOf("selectable_1", "selectable_2"))
+        }
+
+        eventTracker.assertContainsEvent(
+            "linked_accounts.account_picker.accounts_auto_selected",
+            mapOf(
+                "account_ids" to "selectable_1,selectable_2",
+                "is_single_account" to "false",
+            )
+        )
     }
 
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
