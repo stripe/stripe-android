@@ -1,16 +1,18 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.ModalBottomSheetState
@@ -28,6 +30,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
@@ -67,14 +70,18 @@ import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlin.time.Duration.Companion.milliseconds
+
+private val ScrollToPhoneNumberFieldDelay = 300.milliseconds
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
@@ -154,11 +161,11 @@ private fun NetworkingLinkSignupMainContent(
     onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    val lazyListState = rememberLazyListState()
+    val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                elevation = lazyListState.elevation,
+                elevation = scrollState.elevation,
                 showBack = false,
                 onCloseClick = onCloseClick,
             )
@@ -167,7 +174,7 @@ private fun NetworkingLinkSignupMainContent(
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
-                lazyListState = lazyListState,
+                scrollState = scrollState,
                 validForm = state.valid(),
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
@@ -188,7 +195,7 @@ private fun NetworkingLinkSignupMainContent(
 
 @Composable
 private fun NetworkingLinkSignupLoaded(
-    lazyListState: LazyListState,
+    scrollState: ScrollState,
     validForm: Boolean,
     payload: Payload,
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
@@ -198,31 +205,42 @@ private fun NetworkingLinkSignupLoaded(
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
 ) {
-    LazyLayout(
-        lazyListState = lazyListState,
+    val phoneNumberFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(showFullForm) {
+        if (showFullForm) {
+            delay(ScrollToPhoneNumberFieldDelay)
+            scrollState.animateScrollBy(Float.MAX_VALUE, animationSpec = tween())
+            phoneNumberFocusRequester.requestFocus()
+        }
+    }
+
+    Layout(
+        scrollState = scrollState,
         body = {
-            item {
-                Title(payload.content.title)
-                Spacer(modifier = Modifier.size(24.dp))
-            }
-            items(payload.content.body.bullets) {
+            Title(payload.content.title)
+            Spacer(modifier = Modifier.size(24.dp))
+
+            for (bullet in payload.content.body.bullets) {
                 ListItem(
-                    bullet = BulletUI.from(it),
+                    bullet = BulletUI.from(bullet),
                     onClickableTextClick = onClickableTextClick
                 )
                 Spacer(modifier = Modifier.size(16.dp))
             }
-            item {
-                EmailSection(
-                    showFullForm = showFullForm,
-                    loading = lookupAccountSync is Loading,
-                    emailController = payload.emailController,
-                    enabled = true,
-                )
-            }
 
-            if (showFullForm) {
-                item { PhoneNumberSection(payload = payload) }
+            EmailSection(
+                showFullForm = showFullForm,
+                loading = lookupAccountSync is Loading,
+                emailController = payload.emailController,
+                enabled = true,
+            )
+
+            AnimatedVisibility(showFullForm) {
+                PhoneNumberSection(
+                    payload = payload,
+                    focusRequester = phoneNumberFocusRequester,
+                )
             }
         },
         footer = {
@@ -283,7 +301,8 @@ private fun NetworkingLinkSignupFooter(
 
 @Composable
 private fun PhoneNumberSection(
-    payload: Payload
+    payload: Payload,
+    focusRequester: FocusRequester,
 ) {
     var focused by remember { mutableStateOf(false) }
     Column {
@@ -303,9 +322,9 @@ private fun PhoneNumberSection(
                     )
                 },
                 isSelected = focused,
-                requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
                 phoneNumberController = payload.phoneController,
                 imeAction = ImeAction.Default,
+                focusRequester = focusRequester,
                 enabled = true,
             )
         }
