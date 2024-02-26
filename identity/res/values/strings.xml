@@ -4,6 +4,8 @@
   <string name="stripe_accepted_forms_of_id">Accepted forms of ID</string>
   <!-- title for accepted types of ids prefix -->
   <string name="stripe_accepted_forms_of_id_include">Accepted forms of ID include</string>
+  <!-- Instructional text when user needs to align the edge with camera -->
+  <string name="stripe_align_document">Keep ID level</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">App Settings</string>
   <!-- Description of back of driver's license image -->
@@ -35,6 +37,8 @@
   <string name="stripe_could_not_capture_body2">You can either try again or upload an image from your device.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Could not capture image</string>
+  <!-- Instructional text when environment is too bright -->
+  <string name="stripe_decrease_lighting">Details not visible</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">camera icon</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -119,10 +123,14 @@
   <string name="stripe_im_ready">I\'m ready</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">The ID number you entered is incomplete.</string>
+  <!-- Instructional text when environment is too dark -->
+  <string name="stripe_increase_lighting">Move to a well-lit area</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
   <string name="stripe_individual_cpf">Individual CPF</string>
   <!-- Message for invalid Date of birth field -->
   <string name="stripe_invalid_dob_error">Date of birth does not look valid</string>
+  <!-- Instructional text when user needs remove anything blocking the document -->
+  <string name="stripe_keep_fully_visible">Details not visible</string>
   <!-- Continue button text -->
   <string name="stripe_kontinue">continue</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
@@ -131,6 +139,10 @@
   <string name="stripe_last_name">Last</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Loading</string>
+  <!-- Instructional text when camera is too far from a document -->
+  <string name="stripe_move_closer">Move ID closer</string>
+  <!-- Instructional text when camera is too close to a document -->
+  <string name="stripe_move_farther">Move ID farther back</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC or FIN</string>
   <!-- No comment provided by engineer. -->
@@ -141,6 +153,8 @@
   <string name="stripe_passport_selected">Passport is selected</string>
   <!-- Section title for collection phone number -->
   <string name="stripe_phone_number">Phone Number</string>
+  <!-- Instructional text when there is no document in camera frame -->
+  <string name="stripe_point_camera_to_document">No document detected</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Flip your driver\'s license over to the other side</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -153,8 +167,14 @@
   <string name="stripe_position_passport">Position your passport in the center of the frame</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Position your face in the center of the frame.</string>
+  <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">ID not in focus</string>
+  <!-- Instructional text when the document has too much glare -->
+  <string name="stripe_reduce_glare">Details not visible</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Retake Photos</string>
+  <!-- Instructional text when user needs to rotate the document to align with camera -->
+  <string name="stripe_rotate_document">Kee ID level</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="stripe_scanned">Scanned</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
@@ -199,24 +219,4 @@
   <string name="stripe_upload_file_text">Alternatively, you may manually upload a photo of your %1$s</string>
   <!-- Title of document upload screen -->
   <string name="stripe_upload_your_photo_id">Upload your photo ID</string>
-  <!-- Instructional text when user needs to rotate the document to align with camera -->
-  <string name="stripe_rotate_document">Kee ID level</string>
-  <!-- Instructional text when user needs remove anything blocking the document -->
-  <string name="stripe_keep_fully_visible">Details not visible</string>
-  <!-- Instructional text when user needs to align the edge with camera -->
-  <string name="stripe_align_document">Keep ID level</string>
-  <!-- Instructional text when environment is too dark -->
-  <string name="stripe_increase_lighting">Move to a well-lit area</string>
-  <!-- Instructional text when environment is too bright -->
-  <string name="stripe_decrease_lighting">Details not visible</string>
-  <!-- Instructional text when the document has too much glare -->
-  <string name="stripe_reduce_glare">Details not visible</string>
-  <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">ID not in focus</string>
-  <!-- Instructional text when there is no document in camera frame -->
-  <string name="stripe_point_camera_to_document">No document detected</string>
-  <!-- Instructional text when camera is too far from a document -->
-  <string name="stripe_move_closer">Move ID closer</string>
-  <!-- Instructional text when camera is too close to a document -->
-  <string name="stripe_move_farther">Move ID farther back</string>
 </resources>
