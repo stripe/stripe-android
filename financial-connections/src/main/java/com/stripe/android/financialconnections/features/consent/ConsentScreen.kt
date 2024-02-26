@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ExperimentalMaterialApi
@@ -170,31 +171,12 @@ private fun ConsentMainContent(
         Layout(
             lazyListState = scrollState,
             body = {
-                item {
-                    Spacer(modifier = Modifier.size(8.dp))
-                    ConsentLogoHeader(
-                        modifier = Modifier.fillMaxWidth(),
-                        logos = payload.merchantLogos,
-                    )
-                    Spacer(modifier = Modifier.size(32.dp))
-                }
-                item {
-                    AnnotatedText(
-                        text = title,
-                        onClickableTextClick = { onClickableTextClick(it) },
-                        defaultStyle = typography.headingXLarge.copy(
-                            textAlign = TextAlign.Center
-                        )
-                    )
-                    Spacer(modifier = Modifier.size(32.dp))
-                }
-                items(bullets) { bullet ->
-                    ListItem(
-                        bullet = bullet,
-                        onClickableTextClick = onClickableTextClick
-                    )
-                    Spacer(modifier = Modifier.size(24.dp))
-                }
+                consentBody(
+                    payload = payload,
+                    title = title,
+                    onClickableTextClick = onClickableTextClick,
+                    bullets = bullets
+                )
             },
             footer = {
                 ConsentFooter(
@@ -205,6 +187,39 @@ private fun ConsentMainContent(
                 )
             }
         )
+    }
+}
+
+private fun LazyListScope.consentBody(
+    payload: ConsentState.Payload,
+    title: TextResource.Text,
+    onClickableTextClick: (String) -> Unit,
+    bullets: List<BulletUI>
+) {
+    item {
+        Spacer(modifier = Modifier.size(8.dp))
+        ConsentLogoHeader(
+            modifier = Modifier.fillMaxWidth(),
+            logos = payload.merchantLogos,
+        )
+        Spacer(modifier = Modifier.size(32.dp))
+    }
+    item {
+        AnnotatedText(
+            text = title,
+            onClickableTextClick = { onClickableTextClick(it) },
+            defaultStyle = typography.headingXLarge.copy(
+                textAlign = TextAlign.Center
+            )
+        )
+        Spacer(modifier = Modifier.size(32.dp))
+    }
+    items(bullets) { bullet ->
+        ListItem(
+            bullet = bullet,
+            onClickableTextClick = onClickableTextClick
+        )
+        Spacer(modifier = Modifier.size(24.dp))
     }
 }
 
