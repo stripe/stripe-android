@@ -60,9 +60,9 @@ internal class DefaultIdentityRepository @Inject constructor(
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
             ),
-//            params = mapOf(
-//                APP_IDENTIFIER to context.packageName
-//            )
+            params = mapOf(
+                APP_IDENTIFIER to context.packageName
+            )
         ),
         VerificationPage.serializer()
     )
