@@ -70,4 +70,37 @@ internal class PaymentMethodMetadataTest {
         assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
         assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
     }
+
+    @Test
+    fun `supportedPaymentMethodForCode returns expected result`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna")
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
+        )
+        assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
+    }
+
+    @Test
+    fun `supportedPaymentMethodForCode returns null when sharedDataSpecs are missing`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna")
+            ),
+            sharedDataSpecs = emptyList(),
+        )
+        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
+    }
+
+    @Test
+    fun `supportedPaymentMethodForCode returns null when it's not supported`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card")
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("klarna")),
+        )
+        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
+    }
 }
