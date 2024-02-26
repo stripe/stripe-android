@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Pridať spôsob platby</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Uložiť moje údaje pre bezpečnú platbu jedným kliknutím</string>
+  <string name="stripe_inline_sign_up_header">Uložte svoje údaje pre bezpečnú platbu jedným kliknutím pomocou služby Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odhlásiť sa zo služby Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Plaťte rýchlejšie v spoločnosti %s a u tisícoch ďalších obchodníkov.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Pripojením k službe Link súhlasíte s <terms>podmienkami</terms> a <privacy>zásadami ochrany osobných údajov</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Poskytnutím svojho e-mailu súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Poskytnutím svojho telefónneho čísla súhlasíte s vytvorením účtu Link a s uložením svojich platobných informácií do služby Link podľa <terms>podmienok služby Link</terms> a <privacy>zásad ochrany osobných údajov</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Zmeniť e-mail</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

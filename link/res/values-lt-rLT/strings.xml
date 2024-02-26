@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Pridėkite mokėjimo būdą</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Išsaugoti mano informaciją saugiam atsiskaitymui vienu spustelėjimu</string>
+  <string name="stripe_inline_sign_up_header">Išsaugokite savo informaciją saugiam atsiskaitymui vienu spustelėjimu su „Link“</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Atsijungti nuo „Link“</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Mokėkite greičiau „%s“ ir daugybei kitų prekybininkų.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Jungdamiesi prie Link sutinkate su <terms>Sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Pateikdami savo el. pašto adresą sutinkate susikurti „Link“ paskyrą bei įrašyti savo mokėjimo informaciją į „Link“ pagal <terms>„Link“ sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Pateikdami savo telefono numerį sutinkate susikurti „Link“ paskyrą bei įrašyti savo mokėjimo informaciją į „Link“ pagal <terms>„Link“ sąlygas</terms> ir <privacy>privatumo politiką</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Pakeiskite el. paštą</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
