@@ -344,7 +344,6 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_REQUIRED = "required"
         const val PARAM_INIT_SUCCESS = "init_success"
         const val PARAM_INIT_FAILED_REASON = "init_failed_reason"
-        const val PARAM_DETAILS = "details"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_WARMUP = "document_warmup"
