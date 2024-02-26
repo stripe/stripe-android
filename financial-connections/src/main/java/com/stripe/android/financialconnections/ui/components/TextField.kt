@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldColors
 import androidx.compose.material.OutlinedTextField
@@ -27,6 +28,7 @@ internal fun FinancialConnectionsOutlinedTextField(
     readOnly: Boolean = false,
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     placeholder: @Composable (() -> Unit)? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     trailingIcon: @Composable (() -> Unit)? = null,
@@ -45,6 +47,7 @@ internal fun FinancialConnectionsOutlinedTextField(
         maxLines = 1,
         visualTransformation = visualTransformation,
         keyboardOptions = keyboardOptions,
+        keyboardActions = keyboardActions,
         readOnly = readOnly,
         isError = isError,
         value = value,
