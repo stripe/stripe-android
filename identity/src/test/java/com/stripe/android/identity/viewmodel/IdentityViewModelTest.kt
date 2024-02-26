@@ -934,7 +934,6 @@ internal class IdentityViewModelTest {
                 if (isLegacy) FINAL_ID_DETECTOR_LEGACY_RESULT_FRONT else FINAL_ID_DETECTOR_MODERN_RESULT_FRONT
             } else {
                 if (isLegacy) FINAL_ID_DETECTOR_LEGACY_RESULT_BACK else FINAL_ID_DETECTOR_MODERN_RESULT_BACK
-
             },
             mockVerificationPage
         )

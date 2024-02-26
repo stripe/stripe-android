@@ -496,7 +496,6 @@ internal class IdentityViewModel constructor(
                     }
                 }
 
-
                 require(result.result.mbOutput is MBDetector.DetectorResult.Captured) {
                     "Final MBOutput result is not Captured"
                 }

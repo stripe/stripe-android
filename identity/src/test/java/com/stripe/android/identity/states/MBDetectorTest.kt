@@ -37,9 +37,11 @@ class MBDetectorTest {
         assertThat(createdResult).isNull()
         verify(mockIdentityRepository).sendAnalyticsRequest(
             argWhere {
-                it.eventName == EVENT_MB_STATUS
-                    && (it.params[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA]
-                    as Map<*, *>)[IdentityAnalyticsRequestFactory.PARAM_REQUIRED] == false
+                it.eventName == EVENT_MB_STATUS &&
+                    (
+                        it.params[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA]
+                    as Map<*, *>
+                    )[IdentityAnalyticsRequestFactory.PARAM_REQUIRED] == false
             }
         )
     }

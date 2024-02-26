@@ -126,7 +126,6 @@ internal class IDDetectorTransitionerTest {
             )
         }
 
-
     @Test
     fun `Modern - Found stays in Found when moreResultsRequired and transitions to Satisfied when timeRequired is met`() =
         runBlocking {

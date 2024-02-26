@@ -54,7 +54,6 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFr
 import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 internal const val CONTINUE_BUTTON_TAG = "Continue"
@@ -162,7 +161,6 @@ private fun DocumentCaptureScreen(
     LaunchedEffect(Unit) {
         val shouldStartFromBack = collectedData.idDocumentFront != null
         if (shouldStartFromBack) {
-
             startScanning(
                 scanType = IdentityScanState.ScanType.DOC_BACK,
                 identityViewModel = identityViewModel,
@@ -234,7 +232,6 @@ private fun DocumentCaptureScreen(
         is IdentityScanViewModel.State.Scanned -> stringResource(id = R.string.stripe_scanned)
         else -> ""
     }
-
 
     Column(
         modifier = Modifier

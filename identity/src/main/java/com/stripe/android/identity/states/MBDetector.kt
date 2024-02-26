@@ -111,7 +111,6 @@ internal class MBDetector private constructor(settings: MBSettings) {
                         value = when (result.captureState) {
                             FrameAnalysisResult.CaptureState.SideCaptured -> {
                                 DetectorResult.Error(message = "MBDetector gets unexpected sideCaptured state")
-
                             }
 
                             FrameAnalysisResult.CaptureState.DocumentCaptured -> {

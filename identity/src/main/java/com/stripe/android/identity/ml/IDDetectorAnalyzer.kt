@@ -139,7 +139,6 @@ internal class IDDetectorAnalyzer(
             },
             laplacianBlurDetector.calculateBlurOutput(croppedImage)
         )
-
     }
 
     internal class Factory(

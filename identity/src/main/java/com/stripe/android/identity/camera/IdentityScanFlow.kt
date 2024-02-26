@@ -3,7 +3,6 @@ package com.stripe.android.identity.camera
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Rect
-import android.util.Log
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.camera.framework.AggregateResultListener

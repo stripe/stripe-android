@@ -182,7 +182,7 @@ internal class IDDetectorTransitioner(
             )
 
         else -> {
-            //This should never occur
+            // This should never occur
             Unsatisfied(
                 "Unknown state! ",
                 foundState.type,

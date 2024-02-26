@@ -36,24 +36,24 @@ internal sealed interface AnalyzerOutput
 /**
  * Output of IDDetector
  */
-internal sealed interface IDDetectorOutput: AnalyzerOutput {
+internal sealed interface IDDetectorOutput : AnalyzerOutput {
     class Legacy(
         val boundingBox: BoundingBox,
         val category: Category,
         val resultScore: Float,
         val allScores: List<Float>,
         val blurScore: Float
-    ): IDDetectorOutput
+    ) : IDDetectorOutput
 
     class Modern(
         val category: Category,
         val resultScore: Float,
         val allScores: List<Float>,
         val mbOutput: MBDetector.DetectorResult
-    ): IDDetectorOutput
+    ) : IDDetectorOutput
 
     fun category(): Category =
-        when(this){
+        when (this) {
             is Legacy -> {
                 this.category
             }
@@ -61,8 +61,8 @@ internal sealed interface IDDetectorOutput: AnalyzerOutput {
                 this.category
             }
         }
-    fun resultScore() : Float =
-        when(this){
+    fun resultScore(): Float =
+        when (this) {
             is Legacy -> {
                 this.resultScore
             }
@@ -71,8 +71,8 @@ internal sealed interface IDDetectorOutput: AnalyzerOutput {
             }
         }
 
-    fun blurScore() : Float? =
-        when(this){
+    fun blurScore(): Float? =
+        when (this) {
             is Legacy -> {
                 this.blurScore
             }
