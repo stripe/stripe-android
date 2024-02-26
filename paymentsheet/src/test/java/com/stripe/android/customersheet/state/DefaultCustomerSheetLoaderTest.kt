@@ -500,7 +500,14 @@ class DefaultCustomerSheetLoaderTest {
             elementsSessionRepository = FakeElementsSessionRepository(
                 stripeIntent = STRIPE_INTENT.copy(
                     clientSecret = null,
-                    paymentMethodTypes = listOf("card", "us_bank_account")
+                    paymentMethodTypes = listOf("card", "us_bank_account"),
+                    paymentMethodOptionsJsonString = """
+                        {
+                            "us_bank_account": {
+                                "verification_method": "automatic"
+                            }
+                        }
+                    """.trimIndent(),
                 ),
                 error = null,
                 linkSettings = null,
@@ -509,9 +516,8 @@ class DefaultCustomerSheetLoaderTest {
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
-        assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).contains(LpmRepositoryTestHelpers.usBankAccount)
+        val supportedPaymentMethods = loader.load(config).getOrThrow().supportedPaymentMethods
+        assertThat(supportedPaymentMethods).contains(LpmRepositoryTestHelpers.usBankAccount)
     }
 
     @Test
