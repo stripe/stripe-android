@@ -440,6 +440,14 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = true,
+        ),
+        Twint(
+            code = "twint",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

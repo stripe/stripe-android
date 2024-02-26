@@ -56,8 +56,6 @@
     <ID>MaxLineLength:NV21Image.kt$NV21Image$// Log.d(Config.logTag, "Bitmap to RGB Byte buffer conversion took: ${System.currentTimeMillis() - startTime} ms")</ID>
     <ID>MaximumLineLength:com.stripe.android.camera.framework.util.Memoize.kt:612</ID>
     <ID>NestedBlockDepth:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Compat( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer>, rowStrides: IntArray, pixelStrides: IntArray, format: Int, crop: Rect = Rect(0, 0, width, height) ): ByteArray</ID>
-    <ID>ReturnCount:Loop.kt$AnalyzerLoop$protected fun subscribeToFlow( flow: Flow&lt;DataFrame>, processingCoroutineScope: CoroutineScope ): Job?</ID>
-    <ID>ReturnCount:NV21Image.kt$NV21Image$fun crop(left: Int, top: Int, right: Int, bottom: Int): NV21Image</ID>
     <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter$e: java.lang.Exception</ID>
     <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter$t: Throwable</ID>
     <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter.CameraPreview$t: Throwable</ID>

@@ -5,6 +5,7 @@ import androidx.compose.ui.test.hasTextExactly
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 
 internal class CustomerSheetPage(
@@ -37,5 +38,9 @@ internal class CustomerSheetPage(
                 .onAllNodes(hasTextExactly(text))
                 .fetchSemanticsNodes().isNotEmpty()
         }
+    }
+
+    fun inputText(text: String, replacement: String) {
+        composeTestRule.onNode(hasText(text)).performTextInput(replacement)
     }
 }

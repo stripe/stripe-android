@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Lisää maksutapa</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Tallenna tietoni turvalliselle yhden napsautuksen maksamiselle</string>
+  <string name="stripe_inline_sign_up_header">Tallenna tiedot turvalliselle yhden napsautuksen maksamiselle Link-palvelulla</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Kirjaudu ulos Link-palvelusta</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Maksa nopeammin palvelussa %s ja tuhansilla muilla kauppiailla.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Liittymällä Linkiin hyväksyt <terms>ehdot</terms> ja <privacy>tietosuojaselosteen</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Antamalla sähköpostisi hyväksyt Link-tilin luomisen ja tallennat maksutietosi Link-palveluun <terms>Link-ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Antamalla puhelinnumerosi hyväksyt Link-tilin luomisen ja tallennat maksutietosi Link-palveluun <terms>Link-ehtojen</terms> ja <privacy>tietosuojaselosteen</privacy> mukaisesti.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Vaihda sähköposti</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

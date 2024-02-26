@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
@@ -510,5 +511,110 @@ class LpmRepositoryTest {
         )
         val card = lpmRepository.fromCode("card")
         assertThat(card).isNotNull()
+    }
+
+    @Test
+    fun `getSharedDataSpecs load from network`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        val serverSpecs = """
+            [
+                {
+                    "type": "card",
+                    "async": false,
+                    "fields": []
+                },
+                {
+                    "type": "cashapp",
+                    "async": false,
+                    "fields": [],
+                    "selector_icon": {
+                        "light_theme_png": "https://js.stripe.com/cashapptest.png",
+                        "light_theme_svg": "https://js.stripe.com/cashapptest.svg"
+                    }
+                }
+            ]
+        """.trimIndent()
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
+        )
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, serverSpecs)
+        assertThat(result.failedToParseServerResponse).isFalse()
+        val sharedDataSpecs = result.sharedDataSpecs
+        assertThat(sharedDataSpecs).hasSize(2)
+        assertThat(sharedDataSpecs[0].type).isEqualTo("card")
+        assertThat(sharedDataSpecs[1].type).isEqualTo("cashapp")
+        assertThat(sharedDataSpecs[1].selectorIcon?.lightThemePng)
+            .isEqualTo("https://js.stripe.com/cashapptest.png")
+    }
+
+    @Test
+    fun `getSharedDataSpecs loads missing LPMs from disk`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        val serverSpecs = """
+            [
+                {
+                    "type": "card",
+                    "async": false,
+                    "fields": []
+                }
+            ]
+        """.trimIndent()
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
+        )
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, serverSpecs)
+        assertThat(result.failedToParseServerResponse).isFalse()
+        val sharedDataSpecs = result.sharedDataSpecs
+        assertThat(sharedDataSpecs).hasSize(2)
+        assertThat(sharedDataSpecs[0].type).isEqualTo("card")
+        assertThat(sharedDataSpecs[1].type).isEqualTo("cashapp")
+    }
+
+    @Test
+    fun `getSharedDataSpecs loads from disk when server specs don't load`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
+        )
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, null)
+        assertThat(result.failedToParseServerResponse).isFalse()
+        val sharedDataSpecs = result.sharedDataSpecs
+        assertThat(sharedDataSpecs).hasSize(2)
+        assertThat(sharedDataSpecs[0].type).isEqualTo("card")
+        assertThat(sharedDataSpecs[1].type).isEqualTo("cashapp")
+    }
+
+    @Test
+    fun `getSharedDataSpecs loads from disk when server specs are malformed`() {
+        val lpmRepository = LpmRepository(
+            arguments = LpmRepository.LpmRepositoryArguments(
+                resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            ),
+        )
+
+        val paymentIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+            paymentMethodTypes = listOf("card", "cashapp")
+        )
+        val result = lpmRepository.getSharedDataSpecs(paymentIntent, "{[]}")
+        assertThat(result.failedToParseServerResponse).isTrue()
+        val sharedDataSpecs = result.sharedDataSpecs
+        assertThat(sharedDataSpecs).hasSize(2)
+        assertThat(sharedDataSpecs[0].type).isEqualTo("card")
+        assertThat(sharedDataSpecs[1].type).isEqualTo("cashapp")
     }
 }

@@ -52,17 +52,15 @@ internal sealed class PhoneNumberFormatter {
      */
     class WithRegion constructor(private val metadata: Metadata) : PhoneNumberFormatter() {
         override val prefix = metadata.prefix
-        override val placeholder = metadata.pattern.replace('#', '5')
+        override val placeholder = metadata.pattern?.replace('#', '5') ?: ""
         override val countryCode = metadata.regionCode
-
-        private val maxSubscriberDigits = metadata.pattern.count { it == '#' }
 
         override fun userInputFilter(input: String) =
             input.filter { VALID_INPUT_RANGE.contains(it) }.run {
-                substring(0, min(length, maxSubscriberDigits))
+                substring(0, min(length, E164_MAX_DIGITS))
             }
 
-        override fun toE164Format(input: String) = "${prefix}${userInputFilter(input)}"
+        override fun toE164Format(input: String) = "${prefix}${userInputFilter(input).trimStart('0')}"
 
         override val visualTransformation = object : VisualTransformation {
             override fun filter(text: AnnotatedString): TransformedText {
@@ -73,6 +71,8 @@ internal sealed class PhoneNumberFormatter {
                     AnnotatedString(formatted),
                     object : OffsetMapping {
                         override fun originalToTransformed(offset: Int): Int {
+                            if (metadata.pattern == null) return offset
+
                             metadata.pattern.let {
                                 if (offset == 0) return 0
 
@@ -97,7 +97,9 @@ internal sealed class PhoneNumberFormatter {
                         }
 
                         override fun transformedToOriginal(offset: Int): Int {
-                            return if (offset == 0) {
+                            return if (metadata.pattern == null) {
+                                offset
+                            } else if (offset == 0) {
                                 0
                             } else {
                                 metadata.pattern.let {
@@ -123,6 +125,10 @@ internal sealed class PhoneNumberFormatter {
          * for invalid characters and the numbers of characters limited based on E.164 spec.
          */
         fun formatNumberNational(filteredInput: String): String {
+            if (metadata.pattern == null) {
+                // If there's no pattern to format on, return early.
+                return filteredInput
+            }
             var inputIndex = 0
             val formatted = StringBuilder()
             metadata.pattern.forEach {
@@ -161,7 +167,7 @@ internal sealed class PhoneNumberFormatter {
                 substring(0, min(length, E164_MAX_DIGITS))
             }
 
-        override fun toE164Format(input: String) = "+${userInputFilter(input)}"
+        override fun toE164Format(input: String) = "+${userInputFilter(input).trimStart('0')}"
 
         override val visualTransformation =
             VisualTransformation { text ->
@@ -181,8 +187,14 @@ internal sealed class PhoneNumberFormatter {
     data class Metadata(
         val prefix: String,
         val regionCode: String,
-        val pattern: String
-    )
+        val pattern: String? = null
+    ) {
+        init {
+            require(pattern == null || pattern.isNotEmpty()) {
+                "Pattern should not be empty. Set it to null if it's missing."
+            }
+        }
+    }
 
     companion object {
         private const val E164_MAX_DIGITS = 15
@@ -300,7 +312,7 @@ internal sealed class PhoneNumberFormatter {
             "AO" to Metadata(prefix = "+244", regionCode = "AO", pattern = "### ### ###"),
             "GW" to Metadata(prefix = "+245", regionCode = "GW", pattern = "### ####"),
             "IO" to Metadata(prefix = "+246", regionCode = "IO", pattern = "### ####"),
-            "AC" to Metadata(prefix = "+247", regionCode = "AC", pattern = ""),
+            "AC" to Metadata(prefix = "+247", regionCode = "AC"),
             "SC" to Metadata(prefix = "+248", regionCode = "SC", pattern = "# ### ###"),
             "RW" to Metadata(prefix = "+250", regionCode = "RW", pattern = "### ### ###"),
             "ET" to Metadata(prefix = "+251", regionCode = "ET", pattern = "## ### ####"),
@@ -313,8 +325,8 @@ internal sealed class PhoneNumberFormatter {
             "MZ" to Metadata(prefix = "+258", regionCode = "MZ", pattern = "## ### ####"),
             "ZM" to Metadata(prefix = "+260", regionCode = "ZM", pattern = "## #######"),
             "MG" to Metadata(prefix = "+261", regionCode = "MG", pattern = "## ## ### ##"),
-            "RE" to Metadata(prefix = "+262", regionCode = "RE", pattern = ""),
-            "TF" to Metadata(prefix = "+262", regionCode = "TF", pattern = ""),
+            "RE" to Metadata(prefix = "+262", regionCode = "RE"),
+            "TF" to Metadata(prefix = "+262", regionCode = "TF"),
             "YT" to Metadata(prefix = "+262", regionCode = "YT", pattern = "### ## ## ##"),
             "ZW" to Metadata(prefix = "+263", regionCode = "ZW", pattern = "## ### ####"),
             "NA" to Metadata(prefix = "+264", regionCode = "NA", pattern = "## ### ####"),
@@ -324,8 +336,8 @@ internal sealed class PhoneNumberFormatter {
             "SZ" to Metadata(prefix = "+268", regionCode = "SZ", pattern = "#### ####"),
             "KM" to Metadata(prefix = "+269", regionCode = "KM", pattern = "### ## ##"),
             "ZA" to Metadata(prefix = "+27", regionCode = "ZA", pattern = "## ### ####"),
-            "SH" to Metadata(prefix = "+290", regionCode = "SH", pattern = ""),
-            "TA" to Metadata(prefix = "+290", regionCode = "TA", pattern = ""),
+            "SH" to Metadata(prefix = "+290", regionCode = "SH"),
+            "TA" to Metadata(prefix = "+290", regionCode = "TA"),
             "ER" to Metadata(prefix = "+291", regionCode = "ER", pattern = "# ### ###"),
             "AW" to Metadata(prefix = "+297", regionCode = "AW", pattern = "### ####"),
             "FO" to Metadata(prefix = "+298", regionCode = "FO", pattern = "######"),
@@ -344,7 +356,7 @@ internal sealed class PhoneNumberFormatter {
             "MT" to Metadata(prefix = "+356", regionCode = "MT", pattern = "#### ####"),
             "CY" to Metadata(prefix = "+357", regionCode = "CY", pattern = "## ######"),
             "FI" to Metadata(prefix = "+358", regionCode = "FI", pattern = "## ### ## ##"),
-            "AX" to Metadata(prefix = "+358", regionCode = "AX", pattern = ""),
+            "AX" to Metadata(prefix = "+358", regionCode = "AX"),
             "BG" to Metadata(prefix = "+359", regionCode = "BG", pattern = "### ### ##"),
             "HU" to Metadata(prefix = "+36", regionCode = "HU", pattern = "## ### ####"),
             "LT" to Metadata(prefix = "+370", regionCode = "LT", pattern = "### #####"),
@@ -356,7 +368,7 @@ internal sealed class PhoneNumberFormatter {
             "AD" to Metadata(prefix = "+376", regionCode = "AD", pattern = "### ###"),
             "MC" to Metadata(prefix = "+377", regionCode = "MC", pattern = "# ## ## ## ##"),
             "SM" to Metadata(prefix = "+378", regionCode = "SM", pattern = "## ## ## ##"),
-            "VA" to Metadata(prefix = "+379", regionCode = "VA", pattern = ""),
+            "VA" to Metadata(prefix = "+379", regionCode = "VA"),
             "UA" to Metadata(prefix = "+380", regionCode = "UA", pattern = "## ### ####"),
             "RS" to Metadata(prefix = "+381", regionCode = "RS", pattern = "## #######"),
             "ME" to Metadata(prefix = "+382", regionCode = "ME", pattern = "## ### ###"),
@@ -379,12 +391,12 @@ internal sealed class PhoneNumberFormatter {
             "DK" to Metadata(prefix = "+45", regionCode = "DK", pattern = "## ## ## ##"),
             "SE" to Metadata(prefix = "+46", regionCode = "SE", pattern = "##-### ## ##"),
             "NO" to Metadata(prefix = "+47", regionCode = "NO", pattern = "### ## ###"),
-            "BV" to Metadata(prefix = "+47", regionCode = "BV", pattern = ""),
+            "BV" to Metadata(prefix = "+47", regionCode = "BV"),
             "SJ" to Metadata(prefix = "+47", regionCode = "SJ", pattern = "## ## ## ##"),
             "PL" to Metadata(prefix = "+48", regionCode = "PL", pattern = "## ### ## ##"),
             "DE" to Metadata(prefix = "+49", regionCode = "DE", pattern = "### #######"),
-            "FK" to Metadata(prefix = "+500", regionCode = "FK", pattern = ""),
-            "GS" to Metadata(prefix = "+500", regionCode = "GS", pattern = ""),
+            "FK" to Metadata(prefix = "+500", regionCode = "FK"),
+            "GS" to Metadata(prefix = "+500", regionCode = "GS"),
             "BZ" to Metadata(prefix = "+501", regionCode = "BZ", pattern = "###-####"),
             "GT" to Metadata(prefix = "+502", regionCode = "GT", pattern = "#### ####"),
             "SV" to Metadata(prefix = "+503", regionCode = "SV", pattern = "#### ####"),
@@ -396,14 +408,14 @@ internal sealed class PhoneNumberFormatter {
             "HT" to Metadata(prefix = "+509", regionCode = "HT", pattern = "## ## ####"),
             "PE" to Metadata(prefix = "+51", regionCode = "PE", pattern = "### ### ###"),
             "MX" to Metadata(prefix = "+52", regionCode = "MX", pattern = "### ### ####"),
-            "CY" to Metadata(prefix = "+537", regionCode = "CY", pattern = ""),
+            "CY" to Metadata(prefix = "+537", regionCode = "CY"),
             "AR" to Metadata(prefix = "+54", regionCode = "AR", pattern = "## ##-####-####"),
             "BR" to Metadata(prefix = "+55", regionCode = "BR", pattern = "## #####-####"),
             "CL" to Metadata(prefix = "+56", regionCode = "CL", pattern = "# #### ####"),
             "CO" to Metadata(prefix = "+57", regionCode = "CO", pattern = "### #######"),
             "VE" to Metadata(prefix = "+58", regionCode = "VE", pattern = "###-#######"),
             "BL" to Metadata(prefix = "+590", regionCode = "BL", pattern = "### ## ## ##"),
-            "MF" to Metadata(prefix = "+590", regionCode = "MF", pattern = ""),
+            "MF" to Metadata(prefix = "+590", regionCode = "MF"),
             "GP" to Metadata(prefix = "+590", regionCode = "GP", pattern = "### ## ## ##"),
             "BO" to Metadata(prefix = "+591", regionCode = "BO", pattern = "########"),
             "GY" to Metadata(prefix = "+592", regionCode = "GY", pattern = "### ####"),
@@ -433,15 +445,15 @@ internal sealed class PhoneNumberFormatter {
             "FJ" to Metadata(prefix = "+679", regionCode = "FJ", pattern = "### ####"),
             "WF" to Metadata(prefix = "+681", regionCode = "WF", pattern = "## ## ##"),
             "CK" to Metadata(prefix = "+682", regionCode = "CK", pattern = "## ###"),
-            "NU" to Metadata(prefix = "+683", regionCode = "NU", pattern = ""),
-            "WS" to Metadata(prefix = "+685", regionCode = "WS", pattern = ""),
-            "KI" to Metadata(prefix = "+686", regionCode = "KI", pattern = ""),
+            "NU" to Metadata(prefix = "+683", regionCode = "NU"),
+            "WS" to Metadata(prefix = "+685", regionCode = "WS"),
+            "KI" to Metadata(prefix = "+686", regionCode = "KI"),
             "NC" to Metadata(prefix = "+687", regionCode = "NC", pattern = "########"),
-            "TV" to Metadata(prefix = "+688", regionCode = "TV", pattern = ""),
+            "TV" to Metadata(prefix = "+688", regionCode = "TV"),
             "PF" to Metadata(prefix = "+689", regionCode = "PF", pattern = "## ## ##"),
-            "TK" to Metadata(prefix = "+690", regionCode = "TK", pattern = ""),
+            "TK" to Metadata(prefix = "+690", regionCode = "TK"),
             "RU" to Metadata(prefix = "+7", regionCode = "RU", pattern = "### ###-##-##"),
-            "KZ" to Metadata(prefix = "+7", regionCode = "KZ", pattern = ""),
+            "KZ" to Metadata(prefix = "+7", regionCode = "KZ"),
             "JP" to Metadata(prefix = "+81", regionCode = "JP", pattern = "##-####-####"),
             "KR" to Metadata(prefix = "+82", regionCode = "KR", pattern = "##-####-####"),
             "VN" to Metadata(prefix = "+84", regionCode = "VN", pattern = "## ### ## ##"),
@@ -450,7 +462,7 @@ internal sealed class PhoneNumberFormatter {
             "KH" to Metadata(prefix = "+855", regionCode = "KH", pattern = "## ### ###"),
             "LA" to Metadata(prefix = "+856", regionCode = "LA", pattern = "## ## ### ###"),
             "CN" to Metadata(prefix = "+86", regionCode = "CN", pattern = "### #### ####"),
-            "PN" to Metadata(prefix = "+872", regionCode = "PN", pattern = ""),
+            "PN" to Metadata(prefix = "+872", regionCode = "PN"),
             "BD" to Metadata(prefix = "+880", regionCode = "BD", pattern = "####-######"),
             "TW" to Metadata(prefix = "+886", regionCode = "TW", pattern = "### ### ###"),
             "TR" to Metadata(prefix = "+90", regionCode = "TR", pattern = "### ### ####"),

@@ -16,10 +16,10 @@ import com.stripe.android.link.analytics.LinkAnalyticsHelper
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
+import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
-import com.stripe.android.model.CvcCheck
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -324,7 +324,7 @@ class LinkHandlerTest {
     }
 
     @Test
-    fun `payWithLinkInline fails for signedOut user`() = runLinkInlineTest {
+    fun `if lookup fails, payWithLinkInline emits event to pay without Link`() = runLinkInlineTest {
         val userInput = UserInput.SignIn(email = "example@example.com")
 
         handler.setupLink(
@@ -343,8 +343,45 @@ class LinkHandlerTest {
                 handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
             }
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
-            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Error("Whoops"))
-            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Ready)
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
+            verify(linkLauncher, never()).present(eq(configuration))
+        }
+
+        handler.accountStatus.test {
+            assertThat(awaitItem()).isEqualTo(AccountStatus.SignedOut)
+        }
+
+        processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+        accountStatusTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+    }
+
+    @Test
+    fun `if sign up fails, payWithLinkInline emits event to pay without Link`() = runLinkInlineTest {
+        val userInput = UserInput.SignUp(
+            name = "John Doe",
+            email = "example@example.com",
+            phone = "+11234567890",
+            country = "US",
+            consentAction = SignUpConsentAction.Checkbox,
+        )
+
+        handler.setupLink(
+            state = LinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                configuration = configuration,
+            )
+        )
+
+        handler.processingState.test {
+            accountStatusFlow.emit(AccountStatus.SignedOut)
+            ensureAllEventsConsumed() // Begin with no events.
+            whenever(linkConfigurationCoordinator.signInWithUserInput(any(), any()))
+                .thenReturn(Result.failure(IllegalStateException("Whoops")))
+            testScope.launch {
+                handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
+            }
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.CompleteWithoutLink)
             verify(linkLauncher, never()).present(eq(configuration))
         }
 
@@ -454,11 +491,7 @@ private fun runLinkInlineTest(
         LinkPaymentDetails.New(
             paymentDetails = ConsumerPaymentDetails.Card(
                 id = "pm_123",
-                expiryYear = 2050,
-                expiryMonth = 4,
-                brand = CardBrand.Visa,
                 last4 = "4242",
-                cvcCheck = CvcCheck.Pass,
             ),
             paymentMethodCreateParams = mock(),
             originalParams = mock(),

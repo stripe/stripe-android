@@ -163,7 +163,7 @@ internal fun LinkOptionalInlineSignup(
             isShowingPhoneFirst = isShowingPhoneFirst,
             textAlign = TextAlign.Start,
             modifier = Modifier
-                .padding(top = 16.dp)
+                .padding(top = 8.dp)
                 .bringIntoViewRequester(bringTermsIntoViewRequester),
         )
     }

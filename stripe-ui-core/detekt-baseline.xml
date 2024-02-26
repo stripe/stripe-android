@@ -34,10 +34,6 @@
     <ID>MaxLineLength:DrawablePainter.kt$*</ID>
     <ID>MaxLineLength:Html.kt$*</ID>
     <ID>MaxLineLength:UiUtils.kt$*</ID>
-    <ID>ReturnCount:OTPController.kt$OTPController$fun onValueChanged(index: Int, text: String): Int</ID>
-    <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun originalToTransformed(offset: Int): Int</ID>
-    <ID>ReturnCount:PostalCodeVisualTransformation.kt$PostalCodeVisualTransformation.&lt;no name provided>$override fun transformedToOriginal(offset: Int): Int</ID>
-    <ID>ReturnCount:UiUtils.kt$@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Context.getDrawableFromUri(uri: Uri): Drawable?</ID>
     <ID>SpreadOperator:PhoneNumberElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:SectionElementUI.kt$( it.errorMessage, *args )</ID>
     <ID>SpreadOperator:TextFieldUI.kt$( it.errorMessage, *args )</ID>

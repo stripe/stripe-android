@@ -23,18 +23,16 @@
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LongMethod:AddPaymentMethod.kt$@Composable internal fun AddPaymentMethod( sheetViewModel: BaseSheetViewModel, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
-    <ID>LongMethod:CustomerSheetLoader.kt$DefaultCustomerSheetLoader$private suspend fun loadPaymentMethods( customerAdapter: CustomerAdapter, configuration: CustomerSheet.Configuration?, elementsSession: ElementsSession?, )</ID>
+    <ID>LongMethod:CustomerSheetLoader.kt$DefaultCustomerSheetLoader$private suspend fun loadPaymentMethods( customerAdapter: CustomerAdapter, configuration: CustomerSheet.Configuration?, elementsSessionWithMetadata: ElementsSessionWithMetadata?, )</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun AddPaymentMethodWithPaymentElement( viewState: CustomerSheetViewState.AddPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>?, )</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> String, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$private fun transitionToAddPaymentMethod( isFirstPaymentMethod: Boolean, cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility, )</ID>
     <ID>LongMethod:EditPaymentMethod.kt$@Composable internal fun EditPaymentMethodUi( viewState: EditPaymentMethodViewState, viewActionHandler: (action: EditPaymentMethodViewAction) -> Unit, modifier: Modifier = Modifier )</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when element address fields are complete`()</ID>
     <ID>LongMethod:FormViewModelTest.kt$FormViewModelTest$@Test fun `Verify params are set when required address fields are complete`()</ID>
-    <ID>LongMethod:PaymentElement.kt$@Composable internal fun PaymentElement( formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>, enabled: Boolean, supportedPaymentMethods: List&lt;SupportedPaymentMethod>, selectedItem: SupportedPaymentMethod, linkSignupMode: LinkSignupMode?, linkConfigurationCoordinator: LinkConfigurationCoordinator?, showCheckboxFlow: Flow&lt;Boolean>, onItemSelectedListener: (SupportedPaymentMethod) -> Unit, onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit, formArguments: FormArguments, usBankAccountFormArguments: USBankAccountFormArguments, onFormFieldValuesChanged: (FormFieldValues?) -> Unit, )</ID>
     <ID>LongMethod:PaymentOptionFactory.kt$PaymentOptionFactory$fun create(selection: PaymentSelection): PaymentOption</ID>
     <ID>LongMethod:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Appearance.parseAppearance()</ID>
-    <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration, ): PaymentSheetState.Full</ID>
-    <ID>LongMethod:PaymentSheetScreen.kt$@Composable internal fun PaymentSheetScreenContent( viewModel: BaseSheetViewModel, type: PaymentSheetFlowType, modifier: Modifier = Modifier, )</ID>
+    <ID>LongMethod:PaymentSheetLoader.kt$DefaultPaymentSheetLoader$private suspend fun create( elementsSession: ElementsSession, config: PaymentSheet.Configuration, metadata: PaymentMethodMetadata, ): PaymentSheetState.Full</ID>
     <ID>LongMethod:PlaceholderHelperTest.kt$PlaceholderHelperTest$@Test fun `Test correct placeholder is removed for placeholder spec`()</ID>
     <ID>LongMethod:USBankAccountEmitters.kt$@Composable internal fun USBankAccountEmitters( viewModel: USBankAccountFormViewModel, usBankAccountFormArgs: USBankAccountFormArguments, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun BillingDetailsForm( formArgs: FormArguments, isProcessing: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
@@ -80,13 +78,9 @@
     <ID>MaxLineLength:PrimaryButtonTest.kt$PrimaryButtonTest$primaryButton.setAppearanceConfiguration(StripeThemeDefaults.primaryButtonStyle, ColorStateList.valueOf(Color.BLACK))</ID>
     <ID>MaxLineLength:SupportedPaymentMethod.kt$SupportedPaymentMethod$/** This describes the image in the LPM selector. These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$* This will generate payment intent scenarios for all combinations of customers, lpm types in the intent, shipping, and SFU states</ID>
-    <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$val formDescriptor = lpm.getSpecWithFullfilledRequirements(testInput.getIntent(lpm), testInput.getConfig())</ID>
-    <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput$fun toCsv()</ID>
-    <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.PaymentIntentTestInput.Companion$fun toCsvHeader()</ID>
     <ID>MaxLineLength:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest.TestOutput.Companion$formShowsSaveCheckbox == false &amp;&amp; formShowsCheckboxControlledFields == true -> "merchantRequiredSave"</ID>
     <ID>MaxLineLength:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)</ID>
     <ID>NestedBlockDepth:SupportedPaymentMethodTest.kt$SupportedPaymentMethodTest$private fun generatePaymentIntentScenarios(): List&lt;PaymentIntentTestInput></ID>
-    <ID>ReturnCount:AddressUtils.kt$internal fun CharSequence.levenshtein(other: CharSequence): Int</ID>
     <ID>ThrowsCount:PaymentSheetConfigurationKtx.kt$internal fun PaymentSheet.Configuration.validate()</ID>
     <ID>TooManyFunctions:CustomerSheetEventReporter.kt$CustomerSheetEventReporter</ID>
     <ID>TooManyFunctions:DefaultCustomerSheetEventReporter.kt$DefaultCustomerSheetEventReporter : CustomerSheetEventReporter</ID>

@@ -11,11 +11,14 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
+@Parcelize
 data class ContactInformationSpec(
     @SerialName("collect_name")
     val collectName: Boolean = true,
@@ -24,6 +27,7 @@ data class ContactInformationSpec(
     @SerialName("collect_phone")
     val collectPhone: Boolean = true,
 ) : FormItemSpec() {
+    @IgnoredOnParcel
     override val apiPath: IdentifierSpec = IdentifierSpec()
 
     fun transform(initialValues: Map<IdentifierSpec, String?>): SectionElement? {
