@@ -519,8 +519,10 @@ class DefaultIdentityRepositoryTest {
 
             assertThat(request).isInstanceOf(ApiRequest::class.java)
             assertThat(request.method).isEqualTo(StripeRequest.Method.GET)
-            assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID?" +
-                "$APP_IDENTIFIER=${ApplicationProvider.getApplicationContext<Context>().packageName}")
+            assertThat(request.url).isEqualTo(
+                "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID?" +
+                    "$APP_IDENTIFIER=${ApplicationProvider.getApplicationContext<Context>().packageName}"
+            )
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
 
             verificationPageBlock(verificationPage)
