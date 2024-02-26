@@ -15,7 +15,7 @@ import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 internal class PaymentSheetTestRunnerContext(
-    val scenario: ActivityScenario<MainActivity>,
+    private val scenario: ActivityScenario<MainActivity>,
     private val paymentSheet: PaymentSheet,
     private val countDownLatch: CountDownLatch,
 ) {
