@@ -59,7 +59,7 @@ import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -167,7 +167,7 @@ private fun ConsentMainContent(
             )
         }
     ) {
-        Layout(
+        LazyLayout(
             lazyListState = scrollState,
             body = {
                 item {

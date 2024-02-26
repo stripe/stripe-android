@@ -67,7 +67,7 @@ import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
@@ -198,7 +198,7 @@ private fun NetworkingLinkSignupLoaded(
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
 ) {
-    Layout(
+    LazyLayout(
         lazyListState = lazyListState,
         body = {
             item {

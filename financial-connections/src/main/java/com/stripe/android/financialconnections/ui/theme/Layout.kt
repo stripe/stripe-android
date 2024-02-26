@@ -41,7 +41,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
  * @param lazyListState the [LazyListState] to use for the scrollable body.
  */
 @Composable
-internal fun Layout(
+internal fun LazyLayout(
     modifier: Modifier = Modifier,
     body: LazyListScope.() -> Unit,
     footer: (@Composable () -> Unit)? = null,
@@ -124,7 +124,7 @@ internal fun LayoutPreview() {
                 )
             },
             content = {
-                Layout(
+                LazyLayout(
                     lazyListState = state,
                     body = {
                         item {

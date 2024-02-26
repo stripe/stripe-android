@@ -62,7 +62,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.Neutral900
 import kotlinx.coroutines.launch
 
@@ -218,7 +218,7 @@ private fun AccountPickerLoaded(
     onClickableTextClick: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
-    Layout(
+    LazyLayout(
         lazyListState = lazyListState,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         body = {
