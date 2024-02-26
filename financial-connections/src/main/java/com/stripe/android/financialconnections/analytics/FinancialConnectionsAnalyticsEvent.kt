@@ -202,7 +202,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "account_picker.accounts_submitted",
         mapOf(
-            "account_ids" to accountIds.joinToString(","),
+            "account_ids" to accountIds.joinToString(" "),
             "is_skip_account_selection" to isSkipAccountSelection.toString(),
         ).filterNotNullValues()
     )
@@ -213,7 +213,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "account_picker.accounts_auto_selected",
         mapOf(
-            "account_ids" to accountIds.joinToString(","),
+            "account_ids" to accountIds.joinToString(" "),
             "is_single_account" to isSingleAccount.toString(),
         ).filterNotNullValues()
     )

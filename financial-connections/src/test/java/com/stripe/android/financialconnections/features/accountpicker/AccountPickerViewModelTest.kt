@@ -185,7 +185,7 @@ internal class AccountPickerViewModelTest {
         eventTracker.assertContainsEvent(
             "linked_accounts.account_picker.accounts_auto_selected",
             mapOf(
-                "account_ids" to "selectable_1,selectable_2",
+                "account_ids" to "selectable_1 selectable_2",
                 "is_single_account" to "false",
             )
         )
