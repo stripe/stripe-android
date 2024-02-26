@@ -7,7 +7,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 @Parcelize
-data class VerificationPageStaticContentDocumentCaptureMBSettings(
+internal data class VerificationPageStaticContentDocumentCaptureMBSettings(
     @SerialName("license_key")
     val licenseKey: String,
 

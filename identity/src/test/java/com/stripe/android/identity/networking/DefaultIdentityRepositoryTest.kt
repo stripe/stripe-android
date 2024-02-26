@@ -1,6 +1,5 @@
 package com.stripe.android.identity.networking
 
-import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
