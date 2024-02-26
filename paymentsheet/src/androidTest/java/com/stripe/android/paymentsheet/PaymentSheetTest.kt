@@ -20,7 +20,6 @@ import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import okhttp3.mockwebserver.SocketPolicy
-import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -493,7 +492,6 @@ internal class PaymentSheetTest {
     }
 
     @Test
-    @Ignore("Enable when logic for successful card payment with link failure is added")
     fun testSuccessfulCardPaymentWithLinkSignUpFailure() = activityScenarioRule.runPaymentSheetTest(
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -551,18 +549,11 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/log_out"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-logout-success.json")
-        }
-
         page.clickPrimaryButton()
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithExistingLinkUser() = activityScenarioRule.runPaymentSheetTest(
+    fun testSuccessfulCardPaymentWithExistingLinkEmailUsed() = activityScenarioRule.runPaymentSheetTest(
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -574,20 +565,59 @@ internal class PaymentSheetTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                ),
+            )
+        }
+
+        page.fillOutCardDetails()
+
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/customers/cus_123"),
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
         ) { response ->
-            response.testBodyFromFile("customer-get-success.json")
+            response.testBodyFromFile("consumer-session-lookup-exists-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+
+        Espresso.closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-exists-success.json")
         }
 
         networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        composeTestRule.waitForIdle()
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkPreviouslyUsed() = activityScenarioRule.runPaymentSheetTest(
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
             host("api.stripe.com"),
             method("GET"),
-            path("/v1/payment_methods"),
+            path("/v1/elements/sessions"),
         ) { response ->
-            response.testBodyFromFile("payment-methods-get-success.json")
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         testContext.scenario.onActivity {
@@ -599,10 +629,6 @@ internal class PaymentSheetTest {
                 paymentIntentClientSecret = "pi_example_secret_example",
                 configuration = PaymentSheet.Configuration(
                     merchantDisplayName = "Merchant, Inc.",
-                    customer = PaymentSheet.CustomerConfiguration(
-                        id = "cus_123",
-                        ephemeralKeySecret = "some_secret"
-                    )
                 ),
             )
         }
