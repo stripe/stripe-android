@@ -116,7 +116,7 @@ data class CheckoutResponse(
         if (customerId != null && customerEphemeralKeySecret != null) {
             PaymentSheet.CustomerConfiguration(
                 id = customerId,
-                ephemeralKeySecret = "$customerEphemeralKeySecret x"
+                ephemeralKeySecret = customerEphemeralKeySecret
             )
         } else {
             null
