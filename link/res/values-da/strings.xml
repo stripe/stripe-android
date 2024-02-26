@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Tilføj en betalingsmetode</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Gem mine oplysninger for sikker 1-kliks-betaling</string>
+  <string name="stripe_inline_sign_up_header">Gem dine oplysninger om sikker betaling med 1 klik med Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Log ud af Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Betal hurtigere hos %s og tusinder af forhandlere.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Ved at tilmelde dig Link accepterer du <terms>vilkårene</terms> og <privacy>privatlivspolitikken</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Når du angiver din e-mail, accepterer du at oprette en Link-konto og gemme dine betalingsoplysninger på Link i henhold til <terms>Links Vilkår</terms> og <privacy>Privatlivspolitik</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Når du angiver dit telefonnummer, accepterer du at oprette en Link-konto og gemme dine betalingsoplysninger på Link i henhold til <terms>Links Vilkår</terms> og <privacy>Privatlivspolitik</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Skift e-mail</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

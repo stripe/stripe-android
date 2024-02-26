@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">เพิ่มวิธีการชำระเงิน</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">บันทึกข้อมูลของฉันไว้เพื่อการชำระเงินที่ปลอดภัยในคลิกเดียว</string>
+  <string name="stripe_inline_sign_up_header">บันทึกข้อมูลของคุณไว้เพื่อการชำระเงินที่ปลอดภัยในคลิกเดียวด้วย Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">ออกจากระบบ Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">ชำระเงินที่ %s และผู้ค้าอีกนับพันแห่งได้เร็วขึ้น</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[การเข้าร่วม Link หมายถึงคุณยอมรับ<terms>ข้อกำหนด</terms>และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[การให้อีเมลหมายความว่าคุณยินยอมที่จะสร้างบัญชี Link และบันทึกข้อมูลการชำระเงินไปยัง Link ตาม<terms>ข้อกำหนดของ Link</terms> และ<privacy>นโยบายความเป็นส่วนตัว</privacy>]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[การให้หมายเลขโทรศัพท์หมายความว่าคุณยินยอมที่จะสร้างบัญชี Link และบันทึกข้อมูลการชำระเงินไปยัง Link ตาม<terms>ข้อกำหนด</terms> และ<privacy>เงื่อนไข</privacy>ของ Link]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">เปลี่ยนอีเมล</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
