@@ -73,24 +73,24 @@ internal class DefaultCustomerSheetLoader(
             } else {
                 adapter to null
             }
-        }.map { (adapter, session) ->
+        }.map { (adapter, elementsSessionWithMetadata) ->
             loadPaymentMethods(
                 customerAdapter = adapter,
                 configuration = configuration,
-                elementsSession = session,
+                elementsSessionWithMetadata = elementsSessionWithMetadata,
             ).getOrThrow()
         }
     }
 
     private suspend fun retrieveElementsSession(
         configuration: CustomerSheet.Configuration?,
-    ): Result<ElementsSession> {
+    ): Result<ElementsSessionWithMetadata> {
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
             )
         )
-        return elementsSessionRepository.get(initializationMode).onSuccess { elementsSession ->
+        return elementsSessionRepository.get(initializationMode).map { elementsSession ->
             val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
             val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
                 stripeIntent = elementsSession.stripeIntent,
@@ -99,7 +99,7 @@ internal class DefaultCustomerSheetLoader(
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
-                allowsDelayedPaymentMethods = false,
+                allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
@@ -109,13 +109,14 @@ internal class DefaultCustomerSheetLoader(
                 metadata = metadata,
                 specs = sharedDataSpecs,
             )
+            ElementsSessionWithMetadata(elementsSession = elementsSession, metadata = metadata)
         }
     }
 
     private suspend fun loadPaymentMethods(
         customerAdapter: CustomerAdapter,
         configuration: CustomerSheet.Configuration?,
-        elementsSession: ElementsSession?,
+        elementsSessionWithMetadata: ElementsSessionWithMetadata?,
     ) = coroutineScope {
         val paymentMethodsResult = async {
             customerAdapter.retrievePaymentMethods()
@@ -161,10 +162,14 @@ internal class DefaultCustomerSheetLoader(
 
                 val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
 
+                val elementsSession = elementsSessionWithMetadata?.elementsSession
+                val metadata = elementsSessionWithMetadata?.metadata
+                val supportedPaymentMethodDefinitions = metadata?.supportedPaymentMethodDefinitions()
+
                 // By default, only cards are supported. If the elements session is not available, then US Bank account
                 // is not supported
-                val supportedPaymentMethods = elementsSession?.stripeIntent?.paymentMethodTypes?.mapNotNull {
-                    lpmRepository.fromCode(it)
+                val supportedPaymentMethods = supportedPaymentMethodDefinitions?.mapNotNull { paymentMethodDefinition ->
+                    metadata.supportedPaymentMethodForCode(paymentMethodDefinition.type.code)
                 } ?: listOf(CardDefinition.hardcodedCardSpec(billingDetailsCollectionConfig))
 
                 val validSupportedPaymentMethods = filterSupportedPaymentMethods(
@@ -214,6 +219,11 @@ internal class DefaultCustomerSheetLoader(
         }
     }
 }
+
+private data class ElementsSessionWithMetadata(
+    val elementsSession: ElementsSession,
+    val metadata: PaymentMethodMetadata,
+)
 
 private suspend fun <T> Deferred<T>.awaitAsResult(
     timeout: Duration,
