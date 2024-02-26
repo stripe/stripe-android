@@ -9,7 +9,12 @@ import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
-import com.stripe.android.networktesting.RequestMatchers
+import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.composite
+import com.stripe.android.networktesting.RequestMatchers.host
+import com.stripe.android.networktesting.RequestMatchers.method
+import com.stripe.android.networktesting.RequestMatchers.not
+import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.LinkIntegrationType
 import com.stripe.android.paymentsheet.utils.LinkIntegrationTypeProvider
@@ -38,7 +43,7 @@ internal class LinkTest {
     lateinit var integrationType: LinkIntegrationType
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpForPaymentSheet() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUp() = activityScenarioRule.runLinkTest(
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -46,9 +51,9 @@ internal class LinkTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -80,8 +85,8 @@ internal class LinkTest {
         page.fillOutCardDetails()
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/sessions/lookup"),
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
         ) { response ->
             response.testBodyFromFile("consumer-session-lookup-success.json")
         }
@@ -93,37 +98,130 @@ internal class LinkTest {
         Espresso.closeSoftKeyboard()
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/accounts/sign_up"),
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
         ) { response ->
             response.testBodyFromFile("consumer-accounts-signup-success.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/payment_details"),
+            method("POST"),
+            path("/v1/consumers/payment_details"),
             /*
              * Ensures we are passing the full expiration year and not the
              * 2-digit shorthand (should send "2034", not "34")
              */
-            RequestMatchers.bodyPart("card%5Bexp_year%5D", "2034"),
+            bodyPart("card%5Bexp_year%5D", "2034"),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_intents/pi_example/confirm"),
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
             linkInformation()
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/sessions/log_out"),
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
         ) { response ->
             response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughMode() = activityScenarioRule.runLinkTest(
+        integrationType = integrationType,
+        paymentOptionCallback = { paymentOption ->
+            assertThat(paymentOption?.label).endsWith("4242")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode.json")
+        }
+
+        when (testContext) {
+            is LinkTestRunnerContext.PaymentSheet -> {
+                testContext.context.presentPaymentSheet {
+                    presentWithPaymentIntent(
+                        paymentIntentClientSecret = "pi_example_secret_example",
+                        configuration = emptyConfiguration(),
+                    )
+                }
+            }
+            is LinkTestRunnerContext.FlowController -> {
+                testContext.context.configureFlowController {
+                    configureWithPaymentIntent(
+                        paymentIntentClientSecret = "pi_example_secret_example",
+                        configuration = emptyConfiguration(),
+                        callback = { success, error ->
+                            assertThat(success).isTrue()
+                            assertThat(error).isNull()
+                            presentPaymentOptions()
+                        },
+                    )
+                }
+            }
+        }
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+
+        Espresso.closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart("card%5Bexp_year%5D", "2034"),
+            bodyPart("active", "true")
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation())
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
         }
 
         page.clickPrimaryButton()
@@ -138,9 +236,9 @@ internal class LinkTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -172,8 +270,8 @@ internal class LinkTest {
         page.fillOutCardDetails()
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/sessions/lookup"),
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
         ) { response ->
             response.testBodyFromFile("consumer-session-lookup-success.json")
         }
@@ -185,23 +283,23 @@ internal class LinkTest {
         Espresso.closeSoftKeyboard()
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/accounts/sign_up"),
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
         ) { response ->
             response.testBodyFromFile("consumer-accounts-signup-success.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/payment_details"),
+            method("POST"),
+            path("/v1/consumers/payment_details"),
         ) { response ->
             response.setResponseCode(500)
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_intents/pi_example/confirm"),
-            RequestMatchers.not(linkInformation())
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation())
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -218,9 +316,9 @@ internal class LinkTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -252,8 +350,8 @@ internal class LinkTest {
         page.fillOutCardDetails()
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/sessions/lookup"),
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
         ) { response ->
             response.testBodyFromFile("consumer-session-lookup-exists-success.json")
         }
@@ -264,16 +362,16 @@ internal class LinkTest {
         Espresso.closeSoftKeyboard()
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/sessions/lookup"),
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
         ) { response ->
             response.testBodyFromFile("consumer-session-lookup-exists-success.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_intents/pi_example/confirm"),
-            RequestMatchers.not(linkInformation())
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation())
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -290,9 +388,9 @@ internal class LinkTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
@@ -328,9 +426,9 @@ internal class LinkTest {
         page.fillOutCardDetails()
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_intents/pi_example/confirm"),
-            RequestMatchers.not(linkInformation())
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            not(linkInformation())
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -347,17 +445,17 @@ internal class LinkTest {
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            RequestMatchers.method("GET"),
-            RequestMatchers.path("/v1/elements/sessions"),
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         repeat(3) {
             networkRule.enqueue(
-                RequestMatchers.method("POST"),
-                RequestMatchers.path("/v1/consumers/sessions/lookup"),
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
             ) { response ->
                 response.testBodyFromFile("consumer-session-lookup-success.json")
             }
@@ -402,38 +500,38 @@ internal class LinkTest {
 
         repeat(2) {
             networkRule.enqueue(
-                RequestMatchers.method("POST"),
-                RequestMatchers.path("/v1/consumers/sessions/lookup"),
+                method("POST"),
+                path("/v1/consumers/sessions/lookup"),
             ) { response ->
                 response.testBodyFromFile("consumer-session-lookup-success.json")
             }
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/accounts/sign_up"),
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
         ) { response ->
             response.testBodyFromFile("consumer-accounts-signup-success.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/payment_details"),
+            method("POST"),
+            path("/v1/consumers/payment_details"),
         ) { response ->
             response.testBodyFromFile("consumer-payment-details-success.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/payment_intents/pi_example/confirm"),
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
             linkInformation()
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
 
         networkRule.enqueue(
-            RequestMatchers.method("POST"),
-            RequestMatchers.path("/v1/consumers/sessions/log_out"),
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
         ) { response ->
             response.testBodyFromFile("consumer-session-logout-success.json")
         }
@@ -442,16 +540,16 @@ internal class LinkTest {
     }
 
     private fun linkInformation(): RequestMatcher {
-        return RequestMatchers.composite(
-            RequestMatchers.bodyPart(
+        return composite(
+            bodyPart(
                 name = "payment_method_data%5Blink%5D%5Bcard%5D%5Bcvc%5D",
                 value = "123"
             ),
-            RequestMatchers.bodyPart(
+            bodyPart(
                 name = "payment_method_data%5Blink%5D%5Bpayment_details_id%5D",
                 value = "QAAAKJ6"
             ),
-            RequestMatchers.bodyPart(
+            bodyPart(
                 name = "payment_method_data%5Blink%5D%5Bcredentials%5D%5Bconsumer_session_client_secret%5D",
                 value = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND"
             ),
