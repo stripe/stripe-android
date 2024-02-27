@@ -13,6 +13,7 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -183,10 +184,18 @@ internal class LinkHandler @Inject constructor(
                     PaymentSelection.New.LinkInline(linkPaymentDetails)
                 }
                 is LinkPaymentDetails.Saved -> {
+                    val last4 = when (val paymentDetails = linkPaymentDetails.paymentDetails) {
+                        is ConsumerPaymentDetails.Card -> paymentDetails.last4
+                        is ConsumerPaymentDetails.Passthrough -> paymentDetails.last4
+                        is ConsumerPaymentDetails.BankAccount -> paymentDetails.last4
+                        else -> null
+                    }
+
                     PaymentSelection.Saved(
                         paymentMethod = PaymentMethod.Builder()
                             .setId(linkPaymentDetails.paymentDetails.id)
                             .setCode(paymentMethodCreateParams.typeCode)
+                            .setCard(PaymentMethod.Card(last4 = last4))
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
