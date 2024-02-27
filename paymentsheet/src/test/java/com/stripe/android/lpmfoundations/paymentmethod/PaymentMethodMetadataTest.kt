@@ -131,4 +131,114 @@ internal class PaymentMethodMetadataTest {
         )
         assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
     }
+
+    @Test
+    fun `sortedSupportedPaymentMethods returns list sorted by payment_method_types`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm", "klarna"),
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            sharedDataSpecs = listOf(
+                SharedDataSpec("affirm"),
+                SharedDataSpec("card"),
+                SharedDataSpec("klarna"),
+            ),
+        )
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        assertThat(sortedSupportedPaymentMethods).hasSize(3)
+        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
+        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
+        assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("klarna")
+    }
+
+    @Test
+    fun `sortedSupportedPaymentMethods returns list sorted by payment_method_types with different order`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("affirm", "klarna", "card"),
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            sharedDataSpecs = listOf(
+                SharedDataSpec("affirm"),
+                SharedDataSpec("card"),
+                SharedDataSpec("klarna"),
+            ),
+        )
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        assertThat(sortedSupportedPaymentMethods).hasSize(3)
+        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
+        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
+        assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
+    }
+
+    @Test
+    fun `sortedSupportedPaymentMethods filters payment methods without a sharedDataSpec`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("affirm", "klarna", "card"),
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            sharedDataSpecs = listOf(
+                SharedDataSpec("affirm"),
+                SharedDataSpec("card"),
+            ),
+        )
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        assertThat(sortedSupportedPaymentMethods).hasSize(2)
+        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
+        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
+    }
+
+    @Test
+    fun `sortedSupportedPaymentMethods filters unactivated payment methods`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("affirm", "klarna", "card"),
+                unactivatedPaymentMethods = listOf("klarna"),
+                isLiveMode = true,
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            sharedDataSpecs = listOf(
+                SharedDataSpec("affirm"),
+                SharedDataSpec("klarna"),
+                SharedDataSpec("card"),
+            ),
+        )
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        assertThat(sortedSupportedPaymentMethods).hasSize(2)
+        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
+        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
+    }
+
+    @Test
+    fun `sortedSupportedPaymentMethods sorts on custom sort`() {
+        paymentMethodSorter = {
+            sortedBy {
+                when (it.code) {
+                    "card" -> 1
+                    "klarna" -> 2
+                    "affirm" -> 3
+                    else -> 100
+                }
+            }
+        }
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("affirm", "klarna", "card"),
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            sharedDataSpecs = listOf(
+                SharedDataSpec("affirm"),
+                SharedDataSpec("klarna"),
+                SharedDataSpec("card"),
+            ),
+        )
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        paymentMethodSorter = defaultSorter
+        assertThat(sortedSupportedPaymentMethods).hasSize(3)
+        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
+        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
+        assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("affirm")
+    }
 }
