@@ -65,6 +65,6 @@ internal data class PaymentMethodMetadata(
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val defaultSorter: List<SupportedPaymentMethod>.() -> List<SupportedPaymentMethod> = { this }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 // Default to no sort. The server should be doing the sorting! But sometimes we need this for tests.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 var paymentMethodSorter: List<SupportedPaymentMethod>.() -> List<SupportedPaymentMethod> = defaultSorter
