@@ -61,7 +61,7 @@ internal class DefaultIdentityRepository @Inject constructor(
                 apiKey = ephemeralKey
             ),
             params = mapOf(
-                APP_IDENTIFIER to context.packageName
+                APP_IDENTIFIER to context.applicationContext.packageName
             )
         ),
         VerificationPage.serializer()
