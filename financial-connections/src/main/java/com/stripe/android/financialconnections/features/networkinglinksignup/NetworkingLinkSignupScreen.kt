@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
@@ -77,11 +78,7 @@ import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.time.Duration.Companion.milliseconds
-
-private val ScrollToPhoneNumberFieldDelay = 300.milliseconds
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
@@ -209,8 +206,7 @@ private fun NetworkingLinkSignupLoaded(
 
     LaunchedEffect(showFullForm) {
         if (showFullForm) {
-            delay(ScrollToPhoneNumberFieldDelay)
-            scrollState.animateScrollBy(Float.MAX_VALUE, animationSpec = tween())
+            scrollState.animateScrollToBottom()
             phoneNumberFocusRequester.requestFocus()
         }
     }
@@ -378,6 +374,12 @@ internal fun EmailSection(
             }
         }
     }
+}
+
+private suspend fun ScrollState.animateScrollToBottom(
+    animationSpec: AnimationSpec<Float> = tween(),
+) {
+    animateScrollBy(Float.MAX_VALUE, animationSpec)
 }
 
 @Composable
