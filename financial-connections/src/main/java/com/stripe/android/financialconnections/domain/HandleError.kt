@@ -10,7 +10,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsEr
 import javax.inject.Inject
 
 internal interface HandleError {
-    suspend operator fun invoke(
+    operator fun invoke(
         extraMessage: String,
         error: Throwable,
         pane: FinancialConnectionsSessionManifest.Pane,
@@ -38,7 +38,7 @@ internal class RealHandleError @Inject constructor(
      * @param displayErrorScreen whether to navigate to the error screen
      *
      */
-    override suspend operator fun invoke(
+    override operator fun invoke(
         extraMessage: String,
         error: Throwable,
         pane: FinancialConnectionsSessionManifest.Pane,

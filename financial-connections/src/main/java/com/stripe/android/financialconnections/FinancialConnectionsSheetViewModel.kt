@@ -138,7 +138,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun logNoBrowserAvailableAndFinish() {
-        viewModelScope.launch {
+        withState { state ->
             val error = AppInitializationError("No Web browser available to launch AuthFlow")
             analyticsTracker.logError(
                 "error Launching the Auth Flow",
@@ -147,7 +147,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 error = error
             )
             finishWithResult(
-                state = awaitState(),
+                state = state,
                 result = Failed(error)
             )
         }
