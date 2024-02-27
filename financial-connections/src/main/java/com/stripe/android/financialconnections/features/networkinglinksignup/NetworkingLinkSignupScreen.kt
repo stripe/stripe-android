@@ -172,7 +172,7 @@ private fun NetworkingLinkSignupMainContent(
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
                 scrollState = scrollState,
-                validForm = state.valid(),
+                validForm = state.valid,
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
                 saveAccountToLinkSync = state.saveAccountToLink,
