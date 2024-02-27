@@ -313,7 +313,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(bodyPart("payment_method", "pm_1234")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -378,7 +378,7 @@ internal class LinkTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(linkInformation())
+            not(bodyPart("payment_method", "pm_1234")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
