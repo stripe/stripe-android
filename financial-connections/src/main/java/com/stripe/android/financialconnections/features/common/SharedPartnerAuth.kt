@@ -68,7 +68,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
@@ -294,7 +294,7 @@ private fun PrePaneContent(
     onCancelClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
-    Layout(
+    LazyLayout(
         inModal = showInModal,
         // Overrides padding values to allow full-span prepane image background
         verticalArrangement = Arrangement.spacedBy(24.dp),

@@ -41,7 +41,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.LinkColors
 
 @Composable
@@ -62,7 +62,7 @@ private fun NetworkingLinkLoginWarmupContent(
     onSkipClicked: () -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-    Layout(
+    LazyLayout(
         modifier = Modifier
             .fillMaxWidth()
             .background(color = colors.backgroundSurface)

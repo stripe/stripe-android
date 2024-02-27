@@ -41,7 +41,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 
 @Composable
 internal fun NetworkingLinkVerificationScreen() {
@@ -107,7 +107,7 @@ private fun NetworkingLinkVerificationLoaded(
             onCloseFromErrorClick = onCloseFromErrorClick
         )
     } else {
-        Layout(
+        LazyLayout(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             body = {
                 item { Header(payload) }
