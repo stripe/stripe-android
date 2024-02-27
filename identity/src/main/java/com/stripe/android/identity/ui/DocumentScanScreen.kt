@@ -191,7 +191,7 @@ private fun DocumentCaptureScreen(
             documentScannerState.scanState is IdentityScanState.Found
         ) {
             val currentTime = System.currentTimeMillis()
-            if (currentTime - lastFoundResIdUpdateTime >= 300L) {
+            if (currentTime - lastFoundResIdUpdateTime >= FEED_BACK_REFRESH_LIMIT) {
                 lastFoundResIdUpdateTime = currentTime
                 foundResId =
                     documentScannerState.scanState
@@ -348,3 +348,5 @@ private fun CameraViewFinder(
         }
     }
 }
+
+private const val FEED_BACK_REFRESH_LIMIT = 300L

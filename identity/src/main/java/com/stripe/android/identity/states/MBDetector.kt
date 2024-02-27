@@ -117,8 +117,12 @@ internal class MBDetector private constructor(settings: MBSettings) {
                                 val analyzeResult = AnalyzerRunner.detachResult()
                                 try {
                                     DetectorResult.Captured(
-                                        original = requireNotNull(analyzeResult.firstCapture?.imageResult?.image?.convertToBitmap()),
-                                        transformed = requireNotNull(analyzeResult.firstCapture?.transformedImageResult?.image?.convertToBitmap()),
+                                        original = requireNotNull(
+                                            analyzeResult.firstCapture?.imageResult?.image?.convertToBitmap()
+                                        ),
+                                        transformed = requireNotNull(
+                                            analyzeResult.firstCapture?.transformedImageResult?.image?.convertToBitmap()
+                                        ),
                                         isFront = analyzeResult.firstCapture?.side == Side.Front
                                     )
                                 } catch (e: Exception) {
