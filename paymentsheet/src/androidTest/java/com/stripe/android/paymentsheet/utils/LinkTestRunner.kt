@@ -2,9 +2,11 @@ package com.stripe.android.paymentsheet.utils
 
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.rules.ActivityScenarioRule
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
 internal fun ActivityScenarioRule<MainActivity>.runLinkTest(
@@ -20,7 +22,7 @@ internal fun ActivityScenarioRule<MainActivity>.runLinkTest(
                 integrationType = IntegrationType.Compose,
                 resultCallback = resultCallback,
                 block = { context ->
-                    block(LinkTestRunnerContext.PaymentSheet(scenario, context))
+                    block(LinkTestRunnerContext.WithPaymentSheet(scenario, context))
                 },
             )
         }
@@ -31,7 +33,7 @@ internal fun ActivityScenarioRule<MainActivity>.runLinkTest(
                 paymentOptionCallback = paymentOptionCallback,
                 resultCallback = resultCallback,
                 block = { context ->
-                    block(LinkTestRunnerContext.FlowController(scenario, context))
+                    block(LinkTestRunnerContext.WithFlowController(scenario, context))
                 }
             )
         }
@@ -41,13 +43,42 @@ internal fun ActivityScenarioRule<MainActivity>.runLinkTest(
 internal sealed interface LinkTestRunnerContext {
     val scenario: ActivityScenario<MainActivity>
 
-    class PaymentSheet(
-        override val scenario: ActivityScenario<MainActivity>,
-        val context: PaymentSheetTestRunnerContext
-    ) : LinkTestRunnerContext
+    fun launch(
+        configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
+            merchantDisplayName = "Merchant, Inc."
+        )
+    )
 
-    class FlowController(
+    class WithPaymentSheet(
         override val scenario: ActivityScenario<MainActivity>,
-        val context: FlowControllerTestRunnerContext
-    ) : LinkTestRunnerContext
+        private val context: PaymentSheetTestRunnerContext
+    ) : LinkTestRunnerContext {
+        override fun launch(configuration: PaymentSheet.Configuration) {
+            context.presentPaymentSheet {
+                presentWithPaymentIntent(
+                    paymentIntentClientSecret = "pi_example_secret_example",
+                    configuration = configuration,
+                )
+            }
+        }
+    }
+
+    class WithFlowController(
+        override val scenario: ActivityScenario<MainActivity>,
+        private val context: FlowControllerTestRunnerContext
+    ) : LinkTestRunnerContext {
+        override fun launch(configuration: PaymentSheet.Configuration) {
+            context.configureFlowController {
+                configureWithPaymentIntent(
+                    paymentIntentClientSecret = "pi_example_secret_example",
+                    configuration = configuration,
+                    callback = { success, error ->
+                        assertThat(success).isTrue()
+                        assertThat(error).isNull()
+                        presentPaymentOptions()
+                    },
+                )
+            }
+        }
+    }
 }
