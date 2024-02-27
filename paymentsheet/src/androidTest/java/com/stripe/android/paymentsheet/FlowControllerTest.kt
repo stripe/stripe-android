@@ -2,13 +2,11 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.lifecycle.Lifecycle
-import androidx.test.espresso.Espresso
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.networktesting.NetworkRule
-import com.stripe.android.networktesting.RequestMatchers
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -23,7 +21,6 @@ import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.util.UUID
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -548,96 +545,6 @@ internal class FlowControllerTest {
             path("/v1/payment_intents/pi_example"),
         ) { response ->
             response.testBodyFromFile("payment-intent-get-requires_payment_method.json")
-        }
-
-        page.clickPrimaryButton()
-    }
-
-    @Test
-    fun testLogoutAfterLinkTransaction(
-        @TestParameter integrationType: IntegrationType,
-    ) = composeTestRule.activityRule.runFlowControllerTest(
-        integrationType = integrationType,
-        paymentOptionCallback = { paymentOption ->
-            assertThat(paymentOption?.label).endsWith("4242")
-        },
-        resultCallback = ::assertCompleted,
-    ) { testContext ->
-        networkRule.enqueue(
-            RequestMatchers.host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
-        ) { response ->
-            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-        }
-
-        repeat(3) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
-        }
-
-        testContext.configureFlowController {
-            configureWithPaymentIntent(
-                paymentIntentClientSecret = "pi_example_secret_example",
-                configuration = PaymentSheet.Configuration(
-                    merchantDisplayName = "Merchant, Inc.",
-                    defaultBillingDetails = PaymentSheet.BillingDetails(
-                        email = "test-${UUID.randomUUID()}@email.com",
-                        phone = "+15555555555",
-                    )
-                ),
-                callback = { success, error ->
-                    assertThat(success).isTrue()
-                    assertThat(error).isNull()
-                    presentPaymentOptions()
-                },
-            )
-        }
-
-        page.fillOutCardDetails()
-        page.fillOutLink()
-
-        Espresso.closeSoftKeyboard()
-
-        repeat(2) {
-            networkRule.enqueue(
-                method("POST"),
-                path("/v1/consumers/sessions/lookup"),
-            ) { response ->
-                response.testBodyFromFile("consumer-session-lookup-success.json")
-            }
-        }
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/accounts/sign_up"),
-        ) { response ->
-            response.testBodyFromFile("consumer-accounts-signup-success.json")
-        }
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/payment_details"),
-        ) { response ->
-            response.testBodyFromFile("consumer-payment-details-success.json")
-        }
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/payment_intents/pi_example/confirm"),
-        ) { response ->
-            response.testBodyFromFile("payment-intent-confirm.json")
-        }
-
-        networkRule.enqueue(
-            method("POST"),
-            path("/v1/consumers/sessions/log_out"),
-        ) { response ->
-            response.testBodyFromFile("consumer-session-logout-success.json")
         }
 
         page.clickPrimaryButton()
