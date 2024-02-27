@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -21,6 +20,7 @@ internal data class PaymentMethodMetadata(
     val billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration,
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
+    val paymentMethodOrder: List<String>,
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
@@ -58,13 +58,39 @@ internal data class PaymentMethodMetadata(
             } else {
                 paymentMethodDefinition.supportedPaymentMethod(this, sharedDataSpec)
             }
-        }.paymentMethodSorter()
+        }.run {
+            // Optimization to early out if we don't have a client side order.
+            if (paymentMethodOrder.isNotEmpty()) {
+                val orderedPaymentMethodTypes = orderedPaymentMethodTypes().mapOrderToIndex()
+                sortedBy { supportedPaymentMethod ->
+                    orderedPaymentMethodTypes[supportedPaymentMethod.code]
+                }
+            } else {
+                this
+            }
+        }
+    }
+
+    private fun orderedPaymentMethodTypes(): List<String> {
+        val originalOrderedTypes = stripeIntent.paymentMethodTypes.toMutableList()
+        val result = mutableListOf<String>()
+        // 1. Add each PM in paymentMethodOrder first
+        for (pm in paymentMethodOrder) {
+            // Ignore the PM if it's not in originalOrderedTypes
+            if (originalOrderedTypes.contains(pm))  {
+                result += pm
+                // 2. Remove each PM we add from originalOrderedTypes.
+                originalOrderedTypes.remove(pm)
+            }
+        }
+        // 3. Append the remaining PMs in originalOrderedTypes
+        result.addAll(originalOrderedTypes)
+        return result
+    }
+
+    private fun List<String>.mapOrderToIndex(): Map<String, Int> {
+        return mapIndexed { index, s ->
+            s to index
+        }.toMap()
     }
 }
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-val defaultSorter: List<SupportedPaymentMethod>.() -> List<SupportedPaymentMethod> = { this }
-
-// Default to no sort. The server should be doing the sorting! But sometimes we need this for tests.
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-var paymentMethodSorter: List<SupportedPaymentMethod>.() -> List<SupportedPaymentMethod> = defaultSorter
