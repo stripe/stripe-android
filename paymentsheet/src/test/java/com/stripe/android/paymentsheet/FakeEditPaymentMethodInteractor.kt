@@ -26,6 +26,7 @@ internal class FakeEditPaymentMethodInteractor(
                 EditPaymentMethodViewState.CardBrandChoice(CardBrand.fromCode(code))
             } ?: EditPaymentMethodViewState.CardBrandChoice(CardBrand.Unknown),
             displayName = "Card",
+            canRemove = true,
         )
     )
 
@@ -43,7 +44,8 @@ internal class FakeEditPaymentMethodInteractor(
             eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
-            displayName: String
+            displayName: String,
+            canRemove: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
             return FakeEditPaymentMethodInteractor(initialPaymentMethod)
         }

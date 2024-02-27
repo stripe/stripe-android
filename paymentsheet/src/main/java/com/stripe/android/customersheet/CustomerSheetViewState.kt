@@ -25,15 +25,37 @@ internal sealed class CustomerSheetViewState(
     open val isEditing: Boolean,
     open val screen: PaymentSheetScreen,
     open val cbcEligibility: CardBrandChoiceEligibility,
+    open val allowsRemovalOfLastSavedPaymentMethod: Boolean,
 ) {
+
+    private fun isModifiable(paymentMethod: PaymentMethod): Boolean {
+        val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
+            available.size > 1
+        } ?: false
+
+        return cbcEligibility is CardBrandChoiceEligibility.Eligible && hasMultipleNetworks
+    }
+
+    private val canEdit: Boolean
+        get() {
+            return if (allowsRemovalOfLastSavedPaymentMethod) {
+                savedPaymentMethods.isNotEmpty()
+            } else {
+                if (savedPaymentMethods.size == 1) {
+                    isModifiable(savedPaymentMethods.first())
+                } else {
+                    savedPaymentMethods.size > 1
+                }
+            }
+        }
 
     val topBarState: PaymentSheetTopBarState
         get() = PaymentSheetTopBarStateFactory.create(
             screen = screen,
-            paymentMethods = savedPaymentMethods,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
+            canEdit = canEdit,
         )
 
     fun shouldDisplayDismissConfirmationModal(
@@ -55,6 +77,7 @@ internal sealed class CustomerSheetViewState(
         isEditing = false,
         screen = PaymentSheetScreen.Loading,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        allowsRemovalOfLastSavedPaymentMethod = true,
     )
 
     data class SelectPaymentMethod(
@@ -67,6 +90,7 @@ internal sealed class CustomerSheetViewState(
         val isGooglePayEnabled: Boolean,
         val primaryButtonVisible: Boolean,
         val primaryButtonLabel: String?,
+        override val allowsRemovalOfLastSavedPaymentMethod: Boolean,
         val errorMessage: String? = null,
         val unconfirmedPaymentMethod: PaymentMethod? = null,
         val mandateText: String? = null,
@@ -78,6 +102,7 @@ internal sealed class CustomerSheetViewState(
         isEditing = isEditing,
         screen = PaymentSheetScreen.SelectSavedPaymentMethods,
         cbcEligibility = cbcEligibility,
+        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
     ) {
         val primaryButtonEnabled: Boolean
             get() = !isProcessing
@@ -115,6 +140,7 @@ internal sealed class CustomerSheetViewState(
             PaymentSheetScreen.AddAnotherPaymentMethod
         },
         cbcEligibility = cbcEligibility,
+        allowsRemovalOfLastSavedPaymentMethod = true,
     )
 
     data class EditPaymentMethod(
@@ -122,6 +148,7 @@ internal sealed class CustomerSheetViewState(
         override val isLiveMode: Boolean,
         override val cbcEligibility: CardBrandChoiceEligibility,
         override val savedPaymentMethods: List<PaymentMethod>,
+        override val allowsRemovalOfLastSavedPaymentMethod: Boolean,
     ) : CustomerSheetViewState(
         savedPaymentMethods = savedPaymentMethods,
         isLiveMode = isLiveMode,
@@ -129,5 +156,6 @@ internal sealed class CustomerSheetViewState(
         isEditing = false,
         screen = PaymentSheetScreen.EditPaymentMethod(editPaymentMethodInteractor),
         cbcEligibility = cbcEligibility,
+        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
     )
 }

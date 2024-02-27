@@ -131,11 +131,13 @@ internal fun EditPaymentMethodUi(
             onButtonClick = { viewActionHandler.invoke(OnUpdatePressed) },
         )
 
-        RemoveButton(
-            idle = isIdle,
-            removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
-            onRemove = { viewActionHandler(OnRemovePressed) },
-        )
+        if (viewState.canRemove) {
+            RemoveButton(
+                idle = isIdle,
+                removing = viewState.status == EditPaymentMethodViewState.Status.Removing,
+                onRemove = { viewActionHandler(OnRemovePressed) },
+            )
+        }
     }
 
     if (viewState.confirmRemoval) {
@@ -320,7 +322,8 @@ private fun EditPaymentMethodPreview() {
                     EditPaymentMethodViewState.CardBrandChoice(
                         brand = CardBrand.CartesBancaires
                     )
-                )
+                ),
+                canRemove = true,
             ),
             viewActionHandler = {}
         )

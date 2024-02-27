@@ -12,6 +12,7 @@ internal data class EditPaymentMethodViewState(
     val canUpdate: Boolean,
     val selectedBrand: CardBrandChoice,
     val availableBrands: List<CardBrandChoice>,
+    val canRemove: Boolean,
     val confirmRemoval: Boolean = false,
     val error: ResolvableString? = null,
 ) {

@@ -86,6 +86,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonVisible = false,
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        allowsRemovalOfLastSavedPaymentMethod = true,
     )
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -258,7 +259,8 @@ internal object CustomerSheetTestHelper {
                 eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
                 removeExecutor: PaymentMethodRemoveOperation,
                 updateExecutor: PaymentMethodUpdateOperation,
-                displayName: String
+                displayName: String,
+                canRemove: Boolean,
             ): ModifiableEditPaymentMethodViewInteractor {
                 return DefaultEditPaymentMethodViewInteractor(
                     initialPaymentMethod = initialPaymentMethod,
@@ -266,7 +268,8 @@ internal object CustomerSheetTestHelper {
                     removeExecutor = removeExecutor,
                     updateExecutor = updateExecutor,
                     eventHandler = eventHandler,
-                    workContext = workContext
+                    workContext = workContext,
+                    canRemove = canRemove,
                 )
             }
         }

@@ -46,6 +46,7 @@ internal interface ModifiableEditPaymentMethodViewInteractor : EditPaymentMethod
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String,
+            canRemove: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor
     }
 }
@@ -56,6 +57,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
     private val eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
     private val removeExecutor: PaymentMethodRemoveOperation,
     private val updateExecutor: PaymentMethodUpdateOperation,
+    private val canRemove: Boolean,
     workContext: CoroutineContext = Dispatchers.Default,
     viewStateSharingStarted: SharingStarted = SharingStarted.WhileSubscribed()
 ) : ModifiableEditPaymentMethodViewInteractor, CoroutineScope {
@@ -86,6 +88,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             displayName = displayName,
             error = error,
             confirmRemoval = confirmDeletion,
+            canRemove = canRemove,
         )
     }.stateIn(
         scope = this,
@@ -97,6 +100,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             availableBrands = initialPaymentMethod.getAvailableNetworks(),
             status = EditPaymentMethodViewState.Status.Idle,
             displayName = displayName,
+            canRemove = canRemove,
         )
     )
 
@@ -207,6 +211,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             removeExecutor: PaymentMethodRemoveOperation,
             updateExecutor: PaymentMethodUpdateOperation,
             displayName: String,
+            canRemove: Boolean,
         ): ModifiableEditPaymentMethodViewInteractor {
             return DefaultEditPaymentMethodViewInteractor(
                 initialPaymentMethod = initialPaymentMethod,
@@ -214,6 +219,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
                 removeExecutor = removeExecutor,
                 updateExecutor = updateExecutor,
                 displayName = displayName,
+                canRemove = canRemove,
             )
         }
     }

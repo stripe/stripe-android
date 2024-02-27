@@ -22,6 +22,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsViewModel
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -58,14 +59,12 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -236,12 +235,30 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentOptionsState(),
         )
 
+    private val canEdit: StateFlow<Boolean> = paymentOptionsState.map { state ->
+        val paymentMethods = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
+        if (config.allowsRemovalOfLastSavedPaymentMethod) {
+            paymentMethods.isNotEmpty()
+        } else {
+            if (paymentMethods.size == 1) {
+                // We will allow them to change card brand, but not delete.
+                paymentMethods.first().isModifiable
+            } else {
+                paymentMethods.size > 1
+            }
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = false,
+    )
+
     val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
         currentScreen,
-        paymentMethods.map { it.orEmpty() },
         stripeIntent.map { it?.isLiveMode ?: true },
         processing,
         editing,
+        canEdit,
         PaymentSheetTopBarStateFactory::create,
     ).stateIn(
         scope = viewModelScope,
@@ -266,11 +283,19 @@ internal abstract class BaseSheetViewModel(
 
     init {
         viewModelScope.launch {
-            paymentMethods.onEach { paymentMethods ->
+            canEdit.collect { canEdit ->
+                if (!canEdit && editing.value) {
+                    toggleEditing()
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            paymentMethods.collect { paymentMethods ->
                 if (paymentMethods.isNullOrEmpty() && editing.value) {
                     toggleEditing()
                 }
-            }.collect()
+            }
         }
 
         viewModelScope.launch {
@@ -514,6 +539,12 @@ internal abstract class BaseSheetViewModel(
     fun modifyPaymentMethod(paymentMethod: PaymentMethod) {
         eventReporter.onShowEditablePaymentOption()
 
+        val canRemove = if (config.allowsRemovalOfLastSavedPaymentMethod) {
+            true
+        } else {
+            paymentOptionsState.value.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>().size > 1
+        }
+
         transitionTo(
             PaymentSheetScreen.EditPaymentMethod(
                 editInteractorFactory.create(
@@ -540,7 +571,8 @@ internal abstract class BaseSheetViewModel(
                     },
                     updateExecutor = { method, brand ->
                         modifyCardPaymentMethod(method, brand)
-                    }
+                    },
+                    canRemove = canRemove,
                 )
             )
         )

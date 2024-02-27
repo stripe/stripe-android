@@ -579,6 +579,12 @@ internal class CustomerSheetViewModel(
     private fun onModifyItem(paymentMethod: PaymentMethod) {
         val currentViewState = viewState.value
 
+        val canRemove = if (configuration.allowsRemovalOfLastSavedPaymentMethod) {
+            true
+        } else {
+            currentViewState.savedPaymentMethods.size > 1
+        }
+
         transition(
             to = CustomerSheetViewState.EditPaymentMethod(
                 editPaymentMethodInteractor = editInteractorFactory.create(
@@ -612,10 +618,12 @@ internal class CustomerSheetViewModel(
                             is CustomerAdapter.Result.Failure -> Result.failure(result.cause)
                         }
                     },
+                    canRemove = canRemove,
                 ),
                 isLiveMode = currentViewState.isLiveMode,
                 cbcEligibility = currentViewState.cbcEligibility,
-                savedPaymentMethods = currentViewState.savedPaymentMethods
+                savedPaymentMethods = currentViewState.savedPaymentMethods,
+                allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
             )
         )
     }
@@ -1218,6 +1226,7 @@ internal class CustomerSheetViewModel(
                 primaryButtonLabel = resources.getString(R.string.stripe_paymentsheet_confirm),
                 errorMessage = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                allowsRemovalOfLastSavedPaymentMethod = configuration.allowsRemovalOfLastSavedPaymentMethod,
             )
         )
     }
