@@ -6,6 +6,7 @@ import androidx.work.Constraints
 import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.await
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.IsWorkManagerAvailable
 import kotlinx.coroutines.CoroutineDispatcher
@@ -28,15 +29,17 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
     private val dispatcher: CoroutineDispatcher,
 ) : AnalyticsRequestV2Executor {
 
+    @OptIn(DelicateCoroutinesApi::class)
     override fun enqueue(request: AnalyticsRequestV2) {
-        if (isWorkManagerAvailable()) {
-            enqueueRequest(request)
-        } else {
-            executeRequest(request)
+        GlobalScope.launch(dispatcher) {
+            val isEnqueued = isWorkManagerAvailable() && enqueueRequest(request)
+            if (!isEnqueued) {
+                executeRequest(request)
+            }
         }
     }
 
-    private fun enqueueRequest(request: AnalyticsRequestV2) {
+    private suspend fun enqueueRequest(request: AnalyticsRequestV2): Boolean {
         val workManager = WorkManager.getInstance(application)
         val inputData = SendAnalyticsRequestV2Worker.createInputData(request)
 
@@ -51,18 +54,15 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
             .setConstraints(constraints)
             .build()
 
-        workManager.enqueue(workRequest)
+        return runCatching { workManager.enqueue(workRequest).await() }.isSuccess
     }
 
-    @OptIn(DelicateCoroutinesApi::class)
-    private fun executeRequest(request: AnalyticsRequestV2) {
-        GlobalScope.launch(dispatcher) {
-            runCatching {
-                networkClient.executeRequest(request)
-                logger.debug("EVENT: ${request.eventName}")
-            }.onFailure {
-                logger.error("Exception while making analytics request", it)
-            }
+    private suspend fun executeRequest(request: AnalyticsRequestV2) {
+        runCatching {
+            networkClient.executeRequest(request)
+            logger.debug("EVENT: ${request.eventName}")
+        }.onFailure {
+            logger.error("Exception while making analytics request", it)
         }
     }
 }
