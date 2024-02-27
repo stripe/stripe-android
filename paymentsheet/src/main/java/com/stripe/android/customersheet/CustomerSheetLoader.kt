@@ -164,13 +164,11 @@ internal class DefaultCustomerSheetLoader(
 
                 val elementsSession = elementsSessionWithMetadata?.elementsSession
                 val metadata = elementsSessionWithMetadata?.metadata
-                val supportedPaymentMethodDefinitions = metadata?.supportedPaymentMethodDefinitions()
 
                 // By default, only cards are supported. If the elements session is not available, then US Bank account
                 // is not supported
-                val supportedPaymentMethods = supportedPaymentMethodDefinitions?.mapNotNull { paymentMethodDefinition ->
-                    metadata.supportedPaymentMethodForCode(paymentMethodDefinition.type.code)
-                } ?: listOf(CardDefinition.hardcodedCardSpec(billingDetailsCollectionConfig))
+                val supportedPaymentMethods = metadata?.sortedSupportedPaymentMethods()
+                    ?: listOf(CardDefinition.hardcodedCardSpec(billingDetailsCollectionConfig))
 
                 val validSupportedPaymentMethods = filterSupportedPaymentMethods(
                     supportedPaymentMethods,

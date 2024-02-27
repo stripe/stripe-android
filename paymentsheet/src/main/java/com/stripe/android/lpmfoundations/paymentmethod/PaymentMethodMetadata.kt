@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
@@ -48,4 +49,22 @@ internal data class PaymentMethodMetadata(
         val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
         return definition.supportedPaymentMethod(this, sharedDataSpec)
     }
+
+    fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
+        return supportedPaymentMethodDefinitions().mapNotNull { paymentMethodDefinition ->
+            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code }
+            if (sharedDataSpec == null) {
+                null
+            } else {
+                paymentMethodDefinition.supportedPaymentMethod(this, sharedDataSpec)
+            }
+        }.paymentMethodSorter()
+    }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+val defaultSorter: List<SupportedPaymentMethod>.() -> List<SupportedPaymentMethod> = { this }
+
+// Default to no sort. The server should be doing the sorting! But sometimes we need this for tests.
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+var paymentMethodSorter: List<SupportedPaymentMethod>.() -> List<SupportedPaymentMethod> = defaultSorter

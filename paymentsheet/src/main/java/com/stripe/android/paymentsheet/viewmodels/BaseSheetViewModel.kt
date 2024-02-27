@@ -352,9 +352,7 @@ internal abstract class BaseSheetViewModel(
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         val stripeIntent = paymentMethodMetadata?.stripeIntent
         _stripeIntent.value = stripeIntent
-        supportedPaymentMethods = paymentMethodMetadata?.supportedPaymentMethodDefinitions()?.mapNotNull {
-            paymentMethodMetadata.supportedPaymentMethodForCode(it.type.code)
-        } ?: emptyList()
+        supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
 
         if (stripeIntent is PaymentIntent) {
             _amount.value = Amount(
