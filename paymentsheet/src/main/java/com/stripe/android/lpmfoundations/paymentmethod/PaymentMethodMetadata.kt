@@ -62,7 +62,6 @@ internal data class PaymentMethodMetadata(
     }
 }
 
-
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 val defaultSorter: List<SupportedPaymentMethod>.() -> List<SupportedPaymentMethod> = { this }
 
