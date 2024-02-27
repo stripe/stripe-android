@@ -1,3 +1,6 @@
+public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
+}
+
 public final class com/stripe/android/common/ui/ComposableSingletons$BottomSheetKt {
 	public static final field INSTANCE Lcom/stripe/android/common/ui/ComposableSingletons$BottomSheetKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -108,6 +111,7 @@ public final class com/stripe/android/customersheet/CustomerSheet$Configuration 
 
 public final class com/stripe/android/customersheet/CustomerSheet$Configuration$Builder {
 	public static final field $stable I
+	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/customersheet/CustomerSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/customersheet/CustomerSheet$Configuration;
@@ -639,6 +643,7 @@ public final class com/stripe/android/paymentsheet/PaymentSheet$Configuration$Bu
 	public fun <init> (Ljava/lang/String;)V
 	public final fun allowsDelayedPaymentMethods (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun allowsPaymentMethodsRequiringShippingAddress (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
+	public final fun allowsRemovalOfLastSavedPaymentMethod (Z)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun appearance (Lcom/stripe/android/paymentsheet/PaymentSheet$Appearance;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun billingDetailsCollectionConfiguration (Lcom/stripe/android/paymentsheet/PaymentSheet$BillingDetailsCollectionConfiguration;)Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration$Builder;
 	public final fun build ()Lcom/stripe/android/paymentsheet/PaymentSheet$Configuration;

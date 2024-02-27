@@ -6,7 +6,6 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
-import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -634,8 +633,6 @@ class PaymentSheet internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
-            // TODO(jaynewstrom-stripe): remove before AllowsRemovalOfLastSavedPaymentMethodApi Beta.
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
                 this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
