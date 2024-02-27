@@ -4,7 +4,6 @@ import android.app.Application
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -246,8 +245,6 @@ class CustomerSheet @Inject internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
-            // TODO(jaynewstrom-stripe): remove before AllowsRemovalOfLastSavedPaymentMethodApi Beta.
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
                 this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
