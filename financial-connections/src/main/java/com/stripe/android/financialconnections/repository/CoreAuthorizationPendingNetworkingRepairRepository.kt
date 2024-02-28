@@ -35,7 +35,7 @@ internal class CoreAuthorizationPendingNetworkingRepairRepository(
         )
     }.getOrNull()
 
-    suspend fun set(coreAuthorization: String) = runCatching {
+    fun set(coreAuthorization: String) = runCatching {
         logger.debug("core authorization set to $coreAuthorization")
         setState { copy(coreAuthorization = coreAuthorization) }
     }.onFailure {

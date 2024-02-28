@@ -133,7 +133,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             )
     }.execute { copy(confirmVerification = it) }
 
-    private suspend fun onNetworkedAccountsFailed(
+    private fun onNetworkedAccountsFailed(
         error: Throwable,
         updatedManifest: FinancialConnectionsSessionManifest
     ) {
