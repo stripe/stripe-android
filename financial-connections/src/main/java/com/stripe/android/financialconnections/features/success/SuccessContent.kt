@@ -41,6 +41,7 @@ import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
+import com.stripe.android.financialconnections.features.success.SuccessState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -61,14 +62,14 @@ private const val SLIDE_IN_ANIMATION_FRACTION = 4
 @Composable
 internal fun SuccessContent(
     completeSessionAsync: Async<FinancialConnectionsSession>,
-    payload: SuccessState.Payload,
+    payloadAsync: Async<Payload>,
     onDoneClick: () -> Unit,
     onCloseClick: () -> Unit,
 ) {
     SuccessContentInternal(
         // Just enabled on Compose Previews: allows to preview the post-animation state.
         overrideAnimationForPreview = false,
-        payload = payload,
+        payloadAsync = payloadAsync,
         onCloseClick = onCloseClick,
         completeSessionAsync = completeSessionAsync,
         onDoneClick = onDoneClick
@@ -78,18 +79,21 @@ internal fun SuccessContent(
 @Composable
 private fun SuccessContentInternal(
     overrideAnimationForPreview: Boolean,
-    payload: SuccessState.Payload,
+    payloadAsync: Async<Payload>,
     onCloseClick: () -> Unit,
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
+    val payload by remember(payloadAsync) { mutableStateOf(payloadAsync()) }
 
-    if (payload.skipSuccessPane.not()) {
-        LaunchedEffect(true) {
-            delay(ENTER_TRANSITION_DURATION_MS.toLong())
-            showSpinner = false
+    payload?.let {
+        if (it.skipSuccessPane.not()) {
+            LaunchedEffect(true) {
+                delay(ENTER_TRANSITION_DURATION_MS.toLong())
+                showSpinner = false
+            }
         }
     }
 
@@ -114,14 +118,14 @@ private fun SuccessContentInternal(
                 contentAlignment = Alignment.Center
             ) {
                 SpinnerToSuccessAnimation(
-                    customSuccessMessage = payload.customSuccessMessage,
-                    accountsCount = payload.accountsCount,
-                    showSpinner = showSpinner
+                    customSuccessMessage = payload?.customSuccessMessage ?: TextResource.Text(""),
+                    accountsCount = payload?.accountsCount ?: 0,
+                    showSpinner = showSpinner || payload == null
                 )
             }
             SuccessFooter(
                 modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
-                merchantName = payload.businessName,
+                merchantName = payload?.businessName,
                 loading = completeSessionAsync is Loading,
                 onDoneClick = onDoneClick
             )
@@ -263,7 +267,7 @@ internal fun SuccessScreenPreview(
         SuccessContentInternal(
             overrideAnimationForPreview = false,
             completeSessionAsync = state.completeSession,
-            payload = state.payload()!!,
+            payloadAsync = state.payload,
             onDoneClick = {},
             onCloseClick = {}
         )
@@ -282,7 +286,7 @@ internal fun SuccessScreenAnimationCompletedPreview(
         SuccessContentInternal(
             overrideAnimationForPreview = true,
             completeSessionAsync = state.completeSession,
-            payload = state.payload()!!,
+            payloadAsync = state.payload,
             onDoneClick = {},
             onCloseClick = {}
         )

@@ -14,12 +14,9 @@ internal fun SuccessScreen() {
     val parentViewModel = parentViewModel()
     val state: State<SuccessState> = viewModel.collectAsState()
     BackHandler(enabled = true) {}
-    state.value.payload()?.let { payload ->
-        SuccessContent(
-            completeSessionAsync = state.value.completeSession,
-            payload = payload,
-            onDoneClick = viewModel::onDoneClick,
-            onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
-        )
-    }
+    SuccessContent(
+        completeSessionAsync = state.value.completeSession,
+        payloadAsync = state.value.payload,
+        onDoneClick = viewModel::onDoneClick
+    ) { parentViewModel.onCloseNoConfirmationClick(Pane.SUCCESS) }
 }
