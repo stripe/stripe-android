@@ -36,6 +36,7 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
+import kotlin.test.fail
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -151,6 +152,36 @@ class CustomerAdapterTest {
         assertThat(
             paymentMethods.getOrNull()
         ).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+    }
+
+    @Test
+    // TODO:
+    fun `retrievePaymentMethods returns success with paymentMethodTypes`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+        val paymentMethods = adapter.retrievePaymentMethods()
+        assertThat(
+            paymentMethods.getOrNull()
+        ).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        fail()
+    }
+
+    @Test
+    // TODO:
+    fun `retrievePaymentMethods returns failure with invalid paymentMethodTypes`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            )
+        )
+        val paymentMethods = adapter.retrievePaymentMethods()
+        assertThat(
+            paymentMethods.getOrNull()
+        ).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        fail()
     }
 
     @Test
@@ -777,12 +808,14 @@ class CustomerAdapterTest {
         customerRepository: CustomerRepository = FakeCustomerRepository(),
         prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository = {
             FakePrefsRepository()
-        }
+        },
+        paymentMethodTypes: List<String>? = null,
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider,
+            paymentMethodTypes = paymentMethodTypes,
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,

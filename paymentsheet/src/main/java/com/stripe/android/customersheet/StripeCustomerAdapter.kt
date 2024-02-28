@@ -25,10 +25,11 @@ import kotlin.coroutines.CoroutineContext
  */
 @OptIn(ExperimentalCustomerSheetApi::class)
 @JvmSuppressWildcards
-internal class StripeCustomerAdapter @Inject constructor(
+internal class StripeCustomerAdapter @Inject internal constructor(
     private val context: Context,
     private val customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
     private val setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
+    override val paymentMethodTypes: List<String>?,
     private val timeProvider: () -> Long,
     private val customerRepository: CustomerRepository,
     private val prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository,
@@ -41,10 +42,8 @@ internal class StripeCustomerAdapter @Inject constructor(
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
 
-    override val paymentMethodTypes: List<String>?
-        get() = null
-
     override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
+        // TODO: Need to filter payment method types sent here.
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
                 customerConfig = PaymentSheet.CustomerConfiguration(
