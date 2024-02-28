@@ -86,10 +86,105 @@ internal class LinkTest {
             method("POST"),
             path("/v1/consumers/payment_details"),
             /*
+             * Make sure card number is included
+             */
+            bodyPart("card%5Bnumber%5D", "4242424242424242"),
+            /*
+             * Make sure card expiration month is included
+             */
+            bodyPart("card%5Bexp_month%5D", "12"),
+            /*
              * Ensures we are passing the full expiration year and not the
              * 2-digit shorthand (should send "2034", not "34")
              */
             bodyPart("card%5Bexp_year%5D", "2034"),
+            /*
+             * Should use the consumer's publishable key when creating payment details
+             */
+            header("Authorization", "Bearer pk_545454676767898989"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation()
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice() = activityScenarioRule.runLinkTest(
+        integrationType = integrationType,
+        paymentOptionCallback = { paymentOption ->
+            assertThat(paymentOption?.label).endsWith("4242")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetailsWithCardBrandChoice()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+        page.fillOutLinkName()
+
+        Espresso.closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Ensures card number is included
+             */
+            bodyPart("card%5Bnumber%5D", "4000002500001001"),
+            /*
+             * Ensures card expiration month is included
+             */
+            bodyPart("card%5Bexp_month%5D", "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart("card%5Bexp_year%5D", "2034"),
+            /*
+             * Ensures card brand choice is passed properly.
+             */
+            bodyPart("card%5Bpreferred_network%5D", "cartes_bancaires"),
             /*
              * Should use the consumer's publishable key when creating payment details
              */
@@ -163,10 +258,120 @@ internal class LinkTest {
             method("POST"),
             path("/v1/consumers/payment_details"),
             /*
+             * Make sure card number is included
+             */
+            bodyPart("card%5Bnumber%5D", "4242424242424242"),
+            /*
+             * Make sure card expiration month is included
+             */
+            bodyPart("card%5Bexp_month%5D", "12"),
+            /*
              * Ensures we are passing the full expiration year and not the
              * 2-digit shorthand (should send "2034", not "34")
              */
             bodyPart("card%5Bexp_year%5D", "2034"),
+            /*
+             * In passthrough mode, this needs to be true
+             */
+            bodyPart("active", "true"),
+            /*
+             * In passthrough mode, should use the publishable key from base configuration
+             */
+            header("Authorization", "Bearer pk_test_123"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details/share"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-share-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart("payment_method", "pm_1234"),
+            not(linkInformation())
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice() = activityScenarioRule.runLinkTest(
+        integrationType = integrationType,
+        paymentOptionCallback = { paymentOption ->
+            assertThat(paymentOption?.label).endsWith("1001")
+
+            @Suppress("DEPRECATION")
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_pm_with_link_ps_mode_and_cbc.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetailsWithCardBrandChoice()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.fillOutLinkPhone()
+        page.fillOutLinkName()
+
+        Espresso.closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+            /*
+             * Make sure card number is included
+             */
+            bodyPart("card%5Bnumber%5D", "4000002500001001"),
+            /*
+             * Make sure card expiration month is included
+             */
+            bodyPart("card%5Bexp_month%5D", "12"),
+            /*
+             * Ensures we are passing the full expiration year and not the
+             * 2-digit shorthand (should send "2034", not "34")
+             */
+            bodyPart("card%5Bexp_year%5D", "2034"),
+            /*
+             * Ensures card brand choice is passed properly.
+             */
+            bodyPart("card%5Bpreferred_network%5D", "cartes_bancaires"),
             /*
              * In passthrough mode, this needs to be true
              */
