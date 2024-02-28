@@ -9,6 +9,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 internal open class FakeCustomerRepository(
     private val paymentMethods: List<PaymentMethod> = emptyList(),
     private val customer: Customer? = null,
+    private val onGetPaymentMethods: () -> Result<List<PaymentMethod>> = {
+        Result.success(paymentMethods)
+    },
     private val onDetachPaymentMethod: () -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
     },
@@ -19,7 +22,6 @@ internal open class FakeCustomerRepository(
         Result.failure(NotImplementedError())
     }
 ) : CustomerRepository {
-    lateinit var savedPaymentMethod: PaymentMethod
     var error: Throwable? = null
 
     override suspend fun retrieveCustomer(
@@ -31,7 +33,7 @@ internal open class FakeCustomerRepository(
         customerConfig: PaymentSheet.CustomerConfiguration,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
-    ): Result<List<PaymentMethod>> = Result.success(paymentMethods)
+    ): Result<List<PaymentMethod>> = onGetPaymentMethods()
 
     override suspend fun detachPaymentMethod(
         customerConfig: PaymentSheet.CustomerConfiguration,
