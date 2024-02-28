@@ -69,7 +69,7 @@ internal class DefaultCustomerSheetLoader(
 
         return customerAdapter.mapCatching { adapter ->
             if (adapter.canCreateSetupIntents) {
-                adapter to retrieveElementsSession(configuration).getOrThrow()
+                adapter to retrieveElementsSession(configuration, adapter).getOrThrow()
             } else {
                 adapter to null
             }
@@ -84,10 +84,12 @@ internal class DefaultCustomerSheetLoader(
 
     private suspend fun retrieveElementsSession(
         configuration: CustomerSheet.Configuration?,
+        customerAdapter: CustomerAdapter,
     ): Result<ElementsSessionWithMetadata> {
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
+                paymentMethodTypes = customerAdapter.paymentMethodTypes ?: emptyList()
             )
         )
         return elementsSessionRepository.get(initializationMode).map { elementsSession ->

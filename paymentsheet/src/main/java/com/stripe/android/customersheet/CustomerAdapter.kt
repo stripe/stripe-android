@@ -31,6 +31,13 @@ interface CustomerAdapter {
     val canCreateSetupIntents: Boolean
 
     /**
+     * A list of payment method types to display to the customer.
+     * Valid values include: "card", "us_bank_account"
+     * If null or empty, the SDK will dynamically determine the payment methods using your Stripe Dashboard settings.
+     */
+    val paymentMethodTypes: List<String>?
+
+    /**
      * Retrieves a list of payment methods attached to a customer
      * @return a list of [PaymentMethod]s.
      */

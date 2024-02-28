@@ -41,6 +41,9 @@ internal class StripeCustomerAdapter @Inject constructor(
     override val canCreateSetupIntents: Boolean
         get() = setupIntentClientSecretProvider != null
 
+    override val paymentMethodTypes: List<String>?
+        get() = null
+
     override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
