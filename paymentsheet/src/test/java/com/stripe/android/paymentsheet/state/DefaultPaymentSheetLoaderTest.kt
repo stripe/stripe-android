@@ -285,7 +285,8 @@ internal class DefaultPaymentSheetLoaderTest {
     fun `when getPaymentMethods fails in test mode, load() fails`() =
         runTest {
             val expectedException = IllegalArgumentException("invalid API key provided")
-            val customerRepository = FakeCustomerRepository(PAYMENT_METHODS, onGetPaymentMethods = { Result.failure(expectedException)} )
+            val customerRepository =
+                FakeCustomerRepository(PAYMENT_METHODS, onGetPaymentMethods = { Result.failure(expectedException) })
             val loader = createPaymentSheetLoader(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     isLiveMode = false,
