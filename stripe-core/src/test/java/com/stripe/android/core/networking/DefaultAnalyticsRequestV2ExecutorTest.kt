@@ -10,7 +10,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.FakeStripeNetworkClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withContext
 import org.junit.Before
@@ -18,12 +17,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(RobolectricTestRunner::class)
 internal class DefaultAnalyticsRequestV2ExecutorTest {
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
-    private val testDispatcher = UnconfinedTestDispatcher()
 
     @Before
     fun before() {
@@ -31,7 +28,7 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
     }
 
     @Test
-    fun `Enqueues requests directly if WorkManager is available`() = runTest(testDispatcher) {
+    fun `Enqueues requests directly if WorkManager is available`() = runTest {
         val networkClient = FakeStripeNetworkClient()
 
         val executor = DefaultAnalyticsRequestV2Executor(
@@ -39,7 +36,6 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
             networkClient = networkClient,
             logger = Logger.noop(),
             isWorkManagerAvailable = { true },
-            dispatcher = testDispatcher,
         )
 
         val request = mockAnalyticsRequest()
@@ -52,7 +48,7 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
     }
 
     @Test
-    fun `Executes requests directly if WorkManager isn't available`() = runTest(testDispatcher) {
+    fun `Executes requests directly if WorkManager isn't available`() = runTest {
         val networkClient = FakeStripeNetworkClient()
 
         val executor = DefaultAnalyticsRequestV2Executor(
@@ -60,7 +56,6 @@ internal class DefaultAnalyticsRequestV2ExecutorTest {
             networkClient = networkClient,
             logger = Logger.noop(),
             isWorkManagerAvailable = { false },
-            dispatcher = testDispatcher,
         )
 
         val request = mockAnalyticsRequest()
