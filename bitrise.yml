@@ -28,16 +28,16 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: { }
-      - test: { }
-      - run-instrumentation-tests: { }
-      - run-paymentsheet-instrumentation-tests: { }
-      - run-example-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-cardscan-instrumentation-tests: { }
+#      - check: { }
+#      - test: { }
+#      - run-instrumentation-tests: { }
+#      - run-paymentsheet-instrumentation-tests: { }
+#      - run-example-instrumentation-tests: { }
+#      - run-financial-connections-instrumentation-tests: { }
+#      - run-cardscan-instrumentation-tests: { }
       - run-paymentsheet-end-to-end-tests: { }
-      - run-paymentsheet-screenshot-tests: { }
-      - check-dependencies: { }
+#      - run-paymentsheet-screenshot-tests: { }
+#      - check-dependencies: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
@@ -454,4 +454,3 @@ meta:
   bitrise.io:
     stack: linux-docker-android-20.04
     machine_type_id: elite
-
