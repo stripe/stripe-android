@@ -12,6 +12,5 @@ import kotlinx.parcelize.Parcelize
 internal data class UploadedResult(
     val uploadedStripeFile: StripeFile,
     val scores: List<Float>? = null,
-    val uploadMethod: DocumentUploadParam.UploadMethod? = null,
-    val capturedByMb: Boolean? = null
+    val uploadMethod: DocumentUploadParam.UploadMethod? = null
 ) : Parcelable

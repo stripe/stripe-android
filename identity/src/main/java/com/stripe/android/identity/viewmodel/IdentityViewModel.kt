@@ -453,8 +453,7 @@ internal class IdentityViewModel constructor(
                     isHighRes = true,
                     isFront = isFront,
                     scores = scores,
-                    targetScanType = targetScanType,
-                    capturedByMb = false
+                    targetScanType = targetScanType
                 )
 
                 // upload low res
@@ -464,8 +463,7 @@ internal class IdentityViewModel constructor(
                     isHighRes = false,
                     isFront = isFront,
                     scores = scores,
-                    targetScanType = targetScanType,
-                    capturedByMb = false
+                    targetScanType = targetScanType
                 )
             }
 
@@ -506,8 +504,7 @@ internal class IdentityViewModel constructor(
                     isHighRes = true,
                     isFront = isFront,
                     scores = scores,
-                    targetScanType = targetScanType,
-                    capturedByMb = true
+                    targetScanType = targetScanType
                 )
 
                 processAndUploadBitmap(
@@ -516,8 +513,7 @@ internal class IdentityViewModel constructor(
                     isHighRes = false,
                     isFront = isFront,
                     scores = scores,
-                    targetScanType = targetScanType,
-                    capturedByMb = true
+                    targetScanType = targetScanType
                 )
             }
 
@@ -552,38 +548,6 @@ internal class IdentityViewModel constructor(
      * Processes document scan result by cropping and padding the bitmap if necessary,
      * then upload the processed file.
      */
-//    @VisibleForTesting
-//    internal fun processDocumentScanResultAndUpload(
-//        originalBitmap: Bitmap,
-//        boundingBox: BoundingBox,
-//        docCapturePage: VerificationPageStaticContentDocumentCapturePage,
-//        isHighRes: Boolean,
-//        isFront: Boolean,
-//        scores: List<Float>,
-//        targetScanType: IdentityScanState.ScanType
-//    ) {
-//        processAndUploadBitmap(
-//            bitmapToUpload = if (isHighRes) {
-//                identityIO.cropAndPadBitmap(
-//                    originalBitmap,
-//                    boundingBox,
-//                    originalBitmap.longerEdge() * docCapturePage.highResImageCropPadding
-//                )
-//            } else {
-//                originalBitmap
-//            },
-//            docCapturePage = docCapturePage,
-//            isHighRes = isHighRes,
-//            isFront = isFront,
-//            scores = scores,
-//            targetScanType = targetScanType
-//        )
-//    }
-
-    /**
-     * Processes document scan result by cropping and padding the bitmap if necessary,
-     * then upload the processed file.
-     */
     @VisibleForTesting
     internal fun processAndUploadBitmap(
         bitmapToUpload: Bitmap,
@@ -592,7 +556,6 @@ internal class IdentityViewModel constructor(
         isFront: Boolean,
         scores: List<Float>,
         targetScanType: IdentityScanState.ScanType,
-        capturedByMb: Boolean
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
             bitmap = bitmapToUpload,
@@ -634,8 +597,7 @@ internal class IdentityViewModel constructor(
                     docCapturePage.highResImageCompressionQuality
                 } else {
                     docCapturePage.lowResImageCompressionQuality
-                },
-                capturedByMb = capturedByMb
+                }
             )
         }
     }
@@ -658,8 +620,7 @@ internal class IdentityViewModel constructor(
         isHighRes: Boolean,
         isFront: Boolean,
         scanType: IdentityScanState.ScanType,
-        compressionQuality: Float,
-        capturedByMb: Boolean? = null
+        compressionQuality: Float
     ) {
         viewModelScope.launch {
             if (isFront) {
@@ -713,8 +674,7 @@ internal class IdentityViewModel constructor(
                             newResult = UploadedResult(
                                 fileTimePair.first,
                                 scores,
-                                uploadMethod,
-                                capturedByMb
+                                uploadMethod
                             ),
                         )
                     }

@@ -970,8 +970,7 @@ internal class IdentityViewModelTest {
                     UploadedResult(
                         UPLOADED_STRIPE_FILE,
                         ALL_SCORES,
-                        DocumentUploadParam.UploadMethod.AUTOCAPTURE,
-                        capturedByMb = !isLegacy // Only use MB for modern result
+                        DocumentUploadParam.UploadMethod.AUTOCAPTURE
                     )
                 )
             )
@@ -1002,8 +1001,7 @@ internal class IdentityViewModelTest {
                     UploadedResult(
                         UPLOADED_STRIPE_FILE,
                         ALL_SCORES,
-                        DocumentUploadParam.UploadMethod.AUTOCAPTURE,
-                        !isLegacy
+                        DocumentUploadParam.UploadMethod.AUTOCAPTURE
                     )
                 )
             )
