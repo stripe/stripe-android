@@ -77,7 +77,7 @@ internal data class PaymentMethodMetadata(
         // 1. Add each PM in paymentMethodOrder first
         for (pm in paymentMethodOrder) {
             // Ignore the PM if it's not in originalOrderedTypes
-            if (originalOrderedTypes.contains(pm))  {
+            if (originalOrderedTypes.contains(pm)) {
                 result += pm
                 // 2. Remove each PM we add from originalOrderedTypes.
                 originalOrderedTypes.remove(pm)
