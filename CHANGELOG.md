@@ -1,6 +1,7 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+* [Changed][7999](https://github.com/stripe/stripe-android/pull/7999) In test mode, PaymentSheet fails to load when getting saved payment methods fails.
 
 ## 20.38.0 - 2024-02-26
 
