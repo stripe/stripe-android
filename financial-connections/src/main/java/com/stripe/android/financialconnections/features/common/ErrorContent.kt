@@ -32,7 +32,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import java.text.SimpleDateFormat
 
 @Composable
@@ -269,7 +269,7 @@ internal fun ErrorContent(
             view.performHapticFeedback(REJECT)
         }
     }
-    Layout(
+    LazyLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         body = {
             iconContent?.let {

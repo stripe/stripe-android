@@ -74,7 +74,7 @@ import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.uicore.image.StripeImage
 import kotlinx.coroutines.launch
@@ -225,7 +225,7 @@ private fun LinkAccountPickerLoaded(
     onSelectAccountClick: () -> Unit,
     cta: String?
 ) {
-    Layout(
+    LazyLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         lazyListState = scrollState,
         body = {

@@ -1,10 +1,13 @@
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,6 +18,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,10 +43,53 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
  * @param inModal whether the layout is being used in a modal or not. If true, the [body] won't expand to fill the
  * available content.
  * @param showFooterShadowWhenScrollable whether to show a shadow at the top of the footer when the body is scrollable.
- * @param lazyListState the [LazyListState] to use for the scrollable body.
+ * @param scrollState the [ScrollState] to use for the scrollable body.
  */
 @Composable
 internal fun Layout(
+    modifier: Modifier = Modifier,
+    body: @Composable ColumnScope.() -> Unit,
+    footer: (@Composable () -> Unit)? = null,
+    bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
+    inModal: Boolean = false,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    showFooterShadowWhenScrollable: Boolean = true,
+    scrollState: ScrollState = rememberScrollState(),
+) {
+    LayoutScaffold(
+        canScrollForward = scrollState.canScrollForward,
+        inModal = inModal,
+        showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
+        modifier = modifier,
+        footer = footer,
+    ) {
+        Column(
+            modifier = Modifier
+                .verticalScroll(scrollState)
+                .animateContentSize(),
+            verticalArrangement = verticalArrangement,
+        ) {
+            // Nested columns to achieve proper content padding
+            Column(modifier = Modifier.padding(bodyPadding)) {
+                body()
+            }
+        }
+    }
+}
+
+/**
+ * A layout that contains a body, and an optional, bottom fixed footer.
+ *
+ * @param modifier the modifier to apply to the layout.
+ * @param body the content of the layout.
+ * @param footer the content of the footer.
+ * @param inModal whether the layout is being used in a modal or not. If true, the [body] won't expand to fill the
+ * available content.
+ * @param showFooterShadowWhenScrollable whether to show a shadow at the top of the footer when the body is scrollable.
+ * @param lazyListState the [LazyListState] to use for the scrollable body.
+ */
+@Composable
+internal fun LazyLayout(
     modifier: Modifier = Modifier,
     body: LazyListScope.() -> Unit,
     footer: (@Composable () -> Unit)? = null,
@@ -50,6 +98,32 @@ internal fun Layout(
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     lazyListState: LazyListState = rememberLazyListState()
+) {
+    LayoutScaffold(
+        canScrollForward = lazyListState.canScrollForward,
+        inModal = inModal,
+        showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
+        modifier = modifier,
+        footer = footer,
+    ) {
+        LazyColumn(
+            state = lazyListState,
+            verticalArrangement = verticalArrangement,
+            contentPadding = bodyPadding,
+        ) {
+            body()
+        }
+    }
+}
+
+@Composable
+private fun LayoutScaffold(
+    canScrollForward: Boolean,
+    inModal: Boolean,
+    showFooterShadowWhenScrollable: Boolean,
+    modifier: Modifier = Modifier,
+    footer: (@Composable () -> Unit)?,
+    body: @Composable () -> Unit,
 ) {
     Column(
         modifier
@@ -62,17 +136,11 @@ internal fun Layout(
                 .weight(1f, fill = inModal.not())
         ) {
             // Footer shadow (top aligned)
-            if (showFooterShadowWhenScrollable && lazyListState.canScrollForward) {
+            if (showFooterShadowWhenScrollable && canScrollForward) {
                 FooterTopShadow()
             }
             // Body content
-            LazyColumn(
-                state = lazyListState,
-                verticalArrangement = verticalArrangement,
-                contentPadding = bodyPadding,
-            ) {
-                body()
-            }
+            body()
         }
         // Footer content (bottom aligned)
         footer?.let {
@@ -124,7 +192,7 @@ internal fun LayoutPreview() {
                 )
             },
             content = {
-                Layout(
+                LazyLayout(
                     lazyListState = state,
                     body = {
                         item {
@@ -133,9 +201,9 @@ internal fun LayoutPreview() {
                                 style = typography.headingXLarge
                             )
                         }
-                        for (it in 1..50) {
+                        for (index in 1..50) {
                             item {
-                                Text("Body item $it")
+                                Text("Body item $index")
                             }
                         }
                     },

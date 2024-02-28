@@ -48,7 +48,7 @@ import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 
 @Composable
 internal fun LinkStepUpVerificationScreen() {
@@ -125,7 +125,7 @@ private fun LinkStepUpVerificationLoaded(
             onCloseFromErrorClick = onCloseFromErrorClick
         )
     } else {
-        Layout(
+        LazyLayout(
             verticalArrangement = Arrangement.spacedBy(24.dp),
             lazyListState = lazyListState,
             body = {

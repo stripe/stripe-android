@@ -27,7 +27,7 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.sdui.rememberHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 
 @Composable
 internal fun DataAccessBottomSheetContent(
@@ -162,7 +162,7 @@ private fun ModalBottomSheetContent(
     onConfirmModalClick: () -> Unit,
     content: LazyListScope.() -> Unit,
 ) {
-    Layout(
+    LazyLayout(
         modifier = Modifier.padding(top = 32.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
         inModal = true,
