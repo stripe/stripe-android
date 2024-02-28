@@ -12,17 +12,20 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsRes
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
  * Event tracker for Financial Connections.
  */
 internal interface FinancialConnectionsAnalyticsTracker {
-
-    suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit>
+    fun track(event: FinancialConnectionsAnalyticsEvent)
 }
 
-internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
+internal fun FinancialConnectionsAnalyticsTracker.logError(
     extraMessage: String,
     error: Throwable,
     logger: Logger,
@@ -92,21 +95,24 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
         origin = ORIGIN
     )
 
-    override suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit> {
-        return runCatching {
-            val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
-            val commonParams = commonParams()
-            val request = requestFactory.createRequest(
-                eventName = event.eventName,
-                additionalParams = eventParams + commonParams,
-                includeSDKParams = true
-            )
-            stripeNetworkClient.executeRequest(
-                request
-            )
-            logger.debug("EVENT: ${request.eventName}: ${request.params}")
-        }.onFailure {
-            logger.error("Exception while making analytics request", it)
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun track(event: FinancialConnectionsAnalyticsEvent) {
+        GlobalScope.launch(Dispatchers.IO) {
+            runCatching {
+                val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
+                val commonParams = commonParams()
+                val request = requestFactory.createRequest(
+                    eventName = event.eventName,
+                    additionalParams = eventParams + commonParams,
+                    includeSDKParams = true
+                )
+                stripeNetworkClient.executeRequest(
+                    request
+                )
+                logger.debug("EVENT: ${request.eventName}: ${request.params}")
+            }.onFailure {
+                logger.error("Exception while making analytics request", it)
+            }
         }
     }
 

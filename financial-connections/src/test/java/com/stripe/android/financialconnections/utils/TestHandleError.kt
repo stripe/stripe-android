@@ -5,9 +5,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 
 internal class TestHandleError : HandleError {
 
-    val invocations = mutableListOf<HandleErrorInvocation>()
+    private val invocations = mutableListOf<HandleErrorInvocation>()
 
-    override suspend fun invoke(
+    override fun invoke(
         extraMessage: String,
         error: Throwable,
         pane: FinancialConnectionsSessionManifest.Pane,
