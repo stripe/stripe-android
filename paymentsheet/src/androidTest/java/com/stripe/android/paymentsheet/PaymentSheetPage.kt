@@ -67,6 +67,14 @@ internal class PaymentSheetPage(
         replaceText("Phone number", "+12113526421")
     }
 
+    fun fillOutLinkName() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Full name")
+        replaceText("Full name", "John Doe")
+    }
+
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
