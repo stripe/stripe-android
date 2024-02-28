@@ -9,15 +9,11 @@ import androidx.work.WorkManager
 import androidx.work.await
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.IsWorkManagerAvailable
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun interface AnalyticsRequestV2Executor {
-    fun enqueue(request: AnalyticsRequestV2)
+    suspend fun enqueue(request: AnalyticsRequestV2)
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -26,16 +22,12 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
     private val networkClient: StripeNetworkClient,
     private val logger: Logger,
     private val isWorkManagerAvailable: IsWorkManagerAvailable,
-    private val dispatcher: CoroutineDispatcher,
 ) : AnalyticsRequestV2Executor {
 
-    @OptIn(DelicateCoroutinesApi::class)
-    override fun enqueue(request: AnalyticsRequestV2) {
-        GlobalScope.launch(dispatcher) {
-            val isEnqueued = isWorkManagerAvailable() && enqueueRequest(request)
-            if (!isEnqueued) {
-                executeRequest(request)
-            }
+    override suspend fun enqueue(request: AnalyticsRequestV2) {
+        val isEnqueued = isWorkManagerAvailable() && enqueueRequest(request)
+        if (!isEnqueued) {
+            executeRequest(request)
         }
     }
 
