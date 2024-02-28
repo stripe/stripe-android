@@ -300,11 +300,8 @@ internal class DefaultPaymentSheetLoaderTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             )
 
-            assertThat(loadResult.isFailure).isTrue()
             val actualException = loadResult.exceptionOrNull()
-            assertThat(actualException).isNotNull()
-            assertThat(actualException).hasMessageThat().isEqualTo(expectedException.message)
-            assertThat(actualException?.cause).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(actualException?.cause).isEqualTo(expectedException)
         }
 
     @Test
