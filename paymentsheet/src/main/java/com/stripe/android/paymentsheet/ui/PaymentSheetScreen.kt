@@ -35,6 +35,10 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.disabled
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
@@ -236,7 +240,7 @@ private fun PaymentSheetContent(
         )
     }
 
-    PrimaryButton(type)
+    PrimaryButton(viewModel, type)
 
     if (mandateText?.showAbovePrimaryButton == false) {
         Mandate(
@@ -300,18 +304,32 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(type: PaymentSheetFlowType) {
+private fun PrimaryButton(viewModel: BaseSheetViewModel, type: PaymentSheetFlowType) {
+    val uiState = viewModel.primaryButtonUiState.collectAsState()
+
+    val modifier = Modifier
+        .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+        .semantics {
+            role = Role.Button
+
+            val currentState = uiState.value
+
+            if (currentState == null || !currentState.enabled) {
+                disabled()
+            }
+        }
+
     when (type) {
         Complete -> {
             AndroidViewBinding(
                 factory = StripeFragmentPaymentSheetPrimaryButtonBinding::inflate,
-                modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
+                modifier = modifier,
             )
         }
         Custom -> {
             AndroidViewBinding(
                 factory = StripeFragmentPaymentOptionsPrimaryButtonBinding::inflate,
-                modifier = Modifier.testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG),
+                modifier = modifier,
             )
         }
     }

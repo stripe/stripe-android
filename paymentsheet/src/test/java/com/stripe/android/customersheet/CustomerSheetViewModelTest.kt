@@ -2805,6 +2805,40 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `Modifying a payment method does not show remove`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = paymentMethods,
+                )
+            ),
+            customerPaymentMethods = paymentMethods,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(
+                OnBrandChoiceChanged(
+                    EditPaymentMethodViewState.CardBrandChoice(brand = CardBrand.Visa)
+                )
+            )
+
+            verify(eventReporter).onHidePaymentOptionBrands(
+                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                selectedBrand = CardBrand.Visa
+            )
+        }
+    }
+
+    @Test
     fun `Removing the current and original payment selection results in the selection being null`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,

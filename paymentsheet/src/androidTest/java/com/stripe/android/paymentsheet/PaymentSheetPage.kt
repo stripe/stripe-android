@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
@@ -40,6 +41,32 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun clickOnLinkCheckbox() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Save your info for secure 1-click checkout with Link")
+        clickViewWithText("Save your info for secure 1-click checkout with Link")
+    }
+
+    fun fillOutLinkEmail(optionalLabel: Boolean = false) {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        val label = if (optionalLabel) "Email (optional)" else "Email"
+
+        waitForText(label)
+        replaceText(label, "email@email.com")
+    }
+
+    fun fillOutLinkPhone() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Phone number")
+        replaceText("Phone number", "+12113526421")
+    }
+
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -60,6 +87,12 @@ internal class PaymentSheetPage(
     }
 
     fun clickPrimaryButton() {
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()

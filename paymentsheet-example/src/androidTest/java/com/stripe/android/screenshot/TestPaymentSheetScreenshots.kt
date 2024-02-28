@@ -4,6 +4,8 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.lpmfoundations.paymentmethod.defaultSorter
+import com.stripe.android.lpmfoundations.paymentmethod.paymentMethodSorter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
@@ -76,6 +78,26 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     fun resetAppearanceStore() {
         AppearanceStore.reset()
         forceLightMode()
+    }
+
+    @Before
+    fun setSort() {
+        paymentMethodSorter = {
+            sortedBy {
+                when (it.code) {
+                    "card" -> 1
+                    "klarna" -> 2
+                    "p24" -> 3
+                    "eps" -> 4
+                    else -> 100
+                }
+            }
+        }
+    }
+
+    @After
+    fun resetSort() {
+        paymentMethodSorter = defaultSorter
     }
 
     @Test

@@ -231,8 +231,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val paymentMethods = customerRepository.getPaymentMethods(
             customerConfig = customerConfig,
             types = paymentMethodTypes,
-            silentlyFail = true,
-        ).getOrDefault(emptyList())
+            silentlyFail = stripeIntent.isLiveMode,
+        ).getOrThrow()
 
         return paymentMethods.filter { paymentMethod ->
             paymentMethod.hasExpectedDetails()

@@ -73,6 +73,7 @@ internal class CustomerSheetScreenshotTest {
         primaryButtonVisible = false,
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        allowsRemovalOfLastSavedPaymentMethod = true,
     )
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -384,11 +385,48 @@ internal class CustomerSheetScreenshotTest {
                 displayName = "Card",
                 removeExecutor = { null },
                 updateExecutor = { pm, _ -> Result.success(pm) },
-                eventHandler = {}
+                eventHandler = {},
+                canRemove = true,
             ),
             isLiveMode = true,
             cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
             savedPaymentMethods = emptyList(),
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        )
+
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = editPaymentMethod,
+                paymentMethodNameProvider = { it!! },
+                formViewModelSubComponentBuilderProvider = null,
+            )
+        }
+    }
+
+    @Test
+    fun testEditScreenWithoutRemove() {
+        val paymentMethod = PaymentMethodFactory.card().copy(
+            card = PaymentMethod.Card(
+                last4 = "1001",
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf(CardBrand.CartesBancaires.code, CardBrand.Visa.code),
+                ),
+            )
+        )
+
+        val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
+            editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
+                initialPaymentMethod = paymentMethod,
+                displayName = "Card",
+                removeExecutor = { null },
+                updateExecutor = { pm, _ -> Result.success(pm) },
+                eventHandler = {},
+                canRemove = false,
+            ),
+            isLiveMode = true,
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
+            savedPaymentMethods = emptyList(),
+            allowsRemovalOfLastSavedPaymentMethod = false,
         )
 
         paparazzi.snapshot {

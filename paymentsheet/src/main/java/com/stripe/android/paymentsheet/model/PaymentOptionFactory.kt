@@ -75,10 +75,10 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             is PaymentSelection.Saved -> {
                 PaymentOption(
-                    drawableResourceId = selection.paymentMethod.getSavedPaymentMethodIcon(),
+                    drawableResourceId = getSavedIcon(selection),
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
-                    label = selection.paymentMethod.getLabel(resources).orEmpty(),
+                    label = getSavedLabel(selection).orEmpty(),
                     imageLoader = ::loadPaymentOption,
                 )
             }
@@ -122,6 +122,29 @@ internal class PaymentOptionFactory @Inject constructor(
                     imageLoader = ::loadPaymentOption,
                 )
             }
+        }
+    }
+
+    private fun getSavedLabel(selection: PaymentSelection.Saved): String? {
+        return selection.paymentMethod.getLabel(resources) ?: run {
+            when (selection.walletType) {
+                PaymentSelection.Saved.WalletType.Link -> resources.getString(StripeR.string.stripe_link)
+                PaymentSelection.Saved.WalletType.GooglePay -> resources.getString(StripeR.string.stripe_google_pay)
+                else -> null
+            }
+        }
+    }
+
+    private fun getSavedIcon(selection: PaymentSelection.Saved): Int {
+        return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
+            R.drawable.stripe_ic_paymentsheet_card_unknown -> {
+                when (selection.walletType) {
+                    PaymentSelection.Saved.WalletType.Link -> R.drawable.stripe_ic_paymentsheet_link
+                    PaymentSelection.Saved.WalletType.GooglePay -> R.drawable.stripe_google_pay_mark
+                    else -> resourceId
+                }
+            }
+            else -> resourceId
         }
     }
 }

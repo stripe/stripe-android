@@ -35,7 +35,7 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
 }
 
 internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type) {
-    PaymentMethod.Type.Card -> createCardLabel(resources, card?.last4)
+    PaymentMethod.Type.Card -> createCardLabel(resources, card?.last4).takeIf { it.isNotEmpty() }
     PaymentMethod.Type.SepaDebit -> resources.getString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         sepaDebit?.last4
