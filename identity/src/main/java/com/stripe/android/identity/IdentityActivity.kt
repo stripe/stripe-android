@@ -106,7 +106,7 @@ internal class IdentityActivity :
         super.onCreate(savedInstanceState)
         injectWithFallback(
             starterArgs.injectorKey,
-            this
+            this.applicationContext
         )
         subcomponent = subComponentBuilderProvider.get()
             .args(starterArgs)
