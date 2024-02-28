@@ -24,6 +24,8 @@ internal val Neutral900 = Color(0xff21252C)
 internal val Brand50 = Color(0xffF7F5FD)
 internal val Brand400 = Color(0xff8D7FFA)
 
+internal val Attention200 = Color(0xffFCAF4F)
+
 internal object LinkColors {
     val Brand200 = Color(0xffA6FBDD)
     val Brand600 = Color(0xff1AC59B)
