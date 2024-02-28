@@ -5,6 +5,9 @@
 
 * [Added] Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
 
+### PaymentSheet
+* [Added] Added support for `paymentMethodOrder` to PaymentSheet and CustomerSheet.π
+
 ## 20.38.0 - 2024-02-26
 
 ### PaymentSheet
