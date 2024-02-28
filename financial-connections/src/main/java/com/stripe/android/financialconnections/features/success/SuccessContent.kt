@@ -118,7 +118,7 @@ private fun SuccessContentInternal(
                 contentAlignment = Alignment.Center
             ) {
                 SpinnerToSuccessAnimation(
-                    customSuccessMessage = payload?.customSuccessMessage ?: TextResource.Text(""),
+                    customSuccessMessage = payload?.customSuccessMessage,
                     accountsCount = payload?.accountsCount ?: 0,
                     showSpinner = showSpinner || payload == null
                 )
