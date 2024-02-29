@@ -255,13 +255,13 @@ class CustomerSheet @Inject internal constructor(
             }
 
             /**
-             * By default, PaymentSheet will use a dynamic ordering that optimizes payment method display for the
+             * By default, CustomerSheet will use a dynamic ordering that optimizes payment method display for the
              * customer. You can override the default order in which payment methods are displayed in PaymentSheet with
              * a list of payment method types.
              *
              * See https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for the list of valid
              *  types.
-             * - Example: listOf("card", "klarna")
+             * - Example: listOf("card")
              * - Note: If you omit payment methods from this list, they’ll be automatically ordered by Stripe after the
              *  ones you provide. Invalid payment methods are ignored.
              */
