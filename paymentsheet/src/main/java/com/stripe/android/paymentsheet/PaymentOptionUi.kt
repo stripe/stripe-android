@@ -53,6 +53,8 @@ import com.stripe.android.R as StripeR
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
 const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
 
+internal const val TEST_TAG_REMOVE_BADGE = "remove_badge"
+
 private const val EDIT_ICON_SCALE = 0.6f
 private val editIconColorLight = Color(0x99000000)
 private val editIconColorDark = Color.White
@@ -238,7 +240,8 @@ private fun RemoveBadge(
             .size(20.dp)
             .clip(CircleShape)
             .background(color = iconColor)
-            .clickable(onClick = onPressed),
+            .clickable(onClick = onPressed)
+            .testTag(TEST_TAG_REMOVE_BADGE),
     )
 }
 
