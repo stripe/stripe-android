@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-* [Added] Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters which payment methods are shown in the add screen.
+* [Added] Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
 
 ## 20.38.0 - 2024-02-26
 
