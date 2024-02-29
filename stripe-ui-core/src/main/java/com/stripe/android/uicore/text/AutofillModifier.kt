@@ -19,19 +19,6 @@ import androidx.compose.ui.platform.LocalAutofillTree
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun Modifier.autofill(
-    vararg types: AutofillType,
-    onFill: (String) -> Unit,
-): Modifier {
-    return autofill(
-        types = types.toList(),
-        onFill = onFill,
-    )
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-fun Modifier.autofill(
     types: List<AutofillType>,
     onFill: (String) -> Unit,
 ): Modifier {
@@ -50,11 +37,13 @@ fun Modifier.autofill(
     return onGloballyPositioned {
         autofillNode.boundingBox = it.boundsInWindow()
     }.onFocusChanged { focusState ->
-        autofill?.run {
-            if (focusState.isFocused) {
-                requestAutofillForNode(autofillNode)
-            } else {
-                cancelAutofillForNode(autofillNode)
+        if (autofillNode.boundingBox != null) {
+            autofill?.run {
+                if (focusState.isFocused) {
+                    requestAutofillForNode(autofillNode)
+                } else {
+                    cancelAutofillForNode(autofillNode)
+                }
             }
         }
     }
