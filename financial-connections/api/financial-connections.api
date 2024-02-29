@@ -1721,6 +1721,15 @@ public final class com/stripe/android/financialconnections/ui/components/Composa
 	public final fun getLambda-6$financial_connections_release ()Lkotlin/jvm/functions/Function2;
 }
 
+public final class com/stripe/android/financialconnections/ui/components/ComposableSingletons$TestModeBannerKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/components/ComposableSingletons$TestModeBannerKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/financialconnections/ui/components/ComposableSingletons$TextFieldKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/ui/components/ComposableSingletons$TextFieldKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;

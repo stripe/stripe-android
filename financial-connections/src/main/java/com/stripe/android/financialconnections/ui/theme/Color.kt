@@ -43,6 +43,7 @@ internal data class FinancialConnectionsColors(
     val iconSubdued: Color,
     val iconWhite: Color,
     val iconBrand: Color,
+    val iconCaution: Color,
     val buttonPrimary: Color,
     val buttonPrimaryHover: Color,
     val buttonPrimaryPressed: Color,
@@ -53,6 +54,7 @@ internal data class FinancialConnectionsColors(
     val background: Color,
     val backgroundOffset: Color,
     val backgroundBrand: Color,
+    val backgroundCaution: Color,
     val border: Color,
     val borderBrand: Color
 )

@@ -8,10 +8,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalUriHandler
@@ -27,8 +25,8 @@ import com.stripe.android.financialconnections.features.consent.FinancialConnect
 import com.stripe.android.financialconnections.ui.LocalTestMode
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.components.TestModeBanner
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
@@ -43,9 +41,18 @@ internal fun VerificationSection(
     confirmVerificationError: Throwable?,
 ) {
     val view = LocalView.current
+    Column {
+        StripeThemeForConnections {
+            if (LocalTestMode.current) {
+                TestModeBanner(
+                    enabled = enabled,
+                    buttonLabel = stringResource(R.string.stripe_verification_useTestCode),
+                    onButtonClick = otpElement::populateTestCode,
+                )
 
-    StripeThemeForConnections {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
             OTPElementUI(
                 otpInputPlaceholder = "",
                 boxSpacing = 8.dp,
@@ -56,21 +63,8 @@ internal fun VerificationSection(
                 ),
                 focusRequester = focusRequester,
                 enabled = enabled,
-                element = otpElement,
-                modifier = Modifier.fillMaxWidth(),
+                element = otpElement
             )
-
-            if (LocalTestMode.current) {
-                Spacer(modifier = Modifier.height(24.dp))
-
-                FinancialConnectionsButton(
-                    enabled = enabled,
-                    type = FinancialConnectionsButton.Type.Secondary,
-                    onClick = otpElement::populateTestCode,
-                ) {
-                    Text(stringResource(R.string.stripe_verification_useTestCode))
-                }
-            }
         }
         LaunchedEffect(confirmVerificationError) {
             if (confirmVerificationError is OTPError) {
