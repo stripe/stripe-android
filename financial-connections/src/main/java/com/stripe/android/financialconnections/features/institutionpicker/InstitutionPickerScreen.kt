@@ -401,6 +401,7 @@ private fun SearchRow(
                 )
             },
             value = query,
+            enabled = true,
             onValueChange = { onQueryChanged(it) }
         )
     }

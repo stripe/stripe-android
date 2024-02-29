@@ -147,9 +147,11 @@ private fun ManualEntryLoaded(
     onSubmit: () -> Unit,
     onTestFill: () -> Unit
 ) {
+    val loading = linkPaymentAccountStatus is Loading
     Layout(
         scrollState = scrollState,
         body = {
+            Spacer(modifier = Modifier.size(8.dp))
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.stripe_manualentry_title),
@@ -169,13 +171,14 @@ private fun ManualEntryLoaded(
 
             if (payload.testMode) {
                 TestModeBanner(
-                    enabled = true,
+                    enabled = loading.not(),
                     buttonLabel = "Use test account",
                     onButtonClick = { onTestFill() }
                 )
                 Spacer(modifier = Modifier.size(8.dp))
             }
             AccountForm(
+                loading = loading,
                 routing = routing,
                 routingError = routingError,
                 onRoutingEntered = onRoutingEntered,
@@ -199,13 +202,18 @@ private fun ManualEntryLoaded(
             }
         },
         footer = {
-            ManualEntryFooter(isValidForm, onSubmit)
+            ManualEntryFooter(
+                isValidForm = isValidForm,
+                loading = loading,
+                onSubmit = onSubmit
+            )
         }
     )
 }
 
 @Composable
 private fun AccountForm(
+    loading: Boolean,
     routing: String,
     routingError: Int?,
     onRoutingEntered: (String) -> Unit,
@@ -217,6 +225,7 @@ private fun AccountForm(
     onAccountConfirmEntered: (String) -> Unit
 ) {
     InputWithError(
+        enabled = loading.not(),
         label = R.string.stripe_manualentry_routing,
         input = routing,
         error = routingError,
@@ -225,6 +234,7 @@ private fun AccountForm(
     )
     Spacer(modifier = Modifier.size(16.dp))
     InputWithError(
+        enabled = loading.not(),
         label = R.string.stripe_manualentry_account,
         input = account,
         error = accountError,
@@ -233,6 +243,7 @@ private fun AccountForm(
     )
     Spacer(modifier = Modifier.size(16.dp))
     InputWithError(
+        enabled = loading.not(),
         label = R.string.stripe_manualentry_accountconfirm,
         input = accountConfirm,
         error = accountConfirmError,
@@ -244,10 +255,12 @@ private fun AccountForm(
 @Composable
 private fun ManualEntryFooter(
     isValidForm: Boolean,
+    loading: Boolean,
     onSubmit: () -> Unit
 ) {
     Column {
         FinancialConnectionsButton(
+            loading = loading,
             enabled = isValidForm,
             onClick = onSubmit,
             modifier = Modifier
@@ -261,6 +274,7 @@ private fun ManualEntryFooter(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InputWithError(
+    enabled: Boolean,
     input: String,
     @StringRes error: Int?,
     label: Int,
@@ -269,6 +283,7 @@ private fun InputWithError(
 ) {
     Spacer(modifier = Modifier.size(4.dp))
     FinancialConnectionsOutlinedTextField(
+        enabled = enabled,
         value = input,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,

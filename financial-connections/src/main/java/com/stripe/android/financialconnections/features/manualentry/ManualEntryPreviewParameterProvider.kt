@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.manualentry
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Fail
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.core.exception.APIException
@@ -10,6 +11,7 @@ import com.stripe.android.financialconnections.R
 internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<ManualEntryState> {
     override val values = sequenceOf(
         canonical(),
+        loading(),
         failure(),
         fieldFailure(),
         testMode(),
@@ -17,6 +19,17 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
 
     override val count: Int
         get() = super.count
+
+    private fun loading() = ManualEntryState(
+        payload = Success(
+            ManualEntryState.Payload(
+                verifyWithMicrodeposits = true,
+                customManualEntry = false,
+                testMode = false
+            )
+        ),
+        linkPaymentAccount = Loading(),
+    )
 
     private fun failure() = ManualEntryState(
         payload = Success(

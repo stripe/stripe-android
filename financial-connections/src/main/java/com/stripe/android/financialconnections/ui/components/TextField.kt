@@ -7,10 +7,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExposedDropdownMenuDefaults.outlinedTextFieldColors
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -21,6 +23,7 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 @Composable
 internal fun FinancialConnectionsOutlinedTextField(
     value: String,
+    enabled: Boolean,
     modifier: Modifier = Modifier,
     onValueChange: (String) -> Unit,
     readOnly: Boolean = false,
@@ -33,11 +36,14 @@ internal fun FinancialConnectionsOutlinedTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     label: @Composable (() -> Unit)? = null
 ) {
+    val contentAlpha = if (enabled) ContentAlpha.high else ContentAlpha.disabled
     val shape = RoundedCornerShape(12.dp)
     OutlinedTextField(
+        enabled = enabled,
         shape = shape,
         modifier = modifier
             .fillMaxWidth()
+            .alpha(contentAlpha)
             .shadow(1.dp, shape),
         leadingIcon = leadingIcon,
         trailingIcon = trailingIcon,
@@ -82,6 +88,7 @@ internal fun FinancialConnectionsOutlinedTextFieldPreview() {
                 ) {
                     FinancialConnectionsOutlinedTextField(
                         value = "test",
+                        enabled = true,
                         onValueChange = {}
                     )
                 }
