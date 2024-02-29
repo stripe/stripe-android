@@ -36,7 +36,6 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
@@ -46,10 +45,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAutofill
-import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -67,6 +62,7 @@ import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.autofill
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -163,24 +159,6 @@ fun TextField(
 
     val autofillReporter = LocalAutofillEventReporter.current
 
-    val autofillNode = remember {
-        AutofillNode(
-            autofillTypes = listOfNotNull(textFieldController.autofillType),
-            onFill = {
-                textFieldController.autofillType?.let { type ->
-                    autofillReporter(type.name)
-                }
-                textFieldController.onValueChange(it)
-            }
-        )
-    }
-    val autofill = LocalAutofill.current
-    val autofillTree = LocalAutofillTree.current
-
-    LaunchedEffect(autofillNode) {
-        autofillTree += autofillNode
-    }
-
     TextFieldUi(
         value = value,
         loading = loading,
@@ -208,22 +186,20 @@ fun TextField(
                     false
                 }
             }
-            .onGloballyPositioned {
-                autofillNode.boundingBox = it.boundsInWindow()
-            }
+            .autofill(
+                types = listOfNotNull(textFieldController.autofillType),
+                onFill = {
+                    textFieldController.autofillType?.let { type ->
+                        autofillReporter(type.name)
+                    }
+                    textFieldController.onValueChange(it)
+                }
+            )
             .onFocusChanged {
                 if (hasFocus != it.isFocused) {
                     textFieldController.onFocusChange(it.isFocused)
                 }
                 hasFocus = it.isFocused
-
-                if (autofill != null && autofillNode.boundingBox != null) {
-                    if (it.isFocused) {
-                        autofill.requestAutofillForNode(autofillNode)
-                    } else {
-                        autofill.cancelAutofillForNode(autofillNode)
-                    }
-                }
             }
             .focusRequester(focusRequester)
             .semantics {

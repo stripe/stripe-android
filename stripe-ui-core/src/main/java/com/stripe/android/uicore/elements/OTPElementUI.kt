@@ -26,7 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusManager
@@ -56,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.autofill
 
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
@@ -85,8 +88,8 @@ internal fun OTPElementUIDisabledPreview() {
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-@Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun OTPElementUI(
     enabled: Boolean,
@@ -134,8 +137,13 @@ fun OTPElementUI(
                 )
             ) {
                 val value by element.controller.fieldValues[index].collectAsState("")
+
                 var textFieldModifier = Modifier
                     .height(56.dp)
+                    .autofill(
+                        types = listOf(AutofillType.SmsOtpCode),
+                        onFill = element.controller::onAutofillDigit,
+                    )
                     .onFocusChanged { focusState ->
                         if (focusState.isFocused) {
                             focusedElementIndex = index
@@ -182,7 +190,6 @@ fun OTPElementUI(
 }
 
 @Composable
-@OptIn(ExperimentalMaterialApi::class)
 private fun OTPInputBox(
     value: String,
     isSelected: Boolean,

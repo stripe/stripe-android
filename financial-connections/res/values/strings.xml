@@ -129,8 +129,10 @@
     <string name="stripe_verification.codeExpired">It looks like the verification code you provided is not valid anymore. Get a new code and try again.</string>
     <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is not valid anymore. Click “Resend code” and try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
     <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
+    <string name="stripe_verification.inTestMode">You\'re in test mode.</string>
     <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
     <string name="stripe_verification.unexpectedError">Something went wrong.</string>
+    <string name="stripe_verification.useTestCode">Use test code</string>
     <string name="stripe_link_account_picker_disconnected">Disconnected</string>
     <string name="stripe_exit_modal_title">Exit without connecting?</string>
     <string name="stripe_exit_modal_desc">Your bank account won’t be connected to %1$s and all progress will be lost.</string>

@@ -6,6 +6,7 @@ import android.view.HapticFeedbackConstants
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -20,9 +22,11 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError.Type
 import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.ui.LocalTestMode
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.components.TestModeBanner
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
@@ -39,6 +43,16 @@ internal fun VerificationSection(
     val view = LocalView.current
     Column {
         StripeThemeForConnections {
+            if (LocalTestMode.current) {
+                TestModeBanner(
+                    enabled = enabled,
+                    buttonLabel = stringResource(R.string.stripe_verification_useTestCode),
+                    onButtonClick = otpElement::populateTestCode,
+                )
+
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
             OTPElementUI(
                 otpInputPlaceholder = "",
                 boxSpacing = 8.dp,
@@ -103,3 +117,9 @@ private fun OTPError.toMessage(): TextResource = TextResource.StringId(
         Type.CODE_INVALID -> R.string.stripe_verification_codeInvalid
     }
 )
+
+private fun OTPElement.populateTestCode() {
+    for (character in "000000") {
+        controller.onAutofillDigit(character.toString())
+    }
+}

@@ -40,6 +40,7 @@ private val Colors = FinancialConnectionsColors(
     iconSubdued = Color(0xFF6C7688),
     iconWhite = Color(0xFFFFFFFF),
     iconBrand = Color(0xFF675DFF),
+    iconCaution = Color(0xFFFF8F0E),
     buttonPrimary = Color(0xFF675DFF),
     buttonPrimaryHover = Color(0xFF857AFE),
     buttonPrimaryPressed = Color(0xFF533AFD),
@@ -50,8 +51,9 @@ private val Colors = FinancialConnectionsColors(
     backgroundSurface = Color(0xFFFFFFFF),
     backgroundOffset = Color(0xFFF6F8FA),
     backgroundBrand = Color(0xFFF5F6F8),
+    backgroundCaution = Color(0xFFFEF9DA),
     border = Color(0xFFD8DEE4),
-    borderBrand = Color(0xFF675DFF)
+    borderBrand = Color(0xFF675DFF),
 )
 
 private val lineHeightStyle = LineHeightStyle(
