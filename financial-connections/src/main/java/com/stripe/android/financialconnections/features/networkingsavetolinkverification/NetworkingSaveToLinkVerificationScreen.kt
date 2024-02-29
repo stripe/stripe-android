@@ -71,7 +71,6 @@ private fun NetworkingSaveToLinkVerificationContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = true,
                 onCloseClick = onCloseClick,
                 elevation = rememberLazyListState().elevation
             )

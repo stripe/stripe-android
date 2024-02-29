@@ -24,16 +24,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.LocalReducedBranding
@@ -56,14 +61,14 @@ internal fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean = LocalReducedBranding.current,
     testMode: Boolean = LocalTestMode.current,
     elevation: Dp = 0.dp,
-    showBack: Boolean = true,
+    allowBackNavigation: Boolean = true,
     onCloseClick: () -> Unit
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
     val localBackPressed = onBackPressedDispatcher?.onBackPressedDispatcher
 
     val navController = LocalNavHostController.current
-    val canGoBack by navController.collectCanGoBackAsState()
+    val canShowBackIcon by navController.collectCanShowBackIconAsState()
 
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
@@ -76,7 +81,7 @@ internal fun FinancialConnectionsTopAppBar(
             )
         },
         elevation = elevation,
-        navigationIcon = if (canGoBack && showBack) {
+        navigationIcon = if (canShowBackIcon && allowBackNavigation) {
             {
                 BackButton(
                     scope = scope,
@@ -99,6 +104,7 @@ internal fun FinancialConnectionsTopAppBar(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun BackButton(
     scope: CoroutineScope,
@@ -116,7 +122,10 @@ private fun BackButton(
         Icon(
             imageVector = Icons.Filled.ArrowBack,
             contentDescription = "Back icon",
-            tint = FinancialConnectionsTheme.colors.iconDefault
+            tint = FinancialConnectionsTheme.colors.iconDefault,
+            modifier = Modifier
+                .testTag("top-app-bar-back-button")
+                .semantics { testTagsAsResourceId = true }
         )
     }
 }
@@ -195,18 +204,22 @@ internal val LazyListState.elevation: Dp
     }
 
 @Composable
-private fun NavHostController.collectCanGoBackAsState(): State<Boolean> {
-    val canGoBack = remember { mutableStateOf(false) }
+private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {
+    val canShowBackIcon = remember { mutableStateOf(false) }
     DisposableEffect(Unit) {
-        val listener = NavController.OnDestinationChangedListener { controller, _, _ ->
-            canGoBack.value = controller.previousBackStackEntry != null
+        val listener = NavController.OnDestinationChangedListener { controller, destination, _ ->
+            if (destination.navigatorName == BottomSheetNavigator::class.java.simpleName) {
+                // We're looking at a bottom sheet, so don't change the back button
+            } else {
+                canShowBackIcon.value = controller.previousBackStackEntry != null
+            }
         }
         addOnDestinationChangedListener(listener)
         onDispose {
             removeOnDestinationChangedListener(listener)
         }
     }
-    return canGoBack
+    return canShowBackIcon
 }
 
 @Preview(group = "Components", name = "TopAppBar")

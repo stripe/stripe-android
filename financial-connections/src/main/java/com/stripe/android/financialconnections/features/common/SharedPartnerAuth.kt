@@ -245,7 +245,7 @@ private fun SharedPartnerAuthContentWrapper(
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    showBack = canNavigateBack,
+                    allowBackNavigation = canNavigateBack,
                     onCloseClick = onCloseClick
                 )
             }
