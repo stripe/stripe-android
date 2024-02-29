@@ -59,6 +59,11 @@ internal interface StripeCustomerAdapterComponent {
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?
         ): Builder
 
+        @BindsInstance
+        fun paymentMethodTypes(
+            paymentMethodTypes: List<String>?
+        ): Builder
+
         fun build(): StripeCustomerAdapterComponent
     }
 }
