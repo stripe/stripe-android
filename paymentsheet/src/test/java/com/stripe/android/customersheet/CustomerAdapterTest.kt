@@ -33,10 +33,10 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
-import kotlin.test.fail
 
 @RunWith(RobolectricTestRunner::class)
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -155,33 +155,53 @@ class CustomerAdapterTest {
     }
 
     @Test
-    // TODO:
-    fun `retrievePaymentMethods returns success with paymentMethodTypes`() = runTest {
+    fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
+        val customerRepository = mock<CustomerRepository>()
+
+        whenever(customerRepository.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
+
         val adapter = createAdapter(
-            customerRepository = FakeCustomerRepository(
-                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
+            customerRepository = customerRepository,
+            paymentMethodTypes = listOf("card"),
         )
-        val paymentMethods = adapter.retrievePaymentMethods()
-        assertThat(
-            paymentMethods.getOrNull()
-        ).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        fail()
+        adapter.retrievePaymentMethods()
+        verify(customerRepository).getPaymentMethods(
+            customerConfig = any(),
+            types = eq(
+                listOf(
+                    PaymentMethod.Type.Card,
+                )
+            ),
+            silentlyFail = any(),
+        )
     }
 
     @Test
-    // TODO:
     fun `retrievePaymentMethods returns failure with invalid paymentMethodTypes`() = runTest {
         val adapter = createAdapter(
             customerRepository = FakeCustomerRepository(
                 paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
+            ),
+            paymentMethodTypes = listOf("invalid_pm_type"),
         )
         val paymentMethods = adapter.retrievePaymentMethods()
         assertThat(
-            paymentMethods.getOrNull()
-        ).contains(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-        fail()
+            paymentMethods.failureOrNull()?.cause
+        ).hasMessageThat().isEqualTo("Invalid payment method types provided (invalid_pm_type).")
+    }
+
+    @Test
+    fun `retrievePaymentMethods returns failure with unsupported paymentMethodTypes`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            ),
+            paymentMethodTypes = listOf("klarna"),
+        )
+        val paymentMethods = adapter.retrievePaymentMethods()
+        assertThat(
+            paymentMethods.failureOrNull()?.cause
+        ).hasMessageThat().isEqualTo("Unsupported payment method types provided (klarna).")
     }
 
     @Test

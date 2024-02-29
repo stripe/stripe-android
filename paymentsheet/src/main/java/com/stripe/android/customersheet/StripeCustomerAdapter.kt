@@ -43,17 +43,30 @@ internal class StripeCustomerAdapter @Inject internal constructor(
         get() = setupIntentClientSecretProvider != null
 
     override suspend fun retrievePaymentMethods(): CustomerAdapter.Result<List<PaymentMethod>> {
-        // TODO: Need to filter payment method types sent here.
+        paymentMethodTypes?.filter { PaymentMethod.Type.fromCode(it) == null }?.takeIf { it.isNotEmpty() }?.run {
+            val cause = IllegalStateException("Invalid payment method types provided (${joinToString()}).")
+            return CustomerAdapter.Result.failure(cause, null)
+        }
+
+        val unsupportedPaymentMethods = paymentMethodTypes?.minus(supportedPaymentMethodTypes.map { it.code }.toSet()) ?: emptyList()
+        if (unsupportedPaymentMethods.isNotEmpty()) {
+            val cause = IllegalStateException("Unsupported payment method types provided (${unsupportedPaymentMethods.joinToString()}).")
+            return CustomerAdapter.Result.failure(cause, null)
+        }
+
+        val requestedTypes = if (paymentMethodTypes.isNullOrEmpty()) {
+            supportedPaymentMethodTypes
+        } else {
+            paymentMethodTypes.mapNotNull { PaymentMethod.Type.fromCode(it) }
+        }
+
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
                 customerConfig = PaymentSheet.CustomerConfiguration(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 ),
-                types = listOf(
-                    PaymentMethod.Type.Card,
-                    PaymentMethod.Type.USBankAccount,
-                ),
+                types = requestedTypes,
                 silentlyFail = false,
             ).getOrElse {
                 return CustomerAdapter.Result.failure(
@@ -192,6 +205,11 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     internal companion object {
         // 30 minutes, server-side timeout is 60
         internal const val CACHED_CUSTOMER_MAX_AGE_MILLIS = 60 * 30 * 1000L
+
+        private val supportedPaymentMethodTypes: List<PaymentMethod.Type> = listOf(
+            PaymentMethod.Type.Card,
+            PaymentMethod.Type.USBankAccount,
+        )
     }
 }
 
