@@ -21,6 +21,11 @@ internal fun ManualEntrySuccessScreen(
     SuccessContent(
         completeSessionAsync = state.completeSession,
         payloadAsync = state.payload,
-        onDoneClick = viewModel::onSubmit
-    ) { parentViewModel.onCloseNoConfirmationClick(FinancialConnectionsSessionManifest.Pane.MANUAL_ENTRY_SUCCESS) }
+        onDoneClick = viewModel::onSubmit,
+        onCloseClick = {
+            parentViewModel.onCloseNoConfirmationClick(
+                FinancialConnectionsSessionManifest.Pane.MANUAL_ENTRY_SUCCESS
+            )
+        }
+    )
 }
