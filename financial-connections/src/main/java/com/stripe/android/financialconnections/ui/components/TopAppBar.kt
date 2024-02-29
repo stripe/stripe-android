@@ -24,10 +24,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -100,6 +104,7 @@ internal fun FinancialConnectionsTopAppBar(
     )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun BackButton(
     scope: CoroutineScope,
@@ -117,7 +122,10 @@ private fun BackButton(
         Icon(
             imageVector = Icons.Filled.ArrowBack,
             contentDescription = "Back icon",
-            tint = FinancialConnectionsTheme.colors.iconDefault
+            tint = FinancialConnectionsTheme.colors.iconDefault,
+            modifier = Modifier
+                .testTag("top-app-bar-back-button")
+                .semantics { testTagsAsResourceId = true }
         )
     }
 }
