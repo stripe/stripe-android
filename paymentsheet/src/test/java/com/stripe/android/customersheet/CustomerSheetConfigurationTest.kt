@@ -83,6 +83,7 @@ class CustomerSheetConfigurationTest {
             "preferredNetworks",
             "build",
             "allowsRemovalOfLastSavedPaymentMethod",
+            "paymentMethodOrder",
         )
 
         // Programmatically check for any new method on the builder using reflection

@@ -103,6 +103,7 @@ internal class DefaultCustomerSheetLoader(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
+                paymentMethodOrder = configuration?.paymentMethodOrder ?: emptyList(),
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )

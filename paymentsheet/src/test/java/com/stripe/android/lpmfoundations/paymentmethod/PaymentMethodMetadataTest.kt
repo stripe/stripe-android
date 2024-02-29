@@ -213,21 +213,12 @@ internal class PaymentMethodMetadataTest {
 
     @Test
     fun `sortedSupportedPaymentMethods sorts on custom sort`() {
-        paymentMethodSorter = {
-            sortedBy {
-                when (it.code) {
-                    "card" -> 1
-                    "klarna" -> 2
-                    "affirm" -> 3
-                    else -> 100
-                }
-            }
-        }
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("affirm", "klarna", "card"),
             ),
             allowsPaymentMethodsRequiringShippingAddress = true,
+            paymentMethodOrder = listOf("klarna", "affirm", "card", "ignored"),
             sharedDataSpecs = listOf(
                 SharedDataSpec("affirm"),
                 SharedDataSpec("klarna"),
@@ -235,7 +226,27 @@ internal class PaymentMethodMetadataTest {
             ),
         )
         val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
-        paymentMethodSorter = defaultSorter
+        assertThat(sortedSupportedPaymentMethods).hasSize(3)
+        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("klarna")
+        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
+        assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
+    }
+
+    @Test
+    fun `sortedSupportedPaymentMethods add unrequested payment methods at the end`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("klarna", "affirm", "card"),
+            ),
+            allowsPaymentMethodsRequiringShippingAddress = true,
+            paymentMethodOrder = listOf("card"),
+            sharedDataSpecs = listOf(
+                SharedDataSpec("affirm"),
+                SharedDataSpec("klarna"),
+                SharedDataSpec("card"),
+            ),
+        )
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
