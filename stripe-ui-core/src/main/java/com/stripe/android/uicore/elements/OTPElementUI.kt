@@ -138,7 +138,7 @@ fun OTPElementUI(
             ) {
                 val value by element.controller.fieldValues[index].collectAsState("")
 
-                val textFieldModifier = Modifier
+                var textFieldModifier = Modifier
                     .height(56.dp)
                     .autofill(
                         types = listOf(AutofillType.SmsOtpCode),
@@ -149,13 +149,6 @@ fun OTPElementUI(
                             focusedElementIndex = index
                         } else if (!focusState.isFocused && isSelected) {
                             focusedElementIndex = -1
-                        }
-                    }
-                    .run {
-                        if (index == 0) {
-                            focusRequester(focusRequester)
-                        } else {
-                            this
                         }
                     }
                     .onPreviewKeyEvent { event ->
@@ -174,6 +167,10 @@ fun OTPElementUI(
                     .semantics {
                         testTag = "OTP-$index"
                     }
+
+                if (index == 0) {
+                    textFieldModifier = textFieldModifier.focusRequester(focusRequester)
+                }
 
                 OTPInputBox(
                     value = value,
