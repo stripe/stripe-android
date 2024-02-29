@@ -47,7 +47,7 @@ private fun AttachPaymentContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = false,
+                allowBackNavigation = false,
                 onCloseClick = onCloseClick
             )
         }

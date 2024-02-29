@@ -135,7 +135,7 @@ private fun FullScreenError(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = showBack,
+                allowBackNavigation = showBack,
                 onCloseClick = onCloseClick
             )
         }

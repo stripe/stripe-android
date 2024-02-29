@@ -96,7 +96,7 @@ private fun SuccessContentInternal(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = false,
+                allowBackNavigation = false,
                 onCloseClick = onCloseClick,
                 elevation = scrollState.elevation
             )

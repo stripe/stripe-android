@@ -75,7 +75,7 @@ private fun LinkStepUpVerificationContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = false,
+                allowBackNavigation = false,
                 elevation = lazyListState.elevation,
                 onCloseClick = onCloseClick
             )

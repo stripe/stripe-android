@@ -166,7 +166,7 @@ private fun AccountPickerMainContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                showBack = false,
+                allowBackNavigation = false,
                 onCloseClick = onCloseClick,
                 elevation = lazyListState.elevation
             )
