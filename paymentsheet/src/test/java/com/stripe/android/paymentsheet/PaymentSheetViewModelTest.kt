@@ -1416,7 +1416,7 @@ internal class PaymentSheetViewModelTest {
                 ),
                 showCheckbox = false,
                 showCheckboxControlledFields = true,
-                billingDetails = null,
+                billingDetails = PaymentSheet.BillingDetails(),
             )
         )
     }
