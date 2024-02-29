@@ -11,7 +11,8 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
     override val values = sequenceOf(
         canonical(),
         failure(),
-        fieldFailure()
+        fieldFailure(),
+        testMode(),
     )
 
     override val count: Int
@@ -21,7 +22,8 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
-                customManualEntry = false
+                customManualEntry = false,
+                testMode = false
             )
         ),
         linkPaymentAccount = Fail(
@@ -33,7 +35,19 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
-                customManualEntry = false
+                customManualEntry = false,
+                testMode = false
+            )
+        ),
+        linkPaymentAccount = Uninitialized
+    )
+
+    private fun testMode() = ManualEntryState(
+        payload = Success(
+            ManualEntryState.Payload(
+                verifyWithMicrodeposits = true,
+                customManualEntry = false,
+                testMode = true
             )
         ),
         linkPaymentAccount = Uninitialized
@@ -49,7 +63,8 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
-                customManualEntry = false
+                customManualEntry = false,
+                testMode = false
             )
         ),
         linkPaymentAccount = Uninitialized,

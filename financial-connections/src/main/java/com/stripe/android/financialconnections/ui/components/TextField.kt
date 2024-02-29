@@ -12,8 +12,6 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,9 +20,9 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 
 @Composable
 internal fun FinancialConnectionsOutlinedTextField(
-    value: TextFieldValue,
+    value: String,
     modifier: Modifier = Modifier,
-    onValueChange: (TextFieldValue) -> Unit,
+    onValueChange: (String) -> Unit,
     readOnly: Boolean = false,
     isError: Boolean = false,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
@@ -71,20 +69,6 @@ internal fun FinancialConnectionsOutlinedTextField(
     )
 }
 
-internal fun TextFieldValue.filtered(predicate: (Char) -> Boolean): TextFieldValue = copy(
-    text = text.filter(predicate),
-    selection = selection.adjustForFilter(text, predicate),
-    composition = composition?.adjustForFilter(text, predicate),
-)
-
-private fun TextRange.adjustForFilter(
-    text: String,
-    predicate: (Char) -> Boolean
-): TextRange = TextRange(
-    start = text.subSequence(0, start).count(predicate),
-    end = text.subSequence(0, end).count(predicate),
-)
-
 @Preview(group = "Components", name = "TextField - idle")
 @Composable
 internal fun FinancialConnectionsOutlinedTextFieldPreview() {
@@ -97,7 +81,7 @@ internal fun FinancialConnectionsOutlinedTextFieldPreview() {
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     FinancialConnectionsOutlinedTextField(
-                        value = TextFieldValue("test"),
+                        value = "test",
                         onValueChange = {}
                     )
                 }

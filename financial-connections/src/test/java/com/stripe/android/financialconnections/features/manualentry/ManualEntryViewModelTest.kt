@@ -67,7 +67,8 @@ class ManualEntryViewModelTest {
                     Success(
                         Payload(
                             customManualEntry = true,
-                            verifyWithMicrodeposits = sync.manifest.manualEntryUsesMicrodeposits
+                            verifyWithMicrodeposits = sync.manifest.manualEntryUsesMicrodeposits,
+                            testMode = false
                         )
                     )
                 )

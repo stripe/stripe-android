@@ -1,22 +1,16 @@
 package com.stripe.android.financialconnections.features.manualentry
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
@@ -24,7 +18,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -49,34 +42,43 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.components.TestModeBanner
 import com.stripe.android.financialconnections.ui.components.elevation
-import com.stripe.android.financialconnections.ui.components.filtered
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
 internal fun ManualEntryScreen() {
     val viewModel: ManualEntryViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
-    val state: State<ManualEntryState> = viewModel.collectAsState()
+    val state: ManualEntryState by viewModel.collectAsState()
     ManualEntryContent(
-        routing = state.value.routing to state.value.routingError,
-        account = state.value.account to state.value.accountError,
-        accountConfirm = state.value.accountConfirm to state.value.accountConfirmError,
-        isValidForm = state.value.isValidForm,
-        payload = state.value.payload,
-        linkPaymentAccountStatus = state.value.linkPaymentAccount,
+        routing = state.routing,
+        routingError = state.routingError,
+        account = state.account,
+        accountError = state.accountError,
+        accountConfirm = state.accountConfirm,
+        accountConfirmError = state.accountConfirmError,
+        isValidForm = state.isValidForm,
+        payload = state.payload,
+        linkPaymentAccountStatus = state.linkPaymentAccount,
         onRoutingEntered = viewModel::onRoutingEntered,
         onAccountEntered = viewModel::onAccountEntered,
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
-    ) { parentViewModel.onCloseWithConfirmationClick(Pane.MANUAL_ENTRY) }
+        onTestFill = viewModel::onTestFill,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.MANUAL_ENTRY) }
+    )
 }
 
 @Composable
 private fun ManualEntryContent(
-    routing: Pair<String?, Int?>,
-    account: Pair<String?, Int?>,
-    accountConfirm: Pair<String?, Int?>,
+    routing: String,
+    routingError: Int?,
+    account: String,
+    accountError: Int?,
+    accountConfirm: String,
+    accountConfirmError: Int?,
     isValidForm: Boolean,
     payload: Async<Payload>,
     linkPaymentAccountStatus: Async<LinkAccountSessionPaymentAccount>,
@@ -84,7 +86,8 @@ private fun ManualEntryContent(
     onAccountEntered: (String) -> Unit,
     onAccountConfirmEntered: (String) -> Unit,
     onSubmit: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onTestFill: () -> Unit
 ) {
     val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
@@ -109,13 +112,17 @@ private fun ManualEntryContent(
                     linkPaymentAccountStatus = linkPaymentAccountStatus,
                     payload = payload(),
                     routing = routing,
-                    onRoutingEntered = onRoutingEntered,
+                    routingError = routingError,
                     account = account,
-                    onAccountEntered = onAccountEntered,
+                    accountError = accountError,
                     accountConfirm = accountConfirm,
+                    accountConfirmError = accountConfirmError,
+                    onRoutingEntered = onRoutingEntered,
+                    onAccountEntered = onAccountEntered,
                     onAccountConfirmEntered = onAccountConfirmEntered,
                     isValidForm = isValidForm,
-                    onSubmit = onSubmit
+                    onSubmit = onSubmit,
+                    onTestFill = onTestFill
                 )
             }
         }
@@ -127,30 +134,22 @@ private fun ManualEntryLoaded(
     scrollState: ScrollState,
     payload: Payload,
     linkPaymentAccountStatus: Async<LinkAccountSessionPaymentAccount>,
-    routing: Pair<String?, Int?>,
+    routing: String,
+    routingError: Int?,
+    account: String,
+    accountError: Int?,
+    accountConfirm: String,
+    accountConfirmError: Int?,
     onRoutingEntered: (String) -> Unit,
-    account: Pair<String?, Int?>,
     onAccountEntered: (String) -> Unit,
-    accountConfirm: Pair<String?, Int?>,
     onAccountConfirmEntered: (String) -> Unit,
     isValidForm: Boolean,
-    onSubmit: () -> Unit
+    onSubmit: () -> Unit,
+    onTestFill: () -> Unit
 ) {
-    Column(
-        Modifier.fillMaxSize()
-    ) {
-        // Scrollable content
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState)
-                .padding(
-                    top = 16.dp,
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = 24.dp
-                )
-        ) {
+    Layout(
+        scrollState = scrollState,
+        body = {
             Text(
                 modifier = Modifier.fillMaxWidth(),
                 text = stringResource(R.string.stripe_manualentry_title),
@@ -168,25 +167,24 @@ private fun ManualEntryLoaded(
             }
             Spacer(modifier = Modifier.size(8.dp))
 
-            InputWithError(
-                label = R.string.stripe_manualentry_routing,
-                inputWithError = routing,
-                testTag = "RoutingInput",
-                onInputChanged = onRoutingEntered,
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            InputWithError(
-                label = R.string.stripe_manualentry_account,
-                inputWithError = account,
-                testTag = "AccountInput",
-                onInputChanged = onAccountEntered,
-            )
-            Spacer(modifier = Modifier.size(16.dp))
-            InputWithError(
-                label = R.string.stripe_manualentry_accountconfirm,
-                inputWithError = accountConfirm,
-                testTag = "ConfirmAccountInput",
-                onInputChanged = onAccountConfirmEntered,
+            if (payload.testMode) {
+                TestModeBanner(
+                    enabled = true,
+                    buttonLabel = "Use test account",
+                    onButtonClick = { onTestFill() }
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+            AccountForm(
+                routing = routing,
+                routingError = routingError,
+                onRoutingEntered = onRoutingEntered,
+                account = account,
+                accountError = accountError,
+                onAccountEntered = onAccountEntered,
+                accountConfirm = accountConfirm,
+                accountConfirmError = accountConfirmError,
+                onAccountConfirmEntered = onAccountConfirmEntered
             )
             if (linkPaymentAccountStatus is Fail) {
                 Spacer(modifier = Modifier.size(16.dp))
@@ -199,11 +197,48 @@ private fun ManualEntryLoaded(
                     color = FinancialConnectionsTheme.colors.textCritical,
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
+        },
+        footer = {
+            ManualEntryFooter(isValidForm, onSubmit)
         }
-        // Footer
-        ManualEntryFooter(isValidForm, onSubmit)
-    }
+    )
+}
+
+@Composable
+private fun AccountForm(
+    routing: String,
+    routingError: Int?,
+    onRoutingEntered: (String) -> Unit,
+    account: String,
+    accountError: Int?,
+    onAccountEntered: (String) -> Unit,
+    accountConfirm: String,
+    accountConfirmError: Int?,
+    onAccountConfirmEntered: (String) -> Unit
+) {
+    InputWithError(
+        label = R.string.stripe_manualentry_routing,
+        input = routing,
+        error = routingError,
+        testTag = "RoutingInput",
+        onInputChanged = onRoutingEntered,
+    )
+    Spacer(modifier = Modifier.size(16.dp))
+    InputWithError(
+        label = R.string.stripe_manualentry_account,
+        input = account,
+        error = accountError,
+        testTag = "AccountInput",
+        onInputChanged = onAccountEntered,
+    )
+    Spacer(modifier = Modifier.size(16.dp))
+    InputWithError(
+        label = R.string.stripe_manualentry_accountconfirm,
+        input = accountConfirm,
+        error = accountConfirmError,
+        testTag = "ConfirmAccountInput",
+        onInputChanged = onAccountConfirmEntered,
+    )
 }
 
 @Composable
@@ -211,9 +246,7 @@ private fun ManualEntryFooter(
     isValidForm: Boolean,
     onSubmit: () -> Unit
 ) {
-    Column(
-        modifier = Modifier.padding(24.dp)
-    ) {
+    Column {
         FinancialConnectionsButton(
             enabled = isValidForm,
             onClick = onSubmit,
@@ -228,15 +261,15 @@ private fun ManualEntryFooter(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun InputWithError(
-    inputWithError: Pair<String?, Int?>,
+    input: String,
+    @StringRes error: Int?,
     label: Int,
     testTag: String,
     onInputChanged: (String) -> Unit
 ) {
-    var textValue by remember { mutableStateOf(TextFieldValue()) }
     Spacer(modifier = Modifier.size(4.dp))
     FinancialConnectionsOutlinedTextField(
-        value = textValue,
+        value = input,
         keyboardOptions = KeyboardOptions(
             keyboardType = KeyboardType.Number,
         ),
@@ -247,19 +280,16 @@ private fun InputWithError(
                 color = FinancialConnectionsTheme.colors.textSubdued
             )
         },
-        isError = inputWithError.second != null,
-        onValueChange = { text ->
-            textValue = text.filtered { it.isDigit() }
-            onInputChanged(textValue.text)
-        },
+        isError = error != null,
+        onValueChange = { newValue -> onInputChanged(newValue) },
         modifier = Modifier
             .semantics { testTagsAsResourceId = true }
             .testTag(testTag)
     )
-    if (inputWithError.second != null) {
+    if (error != null) {
         Spacer(modifier = Modifier.size(4.dp))
         Text(
-            text = stringResource(id = inputWithError.second!!),
+            text = stringResource(id = error),
             color = FinancialConnectionsTheme.colors.textCritical,
             style = FinancialConnectionsTheme.typography.labelSmall,
         )
@@ -275,16 +305,21 @@ internal fun ManualEntryPreview(
 ) {
     FinancialConnectionsPreview {
         ManualEntryContent(
-            routing = state.routing to state.routingError,
-            account = state.account to state.accountError,
-            accountConfirm = state.accountConfirm to state.accountConfirmError,
+            routing = state.routing,
+            routingError = state.routingError,
+            account = state.account,
+            accountError = state.accountError,
+            accountConfirm = state.accountConfirm,
+            accountConfirmError = state.accountConfirmError,
             isValidForm = true,
             payload = state.payload,
             linkPaymentAccountStatus = state.linkPaymentAccount,
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
+            onTestFill = {},
             onSubmit = {},
-        ) {}
+            onCloseClick = {}
+        )
     }
 }

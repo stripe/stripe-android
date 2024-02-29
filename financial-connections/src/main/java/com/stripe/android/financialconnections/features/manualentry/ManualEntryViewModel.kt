@@ -36,47 +36,17 @@ internal class ManualEntryViewModel @Inject constructor(
 
     init {
         observeAsyncs()
-        observeInputs()
         suspend {
             val sync = getOrFetchSync()
             val manifest = requireNotNull(sync.manifest)
             eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits,
-                customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM
+                customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM,
+                testMode = manifest.livemode.not()
             )
         }.execute {
             copy(payload = it)
-        }
-    }
-
-    private fun observeInputs() {
-        onEach(ManualEntryState::accountConfirm) { input ->
-            if (input != null) {
-                withState {
-                    val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
-                        accountInput = it.account ?: "",
-                        accountConfirmInput = input
-                    )
-                    setState { copy(accountConfirmError = error) }
-                }
-            }
-        }
-        onEach(ManualEntryState::account) { input ->
-            if (input != null) {
-                setState {
-                    val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
-                    copy(accountError = error)
-                }
-            }
-        }
-        onEach(ManualEntryState::routing) { input ->
-            if (input != null) {
-                setState {
-                    val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
-                    copy(routingError = error)
-                }
-            }
         }
     }
 
@@ -107,19 +77,29 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onRoutingEntered(input: String) {
-        val filteredInput = input.filter { it.isDigit() }
-        setState { copy(routing = filteredInput) }
+        setState { copy(routing = input.filter { it.isDigit() }) }
+        withState {
+            val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
+            setState { copy(routingError = error) }
+        }
     }
 
     fun onAccountEntered(input: String) {
-        val filteredInput = input.filter { it.isDigit() }
-        setState { copy(account = filteredInput) }
+        setState { copy(account = input.filter { it.isDigit() }) }
+        withState {
+            val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
+            setState { copy(accountError = error) }
+        }
     }
 
     fun onAccountConfirmEntered(input: String) {
-        val filteredInput = input.filter { it.isDigit() }
-        setState {
-            copy(accountConfirm = filteredInput)
+        setState { copy(accountConfirm = input.filter { it.isDigit() }) }
+        withState {
+            val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
+                accountInput = it.account,
+                accountConfirmInput = input
+            )
+            setState { copy(accountConfirmError = error) }
         }
     }
 
@@ -153,6 +133,19 @@ internal class ManualEntryViewModel @Inject constructor(
         }.execute { copy(linkPaymentAccount = it) }
     }
 
+    fun onTestFill() {
+        setState {
+            copy(
+                routing = "110000000",
+                account = "000123456789",
+                accountConfirm = "000123456789",
+                routingError = null,
+                accountError = null,
+                accountConfirmError = null
+            )
+        }
+    }
+
     companion object :
         MavericksViewModelFactory<ManualEntryViewModel, ManualEntryState> {
 
@@ -175,9 +168,9 @@ internal class ManualEntryViewModel @Inject constructor(
 
 internal data class ManualEntryState(
     val payload: Async<Payload> = Uninitialized,
-    val routing: String? = null,
-    val account: String? = null,
-    val accountConfirm: String? = null,
+    val routing: String = "",
+    val account: String = "",
+    val accountConfirm: String = "",
     val routingError: Int? = null,
     val accountError: Int? = null,
     val accountConfirmError: Int? = null,
@@ -186,7 +179,8 @@ internal data class ManualEntryState(
 
     data class Payload(
         val verifyWithMicrodeposits: Boolean,
-        val customManualEntry: Boolean
+        val customManualEntry: Boolean,
+        val testMode: Boolean
     )
 
     val isValidForm
@@ -195,5 +189,5 @@ internal data class ManualEntryState(
                 (account to accountError).valid() &&
                 (accountConfirm to accountConfirmError).valid()
 
-    private fun Pair<String?, Int?>.valid() = first != null && second == null
+    private fun Pair<String, Int?>.valid() = first.isNotEmpty() && second == null
 }
