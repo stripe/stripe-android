@@ -82,6 +82,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsColors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import kotlinx.coroutines.launch
@@ -129,6 +130,7 @@ private fun InstitutionPickerContent(
             is Uninitialized,
             is Loading,
             is Fail -> FullScreenGenericLoading()
+
             is Success -> LoadedContent(
                 previewText = previewText,
                 selectedInstitutionId = selectedInstitutionId,
@@ -387,26 +389,11 @@ private fun SearchRow(
             keyboardActions = KeyboardActions(
                 onSearch = { focusManager.clearFocus() },
             ),
-            trailingIcon = query.text.takeIf { it.isNotEmpty() }?.let {
-                {
-                    Box(
-                        Modifier
-                            .size(16.dp)
-                            .clickable { onQueryChanged(TextFieldValue("")) }
-                            .background(
-                                color = colors.border,
-                                shape = CircleShape
-                            )
-                            .padding(2.dp)
-                    ) {
-                        Icon(
-                            Icons.Filled.Clear,
-                            tint = colors.backgroundSurface,
-                            contentDescription = "Clear search",
-                        )
-                    }
-                }
-            },
+            trailingIcon = query.text
+                .takeIf { it.isNotEmpty() }
+                ?.let {
+                    { ClearSearchButton(onQueryChanged = onQueryChanged, colors = colors) }
+                },
             placeholder = {
                 Text(
                     text = stringResource(id = R.string.stripe_search),
@@ -416,6 +403,29 @@ private fun SearchRow(
             },
             value = query,
             onValueChange = { onQueryChanged(it) }
+        )
+    }
+}
+
+@Composable
+private fun ClearSearchButton(
+    onQueryChanged: (TextFieldValue) -> Unit,
+    colors: FinancialConnectionsColors
+) {
+    Box(
+        Modifier
+            .size(16.dp)
+            .clickable { onQueryChanged(TextFieldValue("")) }
+            .background(
+                color = colors.border,
+                shape = CircleShape
+            )
+            .padding(2.dp)
+    ) {
+        Icon(
+            Icons.Filled.Clear,
+            tint = colors.backgroundSurface,
+            contentDescription = "Clear search",
         )
     }
 }
