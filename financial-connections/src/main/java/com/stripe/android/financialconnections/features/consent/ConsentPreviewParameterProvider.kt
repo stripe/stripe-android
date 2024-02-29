@@ -181,12 +181,17 @@ internal class ConsentPreviewParameterProvider :
         Bullet(
             icon = Image("https://www.cdn.stripe.com/12321312321.png"),
             title = "Account details",
-            content = "Account number, routing number, account type, account nickname."
+            content = null
         ),
         Bullet(
             icon = Image("https://www.cdn.stripe.com/12321312321.png"),
-            title = "Account details",
-            content = "Account number, routing number, account type, account nickname."
+            title = "Balances",
+            content = null
+        ),
+        Bullet(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+            title = "Transactions",
+            content = null
         ),
     )
 }

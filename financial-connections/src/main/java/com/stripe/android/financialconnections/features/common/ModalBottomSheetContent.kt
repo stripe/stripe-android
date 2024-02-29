@@ -1,14 +1,11 @@
 package com.stripe.android.financialconnections.features.common
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListScope
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -22,12 +19,13 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.sdui.rememberHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
 internal fun DataAccessBottomSheetContent(
@@ -48,37 +46,38 @@ internal fun DataAccessBottomSheetContent(
         onConfirmModalClick = onConfirmModalClick,
         content = {
             dataDialog.icon?.default?.let {
-                item {
-                    ShapedIcon(url = it, contentDescription = "Icon")
-                }
+                ShapedIcon(url = it, contentDescription = "Icon")
+                Spacer(modifier = Modifier.size(16.dp))
             }
-            item {
-                Title(title = title, onClickableTextClick = onClickableTextClick)
-            }
+            Title(title = title, onClickableTextClick = onClickableTextClick)
             // FOR CONNECTED ACCOUNTS: Permissions granted to Stripe by the connected account
             dataDialog.connectedAccountNotice?.let {
-                item {
-                    Subtitle(text = rememberHtml(it.subtitle), onClickableTextClick = onClickableTextClick)
-                }
-                items(it.body.bullets) { bullet ->
+                Spacer(modifier = Modifier.size(16.dp))
+                Subtitle(
+                    text = rememberHtml(it.subtitle),
+                    onClickableTextClick = onClickableTextClick
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+                it.body.bullets.forEach { bullet ->
                     ListItem(
                         bullet = BulletUI.from(bullet),
                         onClickableTextClick = onClickableTextClick
                     )
+                    Spacer(modifier = Modifier.size(16.dp))
                 }
             }
             // FOR ALL MERCHANTS: Permissions granted to Stripe by the merchant
             subtitle?.let {
-                item { Subtitle(it, onClickableTextClick) }
+                Spacer(modifier = Modifier.size(16.dp))
+                Subtitle(it, onClickableTextClick)
             }
-            itemsIndexed(bullets) { index, bullet ->
+            Spacer(modifier = Modifier.size(24.dp))
+            bullets.forEach { bullet ->
                 ListItem(
                     bullet = bullet,
                     onClickableTextClick = onClickableTextClick
                 )
-                if (index < bullets.lastIndex) {
-                    Spacer(modifier = Modifier.size(16.dp))
-                }
+                Spacer(modifier = Modifier.size(16.dp))
             }
         }
     )
@@ -103,35 +102,40 @@ internal fun LegalDetailsBottomSheetContent(
         onConfirmModalClick = onConfirmModalClick
     ) {
         legalDetails.icon?.default?.let {
-            item { ShapedIcon(it, contentDescription = "legal details icon") }
+            ShapedIcon(it, contentDescription = "legal details icon")
+            Spacer(modifier = Modifier.size(16.dp))
         }
 
-        item { Title(title = title, onClickableTextClick = onClickableTextClick) }
+        Title(title = title, onClickableTextClick = onClickableTextClick)
 
         subtitle?.let {
-            item { Subtitle(text = it, onClickableTextClick = onClickableTextClick) }
+            Spacer(modifier = Modifier.size(16.dp))
+            Subtitle(text = it, onClickableTextClick = onClickableTextClick)
         }
 
-        item { Links(links) }
+        Spacer(modifier = Modifier.size(24.dp))
+
+        Links(links, onClickableTextClick)
     }
 }
 
 @Composable
 private fun Links(
     links: List<TextResource.Text>,
+    onClickableTextClick: (String) -> Unit,
 ) {
     Column {
+        val linkStyle = typography.labelLargeEmphasized.copy(color = colors.textBrand)
         links.forEachIndexed { index, link ->
             Divider(color = colors.border)
             AnnotatedText(
-                modifier = Modifier.padding(vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                 text = link,
-                defaultStyle = typography.labelLargeEmphasized.copy(
-                    color = colors.textBrand
+                defaultStyle = linkStyle,
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to linkStyle.toSpanStyle()
                 ),
-                // remove annotation styles to avoid link underline (the default)
-                annotationStyles = emptyMap(),
-                onClickableTextClick = {},
+                onClickableTextClick = onClickableTextClick,
             )
             if (links.lastIndex == index) {
                 Divider(color = colors.border)
@@ -160,11 +164,10 @@ private fun ModalBottomSheetContent(
     cta: String,
     disclaimer: TextResource?,
     onConfirmModalClick: () -> Unit,
-    content: LazyListScope.() -> Unit,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
-    LazyLayout(
+    Layout(
         modifier = Modifier.padding(top = 32.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
         inModal = true,
         body = { content() },
         footer = {
