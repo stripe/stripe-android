@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.sdui.rememberHtml
@@ -114,26 +115,27 @@ internal fun LegalDetailsBottomSheetContent(
 
         Spacer(modifier = Modifier.size(24.dp))
 
-        Links(links)
+        Links(links, onClickableTextClick)
     }
 }
 
 @Composable
 private fun Links(
     links: List<TextResource.Text>,
+    onClickableTextClick: (String) -> Unit,
 ) {
     Column {
+        val linkStyle = typography.labelLargeEmphasized.copy(color = colors.textBrand)
         links.forEachIndexed { index, link ->
             Divider(color = colors.border)
             AnnotatedText(
-                modifier = Modifier.padding(vertical = 16.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
                 text = link,
-                defaultStyle = typography.labelLargeEmphasized.copy(
-                    color = colors.textBrand
+                defaultStyle = linkStyle,
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to linkStyle.toSpanStyle()
                 ),
-                // remove annotation styles to avoid link underline (the default)
-                annotationStyles = emptyMap(),
-                onClickableTextClick = {},
+                onClickableTextClick = onClickableTextClick,
             )
             if (links.lastIndex == index) {
                 Divider(color = colors.border)
