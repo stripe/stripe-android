@@ -2,8 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 * [Changed][7999](https://github.com/stripe/stripe-android/pull/7999) In test mode, PaymentSheet now fails to load when getting saved payment methods fails.
-
-* [Added] Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
+* [Added][8015](https://github.com/stripe/stripe-android/pull/8015) Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
+* [Added][8011](https://github.com/stripe/stripe-android/pull/8011) Added support for `paymentMethodOrder` in `PaymentSheet` and `CustomerSheet`, which provides client side sorting of payment methods.
 
 ### PaymentSheet
 * [Added] Added support for `paymentMethodOrder` to PaymentSheet and CustomerSheet.π
