@@ -48,9 +48,11 @@ internal class StripeCustomerAdapter @Inject internal constructor(
             return CustomerAdapter.Result.failure(cause, null)
         }
 
-        val unsupportedPaymentMethods = paymentMethodTypes?.minus(supportedPaymentMethodTypes.map { it.code }.toSet()) ?: emptyList()
+        val supportedPaymentMethodCodes = supportedPaymentMethodTypes.map { it.code }.toSet()
+        val unsupportedPaymentMethods = paymentMethodTypes?.minus(supportedPaymentMethodCodes) ?: emptyList()
         if (unsupportedPaymentMethods.isNotEmpty()) {
-            val cause = IllegalStateException("Unsupported payment method types provided (${unsupportedPaymentMethods.joinToString()}).")
+            val unsupportedCodes = unsupportedPaymentMethods.joinToString()
+            val cause = IllegalStateException("Unsupported payment method types provided ($unsupportedCodes).")
             return CustomerAdapter.Result.failure(cause, null)
         }
 
