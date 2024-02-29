@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
 import com.stripe.android.financialconnections.ui.LocalReducedBranding
@@ -198,8 +199,12 @@ internal val LazyListState.elevation: Dp
 private fun NavHostController.collectCanGoBackAsState(): State<Boolean> {
     val canGoBack = remember { mutableStateOf(false) }
     DisposableEffect(Unit) {
-        val listener = NavController.OnDestinationChangedListener { controller, _, _ ->
-            canGoBack.value = controller.previousBackStackEntry != null
+        val listener = NavController.OnDestinationChangedListener { controller, destination, _ ->
+            if (destination.navigatorName == BottomSheetNavigator::class.java.simpleName) {
+                // We're looking at a bottom sheet, so don't change the back button
+            } else {
+                canGoBack.value = controller.previousBackStackEntry != null
+            }
         }
         addOnDestinationChangedListener(listener)
         onDispose {
