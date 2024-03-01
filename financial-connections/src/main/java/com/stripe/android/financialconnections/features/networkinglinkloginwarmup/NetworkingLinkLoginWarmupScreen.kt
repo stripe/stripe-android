@@ -71,8 +71,7 @@ private fun NetworkingLinkLoginWarmupContent(
     LazyLayout(
         modifier = Modifier
             .fillMaxWidth()
-            .background(color = colors.backgroundSurface)
-            .padding(top = 24.dp),
+            .background(color = colors.backgroundSurface),
         inModal = true,
         verticalArrangement = Arrangement.spacedBy(24.dp),
         lazyListState = lazyListState,

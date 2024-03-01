@@ -294,11 +294,15 @@ private fun PrePaneContent(
     onCancelClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
 ) {
+    val bodyPadding = remember(showInModal) {
+        PaddingValues(top = if (showInModal) 0.dp else 24.dp)
+    }
+
     LazyLayout(
         inModal = showInModal,
         // Overrides padding values to allow full-span prepane image background
+        bodyPadding = bodyPadding,
         verticalArrangement = Arrangement.spacedBy(24.dp),
-        bodyPadding = PaddingValues(top = 24.dp),
         body = {
             item {
                 PrepaneHeader(

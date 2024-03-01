@@ -164,10 +164,11 @@ private fun ModalBottomSheetContent(
     cta: String,
     disclaimer: TextResource?,
     onConfirmModalClick: () -> Unit,
+    modifier: Modifier = Modifier,
     content: @Composable ColumnScope.() -> Unit,
 ) {
     Layout(
-        modifier = Modifier.padding(top = 32.dp),
+        modifier = modifier,
         inModal = true,
         body = { content() },
         footer = {
