@@ -67,6 +67,7 @@
     <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>
     <ID>SwallowedException:IdentityTheme.kt$e: ReflectiveOperationException</ID>
     <ID>ThrowsCount:DefaultIdentityRepository.kt$DefaultIdentityRepository$private suspend fun &lt;Response : StripeModel> executeRequestWithModelJsonParser( request: StripeRequest, responseJsonParser: ModelJsonParser&lt;Response>, onSuccessExecutionTimeBlock: (Long) -> Unit = {} ): Response</ID>
+    <ID>TooGenericExceptionCaught:IDDetectorAnalyzer.kt$IDDetectorAnalyzer$e: Exception</ID>
     <ID>TooGenericExceptionCaught:LaplacianBlurDetector.kt$LaplacianBlurDetector$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MBDetector.kt$MBDetector.&lt;no name provided>$e: Exception</ID>
     <ID>TooGenericExceptionCaught:MBDetector.kt$MBDetector.Companion$e: Exception</ID>
