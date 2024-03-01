@@ -71,10 +71,10 @@ internal class IDDetectorTransitioner(
                 IdentityScanState.TimeOut(initialState.type, this)
             }
 
-            analyzerOutput.category().matchesScanType(initialState.type) -> {
+            analyzerOutput.category.matchesScanType(initialState.type) -> {
                 Log.d(
                     TAG,
-                    "Matching model output detected with score ${analyzerOutput.resultScore()}, " +
+                    "Matching model output detected with score ${analyzerOutput.resultScore}, " +
                         "transition to Found."
                 )
                 Found(
@@ -87,7 +87,7 @@ internal class IDDetectorTransitioner(
             else -> {
                 Log.d(
                     TAG,
-                    "Model outputs ${analyzerOutput.category()}, which doesn't match with " +
+                    "Model outputs ${analyzerOutput.category}, which doesn't match with " +
                         "scanType ${initialState.type}, stay in Initial"
                 )
                 initialState
@@ -347,8 +347,6 @@ internal class IDDetectorTransitioner(
      */
     private fun Category.matchesScanType(scanType: ScanType): Boolean {
         return this == Category.ID_BACK && scanType == ScanType.DOC_BACK ||
-            this == Category.ID_FRONT && scanType == ScanType.DOC_FRONT ||
-            this == Category.ID_BACK && scanType == ScanType.DOC_BACK ||
             this == Category.ID_FRONT && scanType == ScanType.DOC_FRONT ||
             this == Category.PASSPORT && scanType == ScanType.DOC_FRONT
     }
