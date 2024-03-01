@@ -4,7 +4,6 @@ import androidx.test.filters.SmallTest
 import org.junit.Before
 import org.junit.Test
 import java.util.Calendar
-import java.util.GregorianCalendar
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
@@ -151,7 +150,7 @@ class PaymentCardTest {
     fun isValidExpiry() {
         val expDay = "01"
         val expMonth = "02"
-        val expYear = nextYear().toString()
+        val expYear = "2025"
 
         assertTrue { isValidExpiry(expDay, expMonth, expYear) }
         assertTrue { isValidExpiry(null, expMonth, expYear) }
@@ -162,7 +161,7 @@ class PaymentCardTest {
     fun isValidExpiry_leapYear() {
         val expDay = "29"
         val expMonth = "2"
-        val expYear = nextLeapYear().toString()
+        val expYear = "2024"
 
         assertTrue { isValidExpiry(expDay, expMonth, expYear) }
     }
@@ -266,20 +265,5 @@ class PaymentCardTest {
         assertEquals("01/02/03", formatExpiry("1", "2", "3"))
         assertEquals("01/02/03", formatExpiry("1", "2", "2003"))
         assertEquals("02/03", formatExpiry(null, "02", "03"))
-    }
-
-    private fun nextYear(): Int {
-        return Calendar.getInstance().get(Calendar.YEAR) + 1
-    }
-
-    private fun nextLeapYear(): Int {
-        val calendar = GregorianCalendar()
-        var year = Calendar.getInstance().get(Calendar.YEAR) + 1
-
-        while (!calendar.isLeapYear(year)) {
-            year += 1
-        }
-
-        return year
     }
 }
