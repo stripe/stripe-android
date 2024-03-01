@@ -175,7 +175,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_CUSTOMER to (configuration.customer != null),
                     FIELD_GOOGLE_PAY to (configuration.googlePay != null),
                     FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
-                    FIELD_BILLING to (configuration.defaultBillingDetails != null),
+                    FIELD_BILLING to (configuration.defaultBillingDetails?.isFilledOut() == true),
                     FIELD_DELAYED_PMS to (configuration.allowsDelayedPaymentMethods),
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
