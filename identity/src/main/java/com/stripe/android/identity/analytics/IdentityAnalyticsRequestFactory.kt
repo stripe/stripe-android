@@ -235,6 +235,30 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
+    fun mbStatus(
+        required: Boolean,
+        initSuccess: Boolean? = null,
+        initFailedReason: String? = null
+    ) = requestFactory.createRequest(
+        eventName = EVENT_MB_STATUS,
+        additionalParamWithEventMetadata(
+            PARAM_REQUIRED to required,
+            PARAM_INIT_SUCCESS to initSuccess,
+            PARAM_INIT_FAILED_REASON to initFailedReason
+        )
+    )
+
+    fun mbError(
+        message: String?,
+        stackTrace: String?
+    ) = requestFactory.createRequest(
+        eventName = EVENT_MB_ERROR,
+        additionalParamWithEventMetadata(
+            PARAM_MESSAGE to message,
+            PARAM_STACKTRACE to stackTrace
+        )
+    )
+
     private fun IdentityScanState.ScanType.toParam(): String =
         when (this) {
             IdentityScanState.ScanType.DOC_FRONT -> DOC_FRONT
@@ -277,6 +301,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_TIME_TO_SCREEN = "time_to_screen"
         const val EVENT_IMAGE_UPLOAD = "image_upload"
         const val EVENT_GENERIC_ERROR = "generic_error"
+        const val EVENT_MB_STATUS = "mb_status"
+        const val EVENT_MB_ERROR = "mb_error"
 
         const val PARAM_EVENT_META_DATA = "event_metadata"
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
@@ -315,6 +341,9 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_FILE_NAME = "file_name"
         const val PARAM_FILE_SIZE = "file_size"
         const val PARAM_LIVE_MODE = "live_mode"
+        const val PARAM_REQUIRED = "required"
+        const val PARAM_INIT_SUCCESS = "init_success"
+        const val PARAM_INIT_FAILED_REASON = "init_failed_reason"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_WARMUP = "document_warmup"

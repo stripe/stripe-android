@@ -1,13 +1,19 @@
 package com.stripe.android.identity.ml
 
+import android.content.Context
+import android.graphics.Bitmap
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCenter
 import com.stripe.android.camera.framework.image.size
 import com.stripe.android.camera.framework.util.maxAspectRatioInSize
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
+import com.stripe.android.identity.networking.IdentityRepository
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureMBSettings
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
+import com.stripe.android.identity.states.MBDetector
 import com.stripe.android.identity.utils.roundToMaxDecimals
 import com.stripe.android.mlcore.base.InterpreterOptionsWrapper
 import com.stripe.android.mlcore.base.InterpreterWrapper
@@ -27,6 +33,9 @@ internal class IDDetectorAnalyzer(
     private val idDetectorMinScore: Float,
     private val modelPerformanceTracker: ModelPerformanceTracker,
     private val laplacianBlurDetector: LaplacianBlurDetector,
+    private val mbDetector: MBDetector?,
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    private val identityRepository: IdentityRepository
 ) :
     Analyzer<AnalyzerInput, IdentityScanState, AnalyzerOutput> {
 
@@ -34,6 +43,8 @@ internal class IDDetectorAnalyzer(
         modelFile,
         InterpreterOptionsWrapper.Builder().build()
     )
+
+    private var hasSeenMBRunnerError = false
 
     override suspend fun analyze(
         data: AnalyzerInput,
@@ -97,7 +108,77 @@ internal class IDDetectorAnalyzer(
         }
         val bestCategory = INDEX_CATEGORY_MAP[bestCategoryIndex] ?: Category.INVALID
         val bestBoundingBox = boundingBoxes[bestIndex]
-        return IDDetectorOutput(
+
+        val categoriesMapping = LIST_OF_INDICES.map {
+            categories[bestIndex][it].roundToMaxDecimals(2)
+        }
+
+        val shouldTryReturnModern = mbDetector != null && hasSeenMBRunnerError.not()
+
+        return if (shouldTryReturnModern) {
+            try {
+                val mbOutput = requireNotNull(mbDetector).analyze(data)
+                if (mbOutput is MBDetector.DetectorResult.Error) {
+                    // MB throws AnalysisError, log it and fallback to legacy
+                    hasSeenMBRunnerError = true
+                    logMBError(mbOutput.message, mbOutput.reason?.stackTraceToString())
+                    buildLegacyOutput(
+                        bestBoundingBox,
+                        bestCategory,
+                        bestScore,
+                        categoriesMapping,
+                        croppedImage
+                    )
+                } else {
+                    // MB executed successfully, return Modern result
+                    IDDetectorOutput.Modern(
+                        bestCategory,
+                        bestScore,
+                        categoriesMapping,
+                        mbOutput
+                    )
+                }
+            } catch (e: Exception) {
+                // MB throws an exception during analysis, log it and fallback to legacy
+                hasSeenMBRunnerError = true
+                logMBError(e.message, e.stackTraceToString())
+                buildLegacyOutput(
+                    bestBoundingBox,
+                    bestCategory,
+                    bestScore,
+                    categoriesMapping,
+                    croppedImage
+                )
+            }
+        } else {
+            buildLegacyOutput(
+                bestBoundingBox,
+                bestCategory,
+                bestScore,
+                categoriesMapping,
+                croppedImage
+            )
+        }
+    }
+
+    private suspend fun logMBError(message: String?, stackTrace: String?) {
+        identityRepository.sendAnalyticsRequest(
+            identityAnalyticsRequestFactory.mbError(
+                message,
+                stackTrace
+            )
+        )
+    }
+
+    private fun buildLegacyOutput(
+        bestBoundingBox: FloatArray,
+        bestCategory: Category,
+        bestScore: Float,
+        categoriesMapping: List<Float>,
+        croppedImage: Bitmap
+    ) =
+        IDDetectorOutput.Legacy(
+            // Return Legacy output if mbDetector is not available
             BoundingBox(
                 bestBoundingBox[0],
                 bestBoundingBox[1],
@@ -106,18 +187,19 @@ internal class IDDetectorAnalyzer(
             ),
             bestCategory,
             bestScore,
-            LIST_OF_INDICES.map {
-                categories[bestIndex][it].roundToMaxDecimals(2)
-            },
+            categoriesMapping,
             laplacianBlurDetector.calculateBlurOutput(croppedImage)
         )
-    }
 
     internal class Factory(
+        private val context: Context,
         private val modelFile: File,
         private val idDetectorMinScore: Float,
+        private val mbSettings: VerificationPageStaticContentDocumentCaptureMBSettings?,
         private val modelPerformanceTracker: ModelPerformanceTracker,
-        private val laplacianBlurDetector: LaplacianBlurDetector
+        private val laplacianBlurDetector: LaplacianBlurDetector,
+        private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+        private val identityRepository: IdentityRepository
     ) : AnalyzerFactory<
             AnalyzerInput,
             IdentityScanState,
@@ -129,7 +211,15 @@ internal class IDDetectorAnalyzer(
                 modelFile,
                 idDetectorMinScore,
                 modelPerformanceTracker,
-                laplacianBlurDetector
+                laplacianBlurDetector,
+                MBDetector.maybeCreateMBInstance(
+                    context,
+                    mbSettings,
+                    identityAnalyticsRequestFactory,
+                    identityRepository
+                ),
+                identityAnalyticsRequestFactory,
+                identityRepository
             )
         }
     }
