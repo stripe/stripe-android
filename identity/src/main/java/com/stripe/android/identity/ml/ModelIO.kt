@@ -3,6 +3,7 @@ package com.stripe.android.identity.ml
 import android.graphics.Bitmap
 import android.graphics.Rect
 import com.stripe.android.camera.CameraPreviewImage
+import com.stripe.android.identity.states.MBDetector
 
 /**
  * Result category of IDDetector
@@ -35,13 +36,36 @@ internal sealed interface AnalyzerOutput
 /**
  * Output of IDDetector
  */
-internal data class IDDetectorOutput(
-    val boundingBox: BoundingBox,
+internal sealed class IDDetectorOutput(
     val category: Category,
     val resultScore: Float,
     val allScores: List<Float>,
-    val blurScore: Float
-) : AnalyzerOutput
+) : AnalyzerOutput {
+    class Legacy(
+        val boundingBox: BoundingBox,
+        category: Category,
+        resultScore: Float,
+        allScores: List<Float>,
+        val blurScore: Float
+    ) : IDDetectorOutput(category, resultScore, allScores)
+
+    class Modern(
+        category: Category,
+        resultScore: Float,
+        allScores: List<Float>,
+        val mbOutput: MBDetector.DetectorResult
+    ) : IDDetectorOutput(category, resultScore, allScores)
+
+    fun blurScore(): Float? =
+        when (this) {
+            is Legacy -> {
+                this.blurScore
+            }
+            is Modern -> {
+                null
+            }
+        }
+}
 
 /**
  * Output of FaceDetector

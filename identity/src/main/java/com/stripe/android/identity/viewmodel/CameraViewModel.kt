@@ -6,12 +6,14 @@ import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.scanui.ScanErrorListener
 import com.stripe.android.camera.scanui.SimpleScanStateful
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.camera.IdentityScanFlow
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.LaplacianBlurDetector
@@ -24,7 +26,9 @@ import java.io.File
  */
 internal abstract class CameraViewModel(
     private val modelPerformanceTracker: ModelPerformanceTracker,
-    private val laplacianBlurDetector: LaplacianBlurDetector
+    private val laplacianBlurDetector: LaplacianBlurDetector,
+    private val identityRepository: IdentityRepository,
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
 ) :
     ViewModel(),
     AnalyzerLoopErrorListener,
@@ -45,7 +49,9 @@ internal abstract class CameraViewModel(
             faceDetectorModelFile,
             verificationPage,
             modelPerformanceTracker,
-            laplacianBlurDetector
+            laplacianBlurDetector,
+            identityAnalyticsRequestFactory,
+            identityRepository
         )
     }
 

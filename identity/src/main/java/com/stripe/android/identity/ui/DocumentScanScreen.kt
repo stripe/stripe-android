@@ -18,6 +18,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -114,6 +116,7 @@ internal fun DocumentScanScreen(
             IdentityScanViewModel.State.Initializing -> {
                 LoadingScreen()
             }
+
             else -> { // can be Scanning or Scanned
                 DocumentCaptureScreen(
                     documentScannerState,
@@ -121,7 +124,7 @@ internal fun DocumentScanScreen(
                     identityScanViewModel,
                     identityViewModel,
                     lifecycleOwner,
-                    cameraManager
+                    cameraManager,
                 ) {
                     coroutineScope.launch {
                         identityViewModel.collectDataForDocumentScanScreen(
@@ -180,11 +183,31 @@ private fun DocumentCaptureScreen(
         stringResource(id = R.string.stripe_back_of_id)
     }
 
+    // Throttle the message change speed in Found state
+    var foundResId by remember { mutableIntStateOf(R.string.stripe_hold_still) }
+    var lastFoundResIdUpdateTime by remember { mutableLongStateOf(0L) }
+    LaunchedEffect(documentScannerState) {
+        if (documentScannerState is IdentityScanViewModel.State.Scanning &&
+            documentScannerState.scanState is IdentityScanState.Found
+        ) {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastFoundResIdUpdateTime >= FEED_BACK_REFRESH_LIMIT) {
+                lastFoundResIdUpdateTime = currentTime
+                foundResId =
+                    documentScannerState.scanState
+                        .feedbackRes ?: R.string.stripe_hold_still
+            }
+        }
+    }
+
     val message = when (documentScannerState) {
         is IdentityScanViewModel.State.Scanning -> {
             when (documentScannerState.scanState) {
                 is IdentityScanState.Finished -> stringResource(id = R.string.stripe_scanned)
-                is IdentityScanState.Found -> stringResource(id = R.string.stripe_hold_still)
+                is IdentityScanState.Found -> {
+                    stringResource(id = foundResId)
+                }
+
                 is IdentityScanState.Initial -> {
                     if (targetScanType.isNullOrFront()) {
                         stringResource(id = R.string.stripe_position_id_front)
@@ -325,3 +348,5 @@ private fun CameraViewFinder(
         }
     }
 }
+
+private const val FEED_BACK_REFRESH_LIMIT = 300L

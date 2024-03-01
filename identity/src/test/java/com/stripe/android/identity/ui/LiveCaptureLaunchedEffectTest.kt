@@ -104,7 +104,7 @@ class LiveCaptureLaunchedEffectTest {
         val idScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
-                result = IDDetectorOutput(
+                result = IDDetectorOutput.Legacy(
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_FRONT_MODEL_SCORE,
@@ -153,7 +153,7 @@ class LiveCaptureLaunchedEffectTest {
         val idScannedState = IdentityScanViewModel.State.Scanned(
             IdentityAggregator.FinalResult(
                 frame = mock(),
-                result = IDDetectorOutput(
+                result = IDDetectorOutput.Legacy(
                     boundingBox = mock(),
                     category = mock(),
                     resultScore = ID_BACK_MODEL_SCORE,
