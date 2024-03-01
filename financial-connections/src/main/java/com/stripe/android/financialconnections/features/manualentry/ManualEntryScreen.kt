@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.manualentry
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -162,16 +163,15 @@ private fun ManualEntryLoaded(
                     style = FinancialConnectionsTheme.typography.bodyMedium
                 )
             }
-            Spacer(modifier = Modifier.size(8.dp))
-
             if (payload.testMode) {
+                Spacer(modifier = Modifier.size(8.dp))
                 TestModeBanner(
                     enabled = loading.not(),
                     buttonLabel = "Use test account",
                     onButtonClick = { onTestFill() }
                 )
-                Spacer(modifier = Modifier.size(8.dp))
             }
+            Spacer(modifier = Modifier.size(24.dp))
             AccountForm(
                 loading = loading,
                 routing = routing,
@@ -236,32 +236,35 @@ private fun AccountForm(
     accountConfirmError: Int?,
     onAccountConfirmEntered: (String) -> Unit
 ) {
-    InputWithError(
-        enabled = loading.not(),
-        label = R.string.stripe_manualentry_routing,
-        input = routing,
-        error = routingError,
-        testTag = "RoutingInput",
-        onInputChanged = onRoutingEntered,
-    )
-    Spacer(modifier = Modifier.size(16.dp))
-    InputWithError(
-        enabled = loading.not(),
-        label = R.string.stripe_manualentry_account,
-        input = account,
-        error = accountError,
-        testTag = "AccountInput",
-        onInputChanged = onAccountEntered,
-    )
-    Spacer(modifier = Modifier.size(16.dp))
-    InputWithError(
-        enabled = loading.not(),
-        label = R.string.stripe_manualentry_accountconfirm,
-        input = accountConfirm,
-        error = accountConfirmError,
-        testTag = "ConfirmAccountInput",
-        onInputChanged = onAccountConfirmEntered,
-    )
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        InputWithError(
+            enabled = loading.not(),
+            label = R.string.stripe_manualentry_routing,
+            input = routing,
+            error = routingError,
+            testTag = "RoutingInput",
+            onInputChanged = onRoutingEntered,
+        )
+        InputWithError(
+            enabled = loading.not(),
+            label = R.string.stripe_manualentry_account,
+            input = account,
+            error = accountError,
+            testTag = "AccountInput",
+            onInputChanged = onAccountEntered,
+        )
+        InputWithError(
+            enabled = loading.not(),
+            label = R.string.stripe_manualentry_accountconfirm,
+            input = accountConfirm,
+            error = accountConfirmError,
+            testTag = "ConfirmAccountInput",
+            onInputChanged = onAccountConfirmEntered,
+        )
+    }
 }
 
 @Composable
@@ -293,33 +296,36 @@ private fun InputWithError(
     testTag: String,
     onInputChanged: (String) -> Unit
 ) {
-    Spacer(modifier = Modifier.size(4.dp))
-    FinancialConnectionsOutlinedTextField(
-        enabled = enabled,
-        value = input,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Number,
-        ),
-        placeholder = {
-            Text(
-                text = stringResource(id = label),
-                style = FinancialConnectionsTheme.typography.labelLarge,
-                color = FinancialConnectionsTheme.colors.textSubdued
-            )
-        },
-        isError = error != null,
-        onValueChange = { newValue -> onInputChanged(newValue) },
-        modifier = Modifier
-            .semantics { testTagsAsResourceId = true }
-            .testTag(testTag)
-    )
-    if (error != null) {
-        Spacer(modifier = Modifier.size(4.dp))
-        Text(
-            text = stringResource(id = error),
-            color = FinancialConnectionsTheme.colors.textCritical,
-            style = FinancialConnectionsTheme.typography.labelSmall,
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(4.dp)
+    ) {
+        FinancialConnectionsOutlinedTextField(
+            enabled = enabled,
+            value = input,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+            ),
+            placeholder = {
+                Text(
+                    text = stringResource(id = label),
+                    style = FinancialConnectionsTheme.typography.labelLarge,
+                    color = FinancialConnectionsTheme.colors.textSubdued
+                )
+            },
+            isError = error != null,
+            onValueChange = { newValue -> onInputChanged(newValue) },
+            modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag(testTag)
         )
+        if (error != null) {
+            Text(
+                text = stringResource(id = error),
+                color = FinancialConnectionsTheme.colors.textCritical,
+                style = FinancialConnectionsTheme.typography.labelSmall,
+            )
+        }
     }
 }
 
