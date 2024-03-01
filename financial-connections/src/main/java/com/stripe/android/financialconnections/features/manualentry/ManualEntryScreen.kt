@@ -167,13 +167,13 @@ private fun ManualEntryLoaded(
                 Spacer(modifier = Modifier.size(8.dp))
                 TestModeBanner(
                     enabled = loading.not(),
-                    buttonLabel = "Use test account",
-                    onButtonClick = { onTestFill() }
+                    buttonLabel = stringResource(id = R.string.stripe_manualentry_test_banner),
+                    onButtonClick = onTestFill
                 )
             }
             Spacer(modifier = Modifier.size(24.dp))
             AccountForm(
-                loading = loading,
+                enabled = loading.not(),
                 routing = routing,
                 routingError = routingError,
                 onRoutingEntered = onRoutingEntered,
@@ -225,7 +225,7 @@ private fun Title() {
 
 @Composable
 private fun AccountForm(
-    loading: Boolean,
+    enabled: Boolean,
     routing: String,
     routingError: Int?,
     onRoutingEntered: (String) -> Unit,
@@ -241,7 +241,7 @@ private fun AccountForm(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         InputWithError(
-            enabled = loading.not(),
+            enabled = enabled,
             label = R.string.stripe_manualentry_routing,
             input = routing,
             error = routingError,
@@ -249,7 +249,7 @@ private fun AccountForm(
             onInputChanged = onRoutingEntered,
         )
         InputWithError(
-            enabled = loading.not(),
+            enabled = enabled,
             label = R.string.stripe_manualentry_account,
             input = account,
             error = accountError,
@@ -257,7 +257,7 @@ private fun AccountForm(
             onInputChanged = onAccountEntered,
         )
         InputWithError(
-            enabled = loading.not(),
+            enabled = enabled,
             label = R.string.stripe_manualentry_accountconfirm,
             input = accountConfirm,
             error = accountConfirmError,
@@ -314,7 +314,7 @@ private fun InputWithError(
                 )
             },
             isError = error != null,
-            onValueChange = { newValue -> onInputChanged(newValue) },
+            onValueChange = onInputChanged,
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }
                 .testTag(testTag)
