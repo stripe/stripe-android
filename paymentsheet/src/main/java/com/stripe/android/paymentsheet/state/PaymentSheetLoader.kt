@@ -89,6 +89,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
                 allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
                     .allowsPaymentMethodsRequiringShippingAddress,
+                paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 

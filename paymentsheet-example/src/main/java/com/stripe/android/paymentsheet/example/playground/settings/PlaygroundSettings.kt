@@ -203,6 +203,7 @@ internal class PlaygroundSettings private constructor(
             PaymentMethodConfigurationSettingsDefinition,
             PreferredNetworkSettingsDefinition,
             AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition,
+            PaymentMethodOrderSettingsDefinition,
             IntegrationTypeSettingsDefinition,
         )
 

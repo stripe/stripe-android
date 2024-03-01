@@ -4,13 +4,12 @@ import android.graphics.Color
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
-import com.stripe.android.lpmfoundations.paymentmethod.defaultSorter
-import com.stripe.android.lpmfoundations.paymentmethod.paymentMethodSorter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.After
@@ -23,7 +22,9 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     private val testParams = TestParameters.create(
         paymentMethodCode = "card",
-    ).copy(
+    ) { settings ->
+        settings[PaymentMethodOrderSettingsDefinition] = "card,klarna,p24,eps"
+    }.copy(
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,
         snapshotReturningCustomer = true,
@@ -78,26 +79,6 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     fun resetAppearanceStore() {
         AppearanceStore.reset()
         forceLightMode()
-    }
-
-    @Before
-    fun setSort() {
-        paymentMethodSorter = {
-            sortedBy {
-                when (it.code) {
-                    "card" -> 1
-                    "klarna" -> 2
-                    "p24" -> 3
-                    "eps" -> 4
-                    else -> 100
-                }
-            }
-        }
-    }
-
-    @After
-    fun resetSort() {
-        paymentMethodSorter = defaultSorter
     }
 
     @Test

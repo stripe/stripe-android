@@ -158,6 +158,63 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
+    fun `load should return expected result when customer adapter has paymentMethodTypes`() = runTest {
+        val elementsSessionRepository = FakeElementsSessionRepository(
+            stripeIntent = STRIPE_INTENT,
+            error = null,
+            linkSettings = null,
+        )
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                selectedPaymentOption = CustomerAdapter.Result.success(
+                    CustomerAdapter.PaymentOption.fromId(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+                    )
+                ),
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        PaymentMethodFixtures.US_BANK_ACCOUNT,
+                    )
+                ),
+                paymentMethodTypes = listOf("card", "us_bank_account"),
+            ),
+            elementsSessionRepository = elementsSessionRepository,
+        )
+
+        val config = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
+            googlePayEnabled = true
+        )
+
+        assertThat(
+            loader.load(config).getOrThrow()
+        ).isEqualTo(
+            CustomerSheetState.Full(
+                config = config,
+                stripeIntent = STRIPE_INTENT,
+                customerPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    PaymentMethodFixtures.US_BANK_ACCOUNT,
+                ),
+                supportedPaymentMethods = listOf(
+                    LpmRepositoryTestHelpers.card,
+                ),
+                isGooglePayReady = true,
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                ),
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                validationError = null,
+            )
+        )
+
+        val mode = elementsSessionRepository.lastGetParam as PaymentSheet.InitializationMode.DeferredIntent
+        assertThat(mode.intentConfiguration.paymentMethodTypes)
+            .isEqualTo(listOf("card", "us_bank_account"))
+    }
+
+    @Test
     fun `when setup intent cannot be created, elements session is null`() = runTest {
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(

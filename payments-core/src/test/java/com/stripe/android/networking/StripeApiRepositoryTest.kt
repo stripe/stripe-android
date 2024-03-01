@@ -1876,6 +1876,60 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `createPaymentDetails() for card with card brand choice sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val email = "email@stripe.com"
+            val paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                    card = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.card?.copy(
+                        networks = PaymentMethodCreateParams.Card.Networks(
+                            preferred = "cartes_bancaires"
+                        )
+                    )
+                ).toParamMap(),
+                email
+            )
+            create().createPaymentDetails(
+                clientSecret,
+                paymentDetailsCreateParams,
+                DEFAULT_OPTIONS,
+                false,
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                assertEquals(this["active"], false)
+                assertEquals(this["type"], "card")
+                assertEquals(this["billing_email_address"], email)
+                withNestedParams("billing_address") {
+                    assertEquals(this["country_code"], "US")
+                    assertEquals(this["postal_code"], "94111")
+                }
+                withNestedParams("card") {
+                    assertEquals(this["number"], "4242424242424242")
+                    assertEquals(this["exp_month"], 1)
+                    assertEquals(this["exp_year"], 2054)
+                    assertEquals(this["preferred_network"], "cartes_bancaires")
+                }
+            }
+        }
+
+    @Test
     fun `sharePaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
