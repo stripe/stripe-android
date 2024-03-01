@@ -250,7 +250,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
 
     fun mbError(
         message: String?,
-        stackTrace: String
+        stackTrace: String?
     ) = requestFactory.createRequest(
         eventName = EVENT_MB_ERROR,
         additionalParamWithEventMetadata(

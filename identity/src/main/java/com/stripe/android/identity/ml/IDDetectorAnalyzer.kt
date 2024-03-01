@@ -1,6 +1,7 @@
 package com.stripe.android.identity.ml
 
 import android.content.Context
+import android.graphics.Bitmap
 import com.stripe.android.camera.framework.Analyzer
 import com.stripe.android.camera.framework.AnalyzerFactory
 import com.stripe.android.camera.framework.image.cropCenter
@@ -42,6 +43,8 @@ internal class IDDetectorAnalyzer(
         modelFile,
         InterpreterOptionsWrapper.Builder().build()
     )
+
+    private var hasSeenMBRunnerError = false
 
     override suspend fun analyze(
         data: AnalyzerInput,
@@ -110,21 +113,71 @@ internal class IDDetectorAnalyzer(
             categories[bestIndex][it].roundToMaxDecimals(2)
         }
 
-        return runCatching {
-            mbDetector?.let {
-                // try invoke mb result
-                IDDetectorOutput.Modern(
+        val shouldTryReturnModern = mbDetector != null && hasSeenMBRunnerError.not()
+
+        return if (shouldTryReturnModern) {
+            try {
+                val mbOutput = requireNotNull(mbDetector).analyze(data)
+                if (mbOutput is MBDetector.DetectorResult.Error) {
+                    // MB throws AnalysisError, log it and fallback to legacy
+                    hasSeenMBRunnerError = true
+                    logMBError(mbOutput.message, mbOutput.reason?.stackTraceToString())
+                    buildLegacyOutput(
+                        bestBoundingBox,
+                        bestCategory,
+                        bestScore,
+                        categoriesMapping,
+                        croppedImage
+                    )
+                } else {
+                    // MB executed successfully, return Modern result
+                    IDDetectorOutput.Modern(
+                        bestCategory,
+                        bestScore,
+                        categoriesMapping,
+                        mbOutput
+                    )
+                }
+            } catch (e: Exception) {
+                // MB throws an exception during analysis, log it and fallback to legacy
+                hasSeenMBRunnerError = true
+                logMBError(e.message, e.stackTraceToString())
+                buildLegacyOutput(
+                    bestBoundingBox,
                     bestCategory,
                     bestScore,
                     categoriesMapping,
-                    mbOutput = it.analyze(data)
+                    croppedImage
                 )
             }
-        }.onFailure {
-            identityRepository.sendAnalyticsRequest(
-                identityAnalyticsRequestFactory.mbError(it.message, it.stackTraceToString())
+        } else {
+            buildLegacyOutput(
+                bestBoundingBox,
+                bestCategory,
+                bestScore,
+                categoriesMapping,
+                croppedImage
             )
-        }.getOrNull() ?: IDDetectorOutput.Legacy(
+        }
+    }
+
+    private suspend fun logMBError(message: String?, stackTrace: String?) {
+        identityRepository.sendAnalyticsRequest(
+            identityAnalyticsRequestFactory.mbError(
+                message,
+                stackTrace
+            )
+        )
+    }
+
+    private fun buildLegacyOutput(
+        bestBoundingBox: FloatArray,
+        bestCategory: Category,
+        bestScore: Float,
+        categoriesMapping: List<Float>,
+        croppedImage: Bitmap
+    ) =
+        IDDetectorOutput.Legacy(
             // Return Legacy output if mbDetector is not available
             BoundingBox(
                 bestBoundingBox[0],
@@ -134,12 +187,9 @@ internal class IDDetectorAnalyzer(
             ),
             bestCategory,
             bestScore,
-            LIST_OF_INDICES.map {
-                categories[bestIndex][it].roundToMaxDecimals(2)
-            },
+            categoriesMapping,
             laplacianBlurDetector.calculateBlurOutput(croppedImage)
         )
-    }
 
     internal class Factory(
         private val context: Context,

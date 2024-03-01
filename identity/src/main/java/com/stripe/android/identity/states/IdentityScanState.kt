@@ -59,6 +59,7 @@ internal sealed class IdentityScanState(
         transitioner: IdentityScanStateTransitioner,
         internal var reachedStateAt: ClockMark = Clock.markNow(),
         @IntegerRes val feedbackRes: Int? = null,
+        val isFromLegacyDetector: Boolean? = null
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
@@ -66,7 +67,13 @@ internal sealed class IdentityScanState(
         ) =
             transitioner.transitionFromFound(this, analyzerInput, analyzerOutput)
 
-        fun withFeedback(@IntegerRes feedbackRes: Int?) = Found(type, transitioner, reachedStateAt, feedbackRes)
+        fun withFeedback(@IntegerRes feedbackRes: Int?) = Found(
+            type,
+            transitioner,
+            reachedStateAt,
+            feedbackRes,
+            isFromLegacyDetector
+        )
     }
 
     /**

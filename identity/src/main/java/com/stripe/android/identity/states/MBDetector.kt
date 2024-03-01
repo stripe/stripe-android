@@ -54,7 +54,7 @@ internal class MBDetector private constructor(settings: MBSettings) {
         ) : DetectorResult
 
         class Capturing(val feedback: CaptureFeedback) : DetectorResult
-        class Error(val reason: Throwable? = null, message: String? = null) : DetectorResult
+        class Error(val reason: Throwable? = null, val message: String? = null) : DetectorResult
     }
 
     init {

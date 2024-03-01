@@ -168,7 +168,7 @@
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Position your face in the center of the frame.</string>
   <!-- Instructional text when the document is too blurry -->
-  <string name="stripe_reduce_blur">ID not in focus</string>
+  <string name="stripe_reduce_blur">Make sure all details are visible and focus</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Details not visible</string>
   <!-- Button text displayed to the user to retake photo -->

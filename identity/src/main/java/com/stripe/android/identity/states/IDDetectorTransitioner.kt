@@ -77,7 +77,11 @@ internal class IDDetectorTransitioner(
                     "Matching model output detected with score ${analyzerOutput.resultScore()}, " +
                         "transition to Found."
                 )
-                Found(initialState.type, this)
+                Found(
+                    initialState.type,
+                    this,
+                    isFromLegacyDetector = analyzerOutput is IDDetectorOutput.Legacy
+                )
             }
 
             else -> {
@@ -120,6 +124,12 @@ internal class IDDetectorTransitioner(
         foundState: Found,
         analyzerOutput: IDDetectorOutput.Legacy
     ) = when {
+        foundState.isFromLegacyDetector != true -> Unsatisfied(
+            "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
+            foundState.type,
+            foundState.transitioner
+        )
+
         timeoutAt.hasPassed() -> {
             IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
         }
@@ -152,6 +162,12 @@ internal class IDDetectorTransitioner(
         foundState: Found,
         analyzerOutput: IDDetectorOutput.Modern
     ) = when {
+        foundState.isFromLegacyDetector == true -> Unsatisfied(
+            "Expecting Modern IDDetectorOutput but received a Legacy IDDetectorOutput",
+            foundState.type,
+            foundState.transitioner
+        )
+
         timeoutAt.hasPassed() -> {
             IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
         }
