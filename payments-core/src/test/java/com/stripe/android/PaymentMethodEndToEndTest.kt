@@ -464,4 +464,13 @@ internal class PaymentMethodEndToEndTest {
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.MobilePay)
     }
+
+    @Test
+    fun createPaymentMethod_withAmazonPay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.AMAZON_PAY
+        val stripe = Stripe(context, ApiKeyFixtures.AMAZON_PAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.AmazonPay)
+    }
 }
