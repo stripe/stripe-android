@@ -16,6 +16,7 @@ internal object PaymentMethodMetadataFactory {
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
         financialConnectionsAvailable: Boolean = true,
+        paymentMethodOrder: List<String> = emptyList(),
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -24,6 +25,7 @@ internal object PaymentMethodMetadataFactory {
             allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
             allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
             financialConnectionsAvailable = financialConnectionsAvailable,
+            paymentMethodOrder = paymentMethodOrder,
             sharedDataSpecs = sharedDataSpecs,
         )
     }
