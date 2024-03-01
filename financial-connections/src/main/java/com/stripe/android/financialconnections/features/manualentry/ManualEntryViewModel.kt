@@ -144,6 +144,7 @@ internal class ManualEntryViewModel @Inject constructor(
                 accountConfirmError = null
             )
         }
+        onSubmit()
     }
 
     companion object :

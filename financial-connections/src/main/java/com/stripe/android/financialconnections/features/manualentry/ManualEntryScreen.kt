@@ -152,12 +152,7 @@ private fun ManualEntryLoaded(
         scrollState = scrollState,
         body = {
             Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                modifier = Modifier.fillMaxWidth(),
-                text = stringResource(R.string.stripe_manualentry_title),
-                color = FinancialConnectionsTheme.colors.textDefault,
-                style = FinancialConnectionsTheme.typography.headingXLarge
-            )
+            Title()
             Spacer(modifier = Modifier.size(16.dp))
             if (payload.verifyWithMicrodeposits) {
                 Spacer(modifier = Modifier.size(8.dp))
@@ -191,14 +186,7 @@ private fun ManualEntryLoaded(
             )
             if (linkPaymentAccountStatus is Fail) {
                 Spacer(modifier = Modifier.size(16.dp))
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = (linkPaymentAccountStatus.error as? StripeException)?.message
-                        ?: stringResource(R.string.stripe_error_generic_title),
-                    style = FinancialConnectionsTheme.typography.bodyMedium,
-                    color = FinancialConnectionsTheme.colors.textCritical,
-                )
+                ErrorMessage(linkPaymentAccountStatus.error)
             }
         },
         footer = {
@@ -208,6 +196,30 @@ private fun ManualEntryLoaded(
                 onSubmit = onSubmit
             )
         }
+    )
+}
+
+@Composable
+private fun ErrorMessage(
+    error: Throwable
+) {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        textAlign = TextAlign.Center,
+        text = (error as? StripeException)?.message
+            ?: stringResource(R.string.stripe_error_generic_title),
+        style = FinancialConnectionsTheme.typography.bodyMedium,
+        color = FinancialConnectionsTheme.colors.textCritical,
+    )
+}
+
+@Composable
+private fun Title() {
+    Text(
+        modifier = Modifier.fillMaxWidth(),
+        text = stringResource(R.string.stripe_manualentry_title),
+        color = FinancialConnectionsTheme.colors.textDefault,
+        style = FinancialConnectionsTheme.typography.headingXLarge
     )
 }
 
