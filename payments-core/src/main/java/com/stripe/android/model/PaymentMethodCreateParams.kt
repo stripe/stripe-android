@@ -576,6 +576,14 @@ data class PaymentMethodCreateParams internal constructor(
         override fun toParamMap(): Map<String, Any> = emptyMap()
     }
 
+    /**
+     * Encapsulates parameters used to create [PaymentMethodCreateParams] when using AmazonPay.
+     */
+    @Parcelize
+    class AmazonPay : StripeParamsModel, Parcelable {
+        override fun toParamMap(): Map<String, Any> = emptyMap()
+    }
+
     @Parcelize
     @Suppress("DataClassPrivateConstructor")
     data class USBankAccount private constructor(
@@ -1041,7 +1049,6 @@ data class PaymentMethodCreateParams internal constructor(
             return PaymentMethodCreateParams(CashAppPay(), billingDetails, metadata)
         }
 
-        // TODO: fix AmazonPay symbol not found
         /**
          * Helper method to create [PaymentMethodCreateParams] with [AmazonPay] as the payment
          * method type.
