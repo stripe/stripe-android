@@ -51,7 +51,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -158,7 +157,7 @@ private fun LoadedContent(
     onScrollChanged: () -> Unit,
 ) {
     val listState = rememberLazyListState()
-    var input by remember { mutableStateOf(TextFieldValue(previewText ?: "")) }
+    var input by remember { mutableStateOf(previewText ?: "") }
     var shouldEmitScrollEvent by remember { mutableStateOf(true) }
     val searchInputFocusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -192,14 +191,14 @@ private fun LoadedContent(
                         query = input,
                         onQueryChanged = {
                             input = it
-                            onQueryChanged(input.text)
+                            onQueryChanged(input)
                         },
                     )
                 }
                 item { Spacer(modifier = Modifier.height(16.dp)) }
 
                 searchResults(
-                    isInputEmpty = input.text.isBlank(),
+                    isInputEmpty = input.isBlank(),
                     payload = payload,
                     selectedInstitutionId = selectedInstitutionId,
                     onInstitutionSelected = onInstitutionSelected,
@@ -357,8 +356,8 @@ private fun SearchTitle(modifier: Modifier = Modifier) {
 private fun SearchRow(
     modifier: Modifier = Modifier,
     focusRequester: FocusRequester,
-    query: TextFieldValue,
-    onQueryChanged: (TextFieldValue) -> Unit,
+    query: String,
+    onQueryChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     Box {
@@ -389,7 +388,7 @@ private fun SearchRow(
             keyboardActions = KeyboardActions(
                 onSearch = { focusManager.clearFocus() },
             ),
-            trailingIcon = query.text
+            trailingIcon = query
                 .takeIf { it.isNotEmpty() }
                 ?.let {
                     { ClearSearchButton(onQueryChanged = onQueryChanged, colors = colors) }
@@ -402,6 +401,7 @@ private fun SearchRow(
                 )
             },
             value = query,
+            enabled = true,
             onValueChange = { onQueryChanged(it) }
         )
     }
@@ -409,13 +409,13 @@ private fun SearchRow(
 
 @Composable
 private fun ClearSearchButton(
-    onQueryChanged: (TextFieldValue) -> Unit,
+    onQueryChanged: (String) -> Unit,
     colors: FinancialConnectionsColors
 ) {
     Box(
         Modifier
             .size(16.dp)
-            .clickable { onQueryChanged(TextFieldValue("")) }
+            .clickable { onQueryChanged("") }
             .background(
                 color = colors.border,
                 shape = CircleShape

@@ -84,6 +84,7 @@
     <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
     <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro-deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
+    <string name="stripe_manualentry_test_banner">Use test account</string>
     <plurals name="stripe_attachlinkedpaymentaccount_title">
         <item quantity="one">Linking account</item>
         <item quantity="other">Linking accounts</item>

@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.manualentry
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Fail
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.core.exception.APIException
@@ -10,18 +11,32 @@ import com.stripe.android.financialconnections.R
 internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<ManualEntryState> {
     override val values = sequenceOf(
         canonical(),
+        loading(),
         failure(),
-        fieldFailure()
+        fieldFailure(),
+        testMode(),
     )
 
     override val count: Int
         get() = super.count
 
+    private fun loading() = ManualEntryState(
+        payload = Success(
+            ManualEntryState.Payload(
+                verifyWithMicrodeposits = true,
+                customManualEntry = false,
+                testMode = false
+            )
+        ),
+        linkPaymentAccount = Loading(),
+    )
+
     private fun failure() = ManualEntryState(
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
-                customManualEntry = false
+                customManualEntry = false,
+                testMode = false
             )
         ),
         linkPaymentAccount = Fail(
@@ -33,7 +48,19 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
-                customManualEntry = false
+                customManualEntry = false,
+                testMode = false
+            )
+        ),
+        linkPaymentAccount = Uninitialized
+    )
+
+    private fun testMode() = ManualEntryState(
+        payload = Success(
+            ManualEntryState.Payload(
+                verifyWithMicrodeposits = true,
+                customManualEntry = false,
+                testMode = true
             )
         ),
         linkPaymentAccount = Uninitialized
@@ -49,7 +76,8 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
-                customManualEntry = false
+                customManualEntry = false,
+                testMode = false
             )
         ),
         linkPaymentAccount = Uninitialized,
