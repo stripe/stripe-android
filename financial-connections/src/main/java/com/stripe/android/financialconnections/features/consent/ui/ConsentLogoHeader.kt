@@ -26,6 +26,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -59,21 +60,42 @@ internal fun ConsentLogoHeader(
     val isPreview = LocalInspectionMode.current
     val localDensity = LocalDensity.current
     val bitmapLoadSize = remember { with(localDensity) { 36.dp.toPx().toInt() } }
-
-    val images = if (isPreview) {
-        debugPreviewBitmaps(logos, bitmapLoadSize)
-    } else {
-        loadBitmaps(logos, bitmapLoadSize)
+    val stripeImageLoader = LocalImageLoader.current
+    val placeholderBitmap = generatePlaceholderBitmap(bitmapLoadSize, colors.border)
+    val loadedImages: SnapshotStateList<ImageBitmap> = remember {
+        val elements = if (isPreview) {
+            // preview: initially fill with placeholders
+            debugPreviewBitmaps(logos, bitmapLoadSize)
+        } else {
+            // prod: initially fill with placeholders
+            Array(logos.size) { placeholderBitmap }
+        }
+        mutableStateListOf(*elements)
     }
-    val logoImages = remember(images) { images.filterNotNull() }
+
+    LaunchedEffect(logos) {
+        logos.forEachIndexed { index, logo ->
+            stripeImageLoader.load(logo, bitmapLoadSize, bitmapLoadSize)
+                .onSuccess { result ->
+                    // TODO handle null image.
+                    result?.let { loadedImages[index] = it.asImageBitmap() }
+                }
+                .onFailure {
+                    // TODO handle image failure.
+                    Log.e("ConsentLogoHeader", "Failed to load image: $logo")
+                }
+        }
+    }
+
+
     Box(
         modifier = modifier
             .height(LogoSize)
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        BackgroundRow(images = logoImages)
-        ForegroundRow(images = logoImages)
+        BackgroundRow(images = loadedImages)
+        ForegroundRow(images = loadedImages)
     }
 }
 
@@ -112,17 +134,16 @@ private fun ForegroundRow(images: List<ImageBitmap>) {
     }
 }
 
-@Composable
 private fun debugPreviewBitmaps(
     size: List<String>,
     bitmapLoadSize: Int,
-): List<ImageBitmap> {
+): Array<ImageBitmap> {
     return listOf(Color.Red, Color.Blue, Color.Green).take(size.size).map {
         val androidBitmap = Bitmap.createBitmap(bitmapLoadSize, bitmapLoadSize, Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(androidBitmap)
         canvas.drawColor(it.toArgb())
         androidBitmap.asImageBitmap()
-    }
+    }.toTypedArray()
 }
 
 @Composable
