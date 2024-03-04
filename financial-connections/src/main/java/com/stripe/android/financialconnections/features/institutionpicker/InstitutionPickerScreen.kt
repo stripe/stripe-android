@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
-import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
@@ -93,17 +92,12 @@ internal fun InstitutionPickerScreen() {
     val parentViewModel = parentViewModel()
     val state: InstitutionPickerState by viewModel.collectAsState()
 
-    BackHandler(enabled = !state.allowBackNavigation) {
-        // Prevent back navigation
-    }
-
     InstitutionPickerContent(
         payload = state.payload,
         institutions = state.searchInstitutions,
         // This is just used to provide a text in Compose previews
         previewText = state.previewText,
         selectedInstitutionId = state.selectedInstitutionId,
-        allowBackNavigation = state.allowBackNavigation,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.INSTITUTION_PICKER) },
@@ -118,7 +112,6 @@ private fun InstitutionPickerContent(
     institutions: Async<InstitutionResponse>,
     previewText: String?,
     selectedInstitutionId: String?,
-    allowBackNavigation: Boolean,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     onCloseClick: () -> Unit,
@@ -128,7 +121,6 @@ private fun InstitutionPickerContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = allowBackNavigation,
                 onCloseClick = onCloseClick
             )
         }
@@ -613,12 +605,10 @@ internal fun InstitutionPickerPreview(
             institutions = state.searchInstitutions,
             previewText = state.previewText,
             selectedInstitutionId = state.selectedInstitutionId,
-            allowBackNavigation = state.allowBackNavigation,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
             onCloseClick = {},
             onManualEntryClick = {},
-            onScrollChanged = {},
-        )
+        ) {}
     }
 }

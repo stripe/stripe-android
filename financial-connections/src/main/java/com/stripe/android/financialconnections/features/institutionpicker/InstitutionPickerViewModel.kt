@@ -60,8 +60,34 @@ internal class InstitutionPickerViewModel @Inject constructor(
 
     init {
         logErrors()
-        determineBackNavigation()
-        fetchFeaturedInstitutions()
+        suspend {
+            val manifest = getOrFetchSync().manifest
+            val (featuredInstitutions: InstitutionResponse, duration: Long) = runCatching {
+                measureTimeMillis {
+                    featuredInstitutions(
+                        clientSecret = configuration.financialConnectionsSessionClientSecret
+                    )
+                }
+            }.onFailure {
+                eventTracker.logError(
+                    extraMessage = "Error fetching featured institutions",
+                    error = it,
+                    pane = PANE,
+                    logger = logger
+                )
+            }.getOrElse {
+                // Allow users to search for institutions even if featured institutions fails.
+                InstitutionResponse(
+                    data = emptyList(),
+                    showManualEntry = manifest.allowManualEntry
+                ) to 0L
+            }
+            Payload(
+                featuredInstitutionsDuration = duration,
+                featuredInstitutions = featuredInstitutions,
+                searchDisabled = manifest.institutionSearchDisabled,
+            )
+        }.execute { copy(payload = it) }
     }
 
     private fun logErrors() {
@@ -108,49 +134,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
             }
         )
-    }
-
-    private fun determineBackNavigation() {
-        suspend {
-            val manifest = getOrFetchSync().manifest
-            val isLinkConsumer = manifest.accountholderIsLinkConsumer ?: false
-            val isNetworkingFlow = manifest.isNetworkingUserFlow ?: false
-            isLinkConsumer && !isNetworkingFlow
-        }.execute {
-            val disableBackNavigation = it() ?: true
-            copy(allowBackNavigation = !disableBackNavigation)
-        }
-    }
-
-    private fun fetchFeaturedInstitutions() {
-        suspend {
-            val manifest = getOrFetchSync().manifest
-            val (featuredInstitutions: InstitutionResponse, duration: Long) = runCatching {
-                measureTimeMillis {
-                    featuredInstitutions(
-                        clientSecret = configuration.financialConnectionsSessionClientSecret
-                    )
-                }
-            }.onFailure {
-                eventTracker.logError(
-                    extraMessage = "Error fetching featured institutions",
-                    error = it,
-                    pane = PANE,
-                    logger = logger
-                )
-            }.getOrElse {
-                // Allow users to search for institutions even if featured institutions fails.
-                InstitutionResponse(
-                    data = emptyList(),
-                    showManualEntry = manifest.allowManualEntry
-                ) to 0L
-            }
-            Payload(
-                featuredInstitutionsDuration = duration,
-                featuredInstitutions = featuredInstitutions,
-                searchDisabled = manifest.institutionSearchDisabled,
-            )
-        }.execute { copy(payload = it) }
     }
 
     fun onQueryChanged(query: String) {
@@ -278,8 +261,7 @@ internal data class InstitutionPickerState(
     val selectedInstitutionId: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
-    val createSessionForInstitution: Async<Unit> = Uninitialized,
-    val allowBackNavigation: Boolean = true,
+    val createSessionForInstitution: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(
