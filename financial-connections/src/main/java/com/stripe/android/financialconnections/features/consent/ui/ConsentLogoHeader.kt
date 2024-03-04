@@ -46,7 +46,6 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
-import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 
@@ -67,26 +66,22 @@ internal fun ConsentLogoHeader(
     var bitmaps: List<ImageBitmap> by remember {
         mutableStateOf(
             if (isPreview) {
-                // preview: initially fill with placeholders
                 debugPreviewBitmaps(logos, bitmapLoadSize)
             } else {
-                // prod: initially fill with placeholders
                 List(logos.size) { placeholderBitmap }
             }
         )
     }
 
     LaunchedEffect(logos) {
-        val deferredList: List<Deferred<ImageBitmap>> = logos.map {
+        bitmaps = logos.map {
             async {
-                stripeImageLoader
-                    .load(it, bitmapLoadSize, bitmapLoadSize)
+                stripeImageLoader.load(it, bitmapLoadSize, bitmapLoadSize)
                     .getOrNull()
                     ?.asImageBitmap()
                     ?: placeholderBitmap
             }
-        }
-        bitmaps = deferredList.awaitAll()
+        }.awaitAll()
     }
 
     Box(
