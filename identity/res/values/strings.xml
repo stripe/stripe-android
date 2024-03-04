@@ -174,7 +174,7 @@
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Retake Photos</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->
-  <string name="stripe_rotate_document">Kee ID level</string>
+  <string name="stripe_rotate_document">Keep ID level</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="stripe_scanned">Scanned</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
