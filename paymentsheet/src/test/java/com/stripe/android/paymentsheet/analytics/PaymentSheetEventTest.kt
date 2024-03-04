@@ -1076,8 +1076,8 @@ class PaymentSheetEventTest {
     }
 
     @Test
-    fun `CannotLaunchLinkAndLpms event should return expected toString() with null values`() {
-        val completeEvent = PaymentSheetEvent.CannotLaunchLinkAndLpms(
+    fun `CannotProperlyReturnFromLinkAndLPMs event should return expected toString() with null values`() {
+        val completeEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
             mode = EventReporter.Mode.Complete,
             isDeferred = false,
             linkEnabled = false,
@@ -1100,7 +1100,7 @@ class PaymentSheetEventTest {
             )
         )
 
-        val customEvent = PaymentSheetEvent.CannotLaunchLinkAndLpms(
+        val customEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
             mode = EventReporter.Mode.Custom,
             isDeferred = false,
             linkEnabled = false,

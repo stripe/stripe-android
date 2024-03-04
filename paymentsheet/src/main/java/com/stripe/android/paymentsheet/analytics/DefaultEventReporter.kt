@@ -373,9 +373,9 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onCannotProperlyLaunchLinkAndLpms() {
+    override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
         fireEvent(
-            PaymentSheetEvent.CannotLaunchLinkAndLpms(
+            PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
                 mode = mode,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,

@@ -513,9 +513,9 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
-    fun cannotProperlyLaunchLinkAndLpms() {
+    fun cannotProperlyReturnFromLinkAndOtherLPMs() {
         if (!previouslySentDeepLinkEvent) {
-            eventReporter.onCannotProperlyLaunchLinkAndLpms()
+            eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
 
             previouslySentDeepLinkEvent = true
         }

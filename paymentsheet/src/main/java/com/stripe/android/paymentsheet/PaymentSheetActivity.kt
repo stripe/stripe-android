@@ -61,7 +61,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         )
 
         if (!applicationIsTaskOwner()) {
-            viewModel.cannotProperlyLaunchLinkAndLpms()
+            viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
         }
 
         setContent {

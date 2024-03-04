@@ -2330,15 +2330,15 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `on cannot properly launch link or other lpms, should report event at maximum once`() = runTest {
+    fun `on cannot properly return from link or other lpms, should report event at maximum once`() = runTest {
         val viewModel = createViewModel()
 
-        viewModel.cannotProperlyLaunchLinkAndLpms()
-        viewModel.cannotProperlyLaunchLinkAndLpms()
-        viewModel.cannotProperlyLaunchLinkAndLpms()
-        viewModel.cannotProperlyLaunchLinkAndLpms()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
 
-        verify(eventReporter, times(1)).onCannotProperlyLaunchLinkAndLpms()
+        verify(eventReporter, times(1)).onCannotProperlyReturnFromLinkAndOtherLPMs()
     }
 
     @Test

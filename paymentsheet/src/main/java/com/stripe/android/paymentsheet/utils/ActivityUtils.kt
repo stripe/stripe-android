@@ -20,6 +20,7 @@ internal fun AppCompatActivity.applicationIsTaskOwner(): Boolean {
      * itself by using the activity's task id
      */
     return activityManager.appTasks.any { task ->
+        @Suppress("DEPRECATION")
         task.taskInfo.persistentId == taskId
     }
 }

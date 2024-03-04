@@ -457,7 +457,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
-    class CannotLaunchLinkAndLpms(
+    class CannotProperlyReturnFromLinkAndLPMs(
         mode: EventReporter.Mode,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,

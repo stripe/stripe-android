@@ -170,10 +170,10 @@ internal interface EventReporter {
     )
 
     /**
-     * The customer cannot properly launch Link payments or other LPM payments using
+     * The customer cannot properly return from Link payments or other LPM payments using
      * browser intents.
      */
-    fun onCannotProperlyLaunchLinkAndLpms()
+    fun onCannotProperlyReturnFromLinkAndOtherLPMs()
 
     enum class Mode(val code: String) {
         Complete("complete"),

@@ -247,14 +247,14 @@ class DefaultEventReporterTest {
     }
 
     @Test
-    fun `onCannotProperlyLaunchLinkAndLpms() should fire analytics request with expected event value`() {
+    fun `onCannotProperlyReturnFromLinkAndOtherLPMs() should fire analytics request with expected event value`() {
         val completeEventReporter = createEventReporter(
             mode = EventReporter.Mode.Complete,
         ) {
             simulateSuccessfulSetup()
         }
 
-        completeEventReporter.onCannotProperlyLaunchLinkAndLpms()
+        completeEventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
@@ -268,7 +268,7 @@ class DefaultEventReporterTest {
             simulateSuccessfulSetup()
         }
 
-        customEventReporter.onCannotProperlyLaunchLinkAndLpms()
+        customEventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->

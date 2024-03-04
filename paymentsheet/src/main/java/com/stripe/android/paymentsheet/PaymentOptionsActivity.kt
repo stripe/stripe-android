@@ -46,7 +46,7 @@ internal class PaymentOptionsActivity : BaseSheetActivity<PaymentOptionResult>()
         }
 
         if (!applicationIsTaskOwner()) {
-            viewModel.cannotProperlyLaunchLinkAndLpms()
+            viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
         }
 
         setContent {
