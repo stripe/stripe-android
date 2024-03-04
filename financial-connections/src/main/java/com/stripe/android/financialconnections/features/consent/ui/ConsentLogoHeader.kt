@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.consent.ui
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -24,8 +23,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -46,6 +46,9 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 private val LogoSize = 72.dp
 private val DotsContainerHeight = 6.dp
@@ -60,31 +63,30 @@ internal fun ConsentLogoHeader(
     val localDensity = LocalDensity.current
     val bitmapLoadSize = remember { with(localDensity) { 36.dp.toPx().toInt() } }
     val stripeImageLoader = LocalImageLoader.current
-    val placeholderBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.border)
-    val loadedImages: SnapshotStateList<ImageBitmap> = remember {
-        SnapshotStateList<ImageBitmap>().also {
+    val placeholderBitmap: ImageBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.border)
+    var bitmaps: List<ImageBitmap> by remember {
+        mutableStateOf(
             if (isPreview) {
                 // preview: initially fill with placeholders
-                it.addAll(debugPreviewBitmaps(logos, bitmapLoadSize))
+                debugPreviewBitmaps(logos, bitmapLoadSize)
             } else {
                 // prod: initially fill with placeholders
-                for (i in logos.indices) it.add(placeholderBitmap)
+                List(logos.size) { placeholderBitmap }
             }
-        }
+        )
     }
 
-    logos.forEachIndexed { index, logo ->
-        LaunchedEffect(logo) {
-            stripeImageLoader.load(logo, bitmapLoadSize, bitmapLoadSize)
-                .onSuccess { result ->
-                    // TODO handle null image.
-                    result?.let { loadedImages[index] = it.asImageBitmap() }
-                }
-                .onFailure {
-                    // TODO handle image failure.
-                    Log.e("ConsentLogoHeader", "Failed to load image: $logo")
-                }
+    LaunchedEffect(logos) {
+        val deferredList: List<Deferred<ImageBitmap>> = logos.map {
+            async {
+                stripeImageLoader
+                    .load(it, bitmapLoadSize, bitmapLoadSize)
+                    .getOrNull()
+                    ?.asImageBitmap()
+                    ?: placeholderBitmap
+            }
         }
+        bitmaps = deferredList.awaitAll()
     }
 
     Box(
@@ -93,8 +95,8 @@ internal fun ConsentLogoHeader(
             .fillMaxWidth(),
         contentAlignment = Alignment.Center
     ) {
-        BackgroundRow(images = loadedImages)
-        ForegroundRow(images = loadedImages)
+        BackgroundRow(images = bitmaps)
+        ForegroundRow(images = bitmaps)
     }
 }
 
