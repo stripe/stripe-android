@@ -138,7 +138,7 @@ internal sealed class Destination(
 
     data object NetworkingLinkLoginWarmup : NoArgumentsDestination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
-        composable = { NetworkingLinkLoginWarmupScreen() }
+        composable = { NetworkingLinkLoginWarmupScreen(it) }
     )
 
     data object NetworkingLinkVerification : NoArgumentsDestination(

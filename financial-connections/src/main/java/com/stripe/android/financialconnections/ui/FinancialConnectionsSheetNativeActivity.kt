@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
@@ -34,6 +35,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.bottomSheet
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.navigation.composable
@@ -232,12 +234,14 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                     is NavigationIntent.NavigateTo -> {
                         val from: String? = navHostController.currentDestination?.route
                         val destination: String = intent.route
+
                         if (destination.isNotEmpty() && destination != from) {
                             logger.debug("Navigating from $from to $destination")
                             navHostController.navigate(destination) {
                                 launchSingleTop = intent.isSingleTop
-                                if (from != null && intent.popUpToCurrent) {
-                                    popUpTo(from) { inclusive = true }
+
+                                if (intent.popUpTo != null) {
+                                    apply(from, intent.popUpTo)
                                 }
                             }
                         }
@@ -301,6 +305,22 @@ private class ActivityVisibilityObserver(
         if (!changingConfigurations) {
             isInBackground = true
             onBackgrounded()
+        }
+    }
+}
+
+private fun NavOptionsBuilder.apply(
+    currentRoute: String?,
+    popUpTo: PopUpToBehavior,
+) {
+    val popUpToRoute = when (popUpTo) {
+        is PopUpToBehavior.Current -> currentRoute
+        is PopUpToBehavior.Route -> popUpTo.route
+    }
+
+    if (popUpToRoute != null) {
+        popUpTo(popUpToRoute) {
+            inclusive = popUpTo.inclusive
         }
     }
 }

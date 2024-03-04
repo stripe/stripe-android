@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -31,6 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavBackStackEntry
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
@@ -45,11 +47,15 @@ import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.LinkColors
 
 @Composable
-internal fun NetworkingLinkLoginWarmupScreen() {
-    val viewModel: NetworkingLinkLoginWarmupViewModel = mavericksViewModel()
-    val state = viewModel.collectAsState()
+internal fun NetworkingLinkLoginWarmupScreen(
+    backStackEntry: NavBackStackEntry,
+) {
+    val viewModel: NetworkingLinkLoginWarmupViewModel = mavericksViewModel(
+        argsFactory = { backStackEntry.arguments },
+    )
+    val state by viewModel.collectAsState()
     NetworkingLinkLoginWarmupContent(
-        state = state.value,
+        state = state,
         onSkipClicked = viewModel::onSkipClicked,
         onContinueClick = viewModel::onContinueClick,
     )

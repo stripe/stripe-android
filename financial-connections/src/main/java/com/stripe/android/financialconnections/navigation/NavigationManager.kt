@@ -10,19 +10,30 @@ internal interface NavigationManager {
 
     fun tryNavigateTo(
         route: String,
-        popUpToCurrent: Boolean = false,
-        inclusive: Boolean = false,
+        popUpTo: PopUpToBehavior? = null,
         isSingleTop: Boolean = true,
     )
 
     fun tryNavigateBack()
 }
 
+internal sealed interface PopUpToBehavior {
+    val inclusive: Boolean
+
+    data class Current(
+        override val inclusive: Boolean,
+    ) : PopUpToBehavior
+
+    data class Route(
+        override val inclusive: Boolean,
+        val route: String,
+    ) : PopUpToBehavior
+}
+
 internal sealed class NavigationIntent {
     data class NavigateTo(
         val route: String,
-        val popUpToCurrent: Boolean,
-        val inclusive: Boolean,
+        val popUpTo: PopUpToBehavior?,
         val isSingleTop: Boolean,
     ) : NavigationIntent()
 
@@ -36,15 +47,13 @@ internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
 
     override fun tryNavigateTo(
         route: String,
-        popUpToCurrent: Boolean,
-        inclusive: Boolean,
-        isSingleTop: Boolean
+        popUpTo: PopUpToBehavior?,
+        isSingleTop: Boolean,
     ) {
         _navigationFlow.tryEmit(
             NavigationIntent.NavigateTo(
                 route = route,
-                popUpToCurrent = popUpToCurrent,
-                inclusive = inclusive,
+                popUpTo = popUpTo,
                 isSingleTop = isSingleTop,
             )
         )
