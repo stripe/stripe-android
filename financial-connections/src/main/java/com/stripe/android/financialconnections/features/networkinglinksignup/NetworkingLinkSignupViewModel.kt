@@ -96,7 +96,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             onSuccess = { consumerSession ->
                 if (consumerSession.exists) {
                     eventTracker.track(NetworkingReturningConsumer(PANE))
-                    navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
+                    navigateToLinkVerification()
                 } else {
                     eventTracker.track(NetworkingNewConsumer(PANE))
                 }
@@ -193,12 +193,25 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     }
 
     fun onSaveAccount() {
+        withState { state ->
+            eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
+
+            val hasExistingAccount = state.lookupAccount()?.exists == true
+            if (hasExistingAccount) {
+                navigateToLinkVerification()
+            } else {
+                saveNewAccount()
+            }
+        }
+    }
+
+    private fun saveNewAccount() {
         suspend {
             eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
             val state = awaitState()
             val selectedAccounts = getCachedAccounts()
             val phoneController = state.payload()!!.phoneController
-            require(state.valid()) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
+            require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
             saveAccountToLink.new(
                 country = phoneController.getCountryCode(),
                 email = state.validEmail!!,
@@ -206,6 +219,10 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 selectedAccounts = selectedAccounts.map { it.id },
             )
         }.execute { copy(saveAccountToLink = it) }
+    }
+
+    private fun navigateToLinkVerification() {
+        navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
@@ -277,9 +294,11 @@ internal data class NetworkingLinkSignupState(
     val showFullForm: Boolean
         get() = lookupAccount()?.let { !it.exists } ?: false
 
-    fun valid(): Boolean {
-        return validEmail != null && validPhone != null
-    }
+    val valid: Boolean
+        get() {
+            val hasExistingAccount = lookupAccount()?.exists == true
+            return validEmail != null && (hasExistingAccount || validPhone != null)
+        }
 
     data class Payload(
         val merchantName: String?,
