@@ -2330,6 +2330,18 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `on cannot properly launch link or other lpms, should report event at maximum once`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.cannotProperlyLaunchLinkAndLpms()
+        viewModel.cannotProperlyLaunchLinkAndLpms()
+        viewModel.cannotProperlyLaunchLinkAndLpms()
+        viewModel.cannotProperlyLaunchLinkAndLpms()
+
+        verify(eventReporter, times(1)).onCannotProperlyLaunchLinkAndLpms()
+    }
+
+    @Test
     fun `on navigate to AddPaymentMethod screen, should report form shown event`() = runTest {
         val viewModel = createViewModel(
             args = ARGS_CUSTOMER_WITH_GOOGLEPAY_SETUP,

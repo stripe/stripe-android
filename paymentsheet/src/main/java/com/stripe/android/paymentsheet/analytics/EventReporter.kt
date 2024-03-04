@@ -169,6 +169,12 @@ internal interface EventReporter {
         error: Throwable,
     )
 
+    /**
+     * The customer cannot properly launch Link payments or other LPM payments using
+     * browser intents.
+     */
+    fun onCannotProperlyLaunchLinkAndLpms()
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");

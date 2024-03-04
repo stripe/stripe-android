@@ -247,6 +247,37 @@ class DefaultEventReporterTest {
     }
 
     @Test
+    fun `onCannotProperlyLaunchLinkAndLpms() should fire analytics request with expected event value`() {
+        val completeEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Complete,
+        ) {
+            simulateSuccessfulSetup()
+        }
+
+        completeEventReporter.onCannotProperlyLaunchLinkAndLpms()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_complete_cannot_launch_link_and_lpms"
+            }
+        )
+
+        val customEventReporter = createEventReporter(
+            mode = EventReporter.Mode.Custom,
+        ) {
+            simulateSuccessfulSetup()
+        }
+
+        customEventReporter.onCannotProperlyLaunchLinkAndLpms()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == "mc_custom_cannot_launch_link_and_lpms"
+            }
+        )
+    }
+
+    @Test
     fun `onSelectPaymentOption() should fire analytics request with expected event value`() {
         val customEventReporter = createEventReporter(EventReporter.Mode.Custom) {
             simulateSuccessfulSetup()

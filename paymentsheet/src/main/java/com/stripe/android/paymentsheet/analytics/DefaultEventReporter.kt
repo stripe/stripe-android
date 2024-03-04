@@ -373,6 +373,17 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onCannotProperlyLaunchLinkAndLpms() {
+        fireEvent(
+            PaymentSheetEvent.CannotLaunchLinkAndLpms(
+                mode = mode,
+                isDeferred = isDeferred,
+                linkEnabled = linkEnabled,
+                googlePaySupported = googlePaySupported,
+            )
+        )
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(

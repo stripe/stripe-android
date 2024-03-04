@@ -18,6 +18,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContra
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
+import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filterNotNull
 import java.security.InvalidParameterException
@@ -58,6 +59,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 viewModel::onGooglePayResult
             )
         )
+
+        if (!applicationIsTaskOwner()) {
+            viewModel.cannotProperlyLaunchLinkAndLpms()
+        }
 
         setContent {
             StripeTheme {
