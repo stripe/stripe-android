@@ -360,18 +360,15 @@ private fun SearchRow(
     onQueryChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    Box {
-        // Adds a top background to prevent search results from showing through the search bar
-        Box(
-            modifier = modifier
-                .fillMaxWidth()
-                .align(Alignment.TopCenter)
-                .height(12.dp)
-                .background(colors.backgroundSurface)
-        )
+    // Adds a top background to prevent search results from showing through the search bar
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .background(colors.backgroundSurface)
+            .padding(top = 0.dp, bottom = 8.dp, start = 8.dp, end = 8.dp)
+    ) {
         FinancialConnectionsOutlinedTextField(
             modifier = modifier
-                .padding(horizontal = 6.dp)
                 .fillMaxWidth()
                 .focusRequester(focusRequester),
             leadingIcon = {
