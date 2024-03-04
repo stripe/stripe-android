@@ -6,7 +6,8 @@
 * [Added][8011](https://github.com/stripe/stripe-android/pull/8011) Added support for `paymentMethodOrder` in `PaymentSheet` and `CustomerSheet`, which provides client side sorting of payment methods.
 
 ### PaymentSheet
-* [Added] Added support for `paymentMethodOrder` to PaymentSheet and CustomerSheet.π
+* [Added] Added support for [Link](https://docs.stripe.com/payments/link/mobile-payment-element-link) in PaymentSheet. Enabling Link in your [payment method settings](https://dashboard.stripe.com/settings/payment_methods) will enable Link in PaymentSheet. To choose different Link availability settings on web and mobile, use a custom [payment method configuration](https://docs.stripe.com/payments/multiple-payment-method-configs).
+* [Added] Added support for `paymentMethodOrder` to PaymentSheet and CustomerSheet.
 
 ## 20.38.0 - 2024-02-26
 
