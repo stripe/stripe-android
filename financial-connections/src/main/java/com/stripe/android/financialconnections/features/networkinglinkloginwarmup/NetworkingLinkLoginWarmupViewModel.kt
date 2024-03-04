@@ -80,11 +80,8 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
             disableNetworking().also {
-                val popUpToBehavior = determinePopUpToBehavior()
+                val popUpToBehavior = determinePopUpToBehaviorForSkip()
                 navigationManager.tryNavigateTo(
-                    // skipping disables networking, which means
-                    // we don't want the user to navigate back to
-                    // the warm-up pane.
                     route = it.nextPane.destination(referrer = PANE),
                     popUpTo = popUpToBehavior,
                 )
@@ -92,7 +89,10 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         }.execute { copy(disableNetworkingAsync = it) }
     }
 
-    private suspend fun determinePopUpToBehavior(): PopUpToBehavior {
+    private suspend fun determinePopUpToBehaviorForSkip(): PopUpToBehavior {
+        // Skipping disables networking, which means we don't want the user to navigate back to
+        // the warm-up pane. Since the warmup pane is displayed as a bottom sheet, we need to
+        // pop up all the way to the pane that opened it.
         val referrer = awaitState().referrer
 
         return if (referrer != null) {
