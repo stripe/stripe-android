@@ -457,6 +457,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         )
     }
 
+    class CannotProperlyReturnFromLinkAndLPMs(
+        mode: EventReporter.Mode,
+    ) : PaymentSheetEvent() {
+        override val linkEnabled: Boolean = false
+        override val isDeferred: Boolean = false
+        override val googlePaySupported: Boolean = false
+
+        override val eventName: String = formatEventName(mode, "cannot_return_from_link_and_lpms")
+
+        override val additionalParams: Map<String, Any?> = mapOf()
+    }
+
     private fun standardParams(
         isDecoupled: Boolean,
         linkEnabled: Boolean,

@@ -169,6 +169,15 @@ internal interface EventReporter {
         error: Throwable,
     )
 
+    /**
+     * The customer cannot properly return from Link payments or other LPM payments using
+     * browser intents.
+     *
+     * @see <a href="https://docs.google.com/document/d/1nEfPEGpO7N7MmfifBW6jR-AJe9pWd_V9lKvKTIVht8c">
+     *     Deep Linking issue for Mobile Android SDK</a>
+     */
+    fun onCannotProperlyReturnFromLinkAndOtherLPMs()
+
     enum class Mode(val code: String) {
         Complete("complete"),
         Custom("custom");
