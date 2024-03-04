@@ -24,7 +24,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
@@ -63,14 +62,15 @@ internal fun ConsentLogoHeader(
     val stripeImageLoader = LocalImageLoader.current
     val placeholderBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.border)
     val loadedImages: SnapshotStateList<ImageBitmap> = remember {
-        val elements = if (isPreview) {
-            // preview: initially fill with placeholders
-            debugPreviewBitmaps(logos, bitmapLoadSize)
-        } else {
-            // prod: initially fill with placeholders
-            Array(logos.size) { placeholderBitmap }
+        SnapshotStateList<ImageBitmap>().also {
+            if (isPreview) {
+                // preview: initially fill with placeholders
+                it.addAll(debugPreviewBitmaps(logos, bitmapLoadSize))
+            } else {
+                // prod: initially fill with placeholders
+                for (i in logos.indices) it.add(placeholderBitmap)
+            }
         }
-        mutableStateListOf(*elements)
     }
 
     logos.forEachIndexed { index, logo ->
@@ -136,19 +136,21 @@ private fun ForegroundRow(images: List<ImageBitmap>) {
 private fun debugPreviewBitmaps(
     size: List<String>,
     bitmapLoadSize: Int,
-): Array<ImageBitmap> {
+): List<ImageBitmap> {
     return listOf(Color.Red, Color.Blue, Color.Green).take(size.size).map {
         val androidBitmap = Bitmap.createBitmap(bitmapLoadSize, bitmapLoadSize, Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(androidBitmap)
         canvas.drawColor(it.toArgb())
         androidBitmap.asImageBitmap()
-    }.toTypedArray()
+    }
 }
 
 @Composable
 private fun rememberPlaceholderBitmap(bitmapLoadSize: Int, placeholderColor: Color): ImageBitmap = remember {
     val androidBitmap = Bitmap.createBitmap(
-        bitmapLoadSize, bitmapLoadSize, Bitmap.Config.ARGB_8888
+        bitmapLoadSize,
+        bitmapLoadSize,
+        Bitmap.Config.ARGB_8888
     )
     androidBitmap.eraseColor(placeholderColor.toArgb())
     androidBitmap.asImageBitmap()
