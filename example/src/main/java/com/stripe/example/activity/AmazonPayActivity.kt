@@ -75,7 +75,6 @@ class AmazonPayActivity : StripeIntentActivity() {
 
 private enum class AmazonPayFlow {
     Payment,
-    // TODO-someday: Add PaymentWithFutureUse and Setup
 }
 
 @Composable
