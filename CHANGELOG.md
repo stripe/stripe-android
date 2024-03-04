@@ -1,13 +1,12 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
-* [Changed][7999](https://github.com/stripe/stripe-android/pull/7999) In test mode, PaymentSheet now fails to load when getting saved payment methods fails.
-* [Added][8015](https://github.com/stripe/stripe-android/pull/8015) Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
-* [Added][8011](https://github.com/stripe/stripe-android/pull/8011) Added support for `paymentMethodOrder` in `PaymentSheet` and `CustomerSheet`, which provides client side sorting of payment methods.
 
 ### PaymentSheet
 * [Added] Added support for [Link](https://docs.stripe.com/payments/link/mobile-payment-element-link) in PaymentSheet. Enabling Link in your [payment method settings](https://dashboard.stripe.com/settings/payment_methods) will enable Link in PaymentSheet. To choose different Link availability settings on web and mobile, use a custom [payment method configuration](https://docs.stripe.com/payments/multiple-payment-method-configs).
-* [Added] Added support for `paymentMethodOrder` to PaymentSheet and CustomerSheet.
+* [Changed][7999](https://github.com/stripe/stripe-android/pull/7999) In test mode, PaymentSheet now fails to load when getting saved payment methods fails.
+* [Added][8015](https://github.com/stripe/stripe-android/pull/8015) Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
+* [Added][8011](https://github.com/stripe/stripe-android/pull/8011) Added support for `paymentMethodOrder` in `PaymentSheet` and `CustomerSheet`, which provides client side sorting of payment methods.
 
 ## 20.38.0 - 2024-02-26
 
