@@ -1080,14 +1080,13 @@ class PaymentSheetEventTest {
         val completeEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
             mode = EventReporter.Mode.Complete,
             isDeferred = false,
-            linkEnabled = false,
             googlePaySupported = false,
         )
 
         assertThat(
             completeEvent.eventName
         ).isEqualTo(
-            "mc_complete_cannot_launch_link_and_lpms"
+            "mc_complete_cannot_return_from_link_and_lpms"
         )
 
         assertThat(
@@ -1103,14 +1102,13 @@ class PaymentSheetEventTest {
         val customEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
             mode = EventReporter.Mode.Custom,
             isDeferred = false,
-            linkEnabled = false,
             googlePaySupported = false,
         )
 
         assertThat(
             customEvent.eventName
         ).isEqualTo(
-            "mc_custom_cannot_launch_link_and_lpms"
+            "mc_custom_cannot_return_from_link_and_lpms"
         )
 
         assertThat(

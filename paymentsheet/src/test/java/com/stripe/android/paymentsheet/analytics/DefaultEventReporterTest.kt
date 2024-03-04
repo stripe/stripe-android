@@ -258,7 +258,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_complete_cannot_launch_link_and_lpms"
+                req.params["event"] == "mc_complete_cannot_return_from_link_and_lpms"
             }
         )
 
@@ -272,7 +272,7 @@ class DefaultEventReporterTest {
 
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
-                req.params["event"] == "mc_custom_cannot_launch_link_and_lpms"
+                req.params["event"] == "mc_custom_cannot_return_from_link_and_lpms"
             }
         )
     }

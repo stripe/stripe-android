@@ -378,7 +378,6 @@ internal class DefaultEventReporter @Inject internal constructor(
             PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
                 mode = mode,
                 isDeferred = isDeferred,
-                linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
             )
         )
