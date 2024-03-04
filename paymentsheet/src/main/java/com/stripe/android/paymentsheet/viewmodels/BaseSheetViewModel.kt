@@ -178,6 +178,12 @@ internal abstract class BaseSheetViewModel(
         initialValue = null,
     )
 
+    private var previouslySentDeepLinkEvent: Boolean
+        get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
+        set(value) {
+            savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] = value
+        }
+
     private var previouslyShownForm: PaymentMethodCode?
         get() = savedStateHandle[PREVIOUSLY_SHOWN_PAYMENT_FORM]
         set(value) {
@@ -507,6 +513,14 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    fun cannotProperlyReturnFromLinkAndOtherLPMs() {
+        if (!previouslySentDeepLinkEvent) {
+            eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
+
+            previouslySentDeepLinkEvent = true
+        }
+    }
+
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
         val didRemoveSelectedItem = currentSelection == paymentMethodId
@@ -773,5 +787,6 @@ internal abstract class BaseSheetViewModel(
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"
         internal const val PREVIOUSLY_SHOWN_PAYMENT_FORM = "previously_shown_payment_form"
         internal const val PREVIOUSLY_INTERACTION_PAYMENT_FORM = "previously_interacted_payment_form"
+        internal const val PREVIOUSLY_SENT_DEEP_LINK_EVENT = "previously_sent_deep_link_event"
     }
 }

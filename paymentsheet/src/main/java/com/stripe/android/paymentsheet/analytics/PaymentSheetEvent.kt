@@ -175,7 +175,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_CUSTOMER to (configuration.customer != null),
                     FIELD_GOOGLE_PAY to (configuration.googlePay != null),
                     FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
-                    FIELD_BILLING to (configuration.defaultBillingDetails != null),
+                    FIELD_BILLING to (configuration.defaultBillingDetails?.isFilledOut() == true),
                     FIELD_DELAYED_PMS to (configuration.allowsDelayedPaymentMethods),
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
@@ -455,6 +455,18 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
             FIELD_ERROR_MESSAGE to error.message,
         )
+    }
+
+    class CannotProperlyReturnFromLinkAndLPMs(
+        mode: EventReporter.Mode,
+    ) : PaymentSheetEvent() {
+        override val linkEnabled: Boolean = false
+        override val isDeferred: Boolean = false
+        override val googlePaySupported: Boolean = false
+
+        override val eventName: String = formatEventName(mode, "cannot_return_from_link_and_lpms")
+
+        override val additionalParams: Map<String, Any?> = mapOf()
     }
 
     private fun standardParams(

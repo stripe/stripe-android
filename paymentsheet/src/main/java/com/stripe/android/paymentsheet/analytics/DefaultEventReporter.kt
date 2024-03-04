@@ -373,6 +373,10 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
+    override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
+        fireEvent(PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(mode = mode))
+    }
+
     private fun fireEvent(event: PaymentSheetEvent) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
