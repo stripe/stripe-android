@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.39.0 - 2024-03-04
+
 ### PaymentSheet
 * [Added] Added support for [Link](https://docs.stripe.com/payments/link/mobile-payment-element-link) in PaymentSheet. Enabling Link in your [payment method settings](https://dashboard.stripe.com/settings/payment_methods) will enable Link in PaymentSheet. To choose different Link availability settings on web and mobile, use a custom [payment method configuration](https://docs.stripe.com/payments/multiple-payment-method-configs).
 * [Changed][7999](https://github.com/stripe/stripe-android/pull/7999) In test mode, PaymentSheet now fails to load when getting saved payment methods fails.
