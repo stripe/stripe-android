@@ -116,8 +116,7 @@ class NetworkingLinkSignupViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 NavigationIntent.NavigateTo(
                     route = NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE),
-                    popUpToCurrent = false,
-                    inclusive = false,
+                    popUpTo = null,
                     isSingleTop = true,
                 )
             )
@@ -149,8 +148,7 @@ class NetworkingLinkSignupViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 NavigationIntent.NavigateTo(
                     route = NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE),
-                    popUpToCurrent = false,
-                    inclusive = false,
+                    popUpTo = null,
                     isSingleTop = true,
                 )
             )
@@ -163,8 +161,7 @@ class NetworkingLinkSignupViewModelTest {
             assertThat(awaitItem()).isEqualTo(
                 NavigationIntent.NavigateTo(
                     route = NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE),
-                    popUpToCurrent = false,
-                    inclusive = false,
+                    popUpTo = null,
                     isSingleTop = true,
                 )
             )
