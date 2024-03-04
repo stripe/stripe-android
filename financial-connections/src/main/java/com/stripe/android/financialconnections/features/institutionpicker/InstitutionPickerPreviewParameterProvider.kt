@@ -20,7 +20,8 @@ internal class InstitutionPickerPreviewParameterProvider :
         searchNoResultsNoManualEntry(),
         searchFailed(),
         searchFailedNoManualEntry(),
-        selectedInstitution()
+        selectedInstitution(),
+        featuredWithDisabledLink(),
     )
 
     private fun initialLoading() = InstitutionPickerState(
@@ -33,6 +34,13 @@ internal class InstitutionPickerPreviewParameterProvider :
         previewText = null,
         payload = Success(payload()),
         searchInstitutions = Uninitialized,
+    )
+
+    private fun featuredWithDisabledLink() = InstitutionPickerState(
+        previewText = null,
+        payload = Success(payload()),
+        searchInstitutions = Uninitialized,
+        allowBackNavigation = false,
     )
 
     private fun searchInProgress() = InstitutionPickerState(

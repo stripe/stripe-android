@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.features.institutionpicker
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.airbnb.mvrx.withState
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -129,6 +130,46 @@ internal class InstitutionPickerViewModelTest {
                 pane = Pane.INSTITUTION_PICKER,
                 displayErrorScreen = true
             )
+        }
+    }
+
+    @Test
+    fun `init - initially hides back button until we determine back navigation ability`() = runTest {
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        withState(viewModel) { state ->
+            assertThat(state.allowBackNavigation).isFalse()
+        }
+    }
+
+    @Test
+    fun `init - allows back navigation if consumer is not a link consumer`() = runTest {
+        val manifestAfterLinkDismissal = ApiKeyFixtures.sessionManifest().copy(
+            accountholderIsLinkConsumer = false,
+        )
+
+        givenManifestReturns(manifestAfterLinkDismissal)
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        withState(viewModel) { state ->
+            assertThat(state.allowBackNavigation).isTrue()
+        }
+    }
+
+    @Test
+    fun `init - prevents back navigation if consumer dismissed link usage`() = runTest {
+        val manifestAfterLinkDismissal = ApiKeyFixtures.sessionManifest().copy(
+            accountholderIsLinkConsumer = true,
+            isNetworkingUserFlow = false,
+        )
+
+        givenManifestReturns(manifestAfterLinkDismissal)
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        withState(viewModel) { state ->
+            assertThat(state.allowBackNavigation).isFalse()
         }
     }
 
