@@ -527,7 +527,7 @@ private fun InstitutionResultTile(
             ) { onInstitutionSelected(institution) }
             .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
     ) {
-        InstitutionIcon(institution.icon?.default)
+        InstitutionIcon("https://stripe-camo.global.ssl.fastly.net/ba6ace5e98182777bf96bbe61b54e5558a9996c04cf3e92874a6cba2518c7665/68747470733a2f2f66696c65732e7374726970652e636f6d2f6c696e6b732f4d44423859574e6a6446387854474e5851564249627a6c6b4f484a726331686166475a7358327870646d56664e574a6f556e46454f47746a546c646852576479636c59356130646d546e6b3230305874525765537958")
         Spacer(modifier = Modifier.size(8.dp))
         Column(
             modifier = Modifier.weight(1f)

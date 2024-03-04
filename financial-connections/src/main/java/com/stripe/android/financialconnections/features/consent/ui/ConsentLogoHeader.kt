@@ -41,6 +41,7 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
@@ -62,7 +63,7 @@ internal fun ConsentLogoHeader(
     val localDensity = LocalDensity.current
     val bitmapLoadSize = remember { with(localDensity) { 36.dp.toPx().toInt() } }
     val stripeImageLoader = LocalImageLoader.current
-    val placeholderBitmap: ImageBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.border)
+    val placeholderBitmap: ImageBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.backgroundOffset)
     var bitmaps: List<ImageBitmap> by remember {
         mutableStateOf(
             if (isPreview) {
@@ -217,6 +218,7 @@ private fun Logo(imageBitmap: ImageBitmap) {
             .size(LogoSize)
             .shadow(8.dp, shape)
             .clip(shape)
+            .background(color = colors.backgroundOffset, shape = shape)
     ) {
         Crossfade(
             targetState = imageBitmap,
@@ -224,6 +226,7 @@ private fun Logo(imageBitmap: ImageBitmap) {
         ) { image ->
             Image(
                 bitmap = image,
+                contentScale = ContentScale.Crop,
                 contentDescription = null,
                 modifier = Modifier.fillMaxSize()
             )
