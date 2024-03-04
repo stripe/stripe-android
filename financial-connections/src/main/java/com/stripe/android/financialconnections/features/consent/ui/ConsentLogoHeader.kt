@@ -61,7 +61,7 @@ internal fun ConsentLogoHeader(
     val localDensity = LocalDensity.current
     val bitmapLoadSize = remember { with(localDensity) { 36.dp.toPx().toInt() } }
     val stripeImageLoader = LocalImageLoader.current
-    val placeholderBitmap = generatePlaceholderBitmap(bitmapLoadSize, colors.border)
+    val placeholderBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.border)
     val loadedImages: SnapshotStateList<ImageBitmap> = remember {
         val elements = if (isPreview) {
             // preview: initially fill with placeholders
@@ -73,8 +73,8 @@ internal fun ConsentLogoHeader(
         mutableStateListOf(*elements)
     }
 
-    LaunchedEffect(logos) {
-        logos.forEachIndexed { index, logo ->
+    logos.forEachIndexed { index, logo ->
+        LaunchedEffect(logo) {
             stripeImageLoader.load(logo, bitmapLoadSize, bitmapLoadSize)
                 .onSuccess { result ->
                     // TODO handle null image.
@@ -86,7 +86,6 @@ internal fun ConsentLogoHeader(
                 }
         }
     }
-
 
     Box(
         modifier = modifier
@@ -147,40 +146,12 @@ private fun debugPreviewBitmaps(
 }
 
 @Composable
-private fun loadBitmaps(
-    logos: List<String>,
-    bitmapLoadSize: Int,
-): List<ImageBitmap?> {
-    val stripeImageLoader = LocalImageLoader.current
-    val loadedImages = remember { mutableStateListOf(*Array<ImageBitmap?>(logos.size) { null }) }
-    val placeholderBitmap = generatePlaceholderBitmap(bitmapLoadSize, colors.textCritical)
-
-    LaunchedEffect(logos) {
-        logos.forEachIndexed { index, logo ->
-            stripeImageLoader.load(logo, bitmapLoadSize, bitmapLoadSize).let { loadResult ->
-                loadResult.onSuccess { result ->
-                    loadedImages[index] = result?.asImageBitmap()
-                }
-                loadResult.onFailure {
-                    Log.e("ConsentLogoHeader", "Failed to load image: $logo")
-                    // TODO handle image failure.
-                }
-            }
-        }
-    }
-
-    // TODO: figure how to trigger recomposition on bitmap changes, rather than relying on nullability.
-    // Initially, the SnapshotStateList is filled with nulls, so return a list with placeholders first.
-    // Once the images are loaded, they'll replace the nulls and trigger recomposition.
-    return loadedImages.map { it ?: placeholderBitmap }
-}
-
-private fun generatePlaceholderBitmap(bitmapLoadSize: Int, placeholderColor: Color): ImageBitmap {
+private fun rememberPlaceholderBitmap(bitmapLoadSize: Int, placeholderColor: Color): ImageBitmap = remember {
     val androidBitmap = Bitmap.createBitmap(
         bitmapLoadSize, bitmapLoadSize, Bitmap.Config.ARGB_8888
     )
     androidBitmap.eraseColor(placeholderColor.toArgb())
-    return androidBitmap.asImageBitmap()
+    androidBitmap.asImageBitmap()
 }
 
 @Composable
