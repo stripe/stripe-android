@@ -1079,8 +1079,6 @@ class PaymentSheetEventTest {
     fun `CannotProperlyReturnFromLinkAndLPMs event should return expected toString() with null values`() {
         val completeEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
             mode = EventReporter.Mode.Complete,
-            isDeferred = false,
-            googlePaySupported = false,
         )
 
         assertThat(
@@ -1101,8 +1099,6 @@ class PaymentSheetEventTest {
 
         val customEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
             mode = EventReporter.Mode.Custom,
-            isDeferred = false,
-            googlePaySupported = false,
         )
 
         assertThat(

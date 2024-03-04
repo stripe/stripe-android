@@ -374,13 +374,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     }
 
     override fun onCannotProperlyReturnFromLinkAndOtherLPMs() {
-        fireEvent(
-            PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
-                mode = mode,
-                isDeferred = isDeferred,
-                googlePaySupported = googlePaySupported,
-            )
-        )
+        fireEvent(PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(mode = mode))
     }
 
     private fun fireEvent(event: PaymentSheetEvent) {
