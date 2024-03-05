@@ -12,7 +12,7 @@
     <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing numbers</string>
     <string name="stripe_institutionpicker_pane_error_title">No results</string>
     <string name="stripe_institutionpicker_pane_error_desc">Try searching another bank</string>
-    <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Try searching another bank or <annotation clickable="manual_entry">manually enter details</annotation>.</string>
+    <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Try searching another bank or <annotation clickable="manual_entry">manually\u00a0enter\u00a0details</annotation>.</string>
     <string name="stripe_partnerauth_loading_title">Establishing connection</string>
     <string name="stripe_partnerauth_loading_desc">Please wait while we connect to your bank.</string>
     <string name="stripe_picker_search_no_results">No results for "%1$s"</string>
