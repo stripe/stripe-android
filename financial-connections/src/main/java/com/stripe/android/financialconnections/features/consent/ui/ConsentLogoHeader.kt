@@ -107,11 +107,11 @@ private fun BackgroundRow(images: List<ImageBitmap>) {
                 AnimatedDotsWithFixedGradient(
                     startColor = getPrevalentColorCloseToDots(
                         bitmap = image.asAndroidBitmap(),
-                        startSide = true,
+                        startSide = false,
                     ),
                     endColor = getPrevalentColorCloseToDots(
                         bitmap = nextImage.asAndroidBitmap(),
-                        startSide = false,
+                        startSide = true,
                     )
                 )
             }
