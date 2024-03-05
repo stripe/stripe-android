@@ -360,7 +360,6 @@ private fun SearchRow(
     onQueryChanged: (String) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    // Adds a top background to prevent search results from showing through the search bar
     Box(
         modifier = modifier
             .fillMaxWidth()
