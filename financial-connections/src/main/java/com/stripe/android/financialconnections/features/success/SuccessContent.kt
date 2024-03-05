@@ -28,11 +28,15 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -231,6 +235,7 @@ private fun SuccessCompletedContent(
     }
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun SuccessFooter(
     modifier: Modifier = Modifier,
@@ -243,6 +248,8 @@ private fun SuccessFooter(
             loading = loading,
             onClick = onDoneClick,
             modifier = Modifier
+                .semantics { testTagsAsResourceId = true }
+                .testTag("done_button")
                 .fillMaxWidth()
         ) {
             Text(
