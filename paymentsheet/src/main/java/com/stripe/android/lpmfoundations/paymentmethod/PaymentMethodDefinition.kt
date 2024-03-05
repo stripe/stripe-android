@@ -1,6 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import com.stripe.android.lpmfoundations.luxe.FormLayoutConfiguration
+import com.stripe.android.lpmfoundations.luxe.SetupFutureUsageFieldConfiguration
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -36,21 +36,21 @@ internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata
     }
 }
 
-internal fun PaymentMethodDefinition.getFormLayoutConfiguration(
+internal fun PaymentMethodDefinition.getSetupFutureUsageFieldConfiguration(
     metadata: PaymentMethodMetadata,
     customerConfiguration: PaymentSheet.CustomerConfiguration?,
-): FormLayoutConfiguration? {
-    val oneTimeUse = FormLayoutConfiguration(
+): SetupFutureUsageFieldConfiguration? {
+    val oneTimeUse = SetupFutureUsageFieldConfiguration(
         showCheckbox = false,
-        showCheckboxControlledFields = false
+        saveForFutureUseInitialValue = false
     )
-    val merchantRequestedSave = FormLayoutConfiguration(
+    val merchantRequestedSave = SetupFutureUsageFieldConfiguration(
         showCheckbox = false,
-        showCheckboxControlledFields = true
+        saveForFutureUseInitialValue = true
     )
-    val userSelectableSave = FormLayoutConfiguration(
+    val userSelectableSave = SetupFutureUsageFieldConfiguration(
         showCheckbox = true,
-        showCheckboxControlledFields = false
+        saveForFutureUseInitialValue = false
     )
 
     return when (metadata.stripeIntent) {

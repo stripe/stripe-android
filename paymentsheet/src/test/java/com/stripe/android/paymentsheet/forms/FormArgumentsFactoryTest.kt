@@ -75,7 +75,7 @@ class FormArgumentsFactoryTest {
 
         assertThat(actualArgs.initialPaymentMethodCreateParams).isEqualTo(paymentMethodCreateParams)
         assertThat(actualArgs.showCheckbox).isFalse()
-        assertThat(actualArgs.showCheckboxControlledFields).isFalse()
+        assertThat(actualArgs.saveForFutureUseInitialValue).isFalse()
     }
 
     @Test
@@ -84,7 +84,7 @@ class FormArgumentsFactoryTest {
             customerReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields).isTrue()
+        assertThat(actualFromArguments.saveForFutureUseInitialValue).isTrue()
     }
 
     @Test
@@ -93,7 +93,7 @@ class FormArgumentsFactoryTest {
             customerReuse = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
+        assertThat(actualFromArguments.saveForFutureUseInitialValue).isFalse()
     }
 
     @Test

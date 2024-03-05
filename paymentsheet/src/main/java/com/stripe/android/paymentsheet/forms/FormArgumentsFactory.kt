@@ -5,7 +5,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.getFormLayoutConfiguration
+import com.stripe.android.lpmfoundations.paymentmethod.getSetupFutureUsageFieldConfiguration
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -23,8 +23,8 @@ internal object FormArgumentsFactory {
         newLpm: PaymentSelection.New?,
         cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
-        val formLayoutConfiguration = requireNotNull(
-            paymentMethod.paymentMethodDefinition().getFormLayoutConfiguration(
+        val setupFutureUsageFieldConfiguration = requireNotNull(
+            paymentMethod.paymentMethodDefinition().getSetupFutureUsageFieldConfiguration(
                 metadata = metadata,
                 customerConfiguration = config.customer,
             )
@@ -57,16 +57,16 @@ internal object FormArgumentsFactory {
             else -> null
         }
 
-        val showCheckboxControlledFields = if (newLpm != null) {
+        val saveForFutureUseInitialValue = if (newLpm != null) {
             newLpm.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
         } else {
-            formLayoutConfiguration.showCheckboxControlledFields
+            setupFutureUsageFieldConfiguration.saveForFutureUseInitialValue
         }
 
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
-            showCheckbox = formLayoutConfiguration.showCheckbox,
-            showCheckboxControlledFields = showCheckboxControlledFields,
+            showCheckbox = setupFutureUsageFieldConfiguration.showCheckbox,
+            saveForFutureUseInitialValue = saveForFutureUseInitialValue,
             merchantName = merchantName,
             amount = amount,
             billingDetails = config.defaultBillingDetails,
@@ -90,7 +90,7 @@ internal object FormArgumentsFactory {
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
             showCheckbox = false,
-            showCheckboxControlledFields = false,
+            saveForFutureUseInitialValue = false,
             merchantName = merchantName,
             billingDetails = configuration.defaultBillingDetails,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,

@@ -1415,7 +1415,7 @@ internal class PaymentSheetViewModelTest {
                     currencyCode = "usd",
                 ),
                 showCheckbox = false,
-                showCheckboxControlledFields = true,
+                saveForFutureUseInitialValue = true,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )

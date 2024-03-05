@@ -303,7 +303,7 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.P24.code,
             billingDetails = null,
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            saveForFutureUseInitialValue = true
         )
         val formViewModel = createViewModel(
             args,
@@ -359,7 +359,7 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             showCheckbox = false,
-            showCheckboxControlledFields = true,
+            saveForFutureUseInitialValue = true,
             billingDetails = null
         )
         val formViewModel = createViewModel(
