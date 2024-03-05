@@ -42,8 +42,9 @@ import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.semantics.testTag
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
@@ -164,9 +165,8 @@ fun OTPElementUI(
                         }
                         false
                     }
-                    .semantics {
-                        testTag = "OTP-$index"
-                    }
+                    .testTag("OTP-$index")
+                    .semantics { testTagsAsResourceId = true }
 
                 if (index == 0) {
                     textFieldModifier = textFieldModifier.focusRequester(focusRequester)
