@@ -32,7 +32,6 @@ import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetExampleActivity : AppCompatActivity() {
@@ -134,11 +133,9 @@ private fun CustomerPaymentMethods(
                 onClick = onUpdateDefaultPaymentMethod,
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    state.selection?.paymentOption?.icon()?.let {
+                    state.selection?.paymentOption?.let {
                         Image(
-                            painter = rememberDrawablePainter(
-                                drawable = it
-                            ),
+                            painter = it.iconPainter,
                             contentDescription = "Payment Method Icon",
                             modifier = Modifier.height(32.dp)
                         )

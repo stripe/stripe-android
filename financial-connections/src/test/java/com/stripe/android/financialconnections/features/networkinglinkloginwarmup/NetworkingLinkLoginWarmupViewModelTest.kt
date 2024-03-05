@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -66,6 +67,26 @@ class NetworkingLinkLoginWarmupViewModelTest {
     }
 
     @Test
+    fun `onSkipClicked - navigates to institution picker and clears back stack`() = runTest {
+        val referrer = Pane.CONSENT
+        val viewModel = buildViewModel(NetworkingLinkLoginWarmupState(referrer))
+
+        whenever(disableNetworking()).thenReturn(
+            ApiKeyFixtures.sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
+        )
+
+        viewModel.onSkipClicked()
+        navigationManager.assertNavigatedTo(
+            destination = Destination.InstitutionPicker,
+            popUpTo = PopUpToBehavior.Route(
+                route = referrer.destination.fullRoute,
+                inclusive = true,
+            ),
+            pane = Pane.NETWORKING_LINK_LOGIN_WARMUP,
+        )
+    }
+
+    @Test
     fun `onClickableTextClick - skip_login disables networking and navigates`() = runTest {
         val viewModel = buildViewModel(NetworkingLinkLoginWarmupState())
         val expectedNextPane = Pane.INSTITUTION_PICKER
@@ -79,6 +100,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         verify(disableNetworking).invoke()
         navigationManager.assertNavigatedTo(
             destination = expectedNextPane.destination,
+            popUpTo = PopUpToBehavior.Current(inclusive = true),
             pane = Pane.NETWORKING_LINK_LOGIN_WARMUP
         )
     }

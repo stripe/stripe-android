@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
+import android.os.Bundle
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -18,6 +19,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -78,16 +80,30 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         suspend {
             eventTracker.track(Click("click.skip_sign_in", PANE))
             disableNetworking().also {
+                val popUpToBehavior = determinePopUpToBehaviorForSkip()
                 navigationManager.tryNavigateTo(
-                    // skipping disables networking, which means
-                    // we don't want the user to navigate back to
-                    // the warm-up pane.
-                    it.nextPane.destination(referrer = PANE),
-                    popUpToCurrent = true,
-                    inclusive = true
+                    route = it.nextPane.destination(referrer = PANE),
+                    popUpTo = popUpToBehavior,
                 )
             }
         }.execute { copy(disableNetworkingAsync = it) }
+    }
+
+    private suspend fun determinePopUpToBehaviorForSkip(): PopUpToBehavior {
+        // Skipping disables networking, which means we don't want the user to navigate back to
+        // the warm-up pane. Since the warmup pane is displayed as a bottom sheet, we need to
+        // pop up all the way to the pane that opened it.
+        val referrer = awaitState().referrer
+
+        return if (referrer != null) {
+            PopUpToBehavior.Route(
+                route = referrer.destination.fullRoute,
+                inclusive = true,
+            )
+        } else {
+            // Let's give it our best shot even though we don't know the referrer
+            PopUpToBehavior.Current(inclusive = true)
+        }
     }
 
     companion object :
@@ -111,9 +127,17 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
 }
 
 internal data class NetworkingLinkLoginWarmupState(
+    val referrer: Pane? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
 ) : MavericksState {
+
+    @Suppress("unused") // used by mavericks to create initial state.
+    constructor(args: Bundle?) : this(
+        referrer = Destination.referrer(args),
+        payload = Uninitialized,
+        disableNetworkingAsync = Uninitialized,
+    )
 
     data class Payload(
         val merchantName: String?,

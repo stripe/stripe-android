@@ -1416,7 +1416,7 @@ internal class PaymentSheetViewModelTest {
                 ),
                 showCheckbox = false,
                 showCheckboxControlledFields = true,
-                billingDetails = null,
+                billingDetails = PaymentSheet.BillingDetails(),
             )
         )
     }
@@ -2327,6 +2327,18 @@ internal class PaymentSheetViewModelTest {
         )
 
         verify(eventReporter).onPaymentMethodFormShown("card")
+    }
+
+    @Test
+    fun `on cannot properly return from link or other lpms, should report event at maximum once`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+
+        verify(eventReporter, times(1)).onCannotProperlyReturnFromLinkAndOtherLPMs()
     }
 
     @Test

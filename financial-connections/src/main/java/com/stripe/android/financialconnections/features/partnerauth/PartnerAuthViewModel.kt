@@ -46,6 +46,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -349,9 +350,8 @@ internal class PartnerAuthViewModel @Inject constructor(
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Cancel(Date()))
             navigationManager.tryNavigateTo(
-                result.nextPane.destination(referrer = PANE),
-                popUpToCurrent = true,
-                inclusive = true
+                route = result.nextPane.destination(referrer = PANE),
+                popUpTo = PopUpToBehavior.Current(inclusive = true),
             )
         }
     }

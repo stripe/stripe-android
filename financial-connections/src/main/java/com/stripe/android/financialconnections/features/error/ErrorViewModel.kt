@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -71,9 +72,8 @@ internal class ErrorViewModel @Inject constructor(
 
     private fun reset() {
         navigationManager.tryNavigateTo(
-            Destination.Reset(referrer = PANE),
-            popUpToCurrent = true,
-            inclusive = true
+            route = Destination.Reset(referrer = PANE),
+            popUpTo = PopUpToBehavior.Current(inclusive = true),
         )
     }
 

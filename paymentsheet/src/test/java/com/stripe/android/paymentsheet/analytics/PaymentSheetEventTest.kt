@@ -1074,4 +1074,47 @@ class PaymentSheetEventTest {
             )
         )
     }
+
+    @Test
+    fun `CannotProperlyReturnFromLinkAndLPMs event should return expected toString() with null values`() {
+        val completeEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
+            mode = EventReporter.Mode.Complete,
+        )
+
+        assertThat(
+            completeEvent.eventName
+        ).isEqualTo(
+            "mc_complete_cannot_return_from_link_and_lpms"
+        )
+
+        assertThat(
+            completeEvent.params
+        ).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+
+        val customEvent = PaymentSheetEvent.CannotProperlyReturnFromLinkAndLPMs(
+            mode = EventReporter.Mode.Custom,
+        )
+
+        assertThat(
+            customEvent.eventName
+        ).isEqualTo(
+            "mc_custom_cannot_return_from_link_and_lpms"
+        )
+
+        assertThat(
+            customEvent.params
+        ).isEqualTo(
+            mapOf(
+                "is_decoupled" to false,
+                "link_enabled" to false,
+                "google_pay_enabled" to false,
+            )
+        )
+    }
 }

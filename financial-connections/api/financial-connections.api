@@ -387,6 +387,13 @@ public final class com/stripe/android/financialconnections/features/common/Compo
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/financialconnections/features/consent/ui/ComposableSingletons$ConsentLogoHeaderKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/consent/ui/ComposableSingletons$ConsentLogoHeaderKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
+}
+
 public final class com/stripe/android/financialconnections/features/error/ComposableSingletons$ErrorScreenKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/error/ComposableSingletons$ErrorScreenKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;

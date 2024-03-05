@@ -1,32 +1,31 @@
 package com.stripe.android.financialconnections.features.consent.ui
 
 import android.graphics.Bitmap
-import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -42,10 +41,14 @@ import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.ui.LocalImageLoader
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 
 private val LogoSize = 72.dp
 private val DotsContainerHeight = 6.dp
@@ -58,29 +61,38 @@ internal fun ConsentLogoHeader(
 ) {
     val isPreview = LocalInspectionMode.current
     val localDensity = LocalDensity.current
-    val isVisible = remember { mutableStateOf(false) }
     val bitmapLoadSize = remember { with(localDensity) { 36.dp.toPx().toInt() } }
-
-    val images = if (isPreview) {
-        isVisible.value = true
-        debugPreviewBitmaps(logos, bitmapLoadSize, isVisible)
-    } else {
-        loadBitmaps(logos, bitmapLoadSize, isVisible)
+    val stripeImageLoader = LocalImageLoader.current
+    val placeholderBitmap: ImageBitmap = rememberPlaceholderBitmap(bitmapLoadSize, colors.backgroundOffset)
+    var bitmaps: List<ImageBitmap> by remember {
+        mutableStateOf(
+            if (isPreview) {
+                debugPreviewBitmaps(logos, bitmapLoadSize)
+            } else {
+                List(logos.size) { placeholderBitmap }
+            }
+        )
     }
 
-    Box(modifier = modifier.height(LogoSize)) {
-        AnimatedVisibility(
-            visible = isVisible.value,
-            enter = fadeIn(animationSpec = tween(durationMillis = 500)), // Customize duration as needed
-            modifier = modifier.matchParentSize()
-        ) {
-            val logoImages = remember(images) { images.filterNotNull() }
-
-            Box(contentAlignment = Alignment.Center) {
-                BackgroundRow(images = logoImages)
-                ForegroundRow(images = logoImages)
+    LaunchedEffect(logos) {
+        bitmaps = logos.map {
+            async {
+                stripeImageLoader.load(it, bitmapLoadSize, bitmapLoadSize)
+                    .getOrNull()
+                    ?.asImageBitmap()
+                    ?: placeholderBitmap
             }
-        }
+        }.awaitAll()
+    }
+
+    Box(
+        modifier = modifier
+            .height(LogoSize)
+            .fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        BackgroundRow(images = bitmaps)
+        ForegroundRow(images = bitmaps)
     }
 }
 
@@ -112,7 +124,6 @@ private fun ForegroundRow(images: List<ImageBitmap>) {
     Row(verticalAlignment = Alignment.CenterVertically) {
         for ((index, image) in images.withIndex()) {
             Logo(image)
-
             if (index != images.lastIndex) {
                 Spacer(modifier = Modifier.width(DotsContainerWidth))
             }
@@ -120,13 +131,10 @@ private fun ForegroundRow(images: List<ImageBitmap>) {
     }
 }
 
-@Composable
 private fun debugPreviewBitmaps(
     size: List<String>,
     bitmapLoadSize: Int,
-    isVisible: MutableState<Boolean>
 ): List<ImageBitmap> {
-    isVisible.value = true
     return listOf(Color.Red, Color.Blue, Color.Green).take(size.size).map {
         val androidBitmap = Bitmap.createBitmap(bitmapLoadSize, bitmapLoadSize, Bitmap.Config.ARGB_8888)
         val canvas = android.graphics.Canvas(androidBitmap)
@@ -136,33 +144,14 @@ private fun debugPreviewBitmaps(
 }
 
 @Composable
-private fun loadBitmaps(
-    logos: List<String>,
-    bitmapLoadSize: Int,
-    isVisible: MutableState<Boolean>
-): SnapshotStateList<ImageBitmap?> {
-    val stripeImageLoader = LocalImageLoader.current
-    val loadedImages = remember { mutableStateListOf<ImageBitmap?>() }
-    // Load images
-    logos.forEachIndexed { index, logo ->
-        LaunchedEffect(logo) {
-            stripeImageLoader.load(
-                logo,
-                bitmapLoadSize,
-                bitmapLoadSize
-            ).onSuccess { result ->
-                while (loadedImages.size <= index) {
-                    loadedImages.add(null)
-                }
-                loadedImages[index] = result?.asImageBitmap()
-                // Set visibility to true when all images are loaded
-                if (loadedImages.size == logos.size && loadedImages.all { it != null }) {
-                    isVisible.value = true
-                }
-            }
-        }
-    }
-    return loadedImages
+private fun rememberPlaceholderBitmap(bitmapLoadSize: Int, placeholderColor: Color): ImageBitmap = remember {
+    val androidBitmap = Bitmap.createBitmap(
+        bitmapLoadSize,
+        bitmapLoadSize,
+        Bitmap.Config.ARGB_8888
+    )
+    androidBitmap.eraseColor(placeholderColor.toArgb())
+    androidBitmap.asImageBitmap()
 }
 
 @Composable
@@ -224,15 +213,25 @@ private fun AnimatedDotsWithFixedGradient(
 @Composable
 private fun Logo(imageBitmap: ImageBitmap) {
     val shape = RoundedCornerShape(18.dp)
-
-    Image(
-        bitmap = imageBitmap,
-        contentDescription = null,
+    Box(
         modifier = Modifier
             .size(LogoSize)
             .shadow(8.dp, shape)
             .clip(shape)
-    )
+            .background(color = colors.backgroundOffset, shape = shape)
+    ) {
+        Crossfade(
+            targetState = imageBitmap,
+            animationSpec = tween(durationMillis = 300)
+        ) { image ->
+            Image(
+                bitmap = image,
+                contentScale = ContentScale.Crop,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize()
+            )
+        }
+    }
 }
 
 /**
