@@ -297,7 +297,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config.merchantDisplayName
 
-        val layoutDescriptor = requireNotNull(
+        val formLayoutConfiguration = requireNotNull(
             CardDefinition.getFormLayoutConfiguration(
                 metadata = metadata,
                 customerConfiguration = config.customer,
@@ -307,7 +307,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
             null
-        } else if (layoutDescriptor.showCheckbox) {
+        } else if (formLayoutConfiguration.showCheckbox) {
             LinkSignupMode.AlongsideSaveForFutureUse
         } else {
             LinkSignupMode.InsteadOfSaveForFutureUse

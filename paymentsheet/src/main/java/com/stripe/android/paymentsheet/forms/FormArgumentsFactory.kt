@@ -23,7 +23,7 @@ internal object FormArgumentsFactory {
         newLpm: PaymentSelection.New?,
         cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
-        val layoutFormDescriptor = requireNotNull(
+        val formLayoutConfiguration = requireNotNull(
             paymentMethod.paymentMethodDefinition().getFormLayoutConfiguration(
                 metadata = metadata,
                 customerConfiguration = config.customer,
@@ -60,12 +60,12 @@ internal object FormArgumentsFactory {
         val showCheckboxControlledFields = if (newLpm != null) {
             newLpm.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
         } else {
-            layoutFormDescriptor.showCheckboxControlledFields
+            formLayoutConfiguration.showCheckboxControlledFields
         }
 
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
-            showCheckbox = layoutFormDescriptor.showCheckbox,
+            showCheckbox = formLayoutConfiguration.showCheckbox,
             showCheckboxControlledFields = showCheckboxControlledFields,
             merchantName = merchantName,
             amount = amount,
