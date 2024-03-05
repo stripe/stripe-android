@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [Added][7719](https://github.com/stripe/stripe-android/pull/7719) Added `PaymentOption.iconPainter` to simplify `FlowController` usage in Compose.
+
 ## 20.39.0 - 2024-03-04
 
 ### PaymentSheet

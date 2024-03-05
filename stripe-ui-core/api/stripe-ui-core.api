@@ -255,10 +255,6 @@ public final class com/stripe/android/uicore/image/ComposableSingletons$StripeIm
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 }
 
-public final class com/stripe/android/uicore/image/DrawablePainterKt {
-	public static final fun rememberDrawablePainter (Landroid/graphics/drawable/Drawable;Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
-}
-
 public final class com/stripe/android/uicore/text/EmbeddableImage$Bitmap : com/stripe/android/uicore/text/EmbeddableImage {
 	public static final field $stable I
 	public fun <init> (Landroid/graphics/Bitmap;)V

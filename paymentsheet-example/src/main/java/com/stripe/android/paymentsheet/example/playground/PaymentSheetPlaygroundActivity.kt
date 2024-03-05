@@ -282,7 +282,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
             paymentMethodLabel = flowControllerState.paymentMethodLabel(),
-            paymentMethodIcon = flowControllerState.paymentMethodIcon(),
+            paymentMethodPainter = flowControllerState.paymentMethodPainter(),
             onClick = flowController::presentPaymentOptions
         )
         BuyButton(

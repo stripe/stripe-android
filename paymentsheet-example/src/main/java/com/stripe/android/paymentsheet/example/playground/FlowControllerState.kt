@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground
 
-import android.graphics.drawable.Drawable
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.model.PaymentOption
 
@@ -18,6 +19,7 @@ internal fun FlowControllerState?.paymentMethodLabel(): String {
     }
 }
 
-internal fun FlowControllerState?.paymentMethodIcon(): Drawable? {
-    return this?.selectedPaymentOption?.icon()
+@Composable
+internal fun FlowControllerState?.paymentMethodPainter(): Painter? {
+    return this?.selectedPaymentOption?.iconPainter
 }

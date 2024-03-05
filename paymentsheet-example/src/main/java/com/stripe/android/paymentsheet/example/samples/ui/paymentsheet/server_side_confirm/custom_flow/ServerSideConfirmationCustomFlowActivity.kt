@@ -78,7 +78,7 @@ internal class ServerSideConfirmationCustomFlowActivity : AppCompatActivity() {
                         PaymentMethodSelector(
                             isEnabled = uiState.isPaymentMethodButtonEnabled,
                             paymentMethodLabel = paymentMethodLabel,
-                            paymentMethodIcon = uiState.paymentOption?.icon(),
+                            paymentMethodPainter = uiState.paymentOption?.iconPainter,
                             onClick = flowController::presentPaymentOptions,
                         )
 

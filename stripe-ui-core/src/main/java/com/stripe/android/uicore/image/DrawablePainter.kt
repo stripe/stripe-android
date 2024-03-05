@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.uicore.image
 
 import android.graphics.drawable.Animatable
@@ -8,6 +10,7 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.View
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.getValue

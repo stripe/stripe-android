@@ -15,6 +15,9 @@ import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import com.stripe.android.uicore.image.rememberDrawablePainter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -64,6 +67,13 @@ constructor(
         this.darkThemeIconUrl = darkThemeIconUrl
         this.imageLoader = imageLoader
     }
+
+    /**
+     * A [Painter] to draw the icon associated with this [PaymentOption].
+     */
+    val iconPainter: Painter
+        @Composable
+        get() = rememberDrawablePainter(icon())
 
     /**
      * Fetches the icon associated with this [PaymentOption].
