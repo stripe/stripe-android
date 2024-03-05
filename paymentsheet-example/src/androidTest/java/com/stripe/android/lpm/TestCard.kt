@@ -15,6 +15,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.FieldPopulator
 import com.stripe.android.test.core.TestParameters
 import org.junit.Test
@@ -293,6 +294,22 @@ internal class TestCard : BasePlaygroundTest() {
                     timeoutMillis = 5000L
                 )
             },
+        )
+    }
+
+    @Test
+    fun testCardWith3ds2() {
+        testDriver.confirmNewOrGuestComplete(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ).copy(
+                authorizationAction = AuthorizeAction.Authorize3ds2,
+                saveForFutureUseCheckboxVisible = true,
+            ),
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+            values = FieldPopulator.Values(cardNumber = "4000000000003220")
         )
     }
 }
