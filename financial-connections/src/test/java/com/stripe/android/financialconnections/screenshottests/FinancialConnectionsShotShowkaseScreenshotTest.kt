@@ -12,6 +12,7 @@ import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.financialconnections.getMetadata
+import com.stripe.android.financialconnections.utils.TimeZoneRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -33,6 +34,9 @@ class PaparazziSampleScreenshotTest {
         NEXUS_5(DeviceConfig.NEXUS_5),
         PIXEL_C(DeviceConfig.PIXEL_C),
     }
+
+    @get:Rule
+    val timeZoneRule = TimeZoneRule()
 
     @get:Rule
     val paparazzi = Paparazzi(
