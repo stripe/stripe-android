@@ -5,6 +5,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlin.test.assertIs
@@ -22,15 +23,13 @@ internal class TestNavigationManager : NavigationManager {
 
     override fun tryNavigateTo(
         route: String,
-        popUpToCurrent: Boolean,
-        inclusive: Boolean,
-        isSingleTop: Boolean
+        popUpTo: PopUpToBehavior?,
+        isSingleTop: Boolean,
     ) {
         emittedIntents.add(
             NavigationIntent.NavigateTo(
                 route = route,
-                popUpToCurrent = popUpToCurrent,
-                inclusive = inclusive,
+                popUpTo = popUpTo,
                 isSingleTop = isSingleTop,
             )
         )
@@ -43,10 +42,12 @@ internal class TestNavigationManager : NavigationManager {
     fun assertNavigatedTo(
         destination: Destination,
         pane: Pane,
+        popUpTo: PopUpToBehavior? = null,
         args: Map<String, String?> = emptyMap()
     ) {
         val last: NavigationIntent = emittedIntents.last()
         assertIs<NavigationIntent.NavigateTo>(last)
         assertThat(last.route).isEqualTo(destination(pane, args))
+        assertThat(last.popUpTo).isEqualTo(popUpTo)
     }
 }
