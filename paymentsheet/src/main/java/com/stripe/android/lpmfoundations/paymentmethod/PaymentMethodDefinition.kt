@@ -41,15 +41,15 @@ internal fun PaymentMethodDefinition.getSetupFutureUsageFieldConfiguration(
     customerConfiguration: PaymentSheet.CustomerConfiguration?,
 ): SetupFutureUsageFieldConfiguration? {
     val oneTimeUse = SetupFutureUsageFieldConfiguration(
-        showCheckbox = false,
+        isSaveForFutureUseValueChangeable = false,
         saveForFutureUseInitialValue = false
     )
     val merchantRequestedSave = SetupFutureUsageFieldConfiguration(
-        showCheckbox = false,
+        isSaveForFutureUseValueChangeable = false,
         saveForFutureUseInitialValue = true
     )
     val userSelectableSave = SetupFutureUsageFieldConfiguration(
-        showCheckbox = true,
+        isSaveForFutureUseValueChangeable = true,
         saveForFutureUseInitialValue = false
     )
 

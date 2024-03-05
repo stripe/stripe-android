@@ -1,6 +1,6 @@
 package com.stripe.android.lpmfoundations.luxe
 
 internal data class SetupFutureUsageFieldConfiguration(
-    val showCheckbox: Boolean,
+    val isSaveForFutureUseValueChangeable: Boolean,
     val saveForFutureUseInitialValue: Boolean
 )

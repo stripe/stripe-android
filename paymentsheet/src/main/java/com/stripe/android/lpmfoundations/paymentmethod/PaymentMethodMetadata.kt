@@ -43,14 +43,14 @@ internal data class PaymentMethodMetadata(
         }.filter { paymentMethodDefinition ->
             sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null
         }.run {
-            // Optimization to early out if we don't have a client side order.
-            if (paymentMethodOrder.isNotEmpty()) {
+            if (paymentMethodOrder.isEmpty()) {
+                // Optimization to early out if we don't have a client side order.
+                this
+            } else {
                 val orderedPaymentMethodTypes = orderedPaymentMethodTypes().mapOrderToIndex()
                 sortedBy { paymentMethodDefinition ->
                     orderedPaymentMethodTypes[paymentMethodDefinition.type.code]
                 }
-            } else {
-                this
             }
         }
     }

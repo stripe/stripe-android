@@ -65,7 +65,7 @@ internal object FormArgumentsFactory {
 
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
-            showCheckbox = setupFutureUsageFieldConfiguration.showCheckbox,
+            showCheckbox = setupFutureUsageFieldConfiguration.isSaveForFutureUseValueChangeable,
             saveForFutureUseInitialValue = saveForFutureUseInitialValue,
             merchantName = merchantName,
             amount = amount,

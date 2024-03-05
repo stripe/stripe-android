@@ -39,7 +39,7 @@ internal class PaymentMethodDefinitionTest {
             ),
             customerConfiguration = null,
         )!!
-        assertThat(config.showCheckbox).isFalse()
+        assertThat(config.isSaveForFutureUseValueChangeable).isFalse()
         assertThat(config.saveForFutureUseInitialValue).isTrue()
     }
 
@@ -66,7 +66,7 @@ internal class PaymentMethodDefinitionTest {
             ),
             customerConfiguration = null,
         )!!
-        assertThat(config.showCheckbox).isFalse()
+        assertThat(config.isSaveForFutureUseValueChangeable).isFalse()
         assertThat(config.saveForFutureUseInitialValue).isTrue()
     }
 
@@ -90,7 +90,7 @@ internal class PaymentMethodDefinitionTest {
             metadata = PaymentMethodMetadataFactory.create(),
             customerConfiguration = PaymentSheet.CustomerConfiguration("123", "123"),
         )!!
-        assertThat(config.showCheckbox).isTrue()
+        assertThat(config.isSaveForFutureUseValueChangeable).isTrue()
         assertThat(config.saveForFutureUseInitialValue).isFalse()
     }
 
@@ -100,7 +100,7 @@ internal class PaymentMethodDefinitionTest {
             metadata = PaymentMethodMetadataFactory.create(),
             customerConfiguration = null,
         )!!
-        assertThat(config.showCheckbox).isFalse()
+        assertThat(config.isSaveForFutureUseValueChangeable).isFalse()
         assertThat(config.saveForFutureUseInitialValue).isFalse()
     }
 }

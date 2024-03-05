@@ -307,7 +307,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
             null
-        } else if (setupFutureUsageFieldConfiguration.showCheckbox) {
+        } else if (setupFutureUsageFieldConfiguration.isSaveForFutureUseValueChangeable) {
             LinkSignupMode.AlongsideSaveForFutureUse
         } else {
             LinkSignupMode.InsteadOfSaveForFutureUse
