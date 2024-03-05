@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.AlipayRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -33,7 +32,6 @@ internal object AlipayDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            requirement = AlipayRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
     }

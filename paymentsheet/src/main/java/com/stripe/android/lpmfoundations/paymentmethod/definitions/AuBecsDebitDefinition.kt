@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.AuBecsDebitRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -33,8 +32,7 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = true,
-            requirement = AuBecsDebitRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
+            formSpec = LayoutSpec(sharedDataSpec.fields),
         )
     }
 }

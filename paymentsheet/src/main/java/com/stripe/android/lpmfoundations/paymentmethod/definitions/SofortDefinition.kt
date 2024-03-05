@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.SofortRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -34,7 +33,6 @@ internal object SofortDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            requirement = SofortRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
             placeholderOverrideList = if (metadata.hasIntentToSetup()) {
                 listOf(IdentifierSpec.Name, IdentifierSpec.Email)

@@ -6,8 +6,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -19,8 +19,6 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -48,10 +46,6 @@ class FormArgumentsFactoryTest {
 
     @Test
     fun `Create correct FormArguments for new generic payment method with customer requested save`() {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
-        }
-
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
             code = "bancontact",
             requiresMandate = true,
@@ -64,7 +58,7 @@ class FormArgumentsFactoryTest {
 
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = lpmRepository.fromCode("bancontact")!!,
-            stripeIntent = paymentIntent,
+            metadata = PaymentMethodMetadataFactory.create(),
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
@@ -81,7 +75,7 @@ class FormArgumentsFactoryTest {
 
         assertThat(actualArgs.initialPaymentMethodCreateParams).isEqualTo(paymentMethodCreateParams)
         assertThat(actualArgs.showCheckbox).isFalse()
-        assertThat(actualArgs.showCheckboxControlledFields).isFalse()
+        assertThat(actualArgs.saveForFutureUseInitialValue).isFalse()
     }
 
     @Test
@@ -90,7 +84,7 @@ class FormArgumentsFactoryTest {
             customerReuse = PaymentSelection.CustomerRequestedSave.RequestReuse
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields).isTrue()
+        assertThat(actualFromArguments.saveForFutureUseInitialValue).isTrue()
     }
 
     @Test
@@ -99,7 +93,7 @@ class FormArgumentsFactoryTest {
             customerReuse = PaymentSelection.CustomerRequestedSave.NoRequest
         )
 
-        assertThat(actualFromArguments.showCheckboxControlledFields).isFalse()
+        assertThat(actualFromArguments.saveForFutureUseInitialValue).isFalse()
     }
 
     @Test
@@ -124,10 +118,6 @@ class FormArgumentsFactoryTest {
         customerReuse: PaymentSelection.CustomerRequestedSave,
         config: PaymentSheet.Configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
     ): FormArguments {
-        val paymentIntent = mock<PaymentIntent>().also {
-            whenever(it.paymentMethodTypes).thenReturn(listOf("card", "bancontact"))
-        }
-
         val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
             code = "card",
             requiresMandate = false,
@@ -149,7 +139,7 @@ class FormArgumentsFactoryTest {
 
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = LpmRepositoryTestHelpers.card,
-            stripeIntent = paymentIntent,
+            metadata = PaymentMethodMetadataFactory.create(),
             config = config,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),

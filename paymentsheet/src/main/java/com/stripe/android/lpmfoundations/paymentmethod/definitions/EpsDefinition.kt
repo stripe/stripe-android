@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.EpsRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -33,8 +32,7 @@ internal object EpsDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            requirement = EpsRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
+            formSpec = LayoutSpec(sharedDataSpec.fields),
         )
     }
 }

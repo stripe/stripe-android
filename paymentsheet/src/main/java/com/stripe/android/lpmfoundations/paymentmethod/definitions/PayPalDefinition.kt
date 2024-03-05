@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.PaypalRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -39,8 +38,7 @@ internal object PayPalDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            requirement = PaypalRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs),
         )
     }
 }

@@ -87,7 +87,7 @@ internal class CustomerSheetScreenshotTest {
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             showCheckbox = false,
-            showCheckboxControlledFields = false,
+            saveForFutureUseInitialValue = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             merchantName = ""
         ),

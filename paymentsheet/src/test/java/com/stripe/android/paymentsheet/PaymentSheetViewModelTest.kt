@@ -918,7 +918,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.updateSelection(selection)
 
-        viewModel.stripeIntent.test {
+        viewModel.paymentMethodMetadata.test {
             viewModel.onPaymentResult(PaymentResult.Failed(error))
             verify(eventReporter)
                 .onPaymentFailure(
@@ -926,7 +926,7 @@ internal class PaymentSheetViewModelTest {
                     error = PaymentSheetConfirmationError.Stripe(error),
                 )
 
-            val stripeIntent = awaitItem()
+            val stripeIntent = awaitItem()?.stripeIntent
             assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
     }
@@ -1415,7 +1415,7 @@ internal class PaymentSheetViewModelTest {
                     currencyCode = "usd",
                 ),
                 showCheckbox = false,
-                showCheckboxControlledFields = true,
+                saveForFutureUseInitialValue = true,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )

@@ -60,7 +60,7 @@ class FormArgumentsTest {
         val formArguments = FormArguments(
             PaymentMethod.Type.Card.code,
             showCheckbox = true,
-            showCheckboxControlledFields = true,
+            saveForFutureUseInitialValue = true,
             merchantName = "Merchant, Inc.",
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
@@ -93,7 +93,7 @@ class FormArgumentsTest {
         val formArguments = FormArguments(
             PaymentMethod.Type.Card.code,
             showCheckbox = true,
-            showCheckboxControlledFields = true,
+            saveForFutureUseInitialValue = true,
             merchantName = "Merchant, Inc.",
             amount = Amount(50, "USD"),
             billingDetails = billingDetails,
@@ -121,7 +121,7 @@ class FormArgumentsTest {
         val formArguments = FormArguments(
             PaymentMethod.Type.BacsDebit.code,
             showCheckbox = true,
-            showCheckboxControlledFields = true,
+            saveForFutureUseInitialValue = true,
             merchantName = "Merchant, Inc.",
             amount = Amount(50, "USD"),
             billingDetails = null,
