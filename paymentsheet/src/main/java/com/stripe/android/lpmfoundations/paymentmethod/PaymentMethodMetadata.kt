@@ -3,6 +3,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 import android.os.Parcelable
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
@@ -41,6 +42,24 @@ internal data class PaymentMethodMetadata(
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
             sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null
+        }.run {
+            // Optimization to early out if we don't have a client side order.
+            if (paymentMethodOrder.isNotEmpty()) {
+                val orderedPaymentMethodTypes = orderedPaymentMethodTypes().mapOrderToIndex()
+                sortedBy { paymentMethodDefinition ->
+                    orderedPaymentMethodTypes[paymentMethodDefinition.type.code]
+                }
+            } else {
+                this
+            }
+        }
+    }
+
+    fun supportedSavedPaymentMethodTypes(): List<PaymentMethod.Type> {
+        return supportedPaymentMethodDefinitions().filter { paymentMethodDefinition ->
+            paymentMethodDefinition.supportedAsSavedPaymentMethod
+        }.map {
+            it.type
         }
     }
 
@@ -57,16 +76,6 @@ internal data class PaymentMethodMetadata(
                 null
             } else {
                 paymentMethodDefinition.supportedPaymentMethod(this, sharedDataSpec)
-            }
-        }.run {
-            // Optimization to early out if we don't have a client side order.
-            if (paymentMethodOrder.isNotEmpty()) {
-                val orderedPaymentMethodTypes = orderedPaymentMethodTypes().mapOrderToIndex()
-                sortedBy { supportedPaymentMethod ->
-                    orderedPaymentMethodTypes[supportedPaymentMethod.code]
-                }
-            } else {
-                this
             }
         }
     }

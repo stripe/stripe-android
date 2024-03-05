@@ -3,6 +3,8 @@ package com.stripe.android.lpmfoundations.luxe
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -36,13 +38,6 @@ data class SupportedPaymentMethod(
     val tintIconOnSelection: Boolean,
 
     /**
-     * This describes the requirements of the LPM including if it is supported with
-     * PaymentIntents w/ or w/out SetupFutureUsage set, SetupIntent, or on-session when attached
-     * to the customer object.
-     */
-    val requirement: PaymentMethodRequirements,
-
-    /**
      * This describes how the UI should look.
      */
     val formSpec: LayoutSpec,
@@ -50,12 +45,9 @@ data class SupportedPaymentMethod(
     /**
      * This forces the UI to render the required fields
      */
-    val placeholderOverrideList: List<IdentifierSpec> = emptyList()
+    val placeholderOverrideList: List<IdentifierSpec> = emptyList(),
 ) {
-    /**
-     * Returns true if the payment method supports confirming from a saved
-     * payment method of this type.  See [PaymentMethodRequirements] for
-     * description of the values
-     */
-    fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
+    internal fun paymentMethodDefinition(): PaymentMethodDefinition {
+        return requireNotNull(PaymentMethodRegistry.definitionsByCode[code])
+    }
 }

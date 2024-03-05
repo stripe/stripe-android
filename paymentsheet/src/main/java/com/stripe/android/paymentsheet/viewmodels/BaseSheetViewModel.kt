@@ -19,7 +19,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -102,8 +101,8 @@ internal abstract class BaseSheetViewModel(
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
 
-    private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
-    internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
+    private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
+    internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
     internal var supportedPaymentMethods: List<SupportedPaymentMethod> = emptyList()
         set(value) {
@@ -261,7 +260,7 @@ internal abstract class BaseSheetViewModel(
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
         currentScreen,
-        stripeIntent.map { it?.isLiveMode ?: true },
+        paymentMethodMetadata.map { it?.stripeIntent?.isLiveMode ?: true },
         processing,
         editing,
         canEdit,
@@ -382,7 +381,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         val stripeIntent = paymentMethodMetadata?.stripeIntent
-        _stripeIntent.value = stripeIntent
+        _paymentMethodMetadata.value = paymentMethodMetadata
         supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
 
         if (stripeIntent is PaymentIntent) {
@@ -486,7 +485,7 @@ internal abstract class BaseSheetViewModel(
             context = getApplication(),
             merchantName = merchantName,
             isSaveForFutureUseSelected = isRequestingReuse,
-            isSetupFlow = stripeIntent.value is SetupIntent,
+            isSetupFlow = paymentMethodMetadata.value?.stripeIntent is SetupIntent,
         )
 
         val showAbove = (selection as? PaymentSelection.Saved?)
@@ -679,7 +678,7 @@ internal abstract class BaseSheetViewModel(
         selectedItem: SupportedPaymentMethod,
     ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
-        stripeIntent = requireNotNull(stripeIntent.value),
+        metadata = requireNotNull(paymentMethodMetadata.value),
         config = config,
         merchantName = merchantName,
         amount = amount.value,

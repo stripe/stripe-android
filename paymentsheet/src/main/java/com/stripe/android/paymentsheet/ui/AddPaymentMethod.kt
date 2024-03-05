@@ -95,7 +95,8 @@ internal fun AddPaymentMethod(
                 ?.onBehalfOf
             val processing by sheetViewModel.processing.collectAsState(false)
             val context = LocalContext.current
-            val stripeIntent = sheetViewModel.stripeIntent.collectAsState()
+            val paymentMethodMetadata by sheetViewModel.paymentMethodMetadata.collectAsState()
+            val stripeIntent = paymentMethodMetadata?.stripeIntent
 
             PaymentElement(
                 formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
@@ -118,9 +119,9 @@ internal fun AddPaymentMethod(
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                    isPaymentFlow = stripeIntent.value is PaymentIntent,
-                    stripeIntentId = stripeIntent.value?.id,
-                    clientSecret = stripeIntent.value?.clientSecret,
+                    isPaymentFlow = stripeIntent is PaymentIntent,
+                    stripeIntentId = stripeIntent?.id,
+                    clientSecret = stripeIntent?.clientSecret,
                     shippingDetails = sheetViewModel.config.shippingDetails,
                     draftPaymentSelection = sheetViewModel.newPaymentSelection,
                     onMandateTextChanged = sheetViewModel::updateMandateText,

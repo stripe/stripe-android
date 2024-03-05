@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.CardRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -58,7 +57,6 @@ internal object CardDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             tintIconOnSelection = true,
-            requirement = CardRequirement,
             formSpec = LayoutSpec(specs),
         )
     }

@@ -18,8 +18,7 @@ object LpmRepositoryTestHelpers {
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
         tintIconOnSelection = true,
-        requirement = USBankAccountRequirement,
-        formSpec = LayoutSpec(emptyList())
+        formSpec = LayoutSpec(emptyList()),
     )
 }
 

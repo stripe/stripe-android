@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -251,5 +252,36 @@ internal class PaymentMethodMetadataTest {
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
         assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("affirm")
+    }
+
+    @Test
+    fun `supportedSavedPaymentMethodTypes filters payment_methods not returned in the payment_intent`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            ),
+            sharedDataSpecs = listOf(
+                SharedDataSpec("card"),
+                SharedDataSpec("sepa_debit"),
+            ),
+        )
+        assertThat(metadata.supportedSavedPaymentMethodTypes())
+            .containsExactly(PaymentMethod.Type.Card)
+    }
+
+    @Test
+    fun `supportedSavedPaymentMethodTypes filters payment_methods where supportedAsSavedPaymentMethod is false`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "affirm", "sepa_debit"),
+            ),
+            sharedDataSpecs = listOf(
+                SharedDataSpec("card"),
+                SharedDataSpec("affirm"),
+                SharedDataSpec("sepa_debit"),
+            ),
+        )
+        assertThat(metadata.supportedSavedPaymentMethodTypes())
+            .containsExactly(PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit)
     }
 }

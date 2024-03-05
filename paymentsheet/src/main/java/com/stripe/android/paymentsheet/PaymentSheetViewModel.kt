@@ -458,7 +458,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         startProcessing(identifier)
 
         if (paymentSelection is PaymentSelection.GooglePay) {
-            stripeIntent.value?.let { stripeIntent ->
+            paymentMethodMetadata.value?.stripeIntent?.let { stripeIntent ->
                 googlePayPaymentMethodLauncher?.present(
                     currencyCode = (stripeIntent as? PaymentIntent)?.currency
                         ?: args.googlePayConfig?.currencyCode.orEmpty(),
@@ -643,7 +643,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun onInternalPaymentResult(launcherResult: InternalPaymentResult) {
-        val intent = stripeIntent.value
+        val intent = paymentMethodMetadata.value?.stripeIntent
 
         if (intent == null) {
             // We're recovering from process death. Wait for the pending payment result
@@ -825,7 +825,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun awaitStripeIntent(): StripeIntent {
-        return stripeIntent.filterNotNull().first()
+        return paymentMethodMetadata.filterNotNull().first().stripeIntent
     }
 
     private fun mapViewStateToCheckoutIdentifier(

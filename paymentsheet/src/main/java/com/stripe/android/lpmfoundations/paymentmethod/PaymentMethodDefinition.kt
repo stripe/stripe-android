@@ -1,7 +1,11 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.lpmfoundations.luxe.FormLayoutConfiguration
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal interface PaymentMethodDefinition {
@@ -29,5 +33,51 @@ internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata
     }
     return requirementsToBeUsedAsNewPaymentMethod(metadata.hasIntentToSetup()).all { requirement ->
         requirement.isMetBy(metadata)
+    }
+}
+
+internal fun PaymentMethodDefinition.getFormLayoutConfiguration(
+    metadata: PaymentMethodMetadata,
+    customerConfiguration: PaymentSheet.CustomerConfiguration?,
+): FormLayoutConfiguration? {
+    val oneTimeUse = FormLayoutConfiguration(
+        showCheckbox = false,
+        showCheckboxControlledFields = false
+    )
+    val merchantRequestedSave = FormLayoutConfiguration(
+        showCheckbox = false,
+        showCheckboxControlledFields = true
+    )
+    val userSelectableSave = FormLayoutConfiguration(
+        showCheckbox = true,
+        showCheckboxControlledFields = false
+    )
+
+    return when (metadata.stripeIntent) {
+        is PaymentIntent -> {
+            val isSetupFutureUsageSet = metadata.stripeIntent.isSetupFutureUsageSet(type.code)
+
+            if (isSetupFutureUsageSet) {
+                if (supportedAsSavedPaymentMethod) {
+                    merchantRequestedSave
+                } else {
+                    null
+                }
+            } else {
+                if (customerConfiguration != null) {
+                    userSelectableSave
+                } else {
+                    oneTimeUse
+                }
+            }
+        }
+
+        is SetupIntent -> {
+            if (supportedAsSavedPaymentMethod) {
+                merchantRequestedSave
+            } else {
+                null
+            }
+        }
     }
 }
