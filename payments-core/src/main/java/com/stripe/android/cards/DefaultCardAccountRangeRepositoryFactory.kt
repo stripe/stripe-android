@@ -11,8 +11,8 @@ import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * A [CardAccountRangeRepository.Factory] that returns a [DefaultCardAccountRangeRepositoryFactory].
@@ -116,6 +116,6 @@ class DefaultCardAccountRangeRepositoryFactory(
             cardNumber: CardNumber.Unvalidated
         ): List<AccountRange>? = null
 
-        override val loading: Flow<Boolean> = flowOf(false)
+        override val loading: StateFlow<Boolean> = stateFlowOf(false)
     }
 }

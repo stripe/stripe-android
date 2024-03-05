@@ -7,13 +7,17 @@ import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.ImeAction
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlin.coroutines.CoroutineContext
@@ -28,14 +32,14 @@ class PhoneNumberController constructor(
     private val acceptAnyInput: Boolean = false,
     workContext: CoroutineContext = Dispatchers.Default
 ) : InputController, SectionFieldComposable {
-    override val label = flowOf(CoreR.string.stripe_address_label_phone_number)
+    override val label = stateFlowOf(CoreR.string.stripe_address_label_phone_number)
 
     private val _fieldValue = MutableStateFlow(initialPhoneNumber)
 
     /**
      * Flow of the phone number as input by the user, after filtering.
      */
-    override val fieldValue: Flow<String> = _fieldValue
+    override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
     private val _hasFocus = MutableStateFlow(false)
 
@@ -73,7 +77,7 @@ class PhoneNumberController constructor(
         )
     )
 
-    private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.map {
+    private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.lengthForCountry(
             countryConfig.countries[it].code.value
         )
@@ -82,13 +86,13 @@ class PhoneNumberController constructor(
     /**
      * Flow of the phone number in the E.164 format.
      */
-    override val rawFieldValue = combine(fieldValue, phoneNumberFormatter) { value, formatter ->
+    override val rawFieldValue = combineAsStateFlow(fieldValue, phoneNumberFormatter) { value, formatter ->
         formatter.toE164Format(value)
     }
-    override val isComplete = combine(fieldValue, phoneNumberMinimumLength) { value, minLength ->
+    override val isComplete = combineAsStateFlow(fieldValue, phoneNumberMinimumLength) { value, minLength ->
         value.length >= (minLength ?: 0) || acceptAnyInput
     }
-    override val formFieldValue = fieldValue.combine(isComplete) { fieldValue, isComplete ->
+    override val formFieldValue = combineAsStateFlow(fieldValue, isComplete) { fieldValue, isComplete ->
         FormFieldEntry(fieldValue, isComplete)
     }
 

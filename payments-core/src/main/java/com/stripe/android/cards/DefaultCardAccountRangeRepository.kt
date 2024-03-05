@@ -1,8 +1,8 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 internal class DefaultCardAccountRangeRepository(
     private val inMemorySource: CardAccountRangeSource,
@@ -38,14 +38,11 @@ internal class DefaultCardAccountRangeRepository(
         }
     }
 
-    override val loading: Flow<Boolean> = combine(
-        listOf(
-            inMemorySource.loading,
-            remoteSource.loading,
-            staticSource.loading
-        )
-    ) { loading ->
-        // emit true if any of the sources are loading data
-        loading.any { it }
+    override val loading: StateFlow<Boolean> = combineAsStateFlow(
+        inMemorySource.loading,
+        remoteSource.loading,
+        staticSource.loading
+    ) { loading1, loading2, loading3 ->
+        loading1 || loading2|| loading3
     }
 }
