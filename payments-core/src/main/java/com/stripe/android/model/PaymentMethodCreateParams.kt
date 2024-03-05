@@ -1059,23 +1059,6 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
-         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.AmazonPay] as the payment
-         * method type.
-         */
-        @JvmStatic
-        @JvmOverloads
-        fun createAmazonPay(
-            billingDetails: PaymentMethod.BillingDetails? = null,
-            metadata: Map<String, String>? = null
-        ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(
-                type = PaymentMethod.Type.AmazonPay,
-                billingDetails = billingDetails,
-                metadata = metadata
-            )
-        }
-
-        /**
          * Helper method to create [PaymentMethodCreateParams] with [Swish] as the payment
          * method type.
          */
