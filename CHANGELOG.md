@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+
+### Payments
 * [Added][8028](https://github.com/stripe/stripe-android/pull/8028) Added support for Amazon Pay to API bindings. 
 
 ### PaymentSheet
