@@ -14,8 +14,8 @@ tags:
     visible:
       id: "consent_cta"
     timeout: 30000
-- tapOn: "Enter account details manually instead"
-- assertVisible: "Enter bank account details"
+- tapOn: "Manually verify instead"
+- assertVisible: "Enter bank details"
 - tapOn:
     id: "RoutingInput"
 - inputText: "110000000"
@@ -30,7 +30,7 @@ tags:
     id: "ConfirmAccountInput"
 - inputText: "000123456789"
 - tapOn:
-    text: "Continue"
+    text: "Submit"
     retryTapIfNoChange: false
 - assertVisible: ".*Completed!.*"
 - stopRecording
