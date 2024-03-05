@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.success
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -19,21 +18,25 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
+    topAppBarHost: TopAppBarHost,
     getCachedAccounts: GetCachedAccounts,
     getManifest: GetManifest,
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
-) : MavericksViewModel<SuccessState>(initialState) {
+) : BaseViewModel<SuccessState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()
@@ -51,6 +54,15 @@ internal class SuccessViewModel @Inject constructor(
         }.execute {
             copy(payload = it)
         }
+    }
+
+    override fun mapStateToTopAppBarState(state: SuccessState): TopAppBarState {
+        return TopAppBarState(
+            pane = Pane.SUCCESS,
+            hideStripeLogo = false,
+            testMode = true,
+            allowBackNavigation = false,
+        )
     }
 
     private fun buildCustomMessage(
@@ -93,11 +105,12 @@ internal class SuccessViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: SuccessState
         ): SuccessViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .successSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

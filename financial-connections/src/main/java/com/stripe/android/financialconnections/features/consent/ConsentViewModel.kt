@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
@@ -20,8 +19,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
@@ -31,13 +33,14 @@ import javax.inject.Inject
 
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
+    parentViewModel: FinancialConnectionsSheetNativeViewModel,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : MavericksViewModel<ConsentState>(initialState) {
+) : BaseViewModel<ConsentState>(initialState, parentViewModel) {
 
     init {
         logErrors()
@@ -53,6 +56,15 @@ internal class ConsentViewModel @Inject constructor(
                 merchantLogos = sync.visual.merchantLogos
             )
         }.execute { copy(consent = it) }
+    }
+
+    override fun mapStateToTopAppBarState(state: ConsentState): TopAppBarState {
+        return TopAppBarState(
+            pane = Pane.CONSENT,
+            hideStripeLogo = state.consent()?.shouldShowMerchantLogos ?: false,
+            testMode = true,
+            allowBackNavigation = true,
+        )
     }
 
     private fun logErrors() {
@@ -123,11 +135,12 @@ internal class ConsentViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ConsentState
         ): ConsentViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .consentBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

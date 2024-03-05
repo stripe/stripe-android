@@ -46,7 +46,16 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.UriUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -68,7 +77,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     @Named(APPLICATION_ID) private val applicationId: String,
     initialState: FinancialConnectionsSheetNativeState
-) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState) {
+) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState), TopAppBarHost {
 
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
@@ -92,6 +101,49 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private val currentPane = MutableStateFlow<Pane?>(null)
+
+//    private val _topAppBarState = MutableStateFlow(TopAppBarState.Default)
+//    val topAppBarState: StateFlow<TopAppBarState> = _topAppBarState.asStateFlow()
+
+    private val _topAppBarElevation = MutableStateFlow(0)
+    val topAppBarElevation: StateFlow<Int> = _topAppBarElevation.asStateFlow()
+
+    private val topAppBarStateByPane = MutableStateFlow<Map<Pane, TopAppBarState>>(emptyMap())
+
+    val topAppBarState: StateFlow<TopAppBarState> = combine(
+        topAppBarStateByPane,
+        currentPane,
+    ) { stateByPane, pane ->
+        stateByPane[pane]
+    }.filterNotNull().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = TopAppBarState.Default,
+    )
+
+    override fun handleTopAppBarStateChanged(topAppBarState: TopAppBarState) {
+        val pane = topAppBarState.pane ?: return
+
+        topAppBarStateByPane.update {
+            it + mapOf(pane to topAppBarState)
+        }
+    }
+
+    fun updateTopAppBarElevation(isElevated: Boolean) {
+        _topAppBarElevation.value = if (isElevated) 8 else 0
+    }
+
+    fun handleCurrentPaneChanged(pane: Pane) {
+        currentPane.value = pane
+    }
+
+    fun handleCloseClick() {
+        val pane = currentPane.value ?: return
+        // TODO(tillh-stripe) Handle all cases
+        onCloseWithConfirmationClick(pane)
     }
 
     /**

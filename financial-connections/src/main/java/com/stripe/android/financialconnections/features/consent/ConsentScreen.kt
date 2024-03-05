@@ -48,14 +48,10 @@ import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.LocalReducedBranding
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -156,38 +152,38 @@ private fun ConsentMainContent(
     val bullets = remember(payload.consent.body.bullets) {
         payload.consent.body.bullets.map { bullet -> BulletUI.from(bullet) }
     }
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                hideStripeLogo = when {
-                    payload.shouldShowMerchantLogos -> true
-                    else -> LocalReducedBranding.current
-                },
-                onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
+
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                hideStripeLogo = when {
+//                    payload.shouldShowMerchantLogos -> true
+//                    else -> LocalReducedBranding.current
+//                },
+//                onCloseClick = onCloseClick,
+//                elevation = scrollState.elevation
+//            )
+//        }
+//    ) {
+    LazyLayout(
+        lazyListState = scrollState,
+        body = {
+            consentBody(
+                payload = payload,
+                title = title,
+                onClickableTextClick = onClickableTextClick,
+                bullets = bullets
+            )
+        },
+        footer = {
+            ConsentFooter(
+                consent = payload.consent,
+                acceptConsent = acceptConsent,
+                onClickableTextClick = onClickableTextClick,
+                onContinueClick = onContinueClick
             )
         }
-    ) {
-        LazyLayout(
-            lazyListState = scrollState,
-            body = {
-                consentBody(
-                    payload = payload,
-                    title = title,
-                    onClickableTextClick = onClickableTextClick,
-                    bullets = bullets
-                )
-            },
-            footer = {
-                ConsentFooter(
-                    consent = payload.consent,
-                    acceptConsent = acceptConsent,
-                    onClickableTextClick = onClickableTextClick,
-                    onContinueClick = onContinueClick
-                )
-            }
-        )
-    }
+    )
 }
 
 private fun LazyListScope.consentBody(

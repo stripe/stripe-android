@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.institutionpicker
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -34,7 +33,10 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -43,6 +45,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class InstitutionPickerViewModel @Inject constructor(
+    topAppBarHost: TopAppBarHost,
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val postAuthorizationSession: PostAuthorizationSession,
     private val getOrFetchSync: GetOrFetchSync,
@@ -54,7 +57,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
     initialState: InstitutionPickerState
-) : MavericksViewModel<InstitutionPickerState>(initialState) {
+) : BaseViewModel<InstitutionPickerState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 
@@ -88,6 +91,15 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 searchDisabled = manifest.institutionSearchDisabled,
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun mapStateToTopAppBarState(state: InstitutionPickerState): TopAppBarState {
+        return TopAppBarState(
+            pane = Pane.INSTITUTION_PICKER,
+            hideStripeLogo = false,
+            testMode = true,
+            allowBackNavigation = true,
+        )
     }
 
     private fun logErrors() {
@@ -244,11 +256,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: InstitutionPickerState
         ): InstitutionPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .institutionPickerBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

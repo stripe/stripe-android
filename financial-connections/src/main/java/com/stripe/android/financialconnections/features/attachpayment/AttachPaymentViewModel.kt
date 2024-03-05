@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.attachpayment
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -21,13 +20,17 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import javax.inject.Inject
 
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
+    topAppBarHost: TopAppBarHost,
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -36,7 +39,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val logger: Logger
-) : MavericksViewModel<AttachPaymentState>(initialState) {
+) : BaseViewModel<AttachPaymentState>(initialState, topAppBarHost) {
 
     init {
         logErrors()
@@ -72,6 +75,15 @@ internal class AttachPaymentViewModel @Inject constructor(
         }.execute { copy(linkPaymentAccount = it) }
     }
 
+    override fun mapStateToTopAppBarState(state: AttachPaymentState): TopAppBarState {
+        return TopAppBarState(
+            pane = PANE,
+            hideStripeLogo = false,
+            testMode = true,
+            allowBackNavigation = false,
+        )
+    }
+
     private fun logErrors() {
         onAsync(
             AttachPaymentState::linkPaymentAccount,
@@ -98,11 +110,12 @@ internal class AttachPaymentViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: AttachPaymentState
         ): AttachPaymentViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .attachPaymentSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

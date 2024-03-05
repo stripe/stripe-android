@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.networkinglinksignup
 import android.webkit.URLUtil
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -29,8 +28,11 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.isCancellationError
@@ -50,6 +52,7 @@ import javax.inject.Inject
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
+    topAppBarHost: TopAppBarHost,
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
@@ -60,7 +63,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
+) : BaseViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 
@@ -82,6 +85,15 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                     .createPhoneNumberController(manifest.accountholderPhoneNumber ?: ""),
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun mapStateToTopAppBarState(state: NetworkingLinkSignupState): TopAppBarState {
+        return TopAppBarState(
+            pane = Pane.NETWORKING_LINK_SIGNUP_PANE,
+            hideStripeLogo = false,
+            testMode = true,
+            allowBackNavigation = false,
+        )
     }
 
     private fun observeAsyncs() {
@@ -267,11 +279,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: NetworkingLinkSignupState
         ): NetworkingLinkSignupViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .networkingLinkSignupSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

@@ -47,10 +47,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import kotlinx.coroutines.delay
@@ -97,15 +94,16 @@ private fun SuccessContentInternal(
         }
     }
 
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
-                onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
-            )
-        }
-    ) {
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                allowBackNavigation = false,
+//                onCloseClick = onCloseClick,
+//                elevation = scrollState.elevation
+//            )
+//        }
+//    )
+    Box {
         Column(
             modifier = Modifier
                 .fillMaxSize()

@@ -58,9 +58,6 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.Neutral900
@@ -163,15 +160,16 @@ private fun AccountPickerMainContent(
     onClickableTextClick: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
-                onCloseClick = onCloseClick,
-                elevation = lazyListState.elevation
-            )
-        }
-    ) {
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                allowBackNavigation = false,
+//                onCloseClick = onCloseClick,
+//                elevation = lazyListState.elevation
+//            )
+//        }
+//    )
+    Box {
         when (val payload = state.payload) {
             is Fail -> {
                 when (val error = payload.error) {

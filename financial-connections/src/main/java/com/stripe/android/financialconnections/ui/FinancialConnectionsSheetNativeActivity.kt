@@ -14,14 +14,17 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
@@ -45,6 +48,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.argsOrNull
@@ -128,8 +133,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
 
+        val topAppBarState by viewModel.topAppBarState.collectAsState()
+        val topAppBarElevation by viewModel.topAppBarElevation.collectAsState()
+
         val sheetState = rememberModalBottomSheetState(
-            ModalBottomSheetValue.Hidden,
+            initialValue = ModalBottomSheetValue.Hidden,
             skipHalfExpanded = true
         )
 
@@ -149,34 +157,47 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         ) {
             BackHandler(true) {
                 viewModel.onBackClick(navController.currentDestination?.pane)
-                if (navController.popBackStack().not()) viewModel.onBackPressed()
+                if (navController.popBackStack().not()) {
+                    viewModel.onBackPressed()
+                }
             }
+
             FinancialConnectionsModalBottomSheetLayout(
                 bottomSheetNavigator = bottomSheetNavigator,
             ) {
-                NavHost(
-                    navController,
-                    startDestination = initialDestination.fullRoute,
+                FinancialConnectionsScaffold(
+                    topBar = {
+                        FinancialConnectionsTopAppBar(
+                            state = topAppBarState,
+                            elevation = topAppBarElevation.dp,
+                            onCloseClick = viewModel::handleCloseClick,
+                        )
+                    }
                 ) {
-                    composable(Destination.Consent)
-                    composable(Destination.ManualEntry)
-                    composable(Destination.PartnerAuth)
-                    bottomSheet(Destination.PartnerAuthDrawer)
-                    bottomSheet(Destination.Exit)
-                    composable(Destination.InstitutionPicker)
-                    composable(Destination.AccountPicker)
-                    composable(Destination.Success)
-                    composable(Destination.Reset)
-                    composable(Destination.Error)
-                    composable(Destination.AttachLinkedPaymentAccount)
-                    composable(Destination.NetworkingLinkSignup)
-                    bottomSheet(Destination.NetworkingLinkLoginWarmup)
-                    composable(Destination.NetworkingLinkVerification)
-                    composable(Destination.NetworkingSaveToLinkVerification)
-                    composable(Destination.LinkAccountPicker)
-                    composable(Destination.BankAuthRepair)
-                    composable(Destination.LinkStepUpVerification)
-                    composable(Destination.ManualEntrySuccess)
+                    NavHost(
+                        navController = navController,
+                        startDestination = initialDestination.fullRoute,
+                    ) {
+                        composable(Destination.Consent)
+                        composable(Destination.ManualEntry)
+                        composable(Destination.PartnerAuth)
+                        bottomSheet(Destination.PartnerAuthDrawer)
+                        bottomSheet(Destination.Exit)
+                        composable(Destination.InstitutionPicker)
+                        composable(Destination.AccountPicker)
+                        composable(Destination.Success)
+                        composable(Destination.Reset)
+                        composable(Destination.Error)
+                        composable(Destination.AttachLinkedPaymentAccount)
+                        composable(Destination.NetworkingLinkSignup)
+                        bottomSheet(Destination.NetworkingLinkLoginWarmup)
+                        composable(Destination.NetworkingLinkVerification)
+                        composable(Destination.NetworkingSaveToLinkVerification)
+                        composable(Destination.LinkAccountPicker)
+                        composable(Destination.BankAuthRepair)
+                        composable(Destination.LinkStepUpVerification)
+                        composable(Destination.ManualEntrySuccess)
+                    }
                 }
             }
         }
@@ -222,6 +243,19 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         keyboardController: KeyboardController,
     ) {
         val activity = (LocalContext.current as? Activity)
+
+        DisposableEffect(navHostController) {
+            val listener = NavController.OnDestinationChangedListener { _, destination, _ ->
+                viewModel.handleCurrentPaneChanged(destination.pane)
+            }
+
+            navHostController.addOnDestinationChangedListener(listener)
+
+            onDispose {
+                navHostController.removeOnDestinationChangedListener(listener)
+            }
+        }
+
         LaunchedEffect(activity, navHostController, navigationChannel) {
             navigationChannel.onEach { intent ->
                 if (activity?.isFinishing == true) {

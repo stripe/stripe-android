@@ -64,9 +64,6 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -159,15 +156,16 @@ private fun NetworkingLinkSignupMainContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     val scrollState = rememberScrollState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                elevation = scrollState.elevation,
-                allowBackNavigation = false,
-                onCloseClick = onCloseClick,
-            )
-        }
-    ) {
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                elevation = scrollState.elevation,
+//                allowBackNavigation = false,
+//                onCloseClick = onCloseClick,
+//            )
+//        }
+//    )
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(

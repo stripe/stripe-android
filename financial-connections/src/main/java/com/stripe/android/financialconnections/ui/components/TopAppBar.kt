@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
@@ -55,6 +56,38 @@ private val LOGO_HEIGHT = 20.dp
 private val PILL_HORIZONTAL_PADDING = 4.dp
 private val PILL_VERTICAL_PADDING = 2.dp
 private const val PILL_RADIUS = 8f
+
+internal data class TopAppBarState(
+    val pane: FinancialConnectionsSessionManifest.Pane?,
+    val hideStripeLogo: Boolean,
+    val testMode: Boolean,
+    val allowBackNavigation: Boolean,
+) {
+
+    companion object {
+        val Default = TopAppBarState(
+            pane = null,
+            hideStripeLogo = true,
+            testMode = false,
+            allowBackNavigation = false,
+        )
+    }
+}
+
+@Composable
+internal fun FinancialConnectionsTopAppBar(
+    state: TopAppBarState,
+    elevation: Dp = 0.dp,
+    onCloseClick: () -> Unit
+) {
+    FinancialConnectionsTopAppBar(
+        hideStripeLogo = state.hideStripeLogo,
+        testMode = state.testMode,
+        elevation = elevation,
+        allowBackNavigation = state.allowBackNavigation,
+        onCloseClick = onCloseClick,
+    )
+}
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(

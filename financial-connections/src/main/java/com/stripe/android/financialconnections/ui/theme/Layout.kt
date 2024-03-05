@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.ui.ScrollEffects
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -58,6 +59,7 @@ internal fun Layout(
 ) {
     LayoutScaffold(
         canScrollForward = scrollState.canScrollForward,
+        canScrollBackward = scrollState.canScrollBackward,
         inModal = inModal,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
@@ -101,6 +103,7 @@ internal fun LazyLayout(
 ) {
     LayoutScaffold(
         canScrollForward = lazyListState.canScrollForward,
+        canScrollBackward = lazyListState.canScrollBackward,
         inModal = inModal,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
@@ -118,6 +121,7 @@ internal fun LazyLayout(
 
 @Composable
 private fun LayoutScaffold(
+    canScrollBackward: Boolean,
     canScrollForward: Boolean,
     inModal: Boolean,
     showFooterShadowWhenScrollable: Boolean,
@@ -125,6 +129,8 @@ private fun LayoutScaffold(
     footer: (@Composable () -> Unit)?,
     body: @Composable () -> Unit,
 ) {
+    ScrollEffects(canScrollBackward)
+
     Column(
         modifier
             .also { if (inModal.not()) it.fillMaxSize() }

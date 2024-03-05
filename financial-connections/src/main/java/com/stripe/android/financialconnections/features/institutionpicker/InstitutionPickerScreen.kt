@@ -79,8 +79,6 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsColors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -122,13 +120,14 @@ private fun InstitutionPickerContent(
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick
-            )
-        }
-    ) {
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                onCloseClick = onCloseClick
+//            )
+//        }
+//    ) {
+    Box {
         when (payload) {
             is Uninitialized,
             is Loading,

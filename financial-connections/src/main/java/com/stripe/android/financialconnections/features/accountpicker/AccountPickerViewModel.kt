@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.accountpicker
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -35,8 +34,11 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -44,6 +46,7 @@ import javax.inject.Inject
 
 internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
+    topAppBarHost: TopAppBarHost,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
@@ -51,12 +54,21 @@ internal class AccountPickerViewModel @Inject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
-) : MavericksViewModel<AccountPickerState>(initialState) {
+) : BaseViewModel<AccountPickerState>(initialState, topAppBarHost) {
 
     init {
         logErrors()
         onPayloadLoaded()
         loadAccounts()
+    }
+
+    override fun mapStateToTopAppBarState(state: AccountPickerState): TopAppBarState {
+        return TopAppBarState(
+            pane = Pane.ACCOUNT_PICKER,
+            hideStripeLogo = false,
+            testMode = true,
+            allowBackNavigation = false,
+        )
     }
 
     private fun loadAccounts() {
@@ -308,11 +320,12 @@ internal class AccountPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: AccountPickerState
         ): AccountPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .accountPickerBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

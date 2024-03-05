@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.attachpayment
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.mvrx.Async
@@ -18,8 +19,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 
 @Composable
 internal fun AttachPaymentScreen() {
@@ -44,14 +43,15 @@ private fun AttachPaymentContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
-                onCloseClick = onCloseClick
-            )
-        }
-    ) {
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                allowBackNavigation = false,
+//                onCloseClick = onCloseClick
+//            )
+//        }
+//    )
+    Box {
         when (attachPayment) {
             is Loading,
             is Uninitialized,
