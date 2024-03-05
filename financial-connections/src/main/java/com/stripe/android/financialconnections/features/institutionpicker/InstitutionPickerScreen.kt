@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -91,8 +92,10 @@ internal fun InstitutionPickerScreen() {
     val viewModel: InstitutionPickerViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state: InstitutionPickerState by viewModel.collectAsState()
+    val listState = rememberLazyListState()
 
     InstitutionPickerContent(
+        listState = listState,
         payload = state.payload,
         institutions = state.searchInstitutions,
         // This is just used to provide a text in Compose previews
@@ -108,6 +111,7 @@ internal fun InstitutionPickerScreen() {
 
 @Composable
 private fun InstitutionPickerContent(
+    listState: LazyListState,
     payload: Async<Payload>,
     institutions: Async<InstitutionResponse>,
     previewText: String?,
@@ -131,6 +135,7 @@ private fun InstitutionPickerContent(
             is Fail -> FullScreenGenericLoading()
 
             is Success -> LoadedContent(
+                listState = listState,
                 previewText = previewText,
                 selectedInstitutionId = selectedInstitutionId,
                 onQueryChanged = onQueryChanged,
@@ -147,6 +152,7 @@ private fun InstitutionPickerContent(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun LoadedContent(
+    listState: LazyListState,
     previewText: String?,
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
@@ -156,7 +162,6 @@ private fun LoadedContent(
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit,
 ) {
-    val listState = rememberLazyListState()
     var input by remember { mutableStateOf(previewText ?: "") }
     var shouldEmitScrollEvent by remember { mutableStateOf(true) }
     val searchInputFocusRequester = remember { FocusRequester() }
@@ -195,7 +200,7 @@ private fun LoadedContent(
                         },
                     )
                 }
-                item { Spacer(modifier = Modifier.height(16.dp)) }
+                item { Spacer(modifier = Modifier.height(8.dp)) }
 
                 searchResults(
                     isInputEmpty = input.isBlank(),
@@ -593,10 +598,15 @@ private const val DISABLED_DEPTH_ALPHA = 0.3f
 @Composable
 internal fun InstitutionPickerPreview(
     @PreviewParameter(InstitutionPickerPreviewParameterProvider::class)
-    state: InstitutionPickerState
+    previewState: InstitutionPickerPreviewParameterProvider.InstitutionPreviewState
 ) {
+    val state = previewState.state
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemScrollOffset = previewState.initialScroll
+    )
     FinancialConnectionsPreview {
         InstitutionPickerContent(
+            listState = listState,
             payload = state.payload,
             institutions = state.searchInstitutions,
             previewText = state.previewText,
