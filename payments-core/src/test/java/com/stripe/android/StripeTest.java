@@ -464,6 +464,7 @@ public class StripeTest {
     }
 
     @Test
+    @Ignore("sources are being deprecated")
     public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
             throws StripeException {
         final Stripe stripe = defaultStripe;
@@ -808,6 +809,7 @@ public class StripeTest {
     }
 
     @Test
+    @Ignore("sources are being deprecated")
     public void retrieveSourceAsync_withValidData_passesIntegrationTest() throws StripeException {
         final Source source = createSource();
 
@@ -829,6 +831,7 @@ public class StripeTest {
     }
 
     @Test
+    @Ignore("sources are being deprecated")
     public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
             throws StripeException {
         final Source source = createSource();
