@@ -738,11 +738,15 @@ internal class PlaygroundTestDriver(
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
                         if (checkoutMode != CheckoutMode.SETUP) {
-                            closeQrCodeButton.wait(5000)
+                            closeButton.wait(5000)
                             onView(withText("CLOSE")).perform(click())
                         }
                     }
 
+                    is AuthorizeAction.Authorize3ds2 -> {
+                        closeButton.wait(5000)
+                        UiAutomatorText("COMPLETE", device = device).click()
+                    }
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
                         waitForPollingToFinish()

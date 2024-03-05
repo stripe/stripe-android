@@ -87,6 +87,15 @@ internal sealed interface AuthorizeAction {
         override val isConsideredDone: Boolean = true
     }
 
+    data object Authorize3ds2 : AuthorizeAction {
+        override val requiresBrowser: Boolean = false
+
+        override fun text(checkoutMode: CheckoutMode): String {
+            return "COMPLETE"
+        }
+        override val isConsideredDone: Boolean = true
+    }
+
     data class AuthorizePayment(
         override val requiresBrowser: Boolean = true,
     ) : AuthorizeAction {
