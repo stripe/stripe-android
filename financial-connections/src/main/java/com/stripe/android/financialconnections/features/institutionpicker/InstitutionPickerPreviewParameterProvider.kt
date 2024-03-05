@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.model.InstitutionResponse
 
 internal class InstitutionPickerPreviewParameterProvider :
     PreviewParameterProvider<InstitutionPickerPreviewParameterProvider.InstitutionPreviewState> {
+
     override val values = sequenceOf(
         initialLoading(),
         featured(),
@@ -55,7 +56,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload()),
-            searchInstitutions = Success(institutionResponse(3).copy(showManualEntry = true)),
+            searchInstitutions = Success(institutionResponse(FEW_INSTITUTIONS).copy(showManualEntry = true)),
         ),
         initialScroll = 0
     )
@@ -64,7 +65,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload()),
-            searchInstitutions = Success(institutionResponse(3).copy(showManualEntry = false)),
+            searchInstitutions = Success(institutionResponse(FEW_INSTITUTIONS).copy(showManualEntry = false)),
         ),
         initialScroll = 0
     )
@@ -119,136 +120,72 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload()),
-            searchInstitutions = Success(institutionResponse(3)),
+            searchInstitutions = Success(institutionResponse(FEW_INSTITUTIONS)),
             selectedInstitutionId = "2",
             createSessionForInstitution = Loading(),
         ),
         initialScroll = 0
     )
 
-    private fun partiallyScrolled() = InstitutionPreviewState(
-        state = InstitutionPickerState(
-            previewText = "Some query",
-            payload = Success(payload()),
-            searchInstitutions = Success(institutionResponse(10)),
-        ),
-        initialScroll = 1000
-    )
+    private fun partiallyScrolled(): InstitutionPreviewState {
+        return InstitutionPreviewState(
+            state = InstitutionPickerState(
+                previewText = "Some query",
+                payload = Success(payload()),
+                searchInstitutions = Success(institutionResponse(MANY_INSTITUTIONS)),
+            ),
+            initialScroll = 1000
+        )
+    }
 
     private fun payload(manualEntry: Boolean = true) = InstitutionPickerState.Payload(
-        featuredInstitutions = institutionResponse(institutions = 3).copy(showManualEntry = manualEntry),
+        featuredInstitutions = institutionResponse(institutions = FEW_INSTITUTIONS).copy(showManualEntry = manualEntry),
         searchDisabled = false,
         featuredInstitutionsDuration = 0
     )
 
+    @Suppress("MagicNumber")
     private fun institutionResponse(institutions: Int) = InstitutionResponse(
         showManualEntry = true,
         listOf(
-            FinancialConnectionsInstitution(
-                id = "1",
+            institution(1).copy(
                 name = "Very very long institution content does not fit - 1",
                 url = "https://www.institutionUrl.com/1",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
             ),
-            FinancialConnectionsInstitution(
-                id = "2",
-                name = "Institution 2",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
+            institution(2),
+            institution(3).copy(
+                url = "Unparseable URL"
             ),
-            FinancialConnectionsInstitution(
-                id = "3",
-                name = "Institution 3",
-                url = "Unparseable URL",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
-            FinancialConnectionsInstitution(
-                id = "4",
-                name = "Institution 4",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
-            FinancialConnectionsInstitution(
-                id = "5",
-                name = "Institution 5",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
-            FinancialConnectionsInstitution(
-                id = "6",
-                name = "Institution 6",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
-            FinancialConnectionsInstitution(
-                id = "7",
-                name = "Institution 7",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
-            FinancialConnectionsInstitution(
-                id = "8",
-                name = "Institution 8",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
-            FinancialConnectionsInstitution(
-                id = "9",
-                name = "Institution 9",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            ),
-            FinancialConnectionsInstitution(
-                id = "10",
-                name = "Institution 10",
-                url = "otherUrl.com",
-                featured = false,
-                featuredOrder = null,
-                icon = null,
-                logo = null,
-                mobileHandoffCapable = false
-            )
+            institution(4),
+            institution(5),
+            institution(6),
+            institution(7),
+            institution(8),
+            institution(9),
+            institution(10)
         ).take(institutions)
     )
+
+    private fun institution(i: Int): FinancialConnectionsInstitution {
+        return FinancialConnectionsInstitution(
+            id = i.toString(),
+            name = "Institution $i",
+            url = "otherUrl.com",
+            featured = false,
+            featuredOrder = null,
+            icon = null,
+            logo = null,
+            mobileHandoffCapable = false
+        )
+    }
 
     data class InstitutionPreviewState(
         val state: InstitutionPickerState,
         val initialScroll: Int
     )
+
+    companion object {
+        const val FEW_INSTITUTIONS = 3
+        const val MANY_INSTITUTIONS = 10
+    }
 }
