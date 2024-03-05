@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.common
 
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
@@ -28,6 +29,10 @@ internal fun FinancialConnectionsSessionManifest.getRedactedEmail(): String? =
 internal fun FinancialConnectionsSessionManifest.enableRetrieveAuthSession(): Boolean =
     features
         ?.get("bank_connections_disable_defensive_auth_session_retrieval_on_complete") != true
+
+internal fun FinancialConnectionsAuthorizationSession.showPendingPrepaneWhenReturning(): Boolean =
+    features
+        ?.get("bank_connections_remain_on_pending_when_returning_during_oauth") == true && isOAuth
 
 internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
     return manifest.allowManualEntry && visual.reducedManualEntryProminenceInErrors.not()

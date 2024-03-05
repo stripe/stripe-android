@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthStatus
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
@@ -278,7 +279,7 @@ internal class PartnerAuthViewModelTest {
             pane = Pane.PARTNER_AUTH,
             payload = Uninitialized,
             viewEffect = null,
-            authenticationStatus = Uninitialized
+            authenticationStatus = AuthStatus.Uninitialized
         )
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(

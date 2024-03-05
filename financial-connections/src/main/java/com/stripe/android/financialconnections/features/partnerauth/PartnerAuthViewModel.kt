@@ -2,11 +2,8 @@ package com.stripe.android.financialconnections.features.partnerauth
 
 import android.webkit.URLUtil
 import androidx.core.net.toUri
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
@@ -33,6 +30,8 @@ import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSession
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
+import com.stripe.android.financialconnections.features.common.showPendingPrepaneWhenReturning
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthStatus
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
@@ -191,7 +190,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                     logger = logger,
                     pane = PANE
                 )
-                setState { copy(authenticationStatus = Fail(it)) }
+                setState { copy(authenticationStatus = AuthStatus.Fail(it)) }
             }
     }
 
@@ -224,7 +223,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 }
 
                 WebAuthFlowState.InProgress -> {
-                    setState { copy(authenticationStatus = Loading()) }
+                    setState { copy(authenticationStatus = AuthStatus.Pending) }
                 }
 
                 is WebAuthFlowState.Success -> {
@@ -241,6 +240,7 @@ internal class PartnerAuthViewModel @Inject constructor(
         message: String,
         reason: String?
     ) {
+        setState { copy(authenticationStatus = AuthStatus.Completing) }
         val error = WebAuthFlowFailedException(message, reason)
         kotlin.runCatching {
             val authSession = getOrFetchSync().manifest.activeAuthSession
@@ -265,7 +265,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
                 else -> logger.debug("Could not find AuthSession to cancel.")
             }
-            setState { copy(authenticationStatus = Fail(error)) }
+            setState { copy(authenticationStatus = AuthStatus.Fail(error)) }
         }.onFailure {
             eventTracker.logError(
                 extraMessage = "failed cancelling session after failed web flow",
@@ -278,8 +278,8 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private suspend fun onAuthCancelled(url: String?) {
         kotlin.runCatching {
+            setState { copy(authenticationStatus = AuthStatus.Completing) }
             logger.debug("Auth cancelled, cancelling AuthSession")
-            setState { copy(authenticationStatus = Loading()) }
             val manifest = getOrFetchSync().manifest
             val authSession = manifest.activeAuthSession
             eventTracker.track(
@@ -303,8 +303,13 @@ internal class PartnerAuthViewModel @Inject constructor(
                     )
                 )
                 if (nextPane == PANE) {
-                    // auth session was not completed, proceed with cancellation
-                    cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
+                    if (authSession.showPendingPrepaneWhenReturning() && url == null) {
+                        // if the client returned to SDK mid-flow on an OAuth institution
+                        // show the pending pre-pane prompting the user to return to the bank app.
+                        setState { copy(authenticationStatus = AuthStatus.Pending) }
+                    } else {
+                        cancelAuthSessionAndContinue(authSession = retrievedAuthSession)
+                    }
                 } else {
                     // auth session succeeded although client didn't retrieve any deeplink.
                     postAuthSessionEvent(authSession.id, AuthSessionEvent.Success(Date()))
@@ -320,7 +325,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 logger,
                 PANE
             )
-            setState { copy(authenticationStatus = Fail(it)) }
+            setState { copy(authenticationStatus = AuthStatus.Fail(it)) }
         }
     }
 
@@ -338,7 +343,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             postAuthSessionEvent(authSession.id, AuthSessionEvent.Retry(Date()))
             // for OAuth institutions, we remain on the pre-pane,
             // but create a brand new auth session
-            setState { copy(authenticationStatus = Uninitialized) }
+            setState { copy(authenticationStatus = AuthStatus.Uninitialized) }
             createAuthSession()
         } else {
             // For non-OAuth institutions, navigate to Session cancellation's next pane.
@@ -353,7 +358,7 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     private suspend fun completeAuthorizationSession(url: String) {
         kotlin.runCatching {
-            setState { copy(authenticationStatus = Loading()) }
+            setState { copy(authenticationStatus = AuthStatus.Completing) }
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
@@ -386,7 +391,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 logger = logger,
                 pane = PANE
             )
-            setState { copy(authenticationStatus = Fail(it)) }
+            setState { copy(authenticationStatus = AuthStatus.Fail(it)) }
         }
     }
 

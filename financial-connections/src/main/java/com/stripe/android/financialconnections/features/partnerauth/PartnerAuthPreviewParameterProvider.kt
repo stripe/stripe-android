@@ -3,14 +3,14 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthStatus
 import com.stripe.android.financialconnections.model.Body
 import com.stripe.android.financialconnections.model.Cta
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession.Flow
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
@@ -22,7 +22,8 @@ internal class PartnerAuthPreviewParameterProvider :
     PreviewParameterProvider<SharedPartnerAuthState> {
     override val values = sequenceOf(
         canonical(),
-        browserLoading()
+        browserLoading(),
+        completing()
     )
 
     override val count: Int
@@ -31,21 +32,12 @@ internal class PartnerAuthPreviewParameterProvider :
     private fun canonical() = SharedPartnerAuthState(
         payload = Success(
             SharedPartnerAuthState.Payload(
-                institution = FinancialConnectionsInstitution(
-                    id = "id",
-                    name = "name",
-                    url = "url",
-                    featured = true,
-                    icon = null,
-                    logo = null,
-                    featuredOrder = null,
-                    mobileHandoffCapable = false
-                ),
+                institution = institution(),
                 authSession = session(),
                 isStripeDirect = false
             )
         ),
-        authenticationStatus = Uninitialized,
+        authenticationStatus = AuthStatus.Uninitialized,
         viewEffect = null,
         activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
@@ -54,40 +46,57 @@ internal class PartnerAuthPreviewParameterProvider :
     private fun browserLoading() = SharedPartnerAuthState(
         payload = Success(
             SharedPartnerAuthState.Payload(
-                institution = FinancialConnectionsInstitution(
-                    id = "id",
-                    name = "name",
-                    url = "url",
-                    featured = true,
-                    icon = null,
-                    logo = null,
-                    featuredOrder = null,
-                    mobileHandoffCapable = false
-                ),
+                institution = institution(),
                 authSession = session(),
                 isStripeDirect = false
             )
         ),
-        // While browser is showing, this Async is loading.
-        authenticationStatus = Loading(),
+        // While browser is showing, show the "pending prepane".
+        authenticationStatus = AuthStatus.Pending,
         viewEffect = null,
         activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
     )
 
-    private fun session() =
-        FinancialConnectionsAuthorizationSession(
-            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH.name,
-            showPartnerDisclosure = true,
-            _isOAuth = true,
-            nextPane = Pane.PARTNER_AUTH,
-            id = "1234",
-            display = Display(
-                TextUpdate(
-                    oauthPrepane = oauthPrepane()
-                )
+    private fun completing() = SharedPartnerAuthState(
+        payload = Success(
+            SharedPartnerAuthState.Payload(
+                institution = institution(),
+                authSession = session(),
+                isStripeDirect = false
+            )
+        ),
+        // While authentication is completing, show a loading indicator.
+        authenticationStatus = AuthStatus.Completing,
+        viewEffect = null,
+        activeAuthSession = null,
+        pane = Pane.PARTNER_AUTH
+    )
+
+    private fun institution() = FinancialConnectionsInstitution(
+        id = "id",
+        name = "name",
+        url = "url",
+        featured = true,
+        icon = null,
+        logo = null,
+        featuredOrder = null,
+        mobileHandoffCapable = false
+    )
+
+    private fun session() = FinancialConnectionsAuthorizationSession(
+        flow = Flow.FINICITY_CONNECT_V2_OAUTH.name,
+        showPartnerDisclosure = true,
+        _isOAuth = true,
+        nextPane = Pane.PARTNER_AUTH,
+        id = "1234",
+        display = Display(
+            TextUpdate(
+                oauthPrepane = oauthPrepane(),
+                oauthPrepanePending = oauthPrepanePending(),
             )
         )
+    )
 
     private fun oauthPrepane(): OauthPrepane {
         val sampleImage =
@@ -127,4 +136,20 @@ internal class PartnerAuthPreviewParameterProvider :
             )
         )
     }
+
+    private fun oauthPrepanePending() = OauthPrepane(
+        title = "Continue linking your Test OAuth Institution account",
+        body = Body(
+            listOf(
+                Entry.Text(
+                    "You haven’t finished linking your account. Click Continue to finish the process."
+                ),
+            )
+        ),
+        cta = Cta(
+            icon = null,
+            text = "Continue"
+        ),
+        institutionIcon = null,
+    )
 }

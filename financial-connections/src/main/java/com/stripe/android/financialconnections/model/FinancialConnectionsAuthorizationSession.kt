@@ -32,6 +32,9 @@ internal data class FinancialConnectionsAuthorizationSession(
     @SerialName(value = "flow")
     val flow: String? = null,
 
+    @SerialName(value = "use_app_to_app")
+    val useAppToApp: Boolean? = null,
+
     @SerialName(value = "institution_skip_account_selection")
     val institutionSkipAccountSelection: Boolean? = null,
 
@@ -49,6 +52,9 @@ internal data class FinancialConnectionsAuthorizationSession(
 
     @SerialName(value = "is_oauth")
     private val _isOAuth: Boolean? = false,
+
+    @SerialName(value = "features")
+    val features: Map<String, Boolean>? = null,
 
     @SerialName(value = "display")
     val display: Display? = null
