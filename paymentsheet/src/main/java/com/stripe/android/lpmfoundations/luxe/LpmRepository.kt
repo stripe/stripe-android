@@ -5,12 +5,10 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
-import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
-import com.stripe.android.ui.core.elements.transform
 import java.io.InputStream
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -28,7 +26,6 @@ import javax.inject.Singleton
 internal class LpmRepository(
     private val arguments: LpmRepositoryArguments,
     private val lpmInitialFormData: LpmInitialFormData = LpmInitialFormData.Instance,
-    private val lpmPostConfirmData: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance,
 ) {
 
     @Inject
@@ -117,11 +114,6 @@ internal class LpmRepository(
 
         val supportedPaymentMethodsByType = supportedPaymentMethods.associateBy { it.code }
         lpmInitialFormData.putAll(supportedPaymentMethodsByType)
-
-        val nextActionSpecsByType = specs.associate { spec ->
-            spec.type to spec.nextActionSpec.transform()
-        }
-        lpmPostConfirmData.update(nextActionSpecsByType)
     }
 
     private fun parseLpms(inputStream: InputStream?): List<SharedDataSpec> {
@@ -156,8 +148,6 @@ internal class LpmRepository(
         fun fromCode(code: String?) = code?.let { paymentMethodCode ->
             codeToSupportedPaymentMethod[paymentMethodCode]
         }
-
-        fun containsKey(it: String) = codeToSupportedPaymentMethod.containsKey(it)
 
         fun putAll(map: Map<PaymentMethodCode, SupportedPaymentMethod>) {
             codeToSupportedPaymentMethod.putAll(map)

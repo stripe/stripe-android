@@ -22,9 +22,6 @@ data class SharedDataSpec(
     @SerialName("fields")
     val fields: ArrayList<FormItemSpec> = arrayListOf(EmptyFormSpec),
 
-    @SerialName("next_action_spec")
-    val nextActionSpec: NextActionSpec? = null,
-
     @SerialName("selector_icon")
     val selectorIcon: SelectorIcon? = null,
 ) : Parcelable

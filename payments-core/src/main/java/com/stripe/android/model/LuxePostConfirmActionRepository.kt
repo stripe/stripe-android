@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.StripeIntentResult
 import org.json.JSONObject
 
@@ -15,10 +14,7 @@ class LuxePostConfirmActionRepository {
         lpmToConfirmActionSpec.putAll(additionalData)
     }
 
-    @VisibleForTesting
-    internal fun isPresent(code: PaymentMethodCode) = lpmToConfirmActionSpec.contains(code)
-
-    /**
+   /**
      * Given the PaymentIntent retrieved after the returnUrl (not redirectUrl), based on
      * the Payment Method code and Status of the Intent what is the [StripeIntentResult.Outcome]
      * of the operation.
