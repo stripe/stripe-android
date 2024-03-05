@@ -3,7 +3,7 @@ package com.stripe.android.cards
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CardAccountRangeRepository {
@@ -18,7 +18,7 @@ interface CardAccountRangeRepository {
     /**
      * Flow that represents whether any of the [CardAccountRangeSource] instances are loading.
      */
-    val loading: Flow<Boolean>
+    val loading: StateFlow<Boolean>
 
     interface Factory {
         fun create(): CardAccountRangeRepository

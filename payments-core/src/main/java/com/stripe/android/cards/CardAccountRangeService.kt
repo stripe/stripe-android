@@ -6,7 +6,7 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.CardBrand
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
@@ -23,7 +23,7 @@ class CardAccountRangeService(
     private val isCbcEligible: () -> Boolean,
 ) {
 
-    val isLoading: Flow<Boolean> = cardAccountRangeRepository.loading
+    val isLoading: StateFlow<Boolean> = cardAccountRangeRepository.loading
 
     var accountRanges: List<AccountRange> = emptyList()
         private set

@@ -1,7 +1,7 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 internal interface CardAccountRangeSource {
     suspend fun getAccountRange(
@@ -16,5 +16,5 @@ internal interface CardAccountRangeSource {
         cardNumber: CardNumber.Unvalidated
     ): List<AccountRange>?
 
-    val loading: Flow<Boolean>
+    val loading: StateFlow<Boolean>
 }
