@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
@@ -91,9 +90,6 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity(), Maverick
                     )
 
                     is FinishWithResult -> {
-                        viewEffect.finishToast?.let {
-                            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
-                        }
                         finishWithResult(viewEffect.result)
                     }
 

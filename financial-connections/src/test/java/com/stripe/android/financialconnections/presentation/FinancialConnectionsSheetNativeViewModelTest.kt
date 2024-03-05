@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.domain.CloseAuthFlow
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
@@ -54,6 +55,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
+    private val closeAuthFlow = CloseAuthFlow(mock(), mock())
     private val applicationId = "com.sample.applicationid"
     private val configuration = FinancialConnectionsSheet.Configuration(
         financialConnectionsSessionClientSecret = ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
@@ -290,8 +292,8 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         applicationId = applicationId,
         uriUtils = UriUtils(Logger.noop(), mock()),
         completeFinancialConnectionsSession = completeFinancialConnectionsSession,
+        closeAuthFlow = closeAuthFlow,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        logger = mock(),
         getManifest = mock(),
         navigationManager = TestNavigationManager(),
         initialState = initialState

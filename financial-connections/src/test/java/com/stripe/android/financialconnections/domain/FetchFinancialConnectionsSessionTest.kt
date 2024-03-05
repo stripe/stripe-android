@@ -3,6 +3,8 @@ package com.stripe.android.financialconnections.domain
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.financialConnectionsSessionWithMoreAccounts
 import com.stripe.android.financialconnections.financialConnectionsSessionWithNoMoreAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
@@ -21,20 +23,23 @@ class FetchFinancialConnectionsSessionTest {
 
     private val repository = FakeFinancialConnectionsRepository()
     private val getFinancialConnectionsSession = FetchFinancialConnectionsSession(
-        FetchPaginatedAccountsForSession(repository),
-        repository
+        fetchPaginatedAccountsForSession = FetchPaginatedAccountsForSession(repository),
+        financialConnectionsRepository = repository,
+        configuration = FinancialConnectionsSheet.Configuration(
+            ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+            ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+        ),
     )
 
     @Test
     fun `invoke - when session with no more accounts, should return unmodified session`() =
         runTest {
             // Given
-            val clientSecret = "clientSecret"
             repository.getFinancialConnectionsSessionResultProvider =
                 { financialConnectionsSessionWithNoMoreAccounts }
 
             // When
-            val result: FinancialConnectionsSession = getFinancialConnectionsSession(clientSecret)
+            val result: FinancialConnectionsSession = getFinancialConnectionsSession()
 
             // Then
             assertThat(result).isEqualTo(financialConnectionsSessionWithNoMoreAccounts)
@@ -44,12 +49,11 @@ class FetchFinancialConnectionsSessionTest {
     fun `invoke - when session with more accounts, should return combined account list`() =
         runTest {
             // Given
-            val clientSecret = "clientSecret"
             repository.getFinancialConnectionsSessionResultProvider = { financialConnectionsSessionWithMoreAccounts }
             repository.getAccountsResultProvider = { moreFinancialConnectionsAccountList }
 
             // When
-            val result: FinancialConnectionsSession = getFinancialConnectionsSession(clientSecret)
+            val result: FinancialConnectionsSession = getFinancialConnectionsSession()
 
             // Then
             val combinedAccounts = listOf(
@@ -76,13 +80,12 @@ class FetchFinancialConnectionsSessionTest {
     fun `invoke - when failure fetching more accounts, should return exception`() = runTest {
         // Given
         assertFailsWith<APIException> {
-            val clientSecret = "clientSecret"
             repository.getFinancialConnectionsSessionResultProvider =
                 { financialConnectionsSessionWithMoreAccounts }
             repository.getAccountsResultProvider = { throw APIException() }
 
             // When
-            val result: FinancialConnectionsSession = getFinancialConnectionsSession(clientSecret)
+            val result: FinancialConnectionsSession = getFinancialConnectionsSession()
 
             // Then
             val combinedAccounts = listOf(

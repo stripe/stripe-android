@@ -11,36 +11,25 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.ViewModelContext
 import com.airbnb.mvrx.compose.mavericksActivityViewModel
-import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AppBackgrounded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarBack
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickNavBarClose
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Complete
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLaunched
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.CloseAuthFlow
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
-import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.features.common.getBusinessName
-import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
-import com.stripe.android.financialconnections.model.BankAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
@@ -68,9 +57,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val uriUtils: UriUtils,
+    private val closeAuthFlow: CloseAuthFlow,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val logger: Logger,
     @Named(APPLICATION_ID) private val applicationId: String,
     navigationManager: NavigationManager,
     initialState: FinancialConnectionsSheetNativeState
@@ -232,13 +221,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         closeAuthFlow(closeAuthFlowError = null)
     }
 
-    /**
-     * There's at least three types of close cases:
-     * 1. User closes (with or without an error),
-     *    and fetching accounts returns accounts (or `paymentAccount`). That's a success.
-     * 2. User closes with an error, and fetching accounts returns NO accounts. That's an error.
-     * 3. User closes without an error, and fetching accounts returns NO accounts. That's a cancel.
-     */
     private fun closeAuthFlow(
         earlyTerminationCause: EarlyTerminationCause? = null,
         closeAuthFlowError: Throwable? = null
@@ -247,59 +229,13 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             // prevents multiple complete triggers.
             if (awaitState().completed) return@launch
             setState { copy(completed = true) }
-            runCatching {
-                val session = completeFinancialConnectionsSession(earlyTerminationCause?.value)
-                eventTracker.track(
-                    Complete(
-                        exception = null,
-                        exceptionExtraMessage = null,
-                        connectedAccounts = session.accounts.data.count()
-                    )
+            finishWithResult(
+                closeAuthFlow(
+                    sessionFetcher = { completeFinancialConnectionsSession(earlyTerminationCause?.value) },
+                    closeAuthFlowError = closeAuthFlowError,
+                    fromNative = true
                 )
-                when {
-                    session.isCustomManualEntryError() -> {
-                        FinancialConnections.emitEvent(Name.MANUAL_ENTRY_INITIATED)
-                        finishWithResult(
-                            Failed(error = CustomManualEntryRequiredError())
-                        )
-                    }
-
-                    session.hasAValidAccount() -> {
-                        FinancialConnections.emitEvent(
-                            name = Name.SUCCESS,
-                            metadata = Metadata(
-                                manualEntry = session.paymentAccount is BankAccount,
-                            )
-                        )
-                        finishWithResult(
-                            Completed(
-                                financialConnectionsSession = session,
-                                token = session.parsedToken
-                            )
-                        )
-                    }
-
-                    closeAuthFlowError != null -> finishWithResult(
-                        Failed(error = closeAuthFlowError)
-                    )
-
-                    else -> {
-                        FinancialConnections.emitEvent(Name.CANCEL)
-                        finishWithResult(Canceled)
-                    }
-                }
-            }.onFailure { completeSessionError ->
-                val errorMessage = "Error completing session before closing"
-                logger.error(errorMessage, completeSessionError)
-                eventTracker.track(
-                    Complete(
-                        exception = completeSessionError,
-                        exceptionExtraMessage = errorMessage,
-                        connectedAccounts = null
-                    )
-                )
-                finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
-            }
+            )
         }
     }
 
@@ -308,11 +244,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     ) {
         setState { copy(viewEffect = Finish(result)) }
     }
-
-    private fun FinancialConnectionsSession.hasAValidAccount() =
-        accounts.data.isNotEmpty() ||
-            paymentAccount != null ||
-            bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
         viewModelScope.launch {
