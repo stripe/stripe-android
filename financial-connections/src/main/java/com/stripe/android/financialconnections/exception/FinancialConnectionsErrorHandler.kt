@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.exception
 
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
@@ -12,7 +11,7 @@ internal class FinancialConnectionsErrorHandler @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
 ) {
 
-    fun setup(activity: ComponentActivity) {
+    fun setup(lifecycleOwner: LifecycleOwner) {
         val originalHandler = Thread.getDefaultUncaughtExceptionHandler()
 
         Thread.setDefaultUncaughtExceptionHandler { thread, error ->
@@ -24,7 +23,7 @@ internal class FinancialConnectionsErrorHandler @Inject constructor(
             }
         }
 
-        activity.lifecycle.addObserver(
+        lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     Thread.setDefaultUncaughtExceptionHandler(originalHandler)
