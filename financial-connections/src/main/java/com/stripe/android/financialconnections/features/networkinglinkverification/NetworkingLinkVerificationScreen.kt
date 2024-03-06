@@ -50,7 +50,7 @@ internal fun NetworkingLinkVerificationScreen() {
     val state = viewModel.collectAsState()
     NetworkingLinkVerificationContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_VERIFICATION) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
