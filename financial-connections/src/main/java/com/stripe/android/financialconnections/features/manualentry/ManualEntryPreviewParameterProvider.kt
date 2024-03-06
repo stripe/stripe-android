@@ -6,6 +6,7 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
 
 internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<PreviewState> {
@@ -77,6 +78,12 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Pr
     )
 
     private fun fieldFailure() = PreviewState(
+        routing = "123456789",
+        routingError = R.string.stripe_validation_no_us_routing,
+        account = "123456789",
+        accountError = R.string.stripe_validation_no_us_routing,
+        accountConfirm = "123456789",
+        accountConfirmError = R.string.stripe_validation_no_us_routing,
         state = ManualEntryState(
             payload = Success(
                 ManualEntryState.Payload(
