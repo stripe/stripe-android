@@ -37,8 +37,8 @@ import java.text.SimpleDateFormat
 
 @Composable
 internal fun UnclassifiedErrorContent(
-    error: Throwable,
-    onCloseFromErrorClick: (Throwable) -> Unit
+    allowManualEntry: Boolean = false,
+    onCtaClick: () -> Unit
 ) {
     ErrorContent(
         iconContent = {
@@ -49,9 +49,12 @@ internal fun UnclassifiedErrorContent(
         },
         title = stringResource(R.string.stripe_error_generic_title),
         content = stringResource(R.string.stripe_error_generic_desc),
-        primaryCta = stringResource(R.string.stripe_error_cta_close) to {
-            onCloseFromErrorClick(error)
-        }
+        primaryCta = Pair(
+            stringResource(
+                if (allowManualEntry) R.string.stripe_error_cta_manual_entry else R.string.stripe_error_cta_close
+            ),
+            onCtaClick
+        )
     )
 }
 

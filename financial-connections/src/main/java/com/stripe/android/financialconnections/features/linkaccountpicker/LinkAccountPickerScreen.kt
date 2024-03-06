@@ -205,10 +205,7 @@ private fun LinkAccountPickerMainContent(
                 onAccountClick = onAccountClick
             )
 
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
+            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }

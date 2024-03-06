@@ -86,10 +86,7 @@ private fun NetworkingSaveToLinkVerificationContent(
                 onSkipClick = onSkipClick
             )
 
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
+            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }
@@ -114,10 +111,7 @@ private fun NetworkingSaveToLinkVerificationLoaded(
     }
     LaunchedEffect(Unit) { focusRequester.requestFocus() }
     if (confirmVerificationAsync is Fail && confirmVerificationAsync.error !is ConfirmVerification.OTPError) {
-        UnclassifiedErrorContent(
-            error = confirmVerificationAsync.error,
-            onCloseFromErrorClick = onCloseFromErrorClick
-        )
+        UnclassifiedErrorContent { onCloseFromErrorClick(confirmVerificationAsync.error) }
     } else {
         LazyLayout(
             lazyListState = lazyListState,

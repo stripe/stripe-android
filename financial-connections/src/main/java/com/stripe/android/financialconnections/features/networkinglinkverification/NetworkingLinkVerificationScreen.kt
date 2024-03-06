@@ -76,10 +76,7 @@ private fun NetworkingLinkVerificationContent(
                 onCloseFromErrorClick = onCloseFromErrorClick
             )
 
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
+            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }
@@ -102,10 +99,7 @@ private fun NetworkingLinkVerificationLoaded(
         }
     }
     if (confirmVerificationAsync is Fail && confirmVerificationAsync.error !is OTPError) {
-        UnclassifiedErrorContent(
-            error = confirmVerificationAsync.error,
-            onCloseFromErrorClick = onCloseFromErrorClick
-        )
+        UnclassifiedErrorContent { onCloseFromErrorClick(confirmVerificationAsync.error) }
     } else {
         LazyLayout(
             verticalArrangement = Arrangement.spacedBy(24.dp),

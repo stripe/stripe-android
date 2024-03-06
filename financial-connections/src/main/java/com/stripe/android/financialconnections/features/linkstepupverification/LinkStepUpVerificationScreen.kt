@@ -83,10 +83,7 @@ private fun LinkStepUpVerificationContent(
     ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
+            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
             is Success -> LinkStepUpVerificationLoaded(
                 lazyListState = lazyListState,
                 state.submitError,
@@ -120,10 +117,7 @@ private fun LinkStepUpVerificationLoaded(
         }
     }
     if (submitError != null && submitError !is OTPError) {
-        UnclassifiedErrorContent(
-            error = submitError,
-            onCloseFromErrorClick = onCloseFromErrorClick
-        )
+        UnclassifiedErrorContent { onCloseFromErrorClick(submitError) }
     } else {
         LazyLayout(
             verticalArrangement = Arrangement.spacedBy(24.dp),

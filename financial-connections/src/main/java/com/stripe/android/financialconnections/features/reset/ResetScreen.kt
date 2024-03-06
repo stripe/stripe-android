@@ -46,10 +46,7 @@ private fun ResetContent(
     ) {
         when (payload) {
             Uninitialized, is Loading, is Success -> FullScreenGenericLoading()
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
+            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }

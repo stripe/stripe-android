@@ -79,11 +79,7 @@ private fun ErrorContent(
             onSelectAnotherBank = onSelectAnotherBank,
             onEnterDetailsManually = onEnterDetailsManually
         )
-
-        else -> UnclassifiedErrorContent(
-            error = error,
-            onCloseFromErrorClick = onCloseFromErrorClick
-        )
+        else -> UnclassifiedErrorContent { onCloseFromErrorClick(error) }
     }
 }
 

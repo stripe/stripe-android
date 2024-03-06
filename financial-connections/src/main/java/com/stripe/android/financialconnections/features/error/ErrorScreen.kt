@@ -56,6 +56,7 @@ private fun ErrorContent(
         // Render error successfully retrieved from a previous pane
         is Success -> ErrorContent(
             payload().error,
+            allowManualEntry = payload().allowManualEntry,
             onSelectAnotherBank = onSelectBankClick,
             onEnterDetailsManually = onManualEntryClick,
             onCloseFromErrorClick = onCloseFromErrorClick
@@ -64,6 +65,7 @@ private fun ErrorContent(
         // Something wrong happened while trying to retrieve the error, render the unclassified error
         is Fail -> ErrorContent(
             payload.error,
+            allowManualEntry = false,
             onSelectAnotherBank = onSelectBankClick,
             onEnterDetailsManually = onManualEntryClick,
             onCloseFromErrorClick = onCloseFromErrorClick
@@ -74,9 +76,10 @@ private fun ErrorContent(
 @Composable
 private fun ErrorContent(
     error: Throwable,
+    allowManualEntry: Boolean,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
+    onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     when (error) {
         is InstitutionPlannedDowntimeError -> FullScreenError(
@@ -118,9 +121,14 @@ private fun ErrorContent(
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 UnclassifiedErrorContent(
-                    error = error,
-                    onCloseFromErrorClick = onCloseFromErrorClick
-                )
+                    allowManualEntry = allowManualEntry,
+                ) {
+                    if (allowManualEntry) {
+                        onEnterDetailsManually()
+                    } else {
+                        onCloseFromErrorClick(error)
+                    }
+                }
             }
         )
     }
