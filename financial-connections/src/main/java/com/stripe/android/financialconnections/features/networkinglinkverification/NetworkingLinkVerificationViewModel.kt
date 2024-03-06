@@ -4,7 +4,6 @@ import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
@@ -32,6 +31,8 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -45,6 +46,7 @@ import javax.inject.Inject
 
 internal class NetworkingLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingLinkVerificationState,
+    topAppBarHost: TopAppBarHost,
     private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
@@ -53,7 +55,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
     private val logger: Logger
-) : MavericksViewModel<NetworkingLinkVerificationState>(initialState) {
+) : ScreenViewModel<NetworkingLinkVerificationState>(initialState, topAppBarHost, Pane.NETWORKING_LINK_VERIFICATION) {
 
     init {
         observeAsyncs()
@@ -88,6 +90,14 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                 }
                 .onFailure { setState { copy(payload = Fail(it)) } }
         }
+    }
+
+    override fun allowsBackNavigation(state: NetworkingLinkVerificationState): Boolean {
+        return true
+    }
+
+    override fun hidesStripeLogo(state: NetworkingLinkVerificationState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun buildPayload(consumerSession: ConsumerSession) = Payload(
@@ -169,11 +179,12 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: NetworkingLinkVerificationState
         ): NetworkingLinkVerificationViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .networkingLinkVerificationSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

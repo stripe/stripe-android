@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -32,6 +31,8 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -41,6 +42,7 @@ import javax.inject.Inject
 
 internal class LinkAccountPickerViewModel @Inject constructor(
     initialState: LinkAccountPickerState,
+    topAppBarHost: TopAppBarHost,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val handleClickableUrl: HandleClickableUrl,
@@ -52,7 +54,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<LinkAccountPickerState>(initialState) {
+) : ScreenViewModel<LinkAccountPickerState>(initialState, topAppBarHost, Pane.LINK_ACCOUNT_PICKER) {
 
     init {
         observeAsyncs()
@@ -93,6 +95,15 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 merchantDataAccess = merchantDataAccess.copy(isStripeDirect = false)
             )
         }.execute { copy(payload = it) }
+    }
+
+    // TODO(tillh-stripe) This should come from NavController in most cases
+    override fun allowsBackNavigation(state: LinkAccountPickerState): Boolean {
+        return false
+    }
+
+    override fun hidesStripeLogo(state: LinkAccountPickerState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun observeAsyncs() {
@@ -201,11 +212,12 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: LinkAccountPickerState
         ): LinkAccountPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .linkAccountPickerSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

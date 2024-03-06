@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.features.manualentry
 import androidx.annotation.StringRes
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,12 +40,10 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.ScrollEffects
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.TestModeBanner
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Layout
 
@@ -91,14 +90,18 @@ private fun ManualEntryContent(
     onTestFill: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
-            )
-        }
-    ) {
+    ScrollEffects(state = scrollState)
+
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                onCloseClick = onCloseClick,
+//                elevation = scrollState.elevation
+//            )
+//        }
+//    )
+
+    Box {
         when (payload) {
             is Loading, Uninitialized -> FullScreenGenericLoading()
             is Fail -> UnclassifiedErrorContent(

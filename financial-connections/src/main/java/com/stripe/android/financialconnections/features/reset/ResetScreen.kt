@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.reset
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.mvrx.Async
@@ -15,8 +16,6 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 
 @Composable
 internal fun ResetScreen() {
@@ -37,13 +36,14 @@ private fun ResetContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick
-            )
-        }
-    ) {
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                onCloseClick = onCloseClick
+//            )
+//        }
+//    )
+    Box {
         when (payload) {
             Uninitialized, is Loading, is Success -> FullScreenGenericLoading()
             is Fail -> UnclassifiedErrorContent(

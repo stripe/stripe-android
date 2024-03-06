@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.manualentry
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -21,18 +20,21 @@ import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntrySuccess
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
+    topAppBarHost: TopAppBarHost,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<ManualEntryState>(initialState) {
+) : ScreenViewModel<ManualEntryState>(initialState, topAppBarHost, Pane.MANUAL_ENTRY) {
 
     init {
         observeAsyncs()
@@ -48,6 +50,14 @@ internal class ManualEntryViewModel @Inject constructor(
         }.execute {
             copy(payload = it)
         }
+    }
+
+    override fun allowsBackNavigation(state: ManualEntryState): Boolean {
+        return true
+    }
+
+    override fun hidesStripeLogo(state: ManualEntryState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun observeAsyncs() {
@@ -154,11 +164,12 @@ internal class ManualEntryViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ManualEntryState
         ): ManualEntryViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .manualEntryBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

@@ -63,8 +63,6 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
@@ -235,24 +233,34 @@ private fun SharedPartnerAuthContentWrapper(
     onCloseClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    if (inModal) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            content()
-        }
-    } else {
-        FinancialConnectionsScaffold(
-            topBar = {
-                FinancialConnectionsTopAppBar(
-                    allowBackNavigation = canNavigateBack,
-                    onCloseClick = onCloseClick
-                )
-            }
-        ) {
-            content()
-        }
+    Box(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        content()
     }
+//    if (inModal) {
+//        Box(
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            content()
+//        }
+//    } else {
+//        Box(
+//            modifier = Modifier.fillMaxWidth()
+//        ) {
+//            content()
+//        }
+////        FinancialConnectionsScaffold(
+////            topBar = {
+////                FinancialConnectionsTopAppBar(
+////                    allowBackNavigation = canNavigateBack,
+////                    onCloseClick = onCloseClick
+////                )
+////            }
+////        ) {
+////            content()
+////        }
+//    }
 }
 
 @Composable

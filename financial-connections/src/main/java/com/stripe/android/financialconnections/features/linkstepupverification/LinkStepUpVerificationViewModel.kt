@@ -4,7 +4,6 @@ import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
@@ -31,6 +30,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -44,6 +45,7 @@ import javax.inject.Inject
 
 internal class LinkStepUpVerificationViewModel @Inject constructor(
     initialState: LinkStepUpVerificationState,
+    topAppBarHost: TopAppBarHost,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
@@ -55,11 +57,19 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<LinkStepUpVerificationState>(initialState) {
+) : ScreenViewModel<LinkStepUpVerificationState>(initialState, topAppBarHost, Pane.LINK_STEP_UP_VERIFICATION) {
 
     init {
         logErrors()
         viewModelScope.launch { lookupAndStartVerification() }
+    }
+
+    override fun allowsBackNavigation(state: LinkStepUpVerificationState): Boolean {
+        return false
+    }
+
+    override fun hidesStripeLogo(state: LinkStepUpVerificationState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private suspend fun lookupAndStartVerification() = runCatching {
@@ -210,11 +220,12 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: LinkStepUpVerificationState
         ): LinkStepUpVerificationViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .linkStepUpVerificationSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

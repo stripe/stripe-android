@@ -4,7 +4,6 @@ import android.os.Bundle
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -18,6 +17,8 @@ import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource.StringId
 import kotlinx.coroutines.launch
@@ -25,10 +26,11 @@ import javax.inject.Inject
 
 internal class ManualEntrySuccessViewModel @Inject constructor(
     initialState: ManualEntrySuccessState,
+    topAppBarHost: TopAppBarHost,
     private val getManifest: GetManifest,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-) : MavericksViewModel<ManualEntrySuccessState>(initialState) {
+) : ScreenViewModel<ManualEntrySuccessState>(initialState, topAppBarHost, Pane.MANUAL_ENTRY_SUCCESS) {
 
     init {
         suspend {
@@ -47,6 +49,14 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
+    override fun allowsBackNavigation(state: ManualEntrySuccessState): Boolean {
+        return false
+    }
+
+    override fun hidesStripeLogo(state: ManualEntrySuccessState, originalValue: Boolean): Boolean {
+        return originalValue
+    }
+
     fun onSubmit() {
         viewModelScope.launch {
             setState { copy(completeSession = Loading()) }
@@ -62,11 +72,12 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ManualEntrySuccessState
         ): ManualEntrySuccessViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .manualEntrySuccessBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

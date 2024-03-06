@@ -4,7 +4,6 @@ import android.webkit.URLUtil
 import androidx.core.net.toUri
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -48,6 +47,8 @@ import com.stripe.android.financialconnections.navigation.Destination.AccountPic
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -72,13 +73,22 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
-    initialState: SharedPartnerAuthState
-) : MavericksViewModel<SharedPartnerAuthState>(initialState) {
+    initialState: SharedPartnerAuthState,
+    topAppBarHost: TopAppBarHost,
+) : ScreenViewModel<SharedPartnerAuthState>(initialState, topAppBarHost, initialState.pane) {
 
     init {
         handleErrors()
         launchBrowserIfNonOauth()
         restoreOrCreateAuthSession()
+    }
+
+    override fun allowsBackNavigation(state: SharedPartnerAuthState): Boolean {
+        return state.canNavigateBack
+    }
+
+    override fun hidesStripeLogo(state: SharedPartnerAuthState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun restoreOrCreateAuthSession() = suspend {
@@ -451,11 +461,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: SharedPartnerAuthState
         ): PartnerAuthViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.activity<FinancialConnectionsSheetNativeActivity>().viewModel
+            return parentViewModel
                 .activityRetainedComponent
                 .partnerAuthSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

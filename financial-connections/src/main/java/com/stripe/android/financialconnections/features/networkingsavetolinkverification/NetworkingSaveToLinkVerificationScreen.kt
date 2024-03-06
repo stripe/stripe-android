@@ -41,9 +41,6 @@ import com.stripe.android.financialconnections.features.networkingsavetolinkveri
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 
@@ -68,14 +65,15 @@ private fun NetworkingSaveToLinkVerificationContent(
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                onCloseClick = onCloseClick,
-                elevation = rememberLazyListState().elevation
-            )
-        }
-    ) {
+//    FinancialConnectionsScaffold(
+//        topBar = {
+//            FinancialConnectionsTopAppBar(
+//                onCloseClick = onCloseClick,
+//                elevation = rememberLazyListState().elevation
+//            )
+//        }
+//    )
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingSaveToLinkVerificationLoaded(
