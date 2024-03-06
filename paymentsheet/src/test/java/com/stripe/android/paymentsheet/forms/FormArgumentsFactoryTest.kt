@@ -82,10 +82,11 @@ class FormArgumentsFactoryTest {
     }
 
     @Test
-    fun `Create correct FormArguments for null new payment method with setup intent`() {
+    fun `Create correct FormArguments for null newLpm with setup intent and paymentMethod not supportedAsSavedPaymentMethod`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
         )
+        assertThat(BancontactDefinition.supportedAsSavedPaymentMethod).isFalse()
         val supportedPaymentMethod = BancontactDefinition.supportedPaymentMethod(
             metadata = metadata,
             sharedDataSpec = SharedDataSpec("bancontact"),
