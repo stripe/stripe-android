@@ -61,13 +61,11 @@ internal fun SuccessContent(
     completeSessionAsync: Async<FinancialConnectionsSession>,
     payloadAsync: Async<Payload>,
     onDoneClick: () -> Unit,
-    onCloseClick: () -> Unit,
 ) {
     SuccessContentInternal(
         // Just enabled on Compose Previews: allows to preview the post-animation state.
         overrideAnimationForPreview = false,
         payloadAsync = payloadAsync,
-        onCloseClick = onCloseClick,
         completeSessionAsync = completeSessionAsync,
         onDoneClick = onDoneClick
     )
@@ -77,7 +75,6 @@ internal fun SuccessContent(
 private fun SuccessContentInternal(
     overrideAnimationForPreview: Boolean,
     payloadAsync: Async<Payload>,
-    onCloseClick: () -> Unit,
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
 ) {
@@ -257,7 +254,6 @@ internal fun SuccessScreenPreview(
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
             onDoneClick = {},
-            onCloseClick = {}
         )
     }
 }
@@ -276,7 +272,6 @@ internal fun SuccessScreenAnimationCompletedPreview(
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
             onDoneClick = {},
-            onCloseClick = {}
         )
     }
 }

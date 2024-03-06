@@ -37,7 +37,6 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationState.Payload
-import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationViewModel.Companion.PANE
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -51,7 +50,6 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
     val state = viewModel.collectAsState()
     NetworkingSaveToLinkVerificationContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onSkipClick = viewModel::onSkipClick
     )
@@ -60,7 +58,6 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
 @Composable
 private fun NetworkingSaveToLinkVerificationContent(
     state: NetworkingSaveToLinkVerificationState,
-    onCloseClick: () -> Unit,
     onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
@@ -175,7 +172,6 @@ internal fun SaveToLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingSaveToLinkVerificationContent(
             state = state,
-            onCloseClick = {},
             onSkipClick = {},
             onCloseFromErrorClick = {}
         )

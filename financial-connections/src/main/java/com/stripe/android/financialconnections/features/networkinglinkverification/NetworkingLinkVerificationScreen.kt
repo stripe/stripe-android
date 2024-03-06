@@ -35,7 +35,6 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
@@ -48,7 +47,6 @@ internal fun NetworkingLinkVerificationScreen() {
     val state = viewModel.collectAsState()
     NetworkingLinkVerificationContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
@@ -56,7 +54,6 @@ internal fun NetworkingLinkVerificationScreen() {
 @Composable
 private fun NetworkingLinkVerificationContent(
     state: NetworkingLinkVerificationState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     Box {
@@ -151,7 +148,6 @@ internal fun NetworkingLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingLinkVerificationContent(
             state = state,
-            onCloseClick = {},
             onCloseFromErrorClick = {}
         )
     }

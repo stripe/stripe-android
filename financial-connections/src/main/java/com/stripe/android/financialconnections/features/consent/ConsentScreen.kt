@@ -45,8 +45,6 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.consent.ui.ConsentLogoHeader
 import com.stripe.android.financialconnections.model.ConsentPane
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
@@ -64,7 +62,6 @@ import kotlinx.coroutines.launch
 internal fun ConsentScreen() {
     // update step state when manifest changes
     val viewModel: ConsentViewModel = mavericksViewModel()
-    val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
 
     val uriHandler = LocalUriHandler.current
@@ -94,7 +91,7 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-    ) { parentViewModel.onCloseNoConfirmationClick(Pane.CONSENT) }
+    )
 }
 
 @Composable
@@ -104,7 +101,6 @@ private fun ConsentContent(
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
-    onCloseClick: () -> Unit
 ) {
     when (val consent = state.consent) {
         Uninitialized, is Loading -> ConsentLoadingContent()
@@ -114,7 +110,6 @@ private fun ConsentContent(
             acceptConsent = state.acceptConsent,
             bottomSheetState = bottomSheetState,
             onClickableTextClick = onClickableTextClick,
-            onCloseClick = onCloseClick,
             onConfirmModalClick = onConfirmModalClick,
             onContinueClick = onContinueClick
         )
@@ -143,7 +138,6 @@ private fun ConsentMainContent(
     acceptConsent: Async<Unit>,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val title = remember(payload.consent.title) {
@@ -213,7 +207,6 @@ private fun LoadedContent(
     bottomSheetState: ModalBottomSheetState,
     acceptConsent: Async<Unit>,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
     bottomSheetMode: ConsentState.BottomSheetContent?,
@@ -243,7 +236,6 @@ private fun LoadedContent(
                 payload = payload,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
-                onCloseClick = onCloseClick
             )
         }
     )
@@ -315,6 +307,6 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-        ) {}
+        )
     }
 }

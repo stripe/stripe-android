@@ -72,7 +72,6 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -89,7 +88,6 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun InstitutionPickerScreen() {
     val viewModel: InstitutionPickerViewModel = mavericksViewModel()
-    val parentViewModel = parentViewModel()
     val state: InstitutionPickerState by viewModel.collectAsState()
     val listState = rememberLazyListState()
 
@@ -102,7 +100,6 @@ internal fun InstitutionPickerScreen() {
         selectedInstitutionId = state.selectedInstitutionId,
         onQueryChanged = viewModel::onQueryChanged,
         onInstitutionSelected = viewModel::onInstitutionSelected,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.INSTITUTION_PICKER) },
         onManualEntryClick = viewModel::onManualEntryClick,
         onScrollChanged = viewModel::onScrollChanged,
     )
@@ -117,7 +114,6 @@ private fun InstitutionPickerContent(
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
-    onCloseClick: () -> Unit,
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit
 ) {
@@ -655,8 +651,8 @@ internal fun InstitutionPickerPreview(
             selectedInstitutionId = state.selectedInstitutionId,
             onQueryChanged = {},
             onInstitutionSelected = { _, _ -> },
-            onCloseClick = {},
             onManualEntryClick = {},
-        ) {}
+            onScrollChanged = {},
+        )
     }
 }

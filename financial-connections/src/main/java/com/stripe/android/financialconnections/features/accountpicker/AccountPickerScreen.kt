@@ -53,7 +53,6 @@ import com.stripe.android.financialconnections.features.common.MerchantDataAcces
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -94,7 +93,6 @@ internal fun AccountPickerScreen() {
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.ACCOUNT_PICKER) },
         onClickableTextClick = viewModel::onClickableTextClick,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
@@ -110,7 +108,6 @@ private fun AccountPickerContent(
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -132,7 +129,6 @@ private fun AccountPickerContent(
         },
         content = {
             AccountPickerMainContent(
-                onCloseClick,
                 lazyListState,
                 state,
                 onSelectAnotherBank,
@@ -149,7 +145,6 @@ private fun AccountPickerContent(
 
 @Composable
 private fun AccountPickerMainContent(
-    onCloseClick: () -> Unit,
     lazyListState: LazyListState,
     state: AccountPickerState,
     onSelectAnotherBank: () -> Unit,
@@ -338,7 +333,6 @@ internal fun AccountPickerPreview(
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {},
             bottomSheetState = rememberModalBottomSheetState(

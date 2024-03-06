@@ -59,7 +59,6 @@ import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAc
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -115,7 +114,6 @@ internal fun LinkAccountPickerScreen() {
     LinkAccountPickerContent(
         state = state.value,
         bottomSheetState = bottomSheetState,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.LINK_ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onNewBankAccountClick = viewModel::onNewBankAccountClick,
@@ -128,7 +126,6 @@ internal fun LinkAccountPickerScreen() {
 private fun LinkAccountPickerContent(
     state: LinkAccountPickerState,
     bottomSheetState: ModalBottomSheetState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onNewBankAccountClick: () -> Unit,
@@ -155,7 +152,6 @@ private fun LinkAccountPickerContent(
         content = {
             LinkAccountPickerMainContent(
                 scrollState = scrollState,
-                onCloseClick = onCloseClick,
                 state = state,
                 onClickableTextClick = onClickableTextClick,
                 onSelectAccountClick = onSelectAccountClick,
@@ -170,7 +166,6 @@ private fun LinkAccountPickerContent(
 @Composable
 private fun LinkAccountPickerMainContent(
     scrollState: LazyListState,
-    onCloseClick: () -> Unit,
     state: LinkAccountPickerState,
     onClickableTextClick: (String) -> Unit,
     onSelectAccountClick: () -> Unit,
@@ -404,7 +399,6 @@ internal fun LinkAccountPickerScreenPreview(
         LinkAccountPickerContent(
             state = state,
             bottomSheetState = bottomSheetState,
-            onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {},
             onNewBankAccountClick = {},

@@ -38,7 +38,6 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -56,7 +55,6 @@ internal fun LinkStepUpVerificationScreen() {
     BackHandler(enabled = true) {}
     LinkStepUpVerificationContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_SIGNUP_PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick
     )
@@ -65,7 +63,6 @@ internal fun LinkStepUpVerificationScreen() {
 @Composable
 private fun LinkStepUpVerificationContent(
     state: LinkStepUpVerificationState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
@@ -170,7 +167,7 @@ private fun ResendCodeSection(
         verticalAlignment = Alignment.CenterVertically
     ) {
         if (isLoading) {
-            LoadingSpinner(modifier = Modifier.size(24.dp),)
+            LoadingSpinner(modifier = Modifier.size(24.dp))
         } else {
             AnnotatedText(
                 text = TextResource.StringId(R.string.stripe_link_stepup_verification_resend_code),
@@ -195,7 +192,6 @@ internal fun LinkStepUpVerificationPreview(
     FinancialConnectionsPreview {
         LinkStepUpVerificationContent(
             state = state,
-            onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {}
         )

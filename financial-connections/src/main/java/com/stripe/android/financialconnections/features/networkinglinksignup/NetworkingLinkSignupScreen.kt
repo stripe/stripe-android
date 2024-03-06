@@ -56,7 +56,6 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -101,7 +100,6 @@ internal fun NetworkingLinkSignupScreen() {
     NetworkingLinkSignupContent(
         state = state.value,
         bottomSheetState = bottomSheetState,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount,
@@ -113,7 +111,6 @@ internal fun NetworkingLinkSignupScreen() {
 private fun NetworkingLinkSignupContent(
     bottomSheetState: ModalBottomSheetState,
     state: NetworkingLinkSignupState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit,
@@ -135,7 +132,6 @@ private fun NetworkingLinkSignupContent(
         },
         content = {
             NetworkingLinkSignupMainContent(
-                onCloseClick = onCloseClick,
                 state = state,
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
@@ -148,7 +144,6 @@ private fun NetworkingLinkSignupContent(
 
 @Composable
 private fun NetworkingLinkSignupMainContent(
-    onCloseClick: () -> Unit,
     state: NetworkingLinkSignupState,
     onSaveToLink: () -> Unit,
     onClickableTextClick: (String) -> Unit,
@@ -383,11 +378,10 @@ internal fun NetworkingLinkSignupScreenPreview(
             bottomSheetState = rememberModalBottomSheetState(
                 initialValue = ModalBottomSheetValue.Hidden
             ),
-            onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
             onCloseFromErrorClick = {},
-            onSkipClick = {}
+            onSkipClick = {},
         )
     }
 }

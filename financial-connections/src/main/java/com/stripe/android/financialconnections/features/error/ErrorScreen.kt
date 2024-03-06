@@ -21,8 +21,6 @@ import com.stripe.android.financialconnections.features.common.InstitutionUnplan
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 
 @Composable
 internal fun ErrorScreen() {
@@ -132,16 +130,8 @@ private fun FullScreenError(
     onCloseClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                allowBackNavigation = showBack,
-                onCloseClick = onCloseClick
-            )
-        }
-    ) {
-        content()
-    }
+    // TODO(tillh-stripe) Remove the indirection and pass error to host somehow
+    content()
 }
 
 @Preview

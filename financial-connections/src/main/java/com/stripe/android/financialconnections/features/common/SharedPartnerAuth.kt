@@ -109,7 +109,6 @@ internal fun SharedPartnerAuth(
         state = state,
         onClickableTextClick = onClickableTextClick,
         onContinueClick = onContinueClick,
-        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onCancelClick = onCancelClick,
     )
 }
@@ -120,13 +119,11 @@ private fun SharedPartnerAuthContent(
     inModal: Boolean,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
 ) {
     SharedPartnerAuthBody(
         inModal = inModal,
         state = state,
-        onCloseClick = onCloseClick,
         onClickableTextClick = onClickableTextClick,
         onCancelClick = onCancelClick,
         onContinueClick = onContinueClick,
@@ -199,16 +196,11 @@ private fun SharedPartnerLoading(inModal: Boolean) {
 private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
     inModal: Boolean,
-    onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
-    SharedPartnerAuthContentWrapper(
-        inModal = inModal,
-        canNavigateBack = state.canNavigateBack,
-        onCloseClick = onCloseClick
-    ) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         state.payload()?.let {
             LoadedContent(
                 showInModal = inModal,
@@ -219,24 +211,6 @@ private fun SharedPartnerAuthBody(
                 onClickableTextClick = onClickableTextClick,
             )
         } ?: SharedPartnerLoading(inModal)
-    }
-}
-
-/**
- * Wrapper for the content of the partner auth screen, that based on the [inModal] parameter
- * will render the content in a modal or in a full screen.
- */
-@Composable
-private fun SharedPartnerAuthContentWrapper(
-    inModal: Boolean,
-    canNavigateBack: Boolean,
-    onCloseClick: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    Box(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        content()
     }
 }
 
@@ -520,7 +494,6 @@ internal fun PartnerAuthPreview(
             inModal = false,
             onClickableTextClick = {},
             onContinueClick = {},
-            onCloseClick = {},
             onCancelClick = {}
         )
     }
@@ -541,7 +514,6 @@ internal fun PartnerAuthDrawerPreview(
                 inModal = true,
                 onClickableTextClick = {},
                 onContinueClick = {},
-                onCloseClick = {},
                 onCancelClick = {}
             )
         }
