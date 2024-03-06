@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
@@ -39,7 +39,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val logger: Logger
-) : ScreenViewModel<AttachPaymentState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<AttachPaymentState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

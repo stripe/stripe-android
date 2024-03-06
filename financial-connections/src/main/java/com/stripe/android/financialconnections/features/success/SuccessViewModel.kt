@@ -18,7 +18,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
@@ -36,7 +36,7 @@ internal class SuccessViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
-) : ScreenViewModel<SuccessState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<SuccessState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()

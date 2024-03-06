@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntrySuccess
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -35,7 +35,7 @@ internal class ManualEntryViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<ManualEntryState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<ManualEntryState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()

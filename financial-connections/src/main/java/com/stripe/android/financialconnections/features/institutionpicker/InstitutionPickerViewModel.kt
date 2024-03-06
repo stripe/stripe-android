@@ -33,7 +33,7 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -57,7 +57,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
     initialState: InstitutionPickerState
-) : ScreenViewModel<InstitutionPickerState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<InstitutionPickerState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 

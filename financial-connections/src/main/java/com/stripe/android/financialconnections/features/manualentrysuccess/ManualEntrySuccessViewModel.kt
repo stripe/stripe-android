@@ -17,7 +17,7 @@ import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -31,7 +31,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-) : ScreenViewModel<ManualEntrySuccessState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<ManualEntrySuccessState>(initialState, topAppBarHost) {
 
     init {
         suspend {

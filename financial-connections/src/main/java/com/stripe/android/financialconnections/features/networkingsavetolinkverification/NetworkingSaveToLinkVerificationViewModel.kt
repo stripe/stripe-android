@@ -23,7 +23,7 @@ import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
@@ -49,7 +49,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<NetworkingSaveToLinkVerificationState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<NetworkingSaveToLinkVerificationState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

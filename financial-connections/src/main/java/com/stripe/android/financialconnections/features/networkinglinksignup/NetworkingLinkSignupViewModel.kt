@@ -28,7 +28,7 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
@@ -63,7 +63,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 

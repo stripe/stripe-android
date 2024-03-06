@@ -47,7 +47,7 @@ import com.stripe.android.financialconnections.navigation.Destination.AccountPic
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
@@ -76,7 +76,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val logger: Logger,
     initialState: SharedPartnerAuthState,
     topAppBarHost: TopAppBarHost,
-) : ScreenViewModel<SharedPartnerAuthState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<SharedPartnerAuthState>(initialState, topAppBarHost) {
 
     init {
         handleErrors()

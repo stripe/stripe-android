@@ -31,7 +31,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
@@ -55,7 +55,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<LinkAccountPickerState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<LinkAccountPickerState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()

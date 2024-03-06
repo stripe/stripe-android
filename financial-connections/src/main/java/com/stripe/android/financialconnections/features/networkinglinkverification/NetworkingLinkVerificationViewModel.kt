@@ -31,7 +31,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.FullScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -56,7 +56,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
     private val logger: Logger
-) : ScreenViewModel<NetworkingLinkVerificationState>(initialState, topAppBarHost) {
+) : FullScreenViewModel<NetworkingLinkVerificationState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()

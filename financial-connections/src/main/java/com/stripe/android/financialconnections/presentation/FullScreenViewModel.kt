@@ -21,7 +21,7 @@ internal fun TopAppBarState.apply(update: TopAppBarStateUpdate): TopAppBarState 
     )
 }
 
-internal abstract class ScreenViewModel<S : MavericksState>(
+internal abstract class FullScreenViewModel<S : MavericksState>(
     initialState: S,
     topAppBarHost: TopAppBarHost,
 ) : MavericksViewModel<S>(initialState) {
