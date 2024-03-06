@@ -93,12 +93,6 @@ internal fun InstitutionPickerScreen() {
     val state: InstitutionPickerState by viewModel.collectAsState()
     val listState = rememberLazyListState()
 
-    val parent = parentViewModel()
-    LaunchedEffect(listState.canScrollBackward) {
-        val isScrolled = listState.canScrollBackward
-        parent.updateTopAppBarElevation(isElevated = isScrolled)
-    }
-
     InstitutionPickerContent(
         listState = listState,
         payload = state.payload,
@@ -187,6 +181,7 @@ private fun LoadedContent(
         LazyLayout(
             lazyListState = listState,
             bodyPadding = PaddingValues(horizontal = 16.dp),
+            showTopAppBarElevationWhenScrolled = false,
             showFooterShadowWhenScrollable = false,
         ) {
             item {

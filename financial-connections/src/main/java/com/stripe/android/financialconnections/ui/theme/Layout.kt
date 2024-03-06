@@ -53,6 +53,7 @@ internal fun Layout(
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    showTopAppBarElevationWhenScrolled: Boolean = true,
     showFooterShadowWhenScrollable: Boolean = true,
     scrollState: ScrollState = rememberScrollState(),
     footer: (@Composable () -> Unit)? = null,
@@ -62,6 +63,7 @@ internal fun Layout(
         canScrollForward = scrollState.canScrollForward,
         canScrollBackward = scrollState.canScrollBackward,
         inModal = inModal,
+        showTopAppBarElevationWhenScrolled = showTopAppBarElevationWhenScrolled,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
         footer = footer,
@@ -98,6 +100,7 @@ internal fun LazyLayout(
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    showTopAppBarElevationWhenScrolled: Boolean = true,
     showFooterShadowWhenScrollable: Boolean = true,
     lazyListState: LazyListState = rememberLazyListState(),
     body: LazyListScope.() -> Unit,
@@ -106,6 +109,7 @@ internal fun LazyLayout(
         canScrollForward = lazyListState.canScrollForward,
         canScrollBackward = lazyListState.canScrollBackward,
         inModal = inModal,
+        showTopAppBarElevationWhenScrolled = showTopAppBarElevationWhenScrolled,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
         footer = footer,
@@ -125,6 +129,7 @@ private fun LayoutScaffold(
     canScrollBackward: Boolean,
     canScrollForward: Boolean,
     inModal: Boolean,
+    showTopAppBarElevationWhenScrolled: Boolean,
     showFooterShadowWhenScrollable: Boolean,
     modifier: Modifier = Modifier,
     footer: (@Composable () -> Unit)?,
@@ -132,8 +137,10 @@ private fun LayoutScaffold(
 ) {
     val topAppBarHost = LocalTopAppBarHost.current
 
-    LaunchedEffect(canScrollBackward) {
-        topAppBarHost.updateTopAppBarElevation(isElevated = canScrollBackward)
+    if (showTopAppBarElevationWhenScrolled) {
+        LaunchedEffect(canScrollBackward) {
+            topAppBarHost.updateTopAppBarElevation(isElevated = canScrollBackward)
+        }
     }
 
     Column(
