@@ -148,6 +148,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     fun handleCurrentPaneChanged(pane: Pane) {
         currentPane.value = pane
+
+        // Reset so that we don't carry over an elevation to a loading screen
+        updateTopAppBarElevation(isElevated = false)
     }
 
     fun handleCloseClick() {
