@@ -178,15 +178,6 @@ private fun LinkAccountPickerMainContent(
     onAccountClick: (PartnerAccount) -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                allowBackNavigation = false,
-//                elevation = scrollState.elevation,
-//                onCloseClick = onCloseClick
-//            )
-//        }
-//    )
     Box {
         when (val payload = state.payload) {
             Uninitialized,

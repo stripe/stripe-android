@@ -43,14 +43,6 @@ private fun AttachPaymentContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                allowBackNavigation = false,
-//                onCloseClick = onCloseClick
-//            )
-//        }
-//    )
     Box {
         when (attachPayment) {
             is Loading,

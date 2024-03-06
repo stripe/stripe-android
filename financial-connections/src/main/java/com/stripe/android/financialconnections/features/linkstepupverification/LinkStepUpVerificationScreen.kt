@@ -70,15 +70,6 @@ private fun LinkStepUpVerificationContent(
     onClickableTextClick: (String) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                allowBackNavigation = false,
-//                elevation = lazyListState.elevation,
-//                onCloseClick = onCloseClick
-//            )
-//        }
-//    )
     Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()

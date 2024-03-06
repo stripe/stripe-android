@@ -65,14 +65,6 @@ private fun NetworkingSaveToLinkVerificationContent(
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     val lazyListState = rememberLazyListState()
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                onCloseClick = onCloseClick,
-//                elevation = rememberLazyListState().elevation
-//            )
-//        }
-//    )
     Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()

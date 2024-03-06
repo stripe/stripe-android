@@ -160,15 +160,6 @@ private fun AccountPickerMainContent(
     onClickableTextClick: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                allowBackNavigation = false,
-//                onCloseClick = onCloseClick,
-//                elevation = lazyListState.elevation
-//            )
-//        }
-//    )
     Box {
         when (val payload = state.payload) {
             is Fail -> {

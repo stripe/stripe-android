@@ -92,15 +92,6 @@ private fun ManualEntryContent(
     val scrollState = rememberScrollState()
     ScrollEffects(state = scrollState)
 
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                onCloseClick = onCloseClick,
-//                elevation = scrollState.elevation
-//            )
-//        }
-//    )
-
     Box {
         when (payload) {
             is Loading, Uninitialized -> FullScreenGenericLoading()

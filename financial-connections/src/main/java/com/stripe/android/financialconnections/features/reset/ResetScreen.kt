@@ -36,13 +36,6 @@ private fun ResetContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                onCloseClick = onCloseClick
-//            )
-//        }
-//    )
     Box {
         when (payload) {
             Uninitialized, is Loading, is Success -> FullScreenGenericLoading()

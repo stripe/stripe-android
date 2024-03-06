@@ -238,29 +238,6 @@ private fun SharedPartnerAuthContentWrapper(
     ) {
         content()
     }
-//    if (inModal) {
-//        Box(
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            content()
-//        }
-//    } else {
-//        Box(
-//            modifier = Modifier.fillMaxWidth()
-//        ) {
-//            content()
-//        }
-////        FinancialConnectionsScaffold(
-////            topBar = {
-////                FinancialConnectionsTopAppBar(
-////                    allowBackNavigation = canNavigateBack,
-////                    onCloseClick = onCloseClick
-////                )
-////            }
-////        ) {
-////            content()
-////        }
-//    }
 }
 
 @Composable

@@ -156,15 +156,6 @@ private fun NetworkingLinkSignupMainContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     val scrollState = rememberScrollState()
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                elevation = scrollState.elevation,
-//                allowBackNavigation = false,
-//                onCloseClick = onCloseClick,
-//            )
-//        }
-//    )
     Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()

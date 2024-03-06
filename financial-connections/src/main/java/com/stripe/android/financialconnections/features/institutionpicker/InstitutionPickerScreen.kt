@@ -76,6 +76,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.ScrollEffects
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
@@ -91,6 +92,8 @@ internal fun InstitutionPickerScreen() {
     val parentViewModel = parentViewModel()
     val state: InstitutionPickerState by viewModel.collectAsState()
     val listState = rememberLazyListState()
+
+    ScrollEffects(state = listState)
 
     InstitutionPickerContent(
         listState = listState,
@@ -120,13 +123,6 @@ private fun InstitutionPickerContent(
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit
 ) {
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                onCloseClick = onCloseClick
-//            )
-//        }
-//    ) {
     Box {
         when (payload) {
             is Uninitialized,

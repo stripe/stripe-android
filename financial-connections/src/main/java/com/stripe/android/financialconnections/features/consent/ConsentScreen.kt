@@ -153,18 +153,6 @@ private fun ConsentMainContent(
         payload.consent.body.bullets.map { bullet -> BulletUI.from(bullet) }
     }
 
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                hideStripeLogo = when {
-//                    payload.shouldShowMerchantLogos -> true
-//                    else -> LocalReducedBranding.current
-//                },
-//                onCloseClick = onCloseClick,
-//                elevation = scrollState.elevation
-//            )
-//        }
-//    ) {
     LazyLayout(
         lazyListState = scrollState,
         body = {

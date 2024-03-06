@@ -59,13 +59,6 @@ private fun NetworkingLinkVerificationContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
-//    FinancialConnectionsScaffold(
-//        topBar = {
-//            FinancialConnectionsTopAppBar(
-//                onCloseClick = onCloseClick
-//            )
-//        }
-//    )
     Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
