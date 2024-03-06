@@ -13,7 +13,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 internal object IdealDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Ideal
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
+    override val supportedAsSavedPaymentMethod: Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean

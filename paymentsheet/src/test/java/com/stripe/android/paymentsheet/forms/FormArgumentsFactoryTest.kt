@@ -7,9 +7,11 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.BancontactDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -17,6 +19,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -74,6 +77,30 @@ class FormArgumentsFactoryTest {
         )
 
         assertThat(actualArgs.initialPaymentMethodCreateParams).isEqualTo(paymentMethodCreateParams)
+        assertThat(actualArgs.showCheckbox).isFalse()
+        assertThat(actualArgs.saveForFutureUseInitialValue).isFalse()
+    }
+
+    @Test
+    fun `Create correct FormArguments for null new payment method with setup intent`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+        )
+        val supportedPaymentMethod = BancontactDefinition.supportedPaymentMethod(
+            metadata = metadata,
+            sharedDataSpec = SharedDataSpec("bancontact"),
+        )
+
+        val actualArgs = FormArgumentsFactory.create(
+            paymentMethod = supportedPaymentMethod,
+            metadata = metadata,
+            config = PaymentSheetFixtures.CONFIG_MINIMUM,
+            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
+            amount = null,
+            newLpm = null,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible
+        )
+
         assertThat(actualArgs.showCheckbox).isFalse()
         assertThat(actualArgs.saveForFutureUseInitialValue).isFalse()
     }

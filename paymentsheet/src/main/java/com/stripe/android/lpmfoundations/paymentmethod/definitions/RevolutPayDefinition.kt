@@ -14,7 +14,7 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object RevolutPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.RevolutPay
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
+    override val supportedAsSavedPaymentMethod: Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean

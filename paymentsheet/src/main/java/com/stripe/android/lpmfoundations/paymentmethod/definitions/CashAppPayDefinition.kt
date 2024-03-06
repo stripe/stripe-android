@@ -13,7 +13,7 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object CashAppPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.CashAppPay
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
+    override val supportedAsSavedPaymentMethod: Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
