@@ -34,6 +34,8 @@ internal class ManualEntryViewModel @Inject constructor(
     private val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
+    val form = ManualEntryForm(viewModelScope)
+
     init {
         observeAsyncs()
         suspend {
@@ -77,43 +79,27 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onRoutingEntered(input: String) {
-        setState { copy(routing = input.filter { it.isDigit() }) }
-        withState {
-            val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
-            setState { copy(routingError = error) }
-        }
+        form.routing = input.filter { it.isDigit() }
     }
 
     fun onAccountEntered(input: String) {
-        setState { copy(account = input.filter { it.isDigit() }) }
-        withState {
-            val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
-            setState { copy(accountError = error) }
-        }
+        form.account = input.filter { it.isDigit() }
     }
 
     fun onAccountConfirmEntered(input: String) {
-        setState { copy(accountConfirm = input.filter { it.isDigit() }) }
-        withState {
-            val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
-                accountInput = it.account,
-                accountConfirmInput = input
-            )
-            setState { copy(accountConfirmError = error) }
-        }
+        form.accountConfirm = input.filter { it.isDigit() }
     }
 
     fun onSubmit() {
         suspend {
-            val state = awaitState()
             val sync = getOrFetchSync()
             pollAttachPaymentAccount(
                 sync = sync,
                 activeInstitution = null,
                 consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
-                    routingNumber = requireNotNull(state.routing),
-                    accountNumber = requireNotNull(state.account)
+                    routingNumber = requireNotNull(form.routing),
+                    accountNumber = requireNotNull(form.account)
                 )
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
@@ -122,7 +108,7 @@ internal class ManualEntryViewModel @Inject constructor(
                             referrer = PANE,
                             args = ManualEntrySuccess.argMap(
                                 microdepositVerificationMethod = it.microdepositVerificationMethod,
-                                last4 = state.account.takeLast(4)
+                                last4 = requireNotNull(form.account).takeLast(4)
                             )
                         )
                     )
@@ -134,16 +120,9 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onTestFill() {
-        setState {
-            copy(
-                routing = "110000000",
-                account = "000123456789",
-                accountConfirm = "000123456789",
-                routingError = null,
-                accountError = null,
-                accountConfirmError = null
-            )
-        }
+        form.routing = "110000000"
+        form.account = "000123456789"
+        form.accountConfirm = "000123456789"
         onSubmit()
     }
 
@@ -169,12 +148,6 @@ internal class ManualEntryViewModel @Inject constructor(
 
 internal data class ManualEntryState(
     val payload: Async<Payload> = Uninitialized,
-    val routing: String = "",
-    val account: String = "",
-    val accountConfirm: String = "",
-    val routingError: Int? = null,
-    val accountError: Int? = null,
-    val accountConfirmError: Int? = null,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
 ) : MavericksState {
 
@@ -183,12 +156,4 @@ internal data class ManualEntryState(
         val customManualEntry: Boolean,
         val testMode: Boolean
     )
-
-    val isValidForm
-        get() =
-            (routing to routingError).valid() &&
-                (account to accountError).valid() &&
-                (accountConfirm to accountConfirmError).valid()
-
-    private fun Pair<String, Int?>.valid() = first.isNotEmpty() && second == null
 }

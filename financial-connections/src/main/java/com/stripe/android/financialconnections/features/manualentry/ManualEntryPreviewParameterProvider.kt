@@ -6,7 +6,6 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.financialconnections.R
 
 internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<ManualEntryState> {
     override val values = sequenceOf(
@@ -67,12 +66,6 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
     )
 
     private fun fieldFailure() = ManualEntryState(
-        routing = "123456789",
-        routingError = R.string.stripe_validation_no_us_routing,
-        account = "123456789",
-        accountError = R.string.stripe_validation_no_us_routing,
-        accountConfirm = "123456789",
-        accountConfirmError = R.string.stripe_validation_no_us_routing,
         payload = Success(
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = true,
@@ -82,4 +75,13 @@ internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<Ma
         ),
         linkPaymentAccount = Uninitialized,
     )
+
+    /*
+            routing = "123456789",
+        routingError = R.string.stripe_validation_no_us_routing,
+        account = "123456789",
+        accountError = R.string.stripe_validation_no_us_routing,
+        accountConfirm = "123456789",
+        accountConfirmError = R.string.stripe_validation_no_us_routing,
+     */
 }

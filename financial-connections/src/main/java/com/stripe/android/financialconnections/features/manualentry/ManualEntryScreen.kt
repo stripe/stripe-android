@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -20,8 +21,6 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -38,7 +37,6 @@ import com.stripe.android.financialconnections.features.manualentry.ManualEntryS
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -53,14 +51,18 @@ internal fun ManualEntryScreen() {
     val viewModel: ManualEntryViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state: ManualEntryState by viewModel.collectAsState()
+    val routingError by viewModel.form.routingError.collectAsState()
+    val accountError by viewModel.form.accountError.collectAsState()
+    val accountConfirmError by viewModel.form.accountConfirmError.collectAsState()
+    val isValidForm by viewModel.form.isValid.collectAsState()
     ManualEntryContent(
-        routing = state.routing,
-        routingError = state.routingError,
-        account = state.account,
-        accountError = state.accountError,
-        accountConfirm = state.accountConfirm,
-        accountConfirmError = state.accountConfirmError,
-        isValidForm = state.isValidForm,
+        routing = viewModel.form.routing ?: "",
+        routingError = routingError,
+        account = viewModel.form.account ?: "",
+        accountError = accountError,
+        accountConfirm = viewModel.form.accountConfirm ?: "",
+        accountConfirmError = accountConfirmError,
+        isValidForm = isValidForm,
         payload = state.payload,
         linkPaymentAccountStatus = state.linkPaymentAccount,
         onRoutingEntered = viewModel::onRoutingEntered,
@@ -329,30 +331,30 @@ private fun InputWithError(
     }
 }
 
-@Preview(
-    group = "Manual Entry Pane",
-)
-@Composable
-internal fun ManualEntryPreview(
-    @PreviewParameter(ManualEntryPreviewParameterProvider::class) state: ManualEntryState
-) {
-    FinancialConnectionsPreview {
-        ManualEntryContent(
-            routing = state.routing,
-            routingError = state.routingError,
-            account = state.account,
-            accountError = state.accountError,
-            accountConfirm = state.accountConfirm,
-            accountConfirmError = state.accountConfirmError,
-            isValidForm = true,
-            payload = state.payload,
-            linkPaymentAccountStatus = state.linkPaymentAccount,
-            onRoutingEntered = {},
-            onAccountEntered = {},
-            onAccountConfirmEntered = {},
-            onTestFill = {},
-            onSubmit = {},
-            onCloseClick = {}
-        )
-    }
-}
+//@Preview(
+//    group = "Manual Entry Pane",
+//)
+//@Composable
+//internal fun ManualEntryPreview(
+//    @PreviewParameter(ManualEntryPreviewParameterProvider::class) state: ManualEntryState
+//) {
+//    FinancialConnectionsPreview {
+//        ManualEntryContent(
+//            routing = state.routing,
+//            routingError = state.routingError,
+//            account = state.account,
+//            accountError = state.accountError,
+//            accountConfirm = state.accountConfirm,
+//            accountConfirmError = state.accountConfirmError,
+//            isValidForm = true,
+//            payload = state.payload,
+//            linkPaymentAccountStatus = state.linkPaymentAccount,
+//            onRoutingEntered = {},
+//            onAccountEntered = {},
+//            onAccountConfirmEntered = {},
+//            onTestFill = {},
+//            onSubmit = {},
+//            onCloseClick = {}
+//        )
+//    }
+//}
