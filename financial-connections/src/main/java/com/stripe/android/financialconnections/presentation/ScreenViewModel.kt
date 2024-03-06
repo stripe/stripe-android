@@ -5,7 +5,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.stripe.android.financialconnections.ui.components.TopAppBarState
 
 internal interface TopAppBarHost {
-    val initialTopAppBarState: TopAppBarState
+    val defaultTopAppBarState: TopAppBarState
     fun handleTopAppBarStateChanged(topAppBarState: TopAppBarState)
 }
 
@@ -29,7 +29,7 @@ internal abstract class ScreenViewModel<S : MavericksState>(
     init {
         onEach { state ->
             val update = updateTopAppBarState(state)
-            val topAppBarState = topAppBarHost.initialTopAppBarState.apply(update)
+            val topAppBarState = topAppBarHost.defaultTopAppBarState.apply(update)
             topAppBarHost.handleTopAppBarStateChanged(topAppBarState)
         }
     }
