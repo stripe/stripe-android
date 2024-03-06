@@ -31,7 +31,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-) : ScreenViewModel<ManualEntrySuccessState>(initialState, topAppBarHost, Pane.MANUAL_ENTRY_SUCCESS) {
+) : ScreenViewModel<ManualEntrySuccessState>(initialState, topAppBarHost) {
 
     init {
         suspend {

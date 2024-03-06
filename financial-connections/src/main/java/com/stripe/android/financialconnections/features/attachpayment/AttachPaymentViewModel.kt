@@ -39,7 +39,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val logger: Logger
-) : ScreenViewModel<AttachPaymentState>(initialState, topAppBarHost, Pane.ATTACH_LINKED_PAYMENT_ACCOUNT) {
+) : ScreenViewModel<AttachPaymentState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

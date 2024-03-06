@@ -32,7 +32,7 @@ internal class ErrorViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<ErrorState>(initialState, topAppBarHost, Pane.UNEXPECTED_ERROR) {
+) : ScreenViewModel<ErrorState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

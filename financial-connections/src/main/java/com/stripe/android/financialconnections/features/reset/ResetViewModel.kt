@@ -30,7 +30,7 @@ internal class ResetViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<ResetState>(initialState, topAppBarHost, Pane.RESET) {
+) : ScreenViewModel<ResetState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

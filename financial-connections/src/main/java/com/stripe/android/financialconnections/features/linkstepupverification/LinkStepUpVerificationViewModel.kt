@@ -58,7 +58,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<LinkStepUpVerificationState>(initialState, topAppBarHost, Pane.LINK_STEP_UP_VERIFICATION) {
+) : ScreenViewModel<LinkStepUpVerificationState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

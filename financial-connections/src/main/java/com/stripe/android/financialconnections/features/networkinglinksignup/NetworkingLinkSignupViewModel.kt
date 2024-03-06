@@ -63,7 +63,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost, Pane.NETWORKING_LINK_SIGNUP_PANE) {
+) : ScreenViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 

@@ -49,11 +49,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<NetworkingSaveToLinkVerificationState>(
-    initialState = initialState,
-    topAppBarHost = topAppBarHost,
-    pane = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION,
-) {
+) : ScreenViewModel<NetworkingSaveToLinkVerificationState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

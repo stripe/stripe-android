@@ -36,7 +36,7 @@ internal class SuccessViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
-) : ScreenViewModel<SuccessState>(initialState, topAppBarHost, Pane.SUCCESS) {
+) : ScreenViewModel<SuccessState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()

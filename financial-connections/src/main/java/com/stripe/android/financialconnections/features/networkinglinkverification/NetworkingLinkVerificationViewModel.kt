@@ -56,7 +56,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
     private val logger: Logger
-) : ScreenViewModel<NetworkingLinkVerificationState>(initialState, topAppBarHost, Pane.NETWORKING_LINK_VERIFICATION) {
+) : ScreenViewModel<NetworkingLinkVerificationState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()

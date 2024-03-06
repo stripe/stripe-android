@@ -76,7 +76,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val logger: Logger,
     initialState: SharedPartnerAuthState,
     topAppBarHost: TopAppBarHost,
-) : ScreenViewModel<SharedPartnerAuthState>(initialState, topAppBarHost, initialState.pane) {
+) : ScreenViewModel<SharedPartnerAuthState>(initialState, topAppBarHost) {
 
     init {
         handleErrors()

@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.presentation
 
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.ui.components.TopAppBarState
 
 internal interface TopAppBarHost {
@@ -25,7 +24,6 @@ internal fun TopAppBarState.apply(update: TopAppBarStateUpdate): TopAppBarState 
 internal abstract class ScreenViewModel<S : MavericksState>(
     initialState: S,
     topAppBarHost: TopAppBarHost,
-    pane: FinancialConnectionsSessionManifest.Pane,
 ) : MavericksViewModel<S>(initialState) {
 
     init {

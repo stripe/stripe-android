@@ -57,7 +57,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
     initialState: InstitutionPickerState
-) : ScreenViewModel<InstitutionPickerState>(initialState, topAppBarHost, Pane.INSTITUTION_PICKER) {
+) : ScreenViewModel<InstitutionPickerState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 

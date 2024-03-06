@@ -54,11 +54,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
-) : ScreenViewModel<AccountPickerState>(
-    initialState = initialState,
-    topAppBarHost = topAppBarHost,
-    pane = Pane.ACCOUNT_PICKER,
-) {
+) : ScreenViewModel<AccountPickerState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

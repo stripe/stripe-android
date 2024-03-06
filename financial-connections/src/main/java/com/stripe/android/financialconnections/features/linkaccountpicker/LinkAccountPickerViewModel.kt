@@ -55,7 +55,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<LinkAccountPickerState>(initialState, topAppBarHost, Pane.LINK_ACCOUNT_PICKER) {
+) : ScreenViewModel<LinkAccountPickerState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()

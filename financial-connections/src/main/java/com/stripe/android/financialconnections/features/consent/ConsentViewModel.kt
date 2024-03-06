@@ -40,7 +40,7 @@ internal class ConsentViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : ScreenViewModel<ConsentState>(initialState, topAppBarHost, Pane.CONSENT) {
+) : ScreenViewModel<ConsentState>(initialState, topAppBarHost) {
 
     init {
         logErrors()

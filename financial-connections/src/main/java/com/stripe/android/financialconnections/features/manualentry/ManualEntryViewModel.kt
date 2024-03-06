@@ -35,7 +35,7 @@ internal class ManualEntryViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : ScreenViewModel<ManualEntryState>(initialState, topAppBarHost, Pane.MANUAL_ENTRY) {
+) : ScreenViewModel<ManualEntryState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()
