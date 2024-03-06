@@ -91,6 +91,47 @@ internal fun Layout(
  * @param inModal whether the layout is being used in a modal or not. If true, the [body] won't expand to fill the
  * available content.
  * @param showFooterShadowWhenScrollable whether to show a shadow at the top of the footer when the body is scrollable.
+ * @param scrollState the [ScrollState] to use for the scrollable body.
+ */
+@Composable
+internal fun Layout(
+    modifier: Modifier = Modifier,
+    bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
+    inModal: Boolean = false,
+    verticalArrangement: Arrangement.Vertical = Arrangement.Top,
+    footer: (@Composable () -> Unit)? = null,
+    body: @Composable ColumnScope.() -> Unit,
+) {
+    LayoutScaffold(
+        canScrollForward = false,
+        canScrollBackward = false,
+        inModal = inModal,
+        showTopAppBarElevationWhenScrolled = false,
+        showFooterShadowWhenScrollable = false,
+        modifier = modifier,
+        footer = footer,
+    ) {
+        Column(
+            modifier = Modifier.animateContentSize(),
+            verticalArrangement = verticalArrangement,
+        ) {
+            // Nested columns to achieve proper content padding
+            Column(modifier = Modifier.padding(bodyPadding)) {
+                body()
+            }
+        }
+    }
+}
+
+/**
+ * A layout that contains a body, and an optional, bottom fixed footer.
+ *
+ * @param modifier the modifier to apply to the layout.
+ * @param body the content of the layout.
+ * @param footer the content of the footer.
+ * @param inModal whether the layout is being used in a modal or not. If true, the [body] won't expand to fill the
+ * available content.
+ * @param showFooterShadowWhenScrollable whether to show a shadow at the top of the footer when the body is scrollable.
  * @param lazyListState the [LazyListState] to use for the scrollable body.
  */
 @Composable

@@ -11,11 +11,10 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -26,6 +25,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +50,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.financialconnections.ui.theme.Layout
 import kotlinx.coroutines.delay
 
 private const val ENTER_TRANSITION_DURATION_MS = 1000
@@ -82,12 +81,11 @@ private fun SuccessContentInternal(
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
-    var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
+    var showSpinner by rememberSaveable { mutableStateOf(overrideAnimationForPreview.not()) }
     val payload by remember(payloadAsync) { mutableStateOf(payloadAsync()) }
 
     payload?.let {
-        if (it.skipSuccessPane.not()) {
+        if (showSpinner && it.skipSuccessPane.not()) {
             LaunchedEffect(true) {
                 delay(ENTER_TRANSITION_DURATION_MS.toLong())
                 showSpinner = false
@@ -95,9 +93,12 @@ private fun SuccessContentInternal(
         }
     }
 
-    Layout(
-        scrollState = scrollState,
-        bodyPadding = PaddingValues(24.dp),
+    // We don't use Layout here, because its scrollable nature messes with the
+    // spinner-to-checkmark animation on this screen.
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
     ) {
         Box(
             modifier = Modifier

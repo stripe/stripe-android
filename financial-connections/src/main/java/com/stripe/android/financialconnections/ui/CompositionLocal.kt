@@ -2,9 +2,13 @@ package com.stripe.android.financialconnections.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.NetworkImageDecoder
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -22,6 +26,21 @@ internal fun FinancialConnectionsPreview(
     content: @Composable () -> Unit
 ) {
     val navController = rememberNavController()
+
+    val topAppBarHost = remember {
+        object : TopAppBarHost {
+            override val defaultTopAppBarState: TopAppBarState = TopAppBarState(
+                pane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+                hideStripeLogo = reducedBrandingOverride,
+                testMode = testMode,
+                allowBackNavigation = true,
+            )
+
+            override fun handleTopAppBarStateChanged(topAppBarState: TopAppBarState) = Unit
+            override fun updateTopAppBarElevation(isElevated: Boolean) = Unit
+        }
+    }
+
     FinancialConnectionsTheme {
         CompositionLocalProvider(
             LocalNavHostController provides navController,
@@ -34,6 +53,7 @@ internal fun FinancialConnectionsPreview(
                 networkImageDecoder = NetworkImageDecoder(),
                 diskCache = null
             ),
+            LocalTopAppBarHost provides topAppBarHost,
             content = content
         )
     }
