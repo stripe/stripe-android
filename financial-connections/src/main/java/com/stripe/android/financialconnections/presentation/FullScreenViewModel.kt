@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.ui.components.TopAppBarState
 internal interface TopAppBarHost {
     val defaultTopAppBarState: TopAppBarState
     fun handleTopAppBarStateChanged(topAppBarState: TopAppBarState)
+    fun updateTopAppBarElevation(isElevated: Boolean)
 }
 
 internal data class TopAppBarStateUpdate(

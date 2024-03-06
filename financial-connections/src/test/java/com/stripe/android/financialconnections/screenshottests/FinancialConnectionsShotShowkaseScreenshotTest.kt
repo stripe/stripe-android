@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.screenshottests
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalInspectionMode
@@ -12,10 +12,13 @@ import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.financialconnections.getMetadata
+import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.TimeZoneRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @RunWith(TestParameterInjector::class)
 class PaparazziSampleScreenshotTest {
@@ -56,11 +59,17 @@ class PaparazziSampleScreenshotTest {
             )
         )
         paparazzi.snapshot {
-            CompositionLocalProvider(
-                LocalInspectionMode provides true,
-            ) {
-                Box {
-                    componentTestPreview.Content()
+            FinancialConnectionsTheme {
+                CompositionLocalProvider(
+                    LocalInspectionMode provides true,
+                    LocalTopAppBarHost provides mock(),
+                ) {
+                    Surface(
+                        color = FinancialConnectionsTheme.colors.backgroundSurface,
+                        contentColor = FinancialConnectionsTheme.colors.textDefault,
+                    ) {
+                        componentTestPreview.Content()
+                    }
                 }
             }
         }

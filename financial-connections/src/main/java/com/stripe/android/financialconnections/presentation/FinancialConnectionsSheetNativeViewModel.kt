@@ -142,7 +142,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun updateTopAppBarElevation(isElevated: Boolean) {
+    override fun updateTopAppBarElevation(isElevated: Boolean) {
         _topAppBarElevation.value = if (isElevated) 8 else 0
     }
 

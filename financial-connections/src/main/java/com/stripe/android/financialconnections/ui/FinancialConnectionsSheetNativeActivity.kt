@@ -49,6 +49,7 @@ import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -155,7 +156,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             LocalTestMode provides testMode,
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
-            LocalUriHandler provides uriHandler
+            LocalUriHandler provides uriHandler,
+            LocalTopAppBarHost provides viewModel,
         ) {
             BackHandler(true) {
                 viewModel.onBackClick(navController.currentDestination?.pane)
@@ -334,6 +336,10 @@ internal val LocalTestMode = staticCompositionLocalOf<Boolean> {
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
     error("No ImageLoader provided")
+}
+
+internal val LocalTopAppBarHost = staticCompositionLocalOf<TopAppBarHost> {
+    error("No TopAppBarHost provided")
 }
 
 /**

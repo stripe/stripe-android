@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -130,10 +130,10 @@ private fun LayoutScaffold(
     footer: (@Composable () -> Unit)?,
     body: @Composable () -> Unit,
 ) {
-    val parent = parentViewModel()
+    val topAppBarHost = LocalTopAppBarHost.current
 
     LaunchedEffect(canScrollBackward) {
-        parent.updateTopAppBarElevation(isElevated = canScrollBackward)
+        topAppBarHost.updateTopAppBarElevation(isElevated = canScrollBackward)
     }
 
     Column(
