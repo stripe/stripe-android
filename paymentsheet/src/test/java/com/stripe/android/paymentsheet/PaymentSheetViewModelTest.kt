@@ -2550,7 +2550,6 @@ internal class PaymentSheetViewModelTest {
         linkState: LinkState? = null,
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
-        lpmRepository: LpmRepository = this.lpmRepository,
         initialPaymentSelection: PaymentSelection? =
             customerPaymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
@@ -2580,7 +2579,6 @@ internal class PaymentSheetViewModelTest {
                 paymentSheetLoader = paymentSheetLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
-                lpmRepository = lpmRepository,
                 paymentLauncherFactory = paymentLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

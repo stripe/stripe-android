@@ -10,7 +10,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -83,7 +82,6 @@ internal abstract class BaseSheetViewModel(
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
-    val lpmRepository: LpmRepository,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -226,8 +224,9 @@ internal abstract class BaseSheetViewModel(
     }
 
     private fun providePaymentMethodName(code: PaymentMethodCode?): String {
-        val paymentMethod = lpmRepository.fromCode(code)
-        return paymentMethod?.displayNameResource?.let {
+        return code?.let {
+            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
+        }?.displayNameResource?.let {
             getApplication<Application>().getString(it)
         }.orEmpty()
     }
