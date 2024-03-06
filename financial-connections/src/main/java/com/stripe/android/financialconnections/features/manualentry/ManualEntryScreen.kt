@@ -331,13 +331,13 @@ private fun InputWithError(
     }
 }
 
-//@Preview(
+// @Preview(
 //    group = "Manual Entry Pane",
-//)
-//@Composable
-//internal fun ManualEntryPreview(
+// )
+// @Composable
+// internal fun ManualEntryPreview(
 //    @PreviewParameter(ManualEntryPreviewParameterProvider::class) state: ManualEntryState
-//) {
+// ) {
 //    FinancialConnectionsPreview {
 //        ManualEntryContent(
 //            routing = state.routing,
@@ -357,4 +357,4 @@ private fun InputWithError(
 //            onCloseClick = {}
 //        )
 //    }
-//}
+// }

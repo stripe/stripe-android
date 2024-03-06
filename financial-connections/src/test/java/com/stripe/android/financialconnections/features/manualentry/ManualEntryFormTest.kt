@@ -90,5 +90,4 @@ class ManualEntryFormTest {
         scope.advanceUntilIdle()
         assertTrue(form.isValid.first())
     }
-
 }

@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
-
 @OptIn(ExperimentalCoroutinesApi::class)
 internal class ManualEntryForm(
     scope: CoroutineScope
@@ -99,6 +98,7 @@ internal class ManualEntryForm(
         else -> null
     }
 
+    @Suppress("MagicNumber")
     private fun String.isUSRoutingNumber(): Boolean {
         val usRoutingFactor: (Int) -> Int = {
             when (it % 3) {
@@ -122,5 +122,3 @@ internal class ManualEntryForm(
         private const val ACCOUNT_NUMBER_MAX_LENGTH = 17
     }
 }
-
-
