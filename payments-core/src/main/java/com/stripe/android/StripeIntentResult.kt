@@ -1,9 +1,7 @@
 package com.stripe.android
 
 import androidx.annotation.IntDef
-import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.model.StripeModel
-import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.StripeIntent
 
 /**
@@ -18,19 +16,15 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     abstract val intent: T
     abstract val failureMessage: String?
 
-    @VisibleForTesting
-    internal var luxePostConfirmActionRepository: LuxePostConfirmActionRepository =
-        LuxePostConfirmActionRepository.Instance
-
     @Outcome
     @get:Outcome
     val outcome: Int
         get() = determineOutcome(intent, outcomeFromFlow)
 
-    @StripeIntentResult.Outcome
+    @Outcome
     private fun determineOutcome(
         stripeIntent: StripeIntent,
-        @StripeIntentResult.Outcome outcome: Int
+        @Outcome outcome: Int
     ): Int {
         if (outcome != Outcome.UNKNOWN) {
             return outcome
@@ -40,40 +34,36 @@ abstract class StripeIntentResult<out T : StripeIntent> internal constructor(
     }
 
     private fun getOutcome(stripeIntent: StripeIntent): Int {
-        return luxePostConfirmActionRepository.getPostAuthorizeIntentOutcome(
-            stripeIntent
-        ) ?: run {
-            when (stripeIntent.status) {
-                StripeIntent.Status.RequiresAction -> {
-                    if (stripeIntent.nextActionData == null) {
-                        Outcome.FAILED
-                    } else if (isRequireActionSuccessState(intent)) {
-                        Outcome.SUCCEEDED
-                    } else {
-                        Outcome.CANCELED
-                    }
-                }
-                StripeIntent.Status.Canceled -> {
+        return when (stripeIntent.status) {
+            StripeIntent.Status.RequiresAction -> {
+                if (stripeIntent.nextActionData == null) {
+                    Outcome.FAILED
+                } else if (isRequireActionSuccessState(intent)) {
+                    Outcome.SUCCEEDED
+                } else {
                     Outcome.CANCELED
                 }
-                StripeIntent.Status.RequiresPaymentMethod -> {
-                    Outcome.FAILED
-                }
-                StripeIntent.Status.Succeeded,
-                StripeIntent.Status.RequiresCapture,
-                StripeIntent.Status.RequiresConfirmation -> {
+            }
+            StripeIntent.Status.Canceled -> {
+                Outcome.CANCELED
+            }
+            StripeIntent.Status.RequiresPaymentMethod -> {
+                Outcome.FAILED
+            }
+            StripeIntent.Status.Succeeded,
+            StripeIntent.Status.RequiresCapture,
+            StripeIntent.Status.RequiresConfirmation -> {
+                Outcome.SUCCEEDED
+            }
+            StripeIntent.Status.Processing -> {
+                if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
                     Outcome.SUCCEEDED
-                }
-                StripeIntent.Status.Processing -> {
-                    if (intent.paymentMethod?.type?.hasDelayedSettlement() == true) {
-                        Outcome.SUCCEEDED
-                    } else {
-                        Outcome.UNKNOWN
-                    }
-                }
-                else -> {
+                } else {
                     Outcome.UNKNOWN
                 }
+            }
+            else -> {
+                Outcome.UNKNOWN
             }
         }
     }
