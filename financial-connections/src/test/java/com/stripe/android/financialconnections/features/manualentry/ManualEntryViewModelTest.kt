@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.ManualEntryMode
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,6 +37,7 @@ class ManualEntryViewModelTest {
     private val pollAttachPaymentAccount = mock<PollAttachPaymentAccount>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel() = ManualEntryViewModel(
         getOrFetchSync = getSync,
@@ -45,6 +47,7 @@ class ManualEntryViewModelTest {
         initialState = ManualEntryState(),
         pollAttachPaymentAccount = pollAttachPaymentAccount,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        topAppBarHost = topAppBarHost,
     )
 
     @Test

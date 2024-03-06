@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,6 +45,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: NetworkingSaveToLinkVerificationState = NetworkingSaveToLinkVerificationState()
@@ -58,7 +60,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         getCachedConsumerSession = getCachedConsumerSession,
         saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
         logger = Logger.noop(),
-        initialState = state
+        initialState = state,
+        topAppBarHost = topAppBarHost,
     )
 
     @Test

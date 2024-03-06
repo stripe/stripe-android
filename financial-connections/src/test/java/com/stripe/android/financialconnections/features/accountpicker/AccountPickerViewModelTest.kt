@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -36,6 +37,7 @@ internal class AccountPickerViewModelTest {
     private val navigationManager = mock<NavigationManager>()
     private val selectAccounts = mock<SelectAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: AccountPickerState
@@ -47,7 +49,8 @@ internal class AccountPickerViewModelTest {
         navigationManager = navigationManager,
         logger = Logger.noop(),
         handleClickableUrl = mock(),
-        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts
+        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts,
+        topAppBarHost = topAppBarHost,
     )
 
     @Test

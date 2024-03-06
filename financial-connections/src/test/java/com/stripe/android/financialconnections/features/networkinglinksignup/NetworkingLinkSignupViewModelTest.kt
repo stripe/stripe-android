@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
@@ -50,6 +51,7 @@ class NetworkingLinkSignupViewModelTest {
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val sync = mock<SynchronizeFinancialConnectionsSession>()
     private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState
@@ -64,7 +66,8 @@ class NetworkingLinkSignupViewModelTest {
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         sync = sync,
         saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
-        saveAccountToLink = saveAccountToLink
+        saveAccountToLink = saveAccountToLink,
+        topAppBarHost = topAppBarHost,
     )
 
     @Test

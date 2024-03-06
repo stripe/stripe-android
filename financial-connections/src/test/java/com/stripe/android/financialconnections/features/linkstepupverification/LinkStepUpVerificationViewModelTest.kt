@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -49,6 +50,7 @@ class LinkStepUpVerificationViewModelTest {
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: LinkStepUpVerificationState = LinkStepUpVerificationState()
@@ -64,7 +66,8 @@ class LinkStepUpVerificationViewModelTest {
         updateLocalManifest = updateLocalManifest,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         logger = Logger.noop(),
-        initialState = state
+        initialState = state,
+        topAppBarHost = topAppBarHost,
     )
 
     @Test
