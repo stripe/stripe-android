@@ -45,11 +45,7 @@ private fun ErrorContent(
 ) {
     when (payload) {
         Uninitialized,
-        is Loading -> FullScreenError(
-            showBack = false,
-            onCloseClick = { },
-            content = { FullScreenGenericLoading() }
-        )
+        is Loading -> FullScreenGenericLoading()
 
         // Render error successfully retrieved from a previous pane
         is Success -> ErrorContent(
@@ -77,61 +73,35 @@ private fun ErrorContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (error) {
-        is InstitutionPlannedDowntimeError -> FullScreenError(
-            showBack = false,
-            onCloseClick = { onCloseFromErrorClick(error) },
-            content = {
-                InstitutionPlannedDowntimeErrorContent(
-                    exception = error,
-                    onSelectAnotherBank = onSelectAnotherBank,
-                    onEnterDetailsManually = onEnterDetailsManually
-                )
-            }
-        )
+        is InstitutionPlannedDowntimeError -> {
+            InstitutionPlannedDowntimeErrorContent(
+                exception = error,
+                onSelectAnotherBank = onSelectAnotherBank,
+                onEnterDetailsManually = onEnterDetailsManually
+            )
+        }
 
-        is InstitutionUnplannedDowntimeError -> FullScreenError(
-            showBack = false,
-            onCloseClick = { onCloseFromErrorClick(error) },
-            content = {
-                InstitutionUnplannedDowntimeErrorContent(
-                    exception = error,
-                    onSelectAnotherBank = onSelectAnotherBank,
-                    onEnterDetailsManually = onEnterDetailsManually
-                )
-            }
-        )
+        is InstitutionUnplannedDowntimeError -> {
+            InstitutionUnplannedDowntimeErrorContent(
+                exception = error,
+                onSelectAnotherBank = onSelectAnotherBank,
+                onEnterDetailsManually = onEnterDetailsManually
+            )
+        }
 
-        is PartnerAuthError -> FullScreenError(
-            showBack = false,
-            onCloseClick = { onCloseFromErrorClick(error) },
-            content = {
-                InstitutionUnknownErrorContent(
-                    onSelectAnotherBank = onSelectAnotherBank,
-                )
-            }
-        )
+        is PartnerAuthError -> {
+            InstitutionUnknownErrorContent(
+                onSelectAnotherBank = onSelectAnotherBank,
+            )
+        }
 
-        else -> FullScreenError(
-            showBack = false,
-            onCloseClick = { onCloseFromErrorClick(error) },
-            content = {
-                UnclassifiedErrorContent(
-                    error = error,
-                    onCloseFromErrorClick = onCloseFromErrorClick
-                )
-            }
-        )
+        else -> {
+            UnclassifiedErrorContent(
+                error = error,
+                onCloseFromErrorClick = onCloseFromErrorClick
+            )
+        }
     }
-}
-
-@Composable
-private fun FullScreenError(
-    showBack: Boolean,
-    onCloseClick: () -> Unit,
-    content: @Composable () -> Unit
-) {
-    // TODO(tillh-stripe) Remove the indirection and pass error to host somehow
-    content()
 }
 
 @Preview

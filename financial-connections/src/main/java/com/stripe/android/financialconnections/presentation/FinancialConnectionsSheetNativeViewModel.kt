@@ -43,10 +43,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.closesWithError
 import com.stripe.android.financialconnections.navigation.closesWithoutConfirmation
 import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
+import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,6 +78,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val navigationManager: NavigationManager,
+    private val errorRepository: FinancialConnectionsErrorRepository,
     @Named(APPLICATION_ID) private val applicationId: String,
     initialState: FinancialConnectionsSheetNativeState
 ) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState), TopAppBarHost {
@@ -154,11 +157,22 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 
     fun handleCloseClick() {
+        val pane = currentPane.value
+
         // TODO(tillh-stripe) Handle `onCloseFromErrorClick`?
-        if (currentPane.value.closesWithoutConfirmation) {
+        if (pane.closesWithError) {
+            closeWithError()
+        } else if (pane.closesWithoutConfirmation) {
             onCloseNoConfirmationClick(currentPane.value)
         } else {
             onCloseWithConfirmationClick(currentPane.value)
+        }
+    }
+
+    private fun closeWithError() {
+        viewModelScope.launch {
+            val error = errorRepository.get() ?: return@launch
+            onCloseFromErrorClick(error)
         }
     }
 

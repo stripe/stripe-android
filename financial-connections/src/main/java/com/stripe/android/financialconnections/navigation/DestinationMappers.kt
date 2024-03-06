@@ -41,3 +41,6 @@ internal val Pane.closesWithoutConfirmation: Boolean
         Pane.SUCCESS,
         Pane.MANUAL_ENTRY_SUCCESS,
     )
+
+internal val Pane.closesWithError: Boolean
+    get() = this == Pane.UNEXPECTED_ERROR
