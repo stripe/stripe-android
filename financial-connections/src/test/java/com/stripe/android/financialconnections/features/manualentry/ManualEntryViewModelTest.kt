@@ -17,7 +17,6 @@ import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.utils.TestNavigationManager
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -26,7 +25,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ManualEntryViewModelTest {
     @get:Rule
     val mavericksTestRule = MavericksTestRule()

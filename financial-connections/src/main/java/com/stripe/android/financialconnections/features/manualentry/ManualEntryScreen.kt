@@ -21,6 +21,8 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -33,10 +35,12 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -331,30 +335,30 @@ private fun InputWithError(
     }
 }
 
-// @Preview(
-//    group = "Manual Entry Pane",
-// )
-// @Composable
-// internal fun ManualEntryPreview(
-//    @PreviewParameter(ManualEntryPreviewParameterProvider::class) state: ManualEntryState
-// ) {
-//    FinancialConnectionsPreview {
-//        ManualEntryContent(
-//            routing = state.routing,
-//            routingError = state.routingError,
-//            account = state.account,
-//            accountError = state.accountError,
-//            accountConfirm = state.accountConfirm,
-//            accountConfirmError = state.accountConfirmError,
-//            isValidForm = true,
-//            payload = state.payload,
-//            linkPaymentAccountStatus = state.linkPaymentAccount,
-//            onRoutingEntered = {},
-//            onAccountEntered = {},
-//            onAccountConfirmEntered = {},
-//            onTestFill = {},
-//            onSubmit = {},
-//            onCloseClick = {}
-//        )
-//    }
-// }
+@Preview(
+    group = "Manual Entry Pane",
+)
+@Composable
+internal fun ManualEntryPreview(
+    @PreviewParameter(ManualEntryPreviewParameterProvider::class) previewState: PreviewState
+) {
+    FinancialConnectionsPreview {
+        ManualEntryContent(
+            routing = previewState.routing,
+            routingError = previewState.routingError,
+            account = previewState.account,
+            accountError = previewState.accountError,
+            accountConfirm = previewState.accountConfirm,
+            accountConfirmError = previewState.accountConfirmError,
+            isValidForm = true,
+            payload = previewState.state.payload,
+            linkPaymentAccountStatus = previewState.state.linkPaymentAccount,
+            onRoutingEntered = {},
+            onAccountEntered = {},
+            onAccountConfirmEntered = {},
+            onTestFill = {},
+            onSubmit = {},
+            onCloseClick = {}
+        )
+    }
+}
