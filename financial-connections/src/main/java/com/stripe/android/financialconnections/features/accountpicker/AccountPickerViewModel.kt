@@ -34,11 +34,10 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
-import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -54,7 +53,11 @@ internal class AccountPickerViewModel @Inject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
-) : BaseViewModel<AccountPickerState>(initialState, topAppBarHost) {
+) : ScreenViewModel<AccountPickerState>(
+    initialState = initialState,
+    topAppBarHost = topAppBarHost,
+    pane = Pane.ACCOUNT_PICKER,
+) {
 
     init {
         logErrors()
@@ -62,13 +65,12 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
-    override fun mapStateToTopAppBarState(state: AccountPickerState): TopAppBarState {
-        return TopAppBarState(
-            pane = Pane.ACCOUNT_PICKER,
-            hideStripeLogo = false,
-            testMode = true,
-            allowBackNavigation = false,
-        )
+    override fun hidesStripeLogo(state: AccountPickerState, originalValue: Boolean): Boolean {
+        return originalValue
+    }
+
+    override fun allowsBackNavigation(state: AccountPickerState): Boolean {
+        return false
     }
 
     private fun loadAccounts() {

@@ -34,3 +34,10 @@ internal val NavDestination.pane: Pane
         .firstOrNull { (_, destination) -> destination.fullRoute == route }
         ?.key
         ?: throw IllegalArgumentException("No corresponding destination for $this")
+
+internal val Pane.closesWithoutConfirmation: Boolean
+    get() = this in setOf(
+        Pane.CONSENT,
+        Pane.SUCCESS,
+        Pane.MANUAL_ENTRY_SUCCESS,
+    )

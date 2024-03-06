@@ -20,11 +20,10 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import javax.inject.Inject
 
@@ -39,7 +38,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val logger: Logger
-) : BaseViewModel<AttachPaymentState>(initialState, topAppBarHost) {
+) : ScreenViewModel<AttachPaymentState>(initialState, topAppBarHost, Pane.ATTACH_LINKED_PAYMENT_ACCOUNT) {
 
     init {
         logErrors()
@@ -75,13 +74,12 @@ internal class AttachPaymentViewModel @Inject constructor(
         }.execute { copy(linkPaymentAccount = it) }
     }
 
-    override fun mapStateToTopAppBarState(state: AttachPaymentState): TopAppBarState {
-        return TopAppBarState(
-            pane = PANE,
-            hideStripeLogo = false,
-            testMode = true,
-            allowBackNavigation = false,
-        )
+    override fun allowsBackNavigation(state: AttachPaymentState): Boolean {
+        return false
+    }
+
+    override fun hidesStripeLogo(state: AttachPaymentState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun logErrors() {

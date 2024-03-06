@@ -28,7 +28,7 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -63,7 +63,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : BaseViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost) {
+) : ScreenViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost, Pane.NETWORKING_LINK_SIGNUP_PANE) {
 
     private var searchJob = ConflatedJob()
 
@@ -87,13 +87,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun mapStateToTopAppBarState(state: NetworkingLinkSignupState): TopAppBarState {
-        return TopAppBarState(
-            pane = Pane.NETWORKING_LINK_SIGNUP_PANE,
-            hideStripeLogo = false,
-            testMode = true,
-            allowBackNavigation = false,
-        )
+    override fun allowsBackNavigation(state: NetworkingLinkSignupState): Boolean {
+        return false
+    }
+
+    override fun hidesStripeLogo(state: NetworkingLinkSignupState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun observeAsyncs() {

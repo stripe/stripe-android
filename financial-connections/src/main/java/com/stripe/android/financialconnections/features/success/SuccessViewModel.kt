@@ -18,12 +18,11 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -36,7 +35,7 @@ internal class SuccessViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
-) : BaseViewModel<SuccessState>(initialState, topAppBarHost) {
+) : ScreenViewModel<SuccessState>(initialState, topAppBarHost, Pane.SUCCESS) {
 
     init {
         observeAsyncs()
@@ -56,13 +55,13 @@ internal class SuccessViewModel @Inject constructor(
         }
     }
 
-    override fun mapStateToTopAppBarState(state: SuccessState): TopAppBarState {
-        return TopAppBarState(
-            pane = Pane.SUCCESS,
-            hideStripeLogo = false,
-            testMode = true,
-            allowBackNavigation = false,
-        )
+    // TODO: Should this be solved via NavController?
+    override fun allowsBackNavigation(state: SuccessState): Boolean {
+        return false
+    }
+
+    override fun hidesStripeLogo(state: SuccessState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun buildCustomMessage(

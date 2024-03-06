@@ -33,7 +33,7 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.BaseViewModel
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.components.TopAppBarState
@@ -57,7 +57,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
     initialState: InstitutionPickerState
-) : BaseViewModel<InstitutionPickerState>(initialState, topAppBarHost) {
+) : ScreenViewModel<InstitutionPickerState>(initialState, topAppBarHost, Pane.INSTITUTION_PICKER) {
 
     private var searchJob = ConflatedJob()
 
@@ -93,13 +93,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun mapStateToTopAppBarState(state: InstitutionPickerState): TopAppBarState {
-        return TopAppBarState(
-            pane = Pane.INSTITUTION_PICKER,
-            hideStripeLogo = false,
-            testMode = true,
-            allowBackNavigation = true,
-        )
+    override fun allowsBackNavigation(state: InstitutionPickerState): Boolean {
+        return true
+    }
+
+    override fun hidesStripeLogo(state: InstitutionPickerState, originalValue: Boolean): Boolean {
+        return originalValue
     }
 
     private fun logErrors() {

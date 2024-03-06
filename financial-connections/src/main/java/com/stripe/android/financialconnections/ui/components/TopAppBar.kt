@@ -58,21 +58,11 @@ private val PILL_VERTICAL_PADDING = 2.dp
 private const val PILL_RADIUS = 8f
 
 internal data class TopAppBarState(
-    val pane: FinancialConnectionsSessionManifest.Pane?,
+    val pane: FinancialConnectionsSessionManifest.Pane,
     val hideStripeLogo: Boolean,
     val testMode: Boolean,
     val allowBackNavigation: Boolean,
-) {
-
-    companion object {
-        val Default = TopAppBarState(
-            pane = null,
-            hideStripeLogo = true,
-            testMode = false,
-            allowBackNavigation = false,
-        )
-    }
-}
+)
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(

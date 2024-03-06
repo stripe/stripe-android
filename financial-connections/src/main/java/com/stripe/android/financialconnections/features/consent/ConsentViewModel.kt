@@ -19,8 +19,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.BaseViewModel
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.ui.components.TopAppBarState
@@ -40,7 +40,7 @@ internal class ConsentViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : BaseViewModel<ConsentState>(initialState, parentViewModel) {
+) : ScreenViewModel<ConsentState>(initialState, parentViewModel, Pane.CONSENT) {
 
     init {
         logErrors()
@@ -58,13 +58,12 @@ internal class ConsentViewModel @Inject constructor(
         }.execute { copy(consent = it) }
     }
 
-    override fun mapStateToTopAppBarState(state: ConsentState): TopAppBarState {
-        return TopAppBarState(
-            pane = Pane.CONSENT,
-            hideStripeLogo = state.consent()?.shouldShowMerchantLogos ?: false,
-            testMode = true,
-            allowBackNavigation = true,
-        )
+    override fun hidesStripeLogo(state: ConsentState, originalValue: Boolean): Boolean {
+        return state.consent()?.shouldShowMerchantLogos ?: originalValue
+    }
+
+    override fun allowsBackNavigation(state: ConsentState): Boolean {
+        return true
     }
 
     private fun logErrors() {

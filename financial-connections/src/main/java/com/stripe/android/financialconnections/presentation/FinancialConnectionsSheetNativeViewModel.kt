@@ -43,6 +43,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.closesWithoutConfirmation
 import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
@@ -103,10 +104,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    private val currentPane = MutableStateFlow<Pane?>(null)
+    override val initialTopAppBarState: TopAppBarState = initialState.toTopAppBarState()
 
-//    private val _topAppBarState = MutableStateFlow(TopAppBarState.Default)
-//    val topAppBarState: StateFlow<TopAppBarState> = _topAppBarState.asStateFlow()
+    private val currentPane = MutableStateFlow(initialState.initialPane)
 
     private val _topAppBarElevation = MutableStateFlow(0)
     val topAppBarElevation: StateFlow<Int> = _topAppBarElevation.asStateFlow()
@@ -121,7 +121,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }.filterNotNull().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = TopAppBarState.Default,
+        initialValue = initialTopAppBarState,
     )
 
     override fun handleTopAppBarStateChanged(topAppBarState: TopAppBarState) {
@@ -141,9 +141,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     }
 
     fun handleCloseClick() {
-        val pane = currentPane.value ?: return
-        // TODO(tillh-stripe) Handle all cases
-        onCloseWithConfirmationClick(pane)
+        // TODO(tillh-stripe) Handle `onCloseFromErrorClick`?
+        if (currentPane.value.closesWithoutConfirmation) {
+            onCloseNoConfirmationClick(currentPane.value)
+        } else {
+            onCloseWithConfirmationClick(currentPane.value)
+        }
     }
 
     /**
@@ -495,4 +498,13 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     data class Finish(
         val result: FinancialConnectionsSheetActivityResult
     ) : FinancialConnectionsSheetNativeViewEffect
+}
+
+private fun FinancialConnectionsSheetNativeState.toTopAppBarState(): TopAppBarState {
+    return TopAppBarState(
+        pane = initialPane,
+        hideStripeLogo = reducedBranding,
+        testMode = testMode,
+        allowBackNavigation = false,
+    )
 }
