@@ -12,7 +12,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,6 +42,17 @@ internal fun ErrorScreen(
     topButton: ErrorScreenButton? = null,
     bottomButton: ErrorScreenButton? = null,
 ) {
+    val cause by identityViewModel.errorCause.observeAsState()
+    LaunchedEffect(cause) {
+        cause?.let {
+            identityViewModel.sendAnalyticsRequest(
+                identityViewModel.identityAnalyticsRequestFactory.genericError(
+                    it.message,
+                    it.stackTraceToString()
+                )
+            )
+        }
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
