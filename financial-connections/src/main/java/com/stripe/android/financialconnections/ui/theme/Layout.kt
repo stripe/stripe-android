@@ -22,13 +22,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.ui.ScrollEffects
+import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -49,13 +50,13 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 @Composable
 internal fun Layout(
     modifier: Modifier = Modifier,
-    body: @Composable ColumnScope.() -> Unit,
-    footer: (@Composable () -> Unit)? = null,
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     scrollState: ScrollState = rememberScrollState(),
+    footer: (@Composable () -> Unit)? = null,
+    body: @Composable ColumnScope.() -> Unit,
 ) {
     LayoutScaffold(
         canScrollForward = scrollState.canScrollForward,
@@ -129,7 +130,11 @@ private fun LayoutScaffold(
     footer: (@Composable () -> Unit)?,
     body: @Composable () -> Unit,
 ) {
-    ScrollEffects(canScrollBackward)
+    val parent = parentViewModel()
+
+    LaunchedEffect(canScrollBackward) {
+        parent.updateTopAppBarElevation(isElevated = canScrollBackward)
+    }
 
     Column(
         modifier

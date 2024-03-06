@@ -11,9 +11,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -44,13 +44,13 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.success.SuccessState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.ScrollEffects
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.Layout
 import kotlinx.coroutines.delay
 
 private const val ENTER_TRANSITION_DURATION_MS = 1000
@@ -86,8 +86,6 @@ private fun SuccessContentInternal(
     var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
     val payload by remember(payloadAsync) { mutableStateOf(payloadAsync()) }
 
-    ScrollEffects(scrollState)
-
     payload?.let {
         if (it.skipSuccessPane.not()) {
             LaunchedEffect(true) {
@@ -97,31 +95,28 @@ private fun SuccessContentInternal(
         }
     }
 
-    Box {
-        Column(
+    Layout(
+        scrollState = scrollState,
+        bodyPadding = PaddingValues(24.dp),
+    ) {
+        Box(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp)
+                .weight(1f)
+                .fillMaxWidth(),
+            contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                SpinnerToSuccessAnimation(
-                    customSuccessMessage = payload?.customSuccessMessage,
-                    accountsCount = payload?.accountsCount ?: 0,
-                    showSpinner = showSpinner || payload == null
-                )
-            }
-            SuccessFooter(
-                modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
-                merchantName = payload?.businessName,
-                loading = completeSessionAsync is Loading,
-                onDoneClick = onDoneClick
+            SpinnerToSuccessAnimation(
+                customSuccessMessage = payload?.customSuccessMessage,
+                accountsCount = payload?.accountsCount ?: 0,
+                showSpinner = showSpinner || payload == null
             )
         }
+        SuccessFooter(
+            modifier = Modifier.alpha(if (showSpinner) 0f else 1f),
+            merchantName = payload?.businessName,
+            loading = completeSessionAsync is Loading,
+            onDoneClick = onDoneClick
+        )
     }
 }
 

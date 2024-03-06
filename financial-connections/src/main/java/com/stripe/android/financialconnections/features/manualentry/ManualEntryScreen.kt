@@ -40,7 +40,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.ScrollEffects
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
 import com.stripe.android.financialconnections.ui.components.TestModeBanner
@@ -90,7 +89,6 @@ private fun ManualEntryContent(
     onTestFill: () -> Unit
 ) {
     val scrollState = rememberScrollState()
-    ScrollEffects(state = scrollState)
 
     Box {
         when (payload) {
