@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -76,7 +76,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.ScrollEffects
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
@@ -84,6 +83,7 @@ import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsColors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import kotlinx.coroutines.launch
 
 @Composable
@@ -93,7 +93,11 @@ internal fun InstitutionPickerScreen() {
     val state: InstitutionPickerState by viewModel.collectAsState()
     val listState = rememberLazyListState()
 
-    ScrollEffects(state = listState)
+    val parent = parentViewModel()
+    LaunchedEffect(listState.canScrollBackward) {
+        val isScrolled = listState.canScrollBackward
+        parent.updateTopAppBarElevation(isElevated = isScrolled)
+    }
 
     InstitutionPickerContent(
         listState = listState,
@@ -164,6 +168,7 @@ private fun LoadedContent(
 
     // Scroll event should be emitted just once per search
     LaunchedEffect(institutions) { shouldEmitScrollEvent = true }
+
     // Trigger onScrollChanged with the list of institutions when scrolling stops (true -> false)
     LaunchedEffect(listState.isScrollInProgress) {
         if (institutions()?.data?.isNotEmpty() == true &&
@@ -179,39 +184,86 @@ private fun LoadedContent(
         // Disable overscroll as it does not play well with sticky headers.
         LocalOverscrollConfiguration provides null
     ) {
-        LazyColumn(
-            Modifier.padding(horizontal = 16.dp),
-            state = listState,
-            content = {
-                item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-                stickyHeader(key = "searchRow") {
-                    SearchRow(
-                        focusRequester = searchInputFocusRequester,
-                        query = input,
-                        onQueryChanged = {
-                            input = it
-                            onQueryChanged(input)
-                        },
-                    )
-                }
-                item { Spacer(modifier = Modifier.height(8.dp)) }
+        LazyLayout(
+            lazyListState = listState,
+            bodyPadding = PaddingValues(horizontal = 16.dp),
+            showFooterShadowWhenScrollable = false,
+        ) {
+            item {
+                SearchTitle(modifier = Modifier.padding(horizontal = 8.dp))
+            }
 
-                searchResults(
-                    isInputEmpty = input.isBlank(),
-                    payload = payload,
-                    selectedInstitutionId = selectedInstitutionId,
-                    onInstitutionSelected = onInstitutionSelected,
-                    institutions = institutions,
-                    onManualEntryClick = onManualEntryClick,
-                    onSearchMoreClick = {
-                        // Scroll to the top of the list and focus on the search input
-                        coroutineScope.launch { listState.animateScrollToItem(index = 1) }
-                        searchInputFocusRequester.requestFocus()
-                    }
+            item {
+                Spacer(modifier = Modifier.height(24.dp))
+            }
+
+            stickyHeader(key = "searchRow") {
+                SearchRow(
+                    focusRequester = searchInputFocusRequester,
+                    query = input,
+                    onQueryChanged = {
+                        input = it
+                        onQueryChanged(input)
+                    },
                 )
             }
-        )
+
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+
+            searchResults(
+                isInputEmpty = input.isBlank(),
+                payload = payload,
+                selectedInstitutionId = selectedInstitutionId,
+                onInstitutionSelected = onInstitutionSelected,
+                institutions = institutions,
+                onManualEntryClick = onManualEntryClick,
+                onSearchMoreClick = {
+                    // Scroll to the top of the list and focus on the search input
+                    coroutineScope.launch { listState.animateScrollToItem(index = 1) }
+                    searchInputFocusRequester.requestFocus()
+                }
+            )
+        }
+//        LazyColumn(
+//            contentPadding = PaddingValues(horizontal = 16.dp),
+//            state = listState,
+//            content = {
+//                item {
+//                    SearchTitle(modifier = Modifier.padding(horizontal = 8.dp))
+//                }
+//
+//                item {
+//                    Spacer(modifier = Modifier.height(24.dp))
+//                }
+//
+//                stickyHeader(key = "searchRow") {
+//                    SearchRow(
+//                        focusRequester = searchInputFocusRequester,
+//                        query = input,
+//                        onQueryChanged = {
+//                            input = it
+//                            onQueryChanged(input)
+//                        },
+//                    )
+//                }
+//
+//                item { Spacer(modifier = Modifier.height(8.dp)) }
+//
+//                searchResults(
+//                    isInputEmpty = input.isBlank(),
+//                    payload = payload,
+//                    selectedInstitutionId = selectedInstitutionId,
+//                    onInstitutionSelected = onInstitutionSelected,
+//                    institutions = institutions,
+//                    onManualEntryClick = onManualEntryClick,
+//                    onSearchMoreClick = {
+//                        // Scroll to the top of the list and focus on the search input
+//                        coroutineScope.launch { listState.animateScrollToItem(index = 1) }
+//                        searchInputFocusRequester.requestFocus()
+//                    }
+//                )
+//            }
+//        )
     }
 }
 

@@ -94,13 +94,13 @@ internal fun Layout(
 @Composable
 internal fun LazyLayout(
     modifier: Modifier = Modifier,
-    body: LazyListScope.() -> Unit,
     footer: (@Composable () -> Unit)? = null,
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
-    lazyListState: LazyListState = rememberLazyListState()
+    lazyListState: LazyListState = rememberLazyListState(),
+    body: LazyListScope.() -> Unit,
 ) {
     LayoutScaffold(
         canScrollForward = lazyListState.canScrollForward,
