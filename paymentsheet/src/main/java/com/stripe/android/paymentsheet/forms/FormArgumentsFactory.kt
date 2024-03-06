@@ -23,12 +23,11 @@ internal object FormArgumentsFactory {
         newLpm: PaymentSelection.New?,
         cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
-        val setupFutureUsageFieldConfiguration = requireNotNull(
+        val setupFutureUsageFieldConfiguration =
             paymentMethod.paymentMethodDefinition().getSetupFutureUsageFieldConfiguration(
                 metadata = metadata,
                 customerConfiguration = config.customer,
             )
-        )
 
         val initialParams = when (newLpm) {
             is PaymentSelection.New.LinkInline -> {
@@ -60,12 +59,12 @@ internal object FormArgumentsFactory {
         val saveForFutureUseInitialValue = if (newLpm != null) {
             newLpm.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse
         } else {
-            setupFutureUsageFieldConfiguration.saveForFutureUseInitialValue
+            setupFutureUsageFieldConfiguration?.saveForFutureUseInitialValue == true
         }
 
         return FormArguments(
             paymentMethodCode = paymentMethod.code,
-            showCheckbox = setupFutureUsageFieldConfiguration.isSaveForFutureUseValueChangeable,
+            showCheckbox = setupFutureUsageFieldConfiguration?.isSaveForFutureUseValueChangeable == true,
             saveForFutureUseInitialValue = saveForFutureUseInitialValue,
             merchantName = merchantName,
             amount = amount,
