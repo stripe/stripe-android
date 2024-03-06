@@ -375,7 +375,7 @@ constructor(
             isVoucher = false,
             requiresMandate = false,
             hasDelayedSettlement = false,
-            shouldRefreshIfIntentRequiresAction = false,
+            shouldRefreshIfIntentRequiresAction = true,
         ),
         Alma(
             "alma",
