@@ -5,7 +5,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.elements.filterNotNullValues
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -552,3 +551,6 @@ private fun PaymentSelection?.selectedPaymentMethodType(): Map<String, String> {
         mapOf(PaymentSheetEvent.FIELD_SELECTED_LPM to it)
     }.orEmpty()
 }
+
+private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
+    mapNotNull { (key, value) -> value?.let { key to it } }.toMap()

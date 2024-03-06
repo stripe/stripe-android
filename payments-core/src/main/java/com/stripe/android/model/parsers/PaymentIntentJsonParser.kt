@@ -6,15 +6,12 @@ import com.stripe.android.core.model.StripeJsonUtils.optString
 import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.ModelJsonParser.Companion.jsonArrayToList
 import com.stripe.android.model.Address
-import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import org.json.JSONObject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class PaymentIntentJsonParser(
-    val luxePostConfirmActionRepository: LuxePostConfirmActionRepository = LuxePostConfirmActionRepository.Instance
-) : ModelJsonParser<PaymentIntent> {
+class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
     override fun parse(json: JSONObject): PaymentIntent? {
         val objectType = optString(json, FIELD_OBJECT)
         if (OBJECT_TYPE != objectType) {
@@ -68,19 +65,7 @@ class PaymentIntentJsonParser(
             ShippingJsonParser().parse(it)
         }
         val nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
-            when (
-                val luxeNextActionResult = luxePostConfirmActionRepository.getAction(
-                    paymentMethod?.code,
-                    status,
-                    json
-                )
-            ) {
-                is LuxePostConfirmActionRepository.Result.Action -> luxeNextActionResult.postConfirmAction
-                is LuxePostConfirmActionRepository.Result.NoAction -> null
-                is LuxePostConfirmActionRepository.Result.NotSupported -> {
-                    NextActionDataParser().parse(it)
-                }
-            }
+            NextActionDataParser().parse(it)
         }
 
         val unactivatedPaymentMethods = jsonArrayToList(
