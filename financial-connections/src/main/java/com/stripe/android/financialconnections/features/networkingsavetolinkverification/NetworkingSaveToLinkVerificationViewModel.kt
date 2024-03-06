@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -76,12 +77,8 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun allowsBackNavigation(state: NetworkingSaveToLinkVerificationState): Boolean {
-        return true
-    }
-
-    override fun hidesStripeLogo(state: NetworkingSaveToLinkVerificationState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: NetworkingSaveToLinkVerificationState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = true)
     }
 
     private fun logErrors() {

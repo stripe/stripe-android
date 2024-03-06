@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource.StringId
 import kotlinx.coroutines.launch
@@ -49,12 +50,8 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun allowsBackNavigation(state: ManualEntrySuccessState): Boolean {
-        return false
-    }
-
-    override fun hidesStripeLogo(state: ManualEntrySuccessState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: ManualEntrySuccessState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = false)
     }
 
     fun onSubmit() {

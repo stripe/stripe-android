@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -47,12 +48,8 @@ internal class ErrorViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun allowsBackNavigation(state: ErrorState): Boolean {
-        return false
-    }
-
-    override fun hidesStripeLogo(state: ErrorState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: ErrorState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = false)
     }
 
     private fun logErrors() {

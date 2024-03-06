@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -92,12 +93,8 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         }
     }
 
-    override fun allowsBackNavigation(state: NetworkingLinkVerificationState): Boolean {
-        return true
-    }
-
-    override fun hidesStripeLogo(state: NetworkingLinkVerificationState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: NetworkingLinkVerificationState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = true)
     }
 
     private fun buildPayload(consumerSession: ConsumerSession) = Payload(

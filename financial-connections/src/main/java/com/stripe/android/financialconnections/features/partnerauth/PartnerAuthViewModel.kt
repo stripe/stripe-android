@@ -49,6 +49,7 @@ import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -83,12 +84,8 @@ internal class PartnerAuthViewModel @Inject constructor(
         restoreOrCreateAuthSession()
     }
 
-    override fun allowsBackNavigation(state: SharedPartnerAuthState): Boolean {
-        return state.canNavigateBack
-    }
-
-    override fun hidesStripeLogo(state: SharedPartnerAuthState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: SharedPartnerAuthState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = state.canNavigateBack)
     }
 
     private fun restoreOrCreateAuthSession() = suspend {

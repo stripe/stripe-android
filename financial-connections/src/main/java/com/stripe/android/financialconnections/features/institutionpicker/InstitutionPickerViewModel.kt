@@ -35,8 +35,8 @@ import com.stripe.android.financialconnections.navigation.Destination.PartnerAut
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -93,12 +93,8 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun allowsBackNavigation(state: InstitutionPickerState): Boolean {
-        return true
-    }
-
-    override fun hidesStripeLogo(state: InstitutionPickerState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: InstitutionPickerState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = true)
     }
 
     private fun logErrors() {

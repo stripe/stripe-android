@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -74,12 +75,8 @@ internal class AttachPaymentViewModel @Inject constructor(
         }.execute { copy(linkPaymentAccount = it) }
     }
 
-    override fun allowsBackNavigation(state: AttachPaymentState): Boolean {
-        return false
-    }
-
-    override fun hidesStripeLogo(state: AttachPaymentState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: AttachPaymentState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = false)
     }
 
     private fun logErrors() {

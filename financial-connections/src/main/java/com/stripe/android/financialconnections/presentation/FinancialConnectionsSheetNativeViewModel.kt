@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.presentation
 
 import android.content.Intent
 import android.os.Parcelable
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
@@ -61,6 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.parcelize.Parcelize
+import java.util.Objects
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -84,6 +86,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val navigationFlow = navigationManager.navigationFlow
 
     init {
+        Log.d("TILL123", "Creating FinancialConnectionsSheetNativeViewModel ${Objects.hash(this)}")
         setState { copy(firstInit = false) }
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
@@ -111,10 +114,10 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val _topAppBarElevation = MutableStateFlow(0)
     val topAppBarElevation: StateFlow<Int> = _topAppBarElevation.asStateFlow()
 
-    private val topAppBarStateByPane = MutableStateFlow<Map<Pane, TopAppBarState>>(emptyMap())
+    private val topAppBarStatesByPane = MutableStateFlow<Map<Pane, TopAppBarState>>(emptyMap())
 
     val topAppBarState: StateFlow<TopAppBarState> = combine(
-        topAppBarStateByPane,
+        topAppBarStatesByPane,
         currentPane,
     ) { stateByPane, pane ->
         stateByPane[pane]
@@ -125,10 +128,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     )
 
     override fun handleTopAppBarStateChanged(topAppBarState: TopAppBarState) {
-        val pane = topAppBarState.pane ?: return
-
-        topAppBarStateByPane.update {
-            it + mapOf(pane to topAppBarState)
+        topAppBarStatesByPane.update { statesByPane ->
+            val pane = currentPane.value
+            statesByPane + mapOf(pane to topAppBarState)
         }
     }
 
@@ -388,6 +390,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: FinancialConnectionsSheetNativeState
         ): FinancialConnectionsSheetNativeViewModel {
+            Log.d("TILL123", "> Using FinancialConnectionsSheetNativeViewModel factory")
             val args = viewModelContext.args<FinancialConnectionsSheetNativeActivityArgs>()
             return DaggerFinancialConnectionsSheetNativeComponent
                 .builder()
@@ -505,6 +508,6 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(): TopAppBarSt
         pane = initialPane,
         hideStripeLogo = reducedBranding,
         testMode = testMode,
-        allowBackNavigation = false,
+        allowBackNavigation = true,
     )
 }

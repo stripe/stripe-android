@@ -19,11 +19,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
+import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
-import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
@@ -33,14 +33,14 @@ import javax.inject.Inject
 
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
-    parentViewModel: FinancialConnectionsSheetNativeViewModel,
+    topAppBarHost: TopAppBarHost,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : ScreenViewModel<ConsentState>(initialState, parentViewModel, Pane.CONSENT) {
+) : ScreenViewModel<ConsentState>(initialState, topAppBarHost, Pane.CONSENT) {
 
     init {
         logErrors()
@@ -58,12 +58,11 @@ internal class ConsentViewModel @Inject constructor(
         }.execute { copy(consent = it) }
     }
 
-    override fun hidesStripeLogo(state: ConsentState, originalValue: Boolean): Boolean {
-        return state.consent()?.shouldShowMerchantLogos ?: originalValue
-    }
-
-    override fun allowsBackNavigation(state: ConsentState): Boolean {
-        return true
+    override fun updateTopAppBarState(state: ConsentState): TopAppBarStateUpdate {
+        val hidesStripeLogo = state.consent()?.shouldShowMerchantLogos
+        return TopAppBarStateUpdate(
+            hideStripeLogo = hidesStripeLogo,
+        )
     }
 
     private fun logErrors() {

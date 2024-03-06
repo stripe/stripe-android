@@ -10,6 +10,18 @@ internal interface TopAppBarHost {
     fun handleTopAppBarStateChanged(topAppBarState: TopAppBarState)
 }
 
+internal data class TopAppBarStateUpdate(
+    val allowBackNavigation: Boolean? = null,
+    val hideStripeLogo: Boolean? = null,
+)
+
+internal fun TopAppBarState.apply(update: TopAppBarStateUpdate): TopAppBarState {
+    return copy(
+        hideStripeLogo = update.hideStripeLogo ?: hideStripeLogo,
+        allowBackNavigation = update.allowBackNavigation ?: allowBackNavigation,
+    )
+}
+
 internal abstract class ScreenViewModel<S : MavericksState>(
     initialState: S,
     topAppBarHost: TopAppBarHost,
@@ -18,23 +30,11 @@ internal abstract class ScreenViewModel<S : MavericksState>(
 
     init {
         onEach { state ->
-            val canGoBack = allowsBackNavigation(state)
-            val hideLogo = hidesStripeLogo(
-                state = state,
-                // TODO Should this update?
-                originalValue = topAppBarHost.initialTopAppBarState.hideStripeLogo
-            )
-
-            val topAppBarState = topAppBarHost.initialTopAppBarState.copy(
-                pane = pane,
-                hideStripeLogo = hideLogo,
-                allowBackNavigation = canGoBack,
-            )
-
+            val update = updateTopAppBarState(state)
+            val topAppBarState = topAppBarHost.initialTopAppBarState.apply(update)
             topAppBarHost.handleTopAppBarStateChanged(topAppBarState)
         }
     }
 
-    abstract fun allowsBackNavigation(state: S): Boolean
-    abstract fun hidesStripeLogo(state: S, originalValue: Boolean): Boolean
+    abstract fun updateTopAppBarState(state: S): TopAppBarStateUpdate
 }

@@ -30,9 +30,9 @@ import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.components.TopAppBarState
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.isCancellationError
@@ -87,12 +87,8 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun allowsBackNavigation(state: NetworkingLinkSignupState): Boolean {
-        return false
-    }
-
-    override fun hidesStripeLogo(state: NetworkingLinkSignupState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: NetworkingLinkSignupState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = false)
     }
 
     private fun observeAsyncs() {

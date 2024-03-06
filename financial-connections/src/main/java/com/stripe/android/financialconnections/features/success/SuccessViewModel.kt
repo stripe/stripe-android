@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
@@ -55,13 +56,8 @@ internal class SuccessViewModel @Inject constructor(
         }
     }
 
-    // TODO: Should this be solved via NavController?
-    override fun allowsBackNavigation(state: SuccessState): Boolean {
-        return false
-    }
-
-    override fun hidesStripeLogo(state: SuccessState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: SuccessState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = false)
     }
 
     private fun buildCustomMessage(

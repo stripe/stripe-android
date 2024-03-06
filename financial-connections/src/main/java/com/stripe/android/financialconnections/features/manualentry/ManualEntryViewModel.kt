@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -52,12 +53,8 @@ internal class ManualEntryViewModel @Inject constructor(
         }
     }
 
-    override fun allowsBackNavigation(state: ManualEntryState): Boolean {
-        return true
-    }
-
-    override fun hidesStripeLogo(state: ManualEntryState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: ManualEntryState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = true)
     }
 
     private fun observeAsyncs() {

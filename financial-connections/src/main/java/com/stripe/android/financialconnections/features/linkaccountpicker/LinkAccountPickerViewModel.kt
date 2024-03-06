@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -97,13 +98,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    // TODO(tillh-stripe) This should come from NavController in most cases
-    override fun allowsBackNavigation(state: LinkAccountPickerState): Boolean {
-        return false
-    }
-
-    override fun hidesStripeLogo(state: LinkAccountPickerState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: LinkAccountPickerState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = false)
     }
 
     private fun observeAsyncs() {

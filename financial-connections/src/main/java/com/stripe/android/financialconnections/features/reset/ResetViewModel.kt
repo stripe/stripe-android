@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.ScreenViewModel
 import com.stripe.android.financialconnections.presentation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
@@ -44,12 +45,8 @@ internal class ResetViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun allowsBackNavigation(state: ResetState): Boolean {
-        return true
-    }
-
-    override fun hidesStripeLogo(state: ResetState, originalValue: Boolean): Boolean {
-        return originalValue
+    override fun updateTopAppBarState(state: ResetState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(allowBackNavigation = true)
     }
 
     private fun logErrors() {
