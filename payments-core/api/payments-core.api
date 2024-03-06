@@ -3001,51 +3001,6 @@ public final class com/stripe/android/model/ListPaymentMethodsParams$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/model/LuxeNextActionRepository$Companion {
-	public final fun getInstance ()Lcom/stripe/android/model/LuxeNextActionRepository;
-}
-
-public abstract class com/stripe/android/model/LuxePostConfirmActionCreator {
-	public static final field $stable I
-}
-
-public final class com/stripe/android/model/LuxePostConfirmActionCreator$NoActionCreator : com/stripe/android/model/LuxePostConfirmActionCreator {
-	public static final field $stable I
-	public static final field INSTANCE Lcom/stripe/android/model/LuxePostConfirmActionCreator$NoActionCreator;
-	public synthetic fun create$payments_core_release (Lorg/json/JSONObject;)Lcom/stripe/android/model/LuxePostConfirmActionRepository$Result;
-}
-
-public final class com/stripe/android/model/LuxePostConfirmActionCreator$RedirectActionCreator : com/stripe/android/model/LuxePostConfirmActionCreator {
-	public static final field $stable I
-	public final fun component1 ()Ljava/lang/String;
-	public final fun component2 ()Ljava/lang/String;
-	public final fun copy (Ljava/lang/String;Ljava/lang/String;)Lcom/stripe/android/model/LuxePostConfirmActionCreator$RedirectActionCreator;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/LuxePostConfirmActionCreator$RedirectActionCreator;Ljava/lang/String;Ljava/lang/String;ILjava/lang/Object;)Lcom/stripe/android/model/LuxePostConfirmActionCreator$RedirectActionCreator;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getRedirectPagePath ()Ljava/lang/String;
-	public final fun getReturnToUrlPath ()Ljava/lang/String;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/model/LuxePostConfirmActionRepository$Companion {
-	public final fun getInstance ()Lcom/stripe/android/model/LuxePostConfirmActionRepository;
-}
-
-public final class com/stripe/android/model/LuxePostConfirmActionRepository$LuxeAction {
-	public static final field $stable I
-	public fun <init> (Ljava/util/Map;Ljava/util/Map;)V
-	public final fun component1 ()Ljava/util/Map;
-	public final fun component2 ()Ljava/util/Map;
-	public final fun copy (Ljava/util/Map;Ljava/util/Map;)Lcom/stripe/android/model/LuxePostConfirmActionRepository$LuxeAction;
-	public static synthetic fun copy$default (Lcom/stripe/android/model/LuxePostConfirmActionRepository$LuxeAction;Ljava/util/Map;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/LuxePostConfirmActionRepository$LuxeAction;
-	public fun equals (Ljava/lang/Object;)Z
-	public final fun getPostConfirmActionIntentStatus ()Ljava/util/Map;
-	public final fun getPostConfirmStatusToAction ()Ljava/util/Map;
-	public fun hashCode ()I
-	public fun toString ()Ljava/lang/String;
-}
-
 public final class com/stripe/android/model/MandateDataParams : android/os/Parcelable, com/stripe/android/model/StripeParamsModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
