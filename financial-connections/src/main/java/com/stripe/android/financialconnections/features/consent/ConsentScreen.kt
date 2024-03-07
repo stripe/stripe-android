@@ -98,7 +98,9 @@ internal fun ConsentScreen() {
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-    ) { parentViewModel.onCloseNoConfirmationClick(Pane.CONSENT) }
+        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.CONSENT) },
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
+    )
 }
 
 @Composable
@@ -108,7 +110,8 @@ private fun ConsentContent(
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (val consent = state.consent) {
         Uninitialized, is Loading -> ConsentLoadingContent()
@@ -123,7 +126,7 @@ private fun ConsentContent(
             onContinueClick = onContinueClick
         )
 
-        is Fail -> UnclassifiedErrorContent(error = consent.error, onCloseFromErrorClick = {})
+        is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(consent.error) }
     }
 }
 
@@ -331,6 +334,8 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-        ) {}
+            onCloseClick = {},
+            onCloseFromErrorClick = {}
+        )
     }
 }

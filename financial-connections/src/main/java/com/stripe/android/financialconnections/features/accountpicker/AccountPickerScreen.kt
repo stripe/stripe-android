@@ -188,10 +188,7 @@ private fun AccountPickerMainContent(
                         onSelectAnotherBank = onSelectAnotherBank
                     )
 
-                    else -> UnclassifiedErrorContent(
-                        error,
-                        onCloseFromErrorClick = onCloseFromErrorClick
-                    )
+                    else -> UnclassifiedErrorContent { onCloseFromErrorClick(error) }
                 }
             }
 

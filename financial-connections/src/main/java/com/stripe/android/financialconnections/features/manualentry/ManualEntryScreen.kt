@@ -68,6 +68,7 @@ internal fun ManualEntryScreen() {
         onAccountConfirmEntered = viewModel::onAccountConfirmEntered,
         onSubmit = viewModel::onSubmit,
         onTestFill = viewModel::onTestFill,
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.MANUAL_ENTRY) }
     )
 }
@@ -88,6 +89,7 @@ private fun ManualEntryContent(
     onAccountConfirmEntered: (String) -> Unit,
     onSubmit: () -> Unit,
     onCloseClick: () -> Unit,
+    onCloseFromErrorClick: (Throwable) -> Unit,
     onTestFill: () -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -101,10 +103,7 @@ private fun ManualEntryContent(
     ) {
         when (payload) {
             is Loading, Uninitialized -> FullScreenGenericLoading()
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = {}
-            )
+            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
 
             is Success -> when (payload().customManualEntry) {
                 true -> FullScreenGenericLoading()
@@ -352,7 +351,8 @@ internal fun ManualEntryPreview(
             onAccountConfirmEntered = {},
             onTestFill = {},
             onSubmit = {},
-            onCloseClick = {}
+            onCloseClick = {},
+            onCloseFromErrorClick = {}
         )
     }
 }
