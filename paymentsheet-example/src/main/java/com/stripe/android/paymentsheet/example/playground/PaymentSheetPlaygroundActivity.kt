@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
@@ -296,9 +297,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         addressLauncher: AddressLauncher,
         playgroundState: PlaygroundState,
     ) {
+        val context = LocalContext.current
         Button(
             onClick = {
-                addressLauncher.present(playgroundState.clientSecret)
+                val configuration = AddressLauncher.Configuration.Builder()
+                    .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                    .build()
+                addressLauncher.present(playgroundState.clientSecret, configuration)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
