@@ -302,6 +302,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             onClick = {
                 val configuration = AddressLauncher.Configuration.Builder()
                     .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                    .appearance(AppearanceStore.state)
                     .build()
                 addressLauncher.present(playgroundState.clientSecret, configuration)
             },
