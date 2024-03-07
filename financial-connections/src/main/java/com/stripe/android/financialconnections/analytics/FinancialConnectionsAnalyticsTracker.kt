@@ -21,7 +21,7 @@ import java.util.Locale
 /**
  * Event tracker for Financial Connections.
  */
-internal interface FinancialConnectionsAnalyticsTracker {
+internal fun interface FinancialConnectionsAnalyticsTracker {
     fun track(event: FinancialConnectionsAnalyticsEvent)
 }
 

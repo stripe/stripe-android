@@ -31,6 +31,7 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
+import com.stripe.android.financialconnections.exception.FinancialConnectionsErrorHandler
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -71,6 +72,9 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Inject
     lateinit var browserManager: BrowserManager
 
+    @Inject
+    lateinit var errorHandler: FinancialConnectionsErrorHandler
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (args == null) {
@@ -79,6 +83,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             viewModel.activityRetainedComponent.inject(this)
             viewModel.onEach { postInvalidate() }
             onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
+            errorHandler.setup(this)
             setContent {
                 FinancialConnectionsTheme {
                     val firstPane by viewModel.collectAsState { it.initialPane }

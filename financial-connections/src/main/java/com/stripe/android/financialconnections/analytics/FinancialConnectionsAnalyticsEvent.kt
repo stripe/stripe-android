@@ -408,6 +408,13 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         ).filterNotNullValues()
     )
 
+    class UncaughtException(
+        params: Map<String, String?>,
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "mobile.uncaught_exception",
+        params = params.filterNotNullValues(),
+    )
+
     override fun toString(): String {
         return "FinancialConnectionsEvent(name='$name', params=$params)"
     }
