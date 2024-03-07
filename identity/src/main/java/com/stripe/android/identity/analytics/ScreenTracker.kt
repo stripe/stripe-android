@@ -5,7 +5,8 @@ import com.stripe.android.camera.framework.StatTracker
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.identity.injection.IdentityVerificationScope
-import com.stripe.android.identity.networking.IdentityRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -15,8 +16,7 @@ import javax.inject.Inject
  */
 @IdentityVerificationScope
 internal class ScreenTracker @Inject constructor(
-    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    private val identityRepository: IdentityRepository
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
 ) {
 
     private var screenStatTracker: ScreenTransitionStatTracker? = null
@@ -40,13 +40,13 @@ internal class ScreenTracker @Inject constructor(
 
         screenStatTracker =
             ScreenTransitionStatTracker(startedAt, fromScreenName) { toScreenName ->
-                identityRepository.sendAnalyticsRequest(
+                CoroutineScope(Dispatchers.IO).launch {
                     identityAnalyticsRequestFactory.timeToScreen(
                         value = startedAt.elapsedSince().inMilliseconds.toLong(),
                         fromScreenName = fromScreenName,
                         toScreenName = requireNotNull(toScreenName)
                     )
-                )
+                }
             }
     }
 

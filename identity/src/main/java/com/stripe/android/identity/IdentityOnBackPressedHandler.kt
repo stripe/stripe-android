@@ -14,6 +14,8 @@ import com.stripe.android.identity.navigation.clearDataAndNavigateUp
 import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.networking.models.VerificationPage.Companion.requireSelfie
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /**
  * Handles back button behavior based on current navigation status.
@@ -21,7 +23,8 @@ import com.stripe.android.identity.viewmodel.IdentityViewModel
 internal class IdentityOnBackPressedHandler(
     private val verificationFlowFinishable: VerificationFlowFinishable,
     private val navController: NavController,
-    private val identityViewModel: IdentityViewModel
+    private val identityViewModel: IdentityViewModel,
+    private val coroutineScope: CoroutineScope
 ) : OnBackPressedCallback(true) {
     private var destination: NavDestination? = null
     private var args: Bundle? = null
@@ -62,14 +65,14 @@ internal class IdentityOnBackPressedHandler(
                             "Failed to get failedReason"
                         }
 
-                        identityViewModel.sendAnalyticsRequest(
+                        coroutineScope.launch {
                             identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                                 isFromFallbackUrl = false,
                                 requireSelfie =
                                 identityViewModel.verificationPage.value?.data?.requireSelfie(),
                                 throwable = failedReason
                             )
-                        )
+                        }
                         verificationFlowFinishable.finishWithResult(
                             IdentityVerificationSheet.VerificationFlowResult.Failed(failedReason)
                         )
@@ -89,13 +92,13 @@ internal class IdentityOnBackPressedHandler(
         verificationFlowFinishable: VerificationFlowFinishable,
         lastScreeName: String
     ) {
-        identityViewModel.sendAnalyticsRequest(
+        coroutineScope.launch {
             identityViewModel.identityAnalyticsRequestFactory.verificationCanceled(
                 isFromFallbackUrl = false,
                 lastScreenName = lastScreeName,
                 requireSelfie = identityViewModel.verificationPage.value?.data?.requireSelfie()
             )
-        )
+        }
         verificationFlowFinishable.finishWithResult(
             IdentityVerificationSheet.VerificationFlowResult.Canceled
         )

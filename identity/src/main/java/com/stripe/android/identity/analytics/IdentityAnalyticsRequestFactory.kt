@@ -5,8 +5,10 @@ import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.injection.IdentityVerificationScope
+import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.states.IdentityScanState
 import javax.inject.Inject
 
@@ -16,7 +18,8 @@ import javax.inject.Inject
 @IdentityVerificationScope
 internal class IdentityAnalyticsRequestFactory @Inject constructor(
     context: Context,
-    private val args: IdentityVerificationSheetContract.Args
+    private val args: IdentityVerificationSheetContract.Args,
+    val identityRepository: IdentityRepository,
 ) {
     var verificationPage: VerificationPage? = null
     private val requestFactory = AnalyticsRequestV2Factory(
@@ -25,34 +28,77 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         origin = ORIGIN
     )
 
-    private fun additionalParamWithEventMetadata(vararg pairs: Pair<String, *>) =
-        mapOf(
-            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
-            PARAM_EVENT_META_DATA to
-                mutableMapOf(
-                    *pairs
-                ).also {
-                    verificationPage?.let {
-                        PARAM_LIVE_MODE to it.livemode
-                    }
-                }
-        )
+    private fun additionalParamWithEventMetadata(vararg pairs: Pair<String, *>): Map<String, Any> {
+        val metadataMap = mutableMapOf(*pairs)
+        verificationPage?.livemode?.let { liveMode ->
+            metadataMap[PARAM_LIVE_MODE] = liveMode
+        }
 
-    fun sheetPresented() = requestFactory.createRequest(
-        EVENT_SHEET_PRESENTED,
-        mapOf(
+        return mapOf(
+            PARAM_VERIFICATION_SESSION to args.verificationSessionId,
+            PARAM_EVENT_META_DATA to metadataMap
+        )
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    private suspend fun maybeLogExperimentAndSendLog(
+        eventName: String,
+        additionalParams: Map<String, Any> = mapOf()
+    ) {
+        verificationPage?.let { verificationPage ->
+            val experiments = verificationPage.experiments
+            val userSessionId = verificationPage.userSessionId
+            val metaDatas = additionalParams.getOrDefault(PARAM_EVENT_META_DATA, null) as Map<String, Any>?
+
+            for (exp: VerificationPageStaticContentExperiment in experiments) {
+                if (exp.matches(eventName, metaDatas)) {
+                    identityRepository.sendAnalyticsRequest(
+                        requestFactory.createRequest(
+                            eventName = EVENT_EXPERIMENT_EXPOSURE,
+                            additionalParams = mapOf(
+                                PARAM_USER_SESSION_ID to userSessionId,
+                                PARAM_EXPERIMENT to exp.experimentName
+                            )
+                        )
+                    )
+                }
+            }
+        }
+        val request = requestFactory.createRequest(
+            eventName = eventName,
+            additionalParams = additionalParams
+        )
+        identityRepository.sendAnalyticsRequest(request)
+    }
+
+    private fun VerificationPageStaticContentExperiment.matches(
+        eventName: String,
+        metaDatas: Map<String, Any>?
+    ): Boolean {
+        return if (this.eventMetadata.isEmpty()) {
+            this.eventName == eventName && metaDatas == null
+        } else {
+            metaDatas?.let {
+                this.eventName == eventName && metaDatas.entries.containsAll(this.eventMetadata.entries)
+            } ?: false
+        }
+    }
+
+    suspend fun sheetPresented() = maybeLogExperimentAndSendLog(
+        eventName = EVENT_SHEET_PRESENTED,
+        additionalParams = mapOf(
             PARAM_VERIFICATION_SESSION to args.verificationSessionId
         )
     )
 
-    fun sheetClosed(sessionResult: String) = requestFactory.createRequest(
+    suspend fun sheetClosed(sessionResult: String) = maybeLogExperimentAndSendLog(
         eventName = EVENT_SHEET_CLOSED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_SESSION_RESULT to sessionResult
         )
     )
 
-    fun verificationSucceeded(
+    suspend fun verificationSucceeded(
         isFromFallbackUrl: Boolean,
         scanType: IdentityScanState.ScanType? = null,
         requireSelfie: Boolean? = null,
@@ -66,7 +112,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         selfieModelScore: Float? = null,
         docFrontBlurScore: Float? = null,
         docBackBlurScore: Float? = null
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_SUCCEEDED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
@@ -85,12 +131,12 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun verificationCanceled(
+    suspend fun verificationCanceled(
         isFromFallbackUrl: Boolean,
         lastScreenName: String? = null,
         scanType: IdentityScanState.ScanType? = null,
         requireSelfie: Boolean? = null
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_CANCELED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
@@ -100,14 +146,14 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun verificationFailed(
+    suspend fun verificationFailed(
         isFromFallbackUrl: Boolean,
         scanType: IdentityScanState.ScanType? = null,
         requireSelfie: Boolean? = null,
         docFrontUploadType: DocumentUploadParam.UploadMethod? = null,
         docBackUploadType: DocumentUploadParam.UploadMethod? = null,
         throwable: Throwable
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_VERIFICATION_FAILED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_FROM_FALLBACK_URL to isFromFallbackUrl,
@@ -122,10 +168,10 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun screenPresented(
+    suspend fun screenPresented(
         scanType: IdentityScanState.ScanType? = null,
         screenName: String
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_SCREEN_PRESENTED,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType?.toParam(),
@@ -133,10 +179,10 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun cameraError(
+    suspend fun cameraError(
         scanType: IdentityScanState.ScanType,
         throwable: Throwable
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_CAMERA_ERROR,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType.toParam(),
@@ -147,17 +193,17 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun cameraPermissionDenied() = requestFactory.createRequest(
+    suspend fun cameraPermissionDenied() = maybeLogExperimentAndSendLog(
         eventName = EVENT_CAMERA_PERMISSION_DENIED
     )
 
-    fun cameraPermissionGranted() = requestFactory.createRequest(
+    suspend fun cameraPermissionGranted() = maybeLogExperimentAndSendLog(
         eventName = EVENT_CAMERA_PERMISSION_GRANTED
     )
 
-    fun documentTimeout(
+    suspend fun documentTimeout(
         scanType: IdentityScanState.ScanType
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_DOCUMENT_TIMEOUT,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_SCAN_TYPE to scanType.toParam(),
@@ -165,12 +211,12 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun selfieTimeout() = requestFactory.createRequest(
+    suspend fun selfieTimeout() = maybeLogExperimentAndSendLog(
         eventName = EVENT_SELFIE_TIMEOUT,
         additionalParams = additionalParamWithEventMetadata()
     )
 
-    fun averageFps(type: String, value: Int, frames: Int) = requestFactory.createRequest(
+    suspend fun averageFps(type: String, value: Int, frames: Int) = maybeLogExperimentAndSendLog(
         eventName = EVENT_AVERAGE_FPS,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_TYPE to type,
@@ -179,8 +225,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun modelPerformance(mlModel: String, preprocess: Long, inference: Long, frames: Int) =
-        requestFactory.createRequest(
+    suspend fun modelPerformance(mlModel: String, preprocess: Long, inference: Long, frames: Int) =
+        maybeLogExperimentAndSendLog(
             eventName = EVENT_MODEL_PERFORMANCE,
             additionalParams = additionalParamWithEventMetadata(
                 PARAM_PREPROCESS to preprocess,
@@ -190,12 +236,12 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             )
         )
 
-    fun timeToScreen(
+    suspend fun timeToScreen(
         value: Long,
         networkTime: Long? = null,
         fromScreenName: String?,
         toScreenName: String
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_TIME_TO_SCREEN,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_VALUE to value,
@@ -205,10 +251,10 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun genericError(
+    suspend fun genericError(
         message: String?,
         stackTrace: String
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_GENERIC_ERROR,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_MESSAGE to message,
@@ -216,14 +262,14 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun imageUpload(
+    suspend fun imageUpload(
         value: Long,
         compressionQuality: Float,
         scanType: IdentityScanState.ScanType,
         id: String?,
         fileName: String?,
         fileSize: Long
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_IMAGE_UPLOAD,
         additionalParams = additionalParamWithEventMetadata(
             PARAM_VALUE to value,
@@ -235,11 +281,11 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun mbStatus(
+    suspend fun mbStatus(
         required: Boolean,
         initSuccess: Boolean? = null,
         initFailedReason: String? = null
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_MB_STATUS,
         additionalParamWithEventMetadata(
             PARAM_REQUIRED to required,
@@ -248,10 +294,10 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
-    fun mbError(
+    suspend fun mbError(
         message: String?,
         stackTrace: String?
-    ) = requestFactory.createRequest(
+    ) = maybeLogExperimentAndSendLog(
         eventName = EVENT_MB_ERROR,
         additionalParamWithEventMetadata(
             PARAM_MESSAGE to message,
@@ -303,6 +349,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_GENERIC_ERROR = "generic_error"
         const val EVENT_MB_STATUS = "mb_status"
         const val EVENT_MB_ERROR = "mb_error"
+        const val EVENT_EXPERIMENT_EXPOSURE = "identity_mobile_experiment_exposure"
 
         const val PARAM_EVENT_META_DATA = "event_metadata"
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
@@ -344,6 +391,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_REQUIRED = "required"
         const val PARAM_INIT_SUCCESS = "init_success"
         const val PARAM_INIT_FAILED_REASON = "init_failed_reason"
+        const val PARAM_EXPERIMENT = "experiment"
+        const val PARAM_USER_SESSION_ID = "user_session_id"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_WARMUP = "document_warmup"

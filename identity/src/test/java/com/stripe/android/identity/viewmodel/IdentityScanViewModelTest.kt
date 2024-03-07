@@ -14,7 +14,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
@@ -75,7 +74,6 @@ internal class IdentityScanViewModelTest {
 
         assertThat((viewModel.scannerState.value as IdentityScanViewModel.State.Timeout).fromSelfie).isFalse()
         verify(mockIdentityAnalyticsRequestFactory).documentTimeout(eq(resultType))
-        verify(mockIdentityRepository).sendAnalyticsRequest(anyOrNull())
 
         verify(mockFpsTracker).reportAndReset(
             eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
@@ -98,7 +96,6 @@ internal class IdentityScanViewModelTest {
 
         assertThat((viewModel.scannerState.value as IdentityScanViewModel.State.Timeout).fromSelfie).isTrue()
         verify(mockIdentityAnalyticsRequestFactory).selfieTimeout()
-        verify(mockIdentityRepository).sendAnalyticsRequest(anyOrNull())
 
         verify(mockFpsTracker).reportAndReset(
             eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)

@@ -75,12 +75,12 @@ internal fun DocumentScanScreen(
         DocumentScanCameraManager(
             context = context
         ) { cause ->
-            identityViewModel.sendAnalyticsRequest(
+            coroutineScope.launch {
                 identityViewModel.identityAnalyticsRequestFactory.cameraError(
                     scanType = IdentityScanState.ScanType.DOC_FRONT,
                     throwable = IllegalStateException(cause)
                 )
-            )
+            }
         }
     }
 

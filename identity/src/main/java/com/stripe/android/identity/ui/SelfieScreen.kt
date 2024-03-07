@@ -94,14 +94,15 @@ internal fun SelfieScanScreen(
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
+    val coroutineScope = rememberCoroutineScope()
     val cameraManager = remember {
         SelfieCameraManager(context = context) { cause ->
-            identityViewModel.sendAnalyticsRequest(
+            coroutineScope.launch {
                 identityViewModel.identityAnalyticsRequestFactory.cameraError(
                     scanType = IdentityScanState.ScanType.SELFIE,
                     throwable = IllegalStateException(cause)
                 )
-            )
+            }
         }
     }
 

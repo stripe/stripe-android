@@ -223,7 +223,7 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `uploadScanResult uploads all files and notifies _selfieUploadedState`() {
+    fun `uploadScanResult uploads all files and notifies _selfieUploadedState`() = runBlocking {
         mockUploadSuccess()
         viewModel.uploadScanResult(
             FINAL_FACE_DETECTOR_RESULT,
@@ -250,7 +250,7 @@ internal class IdentityViewModelTest {
     }
 
     @Test
-    fun `uploadScanResult upload failure notifies _selfieUploadedState`() {
+    fun `uploadScanResult upload failure notifies _selfieUploadedState`() = runBlocking {
         mockUploadFailure()
         viewModel.uploadScanResult(
             FINAL_FACE_DETECTOR_RESULT,
@@ -879,7 +879,7 @@ internal class IdentityViewModelTest {
         callback()
     }
 
-    private fun testUploadManualSuccessResult(isFront: Boolean) {
+    private fun testUploadManualSuccessResult(isFront: Boolean) = runBlocking {
         mockUploadSuccess()
 
         val mockUri = mock<Uri>()
@@ -1075,7 +1075,7 @@ internal class IdentityViewModelTest {
         }
     }
 
-    private fun testUploadManualFailureResult(isFront: Boolean) {
+    private fun testUploadManualFailureResult(isFront: Boolean) = runBlocking {
         mockUploadFailure()
 
         viewModel.uploadManualResult(

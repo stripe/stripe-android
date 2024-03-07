@@ -18,6 +18,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.stripe.android.camera.CameraPermissionCheckingActivity
@@ -40,6 +41,7 @@ import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -127,31 +129,31 @@ internal class IdentityActivity :
                 onSuccess = {
                     finishWithResult(
                         if (it.submitted) {
-                            identityViewModel.sendAnalyticsRequest(
+                            lifecycleScope.launch {
                                 identityViewModel.identityAnalyticsRequestFactory
                                     .verificationSucceeded(
                                         isFromFallbackUrl = true
                                     )
-                            )
+                            }
                             VerificationFlowResult.Completed
                         } else {
-                            identityViewModel.sendAnalyticsRequest(
+                            lifecycleScope.launch {
                                 identityViewModel.identityAnalyticsRequestFactory
                                     .verificationCanceled(
                                         isFromFallbackUrl = true
                                     )
-                            )
+                            }
                             VerificationFlowResult.Canceled
                         }
                     )
                 },
                 onFailure = {
-                    identityViewModel.sendAnalyticsRequest(
+                    lifecycleScope.launch {
                         identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
                             isFromFallbackUrl = true,
                             throwable = IllegalStateException(it)
                         )
-                    )
+                    }
                     finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
                 }
             )
@@ -161,9 +163,9 @@ internal class IdentityActivity :
             this,
             onSuccess = {
                 if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
-                    identityViewModel.sendAnalyticsRequest(
+                    lifecycleScope.launch {
                         identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
-                    )
+                    }
                 }
             },
             onFailure = {
@@ -199,7 +201,8 @@ internal class IdentityActivity :
                         IdentityOnBackPressedHandler(
                             this,
                             navController,
-                            identityViewModel
+                            identityViewModel,
+                            lifecycleScope
                         )
                     onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
@@ -214,11 +217,11 @@ internal class IdentityActivity :
     }
 
     override fun finishWithResult(result: VerificationFlowResult) {
-        identityViewModel.sendAnalyticsRequest(
+        lifecycleScope.launch {
             identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
                 result.toString()
             )
-        )
+        }
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(result.toBundle())
@@ -252,9 +255,11 @@ internal class IdentityActivity :
             ConsentDestination.ROUTE.route -> {
                 IdentityTopBarState.CLOSE
             }
+
             ConfirmationDestination.ROUTE.route -> {
                 IdentityTopBarState.CLOSE
             }
+
             ErrorDestination.ROUTE.route -> {
                 if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
                     IdentityTopBarState.CLOSE
@@ -262,9 +267,11 @@ internal class IdentityActivity :
                     IdentityTopBarState.GO_BACK
                 }
             }
+
             IndividualWelcomeDestination.ROUTE.route -> {
                 IdentityTopBarState.CLOSE
             }
+
             else -> {
                 IdentityTopBarState.GO_BACK
             }

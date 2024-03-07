@@ -19,6 +19,7 @@ import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 
@@ -71,17 +72,17 @@ internal class IdentityScanViewModel(
             _scannerState.update { State.Timeout(fromSelfie = result.result is FaceDetectorOutput) }
             when (result.result) {
                 is FaceDetectorOutput -> {
-                    identityRepository.sendAnalyticsRequest(
+                    viewModelScope.launch {
                         identityAnalyticsRequestFactory.selfieTimeout()
-                    )
+                    }
                 }
 
                 is IDDetectorOutput -> {
-                    identityRepository.sendAnalyticsRequest(
+                    viewModelScope.launch {
                         identityAnalyticsRequestFactory.documentTimeout(
                             scanType = result.identityState.type
                         )
-                    )
+                    }
                 }
             }
         }

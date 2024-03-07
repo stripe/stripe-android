@@ -220,7 +220,18 @@ internal val VERIFICATION_PAGE_NOT_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "button_text": "Complete",
         "title": "Verification pending"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 """.trimIndent()
 
@@ -370,7 +381,18 @@ internal val VERIFICATION_PAGE_REQUIRE_LIVE_CAPTURE_JSON_STRING = """
         "button_text": "Complete",
         "title": "Verification pending"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 """.trimIndent()
 
@@ -548,7 +570,18 @@ internal val VERIFICATION_PAGE_REQUIRE_SELFIE_LIVE_CAPTURE_JSON_STRING = """
         "button_text": "Complete",
         "title": "Verification submitted"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 """.trimIndent()
 
@@ -733,7 +766,18 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING = """
         "button_text": "Complete",
         "title": "Verification submitted"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 
 """.trimIndent()
@@ -891,7 +935,18 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING = """
         "button_text": "Complete",
         "title": "Verification submitted"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 """.trimIndent()
 
@@ -1049,7 +1104,18 @@ internal val VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_AND_ID_NUMBER_JSON_
         "button_text": "Complete",
         "title": "Verification submitted"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 """.trimIndent()
 
@@ -1205,7 +1271,18 @@ internal val VERIFICATION_PAGE_TYPE_ID_NUMBER_JSON_STRING = """
         "button_text": "Complete",
         "title": "Verification submitted"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 """.trimIndent()
 
@@ -1361,6 +1438,17 @@ internal val VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING = """
         "button_text": "Complete",
         "title": "Verification submitted"
       },
-      "unsupported_client": false
+      "unsupported_client": false,
+      "user_session_id": "testUserSession",
+      "experiments": [
+        {
+            "experiment_name": "experiment1",
+            "event_name": "eventName1",
+            "event_metadata": {
+                "metadata1": "value1",
+                "metadata2": "value2"
+            }
+        }
+      ]
     }
 """.trimIndent()
