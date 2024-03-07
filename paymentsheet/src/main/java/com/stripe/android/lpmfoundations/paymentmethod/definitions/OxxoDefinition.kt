@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.OxxoRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -34,7 +33,6 @@ internal object OxxoDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             tintIconOnSelection = false,
-            requirement = OxxoRequirement,
             formSpec = LayoutSpec(sharedDataSpec.fields),
         )
     }

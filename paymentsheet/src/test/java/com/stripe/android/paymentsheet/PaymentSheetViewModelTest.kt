@@ -918,7 +918,7 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.updateSelection(selection)
 
-        viewModel.stripeIntent.test {
+        viewModel.paymentMethodMetadata.test {
             viewModel.onPaymentResult(PaymentResult.Failed(error))
             verify(eventReporter)
                 .onPaymentFailure(
@@ -926,7 +926,7 @@ internal class PaymentSheetViewModelTest {
                     error = PaymentSheetConfirmationError.Stripe(error),
                 )
 
-            val stripeIntent = awaitItem()
+            val stripeIntent = awaitItem()?.stripeIntent
             assertThat(stripeIntent).isEqualTo(PAYMENT_INTENT)
         }
     }
@@ -1415,7 +1415,7 @@ internal class PaymentSheetViewModelTest {
                     currencyCode = "usd",
                 ),
                 showCheckbox = false,
-                showCheckboxControlledFields = true,
+                saveForFutureUseInitialValue = true,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )
@@ -2550,7 +2550,6 @@ internal class PaymentSheetViewModelTest {
         linkState: LinkState? = null,
         isGooglePayReady: Boolean = false,
         delay: Duration = Duration.ZERO,
-        lpmRepository: LpmRepository = this.lpmRepository,
         initialPaymentSelection: PaymentSelection? =
             customerPaymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
         bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
@@ -2580,7 +2579,6 @@ internal class PaymentSheetViewModelTest {
                 paymentSheetLoader = paymentSheetLoader,
                 customerRepository = customerRepository,
                 prefsRepository = prefsRepository,
-                lpmRepository = lpmRepository,
                 paymentLauncherFactory = paymentLauncherFactory,
                 googlePayPaymentMethodLauncherFactory = googlePayLauncherFactory,
                 bacsMandateConfirmationLauncherFactory = bacsMandateConfirmationLauncherFactory,

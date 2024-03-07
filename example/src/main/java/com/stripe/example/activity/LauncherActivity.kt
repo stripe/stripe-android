@@ -170,6 +170,10 @@ class LauncherActivity : AppCompatActivity() {
                 ManualUSBankAccountPaymentMethodActivity::class.java
             ),
             Item(
+                activity.getString(R.string.amazon_pay_example),
+                AmazonPayActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.cash_app_pay_example),
                 CashAppPayActivity::class.java
             ),

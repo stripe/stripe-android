@@ -10,7 +10,6 @@ import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
@@ -19,7 +18,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -84,7 +82,6 @@ internal abstract class BaseSheetViewModel(
     protected val prefsRepository: PrefsRepository,
     protected val workContext: CoroutineContext = Dispatchers.IO,
     protected val logger: Logger,
-    val lpmRepository: LpmRepository,
     val savedStateHandle: SavedStateHandle,
     val linkHandler: LinkHandler,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -102,8 +99,8 @@ internal abstract class BaseSheetViewModel(
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
 
-    private val _stripeIntent = MutableStateFlow<StripeIntent?>(null)
-    internal val stripeIntent: StateFlow<StripeIntent?> = _stripeIntent
+    private val _paymentMethodMetadata = MutableStateFlow<PaymentMethodMetadata?>(null)
+    internal val paymentMethodMetadata: StateFlow<PaymentMethodMetadata?> = _paymentMethodMetadata
 
     internal var supportedPaymentMethods: List<SupportedPaymentMethod> = emptyList()
         set(value) {
@@ -227,8 +224,9 @@ internal abstract class BaseSheetViewModel(
     }
 
     private fun providePaymentMethodName(code: PaymentMethodCode?): String {
-        val paymentMethod = lpmRepository.fromCode(code)
-        return paymentMethod?.displayNameResource?.let {
+        return code?.let {
+            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
+        }?.displayNameResource?.let {
             getApplication<Application>().getString(it)
         }.orEmpty()
     }
@@ -261,7 +259,7 @@ internal abstract class BaseSheetViewModel(
 
     val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
         currentScreen,
-        stripeIntent.map { it?.isLiveMode ?: true },
+        paymentMethodMetadata.map { it?.stripeIntent?.isLiveMode ?: true },
         processing,
         editing,
         canEdit,
@@ -382,7 +380,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         val stripeIntent = paymentMethodMetadata?.stripeIntent
-        _stripeIntent.value = stripeIntent
+        _paymentMethodMetadata.value = paymentMethodMetadata
         supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
 
         if (stripeIntent is PaymentIntent) {
@@ -486,7 +484,7 @@ internal abstract class BaseSheetViewModel(
             context = getApplication(),
             merchantName = merchantName,
             isSaveForFutureUseSelected = isRequestingReuse,
-            isSetupFlow = stripeIntent.value is SetupIntent,
+            isSetupFlow = paymentMethodMetadata.value?.stripeIntent is SetupIntent,
         )
 
         val showAbove = (selection as? PaymentSelection.Saved?)
@@ -679,7 +677,7 @@ internal abstract class BaseSheetViewModel(
         selectedItem: SupportedPaymentMethod,
     ): FormArguments = FormArgumentsFactory.create(
         paymentMethod = selectedItem,
-        stripeIntent = requireNotNull(stripeIntent.value),
+        metadata = requireNotNull(paymentMethodMetadata.value),
         config = config,
         merchantName = merchantName,
         amount = amount.value,

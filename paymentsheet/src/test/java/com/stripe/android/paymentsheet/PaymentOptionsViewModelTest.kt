@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
@@ -10,11 +9,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.R
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -700,7 +696,6 @@ internal class PaymentOptionsViewModelTest {
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
-        lpmRepository: LpmRepository = createLpmRepository(),
         editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = mock(),
     ) = TestViewModelFactory.create { linkHandler, linkInteractor, savedStateHandle ->
         PaymentOptionsViewModel(
@@ -711,23 +706,12 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            lpmRepository = lpmRepository,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             linkConfigurationCoordinator = linkInteractor,
             formViewModelSubComponentBuilderProvider = mock(),
             editInteractorFactory = editInteractorFactory,
         )
-    }
-
-    private fun createLpmRepository(
-        paymentIntent: PaymentIntent = PAYMENT_INTENT
-    ) = LpmRepository(
-        LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources
-        )
-    ).apply {
-        this.update(paymentIntent, null)
     }
 
     private companion object {

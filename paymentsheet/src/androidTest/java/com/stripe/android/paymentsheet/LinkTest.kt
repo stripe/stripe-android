@@ -1,7 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.closeSoftKeyboard
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -73,7 +73,7 @@ internal class LinkTest {
         page.fillOutLinkEmail()
         page.fillOutLinkPhone()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -156,7 +156,7 @@ internal class LinkTest {
         page.fillOutLinkPhone()
         page.fillOutLinkName()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -245,7 +245,7 @@ internal class LinkTest {
         page.fillOutLinkEmail()
         page.fillOutLinkPhone()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -343,7 +343,7 @@ internal class LinkTest {
         page.fillOutLinkPhone()
         page.fillOutLinkName()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -441,7 +441,7 @@ internal class LinkTest {
         page.fillOutLinkEmail()
         page.fillOutLinkPhone()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -499,7 +499,7 @@ internal class LinkTest {
         page.fillOutLinkEmail()
         page.fillOutLinkPhone()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -557,7 +557,7 @@ internal class LinkTest {
         page.fillOutLinkEmail()
         page.fillOutLinkPhone()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -621,7 +621,7 @@ internal class LinkTest {
         page.clickOnLinkCheckbox()
         page.fillOutLinkEmail()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         networkRule.enqueue(
             method("POST"),
@@ -714,7 +714,7 @@ internal class LinkTest {
         page.fillOutCardDetails()
         page.fillOutLink()
 
-        Espresso.closeSoftKeyboard()
+        closeSoftKeyboard()
 
         repeat(2) {
             networkRule.enqueue(
@@ -743,6 +743,80 @@ internal class LinkTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             linkInformation()
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/log_out"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-logout-success.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testSuccessfulCardPaymentWithLinkSignUpWithAlbaniaPhoneNumber() = activityScenarioRule.runLinkTest(
+        integrationType = integrationType,
+        paymentOptionCallback = { paymentOption ->
+            assertThat(paymentOption?.label).endsWith("4242")
+        },
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        testContext.launch()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/sessions/lookup"),
+        ) { response ->
+            response.testBodyFromFile("consumer-session-lookup-success.json")
+        }
+
+        page.clickOnLinkCheckbox()
+        page.fillOutLinkEmail()
+        page.selectPhoneNumberCountry("Albania")
+        page.fillOutLinkPhone("888888888")
+
+        closeSoftKeyboard()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/accounts/sign_up"),
+            bodyPart(
+                name = "email_address",
+                value = "email%40email.com"
+            ),
+            bodyPart(
+                name = "phone_number",
+                value = "%2B355888888888"
+            ),
+        ) { response ->
+            response.testBodyFromFile("consumer-accounts-signup-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/consumers/payment_details"),
+        ) { response ->
+            response.testBodyFromFile("consumer-payment-details-success.json")
+        }
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            linkInformation(),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

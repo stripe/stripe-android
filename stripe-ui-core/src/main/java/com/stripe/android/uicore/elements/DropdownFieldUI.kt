@@ -32,6 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -116,6 +117,7 @@ fun DropDown(
                     onClickLabel = stringResource(R.string.stripe_change),
                     onClick = { expanded = true },
                 )
+                .testTag("DropDown:${if (controller.tinyMode) "tiny" else "normal"}")
         ) {
             if (controller.tinyMode) {
                 TinyDropdownLabel(
