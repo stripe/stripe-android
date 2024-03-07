@@ -23,6 +23,7 @@ import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmSetupIntentParams
@@ -156,7 +157,7 @@ internal class CustomerSheetViewModel(
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var unconfirmedPaymentMethod: PaymentMethod? = null
-    private var stripeIntent: StripeIntent? = null
+    private var paymentMethodMetadata: PaymentMethodMetadata? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
 
     private val card = CardDefinition.hardcodedCardSpec(
@@ -330,7 +331,7 @@ internal class CustomerSheetViewModel(
 
                     originalPaymentSelection = state.paymentSelection
                     isGooglePayReadyAndEnabled = state.isGooglePayReady
-                    stripeIntent = state.stripeIntent
+                    paymentMethodMetadata = state.paymentMethodMetadata
 
                     transitionToInitialScreen(
                         paymentMethods = state.customerPaymentMethods,
@@ -784,6 +785,8 @@ internal class CustomerSheetViewModel(
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
             ?: requireNotNull(lpmRepository.fromCode(paymentMethodCode))
+
+        val stripeIntent = paymentMethodMetadata?.stripeIntent
 
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(

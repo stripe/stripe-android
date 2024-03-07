@@ -6,6 +6,7 @@ import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -37,7 +38,7 @@ internal class FakeCustomerSheetLoader(
             Result.success(
                 CustomerSheetState.Full(
                     config = configuration,
-                    stripeIntent = stripeIntent,
+                    PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,
                     isGooglePayReady = isGooglePayAvailable,

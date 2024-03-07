@@ -18,6 +18,7 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -135,7 +136,7 @@ class DefaultCustomerSheetLoaderTest {
         ).isEqualTo(
             CustomerSheetState.Full(
                 config = config,
-                stripeIntent = STRIPE_INTENT,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = STRIPE_INTENT),
                 customerPaymentMethods = listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     PaymentMethodFixtures.US_BANK_ACCOUNT,
@@ -192,7 +193,7 @@ class DefaultCustomerSheetLoaderTest {
         ).isEqualTo(
             CustomerSheetState.Full(
                 config = config,
-                stripeIntent = STRIPE_INTENT,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = STRIPE_INTENT),
                 customerPaymentMethods = listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                     PaymentMethodFixtures.US_BANK_ACCOUNT,
@@ -230,7 +231,7 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().stripeIntent
+            loader.load(config).getOrThrow().paymentMethodMetadata
         ).isNull()
     }
 
@@ -254,7 +255,7 @@ class DefaultCustomerSheetLoaderTest {
         ).isEqualTo(
             CustomerSheetState.Full(
                 config = config,
-                stripeIntent = null,
+                paymentMethodMetadata = null,
                 customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
                 supportedPaymentMethods = listOf(
                     LpmRepositoryTestHelpers.card,
@@ -291,7 +292,7 @@ class DefaultCustomerSheetLoaderTest {
         ).isEqualTo(
             CustomerSheetState.Full(
                 config = config,
-                stripeIntent = STRIPE_INTENT,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = STRIPE_INTENT),
                 customerPaymentMethods = listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
@@ -332,7 +333,7 @@ class DefaultCustomerSheetLoaderTest {
         ).isEqualTo(
             CustomerSheetState.Full(
                 config = config,
-                stripeIntent = STRIPE_INTENT,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = STRIPE_INTENT),
                 customerPaymentMethods = listOf(
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
                     PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
