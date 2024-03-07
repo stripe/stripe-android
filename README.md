@@ -68,9 +68,9 @@ dependencies {
 }
 ```
 
-### Compose versions
+### Compatibility with Jetpack Compose
 
-`stripe-android` uses compose internally, and expects consumers to use a compatible compose version. Compatible versions listed below:
+`stripe-android` uses Jetpack Compose internally and expects consumers to use a compatible version:
 
 <table>
  <tr>
