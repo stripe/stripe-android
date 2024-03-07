@@ -11,7 +11,6 @@ internal class ManualEntryFormState(
     private val account: String? = null,
     private val accountConfirm: String? = null,
 ) {
-
     val routingError: Int?
         get() = routing?.let { getRoutingErrorIdOrNull(routing) }
 
