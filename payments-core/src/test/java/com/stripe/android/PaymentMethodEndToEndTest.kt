@@ -112,7 +112,7 @@ internal class PaymentMethodEndToEndTest {
                 financialConnectionsAccount = null,
                 networks = PaymentMethod.USBankAccount.USBankNetworks(
                     preferred = "ach",
-                    supported = listOf("ach", "us_domestic_wire")
+                    supported = listOf("ach")
                 ),
                 routingNumber = "110000000"
             )
