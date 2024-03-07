@@ -34,7 +34,7 @@ internal class ManualEntryViewModel @Inject constructor(
     private val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
-    val form = ManualEntryForm(viewModelScope)
+    val form = ManualEntryFormState(viewModelScope)
 
     init {
         observeAsyncs()

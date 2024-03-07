@@ -13,14 +13,14 @@ import org.junit.Test
 import kotlin.test.assertEquals
 
 @ExperimentalCoroutinesApi
-class ManualEntryFormTest {
+class ManualEntryFormStateTest {
 
-    private lateinit var form: ManualEntryForm
+    private lateinit var form: ManualEntryFormState
     private val scope = TestScope()
 
     @Before
     fun setUp() {
-        form = ManualEntryForm(scope = scope)
+        form = ManualEntryFormState(scope = scope)
     }
 
     @Test

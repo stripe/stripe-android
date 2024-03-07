@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
-internal class ManualEntryForm(
+internal class ManualEntryFormState(
     scope: CoroutineScope
 ) {
 
