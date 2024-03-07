@@ -55,18 +55,15 @@ internal fun ManualEntryScreen() {
     val viewModel: ManualEntryViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state: ManualEntryState by viewModel.collectAsState()
-    val routingError by viewModel.form.routingError.collectAsState()
-    val accountError by viewModel.form.accountError.collectAsState()
-    val accountConfirmError by viewModel.form.accountConfirmError.collectAsState()
-    val isValidForm by viewModel.form.isValid.collectAsState()
+    val form by viewModel.form.collectAsState()
     ManualEntryContent(
-        routing = viewModel.form.routing ?: "",
-        routingError = routingError,
-        account = viewModel.form.account ?: "",
-        accountError = accountError,
-        accountConfirm = viewModel.form.accountConfirm ?: "",
-        accountConfirmError = accountConfirmError,
-        isValidForm = isValidForm,
+        routing = viewModel.routing ?: "",
+        routingError = form.routingError,
+        account = viewModel.account ?: "",
+        accountError = form.accountError,
+        accountConfirm = viewModel.accountConfirm ?: "",
+        accountConfirmError = form.accountConfirmError,
+        isValidForm = form.isValid,
         payload = state.payload,
         linkPaymentAccountStatus = state.linkPaymentAccount,
         onRoutingEntered = viewModel::onRoutingEntered,

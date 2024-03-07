@@ -1,5 +1,9 @@
 package com.stripe.android.financialconnections.features.manualentry
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -22,6 +26,10 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntrySuccess
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 internal class ManualEntryViewModel @Inject constructor(
@@ -34,7 +42,25 @@ internal class ManualEntryViewModel @Inject constructor(
     private val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
-    val form = ManualEntryFormState(viewModelScope)
+    // Keep form fields outside of State for immediate updates.
+    var routing: String? by mutableStateOf(null)
+    var account: String? by mutableStateOf(null)
+    var accountConfirm: String? by mutableStateOf(null)
+
+    val form: StateFlow<ManualEntryFormState> = combine(
+        snapshotFlow { routing },
+        snapshotFlow { account },
+        snapshotFlow { accountConfirm },
+        ::ManualEntryFormState
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ManualEntryFormState(
+            routing = null,
+            account = null,
+            accountConfirm = null,
+        )
+    )
 
     init {
         observeAsyncs()
@@ -79,15 +105,15 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onRoutingEntered(input: String) {
-        form.routing = input.filter { it.isDigit() }
+        routing = input.filter { it.isDigit() }
     }
 
     fun onAccountEntered(input: String) {
-        form.account = input.filter { it.isDigit() }
+        account = input.filter { it.isDigit() }
     }
 
     fun onAccountConfirmEntered(input: String) {
-        form.accountConfirm = input.filter { it.isDigit() }
+        accountConfirm = input.filter { it.isDigit() }
     }
 
     fun onSubmit() {
@@ -98,8 +124,8 @@ internal class ManualEntryViewModel @Inject constructor(
                 activeInstitution = null,
                 consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
-                    routingNumber = requireNotNull(form.routing),
-                    accountNumber = requireNotNull(form.account)
+                    routingNumber = requireNotNull(routing),
+                    accountNumber = requireNotNull(account)
                 )
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
@@ -108,7 +134,7 @@ internal class ManualEntryViewModel @Inject constructor(
                             referrer = PANE,
                             args = ManualEntrySuccess.argMap(
                                 microdepositVerificationMethod = it.microdepositVerificationMethod,
-                                last4 = requireNotNull(form.account).takeLast(4)
+                                last4 = requireNotNull(account).takeLast(4)
                             )
                         )
                     )
@@ -120,9 +146,9 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onTestFill() {
-        form.routing = "110000000"
-        form.account = "000123456789"
-        form.accountConfirm = "000123456789"
+        routing = "110000000"
+        account = "000123456789"
+        accountConfirm = "000123456789"
         onSubmit()
     }
 
