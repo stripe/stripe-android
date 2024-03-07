@@ -68,6 +68,18 @@ dependencies {
 }
 ```
 
+### Compose versions
+
+`stripe-android` uses compose internally, and expects consumers to use a compatible compose version. Compatible versions listed below:
+
+<table>
+ <tr>
+  <td>20.22.0-20.31.0</td><td>Compose UI 1.4.x</td>
+  <td>20.32.0-20.37.3</td><td>Compose UI 1.5.x</td>
+  <td>20.37.4-Current</td><td>Compose UI 1.5.x or Compose UI 1.6.x</td>
+ </tr>
+</table>
+
 ## Getting Started
 
 ### Integration
