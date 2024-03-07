@@ -13,6 +13,7 @@ internal class ErrorPreviewParameterProvider :
     override val values = sequenceOf(
         loading(),
         unclassified(),
+        unclassifiedWithManualEntry(),
         expectedDowntime(),
         unexpectedDowntime()
     )
@@ -22,6 +23,16 @@ internal class ErrorPreviewParameterProvider :
     )
 
     private fun unclassified() = ErrorState(
+        payload = Success(
+            ErrorState.Payload(
+                error = IllegalArgumentException("An unknown error occurred."),
+                allowManualEntry = false,
+                disableLinkMoreAccounts = true,
+            )
+        ),
+    )
+
+    private fun unclassifiedWithManualEntry() = ErrorState(
         payload = Success(
             ErrorState.Payload(
                 error = IllegalArgumentException("An unknown error occurred."),
