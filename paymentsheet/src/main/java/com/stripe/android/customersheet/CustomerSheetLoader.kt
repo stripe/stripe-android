@@ -183,7 +183,7 @@ internal class DefaultCustomerSheetLoader(
                 Result.success(
                     CustomerSheetState.Full(
                         config = configuration,
-                        stripeIntent = elementsSession?.stripeIntent,
+                        paymentMethodMetadata = metadata,
                         supportedPaymentMethods = validSupportedPaymentMethods,
                         customerPaymentMethods = paymentMethods,
                         isGooglePayReady = isGooglePayReadyAndEnabled,
