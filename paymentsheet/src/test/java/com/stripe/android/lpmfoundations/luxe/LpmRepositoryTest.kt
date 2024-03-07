@@ -235,31 +235,6 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify that payment methods hardcoded to delayed remain regardless of json`() {
-        val stripeIntent = PaymentIntentFactory.create()
-        lpmRepository.updateFromDisk(stripeIntent)
-        assertThat(
-            lpmRepository.fromCode("sofort")?.requirement?.piRequirements
-        ).contains(Delayed)
-
-        lpmRepository.update(
-            stripeIntent,
-            """
-              [
-                {
-                    "type": "sofort",
-                    "async": false,
-                    "fields": []
-                  }
-             ]
-            """.trimIndent()
-        )
-        assertThat(
-            lpmRepository.fromCode("sofort")?.requirement?.piRequirements
-        ).contains(Delayed)
-    }
-
-    @Test
     fun `Verify that us_bank_account is supported when is payment intent and financial connections sdk available`() {
         lpmRepository.update(
             stripeIntent = PaymentIntentFactory.create(

@@ -9,7 +9,6 @@ import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.luxe.PaymentMethodRequirements
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentMethod
@@ -85,8 +84,7 @@ internal class FormViewModelTest {
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
                 tintIconOnSelection = true,
-                requirement = PaymentMethodRequirements(emptySet(), emptySet(), true),
-                formSpec = layoutSpec
+                formSpec = layoutSpec,
             )
         )
         return mockLpmRepository
@@ -305,7 +303,7 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.P24.code,
             billingDetails = null,
             showCheckbox = true,
-            showCheckboxControlledFields = true
+            saveForFutureUseInitialValue = true
         )
         val formViewModel = createViewModel(
             args,
@@ -361,7 +359,7 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             showCheckbox = false,
-            showCheckboxControlledFields = true,
+            saveForFutureUseInitialValue = true,
             billingDetails = null
         )
         val formViewModel = createViewModel(

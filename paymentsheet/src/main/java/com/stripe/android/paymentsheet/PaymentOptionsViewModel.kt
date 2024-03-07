@@ -12,7 +12,6 @@ import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -56,7 +55,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
-    lpmRepository: LpmRepository,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
@@ -70,7 +68,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerRepository = customerRepository,
     workContext = workContext,
     logger = logger,
-    lpmRepository = lpmRepository,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
@@ -167,10 +164,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
         linkHandler.linkInlineSelection.value = args.state.paymentSelection as? PaymentSelection.New.LinkInline
         linkHandler.setupLink(linkState)
 
-        // After recovering from don't keep activities the stripe intent will be saved,
-        // calling setStripeIntent would require the repository be initialized, which
+        // After recovering from don't keep activities the paymentMethodMetadata will be saved,
+        // calling setPaymentMethodMetadata would require the repository be initialized, which
         // would not be the case.
-        if (stripeIntent.value == null) {
+        if (paymentMethodMetadata.value == null) {
             setPaymentMethodMetadata(args.state.paymentMethodMetadata)
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods

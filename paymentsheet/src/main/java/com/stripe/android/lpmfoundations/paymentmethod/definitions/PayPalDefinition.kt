@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.PaypalRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -15,7 +14,7 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object PayPalDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.PayPal
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
+    override val supportedAsSavedPaymentMethod: Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
@@ -39,8 +38,7 @@ internal object PayPalDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            requirement = PaypalRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs),
         )
     }
 }

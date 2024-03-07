@@ -17,7 +17,7 @@ import kotlinx.parcelize.Parcelize
 internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
     val showCheckbox: Boolean,
-    val showCheckboxControlledFields: Boolean,
+    val saveForFutureUseInitialValue: Boolean,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
     val amount: Amount? = null,

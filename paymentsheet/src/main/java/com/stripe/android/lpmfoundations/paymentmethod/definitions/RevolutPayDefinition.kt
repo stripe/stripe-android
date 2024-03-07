@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.RevolutPayRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
@@ -15,7 +14,7 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object RevolutPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.RevolutPay
 
-    override val supportedAsSavedPaymentMethod: Boolean = true
+    override val supportedAsSavedPaymentMethod: Boolean = false
 
     override fun requirementsToBeUsedAsNewPaymentMethod(
         hasIntentToSetup: Boolean
@@ -41,8 +40,7 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            requirement = RevolutPayRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs)
+            formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs),
         )
     }
 }

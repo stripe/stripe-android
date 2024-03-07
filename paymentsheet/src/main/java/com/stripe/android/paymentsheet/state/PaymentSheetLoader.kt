@@ -11,6 +11,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.getSetupFutureUsageFieldConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -22,8 +23,6 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.currency
-import com.stripe.android.paymentsheet.model.getPMAddForm
-import com.stripe.android.paymentsheet.model.getSupportedSavedCustomerPMs
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -156,8 +155,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             when (val customerConfig = config.customer) {
                 null -> emptyList()
                 else -> retrieveCustomerPaymentMethods(
-                    stripeIntent = stripeIntent,
-                    config = config,
+                    metadata = metadata,
                     customerConfig = customerConfig,
                 )
             }
@@ -184,7 +182,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
                 loadLinkState(
                     config = config,
-                    stripeIntent = stripeIntent,
+                    metadata = metadata,
                     merchantCountry = merchantCountry,
                     passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
                     linkSignUpDisabled = elementsSession.disableLinkSignup,
@@ -215,24 +213,15 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     }
 
     private suspend fun retrieveCustomerPaymentMethods(
-        stripeIntent: StripeIntent,
-        config: PaymentSheet.Configuration,
+        metadata: PaymentMethodMetadata,
         customerConfig: PaymentSheet.CustomerConfiguration,
     ): List<PaymentMethod> {
-        val paymentMethodTypes = getSupportedSavedCustomerPMs(
-            stripeIntent,
-            config,
-            lpmRepository,
-        ).mapNotNull {
-            // The SDK is only able to parse customer LPMs
-            // that are hard coded in the SDK.
-            PaymentMethod.Type.fromCode(it.code)
-        }
+        val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
         val paymentMethods = customerRepository.getPaymentMethods(
             customerConfig = customerConfig,
             types = paymentMethodTypes,
-            silentlyFail = stripeIntent.isLiveMode,
+            silentlyFail = metadata.stripeIntent.isLiveMode,
         ).getOrThrow()
 
         return paymentMethods.filter { paymentMethod ->
@@ -248,7 +237,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun loadLinkState(
         config: PaymentSheet.Configuration,
-        stripeIntent: StripeIntent,
+        metadata: PaymentMethodMetadata,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
         linkSignUpDisabled: Boolean,
@@ -256,10 +245,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): LinkState {
         val linkConfig = createLinkConfiguration(
             config = config,
-            stripeIntent = stripeIntent,
+            metadata = metadata,
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
-
             flags = flags,
             linkSignUpDisabled = linkSignUpDisabled,
         )
@@ -280,7 +268,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration,
-        stripeIntent: StripeIntent,
+        metadata: PaymentMethodMetadata,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
         linkSignUpDisabled: Boolean,
@@ -309,13 +297,17 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config.merchantDisplayName
 
-        val layoutDescriptor = CardDefinition.hardcodedCardSpec(BillingDetailsCollectionConfiguration())
-            .getPMAddForm(stripeIntent, config)
+        val setupFutureUsageFieldConfiguration = requireNotNull(
+            CardDefinition.getSetupFutureUsageFieldConfiguration(
+                metadata = metadata,
+                customerConfiguration = config.customer,
+            )
+        )
         val hasUsedLink = linkStore.hasUsedLink()
 
         val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
             null
-        } else if (layoutDescriptor.showCheckbox) {
+        } else if (setupFutureUsageFieldConfiguration.isSaveForFutureUseValueChangeable) {
             LinkSignupMode.AlongsideSaveForFutureUse
         } else {
             LinkSignupMode.InsteadOfSaveForFutureUse
@@ -329,7 +321,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         )
 
         return LinkConfiguration(
-            stripeIntent = stripeIntent,
+            stripeIntent = metadata.stripeIntent,
             signupMode = linkSignupMode,
             merchantName = merchantName,
             merchantCountryCode = merchantCountry,

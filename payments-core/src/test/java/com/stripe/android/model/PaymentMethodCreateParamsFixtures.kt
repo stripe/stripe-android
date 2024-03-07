@@ -110,6 +110,10 @@ internal object PaymentMethodCreateParamsFixtures {
         billingDetails = BILLING_DETAILS,
     )
 
+    internal val AMAZON_PAY = PaymentMethodCreateParams.createAmazonPay(
+        billingDetails = BILLING_DETAILS,
+    )
+
     internal val REVOLUT_PAY = PaymentMethodCreateParams.createRevolutPay(
         billingDetails = BILLING_DETAILS,
     )

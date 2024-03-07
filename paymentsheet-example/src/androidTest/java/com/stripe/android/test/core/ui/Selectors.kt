@@ -80,7 +80,7 @@ internal class Selectors(
 
     fun browserWindow(browser: BrowserUI): UiObject? = browserWindow(device, browser)
 
-    val closeQrCodeButton = UiAutomatorText("Close", device = device)
+    val closeButton = UiAutomatorText("Close", device = device)
 
     fun blockUntilAuthorizationPageLoaded(isSetup: Boolean) {
         assertThat(

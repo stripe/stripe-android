@@ -84,7 +84,7 @@ internal class FormViewModel @Inject internal constructor(
                 addressRepository = addressRepository,
                 initialValues = formArguments.getInitialValuesMap(),
                 amount = formArguments.amount,
-                saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
+                saveForFutureUseInitialValue = formArguments.saveForFutureUseInitialValue,
                 merchantName = formArguments.merchantName,
                 context = context,
                 shippingValues = formArguments.shippingDetails

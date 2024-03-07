@@ -59,12 +59,21 @@ internal class PaymentSheetPage(
         replaceText(label, "email@email.com")
     }
 
-    fun fillOutLinkPhone() {
+    fun selectPhoneNumberCountry(country: String) {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
         waitForText("Phone number")
-        replaceText("Phone number", "+12113526421")
+        composeTestRule.onNode(hasTestTag("DropDown:tiny")).performClick()
+        composeTestRule.onNode(hasText(country, substring = true)).performClick()
+    }
+
+    fun fillOutLinkPhone(phoneNumber: String = "+12113526421") {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Phone number")
+        replaceText("Phone number", phoneNumber)
     }
 
     fun fillOutLinkName() {
