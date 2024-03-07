@@ -45,12 +45,7 @@ internal fun ErrorScreen(
     val cause by identityViewModel.errorCause.observeAsState()
     LaunchedEffect(cause) {
         cause?.let {
-            identityViewModel.sendAnalyticsRequest(
-                identityViewModel.identityAnalyticsRequestFactory.genericError(
-                    it.message,
-                    it.stackTraceToString()
-                )
-            )
+            identityViewModel.logError(it)
         }
     }
     Column(

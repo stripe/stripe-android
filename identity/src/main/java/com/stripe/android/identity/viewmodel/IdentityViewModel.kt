@@ -1712,6 +1712,15 @@ internal class IdentityViewModel constructor(
         _visitedIndividualWelcomeScreen.updateStateAndSave { true }
     }
 
+    fun logError(cause: Throwable) {
+        sendAnalyticsRequest(
+            identityAnalyticsRequestFactory.genericError(
+                cause.message,
+                cause.stackTraceToString()
+            )
+        )
+    }
+
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {
         this.update(function)
         savedStateHandle[
