@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.mock
 
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 
-internal class TestSuccessContentRepository() : SuccessContentRepository {
+internal class TestSuccessContentRepository : SuccessContentRepository {
 
     var state = SuccessContentRepository.State()
     override suspend fun get(): SuccessContentRepository.State {
