@@ -11,6 +11,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -34,6 +35,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -53,14 +55,15 @@ internal fun ManualEntryScreen() {
     val viewModel: ManualEntryViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state: ManualEntryState by viewModel.collectAsState()
+    val form by viewModel.form.collectAsState()
     ManualEntryContent(
-        routing = state.routing,
-        routingError = state.routingError,
-        account = state.account,
-        accountError = state.accountError,
-        accountConfirm = state.accountConfirm,
-        accountConfirmError = state.accountConfirmError,
-        isValidForm = state.isValidForm,
+        routing = viewModel.routing ?: "",
+        routingError = form.routingError,
+        account = viewModel.account ?: "",
+        accountError = form.accountError,
+        accountConfirm = viewModel.accountConfirm ?: "",
+        accountConfirmError = form.accountConfirmError,
+        isValidForm = form.isValid,
         payload = state.payload,
         linkPaymentAccountStatus = state.linkPaymentAccount,
         onRoutingEntered = viewModel::onRoutingEntered,
@@ -333,19 +336,19 @@ private fun InputWithError(
 )
 @Composable
 internal fun ManualEntryPreview(
-    @PreviewParameter(ManualEntryPreviewParameterProvider::class) state: ManualEntryState
+    @PreviewParameter(ManualEntryPreviewParameterProvider::class) previewState: PreviewState
 ) {
     FinancialConnectionsPreview {
         ManualEntryContent(
-            routing = state.routing,
-            routingError = state.routingError,
-            account = state.account,
-            accountError = state.accountError,
-            accountConfirm = state.accountConfirm,
-            accountConfirmError = state.accountConfirmError,
+            routing = previewState.routing,
+            routingError = previewState.routingError,
+            account = previewState.account,
+            accountError = previewState.accountError,
+            accountConfirm = previewState.accountConfirm,
+            accountConfirmError = previewState.accountConfirmError,
             isValidForm = true,
-            payload = state.payload,
-            linkPaymentAccountStatus = state.linkPaymentAccount,
+            payload = previewState.state.payload,
+            linkPaymentAccountStatus = previewState.state.linkPaymentAccount,
             onRoutingEntered = {},
             onAccountEntered = {},
             onAccountConfirmEntered = {},
