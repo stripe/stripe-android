@@ -59,23 +59,18 @@ internal class DefaultCustomerSheetLoader(
     )
 
     override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
-        val customerAdapter = customerAdapterProvider.awaitAsResult(
-            timeout = 5.seconds,
-            error = {
-                "Couldn't find an instance of CustomerAdapter. " +
-                    "Are you instantiating CustomerSheet unconditionally in your app?"
-            },
-        )
+        return runCatching {
+            val customerAdapter = customerAdapterProvider.awaitAsResult(
+                timeout = 5.seconds,
+                error = {
+                    "Couldn't find an instance of CustomerAdapter. " +
+                        "Are you instantiating CustomerSheet unconditionally in your app?"
+                },
+            ).getOrThrow()
 
-        return customerAdapter.mapCatching { adapter ->
-            if (adapter.canCreateSetupIntents) {
-                adapter to retrieveElementsSession(configuration, adapter).getOrThrow()
-            } else {
-                adapter to null
-            }
-        }.map { (adapter, elementsSessionWithMetadata) ->
+            val elementsSessionWithMetadata = retrieveElementsSession(configuration, customerAdapter).getOrThrow()
             loadPaymentMethods(
-                customerAdapter = adapter,
+                customerAdapter = customerAdapter,
                 configuration = configuration,
                 elementsSessionWithMetadata = elementsSessionWithMetadata,
             ).getOrThrow()

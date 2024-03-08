@@ -8,7 +8,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
-import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
@@ -205,26 +204,6 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
-    fun `when setup intent cannot be created, elements session is null`() = runTest {
-        val loader = createCustomerSheetLoader(
-            customerAdapter = FakeCustomerAdapter(
-                paymentMethods = CustomerAdapter.Result.success(
-                    listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    )
-                ),
-                canCreateSetupIntents = false,
-            )
-        )
-
-        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
-
-        assertThat(
-            loader.load(config).getOrThrow().paymentMethodMetadata
-        ).isNull()
-    }
-
-    @Test
     fun `when setup intent cannot be created, supported payment methods should contain at least card`() = runTest {
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -239,22 +218,17 @@ class DefaultCustomerSheetLoaderTest {
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
-        assertThat(
-            loader.load(config).getOrThrow()
-        ).isEqualTo(
-            CustomerSheetState.Full(
-                config = config,
-                paymentMethodMetadata = null,
-                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                supportedPaymentMethods = listOf(
-                    LpmRepositoryTestHelpers.card,
-                ),
-                isGooglePayReady = false,
-                paymentSelection = null,
-                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                validationError = null,
-            )
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.config).isEqualTo(config)
+        assertThat(state.paymentMethodMetadata).isNotNull()
+        assertThat(state.customerPaymentMethods).containsExactly(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
+        assertThat(state.supportedPaymentMethods).containsExactly(LpmRepositoryTestHelpers.card)
+        assertThat(state.isGooglePayReady).isFalse()
+        assertThat(state.paymentSelection).isNull()
+        assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
+        assertThat(state.validationError).isNull()
     }
 
     @Test
