@@ -67,6 +67,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     @Test
     fun `init - starts verification with consumer session secret from cached session`() = runTest {
         val consumerSession = consumerSession()
+        whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession)
 
         val viewModel = buildViewModel()
@@ -84,6 +85,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val selectedAccount = partnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
+            whenever(getManifest()).thenReturn(sessionManifest())
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
 
@@ -122,6 +124,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val selectedAccount = partnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
+            whenever(getManifest()).thenReturn(sessionManifest())
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
             whenever(saveAccountToLink.existing(any(), any())).thenThrow(RuntimeException("error"))
