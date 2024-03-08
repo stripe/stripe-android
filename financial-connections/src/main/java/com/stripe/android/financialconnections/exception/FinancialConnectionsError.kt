@@ -8,7 +8,7 @@ import com.stripe.android.core.exception.StripeException
  */
 internal abstract class FinancialConnectionsError(
     val name: String,
-    stripeException: StripeException,
+    val stripeException: StripeException,
 ) : StripeException(
     stripeException.stripeError,
     stripeException.requestId,
