@@ -6,12 +6,12 @@ import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_EXPERIMENT_EXPOSURE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SHEET_CLOSED
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_ARB_ID
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EVENT_META_DATA
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_EXPERIMENT_RETRIEVED
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_LIVE_MODE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SCREEN_NAME
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_SESSION_RESULT
-import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.PARAM_ARB_ID
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
