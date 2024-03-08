@@ -68,19 +68,20 @@ private fun ExitModalContent(
         Spacer(modifier = Modifier.size(24.dp))
         FinancialConnectionsButton(
             modifier = Modifier.fillMaxWidth(),
-            loading = loading,
-            onClick = onExit
+            enabled = !loading,
+            onClick = onCancel,
         ) {
-            Text(text = stringResource(id = R.string.stripe_exit_modal_cta_accept))
+            Text(text = stringResource(id = R.string.stripe_exit_modal_cta_cancel))
         }
         Spacer(modifier = Modifier.size(8.dp))
         FinancialConnectionsButton(
             modifier = Modifier.fillMaxWidth(),
+            loading = loading,
             enabled = !loading,
             type = FinancialConnectionsButton.Type.Secondary,
-            onClick = onCancel
+            onClick = onExit,
         ) {
-            Text(text = stringResource(id = R.string.stripe_exit_modal_cta_cancel))
+            Text(text = stringResource(id = R.string.stripe_exit_modal_cta_accept))
         }
     }
 }
