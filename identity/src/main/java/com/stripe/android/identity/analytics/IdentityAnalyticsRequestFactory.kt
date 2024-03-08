@@ -56,8 +56,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
                         requestFactory.createRequest(
                             eventName = EVENT_EXPERIMENT_EXPOSURE,
                             additionalParams = mapOf(
-                                PARAM_USER_SESSION_ID to userSessionId,
-                                PARAM_EXPERIMENT to exp.experimentName
+                                PARAM_ARB_ID to userSessionId,
+                                PARAM_EXPERIMENT_RETRIEVED to exp.experimentName
                             )
                         )
                     )
@@ -349,7 +349,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_GENERIC_ERROR = "generic_error"
         const val EVENT_MB_STATUS = "mb_status"
         const val EVENT_MB_ERROR = "mb_error"
-        const val EVENT_EXPERIMENT_EXPOSURE = "identity_mobile_experiment_exposure"
+        const val EVENT_EXPERIMENT_EXPOSURE = "preloaded_experiment_retrieved"
 
         const val PARAM_EVENT_META_DATA = "event_metadata"
         const val PARAM_FROM_FALLBACK_URL = "from_fallback_url"
@@ -391,8 +391,8 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_REQUIRED = "required"
         const val PARAM_INIT_SUCCESS = "init_success"
         const val PARAM_INIT_FAILED_REASON = "init_failed_reason"
-        const val PARAM_EXPERIMENT = "experiment"
-        const val PARAM_USER_SESSION_ID = "user_session_id"
+        const val PARAM_EXPERIMENT_RETRIEVED = "experiment_retrieved"
+        const val PARAM_ARB_ID = "arb_id"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_WARMUP = "document_warmup"
