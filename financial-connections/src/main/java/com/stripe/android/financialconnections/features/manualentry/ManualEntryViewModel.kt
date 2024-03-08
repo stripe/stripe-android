@@ -1,5 +1,9 @@
 package com.stripe.android.financialconnections.features.manualentry
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -24,6 +28,10 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import com.stripe.android.financialconnections.ui.TextResource
 import javax.inject.Inject
 
@@ -37,6 +45,30 @@ internal class ManualEntryViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
+
+    // Keep form fields outside of State for immediate updates.
+    private var _routing: String? by mutableStateOf(null)
+    private var _account: String? by mutableStateOf(null)
+    private var _accountConfirm: String? by mutableStateOf(null)
+
+    val routing: String get() = _routing ?: ""
+    val account: String get() = _account ?: ""
+    val accountConfirm: String get() = _accountConfirm ?: ""
+
+    val form: StateFlow<ManualEntryFormState> = combine(
+        snapshotFlow { _routing },
+        snapshotFlow { _account },
+        snapshotFlow { _accountConfirm },
+        ::ManualEntryFormState
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ManualEntryFormState(
+            routing = null,
+            account = null,
+            accountConfirm = null,
+        )
+    )
 
     init {
         observeAsyncs()
@@ -81,43 +113,27 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onRoutingEntered(input: String) {
-        setState { copy(routing = input.filter { it.isDigit() }) }
-        withState {
-            val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
-            setState { copy(routingError = error) }
-        }
+        _routing = input.filter { it.isDigit() }
     }
 
     fun onAccountEntered(input: String) {
-        setState { copy(account = input.filter { it.isDigit() }) }
-        withState {
-            val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
-            setState { copy(accountError = error) }
-        }
+        _account = input.filter { it.isDigit() }
     }
 
     fun onAccountConfirmEntered(input: String) {
-        setState { copy(accountConfirm = input.filter { it.isDigit() }) }
-        withState {
-            val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
-                accountInput = it.account,
-                accountConfirmInput = input
-            )
-            setState { copy(accountConfirmError = error) }
-        }
+        _accountConfirm = input.filter { it.isDigit() }
     }
 
     fun onSubmit() {
         suspend {
-            val state = awaitState()
             val sync = getOrFetchSync()
             pollAttachPaymentAccount(
                 sync = sync,
                 activeInstitution = null,
                 consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
-                    routingNumber = requireNotNull(state.routing),
-                    accountNumber = requireNotNull(state.account)
+                    routingNumber = requireNotNull(routing),
+                    accountNumber = requireNotNull(account)
                 )
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
@@ -125,7 +141,7 @@ internal class ManualEntryViewModel @Inject constructor(
                         copy(
                             customSuccessMessage = TextResource.StringId(
                                 R.string.stripe_success_pane_desc_microdeposits,
-                                listOf(state.account.takeLast(4))
+                                listOf(account.takeLast(4))
                             )
                         )
                     }
@@ -136,16 +152,9 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onTestFill() {
-        setState {
-            copy(
-                routing = "110000000",
-                account = "000123456789",
-                accountConfirm = "000123456789",
-                routingError = null,
-                accountError = null,
-                accountConfirmError = null
-            )
-        }
+        _routing = "110000000"
+        _account = "000123456789"
+        _accountConfirm = "000123456789"
         onSubmit()
     }
 
@@ -171,12 +180,6 @@ internal class ManualEntryViewModel @Inject constructor(
 
 internal data class ManualEntryState(
     val payload: Async<Payload> = Uninitialized,
-    val routing: String = "",
-    val account: String = "",
-    val accountConfirm: String = "",
-    val routingError: Int? = null,
-    val accountError: Int? = null,
-    val accountConfirmError: Int? = null,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
 ) : MavericksState {
 
@@ -185,12 +188,4 @@ internal data class ManualEntryState(
         val customManualEntry: Boolean,
         val testMode: Boolean
     )
-
-    val isValidForm
-        get() =
-            (routing to routingError).valid() &&
-                (account to accountError).valid() &&
-                (accountConfirm to accountConfirmError).valid()
-
-    private fun Pair<String, Int?>.valid() = first.isNotEmpty() && second == null
 }

@@ -30,6 +30,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
+import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -198,9 +199,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         closeAuthFlow(closeAuthFlowError = null)
     }
 
-    fun onCloseFromErrorClick(error: Throwable) = closeAuthFlow(
-        closeAuthFlowError = error
-    )
+    fun onCloseFromErrorClick(error: Throwable) {
+        // FinancialConnectionsError subclasses aren't public, so we just return their
+        // backing StripeException.
+        val exposedError = (error as? FinancialConnectionsError)?.stripeException ?: error
+        closeAuthFlow(closeAuthFlowError = exposedError)
+    }
 
     /**
      * [NavHost] handles back presses except for when backstack is empty, where it delegates
