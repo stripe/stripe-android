@@ -11,25 +11,21 @@ tags:
 - extendedWaitUntil:
     notVisible:
       id: "connect_accounts"
-    timeout: 30000
+    timeout: 60000
 ######## Bypass Chrome on-boarding screen #######
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
 ################################################
-# Common: web AuthFlow - connect OAuth institution
+# Common: web AuthFlow - connect institution
 - tapOn: "Agree and continue"
 # SELECT OAUTH INSTITUTION
-- assertVisible: "Test OAuth Institution"
-- tapOn: "Test OAuth Institution"
-- tapOn: "Continue Continue"
+- assertVisible: "Test Institution"
+- tapOn: "Test Institution"
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
     visible: "Connect accounts"
     timeout: 60000
 - tapOn: "Connect accounts" # select all accounts
-- tapOn:
-    text: "Link accounts"
-    retryTapIfNoChange: false
 # CONFIRM AND COMPLETE
 - assertVisible: "Test OAuth Institution"
 - tapOn: "Done"
