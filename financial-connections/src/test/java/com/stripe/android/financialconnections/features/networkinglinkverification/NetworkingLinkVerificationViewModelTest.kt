@@ -55,7 +55,6 @@ class NetworkingLinkVerificationViewModelTest {
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         confirmVerification = confirmVerification,
         markLinkVerified = markLinkVerified,
-        fetchNetworkedAccounts = fetchNetworkedAccounts,
         analyticsTracker = analyticsTracker,
         logger = Logger.noop(),
         initialState = state

@@ -17,21 +17,22 @@ internal class NetworkingSaveToLinkVerificationPreviewParameterProvider :
         canonical(),
         submitting(),
         otpError(),
-        randomError()
+        randomError(),
+        returningUser()
     )
 
     private fun canonical() = NetworkingSaveToLinkVerificationState(
-        payload = payload(),
+        payload = Success(payload()),
         confirmVerification = Uninitialized
     )
 
     private fun submitting() = NetworkingSaveToLinkVerificationState(
-        payload = payload(),
+        payload = Success(payload()),
         confirmVerification = Loading()
     )
 
     private fun otpError() = NetworkingSaveToLinkVerificationState(
-        payload = payload(),
+        payload = Success(payload()),
         confirmVerification = Fail(
             ConfirmVerification.OTPError(
                 "12345678",
@@ -41,23 +42,30 @@ internal class NetworkingSaveToLinkVerificationPreviewParameterProvider :
     )
 
     private fun randomError() = NetworkingSaveToLinkVerificationState(
-        payload = payload(),
+        payload = Success(payload()),
         confirmVerification = Fail(
             Exception("Random error")
         )
     )
 
-    private fun payload() = Success(
-        NetworkingSaveToLinkVerificationState.Payload(
-            email = "theLargestEmailYoulleverseeThatCouldBreakALayout@email.com",
-            phoneNumber = "12345678",
-            otpElement = OTPElement(
-                IdentifierSpec.Generic("otp"),
-                OTPController()
-            ),
-            consumerSessionClientSecret = "12345678"
-        )
+    private fun returningUser() = NetworkingSaveToLinkVerificationState(
+        payload = Success(
+            payload().copy(showNotNowButton = true)
+        ),
+        confirmVerification = Success(Unit)
     )
+
+    private fun payload() = NetworkingSaveToLinkVerificationState.Payload(
+        email = "theLargestEmailYoulleverseeThatCouldBreakALayout@email.com",
+        phoneNumber = "12345678",
+        otpElement = OTPElement(
+            IdentifierSpec.Generic("otp"),
+            OTPController()
+        ),
+        showNotNowButton = false,
+        consumerSessionClientSecret = "12345678"
+    )
+
 
     private fun loading() = NetworkingSaveToLinkVerificationState(
         payload = Loading(),

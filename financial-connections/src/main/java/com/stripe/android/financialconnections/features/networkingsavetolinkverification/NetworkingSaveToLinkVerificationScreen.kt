@@ -148,7 +148,9 @@ private fun NetworkingSaveToLinkVerificationLoaded(
                         Text(text = stringResource(R.string.stripe_networking_save_to_link_verification_cta_negative))
                     }
                 }
-            } else null
+            } else {
+                null
+            }
         )
     }
 }

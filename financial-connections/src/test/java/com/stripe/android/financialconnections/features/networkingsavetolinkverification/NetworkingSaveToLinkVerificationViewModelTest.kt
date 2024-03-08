@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
@@ -42,6 +43,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
+    private val getManifest = mock<GetManifest>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
 
@@ -57,6 +59,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         saveAccountToLink = saveAccountToLink,
         getCachedConsumerSession = getCachedConsumerSession,
         saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
+        getManifest = getManifest,
         logger = Logger.noop(),
         initialState = state
     )

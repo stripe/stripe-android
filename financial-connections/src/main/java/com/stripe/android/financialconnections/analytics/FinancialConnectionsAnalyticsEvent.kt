@@ -290,6 +290,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             StartVerificationSessionError("StartVerificationSessionError"),
             ConfirmVerificationSessionError("ConfirmVerificationSessionError"),
             NetworkedAccountsRetrieveMethodError("NetworkedAccountsRetrieveMethodError"),
+            MarkLinkVerifiedError("MarkLinkVerifiedError"),
         }
     }
 
