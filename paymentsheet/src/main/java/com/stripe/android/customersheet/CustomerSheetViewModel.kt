@@ -21,7 +21,6 @@ import com.stripe.android.customersheet.injection.CustomerSheetViewModelScope
 import com.stripe.android.customersheet.injection.DaggerCustomerSheetViewModelComponent
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
@@ -90,7 +89,6 @@ internal class CustomerSheetViewModel(
     private val configuration: CustomerSheet.Configuration,
     private val logger: Logger,
     private val stripeRepository: StripeRepository,
-    private val lpmRepository: LpmRepository,
     private val statusBarColor: Int?,
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
@@ -112,7 +110,6 @@ internal class CustomerSheetViewModel(
         configuration: CustomerSheet.Configuration,
         logger: Logger,
         stripeRepository: StripeRepository,
-        lpmRepository: LpmRepository,
         statusBarColor: Int?,
         eventReporter: CustomerSheetEventReporter,
         workContext: CoroutineContext = Dispatchers.IO,
@@ -133,7 +130,6 @@ internal class CustomerSheetViewModel(
         configuration = configuration,
         logger = logger,
         stripeRepository = stripeRepository,
-        lpmRepository = lpmRepository,
         statusBarColor = statusBarColor,
         eventReporter = eventReporter,
         workContext = workContext,
@@ -157,7 +153,7 @@ internal class CustomerSheetViewModel(
 
     private var previouslySelectedPaymentMethod: SupportedPaymentMethod? = null
     private var unconfirmedPaymentMethod: PaymentMethod? = null
-    private var paymentMethodMetadata: PaymentMethodMetadata? = null
+    var paymentMethodMetadata: PaymentMethodMetadata? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
 
     private val card = CardDefinition.hardcodedCardSpec(
@@ -229,8 +225,9 @@ internal class CustomerSheetViewModel(
     }
 
     fun providePaymentMethodName(code: PaymentMethodCode?): String {
-        val paymentMethod = lpmRepository.fromCode(code)
-        return paymentMethod?.displayNameResource?.let {
+        return code?.let {
+            paymentMethodMetadata?.supportedPaymentMethodForCode(code)
+        }?.displayNameResource?.let {
             resources.getString(it)
         }.orEmpty()
     }
@@ -709,7 +706,9 @@ internal class CustomerSheetViewModel(
                         enabled = false,
                     )
                 }
-                lpmRepository.fromCode(currentViewState.paymentMethodCode)?.let { paymentMethodSpec ->
+                paymentMethodMetadata?.supportedPaymentMethodForCode(
+                    code = currentViewState.paymentMethodCode,
+                )?.let { paymentMethodSpec ->
                     val formData = currentViewState.formViewData
                     if (formData.completeFormValues == null) error("completeFormValues cannot be null")
                     val params = formData.completeFormValues
@@ -784,7 +783,7 @@ internal class CustomerSheetViewModel(
         )
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
-            ?: requireNotNull(lpmRepository.fromCode(paymentMethodCode))
+            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode))
 
         val stripeIntent = paymentMethodMetadata?.stripeIntent
 
