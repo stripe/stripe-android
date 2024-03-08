@@ -11,8 +11,8 @@ internal sealed interface CustomerSheetState {
     object Loading : CustomerSheetState
 
     data class Full(
-        val config: CustomerSheet.Configuration?,
-        val paymentMethodMetadata: PaymentMethodMetadata?,
+        val config: CustomerSheet.Configuration,
+        val paymentMethodMetadata: PaymentMethodMetadata,
         val customerPaymentMethods: List<PaymentMethod>,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val isGooglePayReady: Boolean,

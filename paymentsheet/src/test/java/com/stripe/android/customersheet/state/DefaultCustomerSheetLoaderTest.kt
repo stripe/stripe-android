@@ -8,7 +8,6 @@ import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
-import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
@@ -20,6 +19,7 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -28,6 +28,7 @@ import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAv
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -132,7 +133,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
-        assertThat(state.paymentMethodMetadata?.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
@@ -184,7 +185,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
-        assertThat(state.paymentMethodMetadata?.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
@@ -205,26 +206,6 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
-    fun `when setup intent cannot be created, elements session is null`() = runTest {
-        val loader = createCustomerSheetLoader(
-            customerAdapter = FakeCustomerAdapter(
-                paymentMethods = CustomerAdapter.Result.success(
-                    listOf(
-                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
-                    )
-                ),
-                canCreateSetupIntents = false,
-            )
-        )
-
-        val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
-
-        assertThat(
-            loader.load(config).getOrThrow().paymentMethodMetadata
-        ).isNull()
-    }
-
-    @Test
     fun `when setup intent cannot be created, supported payment methods should contain at least card`() = runTest {
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
@@ -239,22 +220,78 @@ class DefaultCustomerSheetLoaderTest {
 
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
-        assertThat(
-            loader.load(config).getOrThrow()
-        ).isEqualTo(
-            CustomerSheetState.Full(
-                config = config,
-                paymentMethodMetadata = null,
-                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
-                supportedPaymentMethods = listOf(
-                    LpmRepositoryTestHelpers.card,
-                ),
-                isGooglePayReady = false,
-                paymentSelection = null,
-                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                validationError = null,
-            )
+        val state = loader.load(config).getOrThrow()
+        assertThat(state.config).isEqualTo(config)
+        assertThat(state.paymentMethodMetadata).isNotNull()
+        assertThat(state.customerPaymentMethods).containsExactly(
+            PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
+        assertThat(state.supportedPaymentMethods).containsExactly(LpmRepositoryTestHelpers.card)
+        assertThat(state.isGooglePayReady).isFalse()
+        assertThat(state.paymentSelection).isNull()
+        assertThat(state.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
+        assertThat(state.validationError).isNull()
+    }
+
+    @Test
+    fun `when setup intent cannot be created, elements sessions is called with card only`() = runTest {
+        val elementsSessionRepository = FakeElementsSessionRepository(
+            stripeIntent = STRIPE_INTENT,
+            error = null,
+            linkSettings = null,
+            isCbcEligible = false,
+        )
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    )
+                ),
+                canCreateSetupIntents = false,
+            ),
+            elementsSessionRepository = elementsSessionRepository,
+        )
+
+        val config = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
+        )
+
+        assertThat(loader.load(config).getOrThrow()).isNotNull()
+        val params = elementsSessionRepository.lastGetParam?.toElementsSessionParams()
+            as ElementsSessionParams.DeferredIntentType
+        assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
+    }
+
+    @Test
+    fun `when setup intent cannot be created, elements sessions is called with card only when paymentMethodTypes is set`() = runTest {
+        val elementsSessionRepository = FakeElementsSessionRepository(
+            stripeIntent = STRIPE_INTENT,
+            error = null,
+            linkSettings = null,
+            isCbcEligible = false,
+        )
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.success(
+                    listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    )
+                ),
+                canCreateSetupIntents = false,
+                paymentMethodTypes = listOf("card", "us_bank_account"),
+            ),
+            elementsSessionRepository = elementsSessionRepository,
+        )
+
+        val config = CustomerSheet.Configuration(
+            merchantDisplayName = "Example",
+        )
+
+        assertThat(loader.load(config).getOrThrow()).isNotNull()
+        val params = elementsSessionRepository.lastGetParam?.toElementsSessionParams()
+            as ElementsSessionParams.DeferredIntentType
+        assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
     }
 
     @Test
@@ -278,7 +315,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
-        assertThat(state.paymentMethodMetadata?.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
@@ -314,7 +351,7 @@ class DefaultCustomerSheetLoaderTest {
 
         val state = loader.load(config).getOrThrow()
         assertThat(state.config).isEqualTo(config)
-        assertThat(state.paymentMethodMetadata?.stripeIntent).isEqualTo(STRIPE_INTENT)
+        assertThat(state.paymentMethodMetadata.stripeIntent).isEqualTo(STRIPE_INTENT)
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
