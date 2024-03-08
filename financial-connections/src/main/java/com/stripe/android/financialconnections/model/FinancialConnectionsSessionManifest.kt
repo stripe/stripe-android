@@ -138,6 +138,9 @@ internal data class FinancialConnectionsSessionManifest(
     @SerialName(value = "experiment_assignments")
     val experimentAssignments: Map<String, String>? = null,
 
+    @SerialName(value = "display_text")
+    val displayText: TextUpdate? = null,
+
     @SerialName(value = "features")
     val features: Map<String, Boolean>? = null,
 

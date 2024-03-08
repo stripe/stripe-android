@@ -28,7 +28,8 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.repository.SuccessContentRepositoryImpl
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
@@ -154,7 +155,7 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Provides
         fun providesSaveToLinkWithStripeSucceededRepository(
             @IOContext workContext: CoroutineContext
-        ) = SaveToLinkWithStripeSucceededRepository(
+        ): SuccessContentRepository = SuccessContentRepositoryImpl(
             CoroutineScope(SupervisorJob() + workContext)
         )
 

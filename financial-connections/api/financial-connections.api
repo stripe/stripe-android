@@ -1597,6 +1597,14 @@ public final class com/stripe/android/financialconnections/model/ServerLink$Crea
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/financialconnections/model/SuccessPane$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/SuccessPane;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/model/SuccessPane;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/financialconnections/model/SynchronizeSessionResponse$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/model/SynchronizeSessionResponse;

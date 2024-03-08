@@ -17,7 +17,20 @@ internal data class TextUpdate(
     @SerialName("oauth_prepane")
     val oauthPrepane: OauthPrepane? = null,
     @SerialName("returning_networking_user_account_picker")
-    val returningNetworkingUserAccountPicker: ReturningNetworkingUserAccountPicker? = null
+    val returningNetworkingUserAccountPicker: ReturningNetworkingUserAccountPicker? = null,
+    @SerialName("success_pane")
+    val successPane: SuccessPane? = null,
+) : Parcelable
+
+@Serializable
+@Parcelize
+internal data class SuccessPane(
+    @SerialName("caption")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val caption: String,
+    @SerialName("sub_caption")
+    @Serializable(with = MarkdownToHtmlSerializer::class)
+    val subCaption: String,
 ) : Parcelable
 
 @Serializable
