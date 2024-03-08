@@ -51,7 +51,7 @@ class ManualEntryFormStateTest {
             assertEquals(R.string.stripe_validation_account_too_long, accountError)
         }
     }
-//
+
     @Test
     fun `account confirm validation checks for mismatch`() = runTest {
         ManualEntryFormState(

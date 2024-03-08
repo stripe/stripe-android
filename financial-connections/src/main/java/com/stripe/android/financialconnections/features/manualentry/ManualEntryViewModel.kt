@@ -43,14 +43,18 @@ internal class ManualEntryViewModel @Inject constructor(
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
     // Keep form fields outside of State for immediate updates.
-    var routing: String? by mutableStateOf(null)
-    var account: String? by mutableStateOf(null)
-    var accountConfirm: String? by mutableStateOf(null)
+    private var _routing: String? by mutableStateOf(null)
+    private var _account: String? by mutableStateOf(null)
+    private var _accountConfirm: String? by mutableStateOf(null)
+
+    val routing: String get() = _routing ?: ""
+    val account: String get() = _account ?: ""
+    val accountConfirm: String get() = _accountConfirm ?: ""
 
     val form: StateFlow<ManualEntryFormState> = combine(
-        snapshotFlow { routing },
-        snapshotFlow { account },
-        snapshotFlow { accountConfirm },
+        snapshotFlow { _routing },
+        snapshotFlow { _account },
+        snapshotFlow { _accountConfirm },
         ::ManualEntryFormState
     ).stateIn(
         scope = viewModelScope,
@@ -105,15 +109,15 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onRoutingEntered(input: String) {
-        routing = input.filter { it.isDigit() }
+        _routing = input.filter { it.isDigit() }
     }
 
     fun onAccountEntered(input: String) {
-        account = input.filter { it.isDigit() }
+        _account = input.filter { it.isDigit() }
     }
 
     fun onAccountConfirmEntered(input: String) {
-        accountConfirm = input.filter { it.isDigit() }
+        _accountConfirm = input.filter { it.isDigit() }
     }
 
     fun onSubmit() {
@@ -146,9 +150,9 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onTestFill() {
-        routing = "110000000"
-        account = "000123456789"
-        accountConfirm = "000123456789"
+        _routing = "110000000"
+        _account = "000123456789"
+        _accountConfirm = "000123456789"
         onSubmit()
     }
 

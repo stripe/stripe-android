@@ -26,9 +26,9 @@ internal class ManualEntryFormState(
 
     val isValid: Boolean
         get() = routing != null && account != null && accountConfirm != null &&
-            getRoutingErrorIdOrNull(routing) == null &&
-            getAccountErrorIdOrNull(account) == null &&
-            getAccountConfirmIdOrNull(account, accountConfirm) == null
+            routingError == null &&
+            accountError == null &&
+            accountConfirmError == null
 }
 
 private object Validator {
