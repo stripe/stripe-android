@@ -3,10 +3,11 @@ package com.stripe.android.financialconnections.repository
 import com.airbnb.mvrx.MavericksRepository
 import com.airbnb.mvrx.MavericksState
 import com.stripe.android.financialconnections.BuildConfig
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository.State
+import com.stripe.android.financialconnections.repository.SuccessContentRepository.State
+import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.CoroutineScope
 
-internal class SaveToLinkWithStripeSucceededRepository(
+internal class SuccessContentRepository(
     coroutineScope: CoroutineScope
 ) : MavericksRepository<State>(
     initialState = State(),
@@ -14,15 +15,13 @@ internal class SaveToLinkWithStripeSucceededRepository(
     performCorrectnessValidations = BuildConfig.DEBUG,
 ) {
 
-    suspend fun get() = awaitState().saveToLinkWithStripeSucceeded
+    suspend fun get() = awaitState()
 
-    fun set(saveToLinkWithStripeSucceeded: Boolean) {
-        setState {
-            copy(saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded)
-        }
+    fun update(reducer: State.() -> State) {
+        setState(reducer)
     }
 
     data class State(
-        val saveToLinkWithStripeSucceeded: Boolean? = null
+        val customSuccessMessage: TextResource? = null
     ) : MavericksState
 }

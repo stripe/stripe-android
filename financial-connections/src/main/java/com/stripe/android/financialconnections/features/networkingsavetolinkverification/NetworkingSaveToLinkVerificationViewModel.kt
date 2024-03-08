@@ -24,7 +24,6 @@ import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
@@ -38,7 +37,6 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingSaveToLinkVerificationState,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val startVerification: StartVerification,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
@@ -90,7 +88,6 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         onAsync(
             NetworkingSaveToLinkVerificationState::confirmVerification,
             onSuccess = {
-                saveToLinkWithStripeSucceeded.set(true)
                 navigationManager.tryNavigateTo(Success(referrer = PANE))
             },
             onFail = { error ->
@@ -101,7 +98,6 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                     pane = PANE
                 )
                 if (error !is OTPError) {
-                    saveToLinkWithStripeSucceeded.set(false)
                     navigationManager.tryNavigateTo(Success(referrer = PANE))
                 }
             },
