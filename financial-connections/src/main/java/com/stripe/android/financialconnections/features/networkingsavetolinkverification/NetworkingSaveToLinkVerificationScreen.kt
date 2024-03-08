@@ -137,16 +137,18 @@ private fun NetworkingSaveToLinkVerificationLoaded(
                     }
                 }
             },
-            footer = {
-                FinancialConnectionsButton(
-                    type = FinancialConnectionsButton.Type.Secondary,
-                    onClick = onSkipClick,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Text(text = stringResource(R.string.stripe_networking_save_to_link_verification_cta_negative))
+            footer = if (payload.showNotNowButton) {
+                {
+                    FinancialConnectionsButton(
+                        type = FinancialConnectionsButton.Type.Secondary,
+                        onClick = onSkipClick,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                    ) {
+                        Text(text = stringResource(R.string.stripe_networking_save_to_link_verification_cta_negative))
+                    }
                 }
-            }
+            } else null
         )
     }
 }

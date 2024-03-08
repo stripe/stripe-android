@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
@@ -40,6 +41,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val startVerification: StartVerification,
+    private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
     private val getCachedAccounts: GetCachedAccounts,
@@ -52,6 +54,8 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         logErrors()
         suspend {
             val consumerSession = requireNotNull(getCachedConsumerSession())
+            // If we automatically moved to this pane due to prefilled email, we should show the "Not now" button.
+            val showNotNowButton = getManifest().accountholderCustomerEmailAddress != null
             runCatching {
                 startVerification.sms(consumerSession.clientSecret)
             }.onFailure {
@@ -59,6 +63,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             }.getOrThrow()
             eventTracker.track(PaneLoaded(PANE))
             NetworkingSaveToLinkVerificationState.Payload(
+                showNotNowButton = showNotNowButton,
                 email = consumerSession.emailAddress,
                 phoneNumber = consumerSession.getRedactedPhoneNumber(),
                 consumerSessionClientSecret = consumerSession.clientSecret,
@@ -161,6 +166,7 @@ internal data class NetworkingSaveToLinkVerificationState(
 ) : MavericksState {
 
     data class Payload(
+        val showNotNowButton: Boolean,
         val email: String,
         val phoneNumber: String,
         val otpElement: OTPElement,
