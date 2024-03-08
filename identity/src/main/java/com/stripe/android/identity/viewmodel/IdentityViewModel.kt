@@ -12,6 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -371,6 +372,16 @@ internal class IdentityViewModel constructor(
      * LiveData for the cause of ErrorScreen.
      */
     val errorCause = MutableLiveData<Throwable>()
+    private val errorCauseObServer = Observer<Throwable> { value -> logError(value) }
+
+    init {
+        errorCause.observeForever(errorCauseObServer)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        errorCause.removeObserver(errorCauseObServer)
+    }
 
     /**
      * Upload high_res of an image Uri manually picked from local file storage or taken from camera.
@@ -844,13 +855,13 @@ internal class IdentityViewModel constructor(
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
                                 verificationArgs.ephemeralKeySecret
                             ).let { msg ->
-                            _verificationPage.postValue(
-                                Resource.error(
-                                    msg,
-                                    IllegalStateException(msg, it)
+                                _verificationPage.postValue(
+                                    Resource.error(
+                                        msg,
+                                        IllegalStateException(msg, it)
+                                    )
                                 )
-                            )
-                        }
+                            }
                 }
             )
         }
@@ -1712,7 +1723,7 @@ internal class IdentityViewModel constructor(
         _visitedIndividualWelcomeScreen.updateStateAndSave { true }
     }
 
-    fun logError(cause: Throwable) {
+    private fun logError(cause: Throwable) {
         sendAnalyticsRequest(
             identityAnalyticsRequestFactory.genericError(
                 cause.message,

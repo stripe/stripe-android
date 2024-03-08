@@ -8,7 +8,6 @@ import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.identity.TestApplication
-import com.stripe.android.identity.viewmodel.IdentityViewModel
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,9 +25,6 @@ class ErrorScreenTest {
 
     private val mockTopButtonClicked: () -> Unit = mock()
     private val mockBottomButtonClicked: () -> Unit = mock()
-    private val mockIdentityViewModel: IdentityViewModel = mock() {
-        on { errorCause }.thenReturn(mock())
-    }
 
     @Test
     fun `message1 is visible when set`() {
@@ -132,7 +128,7 @@ class ErrorScreenTest {
     ) {
         composeTestRule.setContent {
             ErrorScreen(
-                identityViewModel = mockIdentityViewModel,
+                identityViewModel = mock(),
                 title = ERROR_TITLE,
                 message1 = message1,
                 message2 = message2,
