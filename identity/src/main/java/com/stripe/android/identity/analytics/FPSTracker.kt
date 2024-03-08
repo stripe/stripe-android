@@ -3,9 +3,6 @@ package com.stripe.android.identity.analytics
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.identity.injection.IdentityVerificationScope
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
 
@@ -38,13 +35,11 @@ internal class FPSTracker @Inject constructor(
      */
     suspend fun reportAndReset(type: String) {
         frames.get().let { totalFrames ->
-            CoroutineScope(Dispatchers.IO).launch {
-                identityAnalyticsRequestFactory.averageFps(
-                    type = type,
-                    value = totalFrames.div(startedAt.elapsedSince().inSeconds).toInt(),
-                    frames = totalFrames
-                )
-            }
+            identityAnalyticsRequestFactory.averageFps(
+                type = type,
+                value = totalFrames.div(startedAt.elapsedSince().inSeconds).toInt(),
+                frames = totalFrames
+            )
         }
         frames.set(0)
     }

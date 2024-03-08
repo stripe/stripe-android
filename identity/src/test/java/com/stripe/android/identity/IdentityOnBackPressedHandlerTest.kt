@@ -15,10 +15,8 @@ import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHO
 import com.stripe.android.identity.navigation.InitialLoadingDestination
 import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.anyOrNull
@@ -47,8 +45,7 @@ class IdentityOnBackPressedHandlerTest {
     private val handler = IdentityOnBackPressedHandler(
         mockFlowFinishable,
         mockNavController,
-        mockIdentityViewModel,
-        CoroutineScope(UnconfinedTestDispatcher())
+        mockIdentityViewModel
     )
 
     @Test

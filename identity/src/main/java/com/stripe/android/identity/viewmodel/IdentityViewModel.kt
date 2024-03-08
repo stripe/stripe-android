@@ -1252,12 +1252,10 @@ internal class IdentityViewModel constructor(
     }
 
     fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
-        viewModelScope.launch {
-            identityAnalyticsRequestFactory.screenPresented(
-                scanType = scanType,
-                screenName = screenName
-            )
-        }
+        identityAnalyticsRequestFactory.screenPresented(
+            scanType = scanType,
+            screenName = screenName
+        )
     }
 
     fun trackScreenTransitionFinish(screenName: String) {
@@ -1374,16 +1372,12 @@ internal class IdentityViewModel constructor(
     ) {
         cameraPermissionEnsureable.ensureCameraPermission(
             onCameraReady = {
-                viewModelScope.launch {
-                    identityAnalyticsRequestFactory.cameraPermissionGranted()
-                }
+                identityAnalyticsRequestFactory.cameraPermissionGranted()
                 _cameraPermissionGranted.update { true }
                 navController.navigateTo(DocumentScanDestination)
             },
             onUserDeniedCameraPermission = {
-                viewModelScope.launch {
-                    identityAnalyticsRequestFactory.cameraPermissionDenied()
-                }
+                identityAnalyticsRequestFactory.cameraPermissionDenied()
                 _cameraPermissionGranted.update { false }
                 navController.navigateTo(CameraPermissionDeniedDestination)
             }

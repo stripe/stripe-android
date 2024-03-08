@@ -18,7 +18,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.stripe.android.camera.CameraPermissionCheckingActivity
@@ -129,31 +128,25 @@ internal class IdentityActivity :
                 onSuccess = {
                     finishWithResult(
                         if (it.submitted) {
-                            lifecycleScope.launch {
-                                identityViewModel.identityAnalyticsRequestFactory
-                                    .verificationSucceeded(
-                                        isFromFallbackUrl = true
-                                    )
-                            }
+                            identityViewModel.identityAnalyticsRequestFactory
+                                .verificationSucceeded(
+                                    isFromFallbackUrl = true
+                                )
                             VerificationFlowResult.Completed
                         } else {
-                            lifecycleScope.launch {
-                                identityViewModel.identityAnalyticsRequestFactory
-                                    .verificationCanceled(
-                                        isFromFallbackUrl = true
-                                    )
-                            }
+                            identityViewModel.identityAnalyticsRequestFactory
+                                .verificationCanceled(
+                                    isFromFallbackUrl = true
+                                )
                             VerificationFlowResult.Canceled
                         }
                     )
                 },
                 onFailure = {
-                    lifecycleScope.launch {
-                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                            isFromFallbackUrl = true,
-                            throwable = IllegalStateException(it)
-                        )
-                    }
+                    identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                        isFromFallbackUrl = true,
+                        throwable = IllegalStateException(it)
+                    )
                     finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
                 }
             )
@@ -163,9 +156,7 @@ internal class IdentityActivity :
             this,
             onSuccess = {
                 if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
-                    lifecycleScope.launch {
-                        identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
-                    }
+                    identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
                 }
             },
             onFailure = {
@@ -201,8 +192,7 @@ internal class IdentityActivity :
                         IdentityOnBackPressedHandler(
                             this,
                             navController,
-                            identityViewModel,
-                            lifecycleScope
+                            identityViewModel
                         )
                     onBackPressedDispatcher.addCallback(this, onBackPressedCallback)
 
@@ -217,11 +207,9 @@ internal class IdentityActivity :
     }
 
     override fun finishWithResult(result: VerificationFlowResult) {
-        lifecycleScope.launch {
-            identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
-                result.toString()
-            )
-        }
+        identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
+            result.toString()
+        )
         setResult(
             Activity.RESULT_OK,
             Intent().putExtras(result.toBundle())
