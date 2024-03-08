@@ -135,7 +135,9 @@ internal class PartnerAuthViewModel @Inject constructor(
             asyncProp = SharedPartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
-                if (!it.authSession.isOAuth) launchAuthInBrowser()
+                if (!it.authSession.isOAuth) {
+                    launchAuthInBrowser(it.authSession)
+                }
             }
         )
     }
@@ -168,41 +170,34 @@ internal class PartnerAuthViewModel @Inject constructor(
 
     fun onLaunchAuthClick() {
         setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
-        viewModelScope.launch {
-            awaitState().payload()?.authSession?.let {
-                postAuthSessionEvent(it.id, AuthSessionEvent.OAuthLaunched(Date()))
-                eventTracker.track(PrepaneClickContinue(PANE))
+
+        withState { state ->
+            val authSession = requireNotNull(state.payload()?.authSession) {
+                "Payload shouldn't be null when the user launches the auth flow"
             }
-            launchAuthInBrowser()
+
+            reportOAuthLaunched(authSession.id)
+            launchAuthInBrowser(authSession)
         }
     }
 
-    private suspend fun launchAuthInBrowser() {
-        kotlin.runCatching { requireNotNull(getOrFetchSync().manifest.activeAuthSession) }
-            .onSuccess {
-                it.browserReadyUrl()?.let { url ->
-                    setState { copy(viewEffect = OpenPartnerAuth(url)) }
-                    eventTracker.track(
-                        AuthSessionOpened(
-                            id = it.id,
-                            pane = PANE,
-                            flow = it.flow,
-                            defaultBrowser = browserManager.getPackageToHandleUri(
-                                uri = url.toUri()
-                            )
-                        )
-                    )
-                }
-            }
-            .onFailure {
-                eventTracker.logError(
-                    extraMessage = "failed retrieving active session from cache",
-                    error = it,
-                    logger = logger,
-                    pane = PANE
+    private fun reportOAuthLaunched(sessionId: String) {
+        postAuthSessionEvent(sessionId, AuthSessionEvent.OAuthLaunched(Date()))
+        eventTracker.track(PrepaneClickContinue(PANE))
+    }
+
+    private fun launchAuthInBrowser(authSession: FinancialConnectionsAuthorizationSession) {
+        authSession.browserReadyUrl()?.let { url ->
+            setState { copy(viewEffect = OpenPartnerAuth(url)) }
+            eventTracker.track(
+                AuthSessionOpened(
+                    id = authSession.id,
+                    pane = PANE,
+                    flow = authSession.flow,
+                    defaultBrowser = browserManager.getPackageToHandleUri(uri = url.toUri()),
                 )
-                setState { copy(authenticationStatus = Fail(it)) }
-            }
+            )
+        }
     }
 
     /**
