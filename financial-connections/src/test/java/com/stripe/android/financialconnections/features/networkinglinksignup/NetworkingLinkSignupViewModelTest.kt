@@ -19,7 +19,6 @@ import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
-import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,7 +48,6 @@ class NetworkingLinkSignupViewModelTest {
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val sync = mock<SynchronizeFinancialConnectionsSession>()
-    private val saveToLinkWithStripeSucceeded = mock<SuccessContentRepository>()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState
@@ -63,7 +61,6 @@ class NetworkingLinkSignupViewModelTest {
         lookupAccount = lookupAccount,
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         sync = sync,
-        saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
         saveAccountToLink = saveAccountToLink
     )
 
