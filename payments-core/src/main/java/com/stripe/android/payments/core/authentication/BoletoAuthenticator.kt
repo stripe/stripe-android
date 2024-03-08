@@ -1,6 +1,11 @@
 package com.stripe.android.payments.core.authentication
 
+import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.networking.ErrorReporter
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.view.AuthActivityStarterHost
@@ -15,20 +20,27 @@ import javax.inject.Singleton
 @Singleton
 internal class BoletoAuthenticator @Inject constructor(
     private val webIntentAuthenticator: WebIntentAuthenticator,
-    private val noOpIntentAuthenticator: NoOpIntentAuthenticator
+    private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
+    private val errorReporter: ErrorReporter
 ) : PaymentAuthenticator<StripeIntent>() {
     override suspend fun performAuthentication(
         host: AuthActivityStarterHost,
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        (authenticatable.nextActionData as NextActionData.DisplayBoletoDetails).let { detailsData ->
-            if (detailsData.hostedVoucherUrl == null) {
-                noOpIntentAuthenticator.authenticate(
-                    host,
-                    authenticatable,
-                    requestOptions
-                )
+        suspend fun handleAuthenticationFailed(reason : ErrorReporter.ErrorEvent) {
+            errorReporter.report(reason)
+            noOpIntentAuthenticator.authenticate(
+                host,
+                authenticatable,
+                requestOptions
+            )
+        }
+        (authenticatable.nextActionData as? NextActionData.DisplayBoletoDetails).let { detailsData ->
+            if (detailsData == null) {
+                handleAuthenticationFailed(ErrorReporter.ErrorEvent.INCORRECT_NEXT_ACTION_TYPE)
+            } else if (detailsData.hostedVoucherUrl == null) {
+                handleAuthenticationFailed(ErrorReporter.ErrorEvent.MISSING_HOSTED_VOUCHER_URL)
             } else {
                 webIntentAuthenticator.authenticate(
                     host,
