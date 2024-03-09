@@ -55,7 +55,11 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
             verificationPage?.let { verificationPage ->
                 val experiments = verificationPage.experiments
                 val userSessionId = verificationPage.userSessionId
-                val metaDatas = additionalParams.getOrDefault(PARAM_EVENT_META_DATA, null) as Map<String, Any>?
+                val metaDatas = if (additionalParams.containsKey(PARAM_EVENT_META_DATA)) {
+                    additionalParams[PARAM_EVENT_META_DATA] as Map<String, Any>?
+                } else {
+                    null
+                }
 
                 experiments
                     .filter { it.matches(eventName, metaDatas) }
