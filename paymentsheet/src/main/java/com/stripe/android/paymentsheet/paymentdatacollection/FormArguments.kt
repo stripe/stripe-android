@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection
 
-import android.os.Parcelable
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
@@ -11,9 +10,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.forms.convertToFormValuesMap
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.ParameterDestination
-import kotlinx.parcelize.Parcelize
 
-@Parcelize
 internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
     val showCheckbox: Boolean,
@@ -29,7 +26,7 @@ internal data class FormArguments(
         PaymentSheet.BillingDetailsCollectionConfiguration(),
     val requiresMandate: Boolean = false,
     val requiredFields: List<IdentifierSpec> = emptyList()
-) : Parcelable
+)
 
 internal fun FormArguments.getInitialValuesMap(): Map<IdentifierSpec, String?> {
     val initialValues = initialPaymentMethodCreateParams?.let {
