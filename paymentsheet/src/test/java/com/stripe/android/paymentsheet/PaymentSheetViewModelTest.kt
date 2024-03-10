@@ -27,9 +27,7 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -139,32 +137,6 @@ internal class PaymentSheetViewModelTest {
 
     private val eventReporter = mock<EventReporter>()
     private val application = ApplicationProvider.getApplicationContext<Application>()
-
-    private val lpmRepository = LpmRepository(
-        arguments = LpmRepository.LpmRepositoryArguments(application.resources),
-    ).apply {
-        this.update(
-            PaymentIntentFactory.create(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.USBankAccount.code,
-                    PaymentMethod.Type.CashAppPay.code,
-                    PaymentMethod.Type.Ideal.code,
-                    PaymentMethod.Type.SepaDebit.code,
-                    PaymentMethod.Type.Sofort.code,
-                    PaymentMethod.Type.Affirm.code,
-                    PaymentMethod.Type.AfterpayClearpay.code,
-                ),
-            ).copy(
-                shipping = PaymentIntent.Shipping(
-                    name = "Example buyer",
-                    address = Address(line1 = "123 Main st.", country = "US", postalCode = "12345"),
-                ),
-                clientSecret = null,
-            ),
-            null
-        )
-    }
 
     private val prefsRepository = FakePrefsRepository()
 
@@ -1028,8 +1000,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        val expectedPaymentMethod = lpmRepository.fromCode("afterpay_clearpay")
-        assertThat(viewModel.supportedPaymentMethods).containsExactly(expectedPaymentMethod)
+        assertThat(viewModel.supportedPaymentMethods.map { it.code }).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1045,8 +1016,7 @@ internal class PaymentSheetViewModelTest {
             ),
         )
 
-        val expectedPaymentMethod = lpmRepository.fromCode("afterpay_clearpay")
-        assertThat(viewModel.supportedPaymentMethods).containsExactly(expectedPaymentMethod)
+        assertThat(viewModel.supportedPaymentMethods.map { it.code }).containsExactly("afterpay_clearpay")
     }
 
     @Test
@@ -1147,11 +1117,8 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethods
-        ).containsExactly(
-            lpmRepository.fromCode("card")!!,
-            lpmRepository.fromCode("ideal")!!
-        )
+            viewModel.supportedPaymentMethods.map { it.code }
+        ).containsExactly("card", "ideal")
     }
 
     @Test
@@ -1174,13 +1141,8 @@ internal class PaymentSheetViewModelTest {
         )
 
         assertThat(
-            viewModel.supportedPaymentMethods
-        ).containsExactly(
-            lpmRepository.fromCode("card")!!,
-            lpmRepository.fromCode("ideal")!!,
-            lpmRepository.fromCode("sepa_debit")!!,
-            lpmRepository.fromCode("sofort")!!
-        )
+            viewModel.supportedPaymentMethods.map { it.code }
+        ).containsExactly("card", "ideal", "sepa_debit", "sofort")
     }
 
     @Test
