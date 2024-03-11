@@ -39,7 +39,6 @@ internal class ActivityLaunchObserver(
 
             override fun onActivityDestroyed(activity: Activity) {
             }
-
         }
         val application = host.applicationContext as Application
         application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
