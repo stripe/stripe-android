@@ -7,8 +7,8 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.parcelize.Parcelize
 
