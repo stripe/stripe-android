@@ -59,6 +59,11 @@ tags:
 - tapOn:
     id: "consent_cta"
 # LOGIN TO NETWORKING
+- assertVisible:
+    id: "existing_email-button"
+# Ensure the back button is not visible on the Link login bottom sheet
+- assertNotVisible:
+    id: "top-app-bar-back-button"
 - tapOn:
     id: "existing_email-button"
   # 2FA
