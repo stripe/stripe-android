@@ -31,11 +31,10 @@ internal class LinkTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    @get:Rule
-    val networkRule = NetworkRule()
+    private val activityScenarioRule = composeTestRule.activityRule
 
     @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val networkRule = NetworkRule()
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 

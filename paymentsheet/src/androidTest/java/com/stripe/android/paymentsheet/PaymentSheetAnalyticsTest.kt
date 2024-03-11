@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -29,15 +28,14 @@ internal class PaymentSheetAnalyticsTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    private val activityScenarioRule = composeTestRule.activityRule
+
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
     val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
     )
-
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
