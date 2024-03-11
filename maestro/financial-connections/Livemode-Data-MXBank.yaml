@@ -28,13 +28,11 @@ tags:
 # LOG IN WITH TEST FINBANK INSTITUTION
 - tapOn: "Authorize"
 ###############################################
-# SELECT ALL ACCOUNTS (they're preselected)
-- extendedWaitUntil:
-    visible: "Connect accounts"
-    timeout: 60000
-- tapOn: "Connect accounts" # select all accounts
+# NO ACCOUNT PICKER (skips account selection)
 # CONFIRM AND COMPLETE
-- assertVisible: "Your accounts were connected"
+- extendedWaitUntil:
+    visible: "Your accounts were connected"
+    timeout: 60000
 - tapOn:
     id: "done_button"
 - assertVisible: ".*Completed!.*"
