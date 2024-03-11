@@ -258,7 +258,8 @@ internal class AccountPickerViewModel @Inject constructor(
             eventTracker.track(
                 AccountsSubmitted(
                     accountIds = selectedIds,
-                    isSkipAccountSelection = isSkipAccountSelection
+                    isSkipAccountSelection = isSkipAccountSelection,
+                    pane = PANE
                 )
             )
             val manifest = getOrFetchSync().manifest

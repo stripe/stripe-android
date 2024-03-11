@@ -55,7 +55,8 @@ internal class NetworkingLinkVerificationPreviewParameterProvider :
                 IdentifierSpec.Generic("otp"),
                 OTPController()
             ),
-            consumerSessionClientSecret = "12345678"
+            consumerSessionClientSecret = "12345678",
+            initialInstitution = null
         )
     )
 
