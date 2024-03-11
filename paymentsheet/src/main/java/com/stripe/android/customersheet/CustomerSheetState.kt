@@ -4,7 +4,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal sealed interface CustomerSheetState {
@@ -17,7 +16,6 @@ internal sealed interface CustomerSheetState {
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
         val isGooglePayReady: Boolean,
         val paymentSelection: PaymentSelection?,
-        val cbcEligibility: CardBrandChoiceEligibility,
         val validationError: Throwable?,
     ) : CustomerSheetState
 }

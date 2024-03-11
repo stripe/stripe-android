@@ -15,7 +15,6 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -58,7 +57,6 @@ class FormArgumentsFactoryTest {
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 
         assertThat(actualArgs.initialPaymentMethodCreateParams).isEqualTo(paymentMethodCreateParams)
@@ -84,7 +82,6 @@ class FormArgumentsFactoryTest {
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = null,
             newLpm = null,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 
         assertThat(actualArgs.showCheckbox).isFalse()
@@ -161,7 +158,6 @@ class FormArgumentsFactoryTest {
                 brand = CardBrand.Visa,
                 customerRequestedSave = customerReuse
             ),
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
 
         assertThat(actualArgs.initialPaymentMethodCreateParams).isEqualTo(paymentMethodCreateParams)

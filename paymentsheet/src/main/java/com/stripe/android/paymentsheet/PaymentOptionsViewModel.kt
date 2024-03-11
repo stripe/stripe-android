@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInterac
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -174,13 +173,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
         savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)
-
-        cbcEligibility = when (args.state.isEligibleForCardBrandChoice) {
-            true -> CardBrandChoiceEligibility.Eligible(
-                preferredNetworks = args.state.config.preferredNetworks
-            )
-            false -> CardBrandChoiceEligibility.Ineligible
-        }
 
         transitionToFirstScreen()
     }

@@ -64,7 +64,6 @@ import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.requireApplication
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
@@ -382,13 +381,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        cbcEligibility = when (state.isEligibleForCardBrandChoice) {
-            true -> CardBrandChoiceEligibility.Eligible(
-                preferredNetworks = state.config.preferredNetworks
-            )
-            false -> CardBrandChoiceEligibility.Ineligible
-        }
-
         savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
         updateSelection(state.paymentSelection)
 
