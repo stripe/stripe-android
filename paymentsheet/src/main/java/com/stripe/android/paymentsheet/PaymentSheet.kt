@@ -1229,9 +1229,6 @@ class PaymentSheet internal constructor(
         internal val collectsPhone: Boolean
             get() = phone == CollectionMode.Always
 
-        internal val collectsAddress: Boolean
-            get() = address == AddressCollectionMode.Full
-
         internal val collectsAnything: Boolean
             get() = name == CollectionMode.Always ||
                 phone == CollectionMode.Always ||

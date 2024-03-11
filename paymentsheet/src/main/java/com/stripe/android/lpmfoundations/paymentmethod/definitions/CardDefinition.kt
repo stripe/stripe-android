@@ -46,7 +46,8 @@ internal object CardDefinition : PaymentMethodDefinition {
             CardBillingSpec(
                 collectionMode = billingDetailsCollectionConfiguration.address.toInternal(),
             ).takeIf {
-                billingDetailsCollectionConfiguration.collectsAddress
+                billingDetailsCollectionConfiguration.address !=
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
             },
             SaveForFutureUseSpec(),
         )
