@@ -266,7 +266,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 3600
           inputs:
-            - content: ./count_failures
+            - content: ./count_failures.sh
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
