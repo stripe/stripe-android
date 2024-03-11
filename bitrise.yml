@@ -5,8 +5,8 @@ project_type: android
 trigger_map:
   - push_branch: 'master'
     pipeline: main-trigger-pipeline
-  - pull_request_source_branch: 'carlosmuvi/BANKCON-9530/v3-update-maestro-tests'
-    pipeline: pipeline-connections-e2e-release-tests
+  - pull_request_source_branch: '*'
+    pipeline: main-trigger-pipeline
 app:
   envs:
     - GRADLE_OPTS: -Dkotlin.incremental=false
