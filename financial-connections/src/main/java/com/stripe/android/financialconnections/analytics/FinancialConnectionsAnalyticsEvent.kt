@@ -197,11 +197,13 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     )
 
     class AccountsSubmitted(
+        pane: Pane,
         accountIds: Set<String>,
         isSkipAccountSelection: Boolean
     ) : FinancialConnectionsAnalyticsEvent(
         name = "account_picker.accounts_submitted",
         mapOf(
+            "pane" to pane.value,
             "account_ids" to accountIds.joinToString(" "),
             "is_skip_account_selection" to isSkipAccountSelection.toString(),
         ).filterNotNullValues()

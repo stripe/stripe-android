@@ -66,7 +66,6 @@ internal class NetworkingSaveToLinkVerificationPreviewParameterProvider :
         consumerSessionClientSecret = "12345678"
     )
 
-
     private fun loading() = NetworkingSaveToLinkVerificationState(
         payload = Loading(),
     )
