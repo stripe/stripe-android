@@ -99,12 +99,10 @@ internal class DefaultCustomerSheetLoader(
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             ).sharedDataSpecs
 
-            val cbcEligibility = when (elementsSession.isEligibleForCardBrandChoice) {
-                true -> CardBrandChoiceEligibility.Eligible(
-                    preferredNetworks = configuration.preferredNetworks
-                )
-                false -> CardBrandChoiceEligibility.Ineligible
-            }
+            val cbcEligibility = CardBrandChoiceEligibility.create(
+                isEligible = elementsSession.isEligibleForCardBrandChoice,
+                preferredNetworks = configuration.preferredNetworks,
+            )
 
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,

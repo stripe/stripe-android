@@ -14,4 +14,16 @@ sealed interface CardBrandChoiceEligibility : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Parcelize
     object Ineligible : CardBrandChoiceEligibility
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        fun create(isEligible: Boolean, preferredNetworks: List<CardBrand>): CardBrandChoiceEligibility {
+            return when (isEligible) {
+                true -> Eligible(
+                    preferredNetworks = preferredNetworks
+                )
+                false -> Ineligible
+            }
+        }
+    }
 }

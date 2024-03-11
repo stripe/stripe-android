@@ -79,12 +79,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             val billingDetailsCollectionConfig =
                 paymentSheetConfiguration.billingDetailsCollectionConfiguration.toInternal()
 
-            val cbcEligibility = when (elementsSession.isEligibleForCardBrandChoice) {
-                true -> CardBrandChoiceEligibility.Eligible(
-                    preferredNetworks = paymentSheetConfiguration.preferredNetworks
-                )
-                false -> CardBrandChoiceEligibility.Ineligible
-            }
+            val cbcEligibility = CardBrandChoiceEligibility.create(
+                isEligible = elementsSession.isEligibleForCardBrandChoice,
+                preferredNetworks = paymentSheetConfiguration.preferredNetworks,
+            )
 
             val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
                 stripeIntent = elementsSession.stripeIntent,
