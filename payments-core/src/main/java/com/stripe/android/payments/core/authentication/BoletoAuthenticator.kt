@@ -29,7 +29,7 @@ internal class BoletoAuthenticator @Inject constructor(
         requestOptions: ApiRequest.Options
     ) {
         suspend fun handleAuthenticationFailed(reason : ErrorReporter.ErrorEvent) {
-            errorReporter.report(reason)
+            errorReporter.report(reason, errorCode = null)
             noOpIntentAuthenticator.authenticate(
                 host,
                 authenticatable,

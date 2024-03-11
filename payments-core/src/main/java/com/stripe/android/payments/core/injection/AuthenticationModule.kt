@@ -7,7 +7,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.ErrorReporter
-import com.stripe.android.core.networking.FakeErrorReporter
 import com.stripe.android.core.networking.NetworkTypeDetector
 import com.stripe.android.core.networking.QErrorReporter
 import com.stripe.android.core.utils.ContextUtils.packageInfo
