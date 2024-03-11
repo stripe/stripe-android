@@ -6,6 +6,7 @@ import com.stripe.android.customersheet.CustomerSheetState
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -29,7 +30,7 @@ internal class FakeCustomerSheetLoader(
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
 ) : CustomerSheetLoader {
 
-    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
+    override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
         delay(delay)
         return if (shouldFail) {
             Result.failure(IllegalStateException("failed to load"))
@@ -37,12 +38,14 @@ internal class FakeCustomerSheetLoader(
             Result.success(
                 CustomerSheetState.Full(
                     config = configuration,
-                    stripeIntent = stripeIntent,
+                    PaymentMethodMetadataFactory.create(
+                        stripeIntent = stripeIntent,
+                        cbcEligibility = cbcEligibility,
+                    ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,
                     isGooglePayReady = isGooglePayAvailable,
                     paymentSelection = paymentSelection,
-                    cbcEligibility = cbcEligibility,
                     validationError = null,
                 )
             )

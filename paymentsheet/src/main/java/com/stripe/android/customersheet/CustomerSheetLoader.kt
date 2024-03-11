@@ -8,7 +8,6 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -30,7 +29,7 @@ import kotlin.time.Duration.Companion.seconds
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal interface CustomerSheetLoader {
-    suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full>
+    suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full>
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
@@ -58,24 +57,19 @@ internal class DefaultCustomerSheetLoader(
         customerAdapterProvider = CustomerSheetHacks.adapter,
     )
 
-    override suspend fun load(configuration: CustomerSheet.Configuration?): Result<CustomerSheetState.Full> {
-        val customerAdapter = customerAdapterProvider.awaitAsResult(
-            timeout = 5.seconds,
-            error = {
-                "Couldn't find an instance of CustomerAdapter. " +
-                    "Are you instantiating CustomerSheet unconditionally in your app?"
-            },
-        )
+    override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
+        return runCatching {
+            val customerAdapter = customerAdapterProvider.awaitAsResult(
+                timeout = 5.seconds,
+                error = {
+                    "Couldn't find an instance of CustomerAdapter. " +
+                        "Are you instantiating CustomerSheet unconditionally in your app?"
+                },
+            ).getOrThrow()
 
-        return customerAdapter.mapCatching { adapter ->
-            if (adapter.canCreateSetupIntents) {
-                adapter to retrieveElementsSession(configuration, adapter).getOrThrow()
-            } else {
-                adapter to null
-            }
-        }.map { (adapter, elementsSessionWithMetadata) ->
+            val elementsSessionWithMetadata = retrieveElementsSession(configuration, customerAdapter).getOrThrow()
             loadPaymentMethods(
-                customerAdapter = adapter,
+                customerAdapter = customerAdapter,
                 configuration = configuration,
                 elementsSessionWithMetadata = elementsSessionWithMetadata,
             ).getOrThrow()
@@ -83,27 +77,40 @@ internal class DefaultCustomerSheetLoader(
     }
 
     private suspend fun retrieveElementsSession(
-        configuration: CustomerSheet.Configuration?,
+        configuration: CustomerSheet.Configuration,
         customerAdapter: CustomerAdapter,
     ): Result<ElementsSessionWithMetadata> {
+        val paymentMethodTypes = if (customerAdapter.canCreateSetupIntents) {
+            customerAdapter.paymentMethodTypes ?: emptyList()
+        } else {
+            // We only support cards if `customerAdapter.canCreateSetupIntents` is false.
+            listOf("card")
+        }
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(
             PaymentSheet.IntentConfiguration(
                 mode = PaymentSheet.IntentConfiguration.Mode.Setup(),
-                paymentMethodTypes = customerAdapter.paymentMethodTypes ?: emptyList()
+                paymentMethodTypes = paymentMethodTypes,
             )
         )
         return elementsSessionRepository.get(initializationMode).map { elementsSession ->
-            val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
+            val billingDetailsCollectionConfig = configuration.billingDetailsCollectionConfiguration.toInternal()
             val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             ).sharedDataSpecs
+
+            val cbcEligibility = CardBrandChoiceEligibility.create(
+                isEligible = elementsSession.isEligibleForCardBrandChoice,
+                preferredNetworks = configuration.preferredNetworks,
+            )
+
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
-                paymentMethodOrder = configuration?.paymentMethodOrder ?: emptyList(),
+                paymentMethodOrder = configuration.paymentMethodOrder,
+                cbcEligibility = cbcEligibility,
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )
@@ -118,8 +125,8 @@ internal class DefaultCustomerSheetLoader(
 
     private suspend fun loadPaymentMethods(
         customerAdapter: CustomerAdapter,
-        configuration: CustomerSheet.Configuration?,
-        elementsSessionWithMetadata: ElementsSessionWithMetadata?,
+        configuration: CustomerSheet.Configuration,
+        elementsSessionWithMetadata: ElementsSessionWithMetadata,
     ) = coroutineScope {
         val paymentMethodsResult = async {
             customerAdapter.retrievePaymentMethods()
@@ -159,43 +166,29 @@ internal class DefaultCustomerSheetLoader(
                     }
                 }
 
-                val isGooglePayReadyAndEnabled = configuration?.googlePayEnabled == true && googlePayRepositoryFactory(
+                val isGooglePayReadyAndEnabled = configuration.googlePayEnabled && googlePayRepositoryFactory(
                     if (isLiveModeProvider()) GooglePayEnvironment.Production else GooglePayEnvironment.Test
                 ).isReady().first()
 
-                val billingDetailsCollectionConfig = configuration?.billingDetailsCollectionConfiguration.toInternal()
+                val elementsSession = elementsSessionWithMetadata.elementsSession
+                val metadata = elementsSessionWithMetadata.metadata
 
-                val elementsSession = elementsSessionWithMetadata?.elementsSession
-                val metadata = elementsSessionWithMetadata?.metadata
-
-                // By default, only cards are supported. If the elements session is not available, then US Bank account
-                // is not supported
-                val supportedPaymentMethods = metadata?.sortedSupportedPaymentMethods()
-                    ?: listOf(CardDefinition.hardcodedCardSpec(billingDetailsCollectionConfig))
+                val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
 
                 val validSupportedPaymentMethods = filterSupportedPaymentMethods(
                     supportedPaymentMethods,
                     isFinancialConnectionsAvailable,
                 )
 
-                val isCbcEligible = elementsSession?.isEligibleForCardBrandChoice ?: false
-
                 Result.success(
                     CustomerSheetState.Full(
                         config = configuration,
-                        stripeIntent = elementsSession?.stripeIntent,
+                        paymentMethodMetadata = metadata,
                         supportedPaymentMethods = validSupportedPaymentMethods,
                         customerPaymentMethods = paymentMethods,
                         isGooglePayReady = isGooglePayReadyAndEnabled,
                         paymentSelection = paymentSelection,
-                        cbcEligibility = if (isCbcEligible) {
-                            CardBrandChoiceEligibility.Eligible(
-                                preferredNetworks = configuration?.preferredNetworks.orEmpty(),
-                            )
-                        } else {
-                            CardBrandChoiceEligibility.Ineligible
-                        },
-                        validationError = elementsSession?.stripeIntent?.validate(),
+                        validationError = elementsSession.stripeIntent.validate(),
                     )
                 )
             },

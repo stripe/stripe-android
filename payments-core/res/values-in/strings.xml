@@ -168,6 +168,8 @@
   <string name="stripe_title_payment_method">Metode Pembayaran</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">Pilih Metode Pengiriman</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">Perbarui kartu</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifikasikan pembayaran Anda</string>
 </resources>

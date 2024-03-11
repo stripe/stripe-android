@@ -45,7 +45,6 @@ import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -65,9 +64,8 @@ internal class FormViewModelTest {
         ApplicationProvider.getApplicationContext(),
         StripeR.style.StripeDefaultTheme
     )
-    val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources))
 
-    val showCheckboxFlow = MutableStateFlow(false)
+    private val showCheckboxFlow = MutableStateFlow(false)
 
     private fun createLpmRepositorySupportedPaymentMethod(
         paymentMethodType: PaymentMethod.Type,
@@ -662,7 +660,7 @@ internal class FormViewModelTest {
                 LayoutSpec(specs),
             )
         )
-        val formElement = formViewModel.elementsFlow.first()
+        val formElement = formViewModel.elements
 
         val nameSection = formElement[0] as SectionElement
         val nameElement = nameSection.fields[0] as SimpleTextElement
@@ -711,7 +709,7 @@ internal class FormViewModelTest {
                 ),
             )
         )
-        val formElement = formViewModel.elementsFlow.first()
+        val formElement = formViewModel.elements
 
         val addressSection = formElement.first() as SectionElement
         val addressElement = addressSection.fields[0] as AddressElement
@@ -752,7 +750,7 @@ internal class FormViewModelTest {
                 ),
             )
 
-            val elements = formViewModel.elementsFlow.first()
+            val elements = formViewModel.elements
             val countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
@@ -809,7 +807,7 @@ internal class FormViewModelTest {
                 ),
             )
 
-            val elements = formViewModel.elementsFlow.first()
+            val elements = formViewModel.elements
             val countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
@@ -869,7 +867,7 @@ internal class FormViewModelTest {
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elementsFlow.first()
+        formViewModel.elements
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -914,7 +912,7 @@ internal class FormViewModelTest {
             formViewModel: FormViewModel,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elementsFlow.first()
+            val addressElementFields = formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
@@ -935,7 +933,7 @@ internal class FormViewModelTest {
         }
     }
 
-    fun createViewModel(
+    private fun createViewModel(
         arguments: FormArguments,
         lpmRepository: LpmRepository
     ) = FormViewModel(
@@ -947,11 +945,10 @@ internal class FormViewModelTest {
     )
 }
 
-internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
-    elementsFlow
-        .firstOrNull()
-        ?.filterIsInstance<SaveForFutureUseElement>()
-        ?.firstOrNull()?.controller?.onValueChange(value)
+private fun FormViewModel.setSaveForFutureUse(value: Boolean) {
+    elements
+        .filterIsInstance<SaveForFutureUseElement>()
+        .firstOrNull()?.controller?.onValueChange(value)
 }
 
 private fun createAddressRepository(): AddressRepository {

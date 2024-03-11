@@ -5,6 +5,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -17,6 +18,7 @@ internal object PaymentMethodMetadataFactory {
         allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
         financialConnectionsAvailable: Boolean = true,
         paymentMethodOrder: List<String> = emptyList(),
+        cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -26,6 +28,7 @@ internal object PaymentMethodMetadataFactory {
             allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
             financialConnectionsAvailable = financialConnectionsAvailable,
             paymentMethodOrder = paymentMethodOrder,
+            cbcEligibility = cbcEligibility,
             sharedDataSpecs = sharedDataSpecs,
         )
     }

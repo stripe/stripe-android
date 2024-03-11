@@ -26,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Cím mentése</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Szállítási cím</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">A jelen beszedési beállítás megerősítéséhez három munkanapon belül e-mail-értesítést küldünk a(z) %s címre.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Erősítse meg a beszedési adatait</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Részletek módosítása</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Ezenkívül a jelen utasítás értelmében a beszedni kívánt összegről két nappal korábban értesítést fog kapni e-mailben. A kifizetések mint „%s” jelennek meg a bankszámlakivonatán.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Kifizetéseit védi a(z) %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Fizetési mód választása</string>
   <string name="stripe_paymentsheet_close">Bezárás</string>
@@ -37,6 +47,8 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Fizetési módok kezelése</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">A Stripe néhány munkanapon belül egy 0,01 $ összegű utalást fog küldeni a bankszámlájára. Ezután e-mailben megkapja az útmutatást a fizetés befejezéséhez a(z) %s felé.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">%s szerkesztése</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Vagy fizetés a következővel:</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

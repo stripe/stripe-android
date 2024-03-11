@@ -168,6 +168,8 @@
   <string name="stripe_title_payment_method">お支払い方法</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">配送方法を選択してください</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">カードを更新</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">支払いの確認</string>
 </resources>

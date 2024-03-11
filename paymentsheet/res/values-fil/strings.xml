@@ -26,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">I-save ang address</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Adres ng Nagpadala</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Isang email ang ipapadala sa %s sa loob ng tatlong araw ng negosyo upang kumpirmahin ang pag-setup ng tagubilin sa debit na ito.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Kumpirmahin ang mga detalye ng iyong Direct Debit</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Baguhin ang mga detalye</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Bilang karagdagan, makakatanggap ka ng dalawang araw na paunang abiso sa pamamagitan ng email para sa anumang halaga na ide-debit sa ilalim ng tagubiling ito. Ipapakita ang mga pagbabayad bilang \'%s\' sa iyong bank statement.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Ang iyong mga pagbabayad ay protektado ng %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Pumili ng pamamaraan ng pagbabayad</string>
   <string name="stripe_paymentsheet_close">Isara</string>
@@ -37,6 +47,8 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Pangasiwaan ang iyong mga paraan ng pagbabayad</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Idedeposito ng Stripe ang $0.01 sa iyong account sa loob ng 1-2 araw ng trabaho. Pagkatapos ay makakatanggap ka ng email na may mga tagubilin para kumpletuhin ang pagbabayad sa %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">I-edit ang %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">O magbayad gamit ang</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

@@ -464,39 +464,6 @@ public class StripeTest {
     }
 
     @Test
-    @Ignore("sources are being deprecated")
-    public void createSourceSynchronous_with3DSParams_passesIntegrationTest()
-            throws StripeException {
-        final Stripe stripe = defaultStripe;
-        final SourceParams params = SourceParams.createCardParams(CARD_PARAMS);
-
-        final Source cardSource = stripe.createSourceSynchronous(params);
-        assertNotNull(cardSource);
-        assertNotNull(cardSource.getId());
-        final SourceParams threeDParams = SourceParams.createThreeDSecureParams(
-                50000L,
-                "brl",
-                "example://return",
-                cardSource.getId());
-        final Map<String, String> metadata = new HashMap<String, String>() {{
-            put("dimensions", "three");
-            put("type", "beach ball");
-        }};
-        threeDParams.setMetadata(metadata);
-
-        final Source threeDSource = stripe.createSourceSynchronous(threeDParams);
-        assertNotNull(threeDSource);
-        assertNotNull(threeDSource.getAmount());
-        assertEquals(50000L, threeDSource.getAmount().longValue());
-        assertEquals("brl", threeDSource.getCurrency());
-        assertNotNull(threeDSource.getClientSecret());
-        assertNotNull(threeDSource.getId());
-        assertNull(threeDSource.getSourceTypeModel());
-        assertEquals(Source.SourceType.THREE_D_SECURE, threeDSource.getType());
-        assertNotNull(threeDSource.getSourceTypeData());
-    }
-
-    @Test
     public void createSourceSynchronous_withGiropayParams_passesIntegrationTest()
             throws StripeException {
         final SourceParams params = SourceParams.createGiropayParams(
@@ -806,47 +773,6 @@ public class StripeTest {
         assertEquals(70000L, sofortSource.getAmount().longValue());
         assertNotNull(sofortSource.getRedirect());
         assertEquals("example://return", sofortSource.getRedirect().getReturnUrl());
-    }
-
-    @Test
-    @Ignore("sources are being deprecated")
-    public void retrieveSourceAsync_withValidData_passesIntegrationTest() throws StripeException {
-        final Source source = createSource();
-
-        final Stripe stripe = createStripe(testDispatcher);
-        stripe.retrieveSource(
-                Objects.requireNonNull(source.getId()),
-                Objects.requireNonNull(source.getClientSecret()),
-                sourceCallback
-        );
-        idle();
-
-        verify(sourceCallback).onSuccess(sourceArgumentCaptor.capture());
-
-        final Source capturedSource = sourceArgumentCaptor.getValue();
-        assertEquals(
-                source.getId(),
-                capturedSource.getId()
-        );
-    }
-
-    @Test
-    @Ignore("sources are being deprecated")
-    public void retrieveSourceSynchronous_withValidData_passesIntegrationTest()
-            throws StripeException {
-        final Source source = createSource();
-
-        final String sourceId = source.getId();
-        final String clientSecret = source.getClientSecret();
-        assertNotNull(sourceId);
-        assertNotNull(clientSecret);
-
-        final Source retrievedSource = createStripe()
-                .retrieveSourceSynchronous(sourceId, clientSecret);
-
-        // We aren't actually updating the source on the server, so the two sources should
-        // be identical.
-        assertEquals(source, retrievedSource);
     }
 
     @Test
