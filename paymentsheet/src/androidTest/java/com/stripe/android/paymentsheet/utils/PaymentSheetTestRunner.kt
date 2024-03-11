@@ -1,13 +1,9 @@
 package com.stripe.android.paymentsheet.utils
 
-import android.app.Activity
-import android.app.Application
-import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.rules.ActivityScenarioRule
-import androidx.test.runner.lifecycle.ActivityLifecycleCallback
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
@@ -28,50 +24,12 @@ internal class PaymentSheetTestRunnerContext(
     fun presentPaymentSheet(
         block: PaymentSheet.() -> Unit,
     ) {
-        var unregisterer: (() -> Unit) = { }
-        val paymentSheetLaunchedCountDownLatch = CountDownLatch(1)
-
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentSheetActivity::class.java)
         scenario.onActivity {
-            val activityLifecycleCallbacks = object : Application.ActivityLifecycleCallbacks {
-                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {
-                }
-
-                override fun onActivityStarted(activity: Activity) {
-                }
-
-                override fun onActivityResumed(activity: Activity) {
-                    if (activity is PaymentSheetActivity) {
-                        paymentSheetLaunchedCountDownLatch.countDown()
-                    }
-                }
-
-                override fun onActivityPaused(activity: Activity) {
-                }
-
-                override fun onActivityStopped(activity: Activity) {
-                }
-
-                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {
-                }
-
-                override fun onActivityDestroyed(activity: Activity) {
-                }
-
-            }
-            val application = it.applicationContext as Application
-            application.registerActivityLifecycleCallbacks(activityLifecycleCallbacks)
-            unregisterer = {
-                application.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
-            }
+            activityLaunchObserver.prepareForLaunch(it)
             paymentSheet.block()
         }
-        try {
-            if (!paymentSheetLaunchedCountDownLatch.await(5, TimeUnit.SECONDS)) {
-                println("PaymentSheet failed to launch.")
-            }
-        } finally {
-            unregisterer()
-        }
+        activityLaunchObserver.awaitLaunch()
     }
 
     /**
