@@ -8,7 +8,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
@@ -19,7 +18,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
@@ -29,7 +28,7 @@ internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
     getCachedAccounts: GetCachedAccounts,
     getManifest: GetManifest,
-    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
+    private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
@@ -40,25 +39,17 @@ internal class SuccessViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val accounts = getCachedAccounts()
-            val saveToLinkWithStripeSucceeded: Boolean? = saveToLinkWithStripeSucceeded.get()
+            val successContent: SuccessContentRepository.State = successContentRepository.get()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accountsCount = accounts.size,
-                customSuccessMessage = saveToLinkWithStripeSucceeded?.let { buildCustomMessage(it, accounts.size) },
+                customSuccessMessage = successContent.customSuccessMessage,
                 // We just want to use the business name in the CTA if the feature is enabled in the manifest.
                 businessName = manifest.businessName?.takeIf { manifest.useContinueWithMerchantText() },
             )
         }.execute {
             copy(payload = it)
         }
-    }
-
-    private fun buildCustomMessage(
-        saveToLinkWithStripeSucceeded: Boolean,
-        accountsCount: Int
-    ): TextResource = when (saveToLinkWithStripeSucceeded) {
-        true -> TextResource.PluralId(R.plurals.stripe_success_pane_desc_link_success, accountsCount)
-        false -> TextResource.PluralId(R.plurals.stripe_success_pane_desc_link_error, accountsCount)
     }
 
     private fun observeAsyncs() {
