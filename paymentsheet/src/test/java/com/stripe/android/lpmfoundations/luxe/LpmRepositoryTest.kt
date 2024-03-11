@@ -10,6 +10,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethod.Type.CashAppPay
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
@@ -438,11 +439,11 @@ class LpmRepositoryTest {
             }
          ]
             """.trimIndent(),
-            BillingDetailsCollectionConfiguration(
-                collectName = true,
-                collectEmail = true,
-                collectPhone = false,
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Never,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
             )
         )
 

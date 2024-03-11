@@ -10,7 +10,6 @@ import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.paymentsheet.state.toInternal
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
 
@@ -53,7 +52,7 @@ internal class FakePaymentSheetLoader(
                     paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                         stripeIntent = stripeIntent,
                         billingDetailsCollectionConfiguration = paymentSheetConfiguration
-                            .billingDetailsCollectionConfiguration.toInternal(),
+                            .billingDetailsCollectionConfiguration,
                         allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
                         allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
                             .allowsPaymentMethodsRequiringShippingAddress,

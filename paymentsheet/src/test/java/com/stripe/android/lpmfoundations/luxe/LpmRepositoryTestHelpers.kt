@@ -3,12 +3,14 @@ package com.stripe.android.lpmfoundations.luxe
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.LayoutSpec
 
 object LpmRepositoryTestHelpers {
-    val card: SupportedPaymentMethod = CardDefinition.hardcodedCardSpec(BillingDetailsCollectionConfiguration())
+    val card: SupportedPaymentMethod = CardDefinition.hardcodedCardSpec(
+        PaymentSheet.BillingDetailsCollectionConfiguration()
+    )
 
     val usBankAccount: SupportedPaymentMethod = SupportedPaymentMethod(
         code = "us_bank_account",
@@ -30,8 +32,8 @@ internal fun LpmRepository.updateFromDisk(stripeIntent: StripeIntent) {
 internal fun LpmRepository.update(
     stripeIntent: StripeIntent,
     serverLpmSpecs: String? = null,
-    billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-        BillingDetailsCollectionConfiguration(),
+    billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+        PaymentSheet.BillingDetailsCollectionConfiguration(),
     financialConnectionsAvailable: Boolean = true
 ) {
     val metadata = PaymentMethodMetadataFactory.create(
