@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.model.currency
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -77,7 +76,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         elementsSessionResult.mapCatching { elementsSession ->
             val billingDetailsCollectionConfig =
-                paymentSheetConfiguration.billingDetailsCollectionConfiguration.toInternal()
+                paymentSheetConfiguration.billingDetailsCollectionConfiguration
 
             val cbcEligibility = CardBrandChoiceEligibility.create(
                 isEligible = elementsSession.isEligibleForCardBrandChoice,
@@ -437,24 +436,4 @@ private fun List<PaymentMethod>.withLastUsedPaymentMethodFirst(
 
 private fun PaymentMethod.toPaymentSelection(): PaymentSelection.Saved {
     return PaymentSelection.Saved(this)
-}
-
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration?.toInternal(): BillingDetailsCollectionConfiguration {
-    return BillingDetailsCollectionConfiguration(
-        collectName = this?.name == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-        collectEmail = this?.email == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-        collectPhone = this?.phone == PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-        address = when (this?.address) {
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-            }
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-            }
-            PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
-                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
-            }
-            else -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
-        },
-    )
 }

@@ -72,7 +72,7 @@ internal object FormArgumentsFactory {
             shippingDetails = config.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
             initialPaymentMethodExtraParams = initialExtraParams,
-            billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
+            billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,
             requiresMandate = paymentMethod.requiresMandate,
             requiredFields = paymentMethod.placeholderOverrideList,

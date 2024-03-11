@@ -149,7 +149,9 @@ class FormArgumentsFactoryTest {
 
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = LpmRepositoryTestHelpers.card,
-            metadata = PaymentMethodMetadataFactory.create(),
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
+            ),
             config = config,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),

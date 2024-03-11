@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequireme
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
@@ -31,21 +32,21 @@ internal object CardDefinition : PaymentMethodDefinition {
     }
 
     fun hardcodedCardSpec(
-        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration
     ): SupportedPaymentMethod {
         val specs = listOfNotNull(
             ContactInformationSpec(
                 collectName = false,
-                collectEmail = billingDetailsCollectionConfiguration.collectEmail,
-                collectPhone = billingDetailsCollectionConfiguration.collectPhone,
+                collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
+                collectPhone = billingDetailsCollectionConfiguration.collectsPhone,
             ),
             CardDetailsSectionSpec(
-                collectName = billingDetailsCollectionConfiguration.collectName,
+                collectName = billingDetailsCollectionConfiguration.collectsName,
             ),
             CardBillingSpec(
-                collectionMode = billingDetailsCollectionConfiguration.address,
+                collectionMode = billingDetailsCollectionConfiguration.address.toInternal(),
             ).takeIf {
-                billingDetailsCollectionConfiguration.collectAddress
+                billingDetailsCollectionConfiguration.collectsAddress
             },
             SaveForFutureUseSpec(),
         )
@@ -59,5 +60,25 @@ internal object CardDefinition : PaymentMethodDefinition {
             tintIconOnSelection = true,
             formSpec = LayoutSpec(specs),
         )
+    }
+}
+
+
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode?.toInternal(
+): BillingDetailsCollectionConfiguration.AddressCollectionMode {
+    return when (this) {
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
+        }
+
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+        }
+
+        PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+            BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+        }
+
+        else -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
     }
 }

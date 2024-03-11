@@ -1220,8 +1220,17 @@ class PaymentSheet internal constructor(
         val attachDefaultsToPaymentMethod: Boolean = false,
     ) : Parcelable {
 
+        internal val collectsName: Boolean
+            get() = name == CollectionMode.Always
+
         internal val collectsEmail: Boolean
             get() = email == CollectionMode.Always
+
+        internal val collectsPhone: Boolean
+            get() = phone == CollectionMode.Always
+
+        internal val collectsAddress: Boolean
+            get() = address == AddressCollectionMode.Full
 
         internal val collectsAnything: Boolean
             get() = name == CollectionMode.Always ||
