@@ -23,7 +23,6 @@ import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -52,7 +51,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
-import com.stripe.android.paymentsheet.state.toInternal
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
@@ -155,10 +153,6 @@ internal class CustomerSheetViewModel(
     private var unconfirmedPaymentMethod: PaymentMethod? = null
     var paymentMethodMetadata: PaymentMethodMetadata? = null
     private var supportedPaymentMethods = mutableListOf<SupportedPaymentMethod>()
-
-    private val card = CardDefinition.hardcodedCardSpec(
-        billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration.toInternal()
-    )
 
     init {
         configuration.appearance.parseAppearance()
@@ -432,7 +426,7 @@ internal class CustomerSheetViewModel(
             it.copy(
                 paymentMethodCode = paymentMethod.code,
                 formArguments = FormArgumentsFactory.create(
-                    paymentMethod = paymentMethod,
+                    paymentMethodCode = paymentMethod.code,
                     configuration = configuration,
                     merchantName = configuration.merchantDisplayName,
                     cbcEligibility = it.cbcEligibility,
@@ -770,7 +764,7 @@ internal class CustomerSheetViewModel(
             ?: PaymentMethod.Type.Card.code
 
         val formArguments = FormArgumentsFactory.create(
-            paymentMethod = previouslySelectedPaymentMethod ?: card,
+            paymentMethodCode = paymentMethodCode,
             configuration = configuration,
             merchantName = configuration.merchantDisplayName,
             cbcEligibility = cbcEligibility,
