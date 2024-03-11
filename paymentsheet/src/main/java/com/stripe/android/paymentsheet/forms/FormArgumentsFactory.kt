@@ -22,7 +22,6 @@ internal object FormArgumentsFactory {
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
-        cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
         val setupFutureUsageFieldConfiguration =
             paymentMethod.paymentMethodDefinition().getSetupFutureUsageFieldConfiguration(
@@ -74,7 +73,7 @@ internal object FormArgumentsFactory {
             initialPaymentMethodCreateParams = initialParams,
             initialPaymentMethodExtraParams = initialExtraParams,
             billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
-            cbcEligibility = cbcEligibility,
+            cbcEligibility = metadata.cbcEligibility,
             requiresMandate = paymentMethod.requiresMandate,
             requiredFields = paymentMethod.placeholderOverrideList,
         )

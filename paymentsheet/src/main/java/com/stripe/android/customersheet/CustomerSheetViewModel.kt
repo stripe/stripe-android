@@ -327,7 +327,7 @@ internal class CustomerSheetViewModel(
                     transitionToInitialScreen(
                         paymentMethods = state.customerPaymentMethods,
                         paymentSelection = state.paymentSelection,
-                        cbcEligibility = state.cbcEligibility,
+                        cbcEligibility = state.paymentMethodMetadata.cbcEligibility,
                     )
                 }
             },

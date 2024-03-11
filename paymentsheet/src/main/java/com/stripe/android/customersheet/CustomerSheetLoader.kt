@@ -98,12 +98,19 @@ internal class DefaultCustomerSheetLoader(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             ).sharedDataSpecs
+
+            val cbcEligibility = CardBrandChoiceEligibility.create(
+                isEligible = elementsSession.isEligibleForCardBrandChoice,
+                preferredNetworks = configuration.preferredNetworks,
+            )
+
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
                 allowsDelayedPaymentMethods = true,
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 paymentMethodOrder = configuration.paymentMethodOrder,
+                cbcEligibility = cbcEligibility,
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )
@@ -173,8 +180,6 @@ internal class DefaultCustomerSheetLoader(
                     isFinancialConnectionsAvailable,
                 )
 
-                val isCbcEligible = elementsSession.isEligibleForCardBrandChoice
-
                 Result.success(
                     CustomerSheetState.Full(
                         config = configuration,
@@ -183,13 +188,6 @@ internal class DefaultCustomerSheetLoader(
                         customerPaymentMethods = paymentMethods,
                         isGooglePayReady = isGooglePayReadyAndEnabled,
                         paymentSelection = paymentSelection,
-                        cbcEligibility = if (isCbcEligible) {
-                            CardBrandChoiceEligibility.Eligible(
-                                preferredNetworks = configuration.preferredNetworks,
-                            )
-                        } else {
-                            CardBrandChoiceEligibility.Ineligible
-                        },
                         validationError = elementsSession.stripeIntent.validate(),
                     )
                 )

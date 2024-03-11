@@ -38,12 +38,14 @@ internal class FakeCustomerSheetLoader(
             Result.success(
                 CustomerSheetState.Full(
                     config = configuration,
-                    PaymentMethodMetadataFactory.create(stripeIntent = stripeIntent),
+                    PaymentMethodMetadataFactory.create(
+                        stripeIntent = stripeIntent,
+                        cbcEligibility = cbcEligibility,
+                    ),
                     supportedPaymentMethods = supportedPaymentMethods,
                     customerPaymentMethods = customerPaymentMethods,
                     isGooglePayReady = isGooglePayAvailable,
                     paymentSelection = paymentSelection,
-                    cbcEligibility = cbcEligibility,
                     validationError = null,
                 )
             )
