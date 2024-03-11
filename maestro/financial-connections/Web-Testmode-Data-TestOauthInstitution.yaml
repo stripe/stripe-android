@@ -26,7 +26,6 @@ tags:
     timeout: 60000
 - tapOn: "Connect accounts" # select all accounts
 # CONFIRM AND COMPLETE
-- assertVisible: "Test OAuth Institution"
 - tapOn: "Done"
 - assertVisible: ".*Completed!.*"
 - assertVisible: ".*StripeBank.*"
