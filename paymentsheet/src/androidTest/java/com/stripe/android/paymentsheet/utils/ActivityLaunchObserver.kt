@@ -50,7 +50,7 @@ internal class ActivityLaunchObserver(
     fun awaitLaunch() {
         try {
             if (!launchedCountDownLatch.await(5, TimeUnit.SECONDS)) {
-                println("Failed to launch.")
+                throw IllegalStateException("Failed to launch.")
             }
         } finally {
             unregisterer()
