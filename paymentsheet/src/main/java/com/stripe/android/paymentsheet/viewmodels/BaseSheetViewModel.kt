@@ -94,7 +94,6 @@ internal abstract class BaseSheetViewModel(
     internal val merchantName = config.merchantDisplayName
 
     protected var mostRecentError: Throwable? = null
-    protected var cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible
 
     internal val googlePayState: StateFlow<GooglePayState> = savedStateHandle
         .getStateFlow(SAVE_GOOGLE_PAY_STATE, GooglePayState.Indeterminate)
@@ -219,7 +218,7 @@ internal abstract class BaseSheetViewModel(
             isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
             nameProvider = ::providePaymentMethodName,
-            isCbcEligible = { cbcEligibility is CardBrandChoiceEligibility.Eligible }
+            isCbcEligible = { paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible }
         )
     }
 
@@ -682,7 +681,6 @@ internal abstract class BaseSheetViewModel(
         merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
-        cbcEligibility = cbcEligibility,
     )
 
     fun handleBackPressed() {

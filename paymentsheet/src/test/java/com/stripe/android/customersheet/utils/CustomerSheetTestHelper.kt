@@ -20,6 +20,7 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
@@ -224,7 +225,6 @@ internal object CustomerSheetTestHelper {
             formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
             resources = application.resources,
             stripeRepository = stripeRepository,
-            lpmRepository = lpmRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
@@ -247,6 +247,8 @@ internal object CustomerSheetTestHelper {
             editInteractorFactory = editInteractorFactory,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         }
     }
 

@@ -11,6 +11,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -23,9 +24,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.Destination.ManualEntrySuccess
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -36,6 +39,7 @@ internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
+    private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
@@ -133,18 +137,16 @@ internal class ManualEntryViewModel @Inject constructor(
                 )
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
-                    navigationManager.tryNavigateTo(
-                        ManualEntrySuccess(
-                            referrer = PANE,
-                            args = ManualEntrySuccess.argMap(
-                                microdepositVerificationMethod = it.microdepositVerificationMethod,
-                                last4 = requireNotNull(account).takeLast(4)
+                    successContentRepository.update {
+                        copy(
+                            customSuccessMessage = TextResource.StringId(
+                                R.string.stripe_success_pane_desc_microdeposits,
+                                listOf(account.takeLast(4))
                             )
                         )
-                    )
-                } else {
-                    nativeAuthFlowCoordinator().emit(Complete())
+                    }
                 }
+                navigationManager.tryNavigateTo(Destination.ManualEntrySuccess(referrer = PANE))
             }
         }.execute { copy(linkPaymentAccount = it) }
     }

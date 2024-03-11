@@ -83,8 +83,13 @@ internal class AccountPickerViewModel @Inject constructor(
             val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
 
             AccountPickerState.Payload(
-                skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
-                    activeAuthSession.skipAccountSelection == true,
+                // note that this uses ?? instead of ||, we do NOT want to skip account selection
+                // if EITHER of these are true, we only want to skip account selection when
+                //  `accountsPayload.skipAccountSelection` is true, OR `accountsPayload.skipAccountSelection` nil
+                // AND `authSession.skipAccountSelection` is true
+                skipAccountSelection = partnerAccountList.skipAccountSelection
+                    ?: activeAuthSession.skipAccountSelection
+                    ?: false,
                 accounts = accounts,
                 selectionMode = if (manifest.singleAccount) SelectionMode.Single else SelectionMode.Multiple,
                 dataAccessNotice = dataAccessNotice,
@@ -253,7 +258,8 @@ internal class AccountPickerViewModel @Inject constructor(
             eventTracker.track(
                 AccountsSubmitted(
                     accountIds = selectedIds,
-                    isSkipAccountSelection = isSkipAccountSelection
+                    isSkipAccountSelection = isSkipAccountSelection,
+                    pane = PANE
                 )
             )
             val manifest = getOrFetchSync().manifest
@@ -262,6 +268,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
+
             navigationManager.tryNavigateTo(accountsList.nextPane.destination(referrer = PANE))
             accountsList
         }.execute {

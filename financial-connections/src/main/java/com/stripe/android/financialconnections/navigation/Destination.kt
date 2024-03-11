@@ -31,7 +31,6 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
 import com.stripe.android.financialconnections.navigation.bottomsheet.bottomSheet
 import com.stripe.android.financialconnections.presentation.parentViewModel
 
@@ -183,31 +182,10 @@ internal sealed class Destination(
         composable = { BankAuthRepairScreen() }
     )
 
-    data object ManualEntrySuccess : Destination(
+    data object ManualEntrySuccess : NoArgumentsDestination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
-        paramKeys = listOf(KEY_REFERRER, KEY_MICRODEPOSITS, KEY_LAST4),
-        screenBuilder = { ManualEntrySuccessScreen(it) }
-    ) {
-
-        fun argMap(
-            microdepositVerificationMethod: MicrodepositVerificationMethod,
-            last4: String?
-        ): Map<String, String?> = mapOf(
-            KEY_MICRODEPOSITS to microdepositVerificationMethod.value,
-            KEY_LAST4 to last4
-        )
-
-        fun last4(args: Bundle?): String? = args?.getString(KEY_LAST4)
-
-        override fun invoke(
-            referrer: Pane?,
-            args: Map<String, String?>
-        ): String = route.appendParamValues(
-            KEY_REFERRER to referrer?.value,
-            KEY_MICRODEPOSITS to args[KEY_MICRODEPOSITS],
-            KEY_LAST4 to args[KEY_LAST4]
-        )
-    }
+        composable = { ManualEntrySuccessScreen() }
+    )
 
     companion object {
         internal fun referrer(args: Bundle?): Pane? = args
@@ -215,8 +193,6 @@ internal sealed class Destination(
             ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 
         const val KEY_REFERRER = "referrer"
-        const val KEY_MICRODEPOSITS = "microdeposits"
-        const val KEY_LAST4 = "last4"
     }
 }
 

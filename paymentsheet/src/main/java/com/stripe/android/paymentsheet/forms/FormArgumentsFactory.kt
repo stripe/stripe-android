@@ -6,6 +6,7 @@ import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.getSetupFutureUsageFieldConfiguration
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -21,7 +22,6 @@ internal object FormArgumentsFactory {
         merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
-        cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
         val setupFutureUsageFieldConfiguration =
             paymentMethod.paymentMethodDefinition().getSetupFutureUsageFieldConfiguration(
@@ -73,7 +73,7 @@ internal object FormArgumentsFactory {
             initialPaymentMethodCreateParams = initialParams,
             initialPaymentMethodExtraParams = initialExtraParams,
             billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
-            cbcEligibility = cbcEligibility,
+            cbcEligibility = metadata.cbcEligibility,
             requiresMandate = paymentMethod.requiresMandate,
             requiredFields = paymentMethod.placeholderOverrideList,
         )
@@ -81,13 +81,13 @@ internal object FormArgumentsFactory {
 
     @OptIn(ExperimentalCustomerSheetApi::class)
     fun create(
-        paymentMethod: SupportedPaymentMethod,
+        paymentMethodCode: PaymentMethodCode,
         configuration: CustomerSheet.Configuration,
         merchantName: String,
         cbcEligibility: CardBrandChoiceEligibility,
     ): FormArguments {
         return FormArguments(
-            paymentMethodCode = paymentMethod.code,
+            paymentMethodCode = paymentMethodCode,
             showCheckbox = false,
             saveForFutureUseInitialValue = false,
             merchantName = merchantName,

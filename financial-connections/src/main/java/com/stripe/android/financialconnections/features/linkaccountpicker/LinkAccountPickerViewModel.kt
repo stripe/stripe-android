@@ -8,6 +8,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
@@ -152,6 +153,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         val nextPane = account.nextPaneOnSelection
         // Caches the selected account.
         updateCachedAccounts { listOf(account) }
+        eventTracker.track(
+            FinancialConnectionsAnalyticsEvent.AccountsSubmitted(
+                accountIds = setOf(account.id),
+                isSkipAccountSelection = false,
+                pane = PANE
+            )
+        )
         when (nextPane) {
             Pane.SUCCESS -> {
                 val activeInstitution = selectNetworkedAccount(

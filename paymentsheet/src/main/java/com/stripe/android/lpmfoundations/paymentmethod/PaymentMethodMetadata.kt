@@ -8,6 +8,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.parcelize.Parcelize
 
@@ -22,6 +23,7 @@ internal data class PaymentMethodMetadata(
     val allowsDelayedPaymentMethods: Boolean,
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val paymentMethodOrder: List<String>,
+    val cbcEligibility: CardBrandChoiceEligibility,
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {

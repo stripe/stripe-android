@@ -26,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Gem adresse</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Forsendelsesadresse</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">En e-mail vil blive sendt til %s inden for tre arbejdsdage for at bekræfte opsætningen af denne debitinstruktion.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Bekræft dine oplysninger om direkte debitering</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Rediger detaljer</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Derudover vil du modtage to dages forhåndsvarsel via e-mail om ethvert beløb, der skal debiteres i henhold til denne instruktion. Betalinger vises som \'\'%s\'\' på dit kontoudtog.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Dine betalinger er beskyttet af %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Vælg en betalingsmetode</string>
   <string name="stripe_paymentsheet_close">Luk</string>
@@ -37,6 +47,8 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Administrer dine betalingsmetoder</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe vil sætte 0,01 USD ind på din konto i løbet af 1-2 hverdage. Derefter modtager du en e-mail med instruktioner til at fuldføre betalingen til %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Rediger %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Eller betal med</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->

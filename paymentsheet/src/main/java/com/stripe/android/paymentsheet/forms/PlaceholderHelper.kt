@@ -20,11 +20,7 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.SectionElement
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapConcat
-import kotlinx.coroutines.flow.map
 
 internal object PlaceholderHelper {
     /**
@@ -173,47 +169,36 @@ internal object PlaceholderHelper {
         else -> null
     }
 
-    internal suspend fun connectBillingDetailsFields(elementsFlow: Flow<List<FormElement>>) {
-        var phoneNumberElement: PhoneNumberElement? = null
+    internal suspend fun connectBillingDetailsFields(elements: List<FormElement>) {
+        val phoneNumberElement: PhoneNumberElement? = elements
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<PhoneNumberElement>()
+            .firstOrNull()
 
-        elementsFlow.map { elementsList ->
-            elementsList
+        // Look for a standalone CountryElement.
+        // Note that this should be done first, because AddressElement always has a
+        // CountryElement, but it might be hidden.
+        var countryElement = elements
+            .filterIsInstance<SectionElement>()
+            .flatMap { it.fields }
+            .filterIsInstance<CountryElement>()
+            .firstOrNull()
+
+        // If not found, look for one inside an AddressElement.
+        if (countryElement == null) {
+            countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
-                .filterIsInstance<PhoneNumberElement>()
+                .filterIsInstance<AddressElement>()
                 .firstOrNull()
-        }.collect {
-            phoneNumberElement = it
+                ?.countryElement
         }
 
-        elementsFlow
-            .flatMapConcat { elementsList ->
-                // Look for a standalone CountryElement.
-                // Note that this should be done first, because AddressElement always has a
-                // CountryElement, but it might be hidden.
-                var countryElement = elementsList
-                    .filterIsInstance<SectionElement>()
-                    .flatMap { it.fields }
-                    .filterIsInstance<CountryElement>()
-                    .firstOrNull()
-
-                // If not found, look for one inside an AddressElement.
-                if (countryElement == null) {
-                    countryElement = elementsList
-                        .filterIsInstance<SectionElement>()
-                        .flatMap { it.fields }
-                        .filterIsInstance<AddressElement>()
-                        .firstOrNull()
-                        ?.countryElement
-                }
-
-                countryElement?.controller?.rawFieldValue ?: emptyFlow()
+        countryElement?.controller?.rawFieldValue?.filterNotNull()?.collect {
+            if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
+                phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
             }
-            .filterNotNull()
-            .collect {
-                if (phoneNumberElement?.controller?.getLocalNumber().isNullOrBlank()) {
-                    phoneNumberElement?.controller?.countryDropdownController?.onRawValueChange(it)
-                }
-            }
+        }
     }
 }

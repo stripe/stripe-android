@@ -27,6 +27,7 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -78,6 +79,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             val billingDetailsCollectionConfig =
                 paymentSheetConfiguration.billingDetailsCollectionConfiguration.toInternal()
 
+            val cbcEligibility = CardBrandChoiceEligibility.create(
+                isEligible = elementsSession.isEligibleForCardBrandChoice,
+                preferredNetworks = paymentSheetConfiguration.preferredNetworks,
+            )
+
             val sharedDataSpecsResult = lpmRepository.getSharedDataSpecs(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
@@ -89,6 +95,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
                     .allowsPaymentMethodsRequiringShippingAddress,
                 paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
+                cbcEligibility = cbcEligibility,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 
