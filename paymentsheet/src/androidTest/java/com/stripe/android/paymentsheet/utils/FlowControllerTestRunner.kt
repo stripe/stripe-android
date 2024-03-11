@@ -12,6 +12,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
+import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import java.util.concurrent.CountDownLatch
@@ -25,9 +26,12 @@ internal class FlowControllerTestRunnerContext(
     fun configureFlowController(
         block: PaymentSheet.FlowController.() -> Unit,
     ) {
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
         scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
             flowController.block()
         }
+        activityLaunchObserver.awaitLaunch()
     }
 }
 
