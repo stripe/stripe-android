@@ -18,21 +18,19 @@ import org.robolectric.RobolectricTestRunner
 class MBDetectorTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-
+    private val mockIdentityRepository = mock<IdentityRepository>()
     private val analyticsRequestFactory = IdentityAnalyticsRequestFactory(
         context = context,
-        args = mock()
+        args = mock(),
+        mockIdentityRepository
     )
-
-    private val mockIdentityRepository = mock<IdentityRepository>()
 
     @Test
     fun `Returns null and send analysis when MBSettings is null`() = runBlocking {
         val createdResult = MBDetector.maybeCreateMBInstance(
             context = context,
             settings = null,
-            identityAnalyticsRequestFactory = analyticsRequestFactory,
-            identityRepository = mockIdentityRepository
+            identityAnalyticsRequestFactory = analyticsRequestFactory
         )
         assertThat(createdResult).isNull()
         verify(mockIdentityRepository).sendAnalyticsRequest(

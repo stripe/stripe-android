@@ -4,15 +4,13 @@ import com.stripe.android.camera.framework.StatTracker
 import com.stripe.android.camera.framework.StatTrackerImpl
 import com.stripe.android.camera.framework.TaskStats
 import com.stripe.android.camera.framework.time.Duration
-import com.stripe.android.identity.networking.IdentityRepository
 import javax.inject.Inject
 
 /**
  * Tracker for model performance.
  */
 internal class ModelPerformanceTracker @Inject constructor(
-    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-    private val identityRepository: IdentityRepository
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
 ) {
 
     private val preprocessStats = mutableListOf<TaskStats>()
@@ -44,13 +42,11 @@ internal class ModelPerformanceTracker @Inject constructor(
         }
 
     suspend fun reportAndReset(mlModel: String) {
-        identityRepository.sendAnalyticsRequest(
-            identityAnalyticsRequestFactory.modelPerformance(
-                mlModel = mlModel,
-                preprocess = preprocessStats.averageDuration(),
-                inference = inferenceStats.averageDuration(),
-                frames = preprocessStats.size
-            )
+        identityAnalyticsRequestFactory.modelPerformance(
+            mlModel = mlModel,
+            preprocess = preprocessStats.averageDuration(),
+            inference = inferenceStats.averageDuration(),
+            frames = preprocessStats.size
         )
         preprocessStats.clear()
         inferenceStats.clear()

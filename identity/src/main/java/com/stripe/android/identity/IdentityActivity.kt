@@ -40,6 +40,7 @@ import com.stripe.android.identity.navigation.navigateToFinalErrorScreen
 import com.stripe.android.identity.ui.IdentityTheme
 import com.stripe.android.identity.ui.IdentityTopBarState
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
@@ -127,30 +128,24 @@ internal class IdentityActivity :
                 onSuccess = {
                     finishWithResult(
                         if (it.submitted) {
-                            identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory
-                                    .verificationSucceeded(
-                                        isFromFallbackUrl = true
-                                    )
-                            )
+                            identityViewModel.identityAnalyticsRequestFactory
+                                .verificationSucceeded(
+                                    isFromFallbackUrl = true
+                                )
                             VerificationFlowResult.Completed
                         } else {
-                            identityViewModel.sendAnalyticsRequest(
-                                identityViewModel.identityAnalyticsRequestFactory
-                                    .verificationCanceled(
-                                        isFromFallbackUrl = true
-                                    )
-                            )
+                            identityViewModel.identityAnalyticsRequestFactory
+                                .verificationCanceled(
+                                    isFromFallbackUrl = true
+                                )
                             VerificationFlowResult.Canceled
                         }
                     )
                 },
                 onFailure = {
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
-                            isFromFallbackUrl = true,
-                            throwable = IllegalStateException(it)
-                        )
+                    identityViewModel.identityAnalyticsRequestFactory.verificationFailed(
+                        isFromFallbackUrl = true,
+                        throwable = IllegalStateException(it)
                     )
                     finishWithResult(VerificationFlowResult.Failed(IllegalStateException(it)))
                 }
@@ -161,9 +156,7 @@ internal class IdentityActivity :
             this,
             onSuccess = {
                 if (savedInstanceState?.getBoolean(KEY_PRESENTED, false) != true) {
-                    identityViewModel.sendAnalyticsRequest(
-                        identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
-                    )
+                    identityViewModel.identityAnalyticsRequestFactory.sheetPresented()
                 }
             },
             onFailure = {
@@ -214,10 +207,8 @@ internal class IdentityActivity :
     }
 
     override fun finishWithResult(result: VerificationFlowResult) {
-        identityViewModel.sendAnalyticsRequest(
-            identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
-                result.toString()
-            )
+        identityViewModel.identityAnalyticsRequestFactory.sheetClosed(
+            result.toString()
         )
         setResult(
             Activity.RESULT_OK,
@@ -252,9 +243,11 @@ internal class IdentityActivity :
             ConsentDestination.ROUTE.route -> {
                 IdentityTopBarState.CLOSE
             }
+
             ConfirmationDestination.ROUTE.route -> {
                 IdentityTopBarState.CLOSE
             }
+
             ErrorDestination.ROUTE.route -> {
                 if (args?.getBoolean(ARG_SHOULD_FAIL, false) == true) {
                     IdentityTopBarState.CLOSE
@@ -262,9 +255,11 @@ internal class IdentityActivity :
                     IdentityTopBarState.GO_BACK
                 }
             }
+
             IndividualWelcomeDestination.ROUTE.route -> {
                 IdentityTopBarState.CLOSE
             }
+
             else -> {
                 IdentityTopBarState.GO_BACK
             }

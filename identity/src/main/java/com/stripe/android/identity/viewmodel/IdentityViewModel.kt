@@ -653,15 +653,13 @@ internal class IdentityViewModel constructor(
                 ) to uploadTime
             }.fold(
                 onSuccess = { fileTimePair ->
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.imageUpload(
-                            value = fileTimePair.second,
-                            compressionQuality = compressionQuality,
-                            scanType = scanType,
-                            id = fileTimePair.first.id,
-                            fileName = fileTimePair.first.filename,
-                            fileSize = imageFile.length() / BYTES_IN_KB
-                        )
+                    identityAnalyticsRequestFactory.imageUpload(
+                        value = fileTimePair.second,
+                        compressionQuality = compressionQuality,
+                        scanType = scanType,
+                        id = fileTimePair.first.id,
+                        fileName = fileTimePair.first.filename,
+                        fileSize = imageFile.length() / BYTES_IN_KB
                     )
 
                     updateAnalyticsState { oldState ->
@@ -798,15 +796,13 @@ internal class IdentityViewModel constructor(
                 ) to uploadTime
             }.fold(
                 onSuccess = { fileTimePair ->
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.imageUpload(
-                            value = fileTimePair.second,
-                            compressionQuality = compressionQuality,
-                            scanType = IdentityScanState.ScanType.SELFIE,
-                            id = fileTimePair.first.id,
-                            fileName = fileTimePair.first.filename,
-                            fileSize = imageFile.length() / BYTES_IN_KB
-                        )
+                    identityAnalyticsRequestFactory.imageUpload(
+                        value = fileTimePair.second,
+                        compressionQuality = compressionQuality,
+                        scanType = IdentityScanState.ScanType.SELFIE,
+                        id = fileTimePair.first.id,
+                        fileName = fileTimePair.first.filename,
+                        fileSize = imageFile.length() / BYTES_IN_KB
                     )
                     _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
@@ -1267,11 +1263,9 @@ internal class IdentityViewModel constructor(
     }
 
     fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
-        sendAnalyticsRequest(
-            identityAnalyticsRequestFactory.screenPresented(
-                scanType = scanType,
-                screenName = screenName
-            )
+        identityAnalyticsRequestFactory.screenPresented(
+            scanType = scanType,
+            screenName = screenName
         )
     }
 
@@ -1288,22 +1282,20 @@ internal class IdentityViewModel constructor(
     fun sendSucceededAnalyticsRequestForNative() {
         viewModelScope.launch {
             analyticsState.collectLatest { latestState ->
-                identityRepository.sendAnalyticsRequest(
-                    identityAnalyticsRequestFactory.verificationSucceeded(
-                        isFromFallbackUrl = false,
-                        scanType = latestState.scanType,
-                        requireSelfie = latestState.requireSelfie,
-                        docFrontRetryTimes = latestState.docFrontRetryTimes,
-                        docBackRetryTimes = latestState.docBackRetryTimes,
-                        selfieRetryTimes = latestState.selfieRetryTimes,
-                        docFrontUploadType = latestState.docFrontUploadType,
-                        docBackUploadType = latestState.docBackUploadType,
-                        docFrontModelScore = latestState.docFrontModelScore,
-                        docBackModelScore = latestState.docBackModelScore,
-                        selfieModelScore = latestState.selfieModelScore,
-                        docFrontBlurScore = latestState.docFrontBlurScore,
-                        docBackBlurScore = latestState.docBackBlurScore
-                    )
+                identityAnalyticsRequestFactory.verificationSucceeded(
+                    isFromFallbackUrl = false,
+                    scanType = latestState.scanType,
+                    requireSelfie = latestState.requireSelfie,
+                    docFrontRetryTimes = latestState.docFrontRetryTimes,
+                    docBackRetryTimes = latestState.docBackRetryTimes,
+                    selfieRetryTimes = latestState.selfieRetryTimes,
+                    docFrontUploadType = latestState.docFrontUploadType,
+                    docBackUploadType = latestState.docBackUploadType,
+                    docFrontModelScore = latestState.docFrontModelScore,
+                    docBackModelScore = latestState.docBackModelScore,
+                    selfieModelScore = latestState.selfieModelScore,
+                    docFrontBlurScore = latestState.docFrontBlurScore,
+                    docBackBlurScore = latestState.docBackBlurScore
                 )
             }
         }
@@ -1391,16 +1383,12 @@ internal class IdentityViewModel constructor(
     ) {
         cameraPermissionEnsureable.ensureCameraPermission(
             onCameraReady = {
-                sendAnalyticsRequest(
-                    identityAnalyticsRequestFactory.cameraPermissionGranted()
-                )
+                identityAnalyticsRequestFactory.cameraPermissionGranted()
                 _cameraPermissionGranted.update { true }
                 navController.navigateTo(DocumentScanDestination)
             },
             onUserDeniedCameraPermission = {
-                sendAnalyticsRequest(
-                    identityAnalyticsRequestFactory.cameraPermissionDenied()
-                )
+                identityAnalyticsRequestFactory.cameraPermissionDenied()
                 _cameraPermissionGranted.update { false }
                 navController.navigateTo(CameraPermissionDeniedDestination)
             }

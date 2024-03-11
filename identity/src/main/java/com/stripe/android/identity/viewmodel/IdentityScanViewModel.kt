@@ -71,16 +71,12 @@ internal class IdentityScanViewModel(
             _scannerState.update { State.Timeout(fromSelfie = result.result is FaceDetectorOutput) }
             when (result.result) {
                 is FaceDetectorOutput -> {
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.selfieTimeout()
-                    )
+                    identityAnalyticsRequestFactory.selfieTimeout()
                 }
 
                 is IDDetectorOutput -> {
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.documentTimeout(
-                            scanType = result.identityState.type
-                        )
+                    identityAnalyticsRequestFactory.documentTimeout(
+                        scanType = result.identityState.type
                     )
                 }
             }

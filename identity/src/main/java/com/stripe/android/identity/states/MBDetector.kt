@@ -22,7 +22,6 @@ import com.microblink.capture.settings.TiltPolicy
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.ml.AnalyzerInput
-import com.stripe.android.identity.networking.IdentityRepository
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureMBSettings as MBSettings
@@ -155,8 +154,7 @@ internal class MBDetector private constructor(settings: MBSettings) {
         suspend fun maybeCreateMBInstance(
             context: Context,
             settings: MBSettings?,
-            identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
-            identityRepository: IdentityRepository
+            identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
         ): MBDetector? {
             settings?.let {
                 try {
@@ -164,25 +162,21 @@ internal class MBDetector private constructor(settings: MBSettings) {
                         settings.licenseKey,
                         context
                     )
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.mbStatus(
-                            true,
-                            initSuccess = true
-                        )
+                    identityAnalyticsRequestFactory.mbStatus(
+                        true,
+                        initSuccess = true
                     )
                     return MBDetector(settings)
                 } catch (e: Exception) {
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.mbStatus(
-                            true,
-                            initSuccess = false,
-                            initFailedReason = e.message
-                        )
+                    identityAnalyticsRequestFactory.mbStatus(
+                        true,
+                        initSuccess = false,
+                        initFailedReason = e.message
                     )
                     return null
                 }
             } ?: run {
-                identityRepository.sendAnalyticsRequest(identityAnalyticsRequestFactory.mbStatus(false))
+                identityAnalyticsRequestFactory.mbStatus(false)
                 return null
             }
         }

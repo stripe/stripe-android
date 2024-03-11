@@ -162,11 +162,9 @@ internal class IDDetectorAnalyzer(
     }
 
     private suspend fun logMBError(message: String?, stackTrace: String?) {
-        identityRepository.sendAnalyticsRequest(
-            identityAnalyticsRequestFactory.mbError(
-                message,
-                stackTrace
-            )
+        identityAnalyticsRequestFactory.mbError(
+            message,
+            stackTrace
         )
     }
 
@@ -216,7 +214,6 @@ internal class IDDetectorAnalyzer(
                     context,
                     mbSettings,
                     identityAnalyticsRequestFactory,
-                    identityRepository
                 ),
                 identityAnalyticsRequestFactory,
                 identityRepository
