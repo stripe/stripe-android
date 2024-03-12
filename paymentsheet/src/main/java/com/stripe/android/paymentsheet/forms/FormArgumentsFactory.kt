@@ -19,7 +19,6 @@ internal object FormArgumentsFactory {
         paymentMethod: SupportedPaymentMethod,
         metadata: PaymentMethodMetadata,
         config: PaymentSheet.Configuration,
-        merchantName: String,
         amount: Amount? = null,
         newLpm: PaymentSelection.New?,
     ): FormArguments {
@@ -66,7 +65,7 @@ internal object FormArgumentsFactory {
             paymentMethodCode = paymentMethod.code,
             showCheckbox = setupFutureUsageFieldConfiguration?.isSaveForFutureUseValueChangeable == true,
             saveForFutureUseInitialValue = saveForFutureUseInitialValue,
-            merchantName = merchantName,
+            merchantName = metadata.merchantName,
             amount = amount,
             billingDetails = config.defaultBillingDetails,
             shippingDetails = config.shippingDetails,

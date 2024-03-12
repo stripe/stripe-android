@@ -95,6 +95,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                     .allowsPaymentMethodsRequiringShippingAddress,
                 paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
                 cbcEligibility = cbcEligibility,
+                merchantName = paymentSheetConfiguration.merchantDisplayName,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 

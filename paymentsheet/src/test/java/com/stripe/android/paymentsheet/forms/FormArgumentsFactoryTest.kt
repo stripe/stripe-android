@@ -47,7 +47,6 @@ class FormArgumentsFactoryTest {
             paymentMethod = metadata.supportedPaymentMethodForCode("bancontact")!!,
             metadata = metadata,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
-            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.GenericPaymentMethod(
                 labelResource = resources.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_bancontact),
@@ -79,7 +78,6 @@ class FormArgumentsFactoryTest {
             paymentMethod = supportedPaymentMethod,
             metadata = metadata,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
-            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = null,
             newLpm = null,
         )
@@ -153,7 +151,6 @@ class FormArgumentsFactoryTest {
                 billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
             ),
             config = config,
-            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.Card(
                 paymentMethodCreateParams = paymentMethodCreateParams,
