@@ -204,6 +204,8 @@ internal class CustomerRepositoryTest {
 
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("error")
+            assertThat(errorReporter.getLoggedErrors())
+                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
@@ -231,6 +233,7 @@ internal class CustomerRepositoryTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
+            assertThat(errorReporter.getLoggedErrors()).isEmpty()
         }
 
     @Test
@@ -256,6 +259,7 @@ internal class CustomerRepositoryTest {
 
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("Request Failed")
+            assertThat(errorReporter.getLoggedErrors()).isEmpty()
         }
 
     @Test
