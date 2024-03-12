@@ -28,9 +28,14 @@ internal sealed interface PopUpToBehavior {
         override val inclusive: Boolean,
         val route: String,
     ) : PopUpToBehavior
+
+    data object LaunchAsRoot : PopUpToBehavior {
+        override val inclusive: Boolean = true
+    }
 }
 
 internal sealed class NavigationIntent {
+
     data class NavigateTo(
         val route: String,
         val popUpTo: PopUpToBehavior?,
@@ -50,10 +55,21 @@ internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
         popUpTo: PopUpToBehavior?,
         isSingleTop: Boolean,
     ) {
+        val popUpToBehavior = popUpTo ?: run {
+            val destination = Destination.fromRoute(route.split("/").first())
+            destination?.let {
+                if (it.launchAsRoot) {
+                    PopUpToBehavior.LaunchAsRoot
+                } else {
+                    null
+                }
+            }
+        }
+
         _navigationFlow.tryEmit(
             NavigationIntent.NavigateTo(
                 route = route,
-                popUpTo = popUpTo,
+                popUpTo = popUpToBehavior,
                 isSingleTop = isSingleTop,
             )
         )

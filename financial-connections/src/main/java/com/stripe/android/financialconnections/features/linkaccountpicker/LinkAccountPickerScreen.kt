@@ -184,7 +184,6 @@ private fun LinkAccountPickerMainContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
                 elevation = scrollState.elevation,
                 onCloseClick = onCloseClick
             )

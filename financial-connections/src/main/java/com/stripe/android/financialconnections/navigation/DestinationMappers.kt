@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.navigation
 import androidx.navigation.NavDestination
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 
-private val paneToDestination = mapOf(
+internal val paneToDestination = mapOf(
     Pane.INSTITUTION_PICKER to Destination.InstitutionPicker,
     Pane.CONSENT to Destination.Consent,
     Pane.PARTNER_AUTH to Destination.PartnerAuth,

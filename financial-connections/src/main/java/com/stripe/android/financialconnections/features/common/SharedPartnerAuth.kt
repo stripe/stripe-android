@@ -1,8 +1,10 @@
 package com.stripe.android.financialconnections.features.common
 
+import android.util.Log
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.webkit.WebView
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,6 +25,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -93,6 +96,14 @@ internal fun SharedPartnerAuth(
 
     LaunchedEffect(webAuthFlow.value) {
         onWebAuthFlowFinished(webAuthFlow.value)
+    }
+
+    SideEffect {
+        Log.d("TILL123", "Can navigate back: ${state.canNavigateBack}")
+    }
+
+    BackHandler(enabled = !state.canNavigateBack) {
+        // Prevent back navigation
     }
 
     state.viewEffect?.let { viewEffect ->
@@ -208,7 +219,6 @@ private fun SharedPartnerAuthBody(
 ) {
     SharedPartnerAuthContentWrapper(
         inModal = inModal,
-        canNavigateBack = state.canNavigateBack,
         onCloseClick = onCloseClick
     ) {
         state.payload()?.let {
@@ -231,7 +241,6 @@ private fun SharedPartnerAuthBody(
 @Composable
 private fun SharedPartnerAuthContentWrapper(
     inModal: Boolean,
-    canNavigateBack: Boolean,
     onCloseClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -245,7 +254,6 @@ private fun SharedPartnerAuthContentWrapper(
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    allowBackNavigation = canNavigateBack,
                     onCloseClick = onCloseClick
                 )
             }

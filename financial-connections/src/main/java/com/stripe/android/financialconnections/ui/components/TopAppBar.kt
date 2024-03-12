@@ -61,14 +61,13 @@ internal fun FinancialConnectionsTopAppBar(
     hideStripeLogo: Boolean = LocalReducedBranding.current,
     testMode: Boolean = LocalTestMode.current,
     elevation: Dp = 0.dp,
-    allowBackNavigation: Boolean = true,
-    onCloseClick: () -> Unit
+    onCloseClick: () -> Unit,
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
     val localBackPressed = onBackPressedDispatcher?.onBackPressedDispatcher
 
     val navController = LocalNavHostController.current
-    val canShowBackIcon by navController.collectCanShowBackIconAsState()
+    val showBackIcon by navController.collectCanShowBackIconAsState()
 
     val keyboardController = rememberKeyboardController()
     val scope = rememberCoroutineScope()
@@ -81,7 +80,7 @@ internal fun FinancialConnectionsTopAppBar(
             )
         },
         elevation = elevation,
-        navigationIcon = if (canShowBackIcon && allowBackNavigation) {
+        navigationIcon = if (showBackIcon) {
             {
                 BackButton(
                     scope = scope,
@@ -206,7 +205,7 @@ internal val LazyListState.elevation: Dp
 @Composable
 private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {
     val canShowBackIcon = remember { mutableStateOf(false) }
-    DisposableEffect(Unit) {
+    DisposableEffect(this) {
         val listener = NavController.OnDestinationChangedListener { controller, destination, _ ->
             if (destination.navigatorName == BottomSheetNavigator::class.java.simpleName) {
                 // We're looking at a bottom sheet, so don't change the back button

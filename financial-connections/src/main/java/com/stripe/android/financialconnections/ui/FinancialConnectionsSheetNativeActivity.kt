@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
+import androidx.navigation.NavGraph
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
@@ -155,7 +157,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 bottomSheetNavigator = bottomSheetNavigator,
             ) {
                 NavHost(
-                    navController,
+                    navController = navController,
                     startDestination = initialDestination.fullRoute,
                 ) {
                     composable(Destination.Consent)
@@ -241,7 +243,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                                 launchSingleTop = intent.isSingleTop
 
                                 if (intent.popUpTo != null) {
-                                    apply(from, intent.popUpTo)
+                                    apply(
+                                        currentRoute = from,
+                                        root = navHostController.graph.id,
+                                        popUpTo = intent.popUpTo,
+                                    )
                                 }
                             }
                         }
@@ -311,15 +317,29 @@ private class ActivityVisibilityObserver(
 
 private fun NavOptionsBuilder.apply(
     currentRoute: String?,
+    root: Int,
     popUpTo: PopUpToBehavior,
 ) {
     val popUpToRoute = when (popUpTo) {
         is PopUpToBehavior.Current -> currentRoute
+        is PopUpToBehavior.LaunchAsRoot -> null
         is PopUpToBehavior.Route -> popUpTo.route
+    }
+
+    val popUpToId = when (popUpTo) {
+        is PopUpToBehavior.Current -> null
+        is PopUpToBehavior.LaunchAsRoot -> root
+        is PopUpToBehavior.Route -> null
     }
 
     if (popUpToRoute != null) {
         popUpTo(popUpToRoute) {
+            inclusive = popUpTo.inclusive
+        }
+    }
+
+    if (popUpToId != null) {
+        popUpTo(popUpToId) {
             inclusive = popUpTo.inclusive
         }
     }

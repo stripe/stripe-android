@@ -163,7 +163,6 @@ private fun NetworkingLinkSignupMainContent(
         topBar = {
             FinancialConnectionsTopAppBar(
                 elevation = scrollState.elevation,
-                allowBackNavigation = false,
                 onCloseClick = onCloseClick,
             )
         }

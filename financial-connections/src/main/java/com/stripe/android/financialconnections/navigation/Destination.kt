@@ -35,8 +35,9 @@ import com.stripe.android.financialconnections.navigation.bottomsheet.bottomShee
 import com.stripe.android.financialconnections.presentation.parentViewModel
 
 internal sealed class Destination(
-    protected val route: String,
+    val route: String,
     protected val paramKeys: List<String>,
+    val launchAsRoot: Boolean,
     protected val screenBuilder: @Composable (NavBackStackEntry) -> Unit
 ) {
     val fullRoute: String = if (paramKeys.isEmpty()) {
@@ -76,10 +77,12 @@ internal sealed class Destination(
 
     sealed class NoArgumentsDestination(
         route: String,
+        launchAsRoot: Boolean,
         composable: @Composable (NavBackStackEntry) -> Unit
     ) : Destination(
         route = route,
         paramKeys = listOf(KEY_REFERRER),
+        launchAsRoot = launchAsRoot,
         screenBuilder = composable
     ) {
         override operator fun invoke(
@@ -91,106 +94,128 @@ internal sealed class Destination(
     }
 
     data object InstitutionPicker : NoArgumentsDestination(
-        Pane.INSTITUTION_PICKER.value,
+        route = Pane.INSTITUTION_PICKER.value,
+        launchAsRoot = false,
         composable = { InstitutionPickerScreen() }
     )
 
     data object Consent : NoArgumentsDestination(
         route = Pane.CONSENT.value,
+        launchAsRoot = false,
         composable = { ConsentScreen() }
     )
 
     data object PartnerAuthDrawer : NoArgumentsDestination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
+        launchAsRoot = false,
         composable = { PartnerAuthScreen(inModal = true) }
     )
 
     data object PartnerAuth : NoArgumentsDestination(
         route = Pane.PARTNER_AUTH.value,
+        launchAsRoot = false,
         composable = { PartnerAuthScreen(inModal = false) }
     )
 
     data object AccountPicker : NoArgumentsDestination(
         route = Pane.ACCOUNT_PICKER.value,
+        launchAsRoot = true,
         composable = { AccountPickerScreen() }
     )
 
     data object Success : NoArgumentsDestination(
         route = Pane.SUCCESS.value,
+        launchAsRoot = true,
         composable = { SuccessScreen() }
     )
 
     data object ManualEntry : NoArgumentsDestination(
         route = Pane.MANUAL_ENTRY.value,
+        launchAsRoot = false,
         composable = { ManualEntryScreen() }
     )
 
     data object AttachLinkedPaymentAccount : NoArgumentsDestination(
         route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
+        launchAsRoot = true,
         composable = { AttachPaymentScreen() }
     )
 
     data object NetworkingLinkSignup : NoArgumentsDestination(
         route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
+        launchAsRoot = true,
         composable = { NetworkingLinkSignupScreen() }
     )
 
     data object NetworkingLinkLoginWarmup : NoArgumentsDestination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
+        launchAsRoot = false,
         composable = { NetworkingLinkLoginWarmupScreen(it) }
     )
 
     data object NetworkingLinkVerification : NoArgumentsDestination(
         route = Pane.NETWORKING_LINK_VERIFICATION.value,
+        launchAsRoot = false,
         composable = { NetworkingLinkVerificationScreen() }
     )
 
     data object NetworkingSaveToLinkVerification : NoArgumentsDestination(
         route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
+        launchAsRoot = false,
         composable = { NetworkingSaveToLinkVerificationScreen() }
     )
 
     data object LinkAccountPicker : NoArgumentsDestination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
-        composable = {
-            LinkAccountPickerScreen()
-        },
+        launchAsRoot = true,
+        composable = { LinkAccountPickerScreen() },
     )
 
     data object LinkStepUpVerification : NoArgumentsDestination(
         route = Pane.LINK_STEP_UP_VERIFICATION.value,
+        launchAsRoot = true,
         composable = { LinkStepUpVerificationScreen() }
     )
 
     data object Reset : NoArgumentsDestination(
         route = Pane.RESET.value,
+        launchAsRoot = false,
         composable = { ResetScreen() }
     )
 
     data object Exit : NoArgumentsDestination(
         route = Pane.EXIT.value,
+        launchAsRoot = false,
         composable = { ExitModal(it) }
     )
 
     data object Error : NoArgumentsDestination(
         route = Pane.UNEXPECTED_ERROR.value,
+        launchAsRoot = true,
         composable = { ErrorScreen() }
     )
 
     data object BankAuthRepair : NoArgumentsDestination(
         route = Pane.BANK_AUTH_REPAIR.value,
+        launchAsRoot = false,
         composable = { BankAuthRepairScreen() }
     )
 
     data object ManualEntrySuccess : NoArgumentsDestination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
+        launchAsRoot = true,
         composable = { ManualEntrySuccessScreen() }
     )
 
     companion object {
+
         internal fun referrer(args: Bundle?): Pane? = args
             ?.getString(KEY_REFERRER)
             ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
+
+        internal fun fromRoute(route: String): Destination? {
+            return paneToDestination.keys.firstOrNull { it.destination.route == route }?.destination
+        }
 
         const val KEY_REFERRER = "referrer"
     }

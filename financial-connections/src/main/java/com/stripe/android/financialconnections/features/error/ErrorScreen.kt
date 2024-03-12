@@ -48,7 +48,6 @@ private fun ErrorContent(
     when (payload) {
         Uninitialized,
         is Loading -> FullScreenError(
-            showBack = false,
             onCloseClick = { },
             content = { FullScreenGenericLoading() }
         )
@@ -83,7 +82,6 @@ private fun ErrorContent(
 ) {
     when (error) {
         is InstitutionPlannedDowntimeError -> FullScreenError(
-            showBack = false,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 InstitutionPlannedDowntimeErrorContent(
@@ -95,7 +93,6 @@ private fun ErrorContent(
         )
 
         is InstitutionUnplannedDowntimeError -> FullScreenError(
-            showBack = false,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 InstitutionUnplannedDowntimeErrorContent(
@@ -107,7 +104,6 @@ private fun ErrorContent(
         )
 
         is PartnerAuthError -> FullScreenError(
-            showBack = false,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 InstitutionUnknownErrorContent(
@@ -117,7 +113,6 @@ private fun ErrorContent(
         )
 
         else -> FullScreenError(
-            showBack = false,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 UnclassifiedErrorContent(
@@ -136,14 +131,12 @@ private fun ErrorContent(
 
 @Composable
 private fun FullScreenError(
-    showBack: Boolean,
     onCloseClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = showBack,
                 onCloseClick = onCloseClick
             )
         }
