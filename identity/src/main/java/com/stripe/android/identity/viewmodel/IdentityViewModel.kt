@@ -25,7 +25,6 @@ import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
-import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -1254,14 +1253,6 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
-        viewModelScope.launch {
-            identityRepository.sendAnalyticsRequest(
-                request
-            )
-        }
-    }
-
     fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
         identityAnalyticsRequestFactory.screenPresented(
             scanType = scanType,
@@ -1756,11 +1747,9 @@ internal class IdentityViewModel constructor(
     }
 
     private fun logError(cause: Throwable) {
-        sendAnalyticsRequest(
-            identityAnalyticsRequestFactory.genericError(
-                cause.message,
-                cause.stackTraceToString()
-            )
+        identityAnalyticsRequestFactory.genericError(
+            cause.message,
+            cause.stackTraceToString()
         )
     }
 
