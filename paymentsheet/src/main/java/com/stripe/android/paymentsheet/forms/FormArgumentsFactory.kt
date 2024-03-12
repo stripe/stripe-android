@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 
 internal object FormArgumentsFactory {
@@ -19,7 +18,6 @@ internal object FormArgumentsFactory {
         paymentMethod: SupportedPaymentMethod,
         metadata: PaymentMethodMetadata,
         config: PaymentSheet.Configuration,
-        amount: Amount? = null,
         newLpm: PaymentSelection.New?,
     ): FormArguments {
         val setupFutureUsageFieldConfiguration =
@@ -66,7 +64,7 @@ internal object FormArgumentsFactory {
             showCheckbox = setupFutureUsageFieldConfiguration?.isSaveForFutureUseValueChangeable == true,
             saveForFutureUseInitialValue = saveForFutureUseInitialValue,
             merchantName = metadata.merchantName,
-            amount = amount,
+            amount = metadata.amount(),
             billingDetails = config.defaultBillingDetails,
             shippingDetails = config.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,

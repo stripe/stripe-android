@@ -13,7 +13,6 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -49,7 +48,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -116,9 +114,6 @@ internal abstract class BaseSheetViewModel(
      */
     internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
         .getStateFlow(SAVE_PAYMENT_METHODS, null)
-
-    private val _amount = MutableStateFlow<Amount?>(null)
-    internal val amount: StateFlow<Amount?> = _amount
 
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
         value = listOf(PaymentSheetScreen.Loading),
@@ -378,16 +373,8 @@ internal abstract class BaseSheetViewModel(
     }
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
-        val stripeIntent = paymentMethodMetadata?.stripeIntent
         _paymentMethodMetadata.value = paymentMethodMetadata
         supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
-
-        if (stripeIntent is PaymentIntent) {
-            _amount.value = Amount(
-                requireNotNull(stripeIntent.amount),
-                requireNotNull(stripeIntent.currency)
-            )
-        }
     }
 
     protected fun reportDismiss() {
@@ -674,13 +661,15 @@ internal abstract class BaseSheetViewModel(
 
     fun createFormArguments(
         selectedItem: SupportedPaymentMethod,
-    ): FormArguments = FormArgumentsFactory.create(
-        paymentMethod = selectedItem,
-        metadata = requireNotNull(paymentMethodMetadata.value),
-        config = config,
-        amount = amount.value,
-        newLpm = newPaymentSelection,
-    )
+    ): FormArguments {
+        val metadata = requireNotNull(paymentMethodMetadata.value)
+        return FormArgumentsFactory.create(
+            paymentMethod = selectedItem,
+            metadata = metadata,
+            config = config,
+            newLpm = newPaymentSelection,
+        )
+    }
 
     fun handleBackPressed() {
         if (processing.value) {
