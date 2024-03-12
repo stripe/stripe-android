@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.bacs
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,7 +29,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.android.gms.common.util.VisibleForTesting
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
@@ -201,6 +201,7 @@ internal fun BacsMandateItem(
                 color = MaterialTheme.colors.primary
             )
         )
+
         false -> Text(
             modifier = modifier,
             text = text,
