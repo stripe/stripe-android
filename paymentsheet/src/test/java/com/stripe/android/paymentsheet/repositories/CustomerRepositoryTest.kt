@@ -178,7 +178,7 @@ internal class CustomerRepositoryTest {
                     "ephemeral_key"
                 ),
                 listOf(PaymentMethod.Type.Card),
-                true,
+                silentlyFail = true,
             )
 
             assertThat(result.getOrNull()).isEmpty()
@@ -199,7 +199,7 @@ internal class CustomerRepositoryTest {
                     "ephemeral_key"
                 ),
                 listOf(PaymentMethod.Type.Card),
-                false,
+                silentlyFail = false,
             )
 
             assertThat(result.exceptionOrNull()?.message)
