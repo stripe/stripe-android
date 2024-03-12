@@ -127,7 +127,10 @@ internal class IdentityViewModelTest {
         on { getLiveData<Resource<VerificationPage>>(any(), any()) } doReturn MutableLiveData()
     }
 
-    private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory>()
+    private val mockIdentityAnalyticsRequestFactory = mock<IdentityAnalyticsRequestFactory> {
+        on { genericError(anyOrNull(), anyOrNull()) }.thenReturn(mock())
+    }
+
     private val mockScreenTracker = mock<ScreenTracker>()
     private val mockController = mock<NavController>()
     private val mockCollectedDataParam = mock<CollectedDataParam>()
