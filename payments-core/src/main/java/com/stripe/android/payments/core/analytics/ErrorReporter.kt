@@ -6,7 +6,6 @@ import com.stripe.android.core.networking.AnalyticsEvent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface ErrorReporter {
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun report(errorEvent: ErrorEvent, analyticsValue: String?, statusCode: Int?)
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

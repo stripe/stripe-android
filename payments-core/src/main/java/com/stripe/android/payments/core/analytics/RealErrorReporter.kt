@@ -13,7 +13,6 @@ class RealErrorReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ErrorReporter {
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun report(errorEvent: ErrorReporter.ErrorEvent, analyticsValue: String?, statusCode: Int?) {
         val additionalParams = mapOf(
             "analyticsValue" to analyticsValue,

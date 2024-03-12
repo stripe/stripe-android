@@ -8,7 +8,6 @@ class FakeErrorReporter : ErrorReporter {
 
     private val loggedErrors: MutableList<String> = mutableListOf()
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     override fun report(errorEvent: ErrorReporter.ErrorEvent, analyticsValue: String?, statusCode: Int?) {
         loggedErrors.add(errorEvent.eventName)
     }
