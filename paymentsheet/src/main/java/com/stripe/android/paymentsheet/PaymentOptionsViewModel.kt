@@ -39,6 +39,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -81,7 +82,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         isProcessingPayment = args.state.stripeIntent is PaymentIntent,
         currentScreenFlow = currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = amount,
+        amountFlow = paymentMethodMetadata.map { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         onClick = {

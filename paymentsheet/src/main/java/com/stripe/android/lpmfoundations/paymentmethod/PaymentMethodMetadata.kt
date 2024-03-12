@@ -8,6 +8,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.parcelize.Parcelize
@@ -104,5 +105,15 @@ internal data class PaymentMethodMetadata(
         return mapIndexed { index, s ->
             s to index
         }.toMap()
+    }
+
+    fun amount(): Amount? {
+        if (stripeIntent is PaymentIntent) {
+            return Amount(
+                requireNotNull(stripeIntent.amount),
+                requireNotNull(stripeIntent.currency)
+            )
+        }
+        return null
     }
 }

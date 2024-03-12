@@ -6,8 +6,10 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.Test
+import kotlin.test.assertFails
 
 internal class PaymentMethodMetadataTest {
     @Test
@@ -285,5 +287,50 @@ internal class PaymentMethodMetadataTest {
         )
         assertThat(metadata.supportedSavedPaymentMethodTypes())
             .containsExactly(PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit)
+    }
+
+    @Test
+    fun `amount values match payment intent`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                amount = 500,
+                currency = "USD",
+            ),
+        )
+        assertThat(metadata.amount()).isEqualTo(Amount(500, "USD"))
+    }
+
+    @Test
+    fun `amount fails if payment intent has null amount`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                amount = null,
+                currency = "USD",
+            ),
+        )
+        assertFails {
+            metadata.amount()
+        }
+    }
+
+    @Test
+    fun `amount fails if payment intent has null currency`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                amount = 500,
+                currency = null,
+            ),
+        )
+        assertFails {
+            metadata.amount()
+        }
+    }
+
+    @Test
+    fun `amount is null for setup intent`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
+        )
+        assertThat(metadata.amount()).isNull()
     }
 }
