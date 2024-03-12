@@ -24,6 +24,7 @@ internal data class PaymentMethodMetadata(
     val allowsPaymentMethodsRequiringShippingAddress: Boolean,
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
+    val merchantName: String,
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {

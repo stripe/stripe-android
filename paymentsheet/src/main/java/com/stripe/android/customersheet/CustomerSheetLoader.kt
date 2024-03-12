@@ -110,6 +110,7 @@ internal class DefaultCustomerSheetLoader(
                 allowsPaymentMethodsRequiringShippingAddress = false,
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = cbcEligibility,
+                merchantName = configuration.merchantDisplayName,
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )

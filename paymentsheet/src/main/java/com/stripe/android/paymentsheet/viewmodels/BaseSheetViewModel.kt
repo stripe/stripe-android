@@ -678,7 +678,6 @@ internal abstract class BaseSheetViewModel(
         paymentMethod = selectedItem,
         metadata = requireNotNull(paymentMethodMetadata.value),
         config = config,
-        merchantName = merchantName,
         amount = amount.value,
         newLpm = newPaymentSelection,
     )
