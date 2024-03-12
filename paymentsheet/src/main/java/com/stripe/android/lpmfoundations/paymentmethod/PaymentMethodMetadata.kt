@@ -8,6 +8,7 @@ import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -26,6 +27,8 @@ internal data class PaymentMethodMetadata(
     val paymentMethodOrder: List<String>,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
+    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {

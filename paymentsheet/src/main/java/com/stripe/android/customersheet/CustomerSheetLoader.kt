@@ -111,6 +111,8 @@ internal class DefaultCustomerSheetLoader(
                 paymentMethodOrder = configuration.paymentMethodOrder,
                 cbcEligibility = cbcEligibility,
                 merchantName = configuration.merchantDisplayName,
+                defaultBillingDetails = configuration.defaultBillingDetails,
+                shippingDetails = null,
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )
