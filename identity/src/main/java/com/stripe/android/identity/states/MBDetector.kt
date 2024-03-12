@@ -46,14 +46,14 @@ internal class MBDetector private constructor(settings: MBSettings) {
     }
 
     sealed interface DetectorResult {
-        class Captured(
+        data class Captured(
             val original: Bitmap,
             val transformed: Bitmap,
             val isFront: Boolean
         ) : DetectorResult
 
-        class Capturing(val feedback: CaptureFeedback) : DetectorResult
-        class Error(val reason: Throwable? = null, val message: String? = null) : DetectorResult
+        data class Capturing(val feedback: CaptureFeedback) : DetectorResult
+        data class Error(val reason: Throwable? = null, val message: String? = null) : DetectorResult
     }
 
     init {
