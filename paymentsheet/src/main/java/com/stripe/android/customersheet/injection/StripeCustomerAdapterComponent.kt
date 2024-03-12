@@ -9,11 +9,16 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.NetworkTypeDetector
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerEphemeralKeyProvider
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.SetupIntentClientSecretProvider
 import com.stripe.android.customersheet.StripeCustomerAdapter
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -74,6 +79,9 @@ internal interface StripeCustomerAdapterModule {
     @Binds
     fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
 
+    @Binds
+    fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
+
     companion object {
         @Provides
         fun provideTimeProvider(): () -> Long = {
@@ -124,5 +132,17 @@ internal interface StripeCustomerAdapterModule {
         @Provides
         @Named(ENABLE_LOGGING)
         fun providesEnableLogging(): Boolean = BuildConfig.DEBUG
+
+        @Provides
+        fun provideAnalyticsRequestFactory(
+            context: Context,
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
+            packageManager = context.packageManager,
+            packageName = context.packageName.orEmpty(),
+            packageInfo = context.packageInfo,
+            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
+            networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        )
     }
 }

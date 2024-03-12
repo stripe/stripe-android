@@ -10,6 +10,8 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.testing.FakeErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -30,12 +32,14 @@ import java.security.InvalidParameterException
 internal class CustomerRepositoryTest {
     private val testDispatcher = UnconfinedTestDispatcher()
     private val stripeRepository = mock<StripeRepository>()
+    private val errorReporter = FakeErrorReporter()
 
     private val repository = CustomerApiRepository(
         stripeRepository,
         { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY, "acct_123") },
         Logger.getInstance(false),
-        workContext = testDispatcher
+        workContext = testDispatcher,
+        errorReporter = errorReporter
     )
 
     @Test
@@ -178,6 +182,8 @@ internal class CustomerRepositoryTest {
             )
 
             assertThat(result.getOrNull()).isEmpty()
+            assertThat(errorReporter.getLoggedErrors())
+                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
@@ -207,7 +213,8 @@ internal class CustomerRepositoryTest {
                 failsOnceStripeRepository(),
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                errorReporter = FakeErrorReporter()
             )
 
             // Requesting 3 payment method types, the first request will fail
@@ -233,7 +240,8 @@ internal class CustomerRepositoryTest {
                 failsOnceStripeRepository(),
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                errorReporter = FakeErrorReporter()
             )
 
             // Requesting 3 payment method types, the first request will fail
