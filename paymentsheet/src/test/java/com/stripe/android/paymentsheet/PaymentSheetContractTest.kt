@@ -2,11 +2,9 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -15,9 +13,6 @@ import kotlin.test.Test
 class PaymentSheetContractTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-
-    @get:Rule
-    val composeTestRule = createEmptyComposeRule()
 
     @Test
     @Suppress("DEPRECATION")
