@@ -67,8 +67,11 @@ tags:
 - tapOn:
     id: "existing_email-button"
   # 2FA
+# Ensure the back button is visible when the 2FA screen is shown
 - assertVisible:
     id: "OTP-0"
+- assertVisible:
+    id: "top-app-bar-back-button"
 - inputText: "111111"
 # SELECT NETWORKED ACCOUNT
 - tapOn: "Success"
