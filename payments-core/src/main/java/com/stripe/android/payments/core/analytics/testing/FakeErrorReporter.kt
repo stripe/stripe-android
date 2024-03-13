@@ -15,4 +15,8 @@ class FakeErrorReporter : ErrorReporter {
     fun getLoggedErrors(): List<String> {
         return loggedErrors.toList()
     }
+
+    fun clear() {
+        loggedErrors.clear()
+    }
 }

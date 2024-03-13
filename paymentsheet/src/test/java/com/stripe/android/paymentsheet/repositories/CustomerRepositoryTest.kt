@@ -15,6 +15,7 @@ import com.stripe.android.payments.core.analytics.testing.FakeErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.anyString
@@ -41,6 +42,11 @@ internal class CustomerRepositoryTest {
         workContext = testDispatcher,
         errorReporter = errorReporter
     )
+
+    @Before
+    fun clearErrorReporter() {
+        errorReporter.clear()
+    }
 
     @Test
     fun `getPaymentMethods() should create expected ListPaymentMethodsParams`() =
@@ -211,12 +217,13 @@ internal class CustomerRepositoryTest {
     @Test
     fun `getPaymentMethods() with partially failing requests should emit list with successful values when silent failures`() =
         runTest {
+            val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
-                errorReporter = FakeErrorReporter()
+                errorReporter = errorReporter
             )
 
             // Requesting 3 payment method types, the first request will fail
@@ -226,25 +233,27 @@ internal class CustomerRepositoryTest {
                     "ephemeral_key"
                 ),
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
-                true,
+                silentlyFail = true,
             )
 
             assertThat(result.getOrNull()).containsExactly(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
-            assertThat(errorReporter.getLoggedErrors()).isEmpty()
+            assertThat(errorReporter.getLoggedErrors())
+                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
     fun `getPaymentMethods() with partially failing requests should emit failure`() =
         runTest {
+            val errorReporter = FakeErrorReporter()
             val repository = CustomerApiRepository(
                 failsOnceStripeRepository(),
                 { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 Logger.getInstance(false),
                 workContext = testDispatcher,
-                errorReporter = FakeErrorReporter()
+                errorReporter = errorReporter
             )
 
             // Requesting 3 payment method types, the first request will fail
@@ -254,12 +263,13 @@ internal class CustomerRepositoryTest {
                     "ephemeral_key"
                 ),
                 listOf(PaymentMethod.Type.Card, PaymentMethod.Type.Card, PaymentMethod.Type.Card),
-                false,
+                silentlyFail = false,
             )
 
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("Request Failed")
-            assertThat(errorReporter.getLoggedErrors()).isEmpty()
+            assertThat(errorReporter.getLoggedErrors())
+                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
