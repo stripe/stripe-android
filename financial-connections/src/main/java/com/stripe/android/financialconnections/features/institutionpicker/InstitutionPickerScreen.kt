@@ -515,6 +515,7 @@ private fun InstitutionResultTile(
     index: Int,
     onInstitutionSelected: (FinancialConnectionsInstitution) -> Unit
 ) {
+    val focusManager = LocalFocusManager.current
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -525,7 +526,10 @@ private fun InstitutionResultTile(
                 enabled = enabled && loading.not(),
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
-            ) { onInstitutionSelected(institution) }
+            ) {
+                focusManager.clearFocus()
+                onInstitutionSelected(institution)
+            }
             .alpha(if (enabled) 1f else DISABLED_DEPTH_ALPHA)
     ) {
         InstitutionIcon(institution.icon?.default)
