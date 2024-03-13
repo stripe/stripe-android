@@ -1,4 +1,4 @@
-package com.stripe.android.payments.core.analytics.testing
+package com.stripe.android.testing
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.payments.core.analytics.ErrorReporter
