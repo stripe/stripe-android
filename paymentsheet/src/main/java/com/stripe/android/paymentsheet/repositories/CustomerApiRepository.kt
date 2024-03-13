@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.repositories
 
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.Customer
@@ -10,6 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.async
@@ -29,6 +31,7 @@ internal class CustomerApiRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val logger: Logger,
+    private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     @Named(PRODUCT_USAGE) private val productUsageTokens: Set<String> = emptySet()
 ) : CustomerRepository {
@@ -72,6 +75,10 @@ internal class CustomerApiRepository @Inject constructor(
                     ),
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
+                    errorReporter.report(
+                        ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
+                        StripeException.create(it)
+                    )
                 }
             }
         }

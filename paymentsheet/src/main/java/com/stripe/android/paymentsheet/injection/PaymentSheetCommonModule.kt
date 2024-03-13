@@ -6,12 +6,17 @@ import com.stripe.android.core.injection.ENABLE_LOGGING
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.NetworkTypeDetector
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.DefaultDurationProvider
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.RealLinkConfigurationCoordinator
 import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.paymentsheet.BuildConfig
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.DefaultPrefsRepository
@@ -56,6 +61,9 @@ internal abstract class PaymentSheetCommonModule {
 
     @Binds
     abstract fun bindsCustomerRepository(repository: CustomerApiRepository): CustomerRepository
+
+    @Binds
+    abstract fun bindsErrorReporter(errorReporter: RealErrorReporter): ErrorReporter
 
     @Binds
     abstract fun bindsStripeIntentRepository(
@@ -144,5 +152,17 @@ internal abstract class PaymentSheetCommonModule {
         fun providesEditPaymentMethodViewInteractorFactory(): ModifiableEditPaymentMethodViewInteractor.Factory {
             return DefaultEditPaymentMethodViewInteractor.Factory
         }
+
+        @Provides
+        fun provideAnalyticsRequestFactory(
+            context: Context,
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
+            packageManager = context.packageManager,
+            packageName = context.packageName.orEmpty(),
+            packageInfo = context.packageInfo,
+            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
+            networkTypeProvider = NetworkTypeDetector(context)::invoke,
+        )
     }
 }

@@ -2,9 +2,6 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
-import com.stripe.android.core.networking.AnalyticsRequestFactory
-import com.stripe.android.core.networking.NetworkTypeDetector
-import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
@@ -35,19 +32,6 @@ internal class AddressElementViewModelModule {
     fun providesPublishableKey(
         args: AddressElementActivityContract.Args
     ): String = args.publishableKey
-
-    @Provides
-    @Singleton
-    internal fun provideAnalyticsRequestFactory(
-        context: Context,
-        @Named(PUBLISHABLE_KEY) publishableKey: String
-    ): AnalyticsRequestFactory = AnalyticsRequestFactory(
-        packageManager = context.packageManager,
-        packageName = context.packageName.orEmpty(),
-        packageInfo = context.packageInfo,
-        publishableKeyProvider = { publishableKey },
-        networkTypeProvider = NetworkTypeDetector(context)::invoke,
-    )
 
     @Provides
     @Singleton
