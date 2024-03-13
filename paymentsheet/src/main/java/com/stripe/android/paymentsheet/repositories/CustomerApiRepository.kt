@@ -14,6 +14,7 @@ import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.EventReporter.Companion.report
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
@@ -158,10 +159,4 @@ internal class CustomerApiRepository @Inject constructor(
         ).onFailure {
             logger.error("Failed to update payment method $paymentMethodId.", it)
         }
-
-    private fun ErrorReporter.report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
-        report(
-            errorEvent, stripeException.analyticsValue(), stripeException.statusCode
-        )
-    }
 }

@@ -1,8 +1,10 @@
 package com.stripe.android.paymentsheet.analytics
 
 import androidx.annotation.Keep
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -188,5 +190,15 @@ internal interface EventReporter {
 
     enum class CardBrandChoiceEventSource {
         Edit, Add
+    }
+
+    companion object {
+        fun ErrorReporter.report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
+            report(
+                errorEvent,
+                analyticsValue = stripeException.analyticsValue(),
+                statusCode = stripeException.statusCode
+            )
+        }
     }
 }

@@ -11,8 +11,8 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
