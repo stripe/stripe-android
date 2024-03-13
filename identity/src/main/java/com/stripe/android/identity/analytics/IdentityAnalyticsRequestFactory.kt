@@ -12,7 +12,6 @@ import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -64,7 +63,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
                 experiments
                     .filter { it.matches(eventName, metaDatas) }
                     .forEach { exp ->
-                        GlobalScope.launch(Dispatchers.IO) {
+                        GlobalScope.launch {
                             identityRepository.sendAnalyticsRequest(
                                 requestFactory.createRequest(
                                     eventName = EVENT_EXPERIMENT_EXPOSURE,
