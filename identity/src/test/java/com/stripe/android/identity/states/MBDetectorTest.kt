@@ -6,7 +6,10 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_MB_STATUS
 import com.stripe.android.identity.networking.IdentityRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.argWhere
@@ -19,10 +22,13 @@ class MBDetectorTest {
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val mockIdentityRepository = mock<IdentityRepository>()
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val analyticsRequestFactory = IdentityAnalyticsRequestFactory(
         context = context,
         args = mock(),
-        mockIdentityRepository
+        mockIdentityRepository,
+        CoroutineScope(UnconfinedTestDispatcher())
     )
 
     @Test
