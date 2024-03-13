@@ -4,7 +4,8 @@ import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -12,8 +13,8 @@ import com.stripe.android.ui.core.elements.SharedDataSpec
 internal object PaymentMethodMetadataFactory {
     fun create(
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
-        billingDetailsCollectionConfiguration: BillingDetailsCollectionConfiguration =
-            BillingDetailsCollectionConfiguration(),
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
         allowsDelayedPaymentMethods: Boolean = true,
         allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
         financialConnectionsAvailable: Boolean = true,
@@ -29,6 +30,7 @@ internal object PaymentMethodMetadataFactory {
             financialConnectionsAvailable = financialConnectionsAvailable,
             paymentMethodOrder = paymentMethodOrder,
             cbcEligibility = cbcEligibility,
+            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             sharedDataSpecs = sharedDataSpecs,
         )
     }

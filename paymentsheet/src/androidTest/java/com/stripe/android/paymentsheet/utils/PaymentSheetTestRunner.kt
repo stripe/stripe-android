@@ -10,6 +10,7 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -23,9 +24,12 @@ internal class PaymentSheetTestRunnerContext(
     fun presentPaymentSheet(
         block: PaymentSheet.() -> Unit,
     ) {
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentSheetActivity::class.java)
         scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
             paymentSheet.block()
         }
+        activityLaunchObserver.awaitLaunch()
     }
 
     /**

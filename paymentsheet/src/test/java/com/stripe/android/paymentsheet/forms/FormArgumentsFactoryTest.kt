@@ -14,7 +14,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,8 +46,6 @@ class FormArgumentsFactoryTest {
             paymentMethod = metadata.supportedPaymentMethodForCode("bancontact")!!,
             metadata = metadata,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
-            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.GenericPaymentMethod(
                 labelResource = resources.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_bancontact),
                 iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_bancontact,
@@ -79,8 +76,6 @@ class FormArgumentsFactoryTest {
             paymentMethod = supportedPaymentMethod,
             metadata = metadata,
             config = PaymentSheetFixtures.CONFIG_MINIMUM,
-            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            amount = null,
             newLpm = null,
         )
 
@@ -149,10 +144,10 @@ class FormArgumentsFactoryTest {
 
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = LpmRepositoryTestHelpers.card,
-            metadata = PaymentMethodMetadataFactory.create(),
+            metadata = PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
+            ),
             config = config,
-            merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
-            amount = Amount(50, "USD"),
             newLpm = PaymentSelection.New.Card(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 brand = CardBrand.Visa,

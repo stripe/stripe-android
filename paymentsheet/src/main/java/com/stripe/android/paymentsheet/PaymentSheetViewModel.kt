@@ -132,7 +132,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         isProcessingPayment = isProcessingPaymentIntent,
         currentScreenFlow = currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = amount,
+        amountFlow = paymentMethodMetadata.map { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         onClick = {

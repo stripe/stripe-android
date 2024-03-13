@@ -12,10 +12,6 @@ data class BillingDetailsCollectionConfiguration(
     val collectPhone: Boolean = false,
     val address: AddressCollectionMode = AddressCollectionMode.Automatic,
 ) : Parcelable {
-
-    val collectAddress: Boolean
-        get() = address != AddressCollectionMode.Never
-
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class AddressCollectionMode {
         Automatic,

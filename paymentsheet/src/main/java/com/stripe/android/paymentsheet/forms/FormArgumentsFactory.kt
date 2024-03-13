@@ -10,7 +10,6 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 
 internal object FormArgumentsFactory {
@@ -19,8 +18,6 @@ internal object FormArgumentsFactory {
         paymentMethod: SupportedPaymentMethod,
         metadata: PaymentMethodMetadata,
         config: PaymentSheet.Configuration,
-        merchantName: String,
-        amount: Amount? = null,
         newLpm: PaymentSelection.New?,
     ): FormArguments {
         val setupFutureUsageFieldConfiguration =
@@ -66,13 +63,13 @@ internal object FormArgumentsFactory {
             paymentMethodCode = paymentMethod.code,
             showCheckbox = setupFutureUsageFieldConfiguration?.isSaveForFutureUseValueChangeable == true,
             saveForFutureUseInitialValue = saveForFutureUseInitialValue,
-            merchantName = merchantName,
-            amount = amount,
+            merchantName = metadata.merchantName,
+            amount = metadata.amount(),
             billingDetails = config.defaultBillingDetails,
             shippingDetails = config.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
             initialPaymentMethodExtraParams = initialExtraParams,
-            billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
+            billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,
             requiresMandate = paymentMethod.requiresMandate,
             requiredFields = paymentMethod.placeholderOverrideList,
