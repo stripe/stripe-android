@@ -36,15 +36,12 @@ import com.stripe.android.financialconnections.presentation.parentViewModel
 
 internal sealed class Destination(
     protected val route: String,
-    protected val paramKeys: List<String>,
-    protected val screenBuilder: @Composable (NavBackStackEntry) -> Unit
+    paramKeys: List<String> = listOf(KEY_REFERRER),
+    protected val composable: @Composable (NavBackStackEntry) -> Unit
 ) {
-    val fullRoute: String = if (paramKeys.isEmpty()) {
-        route
-    } else {
-        val builder = StringBuilder(route)
-        paramKeys.forEach { builder.append("/{$it}") }
-        builder.toString()
+    val fullRoute: String by lazy {
+        val placeholders = paramKeys.map { "{$it}" }
+        route.appendParamValues(placeholders)
     }
 
     @Composable
@@ -61,128 +58,109 @@ internal sealed class Destination(
                 paneLaunchedTriggered = true
             }
         }
-        screenBuilder(navBackStackEntry)
+        composable(navBackStackEntry)
     }
 
     /**
-     * Builds the navigation route with arg keys and values.
-     *
-     * @param args a map of arguments to be appended to the route
+     * Builds the navigation route with provided [referrer].
      */
-    abstract operator fun invoke(
-        referrer: Pane?,
-        args: Map<String, String?> = emptyMap()
-    ): String
+    operator fun invoke(
+        referrer: Pane,
+    ): String = route.appendParamValues(listOf(referrer.value))
 
-    sealed class NoArgumentsDestination(
-        route: String,
-        composable: @Composable (NavBackStackEntry) -> Unit
-    ) : Destination(
-        route = route,
-        paramKeys = listOf(KEY_REFERRER),
-        screenBuilder = composable
-    ) {
-        override operator fun invoke(
-            referrer: Pane?,
-            args: Map<String, String?>
-        ): String = route.appendParamValues(
-            KEY_REFERRER to referrer?.value
-        )
-    }
-
-    data object InstitutionPicker : NoArgumentsDestination(
+    data object InstitutionPicker : Destination(
         Pane.INSTITUTION_PICKER.value,
         composable = { InstitutionPickerScreen() }
     )
 
-    data object Consent : NoArgumentsDestination(
+    data object Consent : Destination(
         route = Pane.CONSENT.value,
         composable = { ConsentScreen() }
     )
 
-    data object PartnerAuthDrawer : NoArgumentsDestination(
+    data object PartnerAuthDrawer : Destination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
         composable = { PartnerAuthScreen(inModal = true) }
     )
 
-    data object PartnerAuth : NoArgumentsDestination(
+    data object PartnerAuth : Destination(
         route = Pane.PARTNER_AUTH.value,
         composable = { PartnerAuthScreen(inModal = false) }
     )
 
-    data object AccountPicker : NoArgumentsDestination(
+    data object AccountPicker : Destination(
         route = Pane.ACCOUNT_PICKER.value,
         composable = { AccountPickerScreen() }
     )
 
-    data object Success : NoArgumentsDestination(
+    data object Success : Destination(
         route = Pane.SUCCESS.value,
         composable = { SuccessScreen() }
     )
 
-    data object ManualEntry : NoArgumentsDestination(
+    data object ManualEntry : Destination(
         route = Pane.MANUAL_ENTRY.value,
         composable = { ManualEntryScreen() }
     )
 
-    data object AttachLinkedPaymentAccount : NoArgumentsDestination(
+    data object AttachLinkedPaymentAccount : Destination(
         route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
         composable = { AttachPaymentScreen() }
     )
 
-    data object NetworkingLinkSignup : NoArgumentsDestination(
+    data object NetworkingLinkSignup : Destination(
         route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
         composable = { NetworkingLinkSignupScreen() }
     )
 
-    data object NetworkingLinkLoginWarmup : NoArgumentsDestination(
+    data object NetworkingLinkLoginWarmup : Destination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
         composable = { NetworkingLinkLoginWarmupScreen(it) }
     )
 
-    data object NetworkingLinkVerification : NoArgumentsDestination(
+    data object NetworkingLinkVerification : Destination(
         route = Pane.NETWORKING_LINK_VERIFICATION.value,
         composable = { NetworkingLinkVerificationScreen() }
     )
 
-    data object NetworkingSaveToLinkVerification : NoArgumentsDestination(
+    data object NetworkingSaveToLinkVerification : Destination(
         route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
         composable = { NetworkingSaveToLinkVerificationScreen() }
     )
 
-    data object LinkAccountPicker : NoArgumentsDestination(
+    data object LinkAccountPicker : Destination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
         composable = {
             LinkAccountPickerScreen()
         },
     )
 
-    data object LinkStepUpVerification : NoArgumentsDestination(
+    data object LinkStepUpVerification : Destination(
         route = Pane.LINK_STEP_UP_VERIFICATION.value,
         composable = { LinkStepUpVerificationScreen() }
     )
 
-    data object Reset : NoArgumentsDestination(
+    data object Reset : Destination(
         route = Pane.RESET.value,
         composable = { ResetScreen() }
     )
 
-    data object Exit : NoArgumentsDestination(
+    data object Exit : Destination(
         route = Pane.EXIT.value,
         composable = { ExitModal(it) }
     )
 
-    data object Error : NoArgumentsDestination(
+    data object Error : Destination(
         route = Pane.UNEXPECTED_ERROR.value,
         composable = { ErrorScreen() }
     )
 
-    data object BankAuthRepair : NoArgumentsDestination(
+    data object BankAuthRepair : Destination(
         route = Pane.BANK_AUTH_REPAIR.value,
         composable = { BankAuthRepairScreen() }
     )
 
-    data object ManualEntrySuccess : NoArgumentsDestination(
+    data object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
         composable = { ManualEntrySuccessScreen() }
     )
@@ -196,16 +174,11 @@ internal sealed class Destination(
     }
 }
 
-internal fun String.appendParamValues(vararg params: Pair<String, Any?>): String {
-    val builder = StringBuilder(this)
-
-    params.forEach {
-        it.second?.toString()?.let { arg ->
-            builder.append("/$arg")
-        }
+internal fun String.appendParamValues(params: List<String>): String {
+    return buildString {
+        append(this@appendParamValues)
+        params.forEach { append("/$it") }
     }
-
-    return builder.toString()
 }
 
 internal fun NavGraphBuilder.composable(
