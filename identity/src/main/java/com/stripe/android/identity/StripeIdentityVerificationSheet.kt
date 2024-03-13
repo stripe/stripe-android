@@ -53,7 +53,7 @@ internal class StripeIdentityVerificationSheet internal constructor(
 
     private val identityVerificationSheetComponent: IdentityVerificationSheetComponent =
         DaggerIdentityVerificationSheetComponent.builder()
-            .context(context)
+            .context(context.applicationContext)
             .build()
 
     override fun present(

@@ -1,5 +1,7 @@
 package com.stripe.android.identity.networking
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -46,7 +48,8 @@ class DefaultIdentityRepositoryTest {
     private val mockStripeNetworkClient: StripeNetworkClient = mock()
     private val identityRepository = DefaultIdentityRepository(
         mockStripeNetworkClient,
-        mockIO
+        mockIO,
+        ApplicationProvider.getApplicationContext()
     )
 
     private val requestCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
@@ -516,7 +519,10 @@ class DefaultIdentityRepositoryTest {
 
             assertThat(request).isInstanceOf(ApiRequest::class.java)
             assertThat(request.method).isEqualTo(StripeRequest.Method.GET)
-            assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID")
+            assertThat(request.url).isEqualTo(
+                "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID?" +
+                    "$APP_IDENTIFIER=${ApplicationProvider.getApplicationContext<Context>().packageName}"
+            )
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
 
             verificationPageBlock(verificationPage)

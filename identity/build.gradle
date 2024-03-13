@@ -34,6 +34,7 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
     implementation libs.material
+    implementation libs.microblinkCapture
 
     debugImplementation libs.compose.uiTestManifest
 
