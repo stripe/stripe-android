@@ -43,11 +43,10 @@ internal class TestNavigationManager : NavigationManager {
         destination: Destination,
         pane: Pane,
         popUpTo: PopUpToBehavior? = null,
-        args: Map<String, String?> = emptyMap()
     ) {
         val last: NavigationIntent = emittedIntents.last()
         assertIs<NavigationIntent.NavigateTo>(last)
-        assertThat(last.route).isEqualTo(destination(pane, args))
+        assertThat(last.route).isEqualTo(destination(pane))
         assertThat(last.popUpTo).isEqualTo(popUpTo)
     }
 }
