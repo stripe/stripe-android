@@ -1,6 +1,7 @@
 package com.stripe.android.payments.core.analytics
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import javax.inject.Inject
@@ -13,10 +14,10 @@ class RealErrorReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ErrorReporter {
-    override fun report(errorEvent: ErrorReporter.ErrorEvent, analyticsValue: String?, statusCode: Int?) {
+    override fun report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
         val additionalParams = mapOf(
-            "analyticsValue" to analyticsValue,
-            "statusCode" to statusCode?.toString(),
+            "analyticsValue" to stripeException.analyticsValue(),
+            "statusCode" to stripeException.statusCode.toString(),
         ).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
