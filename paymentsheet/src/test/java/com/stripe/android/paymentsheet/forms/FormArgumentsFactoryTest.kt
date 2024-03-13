@@ -45,7 +45,7 @@ class FormArgumentsFactoryTest {
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = metadata.supportedPaymentMethodForCode("bancontact")!!,
             metadata = metadata,
-            config = PaymentSheetFixtures.CONFIG_MINIMUM,
+            customerConfig = null,
             newLpm = PaymentSelection.New.GenericPaymentMethod(
                 labelResource = resources.getString(StripeUiCoreR.string.stripe_paymentsheet_payment_method_bancontact),
                 iconResource = StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_bancontact,
@@ -75,7 +75,7 @@ class FormArgumentsFactoryTest {
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = supportedPaymentMethod,
             metadata = metadata,
-            config = PaymentSheetFixtures.CONFIG_MINIMUM,
+            customerConfig = null,
             newLpm = null,
         )
 
@@ -147,7 +147,7 @@ class FormArgumentsFactoryTest {
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
             ),
-            config = config,
+            customerConfig = config.customer,
             newLpm = PaymentSelection.New.Card(
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 brand = CardBrand.Visa,

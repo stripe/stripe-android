@@ -666,7 +666,7 @@ internal abstract class BaseSheetViewModel(
         return FormArgumentsFactory.create(
             paymentMethod = selectedItem,
             metadata = metadata,
-            config = config,
+            customerConfig = config.customer,
             newLpm = newPaymentSelection,
         )
     }
