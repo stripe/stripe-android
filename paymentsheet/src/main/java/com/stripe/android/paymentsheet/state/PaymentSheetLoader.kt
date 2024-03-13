@@ -96,6 +96,8 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 paymentMethodOrder = paymentSheetConfiguration.paymentMethodOrder,
                 cbcEligibility = cbcEligibility,
                 merchantName = paymentSheetConfiguration.merchantDisplayName,
+                defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
+                shippingDetails = paymentSheetConfiguration.shippingDetails,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 

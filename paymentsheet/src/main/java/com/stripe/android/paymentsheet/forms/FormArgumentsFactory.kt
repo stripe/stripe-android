@@ -17,13 +17,13 @@ internal object FormArgumentsFactory {
     fun create(
         paymentMethod: SupportedPaymentMethod,
         metadata: PaymentMethodMetadata,
-        config: PaymentSheet.Configuration,
+        customerConfig: PaymentSheet.CustomerConfiguration?,
         newLpm: PaymentSelection.New?,
     ): FormArguments {
         val setupFutureUsageFieldConfiguration =
             paymentMethod.paymentMethodDefinition().getSetupFutureUsageFieldConfiguration(
                 metadata = metadata,
-                customerConfiguration = config.customer,
+                customerConfiguration = customerConfig,
             )
 
         val initialParams = when (newLpm) {
@@ -65,8 +65,8 @@ internal object FormArgumentsFactory {
             saveForFutureUseInitialValue = saveForFutureUseInitialValue,
             merchantName = metadata.merchantName,
             amount = metadata.amount(),
-            billingDetails = config.defaultBillingDetails,
-            shippingDetails = config.shippingDetails,
+            billingDetails = metadata.defaultBillingDetails,
+            shippingDetails = metadata.shippingDetails,
             initialPaymentMethodCreateParams = initialParams,
             initialPaymentMethodExtraParams = initialExtraParams,
             billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
