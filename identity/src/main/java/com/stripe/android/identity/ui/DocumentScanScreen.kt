@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -54,6 +55,7 @@ import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFr
 import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal const val CONTINUE_BUTTON_TAG = "Continue"
@@ -182,13 +184,15 @@ private fun DocumentCaptureScreen(
     }
 
     // Throttle the message change speed in Found state
-    var foundResId by remember { mutableIntStateOf(R.string.stripe_hold_still) }
-    var lastFoundResIdUpdateTime by remember { mutableLongStateOf(0L) }
+    var foundResId by rememberSaveable { mutableIntStateOf(R.string.stripe_hold_still) }
+    var lastFoundResIdUpdateTime by rememberSaveable { mutableLongStateOf(0L) }
+    var timeSinceInitalState by rememberSaveable { mutableLongStateOf(0L) }
+    var shouldShowInitial by rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(documentScannerState) {
+        val currentTime = System.currentTimeMillis()
         if (documentScannerState is IdentityScanViewModel.State.Scanning &&
             documentScannerState.scanState is IdentityScanState.Found
         ) {
-            val currentTime = System.currentTimeMillis()
             if (currentTime - lastFoundResIdUpdateTime >= FEED_BACK_REFRESH_LIMIT) {
                 lastFoundResIdUpdateTime = currentTime
                 foundResId =
@@ -196,39 +200,54 @@ private fun DocumentCaptureScreen(
                         .feedbackRes ?: R.string.stripe_hold_still
             }
         }
+        if (documentScannerState is IdentityScanViewModel.State.Scanning &&
+            documentScannerState.scanState is IdentityScanState.Initial
+        ) {
+            if (currentTime - timeSinceInitalState >= FEED_BACK_REFRESH_LIMIT) {
+                timeSinceInitalState = currentTime
+                launch {
+                    delay(FEED_BACK_REFRESH_LIMIT)
+                    shouldShowInitial = true
+                }
+            }
+        } else {
+            shouldShowInitial = false
+        }
     }
 
-    val message = when (documentScannerState) {
-        is IdentityScanViewModel.State.Scanning -> {
-            when (documentScannerState.scanState) {
-                is IdentityScanState.Finished -> stringResource(id = R.string.stripe_scanned)
-                is IdentityScanState.Found -> {
-                    stringResource(id = foundResId)
-                }
-
-                is IdentityScanState.Initial -> {
-                    if (targetScanType.isNullOrFront()) {
-                        stringResource(id = R.string.stripe_position_id_front)
-                    } else {
-                        stringResource(id = R.string.stripe_position_id_back)
+    val message = if (shouldShowInitial) {
+        if (targetScanType.isNullOrFront()) {
+            stringResource(id = R.string.stripe_position_id_front)
+        } else {
+            stringResource(id = R.string.stripe_position_id_back)
+        }
+    } else {
+        when (documentScannerState) {
+            is IdentityScanViewModel.State.Scanning -> {
+                when (documentScannerState.scanState) {
+                    is IdentityScanState.Finished -> stringResource(id = R.string.stripe_scanned)
+                    is IdentityScanState.Found -> {
+                        stringResource(id = foundResId)
                     }
-                }
 
-                is IdentityScanState.Satisfied -> stringResource(id = R.string.stripe_scanned)
-                is IdentityScanState.TimeOut -> ""
-                is IdentityScanState.Unsatisfied -> ""
-                null -> { // just initialized or start scanning, no scanState yet
-                    if (targetScanType.isNullOrFront()) {
-                        stringResource(id = R.string.stripe_position_id_front)
-                    } else {
-                        stringResource(id = R.string.stripe_position_id_back)
+                    is IdentityScanState.Initial -> stringResource(id = foundResId)
+
+                    is IdentityScanState.Satisfied -> stringResource(id = R.string.stripe_scanned)
+                    is IdentityScanState.TimeOut -> ""
+                    is IdentityScanState.Unsatisfied -> stringResource(id = foundResId)
+                    null -> { // just initialized or start scanning, no scanState yet
+                        if (targetScanType.isNullOrFront()) {
+                            stringResource(id = R.string.stripe_position_id_front)
+                        } else {
+                            stringResource(id = R.string.stripe_position_id_back)
+                        }
                     }
                 }
             }
-        }
 
-        is IdentityScanViewModel.State.Scanned -> stringResource(id = R.string.stripe_scanned)
-        else -> ""
+            is IdentityScanViewModel.State.Scanned -> stringResource(id = R.string.stripe_scanned)
+            else -> ""
+        }
     }
 
     Column(
