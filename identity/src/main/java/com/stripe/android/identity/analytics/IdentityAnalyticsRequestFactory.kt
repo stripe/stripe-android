@@ -5,16 +5,18 @@ import android.util.Log
 import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
 import com.stripe.android.identity.IdentityVerificationSheetContract
+import com.stripe.android.identity.injection.IdentityCommonModule.Companion.GLOBAL_SCOPE
 import com.stripe.android.identity.injection.IdentityVerificationScope
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.DocumentUploadParam
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.states.IdentityScanState
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import javax.inject.Named
 
 /**
  * Factory for creating [AnalyticsRequestV2] for Identity.
@@ -24,6 +26,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
     context: Context,
     private val args: IdentityVerificationSheetContract.Args,
     val identityRepository: IdentityRepository,
+    @Named(GLOBAL_SCOPE) val scope: CoroutineScope
 ) {
     var verificationPage: VerificationPage? = null
     private val requestFactory = AnalyticsRequestV2Factory(
@@ -63,7 +66,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
                 experiments
                     .filter { it.matches(eventName, metaDatas) }
                     .forEach { exp ->
-                        GlobalScope.launch {
+                        scope.launch {
                             identityRepository.sendAnalyticsRequest(
                                 requestFactory.createRequest(
                                     eventName = EVENT_EXPERIMENT_EXPOSURE,
@@ -80,7 +83,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
                 eventName = eventName,
                 additionalParams = additionalParams
             )
-            GlobalScope.launch {
+            scope.launch {
                 identityRepository.sendAnalyticsRequest(request)
             }
         }.onFailure {

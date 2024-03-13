@@ -16,7 +16,10 @@ import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentExperiment
 import com.stripe.android.identity.states.IdentityScanState
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import org.junit.After
 import org.junit.Rule
 import org.junit.Test
@@ -35,10 +38,13 @@ class IdentityAnalyticsRequestFactoryTest {
     private val mockArgs = mock<IdentityVerificationSheetContract.Args> {
         on { verificationSessionId }.thenReturn(VERIFICATION_SESSION)
     }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
     private val factory = IdentityAnalyticsRequestFactory(
         ApplicationProvider.getApplicationContext(),
         mockArgs,
-        mockIdentityRepository
+        mockIdentityRepository,
+        CoroutineScope(UnconfinedTestDispatcher())
     )
 
     private val mockPageScreenPresented = mock<VerificationPage> {
@@ -107,15 +113,15 @@ class IdentityAnalyticsRequestFactoryTest {
 
         verify(mockIdentityRepository).sendAnalyticsRequest(
             argWhere {
-                it.eventName == EVENT_EXPERIMENT_EXPOSURE &&
-                    it.params[PARAM_ARB_ID] == USER_SESSION_ID &&
-                    it.params[PARAM_EXPERIMENT_RETRIEVED] == EXP1
+                it.eventName == EVENT_SCREEN_PRESENTED
             }
         )
 
         verify(mockIdentityRepository).sendAnalyticsRequest(
             argWhere {
-                it.eventName == EVENT_SCREEN_PRESENTED
+                it.eventName == EVENT_EXPERIMENT_EXPOSURE &&
+                    it.params[PARAM_ARB_ID] == USER_SESSION_ID &&
+                    it.params[PARAM_EXPERIMENT_RETRIEVED] == EXP1
             }
         )
     }

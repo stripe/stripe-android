@@ -15,6 +15,10 @@ import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Module(
@@ -45,5 +49,13 @@ internal abstract class IdentityCommonModule {
         @Provides
         @Singleton
         fun provideInterpreterInitializer(): InterpreterInitializer = InterpreterInitializerImpl
+
+        @OptIn(DelicateCoroutinesApi::class)
+        @Provides
+        @Singleton
+        @Named(GLOBAL_SCOPE)
+        fun provideGlobalScope(): CoroutineScope = GlobalScope
+
+        const val GLOBAL_SCOPE = "GlobalScope"
     }
 }
