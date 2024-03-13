@@ -1,14 +1,16 @@
-@file:Suppress("ktlint:filename")
-
 package com.stripe.android.financialconnections.ui.components
 
+import android.os.Build.VERSION.SDK_INT
+import android.os.Build.VERSION_CODES.R
+import android.view.HapticFeedbackConstants.CONFIRM
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -18,7 +20,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ButtonDefaults.buttonColors
-import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ButtonElevation
 import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.LocalRippleTheme
@@ -26,19 +28,31 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
 import com.stripe.android.financialconnections.ui.theme.Brand400
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.Neutral0
 import com.stripe.android.financialconnections.ui.theme.Neutral50
+
+private val DefaultSpinnerHeight = 24.dp
 
 @Composable
 internal fun FinancialConnectionsButton(
@@ -50,43 +64,59 @@ internal fun FinancialConnectionsButton(
     loading: Boolean = false,
     content: @Composable (RowScope.() -> Unit)
 ) {
+    val view = LocalView.current
+    val density = LocalDensity.current
+
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+    var spinnerHeight by remember { mutableStateOf(DefaultSpinnerHeight) }
+
+    val loadingIndicatorAlpha by animateFloatAsState(
+        targetValue = if (loading) 1f else 0f,
+        label = "LoadingIndicatorAlpha",
+    )
+
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
             onClick = {
                 multipleEventsCutter.processEvent {
-                    if (loading.not()) onClick()
+                    if (loading.not()) {
+                        if (SDK_INT >= R) view.performHapticFeedback(CONFIRM)
+                        onClick()
+                    }
                 }
             },
             modifier = modifier,
-            elevation = ButtonDefaults.elevation(
-                defaultElevation = 0.dp,
-                pressedElevation = 0.dp,
-                disabledElevation = 0.dp,
-                hoveredElevation = 0.dp,
-                focusedElevation = 0.dp,
-            ),
+            elevation = type.elevation(),
             enabled = enabled,
             shape = RoundedCornerShape(size = size.radius),
-            contentPadding = size.paddingValues(),
+            contentPadding = PaddingValues(0.dp),
             colors = type.buttonColors(),
             content = {
                 ProvideTextStyle(
-                    value = FinancialConnectionsTheme.typography.bodyEmphasized.copy(
+                    value = typography.labelLargeEmphasized.copy(
                         // material button adds letter spacing internally, this removes it.
                         letterSpacing = 0.sp
                     )
                 ) {
-                    Row {
-                        if (loading) {
-                            CircularProgressIndicator(
-                                strokeWidth = 4.dp,
-                                modifier = Modifier.size(21.dp),
-                                color = colors.textWhite
-                            )
-                            Spacer(modifier = Modifier.size(8.dp))
-                        }
-                        content()
+                    Box(contentAlignment = Alignment.Center) {
+                        Row(
+                            modifier = Modifier
+                                .alpha(1f - loadingIndicatorAlpha)
+                                .padding(size.paddingValues())
+                                .onSizeChanged {
+                                    // Set the spinner to the same height as the label,
+                                    // so we avoid visual jitter.
+                                    spinnerHeight = with(density) { it.height.toDp() }
+                                },
+                            content = content,
+                        )
+
+                        LoadingSpinner(
+                            strokeWidth = 2.dp,
+                            modifier = Modifier
+                                .size(spinnerHeight)
+                                .alpha(loadingIndicatorAlpha),
+                        )
                     }
                 }
             }
@@ -97,9 +127,8 @@ internal fun FinancialConnectionsButton(
 private fun Type.rippleTheme() = object : RippleTheme {
     @Composable
     override fun defaultColor() = when (this@rippleTheme) {
-        Type.Primary -> Color.White
-        Type.Secondary -> colors.textSecondary
-        Type.Critical -> Color.White
+        Type.Primary -> Neutral0
+        Type.Secondary -> colors.textDefault
     }
 
     @Composable
@@ -117,46 +146,43 @@ internal object FinancialConnectionsButton {
         abstract fun buttonColors(): ButtonColors
         abstract fun rippleColor(): Color
 
+        @Composable
+        abstract fun elevation(): ButtonElevation
+
         data object Primary : Type() {
             @Composable
-            override fun buttonColors(): ButtonColors {
-                return buttonColors(
-                    backgroundColor = colors.textBrand,
-                    contentColor = colors.textWhite,
-                    disabledBackgroundColor = colors.textBrand,
-                    disabledContentColor = colors.textWhite.copy(alpha = 0.3f)
-                )
-            }
+            override fun buttonColors(): ButtonColors = buttonColors(
+                backgroundColor = colors.iconBrand,
+                contentColor = colors.textWhite,
+                disabledBackgroundColor = colors.iconBrand,
+                disabledContentColor = colors.textWhite.copy(alpha = 0.4f)
+            )
 
             override fun rippleColor(): Color = Brand400
+
+            @Composable
+            override fun elevation(): ButtonElevation = ButtonDefaults.elevation()
         }
 
         data object Secondary : Type() {
             @Composable
-            override fun buttonColors(): ButtonColors {
-                return buttonColors(
-                    backgroundColor = colors.backgroundContainer,
-                    contentColor = colors.textPrimary,
-                    disabledBackgroundColor = colors.backgroundContainer,
-                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
-                )
-            }
+            override fun buttonColors(): ButtonColors = buttonColors(
+                backgroundColor = Neutral50,
+                contentColor = colors.textDefault,
+                disabledBackgroundColor = Neutral50,
+                disabledContentColor = colors.textDefault.copy(alpha = 0.4f)
+            )
 
             override fun rippleColor(): Color = Neutral50
-        }
 
-        data object Critical : Type() {
             @Composable
-            override fun buttonColors(): ButtonColors {
-                return buttonColors(
-                    backgroundColor = colors.textCritical,
-                    contentColor = colors.textWhite,
-                    disabledBackgroundColor = colors.textCritical.copy(alpha = 0.12f),
-                    disabledContentColor = colors.textPrimary.copy(alpha = 0.12f)
-                )
-            }
-
-            override fun rippleColor(): Color = Neutral50
+            override fun elevation(): ButtonElevation = ButtonDefaults.elevation(
+                defaultElevation = 0.dp,
+                pressedElevation = 0.dp,
+                disabledElevation = 0.dp,
+                hoveredElevation = 0.dp,
+                focusedElevation = 0.dp,
+            )
         }
     }
 
@@ -165,18 +191,6 @@ internal object FinancialConnectionsButton {
         @Composable
         abstract fun paddingValues(): PaddingValues
         abstract val radius: Dp
-
-        data object Pill : Size() {
-            override val radius: Dp = 4.dp
-
-            @Composable
-            override fun paddingValues(): PaddingValues = PaddingValues(
-                start = 8.dp,
-                top = 4.dp,
-                end = 8.dp,
-                bottom = 4.dp
-            )
-        }
 
         data object Regular : Size() {
             override val radius: Dp = 12.dp

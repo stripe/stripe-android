@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Checkbox
 import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.ExperimentalMaterialApi
@@ -30,6 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -161,6 +163,9 @@ private fun TextSetting(
         placeholder = { Text(text = name) },
         label = { Text(text = name) },
         value = value,
+        keyboardOptions = KeyboardOptions(
+            imeAction = ImeAction.Done,
+        ),
         onValueChange = { newValue: String ->
             onOptionChanged(newValue)
         },

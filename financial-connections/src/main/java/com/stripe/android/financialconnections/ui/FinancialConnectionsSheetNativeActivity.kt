@@ -8,21 +8,22 @@ import androidx.activity.addCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.airbnb.mvrx.MavericksView
@@ -30,19 +31,24 @@ import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
-import com.stripe.android.financialconnections.features.common.CloseDialog
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationIntent
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.bottomSheet
+import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
 import com.stripe.android.financialconnections.navigation.composable
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.argsOrNull
+import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
@@ -75,26 +81,14 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
             setContent {
                 FinancialConnectionsTheme {
-                    Column {
-                        Box(modifier = Modifier.weight(1f)) {
-                            val closeDialog = viewModel.collectAsState { it.closeDialog }
-                            val firstPane =
-                                viewModel.collectAsState { it.initialPane }
-                            val reducedBranding =
-                                viewModel.collectAsState { it.reducedBranding }
-                            closeDialog.value?.let {
-                                CloseDialog(
-                                    description = it.description,
-                                    onConfirmClick = viewModel::onCloseConfirm,
-                                    onDismissClick = viewModel::onCloseDismiss
-                                )
-                            }
-                            NavHost(
-                                firstPane.value,
-                                reducedBranding.value
-                            )
-                        }
-                    }
+                    val firstPane by viewModel.collectAsState { it.initialPane }
+                    val reducedBranding by viewModel.collectAsState { it.reducedBranding }
+                    val testMode by viewModel.collectAsState { it.testMode }
+                    NavHost(
+                        initialPane = firstPane,
+                        testMode = testMode,
+                        reducedBranding = reducedBranding
+                    )
                 }
             }
         }
@@ -124,23 +118,31 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         }
     }
 
-    @Suppress("LongMethod")
     @Composable
     fun NavHost(
         initialPane: Pane,
+        testMode: Boolean,
         reducedBranding: Boolean
     ) {
         val context = LocalContext.current
-        val navController = rememberNavController()
-
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
 
+        val sheetState = rememberModalBottomSheetState(
+            ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true
+        )
+
+        val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }
+        val navController = rememberNavController(bottomSheetNavigator)
+        val keyboardController = rememberKeyboardController()
+
         PaneBackgroundEffects(navController)
-        NavigationEffects(viewModel.navigationFlow, navController)
+        NavigationEffects(viewModel.navigationFlow, navController, keyboardController)
 
         CompositionLocalProvider(
             LocalReducedBranding provides reducedBranding,
+            LocalTestMode provides testMode,
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
             LocalUriHandler provides uriHandler
@@ -149,26 +151,33 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 viewModel.onBackClick(navController.currentDestination?.pane)
                 if (navController.popBackStack().not()) viewModel.onBackPressed()
             }
-            NavHost(
-                navController,
-                startDestination = initialDestination.fullRoute,
+            FinancialConnectionsModalBottomSheetLayout(
+                bottomSheetNavigator = bottomSheetNavigator,
             ) {
-                composable(Destination.Consent)
-                composable(Destination.ManualEntry)
-                composable(Destination.PartnerAuth)
-                composable(Destination.InstitutionPicker)
-                composable(Destination.AccountPicker)
-                composable(Destination.Success)
-                composable(Destination.Reset)
-                composable(Destination.AttachLinkedPaymentAccount)
-                composable(Destination.NetworkingLinkSignup)
-                composable(Destination.NetworkingLinkLoginWarmup)
-                composable(Destination.NetworkingLinkVerification)
-                composable(Destination.NetworkingSaveToLinkVerification)
-                composable(Destination.LinkAccountPicker)
-                composable(Destination.BankAuthRepair)
-                composable(Destination.LinkStepUpVerification)
-                composable(Destination.ManualEntrySuccess)
+                NavHost(
+                    navController,
+                    startDestination = initialDestination.fullRoute,
+                ) {
+                    composable(Destination.Consent)
+                    composable(Destination.ManualEntry)
+                    composable(Destination.PartnerAuth)
+                    bottomSheet(Destination.PartnerAuthDrawer)
+                    bottomSheet(Destination.Exit)
+                    composable(Destination.InstitutionPicker)
+                    composable(Destination.AccountPicker)
+                    composable(Destination.Success)
+                    composable(Destination.Reset)
+                    composable(Destination.Error)
+                    composable(Destination.AttachLinkedPaymentAccount)
+                    composable(Destination.NetworkingLinkSignup)
+                    bottomSheet(Destination.NetworkingLinkLoginWarmup)
+                    composable(Destination.NetworkingLinkVerification)
+                    composable(Destination.NetworkingSaveToLinkVerification)
+                    composable(Destination.LinkAccountPicker)
+                    composable(Destination.BankAuthRepair)
+                    composable(Destination.LinkStepUpVerification)
+                    composable(Destination.ManualEntrySuccess)
+                }
             }
         }
     }
@@ -209,7 +218,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Composable
     fun NavigationEffects(
         navigationChannel: SharedFlow<NavigationIntent>,
-        navHostController: NavHostController
+        navHostController: NavHostController,
+        keyboardController: KeyboardController,
     ) {
         val activity = (LocalContext.current as? Activity)
         LaunchedEffect(activity, navHostController, navigationChannel) {
@@ -217,19 +227,28 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
                 if (activity?.isFinishing == true) {
                     return@onEach
                 }
+
+                keyboardController.dismiss()
+
                 when (intent) {
                     is NavigationIntent.NavigateTo -> {
                         val from: String? = navHostController.currentDestination?.route
                         val destination: String = intent.route
+
                         if (destination.isNotEmpty() && destination != from) {
                             logger.debug("Navigating from $from to $destination")
                             navHostController.navigate(destination) {
                                 launchSingleTop = intent.isSingleTop
-                                if (from != null && intent.popUpToCurrent) {
-                                    popUpTo(from) { inclusive = true }
+
+                                if (intent.popUpTo != null) {
+                                    apply(from, intent.popUpTo)
                                 }
                             }
                         }
+                    }
+
+                    NavigationIntent.NavigateBack -> {
+                        navHostController.popBackStack()
                     }
                 }
             }.launchIn(this)
@@ -247,6 +266,10 @@ internal val LocalNavHostController = staticCompositionLocalOf<NavHostController
 
 internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
     error("No ReducedBranding provided")
+}
+
+internal val LocalTestMode = staticCompositionLocalOf<Boolean> {
+    error("No TestMode provided")
 }
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
@@ -282,6 +305,22 @@ private class ActivityVisibilityObserver(
         if (!changingConfigurations) {
             isInBackground = true
             onBackgrounded()
+        }
+    }
+}
+
+private fun NavOptionsBuilder.apply(
+    currentRoute: String?,
+    popUpTo: PopUpToBehavior,
+) {
+    val popUpToRoute = when (popUpTo) {
+        is PopUpToBehavior.Current -> currentRoute
+        is PopUpToBehavior.Route -> popUpTo.route
+    }
+
+    if (popUpToRoute != null) {
+        popUpTo(popUpToRoute) {
+            inclusive = popUpTo.inclusive
         }
     }
 }

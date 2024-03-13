@@ -37,6 +37,7 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -93,7 +94,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
 
     private fun buildPayload(consumerSession: ConsumerSession) = Payload(
         email = consumerSession.emailAddress,
-        phoneNumber = consumerSession.redactedPhoneNumber,
+        phoneNumber = consumerSession.getRedactedPhoneNumber(),
         consumerSessionClientSecret = consumerSession.clientSecret,
         otpElement = OTPElement(
             IdentifierSpec.Generic("otp"),
@@ -112,6 +113,17 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             onFail = { error ->
                 eventTracker.logError(
                     extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+            },
+        )
+        onAsync(
+            LinkStepUpVerificationState::confirmVerification,
+            onFail = { error ->
+                eventTracker.logError(
+                    extraMessage = "Error confirming verification",
                     error = error,
                     logger = logger,
                     pane = PANE
@@ -217,6 +229,11 @@ internal data class LinkStepUpVerificationState(
     val confirmVerification: Async<Unit> = Uninitialized,
     val resendOtp: Async<Unit> = Uninitialized,
 ) : MavericksState {
+
+    val submitLoading: Boolean
+        get() = confirmVerification is Loading || resendOtp is Loading
+    val submitError: Throwable?
+        get() = (confirmVerification as? Fail)?.error ?: (resendOtp as? Fail)?.error
 
     data class Payload(
         val email: String,

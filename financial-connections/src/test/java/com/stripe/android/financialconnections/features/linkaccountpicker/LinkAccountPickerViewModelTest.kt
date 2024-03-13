@@ -6,11 +6,11 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
-import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -44,7 +44,7 @@ class LinkAccountPickerViewModelTest {
     @get:Rule
     val mavericksTestRule = MavericksTestRule()
 
-    private val getManifest = mock<GetManifest>()
+    private val getSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
@@ -57,7 +57,7 @@ class LinkAccountPickerViewModelTest {
         state: LinkAccountPickerState
     ) = LinkAccountPickerViewModel(
         navigationManager = navigationManager,
-        getManifest = getManifest,
+        getSync = getSync,
         logger = Logger.noop(),
         eventTracker = eventTracker,
         getCachedConsumerSession = getCachedConsumerSession,
@@ -66,12 +66,13 @@ class LinkAccountPickerViewModelTest {
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
         initialState = state,
+        handleClickableUrl = mock(),
         coreAuthorizationPendingNetworkingRepair = mock()
     )
 
     @Test
     fun `init - Fetches existing accounts and zips them by id`() = runTest {
-        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getSync()).thenReturn(syncResponse())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
@@ -110,7 +111,7 @@ class LinkAccountPickerViewModelTest {
         val response = twoAccounts().copy(
             nextPaneOnAddAccount = Pane.INSTITUTION_PICKER
         )
-        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getSync()).thenReturn(syncResponse())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(response)
 
@@ -140,7 +141,7 @@ class LinkAccountPickerViewModelTest {
             )
         )
         val selectedAccount = accounts.data.first()
-        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getSync()).thenReturn(syncResponse())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
         whenever(
@@ -183,7 +184,7 @@ class LinkAccountPickerViewModelTest {
                 )
             )
             val selectedAccount = accounts.data.first()
-            whenever(getManifest()).thenReturn(sessionManifest())
+            whenever(getSync()).thenReturn(syncResponse())
             whenever(getCachedConsumerSession()).thenReturn(consumerSession())
             whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
             whenever(

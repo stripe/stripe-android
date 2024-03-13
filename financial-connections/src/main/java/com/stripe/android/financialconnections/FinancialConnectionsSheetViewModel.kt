@@ -48,7 +48,6 @@ import kotlinx.coroutines.sync.withLock
 import javax.inject.Inject
 import javax.inject.Named
 
-@Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
     private val synchronizeFinancialConnectionsSession: SynchronizeFinancialConnectionsSession,
@@ -139,7 +138,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun logNoBrowserAvailableAndFinish() {
-        viewModelScope.launch {
+        withState { state ->
             val error = AppInitializationError("No Web browser available to launch AuthFlow")
             analyticsTracker.logError(
                 "error Launching the Auth Flow",
@@ -148,7 +147,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 error = error
             )
             finishWithResult(
-                state = awaitState(),
+                state = state,
                 result = Failed(error)
             )
         }

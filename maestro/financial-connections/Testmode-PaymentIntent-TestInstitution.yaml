@@ -28,13 +28,14 @@ tags:
     timeout: 60000
 - tapOn: "Success" # select all accounts
 - tapOn:
-    text: "Link account"
+    text: "Connect account"
     retryTapIfNoChange: false
 # SKIP NETWORKING
 - tapOn:
     id: "skip_cta"
     optional: true # Networking might not be enabled
 # CONFIRM AND COMPLETE
-- tapOn: "Done"
+- tapOn:
+    id: "done_button"
 - assertVisible: ".*Intent Confirmed!.*"
 - stopRecording

@@ -25,17 +25,16 @@ tags:
 - runFlow:
     file: ../common/subflow-skip-chrome-welcome.yaml
 ###############################################
-# SELECT ALL ACCOUNTS
+# SELECT ALL ACCOUNTS (they're preselected)
 - extendedWaitUntil:
-    visible: "Select all accounts"
+    visible: "Connect accounts"
     timeout: 60000
-- tapOn: "Select all accounts" # select all accounts
-- tapOn:
-    text: "Link accounts"
-    retryTapIfNoChange: false
+- tapOn: "Connect accounts" # select all accounts
+
 # CONFIRM AND COMPLETE
-- assertVisible: ".*Success.*"
-- tapOn: "Done"
+- assertVisible: "Your accounts were connected"
+- tapOn:
+    id: "done_button"
 - assertVisible: ".*Completed!.*"
 - assertVisible: ".*StripeBank.*"
 - stopRecording

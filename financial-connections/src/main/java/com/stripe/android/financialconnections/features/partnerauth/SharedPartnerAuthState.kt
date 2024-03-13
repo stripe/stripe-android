@@ -7,7 +7,6 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
-import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -22,17 +21,23 @@ internal data class SharedPartnerAuthState(
     val pane: FinancialConnectionsSessionManifest.Pane,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
-    val authenticationStatus: Async<String> = Uninitialized,
+    val authenticationStatus: Async<AuthenticationStatus> = Uninitialized,
 ) : MavericksState {
-
-    val dataAccess: DataAccessNotice?
-        get() = payload()?.authSession?.display?.text?.oauthPrepane?.dataAccessNotice
 
     data class Payload(
         val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
-        val authSession: FinancialConnectionsAuthorizationSession
+        val authSession: FinancialConnectionsAuthorizationSession,
     )
+
+    data class AuthenticationStatus(
+        val action: Action,
+    ) {
+        enum class Action {
+            CANCELLING,
+            AUTHENTICATING
+        }
+    }
 
     val canNavigateBack: Boolean
         get() =

@@ -6,14 +6,13 @@
     <string name="stripe_ok">OK</string>
     <string name="stripe_prepane_title">Link with %1$s</string>
     <string name="stripe_prepane_continue">Continue</string>
-    <string name="stripe_institutionpicker_pane_select_bank">Select your bank</string>
-    <string name="stripe_institutionpicker_no_results_desc">Double check your spelling and search terms</string>
-    <string name="stripe_institutionpicker_no_results_title">No results</string>
+    <string name="stripe_institutionpicker_pane_select_bank">Select bank</string>
     <string name="stripe_institutionpicker_manual_entry_title">Don’t see your bank?</string>
+    <string name="stripe_institutionpicker_search_more_title">Search for more banks</string>
     <string name="stripe_institutionpicker_manual_entry_desc">Enter your account and routing numbers</string>
-    <string name="stripe_institutionpicker_pane_error_title">Search is currently unavailable</string>
-    <string name="stripe_institutionpicker_pane_error_desc">Please try again later</string>
-    <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Please try again later or <annotation clickable="manual_entry">enter your bank details manually.</annotation></string>
+    <string name="stripe_institutionpicker_pane_error_title">No results</string>
+    <string name="stripe_institutionpicker_pane_error_desc">Try searching another bank</string>
+    <string name="stripe_institutionpicker_pane_error_desc_manual_entry">Try searching another bank or <annotation clickable="manual_entry">manually\u00a0enter\u00a0details</annotation>.</string>
     <string name="stripe_partnerauth_loading_title">Establishing connection</string>
     <string name="stripe_partnerauth_loading_desc">Please wait while we connect to your bank.</string>
     <string name="stripe_picker_search_no_results">No results for "%1$s"</string>
@@ -36,23 +35,35 @@
     <string name="stripe_account_picker_multiselect_account">Select accounts</string>
     <string name="stripe_account_picker_cta_confirm">Confirm</string>
     <plurals name="stripe_account_picker_cta_link">
-        <item quantity="one">Link account</item>
-        <item quantity="other">Link accounts</item>
+        <item quantity="one">Connect account</item>
+        <item quantity="other">Connect accounts</item>
     </plurals>
-    <string name="stripe_success_title">Success!</string>
     <string name="stripe_search">Search</string>
     <string name="stripe_account_picker_dropdown_hint">Choose one</string>
-    <string name="stripe_data_accessible_callout_stripe_direct"><annotation bold="accessible_data">Data accessible to Stripe: </annotation>%2$s. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_stripe"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_stripe_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Stripe. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_link"><annotation bold="accessible_data">Data accessible to %1$s: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
-    <string name="stripe_data_accessible_callout_through_link_no_business"><annotation bold="accessible_data">Data accessible to this business: </annotation>%2$s through Link. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_stripe">Stripe can access %2$s. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_business">%1$s can access %2$s. <annotation clickable="learn_more">Learn more</annotation></string>
+    <string name="stripe_data_accessible_callout_no_business">This business can access %2$s. <annotation clickable="learn_more">Learn more</annotation></string>
     <string name="stripe_data_accessible_type_accountdetails">account details</string>
     <string name="stripe_data_accessible_type_balances">balances</string>
     <string name="stripe_data_accessible_type_transactions">transactions</string>
     <string name="stripe_data_accessible_type_ownership">account ownership details</string>
+    <string name="stripe_success_pane_title">Success</string>
+    <string name="stripe_success_pane_desc_microdeposits">You can expect micro-deposits to account ••••%1$s in 1–2 days and an email with further instructions.</string>
+    <string name="stripe_success_pane_desc_microdeposits_no_account">You can expect micro-deposits to your account in 1–2 days and an email with further instructions.</string>
+    <plurals name="stripe_success_pane_desc">
+        <item quantity="one">Your account was connected</item>
+        <item quantity="other">Your accounts were connected</item>
+    </plurals>
+    <plurals name="stripe_success_pane_desc_link_success">
+        <item quantity="one">Your account was connected and saved with Link</item>
+        <item quantity="other">Your accounts were connected and saved with Link</item>
+    </plurals>
+    <plurals name="stripe_success_pane_desc_link_error">
+        <item quantity="one">Your account was connected <annotation bold="bold">but couldn\'t be saved with Link</annotation></item>
+        <item quantity="other">Your accounts were connected <annotation bold="bold">but couldn\'t be saved with Link</annotation></item>
+    </plurals>
     <string name="stripe_success_pane_done">Done</string>
-    <string name="stripe_success_pane_disconnect">You can <annotation clickable="disconnect">disconnect your account</annotation> any time.</string>
+    <string name="stripe_success_pane_done_with_merchant">Back to %1$s</string>
     <string name="stripe_prepane_partner_callout">Stripe works with partners like %1$s to reliably offer access to thousands of financial institutions. <annotation clickable="privacy_center">Learn more</annotation></string>
     <string name="stripe_account_picker_error_no_payment_method_title">No payment accounts available</string>
     <plurals name="stripe_account_picker_error_no_payment_method_desc">
@@ -61,27 +72,19 @@
     </plurals>
     <string name="stripe_account_picker_error_no_account_available_title">There was a problem accessing your %1$s account</string>
     <string name="stripe_account_picker_error_no_account_available_desc">Please select another bank or try again</string>
-    <string name="stripe_manualentry_title">Enter bank account details</string>
+    <string name="stripe_manualentry_title">Enter bank details</string>
     <string name="stripe_manualentry_routing">Routing number</string>
     <string name="stripe_manualentry_account">Account number</string>
     <string name="stripe_manualentry_accountconfirm">Confirm account number</string>
-    <string name="stripe_manualentry_cta">Continue</string>
+    <string name="stripe_manualentry_cta">Submit</string>
     <string name="stripe_validation_routing_too_short">Please enter 9 digits for your routing number.</string>
     <string name="stripe_validation_no_us_routing">Invalid routing number.</string>
     <string name="stripe_validation_routing_required">Routing number required.</string>
     <string name="stripe_validation_account_required">Account number required.</string>
     <string name="stripe_validation_account_too_long">Invalid bank account number: must be at most 17 digits long.</string>
     <string name="stripe_validation_account_confirm_mismatch">Your account numbers don\'t match.</string>
-    <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified with micro-deposits to your account.</string>
-    <string name="stripe_manualentry_account_type_disclaimer">Please enter a checking account.</string>
-    <string name="stripe_manualentrysuccess_title">Micro-deposits initiated</string>
-    <string name="stripe_manualentrysuccess_title_descriptorcode">Micro-deposit initiated</string>
-    <string name="stripe_manualentrysuccess_desc">Expect two small deposits to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_desc_noaccount">Expect two small deposits to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_desc_descriptorcode">Expect a $0.01 deposit to the account ending in ••••%1$s in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_desc_noaccount_descriptorcode">Expect a $0.01 deposit to your account in 1–2 business days and an email with additional instructions to verify your bank account.</string>
-    <string name="stripe_manualentrysuccess_table_title">••••%1$s BANK STATEMENT</string>
-    <string name="stripe_success_pane_link_more_accounts">Link another account</string>
+    <string name="stripe_manualentry_microdeposits_desc">Your bank information will be verified via micro-deposits to your account, typically within 1–2 business days. Only checking accounts are supported.</string>
+    <string name="stripe_manualentry_test_banner">Use test account</string>
     <plurals name="stripe_attachlinkedpaymentaccount_title">
         <item quantity="one">Linking account</item>
         <item quantity="other">Linking accounts</item>
@@ -97,9 +100,6 @@
     <string name="stripe_attachlinkedpaymentaccount_error_title">Your account number couldn’t be accessed at this time</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc">Please enter your bank details manually</string>
     <string name="stripe_attachlinkedpaymentaccount_error_desc_manual_entry">Please enter your bank details manually or select another bank.</string>
-    <string name="stripe_close_dialog_title">Are you sure you want to cancel?</string>
-    <string name="stripe_close_dialog_desc">You haven\'t finished linking your bank account.</string>
-    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
     <string name="stripe_close_dialog_confirm">Yes, cancel</string>
     <string name="stripe_close_dialog_back">Back</string>
     <string name="stripe_error_cta_close">Close</string>
@@ -109,13 +109,11 @@
     <string name="stripe_accounts_error_desc_no_retry">Please select another bank.</string>
     <string name="stripe_accountpicker_singleaccount_description">Select the account you\'d like to link.</string>
     <string name="stripe_account_picker_select_all_accounts">Select all accounts</string>
-    <string name="stripe_success_pane_skip_title">Finishing up</string>
-    <string name="stripe_success_pane_skip_desc">Hold on, we\'re almost done…</string>
     <string name="stripe_networking_signup_phone_number_disclaimer">We’ll use this to verify and manage your account.</string>
-    <string name="stripe_networking_link_login_warmup_email_label">Continue as</string>
-    <string name="stripe_networking_link_login_warmup_skip">Not you? <annotation clickable="skip_login">Continue without signing in</annotation></string>
-    <string name="stripe_networking_link_login_warmup_description">It looks like you have a Link account. Signing in will let you quickly access your saved bank accounts.</string>
-    <string name="stripe_networking_link_login_warmup_title">Sign in to Link</string>
+    <string name="stripe_networking_link_login_warmup_description">Use information you previously saved with your Link account.</string>
+    <string name="stripe_networking_link_login_warmup_title">Continue with Link</string>
+    <string name="stripe_networking_link_login_warmup_cta_continue">Continue with Link</string>
+    <string name="stripe_networking_link_login_warmup_cta_skip">Not now</string>
     <string name="stripe_networking_verification_title">Save your account to Link</string>
     <string name="stripe_networking_verification_desc">Enter the code sent to %1$s</string>
     <string name="stripe_networking_verification_email">Signing in as %1$s</string>
@@ -123,18 +121,29 @@
     <string name="stripe_link_account_picker_title_nobusiness">Select an account to connect to this business</string>
     <string name="stripe_link_account_picker_new_account">New bank account</string>
     <string name="stripe_link_account_picker_cta">Connect account</string>
-    <string name="stripe_link_stepup_verification_title">Check your email to confirm your identity</string>
-    <string name="stripe_link_stepup_verification_desc">To keep your Link account safe, we periodically need to confirm you\'re you. Enter the code sent to your email %1$s.</string>
+    <string name="stripe_link_stepup_verification_title">Confirm your email</string>
+    <string name="stripe_link_stepup_verification_desc">Enter the code sent to %1$s. We periodically request this extra step to keep your account safe.</string>
     <string name="stripe_link_stepup_verification_resend_code"><annotation clickable="resend_code">Resend code</annotation></string>
-    <string name="stripe_networking_save_to_link_verification_title">Sign in to Link</string>
+    <string name="stripe_networking_save_to_link_verification_title">Verify it\'s you</string>
     <string name="stripe_networking_save_to_link_verification_cta_negative">Not now</string>
     <string name="stripe_verification.codeInvalid">Hmm, that code didn’t work. Double check it and try again.</string>
     <string name="stripe_verification.codeExpired">It looks like the verification code you provided is not valid anymore. Get a new code and try again.</string>
     <string name="stripe_verification.codeExpiredEmail">It looks like the verification code you provided is not valid anymore. Click “Resend code” and try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
     <string name="stripe_verification.codeExpiredSms">It looks like the verification code you provided is not valid anymore. Try again, or <annotation clickable="contact_us">Contact us</annotation>.</string>
+    <string name="stripe_verification.inTestMode">You\'re in test mode.</string>
     <string name="stripe_verification.maxAttemptsExceeded">We\'re experiencing high volumes. Try again in an hour and if you need immediate assistance, please contact us.</string>
     <string name="stripe_verification.unexpectedError">Something went wrong.</string>
+    <string name="stripe_verification.useTestCode">Use test code</string>
     <string name="stripe_link_account_picker_disconnected">Disconnected</string>
+    <string name="stripe_exit_modal_title">Exit without connecting?</string>
+    <string name="stripe_exit_modal_desc">Your bank account won’t be connected to %1$s and all progress will be lost.</string>
+    <string name="stripe_exit_modal_desc_no_business">Your bank account won’t be connected to this business and all progress will be lost.</string>
+    <string name="stripe_close_dialog_networking_desc">If you cancel now, your account will be linked to %1$s but it will not be saved to Link.</string>
+    <string name="stripe_close_dialog_networking_desc_no_business">If you cancel now, your account will be linked to this business but it will not be saved to Link.</string>
+    <string name="stripe_exit_modal_cta_accept">Yes, exit</string>
+    <string name="stripe_exit_modal_cta_cancel">Cancel</string>
+    <string name="stripe_prepane_cancel_cta">Cancel</string>
+    <string name="stripe_networking_signup_email_label">Email address</string>
     <plurals name="stripe_success_networking_save_to_link_failed">
         <item quantity="one">Your account was connected to %1$s but could not be saved to Link with Stripe at this time.</item>
         <item quantity="other">Your accounts were connected to %1$s but could not be saved to Link with Stripe at this time.</item>

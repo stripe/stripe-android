@@ -1,5 +1,46 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <SmellBaseline>
   <ManuallySuppressedIssues/>
-  <CurrentIssues/>
+  <CurrentIssues>
+    <ID>ConstructorParameterNaming:FinancialConnectionsAuthorizationSession.kt$FinancialConnectionsAuthorizationSession$@SerialName(value = "is_oauth") private val _isOAuth: Boolean? = false</ID>
+    <ID>ConstructorParameterNaming:PartnerAccountsList.kt$PartnerAccount$@SerialName(value = "allow_selection") private val _allowSelection: Boolean? = null</ID>
+    <ID>LongMethod:AccountItem.kt$@Composable @Preview internal fun AccountItemPreview()</ID>
+    <ID>LongMethod:InstitutionPickerScreen.kt$@Composable private fun SearchRow( modifier: Modifier = Modifier, focusRequester: FocusRequester, query: TextFieldValue, onQueryChanged: (TextFieldValue) -> Unit, )</ID>
+    <ID>LongMethod:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Async&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
+    <ID>LongMethod:LinkAccountPickerPreviewParameterProvider.kt$LinkAccountPickerPreviewParameterProvider$private fun partnerAccountList()</ID>
+    <ID>LongMethod:ManualEntryScreen.kt$@Composable private fun ManualEntryLoaded( scrollState: ScrollState, payload: Payload, linkPaymentAccountStatus: Async&lt;LinkAccountSessionPaymentAccount>, routing: Pair&lt;String?, Int?>, onRoutingEntered: (String) -> Unit, account: Pair&lt;String?, Int?>, onAccountEntered: (String) -> Unit, accountConfirm: Pair&lt;String?, Int?>, onAccountConfirmEntered: (String) -> Unit, isValidForm: Boolean, onSubmit: () -> Unit )</ID>
+    <ID>MagicNumber:AccountPickerScreen.kt$3</ID>
+    <ID>MagicNumber:ConsentLogoHeader.kt$3</ID>
+    <ID>MagicNumber:ConsentLogoHeader.kt$4</ID>
+    <ID>MagicNumber:ConsentLogoHeader.kt$5</ID>
+    <ID>MagicNumber:ConsumerSessionExtensions.kt$10</ID>
+    <ID>MagicNumber:ConsumerSessionExtensions.kt$5</ID>
+    <ID>MagicNumber:ConsumerSessionExtensions.kt$7</ID>
+    <ID>MagicNumber:InstitutionPickerScreen.kt$0.5f</ID>
+    <ID>MagicNumber:InstitutionPickerScreen.kt$0.75f</ID>
+    <ID>MagicNumber:InstitutionPickerScreen.kt$10</ID>
+    <ID>MagicNumber:Layout.kt$4</ID>
+    <ID>MagicNumber:Layout.kt$50</ID>
+    <ID>MagicNumber:LinkAccountPickerScreen.kt$3</ID>
+    <ID>MagicNumber:ManualEntryInputValidator.kt$ManualEntryInputValidator$10</ID>
+    <ID>MagicNumber:ManualEntryInputValidator.kt$ManualEntryInputValidator$3</ID>
+    <ID>MagicNumber:ManualEntryInputValidator.kt$ManualEntryInputValidator$7</ID>
+    <ID>MagicNumber:ManualEntryViewModel.kt$ManualEntryViewModel$4</ID>
+    <ID>MagicNumber:SharedPartnerAuth.kt$.50f</ID>
+    <ID>MatchingDeclarationName:ServerDrivenUi.kt$BulletUI</ID>
+    <ID>MatchingDeclarationName:Type.kt$FinancialConnectionsTypography</ID>
+    <ID>MaxLineLength:FinancialConnectionsUrls.kt$FinancialConnectionsUrls.DataPolicy$const val merchant = "https://support.stripe.com/user/questions/what-data-does-stripe-access-from-my-linked-financial-account"</ID>
+    <ID>MaxLineLength:FinancialConnectionsUrls.kt$FinancialConnectionsUrls.Disconnect$const val link = "https://support.link.co/questions/connecting-your-bank-account#how-do-i-disconnect-my-connected-bank-account"</ID>
+    <ID>MaxLineLength:FinancialConnectionsUrls.kt$FinancialConnectionsUrls.PartnerNotice$const val merchant = "https://support.stripe.com/user/questions/what-is-the-relationship-between-stripe-and-stripes-service-providers"</ID>
+    <ID>MaximumLineLength:com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls.kt:41</ID>
+    <ID>MaximumLineLength:com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls.kt:46</ID>
+    <ID>MaximumLineLength:com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls.kt:9</ID>
+    <ID>NestedBlockDepth:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Async&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
+    <ID>SwallowedException:PollAttachPaymentAccount.kt$PollAttachPaymentAccount$e: StripeException</ID>
+    <ID>SwallowedException:PollAuthorizationSessionAccounts.kt$PollAuthorizationSessionAccounts$e: StripeException</ID>
+    <ID>SwallowedException:PostAuthorizationSession.kt$PostAuthorizationSession$e: StripeException</ID>
+    <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepository</ID>
+    <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepositoryImpl : FinancialConnectionsManifestRepository</ID>
+    <ID>TooManyFunctions:FinancialConnectionsSheetNativeViewModel.kt$FinancialConnectionsSheetNativeViewModel : MavericksViewModel</ID>
+  </CurrentIssues>
 </SmellBaseline>

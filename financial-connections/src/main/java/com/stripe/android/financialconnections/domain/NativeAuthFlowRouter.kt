@@ -25,7 +25,6 @@ internal class NativeAuthFlowRouter @Inject constructor(
         return killSwitchEnabled.not() && nativeExperimentEnabled
     }
 
-    @Suppress("ComplexCondition")
     suspend fun logExposure(manifest: FinancialConnectionsSessionManifest) {
         debugConfiguration.overriddenNative?.let { return }
         if (nativeKillSwitchActive(manifest).not()) {

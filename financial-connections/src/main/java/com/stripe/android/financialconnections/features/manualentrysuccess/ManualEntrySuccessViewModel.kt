@@ -10,24 +10,36 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
 internal class ManualEntrySuccessViewModel @Inject constructor(
     initialState: ManualEntrySuccessState,
+    private val getManifest: GetManifest,
+    private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : MavericksViewModel<ManualEntrySuccessState>(initialState) {
 
     init {
-        viewModelScope.launch {
-            eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY_SUCCESS))
-        }
+        suspend {
+            val manifest = getManifest()
+            SuccessState.Payload(
+                businessName = manifest.businessName,
+                customSuccessMessage = successContentRepository.get().customSuccessMessage,
+                accountsCount = 1, // on manual entry just one account is connected,
+                skipSuccessPane = false
+            ).also {
+                eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY_SUCCESS))
+            }
+        }.execute { copy(payload = it) }
     }
 
     fun onSubmit() {
@@ -57,5 +69,6 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
 }
 
 internal data class ManualEntrySuccessState(
+    val payload: Async<SuccessState.Payload> = Uninitialized,
     val completeSession: Async<FinancialConnectionsSession> = Uninitialized
 ) : MavericksState

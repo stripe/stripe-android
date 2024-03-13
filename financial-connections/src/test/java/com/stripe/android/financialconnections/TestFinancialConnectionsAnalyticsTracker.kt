@@ -8,9 +8,8 @@ internal class TestFinancialConnectionsAnalyticsTracker : FinancialConnectionsAn
 
     val sentEvents = mutableListOf<FinancialConnectionsAnalyticsEvent>()
 
-    override suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit> {
+    override fun track(event: FinancialConnectionsAnalyticsEvent) {
         sentEvents += event
-        return Result.success(Unit)
     }
 
     /**

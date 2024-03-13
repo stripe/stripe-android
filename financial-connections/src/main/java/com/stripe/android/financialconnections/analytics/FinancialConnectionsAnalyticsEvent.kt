@@ -196,6 +196,30 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         ).filterNotNullValues()
     )
 
+    class AccountsSubmitted(
+        pane: Pane,
+        accountIds: Set<String>,
+        isSkipAccountSelection: Boolean
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "account_picker.accounts_submitted",
+        mapOf(
+            "pane" to pane.value,
+            "account_ids" to accountIds.joinToString(" "),
+            "is_skip_account_selection" to isSkipAccountSelection.toString(),
+        ).filterNotNullValues()
+    )
+
+    class AccountsAutoSelected(
+        accountIds: Set<String>,
+        isSingleAccount: Boolean
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "account_picker.accounts_auto_selected",
+        mapOf(
+            "account_ids" to accountIds.joinToString(" "),
+            "is_single_account" to isSingleAccount.toString(),
+        ).filterNotNullValues()
+    )
+
     class PollAttachPaymentsSucceeded(
         authSessionId: String,
         duration: Long
@@ -268,6 +292,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             StartVerificationSessionError("StartVerificationSessionError"),
             ConfirmVerificationSessionError("ConfirmVerificationSessionError"),
             NetworkedAccountsRetrieveMethodError("NetworkedAccountsRetrieveMethodError"),
+            MarkLinkVerifiedError("MarkLinkVerifiedError"),
         }
     }
 

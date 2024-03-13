@@ -5,7 +5,6 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
@@ -21,15 +20,19 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerState.Payload
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
+import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
@@ -39,13 +42,14 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
 internal class InstitutionPickerViewModel @Inject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
+    private val postAuthorizationSession: PostAuthorizationSession,
+    private val getOrFetchSync: GetOrFetchSync,
     private val searchInstitutions: SearchInstitutions,
     private val featuredInstitutions: FeaturedInstitutions,
-    private val getManifest: GetManifest,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val handleError: HandleError,
     private val navigationManager: NavigationManager,
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
@@ -57,29 +61,31 @@ internal class InstitutionPickerViewModel @Inject constructor(
     init {
         logErrors()
         suspend {
-            val manifest = getManifest()
-            val result: Result<Pair<List<FinancialConnectionsInstitution>, Long>> =
-                kotlin.runCatching {
-                    measureTimeMillis {
-                        featuredInstitutions(
-                            clientSecret = configuration.financialConnectionsSessionClientSecret
-                        ).data
-                    }
-                }.onFailure {
-                    eventTracker.logError(
-                        extraMessage = "Error fetching featured institutions",
-                        error = it,
-                        pane = Pane.INSTITUTION_PICKER,
-                        logger = logger
+            val manifest = getOrFetchSync().manifest
+            val (featuredInstitutions: InstitutionResponse, duration: Long) = runCatching {
+                measureTimeMillis {
+                    featuredInstitutions(
+                        clientSecret = configuration.financialConnectionsSessionClientSecret
                     )
                 }
-
-            val (institutions, duration) = result.getOrNull() ?: Pair(emptyList(), 0L)
+            }.onFailure {
+                eventTracker.logError(
+                    extraMessage = "Error fetching featured institutions",
+                    error = it,
+                    pane = PANE,
+                    logger = logger
+                )
+            }.getOrElse {
+                // Allow users to search for institutions even if featured institutions fails.
+                InstitutionResponse(
+                    data = emptyList(),
+                    showManualEntry = manifest.allowManualEntry
+                ) to 0L
+            }
             Payload(
                 featuredInstitutionsDuration = duration,
-                featuredInstitutions = institutions,
+                featuredInstitutions = featuredInstitutions,
                 searchDisabled = manifest.institutionSearchDisabled,
-                allowManualEntry = manifest.allowManualEntry
             )
         }.execute { copy(payload = it) }
     }
@@ -88,43 +94,43 @@ internal class InstitutionPickerViewModel @Inject constructor(
         onAsync(
             InstitutionPickerState::payload,
             onSuccess = { payload ->
-                eventTracker.track(PaneLoaded(Pane.INSTITUTION_PICKER))
+                eventTracker.track(PaneLoaded(PANE))
                 eventTracker.track(
                     FeaturedInstitutionsLoaded(
-                        pane = Pane.INSTITUTION_PICKER,
+                        pane = PANE,
                         duration = payload.featuredInstitutionsDuration,
-                        institutionIds = payload.featuredInstitutions.map { it.id }.toSet()
+                        institutionIds = payload.featuredInstitutions.data.map { it.id }.toSet()
                     )
                 )
             },
             onFail = {
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error fetching initial payload",
                     error = it,
-                    pane = Pane.INSTITUTION_PICKER,
-                    logger = logger
+                    pane = PANE,
+                    displayErrorScreen = true
                 )
             }
         )
         onAsync(
             InstitutionPickerState::searchInstitutions,
             onFail = {
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error searching institutions",
                     error = it,
-                    pane = Pane.INSTITUTION_PICKER,
-                    logger = logger
+                    pane = PANE,
+                    displayErrorScreen = false // don't show error screen for search errors.
                 )
             }
         )
         onAsync(
-            InstitutionPickerState::selectInstitution,
+            InstitutionPickerState::createSessionForInstitution,
             onFail = {
-                eventTracker.logError(
-                    extraMessage = "Error selecting institution institutions",
+                handleError(
+                    extraMessage = "Error selecting or creating session for institution",
                     error = it,
-                    pane = Pane.INSTITUTION_PICKER,
-                    logger = logger
+                    pane = PANE,
+                    displayErrorScreen = true
                 )
             }
         )
@@ -142,7 +148,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 }
                 eventTracker.track(
                     SearchSucceeded(
-                        pane = Pane.INSTITUTION_PICKER,
+                        pane = PANE,
                         query = query,
                         duration = millis,
                         resultCount = result.data.count()
@@ -162,11 +168,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
-        clearSearch()
         suspend {
             eventTracker.track(
                 InstitutionSelected(
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     fromFeatured = fromFeatured,
                     institutionId = institution.id
                 )
@@ -183,43 +188,44 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
             }
             // navigate to next step
-            navigationManager.tryNavigateTo(PartnerAuth(referrer = Pane.INSTITUTION_PICKER))
-        }.execute { this }
-    }
-
-    fun onCancelSearchClick() {
-        clearSearch()
-    }
-
-    private fun clearSearch() {
-        setState {
+            val authSession = postAuthorizationSession(institution, getOrFetchSync())
+            navigateToPartnerAuth(authSession)
+        }.execute { async ->
             copy(
-                searchInstitutions = Success(
-                    InstitutionResponse(
-                        data = emptyList(),
-                        showManualEntry = false
-                    )
-                ),
-                searchMode = false
+                selectedInstitutionId = institution.id.takeIf { async is Loading },
+                createSessionForInstitution = async
             )
         }
     }
 
-    fun onSearchFocused() {
-        setState {
-            copy(searchMode = true)
-        }
+    /**
+     * Navigates to the partner auth screen:
+     *
+     * - If the [authSession] is OAuth, it will navigate to [PartnerAuthDrawer]. The pre-pane will show
+     *   as a bottom sheet, where users can accept which will open the browser with the bank OAuth login.
+     * - If the [authSession] is not-OAuth, it will navigate to [PartnerAuth] (full screen).
+     *   non-OAuth sessions don't have a pre-pane, so partner auth will show a full-screen loading
+     *   and open the browser right away.
+     */
+    private fun navigateToPartnerAuth(authSession: FinancialConnectionsAuthorizationSession) {
+        navigationManager.tryNavigateTo(
+            if (authSession.isOAuth) {
+                PartnerAuthDrawer(referrer = PANE)
+            } else {
+                PartnerAuth(referrer = PANE)
+            }
+        )
     }
 
     fun onManualEntryClick() {
-        navigationManager.tryNavigateTo(ManualEntry(referrer = Pane.INSTITUTION_PICKER))
+        navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
     }
 
     fun onScrollChanged() {
         viewModelScope.launch {
             eventTracker.track(
                 SearchScroll(
-                    pane = Pane.INSTITUTION_PICKER,
+                    pane = PANE,
                     institutionIds = awaitState().searchInstitutions()
                         ?.data
                         ?.map { it.id }
@@ -233,6 +239,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
         MavericksViewModelFactory<InstitutionPickerViewModel, InstitutionPickerState> {
 
         private const val SEARCH_DEBOUNCE_MS = 300L
+        private val PANE = Pane.INSTITUTION_PICKER
         override fun create(
             viewModelContext: ViewModelContext,
             state: InstitutionPickerState
@@ -251,15 +258,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
 internal data class InstitutionPickerState(
     // This is just used to provide a text in Compose previews
     val previewText: String? = null,
-    val searchMode: Boolean = false,
+    val selectedInstitutionId: String? = null,
     val payload: Async<Payload> = Uninitialized,
     val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
-    val selectInstitution: Async<Unit> = Uninitialized
+    val createSessionForInstitution: Async<Unit> = Uninitialized
 ) : MavericksState {
 
     data class Payload(
-        val featuredInstitutions: List<FinancialConnectionsInstitution>,
-        val allowManualEntry: Boolean,
+        val featuredInstitutions: InstitutionResponse,
         val searchDisabled: Boolean,
         val featuredInstitutionsDuration: Long
     )

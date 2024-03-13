@@ -4,20 +4,17 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
-import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
-import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -42,7 +39,6 @@ class NetworkingLinkVerificationViewModelTest {
     private val getManifest = mock<GetManifest>()
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
-    private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -55,7 +51,6 @@ class NetworkingLinkVerificationViewModelTest {
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         confirmVerification = confirmVerification,
         markLinkVerified = markLinkVerified,
-        fetchNetworkedAccounts = fetchNetworkedAccounts,
         analyticsTracker = analyticsTracker,
         logger = Logger.noop(),
         initialState = state
@@ -137,56 +132,7 @@ class NetworkingLinkVerificationViewModelTest {
     }
 
     @Test
-    fun `otpEntered - on valid OTP and no accounts confirms and navigates to manifest next pane`() =
-        runTest {
-            val email = "test@test.com"
-            val consumerSession = consumerSession()
-            val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
-            val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
-            val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
-
-            whenever(getManifest()).thenReturn(
-                sessionManifest().copy(accountholderCustomerEmailAddress = email)
-            )
-            // verify succeeds
-            whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
-            // polling returns no networked accounts
-            whenever(fetchNetworkedAccounts(any()))
-                .thenReturn(NetworkedAccountsList(emptyList()))
-
-            val viewModel = buildViewModel()
-
-            verify(lookupConsumerAndStartVerification).invoke(
-                email = eq(email),
-                businessName = anyOrNull(),
-                verificationType = eq(VerificationType.SMS),
-                onConsumerNotFound = any(),
-                onLookupError = any(),
-                onStartVerification = onStartVerificationCaptor.capture(),
-                onVerificationStarted = onVerificationStartedCaptor.capture(),
-                onStartVerificationError = any()
-            )
-
-            onStartVerificationCaptor.firstValue()
-            onVerificationStartedCaptor.firstValue(consumerSession)
-
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
-
-            // enters valid OTP
-            for (i in 0 until otpController.otpLength) {
-                otpController.onValueChanged(i, "1")
-            }
-
-            verify(confirmVerification).sms(any(), eq("111111"))
-
-            navigationManager.assertNavigatedTo(
-                destination = linkVerifiedManifest.nextPane.destination,
-                pane = NETWORKING_LINK_VERIFICATION
-            )
-        }
-
-    @Test
-    fun `otpEntered - valid OTP and accounts confirms and navigates to LINK_ACCOUNT_PICKER`() =
+    fun `otpEntered - valid OTP and confirms navigates to LINK_ACCOUNT_PICKER`() =
         runTest {
             val email = "test@test.com"
             val consumerSession = consumerSession()
@@ -198,8 +144,6 @@ class NetworkingLinkVerificationViewModelTest {
             )
 
             // polling returns some networked accounts
-            val partnerAccountsList = NetworkedAccountsList(data = (listOf(partnerAccount())))
-            whenever(fetchNetworkedAccounts(any())).thenReturn(partnerAccountsList)
             whenever(markLinkVerified()).thenReturn((linkVerifiedManifest))
 
             val viewModel = buildViewModel()
@@ -228,6 +172,58 @@ class NetworkingLinkVerificationViewModelTest {
             verify(confirmVerification).sms(any(), eq("111111"))
             navigationManager.assertNavigatedTo(
                 destination = Destination.LinkAccountPicker,
+                pane = NETWORKING_LINK_VERIFICATION
+            )
+        }
+
+    @Test
+    fun `otpEntered - save to link fails with no initial institution navigates to INSTITUTI`() =
+        runTest {
+            val email = "test@test.com"
+            val consumerSession = consumerSession()
+            val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
+            val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
+            whenever(getManifest()).thenReturn(
+                sessionManifest().copy(
+                    accountholderCustomerEmailAddress = email,
+                    initialInstitution = null
+                )
+            )
+
+            // polling returns some networked accounts
+            whenever(markLinkVerified()).thenAnswer {
+                throw LocalStripeException(
+                    displayMessage = "error marking link as verified",
+                    analyticsValue = null
+                )
+            }
+
+            val viewModel = buildViewModel()
+
+            verify(lookupConsumerAndStartVerification).invoke(
+                email = eq(email),
+                businessName = anyOrNull(),
+                verificationType = eq(VerificationType.SMS),
+                onConsumerNotFound = any(),
+                onLookupError = any(),
+                onStartVerification = onStartVerificationCaptor.capture(),
+                onVerificationStarted = onVerificationStartedCaptor.capture(),
+                onStartVerificationError = any()
+            )
+
+            onStartVerificationCaptor.firstValue()
+            onVerificationStartedCaptor.firstValue(consumerSession)
+
+            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+
+            // enters valid OTP
+            for (i in 0 until otpController.otpLength) {
+                otpController.onValueChanged(i, "1")
+            }
+
+            verify(confirmVerification).sms(any(), eq("111111"))
+            navigationManager.assertNavigatedTo(
+                destination = Destination.InstitutionPicker,
                 pane = NETWORKING_LINK_VERIFICATION
             )
         }

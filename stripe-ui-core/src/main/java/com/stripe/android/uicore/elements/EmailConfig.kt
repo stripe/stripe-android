@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.regex.Pattern
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmailConfig : TextFieldConfig {
+class EmailConfig(
+    @StringRes override val label: Int = R.string.stripe_email
+) : TextFieldConfig {
+
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "email"
-
-    @StringRes
-    override val label = R.string.stripe_email
     override val keyboard = KeyboardType.Email
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)

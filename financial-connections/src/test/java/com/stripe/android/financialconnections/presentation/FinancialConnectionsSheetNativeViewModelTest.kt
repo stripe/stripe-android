@@ -100,9 +100,12 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithAccounts)
 
+        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
+        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
+
         val viewModel = createViewModel()
 
-        viewModel.onCloseConfirm()
+        messagesFlow.emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -121,12 +124,14 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @Test
     fun `onCloseClick - when closing, no accounts, no errors, finish with cancel`() = runTest {
         val sessionWithNoAccounts = financialConnectionsSessionNoAccounts()
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithNoAccounts)
+
+        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
+        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
 
         val viewModel = createViewModel()
 
-        viewModel.onCloseConfirm()
+        messagesFlow.emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -151,12 +156,14 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                 )
             )
         )
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithNoAccounts)
+
+        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
+        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
 
         val viewModel = createViewModel()
 
-        viewModel.onCloseConfirm()
+        messagesFlow.emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -292,7 +299,6 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         completeFinancialConnectionsSession = completeFinancialConnectionsSession,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
-        getManifest = mock(),
         navigationManager = TestNavigationManager(),
         initialState = initialState
     )

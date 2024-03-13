@@ -7,7 +7,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -22,15 +22,15 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
-    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
+    private val successContentRepository: SuccessContentRepository,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedAccounts: GetCachedAccounts,
@@ -42,14 +42,6 @@ internal class AttachPaymentViewModel @Inject constructor(
 
     init {
         logErrors()
-        suspend {
-            val sync = getOrFetchSync()
-            val manifest = requireNotNull(sync.manifest)
-            AttachPaymentState.Payload(
-                businessName = manifest.businessName,
-                accountsCount = getCachedAccounts().size
-            )
-        }.execute { copy(payload = it) }
         suspend {
             val sync = getOrFetchSync()
             val manifest = requireNotNull(sync.manifest)
@@ -65,9 +57,18 @@ internal class AttachPaymentViewModel @Inject constructor(
                     activeInstitution = activeInstitution,
                     consumerSessionClientSecret = consumerSession?.clientSecret,
                     params = PaymentAccountParams.LinkedAccount(requireNotNull(id))
-                ).also {
-                    val nextPane = it.nextPane ?: Pane.SUCCESS
-                    navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
+                )
+            }
+            if (manifest.isNetworkingUserFlow == true && manifest.accountholderIsLinkConsumer == true) {
+                result.networkingSuccessful?.let {
+                    successContentRepository.update {
+                        copy(
+                            customSuccessMessage = PluralId(
+                                value = R.plurals.stripe_success_pane_desc_link_success,
+                                count = accounts.size
+                            )
+                        )
+                    }
                 }
             }
             eventTracker.track(
@@ -76,32 +77,16 @@ internal class AttachPaymentViewModel @Inject constructor(
                     duration = millis
                 )
             )
+            val nextPane = result.nextPane ?: Pane.SUCCESS
+            navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
             result
         }.execute { copy(linkPaymentAccount = it) }
     }
 
     private fun logErrors() {
         onAsync(
-            AttachPaymentState::payload,
-            onFail = {
-                eventTracker.logError(
-                    logger = logger,
-                    pane = PANE,
-                    extraMessage = "Error retrieving accounts to attach payment",
-                    error = it
-                )
-            },
-            onSuccess = {
-                eventTracker.track(FinancialConnectionsAnalyticsEvent.PaneLoaded(PANE))
-            }
-        )
-        onAsync(
             AttachPaymentState::linkPaymentAccount,
-            onSuccess = {
-                runCatching { saveToLinkWithStripeSucceeded.set(true) }
-            },
             onFail = {
-                runCatching { saveToLinkWithStripeSucceeded.set(false) }
                 eventTracker.logError(
                     logger = logger,
                     pane = PANE,
@@ -138,11 +123,5 @@ internal class AttachPaymentViewModel @Inject constructor(
 }
 
 internal data class AttachPaymentState(
-    val payload: Async<Payload> = Uninitialized,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
-) : MavericksState {
-    data class Payload(
-        val accountsCount: Int,
-        val businessName: String?
-    )
-}
+) : MavericksState

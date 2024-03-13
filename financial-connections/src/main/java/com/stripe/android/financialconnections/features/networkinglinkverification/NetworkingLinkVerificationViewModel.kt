@@ -13,21 +13,19 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.ConsumerNotFoundError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.LookupConsumerSession
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.NetworkedAccountsRetrieveMethodError
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.MarkLinkVerifiedError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.StartVerificationSessionError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccessNoAccounts
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -48,7 +46,6 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
-    private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val navigationManager: NavigationManager,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
@@ -75,7 +72,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                         },
                         onStartVerification = { /* no-op */ },
                         onVerificationStarted = { consumerSession ->
-                            val payload = buildPayload(consumerSession)
+                            val payload = buildPayload(consumerSession, manifest)
                             setState { copy(payload = Success(payload)) }
                         },
                         onStartVerificationError = { error ->
@@ -90,9 +87,13 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         }
     }
 
-    private fun buildPayload(consumerSession: ConsumerSession) = Payload(
+    private fun buildPayload(
+        consumerSession: ConsumerSession,
+        manifest: FinancialConnectionsSessionManifest
+    ) = Payload(
         email = consumerSession.emailAddress,
         phoneNumber = consumerSession.getRedactedPhoneNumber(),
+        initialInstitution = manifest.initialInstitution,
         consumerSessionClientSecret = consumerSession.clientSecret,
         otpElement = OTPElement(
             IdentifierSpec.Generic("otp"),
@@ -125,42 +126,29 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
         )
-        val updatedManifest = markLinkVerified()
-        runCatching { fetchNetworkedAccounts(payload.consumerSessionClientSecret) }
+
+        runCatching { markLinkVerified() }
             .fold(
-                onSuccess = { onNetworkedAccountsSuccess(it, updatedManifest) },
-                onFailure = { onNetworkedAccountsFailed(it, updatedManifest) }
+                // TODO(carlosmuvi): once `/link_verified` is updated to return correct next_pane we should consume that
+                onSuccess = {
+                    analyticsTracker.track(VerificationSuccess(PANE))
+                    navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
+                },
+                onFailure = {
+                    analyticsTracker.logError(
+                        extraMessage = "Error confirming verification or marking link as verified",
+                        error = it,
+                        logger = logger,
+                        pane = PANE
+                    )
+                    val nextPaneOnFailure = payload.initialInstitution
+                        ?.let { Pane.PARTNER_AUTH }
+                        ?: Pane.INSTITUTION_PICKER
+                    analyticsTracker.track(VerificationError(PANE, MarkLinkVerifiedError))
+                    navigationManager.tryNavigateTo(nextPaneOnFailure.destination(referrer = PANE))
+                }
             )
     }.execute { copy(confirmVerification = it) }
-
-    private suspend fun onNetworkedAccountsFailed(
-        error: Throwable,
-        updatedManifest: FinancialConnectionsSessionManifest
-    ) {
-        analyticsTracker.logError(
-            extraMessage = "Error fetching networked accounts",
-            error = error,
-            logger = logger,
-            pane = PANE
-        )
-        analyticsTracker.track(VerificationError(PANE, NetworkedAccountsRetrieveMethodError))
-        navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
-    }
-
-    private suspend fun onNetworkedAccountsSuccess(
-        accounts: NetworkedAccountsList,
-        updatedManifest: FinancialConnectionsSessionManifest
-    ) {
-        if (accounts.data.isEmpty()) {
-            // Networked user has no accounts
-            analyticsTracker.track(VerificationSuccessNoAccounts(PANE))
-            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = PANE))
-        } else {
-            // Networked user has linked accounts
-            analyticsTracker.track(VerificationSuccess(PANE))
-            navigationManager.tryNavigateTo(Destination.LinkAccountPicker(referrer = PANE))
-        }
-    }
 
     companion object :
         MavericksViewModelFactory<NetworkingLinkVerificationViewModel, NetworkingLinkVerificationState> {
@@ -191,6 +179,7 @@ internal data class NetworkingLinkVerificationState(
         val email: String,
         val phoneNumber: String,
         val otpElement: OTPElement,
-        val consumerSessionClientSecret: String
+        val consumerSessionClientSecret: String,
+        val initialInstitution: FinancialConnectionsInstitution?
     )
 }

@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.navigation
 
+import android.os.Bundle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -15,6 +16,8 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
+import com.stripe.android.financialconnections.features.error.ErrorScreen
+import com.stripe.android.financialconnections.features.exit.ExitModal
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
@@ -28,20 +31,17 @@ import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthS
 import com.stripe.android.financialconnections.features.reset.ResetScreen
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount.MicrodepositVerificationMethod
+import com.stripe.android.financialconnections.navigation.bottomsheet.bottomSheet
 import com.stripe.android.financialconnections.presentation.parentViewModel
 
 internal sealed class Destination(
     protected val route: String,
-    protected val paramKeys: List<String>,
-    protected val screenBuilder: @Composable (NavBackStackEntry) -> Unit
+    paramKeys: List<String> = listOf(KEY_REFERRER),
+    protected val composable: @Composable (NavBackStackEntry) -> Unit
 ) {
-    val fullRoute: String = if (paramKeys.isEmpty()) {
-        route
-    } else {
-        val builder = StringBuilder(route)
-        paramKeys.forEach { builder.append("/{$it}") }
-        builder.toString()
+    val fullRoute: String by lazy {
+        val placeholders = paramKeys.map { "{$it}" }
+        route.appendParamValues(placeholders)
     }
 
     @Composable
@@ -52,173 +52,133 @@ internal sealed class Destination(
         if (!paneLaunchedTriggered) {
             LaunchedEffect(Unit) {
                 viewModel.onPaneLaunched(
-                    referrer = referrer(navBackStackEntry),
+                    referrer = referrer(navBackStackEntry.arguments),
                     pane = navBackStackEntry.destination.pane
                 )
                 paneLaunchedTriggered = true
             }
         }
-        screenBuilder(navBackStackEntry)
+        composable(navBackStackEntry)
     }
 
     /**
-     * Builds the navigation route with arg keys and values.
-     *
-     * @param args a map of arguments to be appended to the route
+     * Builds the navigation route with provided [referrer].
      */
-    abstract operator fun invoke(
-        referrer: Pane?,
-        args: Map<String, String?> = emptyMap()
-    ): String
+    operator fun invoke(
+        referrer: Pane,
+    ): String = route.appendParamValues(listOf(referrer.value))
 
-    sealed class NoArgumentsDestination(
-        route: String,
-        composable: @Composable (NavBackStackEntry) -> Unit
-    ) : Destination(
-        route = route,
-        paramKeys = listOf(KEY_REFERRER),
-        screenBuilder = composable
-    ) {
-        override operator fun invoke(
-            referrer: Pane?,
-            args: Map<String, String?>
-        ): String = route.appendParamValues(
-            KEY_REFERRER to referrer?.value
-        )
-    }
-
-    data object InstitutionPicker : NoArgumentsDestination(
+    data object InstitutionPicker : Destination(
         Pane.INSTITUTION_PICKER.value,
         composable = { InstitutionPickerScreen() }
     )
 
-    data object Consent : NoArgumentsDestination(
+    data object Consent : Destination(
         route = Pane.CONSENT.value,
         composable = { ConsentScreen() }
     )
 
-    data object PartnerAuth : NoArgumentsDestination(
-        route = Pane.PARTNER_AUTH.value,
-        composable = { PartnerAuthScreen() }
+    data object PartnerAuthDrawer : Destination(
+        route = Pane.PARTNER_AUTH_DRAWER.value,
+        composable = { PartnerAuthScreen(inModal = true) }
     )
 
-    data object AccountPicker : NoArgumentsDestination(
+    data object PartnerAuth : Destination(
+        route = Pane.PARTNER_AUTH.value,
+        composable = { PartnerAuthScreen(inModal = false) }
+    )
+
+    data object AccountPicker : Destination(
         route = Pane.ACCOUNT_PICKER.value,
         composable = { AccountPickerScreen() }
     )
 
-    data object Success : NoArgumentsDestination(
+    data object Success : Destination(
         route = Pane.SUCCESS.value,
         composable = { SuccessScreen() }
     )
 
-    data object ManualEntry : NoArgumentsDestination(
+    data object ManualEntry : Destination(
         route = Pane.MANUAL_ENTRY.value,
         composable = { ManualEntryScreen() }
     )
 
-    data object AttachLinkedPaymentAccount : NoArgumentsDestination(
+    data object AttachLinkedPaymentAccount : Destination(
         route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
         composable = { AttachPaymentScreen() }
     )
 
-    data object NetworkingLinkSignup : NoArgumentsDestination(
+    data object NetworkingLinkSignup : Destination(
         route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
         composable = { NetworkingLinkSignupScreen() }
     )
 
-    data object NetworkingLinkLoginWarmup : NoArgumentsDestination(
+    data object NetworkingLinkLoginWarmup : Destination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
-        composable = { NetworkingLinkLoginWarmupScreen() }
+        composable = { NetworkingLinkLoginWarmupScreen(it) }
     )
 
-    data object NetworkingLinkVerification : NoArgumentsDestination(
+    data object NetworkingLinkVerification : Destination(
         route = Pane.NETWORKING_LINK_VERIFICATION.value,
         composable = { NetworkingLinkVerificationScreen() }
     )
 
-    data object NetworkingSaveToLinkVerification : NoArgumentsDestination(
+    data object NetworkingSaveToLinkVerification : Destination(
         route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
         composable = { NetworkingSaveToLinkVerificationScreen() }
     )
 
-    data object LinkAccountPicker : NoArgumentsDestination(
+    data object LinkAccountPicker : Destination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
         composable = {
             LinkAccountPickerScreen()
         },
     )
 
-    data object LinkStepUpVerification : NoArgumentsDestination(
+    data object LinkStepUpVerification : Destination(
         route = Pane.LINK_STEP_UP_VERIFICATION.value,
         composable = { LinkStepUpVerificationScreen() }
     )
 
-    data object Reset : NoArgumentsDestination(
+    data object Reset : Destination(
         route = Pane.RESET.value,
         composable = { ResetScreen() }
     )
 
-    data object BankAuthRepair : NoArgumentsDestination(
+    data object Exit : Destination(
+        route = Pane.EXIT.value,
+        composable = { ExitModal(it) }
+    )
+
+    data object Error : Destination(
+        route = Pane.UNEXPECTED_ERROR.value,
+        composable = { ErrorScreen() }
+    )
+
+    data object BankAuthRepair : Destination(
         route = Pane.BANK_AUTH_REPAIR.value,
         composable = { BankAuthRepairScreen() }
     )
 
     data object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
-        paramKeys = listOf(KEY_REFERRER, KEY_MICRODEPOSITS, KEY_LAST4),
-        screenBuilder = { ManualEntrySuccessScreen(it) }
-    ) {
-
-        fun argMap(
-            microdepositVerificationMethod: MicrodepositVerificationMethod,
-            last4: String?
-        ): Map<String, String?> = mapOf(
-            KEY_MICRODEPOSITS to microdepositVerificationMethod.value,
-            KEY_LAST4 to last4
-        )
-
-        fun microdeposits(backStackEntry: NavBackStackEntry): MicrodepositVerificationMethod =
-            backStackEntry.arguments
-                ?.getString(KEY_MICRODEPOSITS)
-                ?.let { value ->
-                    MicrodepositVerificationMethod.entries.firstOrNull { it.value == value }
-                } ?: MicrodepositVerificationMethod.UNKNOWN
-
-        fun last4(backStackEntry: NavBackStackEntry): String? =
-            backStackEntry.arguments?.getString(KEY_LAST4)
-
-        override fun invoke(
-            referrer: Pane?,
-            args: Map<String, String?>
-        ): String = route.appendParamValues(
-            KEY_REFERRER to referrer?.value,
-            KEY_MICRODEPOSITS to args[KEY_MICRODEPOSITS],
-            KEY_LAST4 to args[KEY_LAST4]
-        )
-    }
+        composable = { ManualEntrySuccessScreen() }
+    )
 
     companion object {
-        private fun referrer(entry: NavBackStackEntry): Pane? = entry.arguments
+        internal fun referrer(args: Bundle?): Pane? = args
             ?.getString(KEY_REFERRER)
             ?.let { value -> Pane.entries.firstOrNull { it.value == value } }
 
         const val KEY_REFERRER = "referrer"
-        const val KEY_MICRODEPOSITS = "microdeposits"
-        const val KEY_LAST4 = "last4"
     }
 }
 
-internal fun String.appendParamValues(vararg params: Pair<String, Any?>): String {
-    val builder = StringBuilder(this)
-
-    params.forEach {
-        it.second?.toString()?.let { arg ->
-            builder.append("/$arg")
-        }
+internal fun String.appendParamValues(params: List<String>): String {
+    return buildString {
+        append(this@appendParamValues)
+        params.forEach { append("/$it") }
     }
-
-    return builder.toString()
 }
 
 internal fun NavGraphBuilder.composable(
@@ -227,6 +187,19 @@ internal fun NavGraphBuilder.composable(
     deepLinks: List<NavDeepLink> = emptyList(),
 ) {
     composable(
+        route = destination.fullRoute,
+        arguments = arguments,
+        deepLinks = deepLinks,
+        content = { destination.Composable(navBackStackEntry = it) }
+    )
+}
+
+internal fun NavGraphBuilder.bottomSheet(
+    destination: Destination,
+    arguments: List<NamedNavArgument> = emptyList(),
+    deepLinks: List<NavDeepLink> = emptyList(),
+) {
+    bottomSheet(
         route = destination.fullRoute,
         arguments = arguments,
         deepLinks = deepLinks,

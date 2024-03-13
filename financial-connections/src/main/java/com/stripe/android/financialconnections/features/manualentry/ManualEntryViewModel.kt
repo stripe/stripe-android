@@ -1,5 +1,9 @@
 package com.stripe.android.financialconnections.features.manualentry
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -7,6 +11,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -19,65 +24,65 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
-import com.stripe.android.financialconnections.navigation.Destination.ManualEntrySuccess
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.ui.TextResource
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
-@Suppress("LongParameterList")
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
+    private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
+    // Keep form fields outside of State for immediate updates.
+    private var _routing: String? by mutableStateOf(null)
+    private var _account: String? by mutableStateOf(null)
+    private var _accountConfirm: String? by mutableStateOf(null)
+
+    val routing: String get() = _routing ?: ""
+    val account: String get() = _account ?: ""
+    val accountConfirm: String get() = _accountConfirm ?: ""
+
+    val form: StateFlow<ManualEntryFormState> = combine(
+        snapshotFlow { _routing },
+        snapshotFlow { _account },
+        snapshotFlow { _accountConfirm },
+        ::ManualEntryFormState
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = ManualEntryFormState(
+            routing = null,
+            account = null,
+            accountConfirm = null,
+        )
+    )
+
     init {
         observeAsyncs()
-        observeInputs()
         suspend {
             val sync = getOrFetchSync()
             val manifest = requireNotNull(sync.manifest)
             eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY))
             ManualEntryState.Payload(
                 verifyWithMicrodeposits = manifest.manualEntryUsesMicrodeposits,
-                customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM
+                customManualEntry = manifest.manualEntryMode == ManualEntryMode.CUSTOM,
+                testMode = manifest.livemode.not()
             )
         }.execute {
             copy(payload = it)
-        }
-    }
-
-    private fun observeInputs() {
-        onEach(ManualEntryState::accountConfirm) { input ->
-            if (input != null) {
-                withState {
-                    val error: Int? = ManualEntryInputValidator.getAccountConfirmIdOrNull(
-                        accountInput = it.account ?: "",
-                        accountConfirmInput = input
-                    )
-                    setState { copy(accountConfirmError = error) }
-                }
-            }
-        }
-        onEach(ManualEntryState::account) { input ->
-            if (input != null) {
-                setState {
-                    val error = ManualEntryInputValidator.getAccountErrorIdOrNull(input)
-                    copy(accountError = error)
-                }
-            }
-        }
-        onEach(ManualEntryState::routing) { input ->
-            if (input != null) {
-                setState {
-                    val error = ManualEntryInputValidator.getRoutingErrorIdOrNull(input)
-                    copy(routingError = error)
-                }
-            }
         }
     }
 
@@ -108,51 +113,49 @@ internal class ManualEntryViewModel @Inject constructor(
     }
 
     fun onRoutingEntered(input: String) {
-        val filteredInput = input.filter { it.isDigit() }
-        setState { copy(routing = filteredInput) }
+        _routing = input.filter { it.isDigit() }
     }
 
     fun onAccountEntered(input: String) {
-        val filteredInput = input.filter { it.isDigit() }
-        setState { copy(account = filteredInput) }
+        _account = input.filter { it.isDigit() }
     }
 
     fun onAccountConfirmEntered(input: String) {
-        val filteredInput = input.filter { it.isDigit() }
-        setState {
-            copy(accountConfirm = filteredInput)
-        }
+        _accountConfirm = input.filter { it.isDigit() }
     }
 
-    @Suppress("MagicNumber")
     fun onSubmit() {
         suspend {
-            val state = awaitState()
             val sync = getOrFetchSync()
             pollAttachPaymentAccount(
                 sync = sync,
                 activeInstitution = null,
                 consumerSessionClientSecret = null,
                 params = PaymentAccountParams.BankAccount(
-                    routingNumber = requireNotNull(state.routing),
-                    accountNumber = requireNotNull(state.account)
+                    routingNumber = requireNotNull(routing),
+                    accountNumber = requireNotNull(account)
                 )
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
-                    navigationManager.tryNavigateTo(
-                        ManualEntrySuccess(
-                            referrer = PANE,
-                            args = ManualEntrySuccess.argMap(
-                                microdepositVerificationMethod = it.microdepositVerificationMethod,
-                                last4 = state.account.takeLast(4)
+                    successContentRepository.update {
+                        copy(
+                            customSuccessMessage = TextResource.StringId(
+                                R.string.stripe_success_pane_desc_microdeposits,
+                                listOf(account.takeLast(4))
                             )
                         )
-                    )
-                } else {
-                    nativeAuthFlowCoordinator().emit(Complete())
+                    }
                 }
+                navigationManager.tryNavigateTo(Destination.ManualEntrySuccess(referrer = PANE))
             }
         }.execute { copy(linkPaymentAccount = it) }
+    }
+
+    fun onTestFill() {
+        _routing = "110000000"
+        _account = "000123456789"
+        _accountConfirm = "000123456789"
+        onSubmit()
     }
 
     companion object :
@@ -177,25 +180,12 @@ internal class ManualEntryViewModel @Inject constructor(
 
 internal data class ManualEntryState(
     val payload: Async<Payload> = Uninitialized,
-    val routing: String? = null,
-    val account: String? = null,
-    val accountConfirm: String? = null,
-    val routingError: Int? = null,
-    val accountError: Int? = null,
-    val accountConfirmError: Int? = null,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
 ) : MavericksState {
 
     data class Payload(
         val verifyWithMicrodeposits: Boolean,
-        val customManualEntry: Boolean
+        val customManualEntry: Boolean,
+        val testMode: Boolean
     )
-
-    val isValidForm
-        get() =
-            (routing to routingError).valid() &&
-                (account to accountError).valid() &&
-                (accountConfirm to accountConfirmError).valid()
-
-    private fun Pair<String?, Int?>.valid() = first != null && second == null
 }

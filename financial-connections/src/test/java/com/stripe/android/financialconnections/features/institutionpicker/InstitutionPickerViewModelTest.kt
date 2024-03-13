@@ -8,18 +8,25 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
+import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
+import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
-import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.utils.TestHandleError
+import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
@@ -35,9 +42,11 @@ internal class InstitutionPickerViewModelTest {
 
     private val searchInstitutions = mock<SearchInstitutions>()
     private val featuredInstitutions = mock<FeaturedInstitutions>()
-    private val getManifest = mock<GetManifest>()
+    private val sync = mock<GetOrFetchSync>()
+    private val handleError = TestHandleError()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
-    private val navigationManager = mock<NavigationManager>()
+    private val navigationManager = TestNavigationManager()
+    private val postAuthorizationSession = mock<PostAuthorizationSession>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val defaultConfiguration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
@@ -51,11 +60,13 @@ internal class InstitutionPickerViewModelTest {
             configuration = defaultConfiguration,
             searchInstitutions = searchInstitutions,
             featuredInstitutions = featuredInstitutions,
-            getManifest = getManifest,
+            getOrFetchSync = sync,
             navigationManager = navigationManager,
             updateLocalManifest = updateLocalManifest,
             logger = Logger.noop(),
             eventTracker = eventTracker,
+            postAuthorizationSession = postAuthorizationSession,
+            handleError = handleError,
             initialState = state
         )
     }
@@ -82,8 +93,42 @@ internal class InstitutionPickerViewModelTest {
         val viewModel = buildViewModel(InstitutionPickerState())
 
         withState(viewModel) { state ->
-            assertEquals(state.payload()!!.featuredInstitutions, institutionResponse.data)
+            assertEquals(state.payload()!!.featuredInstitutions, institutionResponse)
             assertIs<Uninitialized>(state.searchInstitutions)
+        }
+    }
+
+    @Test
+    fun `init - fails to fetch featured institutions succeeds with empty list`() = runTest {
+        val error = RuntimeException("error")
+        whenever(featuredInstitutions(defaultConfiguration.financialConnectionsSessionClientSecret))
+            .thenThrow(error)
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        withState(viewModel) { state ->
+            // payload with empty list
+            assertTrue(state.payload()!!.featuredInstitutions.data.isEmpty())
+        }
+    }
+
+    @Test
+    fun `init - fail to fetch payload launches error screen`() = runTest {
+        val error = RuntimeException("error")
+        whenever(sync()).thenThrow(error)
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        withState(viewModel) { state ->
+            assertTrue(state.payload() == null)
+            handleError.assertError(
+                error = error,
+                extraMessage = "Error fetching initial payload",
+                pane = Pane.INSTITUTION_PICKER,
+                displayErrorScreen = true
+            )
         }
     }
 
@@ -126,8 +171,8 @@ internal class InstitutionPickerViewModelTest {
         advanceUntilIdle()
 
         withState(viewModel) { state ->
-            assertEquals(state.payload()!!.featuredInstitutions, featuredResults.data)
-            assertEquals(state.searchInstitutions()!!.data, searchResults.data)
+            assertEquals(state.payload()!!.featuredInstitutions, featuredResults)
+            assertEquals(state.searchInstitutions()!!, searchResults)
             eventTracker.assertContainsEvent(
                 expectedEventName = "linked_accounts.search.succeeded",
                 expectedParams = mapOf(
@@ -155,8 +200,79 @@ internal class InstitutionPickerViewModelTest {
         }
     }
 
+    @Test
+    fun `onInstitutionSelected - OAuth institution navigates to partner Auth in modal mode`() = runTest {
+        val institution = ApiKeyFixtures.institution()
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
+        givenCreateSessionForInstitutionReturns(ApiKeyFixtures.authorizationSession().copy(_isOAuth = true))
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        viewModel.onInstitutionSelected(institution, fromFeatured = true)
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.PartnerAuthDrawer,
+            pane = Pane.INSTITUTION_PICKER,
+        )
+    }
+
+    @Test
+    fun `onInstitutionSelected - non-OAuth institution navigates to partner Auth in full-screen mode`() = runTest {
+        val institution = ApiKeyFixtures.institution()
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
+        givenCreateSessionForInstitutionReturns(ApiKeyFixtures.authorizationSession().copy(_isOAuth = false))
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        viewModel.onInstitutionSelected(institution, fromFeatured = true)
+
+        navigationManager.assertNavigatedTo(
+            destination = Destination.PartnerAuth,
+            pane = Pane.INSTITUTION_PICKER,
+        )
+    }
+
+    @Test
+    fun `onInstitutionSelected - Failed to create AuthSession navigates to error screen`() = runTest {
+        val institution = ApiKeyFixtures.institution()
+
+        givenManifestReturns(ApiKeyFixtures.sessionManifest())
+        val error = InstitutionPlannedDowntimeError(
+            institution,
+            showManualEntry = true,
+            isToday = true,
+            backUpAt = 10000L,
+            stripeException = mock()
+        )
+        givenCreateSessionForInstitutionThrows(error)
+
+        val viewModel = buildViewModel(InstitutionPickerState())
+
+        viewModel.onInstitutionSelected(institution, fromFeatured = true)
+
+        handleError.assertError(
+            error = error,
+            extraMessage = "Error selecting or creating session for institution",
+            pane = Pane.INSTITUTION_PICKER,
+            displayErrorScreen = true
+        )
+    }
+
+    private suspend fun givenCreateSessionForInstitutionThrows(throwable: Throwable) {
+        whenever(postAuthorizationSession(any(), any())).then { throw throwable }
+    }
+
+    private suspend fun InstitutionPickerViewModelTest.givenCreateSessionForInstitutionReturns(
+        financialConnectionsAuthorizationSession: FinancialConnectionsAuthorizationSession
+    ) {
+        whenever(postAuthorizationSession(any(), any()))
+            .thenReturn(financialConnectionsAuthorizationSession)
+    }
+
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
-        whenever(getManifest()).thenReturn(manifest)
+        whenever(sync()).thenReturn(ApiKeyFixtures.syncResponse(manifest))
     }
 
     private suspend fun givenSearchInstitutionsReturns(

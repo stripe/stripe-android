@@ -1,5 +1,3 @@
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.bankauthrepair
 
 import androidx.compose.runtime.Composable
@@ -18,10 +16,10 @@ internal fun BankAuthRepairScreen() {
     SharedPartnerAuth(
         state = state.value,
         onContinueClick = { /*TODO*/ },
-        onSelectAnotherBank = { /*TODO*/ },
+        onCancelClick = { /*TODO*/ },
         onClickableTextClick = { /*TODO*/ },
-        onEnterDetailsManually = { /*TODO*/ },
         onWebAuthFlowFinished = { /*TODO*/ },
-        onViewEffectLaunched = { /*TODO*/ }
+        onViewEffectLaunched = { /*TODO*/ },
+        inModal = false
     )
 }
