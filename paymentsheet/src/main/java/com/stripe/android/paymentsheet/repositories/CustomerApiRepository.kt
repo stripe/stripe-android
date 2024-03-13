@@ -75,11 +75,9 @@ internal class CustomerApiRepository @Inject constructor(
                     ),
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
-                    val stripeException = StripeException.create(it)
                     errorReporter.report(
                         ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
-                        stripeException.analyticsValue(),
-                        stripeException.statusCode
+                        StripeException.create(it)
                     )
                 }
             }
@@ -160,4 +158,10 @@ internal class CustomerApiRepository @Inject constructor(
         ).onFailure {
             logger.error("Failed to update payment method $paymentMethodId.", it)
         }
+
+    private fun ErrorReporter.report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
+        report(
+            errorEvent, stripeException.analyticsValue(), stripeException.statusCode
+        )
+    }
 }
