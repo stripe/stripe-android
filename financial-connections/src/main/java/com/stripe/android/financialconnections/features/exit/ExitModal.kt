@@ -1,9 +1,8 @@
 package com.stripe.android.financialconnections.features.exit
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
@@ -24,6 +23,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
 internal fun ExitModal(
@@ -49,10 +49,14 @@ private fun ExitModalContent(
     onExit: () -> Unit,
     onCancel: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(24.dp),
+    Layout(
+        inModal = true,
+        bodyPadding = PaddingValues(
+            top = 0.dp,
+            start = 24.dp,
+            end = 24.dp,
+            bottom = 24.dp,
+        ),
     ) {
         ShapedIcon(
             painter = painterResource(id = R.drawable.stripe_ic_panel_arrow_right),

@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.ui.components.DragHandle
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -48,13 +49,13 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 @Composable
 internal fun Layout(
     modifier: Modifier = Modifier,
-    body: @Composable ColumnScope.() -> Unit,
-    footer: (@Composable () -> Unit)? = null,
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     scrollState: ScrollState = rememberScrollState(),
+    footer: (@Composable () -> Unit)? = null,
+    body: @Composable ColumnScope.() -> Unit,
 ) {
     LayoutScaffold(
         canScrollForward = scrollState.canScrollForward,
@@ -110,9 +111,8 @@ internal fun LazyLayout(
             state = lazyListState,
             verticalArrangement = verticalArrangement,
             contentPadding = bodyPadding,
-        ) {
-            body()
-        }
+            content = body,
+        )
     }
 }
 
@@ -129,6 +129,15 @@ private fun LayoutScaffold(
         modifier
             .also { if (inModal.not()) it.fillMaxSize() }
     ) {
+        if (inModal) {
+            DragHandle(
+                modifier = Modifier.padding(
+                    top = 12.dp,
+                    bottom = 8.dp,
+                )
+            )
+        }
+
         // Box to contain the layout body and an optional footer shadow drawn on top.
         Box(
             Modifier
