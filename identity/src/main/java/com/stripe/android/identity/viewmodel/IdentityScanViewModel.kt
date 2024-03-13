@@ -30,7 +30,12 @@ internal class IdentityScanViewModel(
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector
 ) :
-    CameraViewModel(modelPerformanceTracker, laplacianBlurDetector) {
+    CameraViewModel(
+        modelPerformanceTracker,
+        laplacianBlurDetector,
+        identityRepository,
+        identityAnalyticsRequestFactory
+    ) {
 
     private val _scannerState: MutableStateFlow<State> = MutableStateFlow(State.Initializing)
 
@@ -66,16 +71,12 @@ internal class IdentityScanViewModel(
             _scannerState.update { State.Timeout(fromSelfie = result.result is FaceDetectorOutput) }
             when (result.result) {
                 is FaceDetectorOutput -> {
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.selfieTimeout()
-                    )
+                    identityAnalyticsRequestFactory.selfieTimeout()
                 }
 
                 is IDDetectorOutput -> {
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.documentTimeout(
-                            scanType = result.identityState.type
-                        )
+                    identityAnalyticsRequestFactory.documentTimeout(
+                        scanType = result.identityState.type
                     )
                 }
             }

@@ -77,7 +77,11 @@ internal class IDDetectorTransitioner(
                     "Matching model output detected with score ${analyzerOutput.resultScore}, " +
                         "transition to Found."
                 )
-                Found(initialState.type, this)
+                Found(
+                    initialState.type,
+                    this,
+                    isFromLegacyDetector = analyzerOutput is IDDetectorOutput.Legacy
+                )
             }
 
             else -> {
@@ -99,33 +103,107 @@ internal class IDDetectorTransitioner(
         require(analyzerOutput is IDDetectorOutput) {
             "Unexpected output type: $analyzerOutput"
         }
-        return when {
-            timeoutAt.hasPassed() -> {
-                IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
+        return when (analyzerOutput) {
+            is IDDetectorOutput.Legacy -> {
+                transitionFromFoundLegacy(
+                    foundState,
+                    analyzerOutput
+                )
             }
 
-            !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
-                "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
+            is IDDetectorOutput.Modern -> {
+                transitionFromFoundModern(
+                    foundState,
+                    analyzerOutput
+                )
+            }
+        }
+    }
+
+    private fun transitionFromFoundLegacy(
+        foundState: Found,
+        analyzerOutput: IDDetectorOutput.Legacy
+    ) = when {
+        foundState.isFromLegacyDetector != true -> Unsatisfied(
+            "Expecting Legacy IDDetectorOutput but received a Modern IDDetectorOutput",
+            foundState.type,
+            foundState.transitioner
+        )
+
+        timeoutAt.hasPassed() -> {
+            IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
+        }
+
+        !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
+            "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
+            foundState.type,
+            foundState.transitioner
+        )
+
+        !iOUCheckPass(analyzerOutput.boundingBox) -> {
+            // reset timer of the foundState
+            foundState.reachedStateAt = Clock.markNow()
+            foundState
+        }
+
+        isBlurry(analyzerOutput.blurScore) -> {
+            // reset timer of the foundState
+            foundState.reachedStateAt = Clock.markNow()
+            foundState
+        }
+
+        moreResultsRequired(foundState) -> foundState
+        else -> {
+            Satisfied(foundState.type, foundState.transitioner)
+        }
+    }
+
+    private fun transitionFromFoundModern(
+        foundState: Found,
+        analyzerOutput: IDDetectorOutput.Modern
+    ) = when {
+        foundState.isFromLegacyDetector == true -> Unsatisfied(
+            "Expecting Modern IDDetectorOutput but received a Legacy IDDetectorOutput",
+            foundState.type,
+            foundState.transitioner
+        )
+
+        timeoutAt.hasPassed() -> {
+            IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
+        }
+
+        !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
+            "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
+            foundState.type,
+            foundState.transitioner
+        )
+
+        analyzerOutput.mbOutput is MBDetector.DetectorResult.Error -> Unsatisfied(
+            "MB detector error",
+            foundState.type,
+            foundState.transitioner
+        )
+
+        // Keep staying in Found state if MB is still Capturing
+        analyzerOutput.mbOutput is MBDetector.DetectorResult.Capturing ->
+            foundState.withFeedback(analyzerOutput.mbOutput.feedback.stringResource)
+
+        // Modern result directly transitions to Finished without Satisfied,
+        // Because the next frame analyzerOutput.mbOutput might become Capturing again, which would
+        // not contain the transformed result.
+        analyzerOutput.mbOutput is MBDetector.DetectorResult.Captured ->
+            IdentityScanState.Finished(
                 foundState.type,
                 foundState.transitioner
             )
 
-            !iOUCheckPass(analyzerOutput.boundingBox) -> {
-                // reset timer of the foundState
-                foundState.reachedStateAt = Clock.markNow()
-                foundState
-            }
-
-            isBlurry(analyzerOutput.blurScore) -> {
-                // reset timer of the foundState
-                foundState.reachedStateAt = Clock.markNow()
-                foundState
-            }
-
-            moreResultsRequired(foundState) -> foundState
-            else -> {
-                Satisfied(foundState.type, foundState.transitioner)
-            }
+        else -> {
+            // This should never occur
+            Unsatisfied(
+                "Unknown state! ",
+                foundState.type,
+                foundState.transitioner
+            )
         }
     }
 
@@ -269,8 +347,6 @@ internal class IDDetectorTransitioner(
      */
     private fun Category.matchesScanType(scanType: ScanType): Boolean {
         return this == Category.ID_BACK && scanType == ScanType.DOC_BACK ||
-            this == Category.ID_FRONT && scanType == ScanType.DOC_FRONT ||
-            this == Category.ID_BACK && scanType == ScanType.DOC_BACK ||
             this == Category.ID_FRONT && scanType == ScanType.DOC_FRONT ||
             this == Category.PASSPORT && scanType == ScanType.DOC_FRONT
     }

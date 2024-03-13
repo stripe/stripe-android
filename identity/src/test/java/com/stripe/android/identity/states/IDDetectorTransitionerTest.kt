@@ -1,5 +1,6 @@
 package com.stripe.android.identity.states
 
+import android.graphics.Bitmap
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.framework.time.milliseconds
@@ -39,17 +40,18 @@ internal class IDDetectorTransitionerTest {
         val foundState = IdentityScanState.Found(
             ScanType.DOC_FRONT,
             transitioner,
-            mockReachedStateAt
+            mockReachedStateAt,
+            isFromLegacyDetector = true
         )
         // initialize previousBoundingBox
-        transitioner.transitionFromFound(foundState, mock(), INITIAL_ID_FRONT_OUTPUT)
+        transitioner.transitionFromFound(foundState, mock(), INITIAL_LEGACY_ID_FRONT_OUTPUT)
 
         // send a low IOU result
         assertThat(
             transitioner.transitionFromFound(
                 foundState,
                 mock(),
-                createAnalyzerOutputWithLowIOU(INITIAL_ID_FRONT_OUTPUT)
+                createLegacyAnalyzerOutputWithLowIOU(INITIAL_LEGACY_ID_FRONT_OUTPUT)
             )
         ).isSameInstanceAs(foundState)
 
@@ -66,7 +68,8 @@ internal class IDDetectorTransitionerTest {
         val foundState = IdentityScanState.Found(
             ScanType.DOC_FRONT,
             transitioner,
-            mockReachedStateAt
+            mockReachedStateAt,
+            isFromLegacyDetector = true
         )
 
         // send a low IOU result
@@ -74,7 +77,7 @@ internal class IDDetectorTransitionerTest {
             transitioner.transitionFromFound(
                 foundState,
                 mock(),
-                createAnalyzerOutputWithLowIOU(BLURRY_ID_FRONT_OUTPUT)
+                createLegacyAnalyzerOutputWithLowIOU(BLURRY_ID_FRONT_OUTPUT)
             )
         ).isSameInstanceAs(foundState)
 
@@ -83,7 +86,7 @@ internal class IDDetectorTransitionerTest {
     }
 
     @Test
-    fun `Found stays in Found when moreResultsRequired and transitions to Satisfied when timeRequired is met`() =
+    fun `Legacy - Found stays in Found when moreResultsRequired and transitions to Satisfied when timeRequired is met`() =
         runBlocking {
             val timeRequired = 500
             val transitioner = IDDetectorTransitioner(
@@ -97,9 +100,10 @@ internal class IDDetectorTransitionerTest {
                 whenever(it.type).thenReturn(ScanType.DOC_FRONT)
                 whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
                 whenever(it.transitioner).thenReturn(transitioner)
+                whenever(it.isFromLegacyDetector).thenReturn(true)
             }
 
-            val result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
+            val result = createLegacyAnalyzerOutputWithHighIOU(INITIAL_LEGACY_ID_FRONT_OUTPUT)
 
             // mock time required is not yet met
             whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
@@ -116,7 +120,7 @@ internal class IDDetectorTransitionerTest {
             val resultState = transitioner.transitionFromFound(
                 mockFoundState,
                 mock(),
-                createAnalyzerOutputWithHighIOU(result)
+                createLegacyAnalyzerOutputWithHighIOU(result)
             )
 
             assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
@@ -126,7 +130,97 @@ internal class IDDetectorTransitionerTest {
         }
 
     @Test
-    fun `Found stays in Found when moreResultsRequired and stays in Found when IOU check fails`() =
+    fun `Found in Legacy, see a new result in Modern, transition to Unsatisfied`() =
+        runBlocking {
+            val timeRequired = 500
+            val transitioner = IDDetectorTransitioner(
+                timeout = TIMEOUT_DURATION,
+                timeRequired = timeRequired,
+                blurThreshold = TEST_BLUR_THRESHOLD
+            )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+            val mockLegacyFoundState = mock<IdentityScanState.Found>().also {
+                whenever(it.type).thenReturn(ScanType.DOC_FRONT)
+                whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
+                whenever(it.transitioner).thenReturn(transitioner)
+                whenever(it.isFromLegacyDetector).thenReturn(true)
+            }
+
+            // send a modern result
+            val resultState = transitioner.transitionFromFound(
+                mockLegacyFoundState,
+                mock(),
+                mock<IDDetectorOutput.Modern>()
+            )
+
+            assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
+        }
+
+    @Test
+    fun `Found in Modern, see a new result in Legacy, transition to Unsatisfied`() =
+        runBlocking {
+            val timeRequired = 500
+            val transitioner = IDDetectorTransitioner(
+                timeout = TIMEOUT_DURATION,
+                timeRequired = timeRequired,
+                blurThreshold = TEST_BLUR_THRESHOLD
+            )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+            val mockModernFoundState = mock<IdentityScanState.Found>().also {
+                whenever(it.type).thenReturn(ScanType.DOC_FRONT)
+                whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
+                whenever(it.transitioner).thenReturn(transitioner)
+                whenever(it.isFromLegacyDetector).thenReturn(false)
+            }
+
+            // send a legacy result
+            val resultState = transitioner.transitionFromFound(
+                mockModernFoundState,
+                mock(),
+                mock<IDDetectorOutput.Legacy>()
+            )
+
+            assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
+        }
+
+    @Test
+    fun `Modern - Found stays in Found when moreResultsRequired and transitions to Satisfied when timeRequired is met`() =
+        runBlocking {
+            val timeRequired = 500
+            val transitioner = IDDetectorTransitioner(
+                timeout = TIMEOUT_DURATION,
+                timeRequired = timeRequired,
+                blurThreshold = TEST_BLUR_THRESHOLD
+            )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+            val mockFoundState = mock<IdentityScanState.Found>().also {
+                whenever(it.type).thenReturn(ScanType.DOC_FRONT)
+                whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
+                whenever(it.transitioner).thenReturn(transitioner)
+                whenever(it.isFromLegacyDetector).thenReturn(false)
+            }
+
+            val result = createModernAnalyzerOutputWithCapturing(INITIAL_MODERN_ID_FRONT_OUTPUT)
+
+            // mock time required is met
+            whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired + 10).milliseconds)
+            val resultState = transitioner.transitionFromFound(
+                mockFoundState,
+                mock(),
+                createModernAnalyzerOutputWithCaptured(result)
+            )
+
+            assertThat(resultState).isInstanceOf(IdentityScanState.Finished::class.java)
+            assertThat((resultState as IdentityScanState.Finished).type).isEqualTo(
+                ScanType.DOC_FRONT
+            )
+        }
+
+    @Test
+    fun `Modern - Found stays in Found when moreResultsRequired and stays in Found when next frame is still Capturing`() =
         runBlocking {
             val timeRequired = 500
             val allowedUnmatchedFrames = 2
@@ -144,11 +238,55 @@ internal class IDDetectorTransitionerTest {
             val foundState = IdentityScanState.Found(
                 ScanType.DOC_FRONT,
                 transitioner,
-                mockReachedStateAt
+                mockReachedStateAt,
+                isFromLegacyDetector = false
             )
 
             // 1st frame - a match, stays in Found
-            val result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
+            val result = createModernAnalyzerOutputWithCapturing(INITIAL_MODERN_ID_FRONT_OUTPUT)
+            assertThat(
+                transitioner.transitionFromFound(
+                    foundState,
+                    mock(),
+                    result
+                )
+            ).isInstanceOf(IdentityScanState.Found::class.java)
+
+            // 2nd frame - still capturing, stays in Found
+            assertThat(
+                transitioner.transitionFromFound(
+                    foundState,
+                    mock(),
+                    createModernAnalyzerOutputWithCapturing(result)
+                )
+            ).isInstanceOf(IdentityScanState.Found::class.java)
+        }
+
+    @Test
+    fun `Legacy - Found stays in Found when moreResultsRequired and stays in Found when IOU check fails`() =
+        runBlocking {
+            val timeRequired = 500
+            val allowedUnmatchedFrames = 2
+            val transitioner = IDDetectorTransitioner(
+                timeout = TIMEOUT_DURATION,
+                timeRequired = timeRequired,
+                allowedUnmatchedFrames = allowedUnmatchedFrames,
+                blurThreshold = TEST_BLUR_THRESHOLD
+            )
+            transitioner.timeoutAt = mockNeverTimeoutClockMark
+
+            // never meets required time
+            whenever(mockReachedStateAt.elapsedSince()).thenReturn((timeRequired - 10).milliseconds)
+
+            val foundState = IdentityScanState.Found(
+                ScanType.DOC_FRONT,
+                transitioner,
+                mockReachedStateAt,
+                isFromLegacyDetector = true
+            )
+
+            // 1st frame - a match, stays in Found
+            val result = createLegacyAnalyzerOutputWithHighIOU(INITIAL_LEGACY_ID_FRONT_OUTPUT)
             assertThat(
                 transitioner.transitionFromFound(
                     foundState,
@@ -162,7 +300,7 @@ internal class IDDetectorTransitionerTest {
                 transitioner.transitionFromFound(
                     foundState,
                     mock(),
-                    createAnalyzerOutputWithLowIOU(result)
+                    createLegacyAnalyzerOutputWithLowIOU(result)
                 )
             ).isSameInstanceAs(foundState)
 
@@ -171,7 +309,7 @@ internal class IDDetectorTransitionerTest {
         }
 
     @Test
-    fun `Found keeps staying in Found while unmatched frames within allowedUnmatchedFrames and to Unsatisfied when going beyond`() =
+    fun `Legacy - Found keeps staying in Found while unmatched frames within allowedUnmatchedFrames and to Unsatisfied when going beyond`() =
         runBlocking {
             val timeRequired = 500
             val allowedUnmatchedFrames = 2
@@ -189,10 +327,11 @@ internal class IDDetectorTransitionerTest {
                 whenever(it.type).thenReturn(ScanType.DOC_FRONT)
                 whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
                 whenever(it.transitioner).thenReturn(transitioner)
+                whenever(it.isFromLegacyDetector).thenReturn(true)
             }
 
             // 1st frame - a match, stays in Found
-            var result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
+            var result = createLegacyAnalyzerOutputWithHighIOU(INITIAL_LEGACY_ID_FRONT_OUTPUT)
             assertThat(
                 transitioner.transitionFromFound(
                     mockFoundState,
@@ -203,7 +342,7 @@ internal class IDDetectorTransitionerTest {
 
             // follow up frames - high IOU frames with unmatch within allowedUnmatchedFrames, stays in Found
             for (i in 1..allowedUnmatchedFrames) {
-                result = createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
+                result = createLegacyAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
                 assertThat(
                     transitioner.transitionFromFound(
                         mockFoundState,
@@ -217,7 +356,7 @@ internal class IDDetectorTransitionerTest {
             val resultState = transitioner.transitionFromFound(
                 mockFoundState,
                 mock(),
-                createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
+                createLegacyAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
             )
 
             assertThat(resultState).isInstanceOf(IdentityScanState.Unsatisfied::class.java)
@@ -228,7 +367,7 @@ internal class IDDetectorTransitionerTest {
         }
 
     @Test
-    fun `Found keeps staying in Found while unmatched frames within allowedUnmatchedFrames and to Satisfied when going beyond`() =
+    fun `Legacy - Found keeps staying in Found while unmatched frames within allowedUnmatchedFrames and to Satisfied when going beyond`() =
         runBlocking {
             val timeRequired = 500
             val allowedUnmatchedFrames = 2
@@ -246,10 +385,11 @@ internal class IDDetectorTransitionerTest {
                 whenever(it.type).thenReturn(ScanType.DOC_FRONT)
                 whenever(it.reachedStateAt).thenReturn(mockReachedStateAt)
                 whenever(it.transitioner).thenReturn(transitioner)
+                whenever(it.isFromLegacyDetector).thenReturn(true)
             }
 
             // 1st frame - a match, stays in Found
-            var result = createAnalyzerOutputWithHighIOU(INITIAL_ID_FRONT_OUTPUT)
+            var result = createLegacyAnalyzerOutputWithHighIOU(INITIAL_LEGACY_ID_FRONT_OUTPUT)
             assertThat(
                 transitioner.transitionFromFound(
                     mockFoundState,
@@ -260,7 +400,7 @@ internal class IDDetectorTransitionerTest {
 
             // follow up frames - high IOU frames with unmatch within allowedUnmatchedFrames, stays in Found
             for (i in 1..allowedUnmatchedFrames) {
-                result = createAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
+                result = createLegacyAnalyzerOutputWithHighIOU(result, Category.ID_BACK)
                 assertThat(
                     transitioner.transitionFromFound(
                         mockFoundState,
@@ -276,7 +416,7 @@ internal class IDDetectorTransitionerTest {
             val resultState = transitioner.transitionFromFound(
                 mockFoundState,
                 mock(),
-                createAnalyzerOutputWithHighIOU(result, Category.ID_FRONT)
+                createLegacyAnalyzerOutputWithHighIOU(result, Category.ID_FRONT)
             )
 
             assertThat(resultState).isInstanceOf(IdentityScanState.Satisfied::class.java)
@@ -300,7 +440,7 @@ internal class IDDetectorTransitionerTest {
             transitioner.transitionFromInitial(
                 initialState,
                 mock(),
-                createAnalyzerOutputWithLowIOU(INITIAL_ID_BACK_OUTPUT)
+                createLegacyAnalyzerOutputWithLowIOU(INITIAL_LEGACY_ID_BACK_OUTPUT)
             )
         ).isInstanceOf(IdentityScanState.TimeOut::class.java)
     }
@@ -322,7 +462,7 @@ internal class IDDetectorTransitionerTest {
             transitioner.transitionFromInitial(
                 initialState,
                 mock(),
-                createAnalyzerOutputWithLowIOU(INITIAL_ID_BACK_OUTPUT)
+                createLegacyAnalyzerOutputWithLowIOU(INITIAL_LEGACY_ID_BACK_OUTPUT)
             )
         ).isSameInstanceAs(initialState)
     }
@@ -344,7 +484,7 @@ internal class IDDetectorTransitionerTest {
             transitioner.transitionFromInitial(
                 initialState,
                 mock(),
-                createAnalyzerOutputWithLowIOU(INITIAL_ID_FRONT_OUTPUT)
+                createLegacyAnalyzerOutputWithLowIOU(INITIAL_LEGACY_ID_FRONT_OUTPUT)
             )
         ).isInstanceOf(IdentityScanState.Found::class.java)
     }
@@ -487,11 +627,11 @@ internal class IDDetectorTransitionerTest {
             assertThat(resultState).isInstanceOf(IdentityScanState.Initial::class.java)
         }
 
-    private fun createAnalyzerOutputWithHighIOU(
-        previousAnalyzerOutput: IDDetectorOutput,
+    private fun createLegacyAnalyzerOutputWithHighIOU(
+        previousAnalyzerOutput: IDDetectorOutput.Legacy,
         newCategory: Category? = null
     ) =
-        IDDetectorOutput(
+        IDDetectorOutput.Legacy(
             boundingBox = BoundingBox(
                 previousAnalyzerOutput.boundingBox.left + 1,
                 previousAnalyzerOutput.boundingBox.top + 1,
@@ -504,8 +644,8 @@ internal class IDDetectorTransitionerTest {
             previousAnalyzerOutput.blurScore
         )
 
-    private fun createAnalyzerOutputWithLowIOU(previousAnalyzerOutput: IDDetectorOutput) =
-        IDDetectorOutput(
+    private fun createLegacyAnalyzerOutputWithLowIOU(previousAnalyzerOutput: IDDetectorOutput.Legacy) =
+        IDDetectorOutput.Legacy(
             boundingBox = BoundingBox(
                 previousAnalyzerOutput.boundingBox.left + 500f,
                 previousAnalyzerOutput.boundingBox.top + 500f,
@@ -518,6 +658,28 @@ internal class IDDetectorTransitionerTest {
             previousAnalyzerOutput.blurScore
         )
 
+    private fun createModernAnalyzerOutputWithCapturing(
+        previousAnalyzerOutput: IDDetectorOutput.Modern,
+        newCategory: Category? = null
+    ) =
+        IDDetectorOutput.Modern(
+            newCategory ?: previousAnalyzerOutput.category,
+            previousAnalyzerOutput.resultScore,
+            previousAnalyzerOutput.allScores,
+            CAPTURING
+        )
+
+    private fun createModernAnalyzerOutputWithCaptured(
+        previousAnalyzerOutput: IDDetectorOutput.Modern,
+        newCategory: Category? = null
+    ) =
+        IDDetectorOutput.Modern(
+            newCategory ?: previousAnalyzerOutput.category,
+            previousAnalyzerOutput.resultScore,
+            previousAnalyzerOutput.allScores,
+            CAPTURED
+        )
+
     private companion object {
         const val TEST_BLUR_THRESHOLD = 0.5f
         const val TEST_BLURRY_SCORE = 0.0f
@@ -525,7 +687,7 @@ internal class IDDetectorTransitionerTest {
         const val DEFAULT_DISPLAY_SATISFIED_DURATION = 1000
         const val DEFAULT_DISPLAY_UNSATISFIED_DURATION = 1000
         val INITIAL_BOUNDING_BOX = BoundingBox(0f, 0f, 500f, 500f)
-        val INITIAL_ID_FRONT_OUTPUT = IDDetectorOutput(
+        val INITIAL_LEGACY_ID_FRONT_OUTPUT = IDDetectorOutput.Legacy(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,
             0f,
@@ -533,7 +695,7 @@ internal class IDDetectorTransitionerTest {
             1.0f
         )
 
-        val INITIAL_ID_BACK_OUTPUT = IDDetectorOutput(
+        val INITIAL_LEGACY_ID_BACK_OUTPUT = IDDetectorOutput.Legacy(
             INITIAL_BOUNDING_BOX,
             Category.ID_BACK,
             0f,
@@ -541,7 +703,33 @@ internal class IDDetectorTransitionerTest {
             1.0f
         )
 
-        val BLURRY_ID_FRONT_OUTPUT = IDDetectorOutput(
+        val DUMMYBITMAP = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
+
+        val CAPTURING = MBDetector.DetectorResult.Capturing(
+            MBDetector.CaptureFeedback.UNKNOWN
+        )
+
+        val CAPTURED = MBDetector.DetectorResult.Captured(
+            DUMMYBITMAP,
+            DUMMYBITMAP,
+            false
+        )
+
+        val INITIAL_MODERN_ID_FRONT_OUTPUT = IDDetectorOutput.Modern(
+            Category.ID_FRONT,
+            0f,
+            listOf(),
+            CAPTURING
+        )
+
+        val INITIAL_MODERN_ID_BACK_OUTPUT = IDDetectorOutput.Modern(
+            Category.ID_BACK,
+            0f,
+            listOf(),
+            CAPTURING
+        )
+
+        val BLURRY_ID_FRONT_OUTPUT = IDDetectorOutput.Legacy(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,
             0f,
@@ -549,7 +737,7 @@ internal class IDDetectorTransitionerTest {
             TEST_BLURRY_SCORE
         )
 
-        val UNBLURRY_ID_FRONT_OUTPUT = IDDetectorOutput(
+        val UNBLURRY_ID_FRONT_OUTPUT = IDDetectorOutput.Legacy(
             INITIAL_BOUNDING_BOX,
             Category.ID_FRONT,
             0f,

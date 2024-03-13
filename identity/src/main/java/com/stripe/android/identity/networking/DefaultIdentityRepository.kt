@@ -1,5 +1,6 @@
 package com.stripe.android.identity.networking
 
+import android.content.Context
 import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.time.Clock
@@ -32,7 +33,8 @@ import javax.inject.Inject
 
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
-    private val identityIO: IdentityIO
+    private val identityIO: IdentityIO,
+    private val context: Context
 ) : IdentityRepository {
 
     @VisibleForTesting
@@ -57,6 +59,9 @@ internal class DefaultIdentityRepository @Inject constructor(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                APP_IDENTIFIER to context.packageName
             )
         ),
         VerificationPage.serializer()
