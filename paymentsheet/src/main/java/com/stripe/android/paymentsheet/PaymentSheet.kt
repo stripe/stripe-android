@@ -1622,7 +1622,6 @@ class PaymentSheet internal constructor(
 }
 
 typealias ExternalPaymentMethodConfirmHandler = (
-    // TODO: are these the right types to use here? NO.
     externalPaymentMethodType: String, billingDetails: PaymentSheet.BillingDetails?, completion: (PaymentSheetResult) -> Unit
 ) -> Unit
 

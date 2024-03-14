@@ -34,6 +34,7 @@ internal sealed class PaymentOptionsItem {
         override val isEnabledDuringEditing: Boolean = false
     }
 
+    // saved payment type wording here is a bit confusing
     /**
      * Represents a [PaymentMethod] that is already saved and attached to the current customer.
      */

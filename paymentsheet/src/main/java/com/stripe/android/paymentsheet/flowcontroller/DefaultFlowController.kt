@@ -324,6 +324,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     confirmPaymentSelection(paymentSelection, state)
                 }
             }
+            // definitely confused about PaymentSelection.New vs. PaymentSelection.Saved here, esp given that
+            // Saved seems to be where all the paymentMethod types/objs are
             is PaymentSelection.New,
             null -> confirmPaymentSelection(paymentSelection, state)
             is PaymentSelection.Saved -> {
