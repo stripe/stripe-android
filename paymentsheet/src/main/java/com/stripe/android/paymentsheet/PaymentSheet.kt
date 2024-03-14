@@ -15,7 +15,9 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
+import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -1167,6 +1169,8 @@ class PaymentSheet internal constructor(
                 phone != null
         }
 
+
+
         /**
          * [BillingDetails] builder for cleaner object creation from Java.
          */
@@ -1185,6 +1189,19 @@ class PaymentSheet internal constructor(
             fun phone(phone: String?) = apply { this.phone = phone }
 
             fun build() = BillingDetails(address, email, name, phone)
+
+            // TODO: this should probably be an extension fn or something in the flowcontroller class
+            fun ofPaymentMethodType(billingDetails : PaymentMethod.BillingDetails?) {
+                if (billingDetails != null) {
+                    // TODO: better solution for this...
+                    val address =
+                        Address(city = billingDetails.address?.city)
+                    this.address(address)
+                    this.email = billingDetails.email
+                    this.name = billingDetails.name
+                    this.phone = billingDetails.phone
+                }
+            }
         }
     }
 
@@ -1605,6 +1622,7 @@ class PaymentSheet internal constructor(
 }
 
 typealias ExternalPaymentMethodConfirmHandler = (
+    // TODO: are these the right types to use here? NO.
     externalPaymentMethodType: String, billingDetails: PaymentSheet.BillingDetails?, completion: (PaymentSheetResult) -> Unit
 ) -> Unit
 

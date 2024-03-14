@@ -301,7 +301,7 @@ internal class DefaultFlowController @Inject internal constructor(
         // TODO: when the payment selection is an external payment method, then we need to call the callback
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.GooglePay -> launchGooglePay(state)
-            is PaymentSelection.ExternalPaymentMethod -> callExternalPayMethod(paymentSelection, state)
+            is PaymentSelection.ExternalPaymentMethod -> callExternalPayMethod(paymentSelection,  state)
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
             is PaymentSelection.New.GenericPaymentMethod -> {
@@ -692,7 +692,10 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     // TODO: rename
-    private fun callExternalPayMethod(externalPaymentMethod: PaymentSelection.ExternalPaymentMethod, state : PaymentSheetState.Full) {
+    private fun callExternalPayMethod(
+        externalPaymentMethod: PaymentSelection.ExternalPaymentMethod,
+        state: PaymentSheetState.Full
+    ) {
         val defaultExternalPaymentConfirmHandler = fun(
             epm: String,
             billingDetails: PaymentSheet.BillingDetails?,
@@ -703,10 +706,18 @@ internal class DefaultFlowController @Inject internal constructor(
         val externalPaymentMethodConfirmHandler =
             state.config.externalPaymentMethodsConfiguration.externalPaymentMethodConfirmHandler
                 ?: defaultExternalPaymentConfirmHandler
-        // TODO: get real billing details here
-        // TODO: what should the actual completion be here?
-        val completion = fun(result : PaymentSheetResult) { throw NotImplementedError("TODO: implement")}
-        externalPaymentMethodConfirmHandler(externalPaymentMethod.name, state.config.defaultBillingDetails, completion)
+        // TODO: better solution for copying over the billing details from this point
+        val paymentMethodBillingDetails = externalPaymentMethod.paymentMethod.billingDetails
+        val billingDetails = PaymentSheet.BillingDetails.Builder()
+        billingDetails.ofPaymentMethodType(paymentMethodBillingDetails)
+        val completion = fun(result: PaymentSheetResult) {
+            viewModelScope.launch {
+                paymentResultCallback.onPaymentSheetResult(
+                   result
+                )
+            }
+        }
+        externalPaymentMethodConfirmHandler(externalPaymentMethod.name, billingDetails.build(), completion)
     }
 
     private fun launchGooglePay(state: PaymentSheetState.Full) {

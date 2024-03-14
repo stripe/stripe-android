@@ -542,6 +542,7 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.Link -> "link"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code
+        is PaymentSelection.ExternalPaymentMethod -> name
         null -> null
     }
 }

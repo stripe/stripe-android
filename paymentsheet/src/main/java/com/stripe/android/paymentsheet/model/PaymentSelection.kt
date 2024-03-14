@@ -225,8 +225,14 @@ internal sealed class PaymentSelection : Parcelable {
         ) : New()
     }
 
+    // TODO: move to new?
     @Parcelize
-    data class ExternalPaymentMethod(val name : String, val handler : ExternalPaymentMethodConfirmHandler, override val requiresConfirmation: Boolean) :
+    data class ExternalPaymentMethod(
+        val name: String,
+        val paymentMethod: PaymentMethod,
+        val handler: ExternalPaymentMethodConfirmHandler,
+        override val requiresConfirmation: Boolean,
+    ) :
         PaymentSelection() {
         override fun mandateText(
             context: Context,
