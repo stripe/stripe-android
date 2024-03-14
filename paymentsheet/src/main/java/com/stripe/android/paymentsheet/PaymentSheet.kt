@@ -442,6 +442,8 @@ class PaymentSheet internal constructor(
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+
+        internal val externalPaymentMethodsConfiguration: ExternalPaymentMethodsConfiguration = ExternalPaymentMethodsConfiguration()
     ) : Parcelable {
 
         @JvmOverloads
@@ -1186,6 +1188,17 @@ class PaymentSheet internal constructor(
         }
     }
 
+    // TODO: why parcelable?
+    @Parcelize
+    data class ExternalPaymentMethodsConfiguration(
+        val externalPaymentMethods : List<String> = emptyList(),
+
+        // TODO: more android-y naming on the handler params?
+        val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+    ) : Parcelable {
+
+    }
+
     /**
      * Configuration for how billing details are collected during checkout.
      */
@@ -1590,3 +1603,8 @@ class PaymentSheet internal constructor(
         }
     }
 }
+
+typealias ExternalPaymentMethodConfirmHandler = (
+    externalPaymentMethodType: String, billingDetails: PaymentSheet.BillingDetails?, completion: (PaymentSheetResult) -> Unit
+) -> Unit
+

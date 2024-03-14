@@ -52,6 +52,7 @@ interface StripeRepository {
         expandFields: List<String> = emptyList()
     ): Result<StripeIntent>
 
+    // TODO: one of these is probably where we need to send the external payment methods?
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun confirmPaymentIntent(
         confirmPaymentIntentParams: ConfirmPaymentIntentParams,

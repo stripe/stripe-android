@@ -63,6 +63,7 @@ import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.utils.AnimationConstants
 import dagger.Lazy
+import kotlinx.coroutines.CompletionHandler
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -297,8 +298,10 @@ internal class DefaultFlowController @Inject internal constructor(
             return
         }
 
+        // TODO: when the payment selection is an external payment method, then we need to call the callback
         when (val paymentSelection = viewModel.paymentSelection) {
             is PaymentSelection.GooglePay -> launchGooglePay(state)
+            is PaymentSelection.ExternalPaymentMethod -> callExternalPayMethod(paymentSelection, state)
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
             is PaymentSelection.New.GenericPaymentMethod -> {
@@ -686,6 +689,24 @@ internal class DefaultFlowController @Inject internal constructor(
             // New user paying inline, complete without launching Link
             confirmPaymentSelection(paymentSelection, state)
         }
+    }
+
+    // TODO: rename
+    private fun callExternalPayMethod(externalPaymentMethod: PaymentSelection.ExternalPaymentMethod, state : PaymentSheetState.Full) {
+        val defaultExternalPaymentConfirmHandler = fun(
+            epm: String,
+            billingDetails: PaymentSheet.BillingDetails?,
+            completionHandler: (PaymentSheetResult) -> Unit
+        ) {
+            completionHandler(PaymentSheetResult.Failed(NotImplementedError("handling this epm is not implemented")))
+        }
+        val externalPaymentMethodConfirmHandler =
+            state.config.externalPaymentMethodsConfiguration.externalPaymentMethodConfirmHandler
+                ?: defaultExternalPaymentConfirmHandler
+        // TODO: get real billing details here
+        // TODO: what should the actual completion be here?
+        val completion = fun(result : PaymentSheetResult) { throw NotImplementedError("TODO: implement")}
+        externalPaymentMethodConfirmHandler(externalPaymentMethod.name, state.config.defaultBillingDetails, completion)
     }
 
     private fun launchGooglePay(state: PaymentSheetState.Full) {
