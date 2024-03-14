@@ -2,8 +2,6 @@ package com.stripe.android.identity.viewmodel
 
 import android.content.Context
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.scanui.util.asRect
 import com.stripe.android.identity.analytics.FPSTracker
@@ -20,13 +18,12 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import java.lang.ref.WeakReference
-import javax.inject.Inject
 
-internal class IdentityScanViewModel(
+internal abstract class IdentityScanViewModel(
     private val context: WeakReference<Context>,
-    val fpsTracker: FPSTracker,
-    val identityRepository: IdentityRepository,
-    val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    open val fpsTracker: FPSTracker,
+    open val identityRepository: IdentityRepository,
+    open val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector
 ) :
@@ -47,6 +44,8 @@ internal class IdentityScanViewModel(
     internal val targetScanTypeFlow = MutableStateFlow<IdentityScanState.ScanType?>(null)
 
     private lateinit var cameraManager: IdentityCameraManager
+
+    abstract val scanFeedback: StateFlow<Int?>
 
     internal sealed class State {
         data object Initializing : State()
@@ -165,26 +164,5 @@ internal class IdentityScanViewModel(
 
     fun resetScannerState() {
         _scannerState.update { State.Initializing }
-    }
-
-    internal class IdentityScanViewModelFactory @Inject constructor(
-        private val context: Context,
-        private val modelPerformanceTracker: ModelPerformanceTracker,
-        private val laplacianBlurDetector: LaplacianBlurDetector,
-        private val fpsTracker: FPSTracker,
-        private val identityRepository: IdentityRepository,
-        private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
-    ) : ViewModelProvider.Factory {
-        @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return IdentityScanViewModel(
-                WeakReference(context),
-                fpsTracker,
-                identityRepository,
-                identityAnalyticsRequestFactory,
-                modelPerformanceTracker,
-                laplacianBlurDetector
-            ) as T
-        }
     }
 }

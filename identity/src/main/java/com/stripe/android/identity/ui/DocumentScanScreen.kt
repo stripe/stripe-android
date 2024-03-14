@@ -1,5 +1,6 @@
 package com.stripe.android.identity.ui
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -18,12 +19,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,9 +51,9 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanState.Companion.isFront
 import com.stripe.android.identity.states.IdentityScanState.Companion.isNullOrFront
 import com.stripe.android.identity.utils.startScanning
+import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 internal const val CONTINUE_BUTTON_TAG = "Continue"
@@ -68,7 +66,7 @@ internal const val VIEW_FINDER_ASPECT_RATIO = 1f
 internal fun DocumentScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    identityScanViewModel: IdentityScanViewModel
+    documentScanViewModel: DocumentScanViewModel
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -89,7 +87,7 @@ internal fun DocumentScanScreen(
         navController = navController
     ) { pageAndModelFiles ->
 
-        val targetScanType by identityScanViewModel.targetScanTypeFlow.collectAsState()
+        val targetScanType by documentScanViewModel.targetScanTypeFlow.collectAsState()
 
         ScreenTransitionLaunchedEffect(
             identityViewModel = identityViewModel,
@@ -98,13 +96,14 @@ internal fun DocumentScanScreen(
 
         // run once to initialize
         LaunchedEffect(Unit) {
-            identityScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
+            documentScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
         }
-        val documentScannerState by identityScanViewModel.scannerState.collectAsState()
+        val documentScannerState by documentScanViewModel.scannerState.collectAsState()
+        val feedback by documentScanViewModel.scanFeedback.collectAsState()
 
         LiveCaptureLaunchedEffect(
             scannerState = documentScannerState,
-            identityScanViewModel = identityScanViewModel,
+            identityScanViewModel = documentScanViewModel,
             identityViewModel = identityViewModel,
             lifecycleOwner = lifecycleOwner,
             verificationPage = pageAndModelFiles.page,
@@ -120,8 +119,9 @@ internal fun DocumentScanScreen(
             else -> { // can be Scanning or Scanned
                 DocumentCaptureScreen(
                     documentScannerState,
+                    feedback,
                     targetScanType,
-                    identityScanViewModel,
+                    documentScanViewModel,
                     identityViewModel,
                     lifecycleOwner,
                     cameraManager,
@@ -136,7 +136,7 @@ internal fun DocumentScanScreen(
                             startScanning(
                                 scanType = IdentityScanState.ScanType.DOC_BACK,
                                 identityViewModel = identityViewModel,
-                                identityScanViewModel = identityScanViewModel,
+                                identityScanViewModel = documentScanViewModel,
                                 lifecycleOwner = lifecycleOwner
                             )
                         }
@@ -150,6 +150,7 @@ internal fun DocumentScanScreen(
 @Composable
 private fun DocumentCaptureScreen(
     documentScannerState: IdentityScanViewModel.State,
+    @StringRes feedback: Int,
     targetScanType: IdentityScanState.ScanType?,
     identityScanViewModel: IdentityScanViewModel,
     identityViewModel: IdentityViewModel,
@@ -181,73 +182,6 @@ private fun DocumentCaptureScreen(
         stringResource(id = R.string.stripe_front_of_id)
     } else {
         stringResource(id = R.string.stripe_back_of_id)
-    }
-
-    // Throttle the message change speed in Found state
-    var foundResId by rememberSaveable { mutableIntStateOf(R.string.stripe_hold_still) }
-    var lastFoundResIdUpdateTime by rememberSaveable { mutableLongStateOf(0L) }
-    var timeSinceInitalState by rememberSaveable { mutableLongStateOf(0L) }
-    var shouldShowInitial by rememberSaveable { mutableStateOf(false) }
-    LaunchedEffect(documentScannerState) {
-        val currentTime = System.currentTimeMillis()
-        if (documentScannerState is IdentityScanViewModel.State.Scanning &&
-            documentScannerState.scanState is IdentityScanState.Found
-        ) {
-            if (currentTime - lastFoundResIdUpdateTime >= FEED_BACK_REFRESH_LIMIT) {
-                lastFoundResIdUpdateTime = currentTime
-                foundResId =
-                    documentScannerState.scanState
-                        .feedbackRes ?: R.string.stripe_hold_still
-            }
-        }
-        if (documentScannerState is IdentityScanViewModel.State.Scanning &&
-            documentScannerState.scanState is IdentityScanState.Initial
-        ) {
-            if (currentTime - timeSinceInitalState >= FEED_BACK_REFRESH_LIMIT) {
-                timeSinceInitalState = currentTime
-                launch {
-                    delay(FEED_BACK_REFRESH_LIMIT)
-                    shouldShowInitial = true
-                }
-            }
-        } else {
-            shouldShowInitial = false
-        }
-    }
-
-    val message = if (shouldShowInitial) {
-        if (targetScanType.isNullOrFront()) {
-            stringResource(id = R.string.stripe_position_id_front)
-        } else {
-            stringResource(id = R.string.stripe_position_id_back)
-        }
-    } else {
-        when (documentScannerState) {
-            is IdentityScanViewModel.State.Scanning -> {
-                when (documentScannerState.scanState) {
-                    is IdentityScanState.Finished -> stringResource(id = R.string.stripe_scanned)
-                    is IdentityScanState.Found -> {
-                        stringResource(id = foundResId)
-                    }
-
-                    is IdentityScanState.Initial -> stringResource(id = foundResId)
-
-                    is IdentityScanState.Satisfied -> stringResource(id = R.string.stripe_scanned)
-                    is IdentityScanState.TimeOut -> ""
-                    is IdentityScanState.Unsatisfied -> stringResource(id = foundResId)
-                    null -> { // just initialized or start scanning, no scanState yet
-                        if (targetScanType.isNullOrFront()) {
-                            stringResource(id = R.string.stripe_position_id_front)
-                        } else {
-                            stringResource(id = R.string.stripe_position_id_back)
-                        }
-                    }
-                }
-            }
-
-            is IdentityScanViewModel.State.Scanned -> stringResource(id = R.string.stripe_scanned)
-            else -> ""
-        }
     }
 
     Column(
@@ -284,7 +218,7 @@ private fun DocumentCaptureScreen(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = message,
+                text = stringResource(id = feedback),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)

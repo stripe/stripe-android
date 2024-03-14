@@ -10,6 +10,7 @@ import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,14 +27,16 @@ internal class IdentityScanViewModelTest {
     private val mockIdentityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory = mock()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val viewModel = IdentityScanViewModel(
+    val viewModel = object : IdentityScanViewModel(
         WeakReference(ApplicationProvider.getApplicationContext()),
         mockFpsTracker,
         mockIdentityRepository,
         mockIdentityAnalyticsRequestFactory,
         mock(),
         mock()
-    )
+    ) {
+        override val scanFeedback = MutableStateFlow(null)
+    }
 
     @Test
     fun testFpsTrackedOnInterimResult() = runBlocking {
