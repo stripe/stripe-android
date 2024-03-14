@@ -204,7 +204,6 @@ private fun ModalBottomSheetFooter(
     cta: String
 ) = Column {
     disclaimer?.let {
-        Spacer(modifier = Modifier.size(16.dp))
         AnnotatedText(
             modifier = Modifier.align(Alignment.CenterHorizontally),
             text = it,
