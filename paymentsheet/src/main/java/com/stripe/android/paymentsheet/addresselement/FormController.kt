@@ -1,9 +1,9 @@
-package com.stripe.android.ui.core
+package com.stripe.android.paymentsheet.addresselement
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
 import kotlinx.coroutines.flow.MutableStateFlow

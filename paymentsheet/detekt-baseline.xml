@@ -4,6 +4,7 @@
   <CurrentIssues>
     <ID>CyclomaticComplexMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$fun handleViewAction(viewAction: CustomerSheetViewAction)</ID>
     <ID>CyclomaticComplexMethod:PlaceholderHelper.kt$PlaceholderHelper$@VisibleForTesting internal fun specForPlaceholderField( field: PlaceholderField, placeholderOverrideList: List&lt;IdentifierSpec>, requiresMandate: Boolean, configuration: PaymentSheet.BillingDetailsCollectionConfiguration, )</ID>
+    <ID>CyclomaticComplexMethod:TransformSpecToElements.kt$TransformSpecToElements$fun transform(list: List&lt;FormItemSpec>): List&lt;FormElement></ID>
     <ID>EmptyFunctionBlock:PrimaryButtonAnimator.kt$PrimaryButtonAnimator.&lt;no name provided>${ }</ID>
     <ID>ForbiddenComment:PaymentOptionFactory.kt$PaymentOptionFactory$// TODO: Should use labelResource paymentMethodCreateParams or extension function</ID>
     <ID>FunctionNaming:PaymentSheetTopBar.kt$@Preview @Composable internal fun PaymentSheetTopBar_Preview()</ID>
@@ -21,7 +22,6 @@
     <ID>LargeClass:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest</ID>
     <ID>LongMethod:AddPaymentMethod.kt$@Composable internal fun AddPaymentMethod( sheetViewModel: BaseSheetViewModel, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:AutocompleteScreen.kt$@Composable internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel)</ID>
-    <ID>LongMethod:CustomerSheetLoader.kt$DefaultCustomerSheetLoader$private suspend fun loadPaymentMethods( customerAdapter: CustomerAdapter, configuration: CustomerSheet.Configuration, elementsSessionWithMetadata: ElementsSessionWithMetadata, )</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun AddPaymentMethodWithPaymentElement( viewState: CustomerSheetViewState.AddPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, formViewModelSubComponentBuilderProvider: Provider&lt;FormViewModelSubcomponent.Builder>?, )</ID>
     <ID>LongMethod:CustomerSheetScreen.kt$@Composable internal fun SelectPaymentMethod( viewState: CustomerSheetViewState.SelectPaymentMethod, viewActionHandler: (CustomerSheetViewAction) -> Unit, paymentMethodNameProvider: (PaymentMethodCode?) -> String, modifier: Modifier = Modifier, )</ID>
     <ID>LongMethod:CustomerSheetViewModel.kt$CustomerSheetViewModel$private fun transitionToAddPaymentMethod( isFirstPaymentMethod: Boolean, cbcEligibility: CardBrandChoiceEligibility = viewState.value.cbcEligibility, )</ID>

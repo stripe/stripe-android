@@ -1,10 +1,9 @@
-package com.stripe.android.ui.core.injection
+package com.stripe.android.paymentsheet.addresselement
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.BindsInstance

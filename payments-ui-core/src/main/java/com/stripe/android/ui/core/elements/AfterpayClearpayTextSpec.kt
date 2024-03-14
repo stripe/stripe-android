@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -12,7 +13,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-internal data class AfterpayClearpayTextSpec(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class AfterpayClearpayTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("afterpay_text")
 ) : FormItemSpec() {

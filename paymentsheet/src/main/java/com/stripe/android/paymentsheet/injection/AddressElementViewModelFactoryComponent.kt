@@ -6,8 +6,8 @@ import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.payments.core.injection.StripeRepositoryModule
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.AddressElementViewModel
+import com.stripe.android.paymentsheet.addresselement.FormControllerModule
 import com.stripe.android.ui.core.forms.resources.injection.ResourceRepositoryModule
-import com.stripe.android.ui.core.injection.FormControllerModule
 import dagger.BindsInstance
 import dagger.Component
 import javax.inject.Singleton

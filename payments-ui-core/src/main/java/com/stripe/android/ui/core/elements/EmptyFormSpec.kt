@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -14,7 +15,8 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-internal object EmptyFormSpec : FormItemSpec() {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data object EmptyFormSpec : FormItemSpec() {
     @IgnoredOnParcel
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("empty")
