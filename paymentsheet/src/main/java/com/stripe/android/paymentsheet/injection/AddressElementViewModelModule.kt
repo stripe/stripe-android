@@ -3,11 +3,11 @@ package com.stripe.android.paymentsheet.injection
 import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
+import com.stripe.android.paymentsheet.addresselement.FormControllerSubcomponent
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.addresselement.analytics.DefaultAddressLauncherEventReporter
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import dagger.Module
 import dagger.Provides
 import javax.inject.Named

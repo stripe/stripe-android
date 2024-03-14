@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.forms
+package com.stripe.android.lpmfoundations.luxe
 
 import android.content.Context
 import androidx.annotation.RestrictTo

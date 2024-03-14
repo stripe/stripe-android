@@ -1,14 +1,14 @@
-package com.stripe.android.ui.core.injection
+package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Context
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.ui.core.forms.TransformSpecToElements
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.Module

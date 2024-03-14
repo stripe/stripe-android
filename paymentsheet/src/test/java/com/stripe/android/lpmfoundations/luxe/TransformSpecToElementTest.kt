@@ -1,4 +1,4 @@
-package com.stripe.android.ui.core.forms
+package com.stripe.android.lpmfoundations.luxe
 
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -39,15 +39,15 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
-import com.stripe.android.stripecardscan.R as CardScanR
 
 @RunWith(RobolectricTestRunner::class)
 internal class TransformSpecToElementTest {
 
     private val context = ContextThemeWrapper(
         ApplicationProvider.getApplicationContext(),
-        CardScanR.style.StripeCardScanDefaultTheme
+        StripeR.style.StripeDefaultTheme
     )
 
     private val nameSection = NameSpec()

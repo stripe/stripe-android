@@ -7,9 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
-import com.stripe.android.ui.core.FormController
 import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
