@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -161,6 +162,7 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
         onButtonClick: () -> Unit,
         modifier: Modifier = Modifier,
     ) {
+        val focusManager = LocalFocusManager.current
         LazyColumn(
             contentPadding = PaddingValues(16.dp),
             modifier = modifier,
@@ -203,7 +205,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag("connect_accounts"),
-                    onClick = onButtonClick,
+                    onClick = {
+                        focusManager.clearFocus()
+                        onButtonClick()
+                    },
                 ) {
                     Text("Connect Accounts")
                 }
