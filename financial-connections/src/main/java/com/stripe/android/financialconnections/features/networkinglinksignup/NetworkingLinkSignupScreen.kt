@@ -88,7 +88,8 @@ internal fun NetworkingLinkSignupScreen() {
     BackHandler(enabled = true) {}
     val uriHandler = LocalUriHandler.current
     val bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden
+        initialValue = ModalBottomSheetValue.Hidden,
+        skipHalfExpanded = true
     )
 
     state.value.viewEffect?.let { viewEffect ->
