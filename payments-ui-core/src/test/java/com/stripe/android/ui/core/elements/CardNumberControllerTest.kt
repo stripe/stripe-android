@@ -21,9 +21,11 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -78,7 +80,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `Verify get the form field value correctly`() = runTest {
-        cardNumberController.formFieldValue.distinctUntilChanged().test {
+        cardNumberController.formFieldValue.test {
             cardNumberController.onValueChange("4242")
             idleLooper()
 
@@ -100,7 +102,7 @@ internal class CardNumberControllerTest {
     @Test
     fun `Verify error is visible based on the focus`() = runTest {
         // incomplete
-        cardNumberController.visibleError.distinctUntilChanged().test {
+        cardNumberController.visibleError.test {
             cardNumberController.onFocusChange(true)
             cardNumberController.onValueChange("4242")
             idleLooper()
@@ -139,7 +141,7 @@ internal class CardNumberControllerTest {
                     }
                 }
 
-                override val loading: Flow<Boolean> = flowOf(false)
+                override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             testDispatcher,
             testDispatcher,
