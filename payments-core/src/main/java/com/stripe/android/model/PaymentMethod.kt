@@ -177,6 +177,14 @@ constructor(
             hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = false,
         ),
+        ExternalPaymentMethod(
+            "external_payment_method",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false, // TODO: unsure
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false
+        ),
         Card(
             "card",
             isReusable = true,

@@ -45,6 +45,9 @@ sealed interface StripeIntent : StripeModel {
      */
     val paymentMethodTypes: List<String>
 
+    // TODO: actually set/use this field
+    val externalPaymentMethodTypes : List<String>
+
     val nextActionType: NextActionType?
 
     val clientSecret: String?

@@ -87,6 +87,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             )
+            val externalPaymentMethodSpecs = lpmRepository.getExternalPaymentMethodSpecs(
+                stripeIntent = elementsSession.stripeIntent,
+                serverExternalPaymentMethodSpecs = elementsSession.externalPaymentMethodsData
+            )
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
@@ -99,6 +103,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
                 shippingDetails = paymentSheetConfiguration.shippingDetails,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs
             )
 
             lpmRepository.update(metadata, sharedDataSpecsResult.sharedDataSpecs)

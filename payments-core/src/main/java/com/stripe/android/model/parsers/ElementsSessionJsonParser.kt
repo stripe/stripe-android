@@ -45,6 +45,7 @@ internal class ElementsSessionJsonParser(
         } ?: emptyMap()
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
+        val externalPaymentMethodsData = paymentMethodPreference.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHODS_DATA)?.toString()
 
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
 
@@ -71,6 +72,7 @@ internal class ElementsSessionJsonParser(
                     disableLinkSignup = disableLinkSignup,
                 ),
                 paymentMethodSpecs = paymentMethodSpecs,
+                externalPaymentMethodsData = externalPaymentMethodsData,
                 stripeIntent = stripeIntent,
                 merchantCountry = merchantCountry,
                 isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
@@ -175,6 +177,7 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
         private const val FIELD_CARD_BRAND_CHOICE = "card_brand_choice"
         private const val FIELD_ELIGIBLE = "eligible"
+        private const val FIELD_EXTERNAL_PAYMENT_METHODS_DATA = "external_payment_methods_data"
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
     }
 }
