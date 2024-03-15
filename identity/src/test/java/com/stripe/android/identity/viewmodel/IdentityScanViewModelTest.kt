@@ -18,7 +18,6 @@ import org.mockito.Mockito.mock
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import java.lang.ref.WeakReference
 
 @RunWith(RobolectricTestRunner::class)
 internal class IdentityScanViewModelTest {
@@ -28,7 +27,7 @@ internal class IdentityScanViewModelTest {
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val viewModel = object : IdentityScanViewModel(
-        WeakReference(ApplicationProvider.getApplicationContext()),
+        ApplicationProvider.getApplicationContext(),
         mockFpsTracker,
         mockIdentityRepository,
         mockIdentityAnalyticsRequestFactory,

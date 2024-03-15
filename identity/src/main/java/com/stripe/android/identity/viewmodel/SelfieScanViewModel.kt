@@ -1,9 +1,12 @@
 package com.stripe.android.identity.viewmodel
 
+import android.app.Application
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.identity.R
 import com.stripe.android.identity.analytics.FPSTracker
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -16,18 +19,17 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
-import java.lang.ref.WeakReference
 import javax.inject.Inject
 
 internal class SelfieScanViewModel(
-    context: WeakReference<Context>,
+    applicationContext: Application,
     override val fpsTracker: FPSTracker,
     override val identityRepository: IdentityRepository,
     override val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     modelPerformanceTracker: ModelPerformanceTracker,
     laplacianBlurDetector: LaplacianBlurDetector
 ) : IdentityScanViewModel(
-    context,
+    applicationContext,
     fpsTracker,
     identityRepository,
     identityAnalyticsRequestFactory,
@@ -68,9 +70,9 @@ internal class SelfieScanViewModel(
         private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return SelfieScanViewModel(
-                WeakReference(context),
+                extras.requireApplication(),
                 fpsTracker,
                 identityRepository,
                 identityAnalyticsRequestFactory,

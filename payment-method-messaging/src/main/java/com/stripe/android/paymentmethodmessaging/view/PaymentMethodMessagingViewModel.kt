@@ -6,10 +6,10 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentmethodmessaging.view.injection.DaggerPaymentMethodMessagingComponent
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.MutableStateFlow

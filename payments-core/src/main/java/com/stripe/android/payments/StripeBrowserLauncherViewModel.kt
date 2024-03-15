@@ -18,9 +18,9 @@ import com.stripe.android.core.browser.BrowserCapabilitiesSupplier
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
-import com.stripe.android.utils.requireApplication
 
 internal class StripeBrowserLauncherViewModel(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,

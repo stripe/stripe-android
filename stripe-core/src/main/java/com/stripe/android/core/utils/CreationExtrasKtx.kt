@@ -1,6 +1,4 @@
-@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-
-package com.stripe.android.utils
+package com.stripe.android.core.utils
 
 import android.app.Application
 import androidx.annotation.RestrictTo

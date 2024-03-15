@@ -16,6 +16,7 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.FeatureFlags.customerSheetACHv2
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
@@ -28,7 +29,6 @@ import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateS
 import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetRequest
 import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted

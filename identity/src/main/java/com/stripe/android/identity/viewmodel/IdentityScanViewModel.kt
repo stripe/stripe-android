@@ -1,6 +1,6 @@
 package com.stripe.android.identity.viewmodel
 
-import android.content.Context
+import android.app.Application
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.camera.scanui.util.asRect
@@ -17,10 +17,9 @@ import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import java.lang.ref.WeakReference
 
 internal abstract class IdentityScanViewModel(
-    private val context: WeakReference<Context>,
+    private val applicationContext: Application,
     open val fpsTracker: FPSTracker,
     open val identityRepository: IdentityRepository,
     open val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
@@ -132,7 +131,7 @@ internal abstract class IdentityScanViewModel(
         scanStatePrevious = null
 
         identityScanFlow?.startFlow(
-            context = requireNotNull(context.get()),
+            context = applicationContext,
             imageStream = cameraManager.requireCameraAdapter().getImageStream(),
             viewFinder = cameraManager.requireCameraView().viewFinderWindowView.asRect(),
             lifecycleOwner = lifecycleOwner,

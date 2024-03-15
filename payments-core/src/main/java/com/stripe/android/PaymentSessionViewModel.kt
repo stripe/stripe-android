@@ -10,9 +10,9 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
