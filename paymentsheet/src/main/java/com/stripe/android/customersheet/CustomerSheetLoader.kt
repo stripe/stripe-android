@@ -97,6 +97,8 @@ internal class DefaultCustomerSheetLoader(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             ).sharedDataSpecs
+            val externalPaymentMethodSpecs = lpmRepository.getExternalPaymentMethodSpecs(elementsSession.stripeIntent,
+                elementsSession.externalPaymentMethodsData)
 
             val cbcEligibility = CardBrandChoiceEligibility.create(
                 isEligible = elementsSession.isEligibleForCardBrandChoice,
@@ -114,7 +116,8 @@ internal class DefaultCustomerSheetLoader(
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
                 sharedDataSpecs = sharedDataSpecs,
-                financialConnectionsAvailable = isFinancialConnectionsAvailable()
+                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs
             )
 
             lpmRepository.update(

@@ -57,7 +57,8 @@ class SetupIntentJsonParser : ModelJsonParser<SetupIntent> {
             nextActionData = json.optJSONObject(FIELD_NEXT_ACTION)?.let {
                 NextActionDataParser().parse(it)
             },
-            paymentMethodOptionsJsonString = paymentMethodOptions
+            paymentMethodOptionsJsonString = paymentMethodOptions,
+            externalPaymentMethodTypes = emptyList() // TODO: parse from intent
         )
     }
 

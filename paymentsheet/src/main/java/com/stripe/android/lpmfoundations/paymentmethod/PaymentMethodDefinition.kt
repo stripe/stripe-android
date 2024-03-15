@@ -24,6 +24,8 @@ internal interface PaymentMethodDefinition {
      */
     fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
 
+    // TODO: PaymentMethodDefinition currently accepts a sharedDataSpec, but I was planning on having an ExternalPaymentMethodSpec
+    // see if this can be shared? or we will need to update this PaymentMethodDefinition potentially??
     fun supportedPaymentMethod(metadata: PaymentMethodMetadata, sharedDataSpec: SharedDataSpec): SupportedPaymentMethod
 }
 

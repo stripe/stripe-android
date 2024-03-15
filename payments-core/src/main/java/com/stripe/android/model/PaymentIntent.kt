@@ -31,6 +31,9 @@ constructor(
      */
     override val paymentMethodTypes: List<String>,
 
+    // TODO: javadoc
+    override val externalPaymentMethodTypes: List<String>,
+
     /**
      * Amount intended to be collected by this [PaymentIntent]. A positive integer
      * representing how much to charge in the smallest currency unit (e.g., 100 cents to charge

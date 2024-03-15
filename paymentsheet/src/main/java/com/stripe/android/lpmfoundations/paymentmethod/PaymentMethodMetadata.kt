@@ -45,6 +45,8 @@ internal data class PaymentMethodMetadata(
         val possiblePaymentMethodTypes = listOf(stripeIntent.paymentMethodTypes, stripeIntent.externalPaymentMethodTypes).flatten()
         return possiblePaymentMethodTypes.mapNotNull {
             // TODO: add EPMs to this registry???
+            // TODO: another thing is that we will need to show multiple EPMs, so we need to make sure that
+            // we are including multiple
             PaymentMethodRegistry.definitionsByCode[it]
         }.filter {
             it.isSupported(this)

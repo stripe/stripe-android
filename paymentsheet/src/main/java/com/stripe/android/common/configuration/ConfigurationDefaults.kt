@@ -22,4 +22,5 @@ internal object ConfigurationDefaults {
     val primaryButtonColor: ColorStateList? = null
     val primaryButtonLabel: String? = null
     val shippingDetails: AddressDetails? = null
+    val externalPaymentMethodsConfiguration = PaymentSheet.ExternalPaymentMethodsConfiguration()
 }

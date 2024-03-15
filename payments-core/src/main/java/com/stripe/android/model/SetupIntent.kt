@@ -107,6 +107,7 @@ data class SetupIntent internal constructor(
     override val nextActionData: StripeIntent.NextActionData?,
 
     private val paymentMethodOptionsJsonString: String? = null,
+    override val externalPaymentMethodTypes: List<String>,
 ) : StripeIntent {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -20,6 +20,8 @@ class DeferredPaymentIntentJsonParser(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
         )
 
+        val externalPaymentMethodTypes = jsonArrayToList(json.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHOD_TYPES))
+
         val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         )
@@ -47,7 +49,8 @@ class DeferredPaymentIntentJsonParser(
             created = timeProvider(),
             setupFutureUsage = paymentMode.setupFutureUsage,
             amount = paymentMode.amount,
-            currency = paymentMode.currency
+            currency = paymentMode.currency,
+            externalPaymentMethodTypes = externalPaymentMethodTypes
         )
     }
 
@@ -56,5 +59,7 @@ class DeferredPaymentIntentJsonParser(
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        // TODO: ensure this is included in the intent.
+        private const val FIELD_EXTERNAL_PAYMENT_METHOD_TYPES = "external_payment_methods_data"
     }
 }

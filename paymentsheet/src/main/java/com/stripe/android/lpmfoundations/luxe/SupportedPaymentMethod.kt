@@ -20,6 +20,7 @@ data class SupportedPaymentMethod(
     /** This describes if the LPM requires a mandate see [ConfirmPaymentIntentParams.mandateDataParams]. */
     val requiresMandate: Boolean,
 
+    // TODO: this is going to come from the intent for EPMs, so will need to be a string. Not a string resource.
     /** This describes the name that appears under the selector. */
     @StringRes val displayNameResource: Int,
 
