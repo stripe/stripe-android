@@ -49,7 +49,6 @@ import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
-import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
@@ -65,7 +64,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -400,15 +398,6 @@ internal class CustomerSheetViewModel(
             it.copy(
                 isEditing = isEditing,
                 primaryButtonVisible = !isEditing && originalPaymentSelection != it.paymentSelection,
-            )
-        }
-    }
-
-    private fun onFormDataUpdated(formData: FormViewModel.ViewData) {
-        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-            it.copy(
-                formViewData = formData,
-                primaryButtonEnabled = formData.completeFormValues != null && !it.isProcessing,
             )
         }
     }
@@ -770,12 +759,6 @@ internal class CustomerSheetViewModel(
             cbcEligibility = cbcEligibility,
         )
 
-        val observe = buildFormObserver(
-            formArguments = formArguments,
-            formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
-            onFormDataUpdated = ::onFormDataUpdated
-        )
-
         val selectedPaymentMethod = previouslySelectedPaymentMethod
             ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode))
 
@@ -828,8 +811,6 @@ internal class CustomerSheetViewModel(
             ),
             reset = isFirstPaymentMethod
         )
-
-        observe()
     }
 
     private fun updateCustomButtonUIState(callback: (PrimaryButton.UIState?) -> PrimaryButton.UIState?) {
@@ -1182,26 +1163,6 @@ internal class CustomerSheetViewModel(
         } else {
             backStack.update { currentStack ->
                 listOf(buildDefaultSelectPaymentMethod(update)) + currentStack
-            }
-        }
-    }
-
-    private fun buildFormObserver(
-        formArguments: FormArguments,
-        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
-        onFormDataUpdated: (data: FormViewModel.ViewData) -> Unit
-    ): () -> Unit {
-        val formViewModel = formViewModelSubcomponentBuilderProvider.get()
-            .formArguments(formArguments)
-            .showCheckboxFlow(flowOf(false))
-            .build()
-            .viewModel
-
-        return {
-            viewModelScope.launch {
-                formViewModel.viewDataFlow.collect { data ->
-                    onFormDataUpdated(data)
-                }
             }
         }
     }
