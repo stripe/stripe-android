@@ -76,7 +76,9 @@
     <ID>TooManyFunctions:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>UnnecessaryAbstractClass:IdentityCommonModule.kt$IdentityCommonModule$IdentityCommonModule</ID>
     <ID>UnusedPrivateMember:DocumentScanScreen.kt$private const val FEED_BACK_REFRESH_LIMIT = 300L</ID>
+    <ID>UnusedPrivateMember:DocumentScanViewModel.kt$DocumentScanViewModel.DocumentScanViewModelFactory$private val context: Context</ID>
     <ID>UnusedPrivateMember:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$i</ID>
+    <ID>UnusedPrivateMember:SelfieScanViewModel.kt$SelfieScanViewModel.SelfieScanViewModelFactory$private val context: Context</ID>
     <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * Response for initial VerificationPage, used for building UI. */ @VisibleForTesting internal val _verificationPage: MutableLiveData&lt;Resource&lt;VerificationPage>> = // No need to write to savedStateHandle for livedata savedStateHandle.getLiveData( key = VERIFICATION_PAGE, initialValue = Resource.idle() )</ID>
     <ID>VariableNaming:IdentityViewModel.kt$IdentityViewModel$/** * StateFlow to track the data collected so far. */ @VisibleForTesting internal val _collectedData = MutableStateFlow( savedStateHandle[COLLECTED_DATA] ?: CollectedDataParam() )</ID>
   </CurrentIssues>
