@@ -24,6 +24,7 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.ml.AnalyzerInput
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
+import kotlin.random.Random
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentDocumentCaptureMBSettings as MBSettings
 
 internal class MBDetector private constructor(settings: MBSettings) {
