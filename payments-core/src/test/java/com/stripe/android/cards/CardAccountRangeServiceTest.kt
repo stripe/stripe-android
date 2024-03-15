@@ -14,10 +14,10 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -156,7 +156,7 @@ class CardAccountRangeServiceTest {
                     return expectedAccountRanges
                 }
 
-                override val loading: Flow<Boolean> = flowOf(false)
+                override val loading: StateFlow<Boolean> = stateFlowOf(false)
             }
         )
 

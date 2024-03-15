@@ -43,6 +43,6 @@ internal class DefaultCardAccountRangeRepository(
         remoteSource.loading,
         staticSource.loading
     ) { loading1, loading2, loading3 ->
-        loading1 || loading2|| loading3
+        loading1 || loading2 || loading3
     }
 }

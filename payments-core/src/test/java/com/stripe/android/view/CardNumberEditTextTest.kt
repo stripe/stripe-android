@@ -39,13 +39,13 @@ import com.stripe.android.model.BinRange
 import com.stripe.android.model.CardBrand
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.testharness.ViewTestUtils
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -746,7 +746,7 @@ internal class CardNumberEditTextTest {
                     return cardAccountRangeRepository.getAccountRanges(cardNumber)
                 }
 
-                override val loading: Flow<Boolean> = flowOf(false)
+                override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory
@@ -851,7 +851,7 @@ internal class CardNumberEditTextTest {
                     return cardAccountRangeRepository.getAccountRanges(cardNumber)
                 }
 
-                override val loading: Flow<Boolean> = flowOf(false)
+                override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             analyticsRequestExecutor = analyticsRequestExecutor,
             paymentAnalyticsRequestFactory = analyticsRequestFactory
@@ -914,7 +914,7 @@ internal class CardNumberEditTextTest {
                     cardNumber: CardNumber.Unvalidated
                 ): List<AccountRange>? = null
 
-                override val loading: Flow<Boolean> = flowOf(false)
+                override val loading: StateFlow<Boolean> = stateFlowOf(false)
             },
             analyticsRequestExecutor = {
                 analyticsRequests.add(it)
@@ -1138,7 +1138,7 @@ internal class CardNumberEditTextTest {
             return null
         }
 
-        override val loading: Flow<Boolean> = flowOf(false)
+        override val loading: StateFlow<Boolean> = stateFlowOf(false)
     }
 
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
@@ -1159,7 +1159,7 @@ internal class CardNumberEditTextTest {
             }
         }
 
-        override val loading: Flow<Boolean> = flowOf(false)
+        override val loading: StateFlow<Boolean> = stateFlowOf(false)
     }
 
     private companion object {

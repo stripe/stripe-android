@@ -18,8 +18,8 @@ import com.stripe.android.networktesting.RequestMatchers.header
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
@@ -323,7 +323,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
             return accountRanges
         }
 
-        override val loading: Flow<Boolean> = flowOf(isLoading)
+        override val loading: StateFlow<Boolean> = stateFlowOf(isLoading)
     }
 
     private companion object {
