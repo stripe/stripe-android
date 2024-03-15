@@ -603,28 +603,28 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `On checkout clear the previous view state error`() = runTest {
+    fun `On checkout clear the previous view state error`() = runTest(UnconfinedTestDispatcher()) {
         val viewModel = createViewModel()
         viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
         turbineScope {
             val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
-            val buyButtonTurbine = viewModel.buyButtonState.testIn(this)
+            val primaryButtonStateTurbine = viewModel.primaryButtonState.testIn(this)
 
             assertThat(walletsProcessingStateTurbine.awaitItem())
                 .isEqualTo(WalletsProcessingState.Idle(null))
-            assertThat(buyButtonTurbine.awaitItem())
-                .isEqualTo(null)
+            assertThat(primaryButtonStateTurbine.awaitItem())
+                .isEqualTo(PrimaryButton.State.Ready)
 
             viewModel.checkout()
 
             assertThat(walletsProcessingStateTurbine.awaitItem())
                 .isEqualTo(null)
-            assertThat(buyButtonTurbine.awaitItem())
-                .isEqualTo(PaymentSheetViewState.StartProcessing)
+            assertThat(primaryButtonStateTurbine.awaitItem())
+                .isEqualTo(PrimaryButton.State.StartProcessing)
 
             walletsProcessingStateTurbine.cancel()
-            buyButtonTurbine.cancel()
+            primaryButtonStateTurbine.cancel()
         }
     }
 
@@ -685,12 +685,10 @@ internal class PaymentSheetViewModelTest {
 
         turbineScope {
             val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
-            val buyButtonStateTurbine = viewModel.buyButtonState.testIn(this)
+            val primaryButtonStateTurbine = viewModel.primaryButtonState.testIn(this)
 
             assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(null)
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(
-                PaymentSheetViewState.Reset(null)
-            )
+            assertThat(primaryButtonStateTurbine.awaitItem()).isEqualTo(PrimaryButton.State.Ready)
 
             viewModel.updateSelection(
                 PaymentSelection.New.Card(
@@ -718,15 +716,15 @@ internal class PaymentSheetViewModelTest {
 
             walletsProcessingStateTurbine.expectNoEvents()
 
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(PaymentSheetViewState.StartProcessing)
+            assertThat(primaryButtonStateTurbine.awaitItem()).isEqualTo(PrimaryButton.State.StartProcessing)
 
             fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
-            assertThat(buyButtonStateTurbine.awaitItem()).isInstanceOf(
-                PaymentSheetViewState.FinishProcessing::class.java
+            assertThat(primaryButtonStateTurbine.awaitItem()).isInstanceOf(
+                PrimaryButton.State.FinishProcessing::class.java
             )
 
-            buyButtonStateTurbine.cancel()
+            primaryButtonStateTurbine.cancel()
             walletsProcessingStateTurbine.cancel()
         }
     }
@@ -757,17 +755,15 @@ internal class PaymentSheetViewModelTest {
 
         turbineScope {
             val walletsProcessingStateTurbine = viewModel.walletsProcessingState.testIn(this)
-            val buyButtonStateTurbine = viewModel.buyButtonState.testIn(this)
+            val primaryButtonStateTurbine = viewModel.primaryButtonState.testIn(this)
 
             assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(null)
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(
-                PaymentSheetViewState.Reset(null)
-            )
+            assertThat(primaryButtonStateTurbine.awaitItem()).isEqualTo(PrimaryButton.State.Ready)
 
             viewModel.linkHandler.launchLink()
 
             assertThat(walletsProcessingStateTurbine.awaitItem()).isEqualTo(WalletsProcessingState.Processing)
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(null)
+            assertThat(primaryButtonStateTurbine.awaitItem()).isEqualTo(null)
 
             fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
@@ -780,9 +776,9 @@ internal class PaymentSheetViewModelTest {
             assertThat(walletsProcessingStateTurbine.awaitItem()).isInstanceOf(
                 WalletsProcessingState.Completed::class.java
             )
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(null)
+            primaryButtonStateTurbine.expectNoEvents()
 
-            buyButtonStateTurbine.cancel()
+            primaryButtonStateTurbine.cancel()
             walletsProcessingStateTurbine.cancel()
         }
     }
@@ -1237,11 +1233,11 @@ internal class PaymentSheetViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.primaryButtonState.test {
-            assertThat(awaitItem()).isNull()
-
-            viewModel.updatePrimaryButtonState(PrimaryButton.State.Ready)
-
             assertThat(awaitItem()).isEqualTo(PrimaryButton.State.Ready)
+
+            viewModel.updatePrimaryButtonState(PrimaryButton.State.StartProcessing)
+
+            assertThat(awaitItem()).isEqualTo(PrimaryButton.State.StartProcessing)
         }
     }
 

@@ -61,6 +61,7 @@ import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -68,12 +69,13 @@ import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -149,10 +151,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-    val buyButtonState: Flow<PaymentSheetViewState?> = viewState.map { viewState ->
-        mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetBottomBuy)
-    }
-
     internal val isProcessingPaymentIntent
         get() = args.initializationMode.isProcessingPayment
 
@@ -210,7 +208,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         initialValue = null,
     )
 
-    override val error: StateFlow<String?> = buyButtonState.map { it?.errorMessage?.message }.stateIn(
+    override val error: StateFlow<String?> = viewState.map {
+        it?.errorMessage?.message?.takeIf {
+            checkoutIdentifier == CheckoutIdentifier.SheetBottomBuy
+        }
+    }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = null,
@@ -266,6 +268,25 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         viewModelScope.launch {
             linkHandler.processingState.collect { processingState ->
                 handleLinkProcessingState(processingState)
+            }
+        }
+
+        viewModelScope.launch {
+            viewState.map { viewState ->
+                when (
+                    val viewStateFromIdentifier = mapViewStateToCheckoutIdentifier(
+                        viewState,
+                        CheckoutIdentifier.SheetBottomBuy
+                    )
+                ) {
+                    null -> null
+                    is PaymentSheetViewState.Reset -> PrimaryButton.State.Ready
+                    is PaymentSheetViewState.StartProcessing -> PrimaryButton.State.StartProcessing
+                    is PaymentSheetViewState.FinishProcessing ->
+                        PrimaryButton.State.FinishProcessing(viewStateFromIdentifier.onComplete)
+                }
+            }.collectLatest { state ->
+                updatePrimaryButtonState(state)
             }
         }
 

@@ -4,15 +4,19 @@ import android.content.Context
 import android.os.Build
 import androidx.activity.result.ActivityResultLauncher
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.core.view.isVisible
+import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -34,11 +38,9 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.update
-import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherFactory
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -46,7 +48,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
 import com.stripe.android.paymentsheet.PaymentSheetViewModel.CheckoutIdentifier
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSheetViewState
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -55,8 +56,12 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSaved
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.POST_SUCCESS_ANIMATION_DELAY
+import com.stripe.android.paymentsheet.ui.PRE_SUCCESS_ANIMATION_DELAY
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
+import com.stripe.android.paymentsheet.utils.doesNotHaveDrawable
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
@@ -161,8 +166,8 @@ internal class PaymentSheetActivityTest {
         }
     }
 
-    private val PaymentSheetActivity.buyButton: PrimaryButton
-        get() = findViewById(R.id.primary_button)
+    private val buyButton: SemanticsNodeInteraction
+        get() = composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
     @Test
     fun `disables primary button when editing`() {
@@ -172,11 +177,12 @@ internal class PaymentSheetActivityTest {
 
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.buyButton.isEnabled).isTrue()
+        scenario.launch(intent).onActivity {
+            buyButton.assertIsEnabled()
 
             viewModel.toggleEditing()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+
+            buyButton.assertIsNotEnabled()
         }
     }
 
@@ -203,12 +209,12 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel(isLinkAvailable = true)
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
                 .assertIsEnabled()
 
-            activity.buyButton.callOnClick()
+            buyButton.performClick()
 
             composeTestRule
                 .onNodeWithTag(LinkButtonTestTag)
@@ -221,7 +227,7 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             val error = "some error"
 
             composeTestRule
@@ -234,7 +240,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(error)
                 .assertExists()
 
-            activity.buyButton.callOnClick()
+            buyButton.performClick()
 
             composeTestRule
                 .onNodeWithText(error)
@@ -399,42 +405,72 @@ internal class PaymentSheetActivityTest {
 
         val viewModel = createViewModel(paymentMethods = emptyList())
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             // Initially empty card
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            buyButton.assertExists()
+            buyButton.assertIsNotEnabled()
 
             // Update to Google Pay
             viewModel.checkoutWithGooglePay()
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            buyButton.assertDoesNotExist()
             assertThat(viewModel.contentVisible.value).isFalse()
 
             viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
             assertThat(viewModel.contentVisible.value).isTrue()
 
-            // Update to saved card
-            viewModel.updateSelection(
-                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            composeTestRule
+                .onNodeWithText("Card number")
+                .performTextInput("4242424242424242")
 
-            // Back to empty/invalid card
-            viewModel.updateSelection(null)
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isFalse()
+            composeTestRule
+                .onNodeWithText("MM / YY")
+                .performTextInput("0525")
 
-            // New valid card
-            viewModel.updateSelection(
-                PaymentSelection.New.Card(
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    CardBrand.Visa,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                )
-            )
-            assertThat(activity.buyButton.isVisible).isTrue()
-            assertThat(activity.buyButton.isEnabled).isTrue()
+            composeTestRule
+                .onNodeWithText("CVC")
+                .performTextInput("507")
+
+            composeTestRule
+                .onNodeWithText("ZIP Code")
+                .performTextInput("99999")
+
+            buyButton.assertExists()
+            buyButton.assertIsEnabled()
+        }
+    }
+
+    @Test
+    fun `updates buy button state on select payment`() {
+        Dispatchers.setMain(testDispatcher)
+
+        val viewModel = createViewModel(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+            initialPaymentSelection = null
+        )
+        val scenario = activityScenario(viewModel)
+        scenario.launch(intent).onActivity {
+            buyButton.assertExists()
+            buyButton.assertIsNotEnabled()
+
+            viewModel.checkoutWithGooglePay()
+            buyButton.assertDoesNotExist()
+            assertThat(viewModel.contentVisible.value).isFalse()
+
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            assertThat(viewModel.contentVisible.value).isTrue()
+
+            composeTestRule.onNode(
+                hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+                    .and(
+                        hasText(
+                            text = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.last4 ?: "",
+                            substring = true
+                        )
+                    )
+            ).performClick()
+
+            buyButton.assertExists()
+            buyButton.assertIsEnabled()
         }
     }
 
@@ -498,17 +534,14 @@ internal class PaymentSheetActivityTest {
         val viewModel = createViewModel()
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             viewModel.updateSelection(
                 PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
             )
-            assertThat(activity.buyButton.isEnabled)
-                .isTrue()
 
-            activity.buyButton.performClick()
-
-            assertThat(activity.buyButton.isEnabled)
-                .isFalse()
+            buyButton.assertIsEnabled()
+            buyButton.performClick()
+            buyButton.assertIsNotEnabled()
         }
     }
 
@@ -520,10 +553,11 @@ internal class PaymentSheetActivityTest {
         scenario.launch(intent).onActivity { activity ->
             viewModel.viewState.value = PaymentSheetViewState.Reset(null)
 
-            val buyBinding = StripePrimaryButtonBinding.bind(activity.buyButton)
-
-            assertThat(buyBinding.confirmedIcon.isVisible)
-                .isFalse()
+            buyButton.assert(
+                doesNotHaveDrawable(
+                    R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark
+                )
+            )
 
             activity.finish()
         }
@@ -538,8 +572,9 @@ internal class PaymentSheetActivityTest {
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
             viewModel.viewState.value = PaymentSheetViewState.StartProcessing
 
-            assertThat(activity.buyButton.externalLabel)
-                .isEqualTo(activity.getString(R.string.stripe_paymentsheet_primary_button_processing))
+            buyButton.assertTextEquals(
+                activity.getString(R.string.stripe_paymentsheet_primary_button_processing)
+            )
         }
     }
 
@@ -557,6 +592,12 @@ internal class PaymentSheetActivityTest {
             viewModel.viewState.value = PaymentSheetViewState.FinishProcessing {
                 countDownLatch.countDown()
             }
+
+            composeTestRule.mainClock.advanceTimeBy(
+                milliseconds = PRE_SUCCESS_ANIMATION_DELAY + POST_SUCCESS_ANIMATION_DELAY
+            )
+
+            composeTestRule.waitForIdle()
 
             countDownLatch.await(5, TimeUnit.SECONDS)
         }
@@ -779,46 +820,56 @@ internal class PaymentSheetActivityTest {
 
     @Test
     fun `mandate text is shown below primary button when showAbove is false`() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            paymentMethods = listOf(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                PaymentMethodFixtures.US_BANK_ACCOUNT
+            )
+        )
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            val text = "some text"
-            val mandateNode = composeTestRule.onNode(hasText(text))
+            val mandateNode = composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_MANDATE_TEST_TAG)
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, false)
+            viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
             val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
             assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-            viewModel.updateMandateText(null, false)
+            viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
             mandateNode.assertDoesNotExist()
         }
     }
 
     @Test
     fun `mandate text is shown above primary button when showAbove is true`() {
-        val viewModel = createViewModel()
+        val viewModel = createViewModel(
+            paymentMethods = listOf(
+                PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+            )
+        )
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            val text = "some text"
-            val mandateNode = composeTestRule.onNode(hasText(text))
+            val mandateNode = composeTestRule
+                .onNodeWithTag(PAYMENT_SHEET_MANDATE_TEST_TAG)
             val primaryButtonNode = composeTestRule
                 .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-            viewModel.updateMandateText(text, true)
+            viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD))
             mandateNode.assertIsDisplayed()
 
             val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
             val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
             assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-            viewModel.updateMandateText(null, true)
+            viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
             mandateNode.assertDoesNotExist()
         }
     }
@@ -916,8 +967,8 @@ internal class PaymentSheetActivityTest {
             paymentMethods = emptyList(),
         )
         val scenario = activityScenario(viewModel)
-        scenario.launch(intent).onActivity { activity ->
-            assertThat(activity.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
+        scenario.launch(intent).onActivity {
+            buyButton.assertTextEquals("Pay CA\$99.99")
         }
     }
 
@@ -934,11 +985,11 @@ internal class PaymentSheetActivityTest {
 
         val scenario = activityScenario(viewModel)
 
-        scenario.launch(intent).onActivity { activity ->
+        scenario.launch(intent).onActivity {
             testDispatcher.scheduler.advanceTimeBy(50)
-            assertThat(activity.buyButton.externalLabel).isEqualTo("Pay")
+            buyButton.assertDoesNotExist()
             testDispatcher.scheduler.advanceTimeBy(250)
-            assertThat(activity.buyButton.externalLabel).isEqualTo("Pay CA\$99.99")
+            buyButton.assertTextEquals("Pay CA\$99.99")
         }
     }
 

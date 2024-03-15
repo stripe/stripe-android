@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
@@ -11,6 +12,10 @@ import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.POST_SUCCESS_ANIMATION_DELAY
+import com.stripe.android.paymentsheet.ui.PRE_SUCCESS_ANIMATION_DELAY
+import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingState
+import com.stripe.android.paymentsheet.ui.PrimaryButtonProcessingStateKey
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 private typealias ComposeTestRule = AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>
@@ -104,6 +109,9 @@ internal class PaymentSheetPage(
     }
 
     fun clickPrimaryButton() {
+        Espresso.closeSoftKeyboard()
+        Espresso.onIdle()
+
         composeTestRule.waitUntil(5_000) {
             composeTestRule
                 .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
@@ -113,6 +121,16 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
+//
+//        composeTestRule.mainClock.advanceTimeByFrame()
+//
+//        composeTestRule.waitForIdle()
+//
+//        composeTestRule.mainClock.advanceTimeBy(
+//            PRE_SUCCESS_ANIMATION_DELAY + POST_SUCCESS_ANIMATION_DELAY
+//        )
+
+        composeTestRule.waitForIdle()
     }
 
     fun clickViewWithText(text: String) {
@@ -157,5 +175,9 @@ internal class PaymentSheetPage(
         composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
             .performScrollTo()
             .performClick()
+    }
+
+    private fun hasProcessingState(processingState: PrimaryButtonProcessingState): SemanticsMatcher {
+        return SemanticsMatcher.expectValue(PrimaryButtonProcessingStateKey, processingState)
     }
 }
