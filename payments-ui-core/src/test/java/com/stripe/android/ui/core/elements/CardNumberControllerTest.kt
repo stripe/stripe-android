@@ -24,10 +24,8 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -501,7 +499,7 @@ internal class CardNumberControllerTest {
             }
         }
 
-        override val loading: Flow<Boolean> = flowOf(false)
+        override val loading: StateFlow<Boolean> = stateFlowOf(false)
     }
 
     private companion object {

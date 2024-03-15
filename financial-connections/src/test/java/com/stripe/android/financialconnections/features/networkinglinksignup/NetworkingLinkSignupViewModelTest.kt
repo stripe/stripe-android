@@ -22,7 +22,6 @@ import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -85,7 +84,7 @@ class NetworkingLinkSignupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkSignupState())
         val state = viewModel.awaitState()
         val payload = requireNotNull(state.payload())
-        assertThat(payload.emailController.fieldValue.first()).isEqualTo("test@test.com")
+        assertThat(payload.emailController.fieldValue.value).isEqualTo("test@test.com")
     }
 
     @Test
