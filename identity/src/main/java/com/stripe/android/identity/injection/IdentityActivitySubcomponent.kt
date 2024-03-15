@@ -13,7 +13,8 @@ import com.stripe.android.identity.networking.IdentityModelFetcher
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
-import com.stripe.android.identity.viewmodel.IdentityScanViewModel
+import com.stripe.android.identity.viewmodel.DocumentScanViewModel
+import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.mlcore.base.InterpreterInitializer
 import com.stripe.android.uicore.address.AddressRepository
 import dagger.BindsInstance
@@ -22,7 +23,8 @@ import dagger.Subcomponent
 @IdentityVerificationScope
 @Subcomponent
 internal interface IdentityActivitySubcomponent {
-    val identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory
+    val documentScanViewModelFactory: DocumentScanViewModel.DocumentScanViewModelFactory
+    val selfieScanViewModelFactory: SelfieScanViewModel.SelfieScanViewModelFactory
     val identityRepository: IdentityRepository
     val identityModelFetcher: IdentityModelFetcher
     val identityIO: IdentityIO

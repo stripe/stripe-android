@@ -181,7 +181,8 @@ internal class IdentityActivity :
                     appSettingsOpenable = this,
                     cameraPermissionEnsureable = this,
                     verificationFlowFinishable = this,
-                    identityScanViewModelFactory = subcomponent.identityScanViewModelFactory,
+                    documentScanViewModelFactory = subcomponent.documentScanViewModelFactory,
+                    selfieScanViewModelFactory = subcomponent.selfieScanViewModelFactory,
                     topBarState = topBarState,
                     onTopBarNavigationClick = {
                         onBackPressedCallback.handleOnBackPressed()

@@ -16,9 +16,9 @@ import com.stripe.android.analytics.PaymentSessionEventReporter
 import com.stripe.android.analytics.PaymentSessionEventReporterFactory
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.i18n.ErrorMessageTranslator
 import com.stripe.android.view.i18n.TranslatorManager
 import kotlin.coroutines.resume

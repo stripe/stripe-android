@@ -51,8 +51,9 @@ import com.stripe.android.identity.ui.SelfieScanScreen
 import com.stripe.android.identity.ui.SelfieWarmupScreen
 import com.stripe.android.identity.ui.UploadScreen
 import com.stripe.android.identity.viewmodel.BottomSheetViewModel
-import com.stripe.android.identity.viewmodel.IdentityScanViewModel
+import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.uicore.stripeShapes
 import kotlinx.coroutines.launch
 
@@ -65,7 +66,8 @@ internal fun IdentityNavGraph(
     appSettingsOpenable: AppSettingsOpenable,
     cameraPermissionEnsureable: CameraPermissionEnsureable,
     verificationFlowFinishable: VerificationFlowFinishable,
-    identityScanViewModelFactory: IdentityScanViewModel.IdentityScanViewModelFactory,
+    documentScanViewModelFactory: DocumentScanViewModel.DocumentScanViewModelFactory,
+    selfieScanViewModelFactory: SelfieScanViewModel.SelfieScanViewModelFactory,
     onTopBarNavigationClick: () -> Unit,
     topBarState: IdentityTopBarState,
     onNavControllerCreated: (NavController) -> Unit
@@ -119,16 +121,16 @@ internal fun IdentityNavGraph(
                 )
             }
             screen(DocumentScanDestination.ROUTE) {
-                val identityScanViewModel: IdentityScanViewModel =
-                    viewModel(factory = identityScanViewModelFactory)
+                val documentScanViewModel: DocumentScanViewModel =
+                    viewModel(factory = documentScanViewModelFactory)
                 ScanDestinationEffect(
                     lifecycleOwner = it,
-                    identityScanViewModel = identityScanViewModel
+                    identityScanViewModel = documentScanViewModel
                 )
                 DocumentScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel
+                    documentScanViewModel = documentScanViewModel
                 )
             }
             screen(SelfieWarmupDestination.ROUTE) {
@@ -138,16 +140,17 @@ internal fun IdentityNavGraph(
                 )
             }
             screen(SelfieDestination.ROUTE) {
-                val identityScanViewModel: IdentityScanViewModel =
-                    viewModel(factory = identityScanViewModelFactory)
+                val selfieScanViewModel: SelfieScanViewModel =
+                    viewModel(factory = selfieScanViewModelFactory)
+
                 ScanDestinationEffect(
                     lifecycleOwner = it,
-                    identityScanViewModel = identityScanViewModel
+                    identityScanViewModel = selfieScanViewModel
                 )
                 SelfieScanScreen(
                     navController = navController,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel
+                    selfieScanViewModel = selfieScanViewModel
                 )
             }
             screen(DocumentUploadDestination.ROUTE) {
