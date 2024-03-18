@@ -263,14 +263,80 @@ class LinkHandlerTest {
             whenever(linkConfigurationCoordinator.signInWithUserInput(any(), any()))
                 .thenReturn(Result.success(true))
             testScope.launch {
-                handler.payWithLinkInline(userInput, cardSelection(), shouldCompleteLinkFlow)
+                handler.payWithLinkInline(
+                    userInput,
+                    cardSelection().copy(customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest),
+                    shouldCompleteLinkFlow
+                )
             }
             accountStatusFlow.emit(AccountStatus.SignedOut)
             assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
 
             accountStatusFlow.emit(AccountStatus.Verified)
-            assertThat(awaitItem()).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+
+            val processingState = awaitItem()
+            assertThat(processingState).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+
+            val selection = (processingState as LinkHandler.ProcessingState.PaymentDetailsCollected).paymentSelection
+            assertThat(selection).isInstanceOf(PaymentSelection.New.LinkInline::class.java)
+
+            val linkInlineSelection = selection as PaymentSelection.New.LinkInline
+            assertThat(linkInlineSelection.customerRequestedSave).isEqualTo(
+                PaymentSelection.CustomerRequestedSave.NoRequest
+            )
+
+            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
+            verify(linkLauncher, never()).present(eq(configuration))
+            verify(linkStore).markLinkAsUsed()
+        }
+
+        processingStateTurbine.cancelAndIgnoreRemainingEvents() // Validated above.
+    }
+
+    @Test
+    fun `payWithLinkInline collects payment details and requests payment is saved`() = runLinkInlineTest(
+        accountStatusFlow = MutableSharedFlow(replay = 0),
+        shouldCompleteLinkFlowValues = listOf(false),
+    ) {
+        val userInput = UserInput.SignIn(email = "example@example.com")
+
+        accountStatusTurbine.ensureAllEventsConsumed()
+        handler.setupLink(
+            state = LinkState(
+                loginState = LinkState.LoginState.LoggedOut,
+                configuration = configuration,
+            )
+        )
+
+        handler.processingState.test {
+            ensureAllEventsConsumed() // Begin with no events.
+            whenever(linkConfigurationCoordinator.signInWithUserInput(any(), any()))
+                .thenReturn(Result.success(true))
+            testScope.launch {
+                handler.payWithLinkInline(
+                    userInput,
+                    cardSelection().copy(customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse),
+                    shouldCompleteLinkFlow
+                )
+            }
+            accountStatusFlow.emit(AccountStatus.SignedOut)
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
+            assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.SignedOut)
+
+            accountStatusFlow.emit(AccountStatus.Verified)
+
+            val processingState = awaitItem()
+            assertThat(processingState).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+
+            val selection = (processingState as LinkHandler.ProcessingState.PaymentDetailsCollected).paymentSelection
+            assertThat(selection).isInstanceOf(PaymentSelection.New.LinkInline::class.java)
+
+            val linkInlineSelection = selection as PaymentSelection.New.LinkInline
+            assertThat(linkInlineSelection.customerRequestedSave).isEqualTo(
+                PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+
             assertThat(accountStatusTurbine.awaitItem()).isEqualTo(AccountStatus.Verified)
             verify(linkLauncher, never()).present(eq(configuration))
             verify(linkStore).markLinkAsUsed()

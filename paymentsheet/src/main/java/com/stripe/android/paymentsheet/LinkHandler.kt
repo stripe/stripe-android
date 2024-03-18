@@ -133,7 +133,7 @@ internal class LinkHandler @Inject constructor(
                     completeLinkInlinePayment(
                         configuration,
                         params,
-                        paymentSelection.customerRequestedSave == PaymentSelection.CustomerRequestedSave.RequestReuse,
+                        paymentSelection.customerRequestedSave,
                         userInput is UserInput.SignIn && shouldCompleteLinkInlineFlow
                     )
                 }
@@ -170,7 +170,7 @@ internal class LinkHandler @Inject constructor(
     private suspend fun completeLinkInlinePayment(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
-        customerRequestedSave: Boolean,
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         shouldCompleteLinkInlineFlow: Boolean
     ) {
         if (shouldCompleteLinkInlineFlow) {
@@ -184,7 +184,7 @@ internal class LinkHandler @Inject constructor(
 
             val paymentSelection = when (linkPaymentDetails) {
                 is LinkPaymentDetails.New -> {
-                    PaymentSelection.New.LinkInline(linkPaymentDetails)
+                    PaymentSelection.New.LinkInline(linkPaymentDetails, customerRequestedSave)
                 }
                 is LinkPaymentDetails.Saved -> {
                     val last4 = when (val paymentDetails = linkPaymentDetails.paymentDetails) {
@@ -207,7 +207,8 @@ internal class LinkHandler @Inject constructor(
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
-                        requiresSaveOnConfirmation = customerRequestedSave
+                        requiresSaveOnConfirmation = customerRequestedSave ==
+                            PaymentSelection.CustomerRequestedSave.RequestReuse,
                     )
                 }
                 null -> null

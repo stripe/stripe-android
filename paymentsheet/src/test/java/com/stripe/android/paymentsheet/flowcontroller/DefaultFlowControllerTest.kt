@@ -721,7 +721,8 @@ internal class DefaultFlowControllerTest {
                 PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                 mock(),
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            )
+            ),
+            PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
         flowController.onPaymentOptionResult(
@@ -760,7 +761,8 @@ internal class DefaultFlowControllerTest {
                 PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                 mock(),
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            )
+            ),
+            PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
         flowController.onPaymentOptionResult(
@@ -810,7 +812,8 @@ internal class DefaultFlowControllerTest {
                 PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                 mock(),
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            )
+            ),
+            PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
         flowController.onPaymentOptionResult(

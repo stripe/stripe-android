@@ -179,10 +179,10 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails) : New() {
-            @IgnoredOnParcel
-            override val customerRequestedSave = CustomerRequestedSave.NoRequest
-
+        data class LinkInline(
+            val linkPaymentDetails: LinkPaymentDetails,
+            override val customerRequestedSave: CustomerRequestedSave,
+        ) : New() {
             @IgnoredOnParcel
             private val paymentDetails = linkPaymentDetails.paymentDetails
 
