@@ -29,16 +29,7 @@ internal object CardDefinition : PaymentMethodDefinition {
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
-        return hardcodedCardSpec(
-            billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
-            transformSpecToElements = transformSpecToElements,
-        )
-    }
-
-    fun hardcodedCardSpec(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-        transformSpecToElements: TransformSpecToElements,
-    ): SupportedPaymentMethod {
+        val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
         val specs = listOfNotNull(
             ContactInformationSpec(
                 collectName = false,

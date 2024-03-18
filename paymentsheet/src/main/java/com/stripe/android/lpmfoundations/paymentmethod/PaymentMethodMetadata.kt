@@ -147,7 +147,6 @@ internal data class PaymentMethodMetadata(
         return null
     }
 
-    // TODO: Add tests for this new stuff.
     private fun transformSpecToElements(
         context: Context,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,

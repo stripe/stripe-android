@@ -8,12 +8,24 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.AddressElement
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.PhoneNumberElement
+import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.elements.SimpleTextElement
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFails
+import com.stripe.android.core.R as CoreR
+import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
@@ -342,89 +354,71 @@ internal class PaymentMethodMetadataTest {
         assertThat(metadata.amount()).isNull()
     }
 
-    // TODO: Add tests.
-//    @Test
-//    fun `Test placeholder specs are transformed correctly`() = runBlocking {
-//        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-//            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-//            attachDefaultsToPaymentMethod = false,
-//        )
-//        val specs = listOf(
-//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
-//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
-//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
-//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
-//        )
-//
-//        val args = COMPOSE_FRAGMENT_ARGS.copy(
-//            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-//        )
-//        val formViewModel = createViewModel(
-//            args,
-//            createLpmRepositorySupportedPaymentMethod(
-//                PaymentMethod.Type.Bancontact,
-//                LayoutSpec(specs),
-//            )
-//        )
-//        val formElement = formViewModel.elements
-//
-//        val nameSection = formElement[0] as SectionElement
-//        val nameElement = nameSection.fields[0] as SimpleTextElement
-//        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
-//        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
-//
-//        val emailSection = formElement[1] as SectionElement
-//        val emailElement = emailSection.fields[0] as EmailElement
-//        assertThat(emailElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_email)
-//        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
-//
-//        val phoneSection = formElement[2] as SectionElement
-//        val phoneElement = phoneSection.fields[0] as PhoneNumberElement
-//        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
-//        assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
-//
-//        val addressSection = formElement[3] as SectionElement
-//        val addressElement = addressSection.fields[0] as AddressElement
-//
-//        val identifiers = addressElement.fields.first().map { it.identifier }
-//        // Check that the address element contains country.
-//        assertThat(identifiers).contains(IdentifierSpec.Country)
-//    }
-//
-//    @Test
-//    fun `Test address without country placeholder produces correct element`() = runBlocking {
-//        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-//            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-//            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-//            attachDefaultsToPaymentMethod = false,
-//        )
-//
-//        val args = COMPOSE_FRAGMENT_ARGS.copy(
-//            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-//        )
-//        val formViewModel = createViewModel(
-//            args,
-//            createLpmRepositorySupportedPaymentMethod(
-//                PaymentMethod.Type.Bancontact,
-//                LayoutSpec(
-//                    listOf(
-//                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry)
-//                    )
-//                ),
-//            )
-//        )
-//        val formElement = formViewModel.elements
-//
-//        val addressSection = formElement.first() as SectionElement
-//        val addressElement = addressSection.fields[0] as AddressElement
-//        val identifiers = addressElement.fields.first().map { it.identifier }
-//        // Check that the address element doesn't contain country.
-//        assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
-//    }
-//
+    @Test
+    fun `supportedPaymentMethod fields are constructed correctly`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "bancontact")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+        val supportedPaymentMethod = metadata.supportedPaymentMethodForCode("bancontact", context)!!
+        val formElement = supportedPaymentMethod.formElements
+
+        val nameSection = formElement[0] as SectionElement
+        val nameElement = nameSection.fields[0] as SimpleTextElement
+        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
+        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
+
+        val emailSection = formElement[1] as SectionElement
+        val emailElement = emailSection.fields[0] as EmailElement
+        assertThat(emailElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_email)
+        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
+
+        val phoneSection = formElement[2] as SectionElement
+        val phoneElement = phoneSection.fields[0] as PhoneNumberElement
+        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
+        assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
+
+        val addressSection = formElement[3] as SectionElement
+        val addressElement = addressSection.fields[0] as AddressElement
+
+        val identifiers = addressElement.fields.first().map { it.identifier }
+        // Check that the address element contains country.
+        assertThat(identifiers).contains(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `supportedPaymentMethod fields address without country placeholder produces correct element`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            )
+        )
+        val supportedPaymentMethod = metadata.supportedPaymentMethodForCode("klarna", context)!!
+        val formElement = supportedPaymentMethod.formElements
+
+        val countrySection = formElement[4] as SectionElement
+        val countryElement = countrySection.fields[0] as CountryElement
+        assertThat(countryElement.identifier).isEqualTo(IdentifierSpec.Country)
+
+        val addressSection = formElement[5] as SectionElement
+        val addressElement = addressSection.fields[0] as AddressElement
+        val addressIdentifiers = addressElement.fields.first().map { it.identifier }
+        // Check that the address element doesn't contain country.
+        assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
+    }
 }
