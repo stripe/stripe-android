@@ -91,15 +91,9 @@ class DefaultIntentConfirmationInterceptorTest {
     }
 
     @Test
-    fun `Returns confirm params with setup future usage set to off session when requires save on confirmation`() =
+    fun `Returns confirm params with 'setup_future_usage' set to 'off_session' when requires save on confirmation`() =
         runTest {
-            val interceptor = DefaultIntentConfirmationInterceptor(
-                context = context,
-                stripeRepository = object : AbsFakeStripeRepository() {},
-                publishableKeyProvider = { "pk" },
-                stripeAccountIdProvider = { null },
-                isFlowController = false,
-            )
+            val interceptor = createIntentConfirmationInterceptor()
 
             val nextStep = interceptor.intercept(
                 initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
@@ -554,6 +548,16 @@ class DefaultIntentConfirmationInterceptorTest {
                 displayMessage = message
             )
         }
+    }
+
+    private fun createIntentConfirmationInterceptor(): DefaultIntentConfirmationInterceptor {
+        return DefaultIntentConfirmationInterceptor(
+            context = context,
+            stripeRepository = object : AbsFakeStripeRepository() {},
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+            isFlowController = false,
+        )
     }
 
     private class TestException(message: String? = null) : Exception(message) {

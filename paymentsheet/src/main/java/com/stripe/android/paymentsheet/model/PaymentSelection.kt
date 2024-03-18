@@ -190,7 +190,9 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
 
             @IgnoredOnParcel
-            override val paymentMethodOptionsParams = null
+            override val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = customerRequestedSave.setupFutureUsage
+            )
 
             @IgnoredOnParcel
             override val paymentMethodExtraParams = null
