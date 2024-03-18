@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
-import app.cash.turbine.testIn
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkActivityResult
@@ -22,6 +21,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -322,10 +322,16 @@ class LinkHandlerTest {
                         paymentMethod = PaymentMethod.Builder()
                             .setId("pm_123")
                             .setCode("card")
-                            .setCard(PaymentMethod.Card(last4 = "4242"))
+                            .setCard(
+                                PaymentMethod.Card(
+                                    last4 = "4242",
+                                    wallet = Wallet.LinkWallet("4242")
+                                )
+                            )
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
+                        requiresSaveOnConfirmation = true,
                     ),
                 )
             )
