@@ -22,15 +22,12 @@ import com.stripe.android.mlcore.impl.InterpreterInitializerImpl
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-<<<<<<< HEAD
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import javax.inject.Named
-=======
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
->>>>>>> 3a7864e749 (Use executor in Identity SDK)
 import javax.inject.Singleton
 
 @Module(

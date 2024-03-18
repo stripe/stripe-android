@@ -39,7 +39,8 @@ internal class SendAnalyticsRequestV2Worker(
 
     private inline fun withRequest(block: (AnalyticsRequestV2) -> Result): Result {
         val request = getRequest(inputData) ?: return Result.failure()
-        return block(request)
+        val workManagerRequest = request.withWorkManagerParams(runAttemptCount)
+        return block(workManagerRequest)
     }
 
     companion object {

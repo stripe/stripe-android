@@ -37,13 +37,15 @@ import kotlin.time.DurationUnit.SECONDS
  *
  * Additional params can be passed as constructor parameters.
  */
+@Suppress("DataClassPrivateConstructor")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-class AnalyticsRequestV2 private constructor(
+data class AnalyticsRequestV2 private constructor(
     @get:VisibleForTesting
     val eventName: String,
     private val clientId: String,
     private val origin: String,
+    private val created: Double,
     private val params: JsonElement,
 ) : StripeRequest() {
 
@@ -137,7 +139,7 @@ class AnalyticsRequestV2 private constructor(
      */
     private fun analyticParams(): Map<String, Any> = mapOf(
         PARAM_CLIENT_ID to clientId,
-        PARAM_CREATED to System.currentTimeMillis().milliseconds.toDouble(SECONDS),
+        PARAM_CREATED to created,
         PARAM_EVENT_NAME to eventName,
         PARAM_EVENT_ID to UUID.randomUUID().toString()
     )
@@ -163,6 +165,29 @@ class AnalyticsRequestV2 private constructor(
 
     override val url = ANALYTICS_HOST
 
+    fun withWorkManagerParams(
+        runAttemptCount: Int,
+    ): AnalyticsRequestV2 {
+        val updatedParams = params.toMap() + createWorkManagerParams(runAttemptCount)
+        return copy(
+            params = updatedParams.toJsonElement(),
+        )
+    }
+
+    private fun createWorkManagerParams(runAttemptCount: Int): Map<String, *> {
+        val currentTimeInSeconds = System.currentTimeMillis().milliseconds.toDouble(SECONDS)
+
+        // Our very scientific formula to determine if an event was fired immediately or
+        // with a delay due to unsatisfied conditions.
+        val wasDelayed = currentTimeInSeconds - created > 5
+
+        return mapOf(
+            PARAM_USES_WORK_MANAGER to true,
+            PARAM_IS_RETRY to (runAttemptCount > 0),
+            PARAM_DELAYED to wasDelayed,
+        )
+    }
+
     internal companion object {
         internal const val ANALYTICS_HOST = "https://r.stripe.com/0"
         internal const val HEADER_ORIGIN = "origin"
@@ -171,6 +196,9 @@ class AnalyticsRequestV2 private constructor(
         internal const val PARAM_CREATED = "created"
         internal const val PARAM_EVENT_NAME = "event_name"
         internal const val PARAM_EVENT_ID = "event_id"
+        private const val PARAM_USES_WORK_MANAGER = "uses_work_manager"
+        private const val PARAM_IS_RETRY = "is_retry"
+        private const val PARAM_DELAYED = "delayed"
 
         private const val INDENTATION = "  "
 
@@ -184,6 +212,7 @@ class AnalyticsRequestV2 private constructor(
                 eventName = eventName,
                 clientId = clientId,
                 origin = origin,
+                created = System.currentTimeMillis().milliseconds.toDouble(SECONDS),
                 params = params.toJsonElement(),
             )
         }
