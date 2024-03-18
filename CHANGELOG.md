@@ -2,11 +2,14 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-### Payments
-* [Added][8028](https://github.com/stripe/stripe-android/pull/8028) Added support for Amazon Pay to API bindings. 
-
 ### PaymentSheet
 * [Added][7719](https://github.com/stripe/stripe-android/pull/7719) Added `PaymentOption.iconPainter` to simplify `FlowController` usage in Compose.
+
+### Payments
+* [Added][8028](https://github.com/stripe/stripe-android/pull/8028) Added support for Amazon Pay to API bindings.
+
+### Financial Connections
+* [Changed] Updated the design of the Financial Connections authentication flow.
 
 ## 20.39.0 - 2024-03-04
 
