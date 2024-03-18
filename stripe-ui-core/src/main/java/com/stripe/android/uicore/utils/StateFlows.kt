@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 /**
@@ -70,7 +71,7 @@ fun <T1, T2, R> combineAsStateFlow(
     transform: (T1, T2) -> R,
 ): StateFlow<R> {
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, transform),
+        flow = combine(flow1, flow2, transform).distinctUntilChanged(),
         produceValue = { transform(flow1.value, flow2.value) },
     )
 }
@@ -86,7 +87,7 @@ fun <T1, T2, T3, R> combineAsStateFlow(
     transform: (T1, T2, T3) -> R,
 ): StateFlow<R> {
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, flow3, transform),
+        flow = combine(flow1, flow2, flow3, transform).distinctUntilChanged(),
         produceValue = { transform(flow1.value, flow2.value, flow3.value) },
     )
 }
