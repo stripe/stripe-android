@@ -172,7 +172,7 @@ internal class CustomerRepositoryTest {
         }
 
     @Test
-    fun `getPaymentsMeth() should keep cards from Link wallet`() = runTest {
+    fun `getPaymentsMethods() should keep cards from Link wallet`() = runTest {
         givenGetPaymentMethodsReturns(
             Result.success(emptyList())
         )
