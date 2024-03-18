@@ -23,6 +23,9 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -33,6 +36,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -661,20 +665,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `On inline link payment, should process with primary button`() = runTest {
-        val linkConfiguration = LinkConfiguration(
-            stripeIntent = mock {
-                on { linkFundingSources } doReturn listOf(
-                    PaymentMethod.Type.Card.code
-                )
-            },
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
-            flags = mapOf(),
-            merchantName = "Test merchant inc.",
-            merchantCountryCode = "US",
-            passthroughModeEnabled = false,
-            shippingValues = mapOf(),
-        )
+        val linkConfiguration = createLinkConfiguration()
 
         val viewModel = createViewModel(
             linkState = LinkState(
@@ -730,6 +721,86 @@ internal class PaymentSheetViewModelTest {
             walletsProcessingStateTurbine.cancel()
         }
     }
+
+    @Test
+    fun `On inline link payment with save requested, should set with 'requireSaveOnConfirmation' set to 'true'`() =
+        runTest {
+            val linkConfiguration = createLinkConfiguration()
+            val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+                attachNewCardToAccountResult = Result.success(LINK_SAVED_PAYMENT_DETAILS),
+                accountStatus = AccountStatus.Verified,
+            )
+
+            val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
+
+            val viewModel = createViewModel(
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                linkState = LinkState(
+                    configuration = linkConfiguration,
+                    loginState = LinkState.LoginState.LoggedOut
+                )
+            )
+
+            viewModel.linkHandler.payWithLinkInline(
+                userInput = UserInput.SignIn(
+                    email = "email@email.com",
+                ),
+                paymentSelection = PaymentSelection.New.Card(
+                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    brand = CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                ),
+                shouldCompleteLinkInlineFlow = false
+            )
+
+            verify(intentConfirmationInterceptor).intercept(
+                initializationMode = any(),
+                paymentMethod = any(),
+                shippingValues = isNull(),
+                requiresSaveOnConfirmation = eq(true),
+            )
+        }
+
+    @Test
+    fun `On inline link payment with save not requested, should set with 'requireSaveOnConfirmation' set to 'false'`() =
+        runTest {
+            val linkConfiguration = createLinkConfiguration()
+            val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+                attachNewCardToAccountResult = Result.success(LINK_SAVED_PAYMENT_DETAILS),
+                accountStatus = AccountStatus.Verified,
+            )
+
+            val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
+
+            val viewModel = createViewModel(
+                linkConfigurationCoordinator = linkConfigurationCoordinator,
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
+                linkState = LinkState(
+                    configuration = linkConfiguration,
+                    loginState = LinkState.LoginState.LoggedOut
+                )
+            )
+
+            viewModel.linkHandler.payWithLinkInline(
+                userInput = UserInput.SignIn(
+                    email = "email@email.com",
+                ),
+                paymentSelection = PaymentSelection.New.Card(
+                    paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    brand = CardBrand.Visa,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                ),
+                shouldCompleteLinkInlineFlow = false
+            )
+
+            verify(intentConfirmationInterceptor).intercept(
+                initializationMode = any(),
+                paymentMethod = any(),
+                shippingValues = isNull(),
+                requiresSaveOnConfirmation = eq(false),
+            )
+        }
 
     @Test
     fun `On link payment through launcher, should process with wallets processing state`() = runTest {
@@ -2506,6 +2577,8 @@ internal class PaymentSheetViewModelTest {
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
         customerRepository: CustomerRepository = FakeCustomerRepository(customerPaymentMethods),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
@@ -2548,7 +2621,7 @@ internal class PaymentSheetViewModelTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory
             )
         }
@@ -2610,6 +2683,23 @@ internal class PaymentSheetViewModelTest {
         )
     }
 
+    private fun createLinkConfiguration(): LinkConfiguration {
+        return LinkConfiguration(
+            stripeIntent = mock {
+                on { linkFundingSources } doReturn listOf(
+                    PaymentMethod.Type.Card.code
+                )
+            },
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
+            flags = mapOf(),
+            merchantName = "Test merchant inc.",
+            merchantCountryCode = "US",
+            passthroughModeEnabled = false,
+            shippingValues = mapOf(),
+        )
+    }
+
     private fun PaymentSheetViewModel.capturePaymentResultListener(): ActivityResultCallback<InternalPaymentResult> {
         val mockActivityResultCaller = mock<ActivityResultCaller> {
             on {
@@ -2639,6 +2729,14 @@ internal class PaymentSheetViewModelTest {
         val PAYMENT_INTENT = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
         val PAYMENT_INTENT_WITH_PAYMENT_METHOD = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD
         val SETUP_INTENT = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD
+
+        private val LINK_SAVED_PAYMENT_DETAILS = LinkPaymentDetails.Saved(
+            paymentDetails = ConsumerPaymentDetails.Card(
+                id = "pm_123",
+                last4 = "4242",
+            ),
+            paymentMethodCreateParams = mock(),
+        )
 
         private const val BACS_ACCOUNT_NUMBER = "00012345"
         private const val BACS_SORT_CODE = "108800"
