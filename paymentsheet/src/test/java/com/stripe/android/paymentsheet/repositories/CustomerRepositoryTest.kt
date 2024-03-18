@@ -172,6 +172,66 @@ internal class CustomerRepositoryTest {
         }
 
     @Test
+    fun `getPaymentsMeth() should keep cards from Link wallet`() = runTest {
+        givenGetPaymentMethodsReturns(
+            Result.success(emptyList())
+        )
+
+        val initialCard = PaymentMethodFixtures.CARD_PAYMENT_METHOD
+
+        val mockedReturnPaymentMethods = listOf(
+            initialCard.copy("pm_1"),
+            initialCard.copy(
+                id = "pm_2",
+                card = initialCard.card?.copy(
+                    wallet = Wallet.GooglePayWallet("3000")
+                )
+            ),
+            initialCard.copy(
+                id = "pm_3",
+                card = initialCard.card?.copy(
+                    wallet = Wallet.LinkWallet("4000")
+                )
+            ),
+            initialCard.copy(
+                id = "pm_4",
+                card = initialCard.card?.copy(
+                    wallet = Wallet.LinkWallet("5000")
+                )
+            ),
+        )
+
+        stripeRepository.stub {
+            onBlocking {
+                getPaymentMethods(
+                    listPaymentMethodsParams = eq(
+                        ListPaymentMethodsParams(
+                            customerId = "customer_id",
+                            paymentMethodType = PaymentMethod.Type.Card
+                        )
+                    ),
+                    productUsageTokens = any(),
+                    requestOptions = any()
+                )
+            }.thenReturn(Result.success(mockedReturnPaymentMethods))
+        }
+
+        val result = repository.getPaymentMethods(
+            PaymentSheet.CustomerConfiguration(
+                "customer_id",
+                "ephemeral_key"
+            ),
+            listOf(PaymentMethod.Type.Card),
+            true,
+        ).getOrThrow()
+
+        assertThat(result).hasSize(3)
+        assertThat(result[0].id).isEqualTo("pm_1")
+        assertThat(result[1].id).isEqualTo("pm_3")
+        assertThat(result[2].id).isEqualTo("pm_4")
+    }
+
+    @Test
     fun `getPaymentMethods() should return empty list on failure when silent failures`() =
         runTest {
             givenGetPaymentMethodsReturns(

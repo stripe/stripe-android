@@ -96,7 +96,6 @@ internal class CustomerApiRepository @Inject constructor(
                         Wallet.Type.ApplePay,
                         Wallet.Type.GooglePay,
                         Wallet.Type.SamsungPay,
-                        Wallet.Type.Link,
                     )
                     paymentMethods.addAll(
                         customerPaymentMethods.filter { paymentMethod ->
