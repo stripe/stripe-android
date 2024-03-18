@@ -62,7 +62,6 @@ internal class DefaultPaymentSheetLoaderTest {
         arguments = LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
         ),
-        lpmInitialFormData = LpmRepository.LpmInitialFormData(),
     )
 
     private val prefsRepository = FakePrefsRepository()

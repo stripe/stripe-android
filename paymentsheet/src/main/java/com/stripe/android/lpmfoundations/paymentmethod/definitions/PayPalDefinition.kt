@@ -1,13 +1,13 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.FormItemSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -22,7 +22,8 @@ internal object PayPalDefinition : PaymentMethodDefinition {
 
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         val localLayoutSpecs: List<FormItemSpec> = if (metadata.hasIntentToSetup()) {
             listOf(MandateTextSpec(stringResId = R.string.stripe_paypal_mandate))
@@ -38,7 +39,10 @@ internal object PayPalDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            formSpec = LayoutSpec(sharedDataSpec.fields + localLayoutSpecs),
+            formElements = transformSpecToElements.transform(
+                specs = sharedDataSpec.fields + localLayoutSpecs,
+                requiresMandate = metadata.hasIntentToSetup()
+            ),
         )
     }
 }

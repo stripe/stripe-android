@@ -98,7 +98,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         viewState = viewState,
                         viewActionHandler = viewModel::handleViewAction,
                         paymentMethodNameProvider = viewModel::providePaymentMethodName,
-                        formViewModelSubComponentBuilderProvider = viewModel.formViewModelSubcomponentBuilderProvider,
                     )
                 }
             }

@@ -87,7 +87,6 @@ internal class CustomerSheetScreenshotTest {
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             showCheckbox = false,
-            saveForFutureUseInitialValue = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             merchantName = ""
         ),
@@ -116,7 +115,6 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = selectPaymentMethodViewState,
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -152,7 +150,6 @@ internal class CustomerSheetScreenshotTest {
                     counter++
                     "424$counter"
                 },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -190,7 +187,6 @@ internal class CustomerSheetScreenshotTest {
                     counter++
                     "424$counter"
                 },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -207,7 +203,6 @@ internal class CustomerSheetScreenshotTest {
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -231,7 +226,6 @@ internal class CustomerSheetScreenshotTest {
                     mandateText = "Some mandate text."
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -246,7 +240,6 @@ internal class CustomerSheetScreenshotTest {
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -269,7 +262,6 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonEnabled = true,
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -285,7 +277,6 @@ internal class CustomerSheetScreenshotTest {
                     isFirstPaymentMethod = true
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -309,7 +300,6 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonEnabled = true,
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -328,7 +318,7 @@ internal class CustomerSheetScreenshotTest {
                     showMandateAbovePrimaryButton = true,
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
+                displayAddForm = false,
             )
         }
     }
@@ -347,7 +337,7 @@ internal class CustomerSheetScreenshotTest {
                     showMandateAbovePrimaryButton = false,
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
+                displayAddForm = false,
             )
         }
     }
@@ -363,7 +353,7 @@ internal class CustomerSheetScreenshotTest {
                     displayDismissConfirmationModal = true,
                 ),
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
+                displayAddForm = false,
             )
         }
     }
@@ -398,7 +388,6 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }
@@ -433,7 +422,6 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = editPaymentMethod,
                 paymentMethodNameProvider = { it!! },
-                formViewModelSubComponentBuilderProvider = null,
             )
         }
     }

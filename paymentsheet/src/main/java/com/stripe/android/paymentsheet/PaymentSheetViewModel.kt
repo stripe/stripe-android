@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.addresselement.toConfirmPaymentIntentShip
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
 import com.stripe.android.paymentsheet.injection.DaggerPaymentSheetLauncherComponent
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.PaymentSheetViewModelModule
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -82,7 +81,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
@@ -108,7 +106,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
     application = application,
@@ -122,7 +119,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = true),
-    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
     editInteractorFactory = editInteractorFactory
 ) {
 

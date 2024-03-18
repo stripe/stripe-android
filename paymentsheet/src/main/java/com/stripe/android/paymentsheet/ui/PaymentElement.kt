@@ -28,18 +28,15 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountForm
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.Flow
 import java.util.UUID
-import javax.inject.Provider
 
 @Composable
 internal fun PaymentElement(
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     enabled: Boolean,
     supportedPaymentMethods: List<SupportedPaymentMethod>,
     selectedItem: SupportedPaymentMethod,
@@ -62,10 +59,14 @@ internal fun PaymentElement(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
 
+    val selectedIndex = remember(selectedItem, supportedPaymentMethods) {
+        supportedPaymentMethods.map { it.code }.indexOf(selectedItem.code)
+    }
+
     Column(modifier = Modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
             PaymentMethodsUI(
-                selectedIndex = supportedPaymentMethods.indexOf(selectedItem),
+                selectedIndex = selectedIndex,
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,
                 onItemSelectedListener = onItemSelectedListener,
@@ -75,7 +76,6 @@ internal fun PaymentElement(
         }
 
         FormElement(
-            formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
             enabled = enabled,
             selectedItem = selectedItem,
             showCheckboxFlow = showCheckboxFlow,
@@ -98,7 +98,6 @@ internal fun PaymentElement(
 
 @Composable
 private fun FormElement(
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     enabled: Boolean,
     selectedItem: SupportedPaymentMethod,
     showCheckboxFlow: Flow<Boolean>,
@@ -144,7 +143,7 @@ private fun FormElement(
                 enabled = enabled,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
                 showCheckboxFlow = showCheckboxFlow,
-                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                formElements = selectedItem.formElements,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )
         }

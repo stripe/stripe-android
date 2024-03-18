@@ -53,7 +53,6 @@ class USBankAccountFormViewModelTest {
         formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
             showCheckbox = false,
-            saveForFutureUseInitialValue = false,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
             billingDetails = PaymentSheet.BillingDetails(
@@ -633,7 +632,6 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     showCheckbox = true,
-                    saveForFutureUseInitialValue = true,
                 ),
             ),
         )
@@ -646,7 +644,6 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     showCheckbox = true,
-                    saveForFutureUseInitialValue = true,
                 ),
             ),
         )
@@ -670,7 +667,6 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     showCheckbox = true,
-                    saveForFutureUseInitialValue = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                 ),
             ),
@@ -696,7 +692,6 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     showCheckbox = true,
-                    saveForFutureUseInitialValue = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
@@ -725,7 +720,6 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     showCheckbox = true,
-                    saveForFutureUseInitialValue = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
@@ -754,7 +748,6 @@ class USBankAccountFormViewModelTest {
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
                     showCheckbox = true,
-                    saveForFutureUseInitialValue = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",

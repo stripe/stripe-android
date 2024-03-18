@@ -1,5 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.PaymentIntentFixtures
@@ -9,9 +11,14 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 import kotlin.test.assertFails
 
+@RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
+    private val context: Context = ApplicationProvider.getApplicationContext()
+
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
         val metadata = PaymentMethodMetadataFactory.create(
@@ -51,7 +58,8 @@ internal class PaymentMethodMetadataTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
-            )
+            ),
+            sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
         val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
         assertThat(supportedPaymentMethods).hasSize(1)
@@ -111,7 +119,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
+        assertThat(metadata.supportedPaymentMethodForCode("klarna", context)?.code).isEqualTo("klarna")
     }
 
     @Test
@@ -122,7 +130,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = emptyList(),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("klarna", context)).isNull()
     }
 
     @Test
@@ -133,7 +141,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("klarna", context)).isNull()
     }
 
     @Test
@@ -149,7 +157,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("klarna"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
@@ -169,7 +177,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("klarna"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
@@ -188,7 +196,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
         assertThat(sortedSupportedPaymentMethods).hasSize(2)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
@@ -209,7 +217,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
         assertThat(sortedSupportedPaymentMethods).hasSize(2)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
@@ -229,7 +237,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("klarna")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
@@ -250,7 +258,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
@@ -333,4 +341,90 @@ internal class PaymentMethodMetadataTest {
         )
         assertThat(metadata.amount()).isNull()
     }
+
+    // TODO: Add tests.
+//    @Test
+//    fun `Test placeholder specs are transformed correctly`() = runBlocking {
+//        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+//            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+//            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+//            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+//            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+//            attachDefaultsToPaymentMethod = false,
+//        )
+//        val specs = listOf(
+//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
+//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
+//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
+//            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
+//        )
+//
+//        val args = COMPOSE_FRAGMENT_ARGS.copy(
+//            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+//        )
+//        val formViewModel = createViewModel(
+//            args,
+//            createLpmRepositorySupportedPaymentMethod(
+//                PaymentMethod.Type.Bancontact,
+//                LayoutSpec(specs),
+//            )
+//        )
+//        val formElement = formViewModel.elements
+//
+//        val nameSection = formElement[0] as SectionElement
+//        val nameElement = nameSection.fields[0] as SimpleTextElement
+//        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
+//        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
+//
+//        val emailSection = formElement[1] as SectionElement
+//        val emailElement = emailSection.fields[0] as EmailElement
+//        assertThat(emailElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_email)
+//        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
+//
+//        val phoneSection = formElement[2] as SectionElement
+//        val phoneElement = phoneSection.fields[0] as PhoneNumberElement
+//        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
+//        assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
+//
+//        val addressSection = formElement[3] as SectionElement
+//        val addressElement = addressSection.fields[0] as AddressElement
+//
+//        val identifiers = addressElement.fields.first().map { it.identifier }
+//        // Check that the address element contains country.
+//        assertThat(identifiers).contains(IdentifierSpec.Country)
+//    }
+//
+//    @Test
+//    fun `Test address without country placeholder produces correct element`() = runBlocking {
+//        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+//            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+//            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+//            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+//            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+//            attachDefaultsToPaymentMethod = false,
+//        )
+//
+//        val args = COMPOSE_FRAGMENT_ARGS.copy(
+//            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+//        )
+//        val formViewModel = createViewModel(
+//            args,
+//            createLpmRepositorySupportedPaymentMethod(
+//                PaymentMethod.Type.Bancontact,
+//                LayoutSpec(
+//                    listOf(
+//                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry)
+//                    )
+//                ),
+//            )
+//        )
+//        val formElement = formViewModel.elements
+//
+//        val addressSection = formElement.first() as SectionElement
+//        val addressElement = addressSection.fields[0] as AddressElement
+//        val identifiers = addressElement.fields.first().map { it.identifier }
+//        // Check that the address element doesn't contain country.
+//        assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
+//    }
+//
 }

@@ -47,7 +47,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -89,7 +88,6 @@ internal class CustomerSheetViewModel(
     private val eventReporter: CustomerSheetEventReporter,
     private val workContext: CoroutineContext = Dispatchers.IO,
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
-    val formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
     private val customerSheetLoader: CustomerSheetLoader,
@@ -110,7 +108,6 @@ internal class CustomerSheetViewModel(
         eventReporter: CustomerSheetEventReporter,
         workContext: CoroutineContext = Dispatchers.IO,
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
-        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
         paymentLauncherFactory: StripePaymentLauncherAssistedFactory,
         intentConfirmationInterceptor: IntentConfirmationInterceptor,
         customerSheetLoader: CustomerSheetLoader,
@@ -130,7 +127,6 @@ internal class CustomerSheetViewModel(
         eventReporter = eventReporter,
         workContext = workContext,
         isLiveModeProvider = isLiveModeProvider,
-        formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
         paymentLauncherFactory = paymentLauncherFactory,
         intentConfirmationInterceptor = intentConfirmationInterceptor,
         customerSheetLoader = customerSheetLoader,
@@ -218,7 +214,7 @@ internal class CustomerSheetViewModel(
 
     fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
-            paymentMethodMetadata?.supportedPaymentMethodForCode(code)
+            paymentMethodMetadata?.supportedPaymentMethodForCode(code, application)
         }?.displayNameResource?.let {
             resources.getString(it)
         }.orEmpty()
@@ -691,6 +687,7 @@ internal class CustomerSheetViewModel(
                 }
                 paymentMethodMetadata?.supportedPaymentMethodForCode(
                     code = currentViewState.paymentMethodCode,
+                    context = application,
                 )?.let { paymentMethodSpec ->
                     val formData = currentViewState.formViewData
                     if (formData.completeFormValues == null) error("completeFormValues cannot be null")
@@ -760,7 +757,7 @@ internal class CustomerSheetViewModel(
         )
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
-            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode))
+            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode, application))
 
         val stripeIntent = paymentMethodMetadata?.stripeIntent
 

@@ -17,7 +17,6 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -43,7 +42,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
@@ -58,7 +56,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
     application = application,
@@ -72,7 +69,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
-    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
     editInteractorFactory = editInteractorFactory
 ) {
 

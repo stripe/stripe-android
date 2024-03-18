@@ -21,13 +21,11 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -42,11 +40,7 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-@Module(
-    subcomponents = [
-        FormViewModelSubcomponent::class,
-    ]
-)
+@Module
 internal interface CustomerSheetViewModelModule {
 
     @Binds
@@ -144,13 +138,6 @@ internal interface CustomerSheetViewModelModule {
         @UIContext
         fun uiContext(): CoroutineContext {
             return Dispatchers.Main
-        }
-
-        @Provides
-        fun provideLpmRepository(resources: Resources): LpmRepository {
-            return LpmRepository.getInstance(
-                LpmRepository.LpmRepositoryArguments(resources)
-            )
         }
 
         @Provides

@@ -1,24 +1,15 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.connectBillingDetailsFields
-import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -30,7 +21,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
@@ -41,53 +31,24 @@ import javax.inject.Provider
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 internal class FormViewModel @Inject internal constructor(
-    context: Context,
+    val elements: List<FormElement>,
     val formArguments: FormArguments,
-    lpmRepository: LpmRepository,
-    addressRepository: AddressRepository,
     val showCheckboxFlow: Flow<Boolean>
 ) : ViewModel() {
     internal class Factory(
-        val config: FormArguments,
+        val formElements: List<FormElement>,
+        val formArguments: FormArguments,
         val showCheckboxFlow: Flow<Boolean>,
-        private val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return formViewModelSubComponentBuilderProvider.get()
-                .formArguments(config)
-                .showCheckboxFlow(showCheckboxFlow)
-                .build().viewModel as T
+            return FormViewModel(
+                elements = formElements,
+                formArguments = formArguments,
+                showCheckboxFlow = showCheckboxFlow,
+            ) as T
         }
-    }
-
-    val elements = run {
-        var specs = requireNotNull(
-            lpmRepository.fromCode(formArguments.paymentMethodCode)
-        ).formSpec.items
-
-        // Cards & Bacs debit are a special case and already contain specs based on the configuration.
-        if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
-            specs = specsForConfiguration(
-                configuration = formArguments.billingDetailsCollectionConfiguration,
-                placeholderOverrideList = formArguments.requiredFields,
-                requiresMandate = formArguments.requiresMandate,
-                specs = specs,
-            )
-        }
-
-        TransformSpecToElements(
-            addressRepository = addressRepository,
-            initialValues = formArguments.getInitialValuesMap(),
-            amount = formArguments.amount,
-            saveForFutureUseInitialValue = formArguments.saveForFutureUseInitialValue,
-            merchantName = formArguments.merchantName,
-            context = context,
-            shippingValues = formArguments.shippingDetails
-                ?.toIdentifierMap(formArguments.billingDetails),
-            cbcEligibility = formArguments.cbcEligibility,
-        ).transform(specs)
     }
 
     private val saveForFutureUseElement = elements.find { element ->

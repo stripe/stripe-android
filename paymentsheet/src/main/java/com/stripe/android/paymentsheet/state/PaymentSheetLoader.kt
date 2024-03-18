@@ -101,8 +101,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 
-            lpmRepository.update(metadata, sharedDataSpecsResult.sharedDataSpecs)
-
             if (sharedDataSpecsResult.failedToParseServerResponse) {
                 eventReporter.onLpmSpecFailure()
             }

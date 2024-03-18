@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.paymentdatacollection
+package com.stripe.android.lpmfoundations.luxe
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
@@ -6,12 +6,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 
-class FormArgumentsTest {
+class InitialValuesFactoryTest {
     private val billingDetails = PaymentSheet.BillingDetails(
         PaymentSheet.Address(
             line1 = "123 Main Street",
@@ -57,18 +55,13 @@ class FormArgumentsTest {
 
     @Test
     fun `Verify payment method parameters overrides any billing address values`() {
-        val formArguments = FormArguments(
-            PaymentMethod.Type.Card.code,
-            showCheckbox = true,
-            saveForFutureUseInitialValue = true,
-            merchantName = "Merchant, Inc.",
-            amount = Amount(50, "USD"),
-            billingDetails = billingDetails,
-            initialPaymentMethodCreateParams = paymentMethodCreateParams,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
-        )
-
-        assertThat(formArguments.getInitialValuesMap()).isEqualTo(
+        assertThat(
+            InitialValuesFactory.create(
+                defaultBillingDetails = billingDetails,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                paymentMethodExtraParams = null,
+            )
+        ).isEqualTo(
             mapOf(
                 IdentifierSpec.Name to "Jenny Rosen",
                 IdentifierSpec.Email to "jenny.rosen@example.com",
@@ -90,18 +83,13 @@ class FormArgumentsTest {
 
     @Test
     fun `Verify if only default billing address they appear in the initial values`() {
-        val formArguments = FormArguments(
-            PaymentMethod.Type.Card.code,
-            showCheckbox = true,
-            saveForFutureUseInitialValue = true,
-            merchantName = "Merchant, Inc.",
-            amount = Amount(50, "USD"),
-            billingDetails = billingDetails,
-            initialPaymentMethodCreateParams = null,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
-        )
-
-        assertThat(formArguments.getInitialValuesMap()).isEqualTo(
+        assertThat(
+            InitialValuesFactory.create(
+                defaultBillingDetails = billingDetails,
+                paymentMethodCreateParams = null,
+                paymentMethodExtraParams = null,
+            )
+        ).isEqualTo(
             mapOf(
                 IdentifierSpec.Name to "Jenny Smith",
                 IdentifierSpec.Email to "email.email.com",
@@ -118,38 +106,32 @@ class FormArgumentsTest {
 
     @Test
     fun `Verify extra parameters are included if passed in`() {
-        val formArguments = FormArguments(
-            PaymentMethod.Type.BacsDebit.code,
-            showCheckbox = true,
-            saveForFutureUseInitialValue = true,
-            merchantName = "Merchant, Inc.",
-            amount = Amount(50, "USD"),
-            billingDetails = null,
-            initialPaymentMethodCreateParams = PaymentMethodCreateParams.create(
-                bacsDebit = PaymentMethodCreateParams.BacsDebit(
-                    accountNumber = "00012345",
-                    sortCode = "10-88-00"
-                ),
-                billingDetails = PaymentMethod.BillingDetails(
-                    name = "Jenny Rosen",
-                    email = "jenny.rosen@example.com",
-                    address = Address(
-                        line1 = "123 Main Street",
-                        line2 = "APt 1",
-                        city = "Dublin",
-                        state = "Co. Dublin",
-                        postalCode = "T37 F8HK",
-                        country = "IE"
+        assertThat(
+            InitialValuesFactory.create(
+                defaultBillingDetails = null,
+                paymentMethodCreateParams = PaymentMethodCreateParams.create(
+                    bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                        accountNumber = "00012345",
+                        sortCode = "10-88-00"
+                    ),
+                    billingDetails = PaymentMethod.BillingDetails(
+                        name = "Jenny Rosen",
+                        email = "jenny.rosen@example.com",
+                        address = Address(
+                            line1 = "123 Main Street",
+                            line2 = "APt 1",
+                            city = "Dublin",
+                            state = "Co. Dublin",
+                            postalCode = "T37 F8HK",
+                            country = "IE"
+                        )
                     )
-                )
-            ),
-            initialPaymentMethodExtraParams = PaymentMethodExtraParams.BacsDebit(
-                confirmed = true
-            ),
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
-        )
-
-        assertThat(formArguments.getInitialValuesMap()).isEqualTo(
+                ),
+                paymentMethodExtraParams = PaymentMethodExtraParams.BacsDebit(
+                    confirmed = true
+                ),
+            )
+        ).isEqualTo(
             mapOf(
                 IdentifierSpec.Name to "Jenny Rosen",
                 IdentifierSpec.Email to "jenny.rosen@example.com",

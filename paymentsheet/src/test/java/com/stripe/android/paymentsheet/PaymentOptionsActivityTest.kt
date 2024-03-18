@@ -26,8 +26,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.ui.BottomSheetContentTestTag
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -44,7 +42,6 @@ import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
-import com.stripe.android.utils.formViewModelSubcomponentBuilder
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.Dispatchers
@@ -413,18 +410,6 @@ internal class PaymentOptionsActivityTest {
             bundleOf(ActivityStarter.Args.EXTRA to args)
         )
 
-        val lpmRepository = LpmRepository(
-            arguments = LpmRepository.LpmRepositoryArguments(
-                resources = ApplicationProvider.getApplicationContext<Context>().resources,
-            ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            update(
-                stripeIntent = args.state.stripeIntent,
-                serverLpmSpecs = null,
-            )
-        }
-
         val viewModel = TestViewModelFactory.create(
             linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         ) { linkHandler, linkInteractor, savedStateHandle ->
@@ -439,10 +424,6 @@ internal class PaymentOptionsActivityTest {
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                formViewModelSubComponentBuilderProvider = formViewModelSubcomponentBuilder(
-                    context = ApplicationProvider.getApplicationContext(),
-                    lpmRepository = lpmRepository,
-                ),
                 editInteractorFactory = mock()
             )
         }

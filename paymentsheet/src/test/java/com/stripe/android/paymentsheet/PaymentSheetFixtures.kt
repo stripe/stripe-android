@@ -174,7 +174,6 @@ internal object PaymentSheetFixtures {
         get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
             showCheckbox = true,
-            saveForFutureUseInitialValue = true,
             merchantName = "Merchant, Inc.",
             billingDetails = PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(

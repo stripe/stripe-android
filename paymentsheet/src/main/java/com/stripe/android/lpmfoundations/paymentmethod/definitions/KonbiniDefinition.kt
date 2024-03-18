@@ -1,12 +1,12 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
 internal object KonbiniDefinition : PaymentMethodDefinition {
@@ -23,7 +23,8 @@ internal object KonbiniDefinition : PaymentMethodDefinition {
 
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "konbini",
@@ -33,7 +34,10 @@ internal object KonbiniDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            formSpec = LayoutSpec(sharedDataSpec.fields),
+            formElements = transformSpecToElements.transform(
+                specs = sharedDataSpec.fields,
+                requiresMandate = false,
+            ),
         )
     }
 }

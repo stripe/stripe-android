@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
@@ -65,7 +64,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.Closeable
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -84,7 +82,6 @@ internal abstract class BaseSheetViewModel(
     val linkHandler: LinkHandler,
     val linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val headerTextFactory: HeaderTextFactory,
-    val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
@@ -219,7 +216,7 @@ internal abstract class BaseSheetViewModel(
 
     private fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
-            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
+            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code, getApplication())
         }?.displayNameResource?.let {
             getApplication<Application>().getString(it)
         }.orEmpty()
@@ -374,7 +371,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
-        supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
+        supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods(getApplication()) ?: emptyList()
     }
 
     protected fun reportDismiss() {
@@ -659,6 +656,19 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
+        val currentSelection = newPaymentSelection?.takeIf { it.paymentMethodCreateParams.typeCode == code }
+
+        return requireNotNull(
+            paymentMethodMetadata.value?.supportedPaymentMethodForCode(
+                code = code,
+                context = getApplication(),
+                paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
+                paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+            )
+        )
+    }
+
     fun createFormArguments(
         selectedItem: SupportedPaymentMethod,
     ): FormArguments {
@@ -667,7 +677,6 @@ internal abstract class BaseSheetViewModel(
             paymentMethod = selectedItem,
             metadata = metadata,
             customerConfig = config.customer,
-            newLpm = newPaymentSelection,
         )
     }
 

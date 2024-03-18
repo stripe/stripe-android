@@ -20,7 +20,6 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
@@ -37,13 +36,12 @@ import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReport
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
 import kotlinx.coroutines.flow.flowOf
-import javax.inject.Provider
 import com.stripe.android.R as PaymentsCoreR
 
 @Composable
 internal fun CustomerSheetScreen(
     viewState: CustomerSheetViewState,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
+    displayAddForm: Boolean = true,
     modifier: Modifier = Modifier,
     viewActionHandler: (CustomerSheetViewAction) -> Unit = {},
     paymentMethodNameProvider: (PaymentMethodCode?) -> String,
@@ -81,7 +79,7 @@ internal fun CustomerSheetScreen(
                             AddPaymentMethodWithPaymentElement(
                                 viewState = viewState,
                                 viewActionHandler = viewActionHandler,
-                                formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
+                                displayForm = displayAddForm,
                             )
                         } else {
                             AddPaymentMethod(
@@ -229,7 +227,7 @@ internal fun AddPaymentMethod(
 internal fun AddPaymentMethodWithPaymentElement(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>?,
+    displayForm: Boolean,
 ) {
     val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
@@ -262,12 +260,11 @@ internal fun AddPaymentMethodWithPaymentElement(
             DefaultCardNumberCompletedEventReporter(viewActionHandler)
         }
 
-        formViewModelSubComponentBuilderProvider?.let {
+        if (displayForm) {
             CompositionLocalProvider(
                 LocalCardNumberCompletedEventReporter provides eventReporter
             ) {
                 PaymentElement(
-                    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
                     enabled = viewState.enabled,
                     supportedPaymentMethods = viewState.supportedPaymentMethods,
                     selectedItem = viewState.selectedPaymentMethod,

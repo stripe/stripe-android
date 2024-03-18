@@ -1377,7 +1377,6 @@ internal class PaymentSheetViewModelTest {
                     currencyCode = "usd",
                 ),
                 showCheckbox = false,
-                saveForFutureUseInitialValue = true,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )
@@ -2550,7 +2549,6 @@ internal class PaymentSheetViewModelTest {
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
-                formViewModelSubComponentBuilderProvider = mock(),
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory
             )
         }
