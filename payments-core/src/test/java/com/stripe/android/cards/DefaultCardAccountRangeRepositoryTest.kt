@@ -2,6 +2,7 @@ package com.stripe.android.cards
 
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.CardNumberFixtures
@@ -25,6 +26,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -165,34 +167,26 @@ internal class DefaultCardAccountRangeRepositoryTest {
 
     @Test
     fun `loading when no sources are loading should emit false`() = runTest {
-        val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
             remoteSource = FakeCardAccountRangeSource(),
             staticSource = FakeCardAccountRangeSource(),
             store = realStore
-        ).loading.collect {
-            collected.add(it)
+        ).loading.test {
+            assertThat(awaitItem()).isFalse()
         }
-
-        assertThat(collected)
-            .containsExactly(false)
     }
 
     @Test
     fun `loading when one source is loading should emit true`() = runTest {
-        val collected = mutableListOf<Boolean>()
         DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(),
             remoteSource = FakeCardAccountRangeSource(isLoading = true),
             staticSource = FakeCardAccountRangeSource(),
             store = realStore
-        ).loading.collect {
-            collected.add(it)
+        ).loading.test {
+            assertThat(awaitItem()).isTrue()
         }
-
-        assertThat(collected)
-            .containsExactly(true)
     }
 
     @Test
@@ -217,7 +211,7 @@ internal class DefaultCardAccountRangeRepositoryTest {
     fun `Should return static account ranges if remote source fails and BIN is not in store`() = runTest {
         val repository = DefaultCardAccountRangeRepository(
             inMemorySource = FakeCardAccountRangeSource(accountRanges = null),
-            remoteSource = mock(),
+            remoteSource = mock { on { loading } doReturn stateFlowOf(false) },
             staticSource = StaticCardAccountRangeSource(),
             store = realStore,
         )

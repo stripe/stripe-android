@@ -25,7 +25,6 @@ import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -39,6 +38,7 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
+import com.stripe.android.uicore.R as StripeUiCoreR
 import com.stripe.payments.model.R as PaymentModelR
 
 @RunWith(RobolectricTestRunner::class)
@@ -48,14 +48,6 @@ internal class CardNumberControllerTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
 
-    private val cardNumberController = DefaultCardNumberController(
-        CardNumberConfig(),
-        FakeCardAccountRangeRepository(),
-        testDispatcher,
-        testDispatcher,
-        initialValue = null
-    )
-
     @After
     fun cleanup() {
         Dispatchers.resetMain()
@@ -63,21 +55,19 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `When invalid card number verify visible error`() = runTest {
-        cardNumberController.error.distinctUntilChanged().test {
+        val cardNumberController = createController()
+
+        cardNumberController.error.test {
             assertThat(awaitItem()).isNull()
-
             cardNumberController.onValueChange("012")
-            idleLooper()
-
-            skipItems(2)
-
-            assertThat(awaitItem()?.errorMessage)
-                .isEqualTo(StripeR.string.stripe_invalid_card_number)
+            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeUiCoreR.string.stripe_blank_and_required)
+            assertThat(awaitItem()?.errorMessage).isEqualTo(StripeR.string.stripe_invalid_card_number)
         }
     }
 
     @Test
     fun `Verify get the form field value correctly`() = runTest {
+        val cardNumberController = createController()
         cardNumberController.formFieldValue.test {
             cardNumberController.onValueChange("4242")
             idleLooper()
@@ -99,59 +89,32 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `Verify error is visible based on the focus`() = runTest {
-        // incomplete
+        val cardNumberController = createController()
         cardNumberController.visibleError.test {
-            cardNumberController.onFocusChange(true)
-            cardNumberController.onValueChange("4242")
-            idleLooper()
-
             assertThat(awaitItem()).isFalse()
 
-            cardNumberController.onFocusChange(false)
-            idleLooper()
+            cardNumberController.onFocusChange(true)
+            cardNumberController.onValueChange("4242")
+            expectNoEvents()
 
+            cardNumberController.onFocusChange(false)
             assertThat(awaitItem()).isTrue()
         }
     }
 
     @Test
     fun `Entering VISA BIN does not call accountRangeRepository`() {
-        var repositoryCalls = 0
-        val cardNumberController = DefaultCardNumberController(
-            CardNumberConfig(),
-            object : CardAccountRangeRepository {
-                private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
-                override suspend fun getAccountRange(
-                    cardNumber: CardNumber.Unvalidated
-                ): AccountRange? {
-                    repositoryCalls++
-                    return cardNumber.bin?.let {
-                        staticCardAccountRangeSource.getAccountRange(cardNumber)
-                    }
-                }
+        val fakeRepository = FakeCardAccountRangeRepository()
+        val cardNumberController = createController(repository = fakeRepository)
 
-                override suspend fun getAccountRanges(
-                    cardNumber: CardNumber.Unvalidated
-                ): List<AccountRange>? {
-                    repositoryCalls++
-                    return cardNumber.bin?.let {
-                        staticCardAccountRangeSource.getAccountRanges(cardNumber)
-                    }
-                }
-
-                override val loading: StateFlow<Boolean> = stateFlowOf(false)
-            },
-            testDispatcher,
-            testDispatcher,
-            initialValue = null
-        )
         cardNumberController.onValueChange("42424242424242424242")
         idleLooper()
-        assertThat(repositoryCalls).isEqualTo(0)
+        assertThat(fakeRepository.numberOfCalls).isEqualTo(0)
     }
 
     @Test
     fun `Entering valid 19 digit UnionPay BIN returns accountRange of 19`() {
+        val cardNumberController = createController()
         cardNumberController.onValueChange("6216828050000000000")
         idleLooper()
         assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(19)
@@ -159,6 +122,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `Entering valid 16 digit UnionPay BIN returns accountRange of 16`() {
+        val cardNumberController = createController()
         cardNumberController.onValueChange("6282000000000000")
         idleLooper()
         assertThat(cardNumberController.accountRangeService.accountRange!!.panLength).isEqualTo(16)
@@ -166,6 +130,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `trailingIcon should have multi trailing icons when field is empty`() = runTest {
+        val cardNumberController = createController()
         cardNumberController.trailingIcon.test {
             cardNumberController.onValueChange("")
             idleLooper()
@@ -190,27 +155,45 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `trailingIcon should have trailing icon when field matches bin`() = runTest {
-        cardNumberController.trailingIcon.test {
-            cardNumberController.onValueChange("4")
-            idleLooper()
-            cardNumberController.onValueChange("")
-            idleLooper()
+        val cardNumberController = createController()
 
-            skipItems(1)
-            assertThat(awaitItem()).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
-            assertThat(awaitItem()).isEqualTo(TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false))
-            assertThat(awaitItem()).isInstanceOf(TextFieldIcon.MultiTrailing::class.java)
+        val multiTrailingIcon = TextFieldIcon.MultiTrailing(
+            staticIcons = listOf(
+                TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false),
+                TextFieldIcon.Trailing(CardBrand.MasterCard.icon, isTintable = false),
+                TextFieldIcon.Trailing(CardBrand.AmericanExpress.icon, isTintable = false),
+            ),
+            animatedIcons = listOf(
+                TextFieldIcon.Trailing(CardBrand.Discover.icon, isTintable = false),
+                TextFieldIcon.Trailing(CardBrand.JCB.icon, isTintable = false),
+                TextFieldIcon.Trailing(CardBrand.DinersClub.icon, isTintable = false),
+                TextFieldIcon.Trailing(CardBrand.UnionPay.icon, isTintable = false),
+            ),
+        )
+
+        val visaIcon = TextFieldIcon.Trailing(CardBrand.Visa.icon, isTintable = false)
+
+        val multiTrailingIconWithJustVisa = TextFieldIcon.MultiTrailing(
+            staticIcons = listOf(visaIcon),
+            animatedIcons = emptyList(),
+        )
+
+        cardNumberController.trailingIcon.test {
+            assertThat(awaitItem()).isEqualTo(multiTrailingIcon)
+
+            cardNumberController.onValueChange("4")
+
+            assertThat(awaitItem()).isEqualTo(multiTrailingIconWithJustVisa)
+            assertThat(awaitItem()).isEqualTo(visaIcon)
+
+            cardNumberController.onValueChange("")
+            assertThat(awaitItem()).isEqualTo(multiTrailingIcon)
         }
     }
 
     @Test
     fun `trailingIcon should be dropdown if card brand choice eligible`() = runTest {
-        val cardNumberController = DefaultCardNumberController(
-            CardNumberConfig(),
-            FakeCardAccountRangeRepository(),
-            testDispatcher,
-            testDispatcher,
-            initialValue = null,
+        val cardNumberController = createController(
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(),
                 initialBrand = null
@@ -250,12 +233,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `on cbc eligible with preferred brands, should use the preferred brand if none are initially selected`() = runTest {
-        val cardNumberController = DefaultCardNumberController(
-            CardNumberConfig(),
-            FakeCardAccountRangeRepository(),
-            testDispatcher,
-            testDispatcher,
-            initialValue = null,
+        val cardNumberController = createController(
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(CardBrand.CartesBancaires),
                 initialBrand = null
@@ -295,12 +273,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `on dropdown item click, card brand should have been changed`() = runTest {
-        val cardNumberController = DefaultCardNumberController(
-            CardNumberConfig(),
-            FakeCardAccountRangeRepository(),
-            testDispatcher,
-            testDispatcher,
-            initialValue = null,
+        val cardNumberController = createController(
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(),
                 initialBrand = null
@@ -347,12 +320,7 @@ internal class CardNumberControllerTest {
 
     @Test
     fun `on number updated after update to number with no brands, user choice should be re-used if possible`() = runTest {
-        val cardNumberController = DefaultCardNumberController(
-            CardNumberConfig(),
-            FakeCardAccountRangeRepository(),
-            testDispatcher,
-            testDispatcher,
-            initialValue = null,
+        val cardNumberController = createController(
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(CardBrand.CartesBancaires),
                 initialBrand = null
@@ -403,12 +371,7 @@ internal class CardNumberControllerTest {
     fun `on number completed, should report event`() = runTest {
         val eventReporter: CardNumberCompletedEventReporter = mock()
 
-        val cardNumberController = DefaultCardNumberController(
-            CardNumberConfig(),
-            FakeCardAccountRangeRepository(),
-            testDispatcher,
-            testDispatcher,
-            initialValue = null,
+        val cardNumberController = createController(
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(CardBrand.CartesBancaires),
                 initialBrand = null
@@ -445,11 +408,7 @@ internal class CardNumberControllerTest {
     fun `on initial number completed, should not report event`() = runTest {
         val eventReporter: CardNumberCompletedEventReporter = mock()
 
-        val cardNumberController = DefaultCardNumberController(
-            CardNumberConfig(),
-            FakeCardAccountRangeRepository(),
-            testDispatcher,
-            testDispatcher,
+        val cardNumberController = createController(
             initialValue = "4242424242424242",
             cardBrandChoiceConfig = CardBrandChoiceConfig.Eligible(
                 preferredBrands = listOf(CardBrand.CartesBancaires),
@@ -481,11 +440,32 @@ internal class CardNumberControllerTest {
         verifyNoInteractions(eventReporter)
     }
 
+    private fun createController(
+        initialValue: String? = null,
+        cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
+        repository: CardAccountRangeRepository = FakeCardAccountRangeRepository(),
+    ): DefaultCardNumberController {
+        return DefaultCardNumberController(
+            cardTextFieldConfig = CardNumberConfig(),
+            cardAccountRangeRepository = repository,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
+            initialValue = initialValue,
+            cardBrandChoiceConfig = cardBrandChoiceConfig,
+        )
+    }
+
     private class FakeCardAccountRangeRepository : CardAccountRangeRepository {
+
         private val staticCardAccountRangeSource = StaticCardAccountRangeSource()
+
+        var numberOfCalls: Int = 0
+            private set
+
         override suspend fun getAccountRange(
             cardNumber: CardNumber.Unvalidated
         ): AccountRange? {
+            numberOfCalls += 1
             return cardNumber.bin?.let {
                 staticCardAccountRangeSource.getAccountRange(cardNumber)
             }
@@ -494,6 +474,7 @@ internal class CardNumberControllerTest {
         override suspend fun getAccountRanges(
             cardNumber: CardNumber.Unvalidated
         ): List<AccountRange>? {
+            numberOfCalls += 1
             return cardNumber.bin?.let {
                 staticCardAccountRangeSource.getAccountRanges(cardNumber)
             }
