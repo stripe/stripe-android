@@ -19,7 +19,7 @@ tags:
 # Common: web AuthFlow - connect institution
 - tapOn: "Agree and continue"
 # SELECT OAUTH INSTITUTION
-- tapOn: ".*Test Institution.*"
+- tapOn: ".*Ownership Accounts.*"
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
     visible: "Connect accounts"
