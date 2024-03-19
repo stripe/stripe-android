@@ -6,7 +6,6 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
@@ -14,10 +13,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -52,7 +51,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val coreAuthorizationPendingNetworkingRepair: CoreAuthorizationPendingNetworkingRepairRepository,
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val handleError: HandleError,
 ) : MavericksViewModel<LinkAccountPickerState>(initialState) {
 
     init {
@@ -100,11 +99,11 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         onAsync(
             LinkAccountPickerState::payload,
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error fetching payload",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = false,
                 )
                 navigationManager.tryNavigateTo(Destination.InstitutionPicker(referrer = PANE))
             },
@@ -112,11 +111,11 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         onAsync(
             LinkAccountPickerState::selectNetworkedAccountAsync,
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error selecting networked account",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )

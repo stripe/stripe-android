@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
@@ -49,7 +50,8 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
-    private val logger: Logger
+    private val logger: Logger,
+    private val handleError: HandleError,
 ) : MavericksViewModel<NetworkingLinkVerificationState>(initialState) {
 
     init {
@@ -110,11 +112,11 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                analyticsTracker.logError(
+                handleError(
                     extraMessage = "Error starting verification",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )

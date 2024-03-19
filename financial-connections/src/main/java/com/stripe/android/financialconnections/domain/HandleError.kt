@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -53,7 +54,8 @@ internal class RealHandleError @Inject constructor(
 
         // Navigate to error screen
         if (displayErrorScreen) {
-            errorRepository.set(error)
+            val retryPane = pane.takeIf { error is FinancialConnectionsError && error.allowRetry }
+            errorRepository.set(error, retryPane)
             navigationManager.tryNavigateTo(route = Destination.Error(referrer = pane))
         }
     }

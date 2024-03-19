@@ -4,6 +4,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -15,7 +16,8 @@ internal class ErrorPreviewParameterProvider :
         unclassified(),
         unclassifiedWithManualEntry(),
         expectedDowntime(),
-        unexpectedDowntime()
+        unexpectedDowntime(),
+        retryable(),
     )
 
     private fun loading() = ErrorState(
@@ -28,6 +30,7 @@ internal class ErrorPreviewParameterProvider :
                 error = IllegalArgumentException("An unknown error occurred."),
                 allowManualEntry = false,
                 disableLinkMoreAccounts = true,
+                allowRetry = false,
             )
         ),
     )
@@ -38,6 +41,7 @@ internal class ErrorPreviewParameterProvider :
                 error = IllegalArgumentException("An unknown error occurred."),
                 allowManualEntry = true,
                 disableLinkMoreAccounts = true,
+                allowRetry = false,
             )
         ),
     )
@@ -54,6 +58,7 @@ internal class ErrorPreviewParameterProvider :
                 ),
                 allowManualEntry = true,
                 disableLinkMoreAccounts = true,
+                allowRetry = false,
             )
         ),
     )
@@ -68,6 +73,23 @@ internal class ErrorPreviewParameterProvider :
                 ),
                 allowManualEntry = true,
                 disableLinkMoreAccounts = true,
+                allowRetry = false,
+            )
+        ),
+    )
+
+    private fun retryable() = ErrorState(
+        payload = Success(
+            ErrorState.Payload(
+                error = AccountLoadError(
+                    institution = institution(),
+                    showManualEntry = true,
+                    stripeException = APIException(),
+                    canRetry = true,
+                ),
+                allowManualEntry = true,
+                disableLinkMoreAccounts = true,
+                allowRetry = true,
             )
         ),
     )

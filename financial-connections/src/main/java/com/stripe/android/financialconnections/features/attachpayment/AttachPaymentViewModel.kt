@@ -10,10 +10,10 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -37,7 +37,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val logger: Logger
+    private val handleError: HandleError,
 ) : MavericksViewModel<AttachPaymentState>(initialState) {
 
     init {
@@ -87,11 +87,11 @@ internal class AttachPaymentViewModel @Inject constructor(
         onAsync(
             AttachPaymentState::linkPaymentAccount,
             onFail = {
-                eventTracker.logError(
-                    logger = logger,
-                    pane = PANE,
+                handleError(
                     extraMessage = "Error Attaching payment account",
-                    error = it
+                    error = it,
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             }
         )

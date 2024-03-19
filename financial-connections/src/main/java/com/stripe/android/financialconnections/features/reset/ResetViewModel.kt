@@ -9,7 +9,7 @@ import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LinkMoreAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.ClearPartnerWebAuth
@@ -26,7 +26,7 @@ internal class ResetViewModel @Inject constructor(
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val handleError: HandleError,
 ) : MavericksViewModel<ResetState>(initialState) {
 
     init {
@@ -46,11 +46,11 @@ internal class ResetViewModel @Inject constructor(
         onAsync(
             ResetState::payload,
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error linking more accounts",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )

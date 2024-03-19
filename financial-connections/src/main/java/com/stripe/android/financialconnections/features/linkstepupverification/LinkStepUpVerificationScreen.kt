@@ -82,12 +82,11 @@ private fun LinkStepUpVerificationContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> FullScreenGenericLoading()
-            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
+            Uninitialized, is Loading, is Fail -> FullScreenGenericLoading()
             is Success -> LinkStepUpVerificationLoaded(
                 lazyListState = lazyListState,
-                state.submitError,
-                state.submitLoading,
+                submitError = state.submitError,
+                submitLoading = state.submitLoading,
                 payload = payload(),
                 onCloseFromErrorClick = onCloseFromErrorClick,
                 onClickableTextClick = onClickableTextClick

@@ -77,7 +77,7 @@ private fun NetworkingSaveToLinkVerificationContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> FullScreenGenericLoading()
+            Uninitialized, is Loading, is Fail -> FullScreenGenericLoading()
             is Success -> NetworkingSaveToLinkVerificationLoaded(
                 lazyListState = lazyListState,
                 payload = payload(),
@@ -85,8 +85,6 @@ private fun NetworkingSaveToLinkVerificationContent(
                 onCloseFromErrorClick = onCloseFromErrorClick,
                 onSkipClick = onSkipClick
             )
-
-            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }

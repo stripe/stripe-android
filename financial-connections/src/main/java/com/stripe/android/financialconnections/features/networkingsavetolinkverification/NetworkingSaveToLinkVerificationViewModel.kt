@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPErr
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
@@ -45,7 +46,8 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     private val getCachedAccounts: GetCachedAccounts,
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val handleError: HandleError,
 ) : MavericksViewModel<NetworkingSaveToLinkVerificationState>(initialState) {
 
     init {
@@ -82,11 +84,11 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error fetching payload",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )

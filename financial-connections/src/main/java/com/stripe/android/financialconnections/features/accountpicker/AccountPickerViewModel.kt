@@ -8,6 +8,7 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsAutoSelected
@@ -18,10 +19,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAccountsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
+import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
@@ -38,6 +40,7 @@ import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -50,7 +53,8 @@ internal class AccountPickerViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
-    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
+    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
+    private val handleError: HandleError,
 ) : MavericksViewModel<AccountPickerState>(initialState) {
 
     init {
@@ -66,12 +70,28 @@ internal class AccountPickerViewModel @Inject constructor(
             val dataAccessNotice = sync.text?.consent?.dataAccessNotice
             val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
+
+            // TODO: For testing only!
+            if (shouldFail) {
+                shouldFail = false
+                delay(2_000)
+                throw AccountLoadError(
+                    showManualEntry = true,
+                    canRetry = state.canRetry,
+                    institution = manifest.activeInstitution!!,
+                    stripeException = APIConnectionException(),
+                )
+            } else {
+                delay(2_000)
+            }
+
             val (partnerAccountList, millis) = measureTimeMillis {
                 pollAuthorizationSessionAccounts(
                     sync = sync,
                     canRetry = state.canRetry
                 )
             }
+
             if (partnerAccountList.data.isNotEmpty()) {
                 eventTracker.track(
                     PollAccountsSucceeded(
@@ -159,22 +179,22 @@ internal class AccountPickerViewModel @Inject constructor(
         onAsync(
             AccountPickerState::payload,
             onFail = {
-                eventTracker.logError(
-                    logger = logger,
-                    pane = PANE,
+                handleError(
                     extraMessage = "Error retrieving accounts",
-                    error = it
+                    error = it,
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )
         onAsync(
             AccountPickerState::selectAccounts,
             onFail = {
-                eventTracker.logError(
-                    logger = logger,
-                    pane = PANE,
+                handleError(
                     extraMessage = "Error selecting accounts",
-                    error = it
+                    error = it,
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             }
         )
@@ -310,6 +330,9 @@ internal class AccountPickerViewModel @Inject constructor(
 
     companion object :
         MavericksViewModelFactory<AccountPickerViewModel, AccountPickerState> {
+
+//            TODO: For testing only!
+            var shouldFail: Boolean = true
 
         override fun create(
             viewModelContext: ViewModelContext,

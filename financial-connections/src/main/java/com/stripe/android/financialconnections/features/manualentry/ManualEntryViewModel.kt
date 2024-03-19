@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
@@ -43,7 +44,8 @@ internal class ManualEntryViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val handleError: HandleError,
 ) : MavericksViewModel<ManualEntryState>(initialState) {
 
     // Keep form fields outside of State for immediate updates.
@@ -98,6 +100,14 @@ internal class ManualEntryViewModel @Inject constructor(
                     )
                 }
             },
+            onFail = {
+                handleError(
+                    extraMessage = "Error fetching payload",
+                    error = it,
+                    pane = PANE,
+                    displayErrorScreen = true,
+                )
+            }
         )
         onAsync(
             ManualEntryState::linkPaymentAccount,

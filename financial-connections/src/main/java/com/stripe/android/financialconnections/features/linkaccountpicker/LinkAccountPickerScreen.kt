@@ -42,10 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
@@ -53,7 +50,6 @@ import com.stripe.android.financialconnections.features.common.AccountItem
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenBottomSheet
@@ -190,23 +186,17 @@ private fun LinkAccountPickerMainContent(
             )
         }
     ) {
-        when (val payload = state.payload) {
-            Uninitialized,
-            is Loading,
-            is Success -> LinkAccountPickerLoaded(
-                scrollState = scrollState,
-                payload = payload,
-                cta = state.cta,
-                selectedAccountId = state.selectedAccountId,
-                selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
-                onClickableTextClick = onClickableTextClick,
-                onSelectAccountClick = onSelectAccountClick,
-                onNewBankAccountClick = onNewBankAccountClick,
-                onAccountClick = onAccountClick
-            )
-
-            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
-        }
+        LinkAccountPickerLoaded(
+            scrollState = scrollState,
+            payload = state.payload,
+            cta = state.cta,
+            selectedAccountId = state.selectedAccountId,
+            selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
+            onClickableTextClick = onClickableTextClick,
+            onSelectAccountClick = onSelectAccountClick,
+            onNewBankAccountClick = onNewBankAccountClick,
+            onAccountClick = onAccountClick
+        )
     }
 }
 

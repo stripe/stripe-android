@@ -40,7 +40,6 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.consent.ui.ConsentLogoHeader
@@ -114,7 +113,7 @@ private fun ConsentContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (val consent = state.consent) {
-        Uninitialized, is Loading -> ConsentLoadingContent()
+        Uninitialized, is Loading, is Fail -> ConsentLoadingContent()
         is Success -> LoadedContent(
             payload = consent(),
             bottomSheetMode = state.currentBottomSheet,
@@ -125,8 +124,6 @@ private fun ConsentContent(
             onConfirmModalClick = onConfirmModalClick,
             onContinueClick = onContinueClick
         )
-
-        is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(consent.error) }
     }
 }
 

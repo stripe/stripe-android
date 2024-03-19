@@ -31,16 +31,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.exception.AccountLoadError
-import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenBottomSheet
@@ -50,9 +43,6 @@ import com.stripe.android.financialconnections.features.common.DataAccessBottomS
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
-import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
-import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.parentViewModel
@@ -172,43 +162,18 @@ private fun AccountPickerMainContent(
             )
         }
     ) {
-        when (val payload = state.payload) {
-            is Fail -> {
-                when (val error = payload.error) {
-                    is AccountNoneEligibleForPaymentMethodError ->
-                        NoSupportedPaymentMethodTypeAccountsErrorContent(
-                            exception = error,
-                            onSelectAnotherBank = onSelectAnotherBank
-                        )
-
-                    is AccountLoadError -> NoAccountsAvailableErrorContent(
-                        exception = error,
-                        onEnterDetailsManually = onEnterDetailsManually,
-                        onTryAgain = onLoadAccountsAgain,
-                        onSelectAnotherBank = onSelectAnotherBank
-                    )
-
-                    else -> UnclassifiedErrorContent { onCloseFromErrorClick(error) }
-                }
-            }
-
-            is Loading,
-            is Uninitialized,
-            is Success -> AccountPickerLoaded(
-                payload = payload,
-                state = state,
-                onAccountClicked = onAccountClicked,
-                onClickableTextClick = onClickableTextClick,
-                lazyListState = lazyListState,
-                onSubmit = onSubmit
-            )
-        }
+        AccountPickerLoaded(
+            state = state,
+            onAccountClicked = onAccountClicked,
+            onClickableTextClick = onClickableTextClick,
+            lazyListState = lazyListState,
+            onSubmit = onSubmit
+        )
     }
 }
 
 @Composable
 private fun AccountPickerLoaded(
-    payload: Async<AccountPickerState.Payload>,
     state: AccountPickerState,
     lazyListState: LazyListState,
     onAccountClicked: (PartnerAccount) -> Unit,
@@ -219,7 +184,7 @@ private fun AccountPickerLoaded(
         lazyListState = lazyListState,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         body = {
-            payload()
+            state.payload()
                 ?.takeIf { it.shouldSkipPane.not() }
                 ?.let {
                     loadedContent(
@@ -230,7 +195,7 @@ private fun AccountPickerLoaded(
                 } ?: run { loadingContent() }
         },
         footer = {
-            payload()
+            state.payload()
                 ?.takeIf { it.shouldSkipPane.not() }
                 ?.let {
                     Footer(
