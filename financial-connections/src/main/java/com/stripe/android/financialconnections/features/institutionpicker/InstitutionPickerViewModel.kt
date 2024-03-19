@@ -242,7 +242,6 @@ internal class InstitutionPickerViewModel @Inject constructor(
 
         private const val SEARCH_DEBOUNCE_MS = 300L
         private val PANE = Pane.INSTITUTION_PICKER
-
     }
 }
 
