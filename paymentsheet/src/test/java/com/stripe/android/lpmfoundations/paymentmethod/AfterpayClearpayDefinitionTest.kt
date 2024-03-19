@@ -18,23 +18,16 @@ internal class AfterpayClearpayDefinitionTest {
 
     @Test
     fun `Test label for afterpay show correctly when clearpay string`() {
-        localeRule.setTemporarily(Locale.UK)
-        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
-            stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
-                paymentMethodTypes = listOf("card", "afterpay_clearpay"),
-            )
-        )
-        val supportedPaymentMethod = paymentMethodMetadata.supportedPaymentMethodForCode(
-            code = "afterpay_clearpay",
-            context = ApplicationProvider.getApplicationContext(),
-        )!!
-        assertThat(supportedPaymentMethod.displayNameResource)
-            .isEqualTo(R.string.stripe_paymentsheet_payment_method_clearpay)
+        testDisplayNameReflectsLocale(Locale.UK, R.string.stripe_paymentsheet_payment_method_clearpay)
     }
 
     @Test
     fun `Test label for afterpay show correctly when afterpay string`() {
-        localeRule.setTemporarily(Locale.US)
+        testDisplayNameReflectsLocale(Locale.US, R.string.stripe_paymentsheet_payment_method_afterpay)
+    }
+
+    private fun testDisplayNameReflectsLocale(locale: Locale, resourceId: Int) {
+        localeRule.setTemporarily(locale)
         val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING.copy(
                 paymentMethodTypes = listOf("card", "afterpay_clearpay"),
@@ -45,6 +38,6 @@ internal class AfterpayClearpayDefinitionTest {
             context = ApplicationProvider.getApplicationContext(),
         )!!
         assertThat(supportedPaymentMethod.displayNameResource)
-            .isEqualTo(R.string.stripe_paymentsheet_payment_method_afterpay)
+            .isEqualTo(resourceId)
     }
 }

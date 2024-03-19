@@ -395,7 +395,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `supportedPaymentMethod fields address without country placeholder produces correct element`() = runTest {
+    fun `supportedPaymentMethod replaces country placeholder fields correctly`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
