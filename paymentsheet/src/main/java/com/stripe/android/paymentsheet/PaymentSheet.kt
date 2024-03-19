@@ -438,6 +438,8 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
+        val externalPaymentMethods : ExternalPaymentMethodsConfiguration = ConfigurationDefaults.externalPaymentMethodsConfiguration,
+
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
@@ -1185,6 +1187,13 @@ class PaymentSheet internal constructor(
             fun build() = BillingDetails(address, email, name, phone)
         }
     }
+
+    // TODO: fill in fields
+    @Parcelize
+    data class ExternalPaymentMethodsConfiguration(
+        val externalPaymentMethods: List<String> = emptyList(),
+        val callback : ExternalPaymentMethodConfirmHandler
+        ) : Parcelable
 
     /**
      * Configuration for how billing details are collected during checkout.

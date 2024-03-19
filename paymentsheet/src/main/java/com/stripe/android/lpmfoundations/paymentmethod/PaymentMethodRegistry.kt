@@ -68,6 +68,7 @@ internal object PaymentMethodRegistry {
         UsBankAccountDefinition,
         WeChatPayDefinition,
         ZipDefinition,
+        // TODO: add ExternalPaymentMethod definition here
     )
 
     val definitionsByCode: Map<String, PaymentMethodDefinition> by lazy {

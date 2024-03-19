@@ -35,6 +35,7 @@ data class PaymentMethodCreateParams internal constructor(
     private val link: Link? = null,
     private val cashAppPay: CashAppPay? = null,
     private val swish: Swish? = null,
+    private val externalPaymentMethod : ExternalPaymentMethod? = null,
     val billingDetails: PaymentMethod.BillingDetails? = null,
     private val metadata: Map<String, String>? = null,
     private val productUsage: Set<String> = emptySet(),
@@ -67,6 +68,7 @@ data class PaymentMethodCreateParams internal constructor(
         link: Link? = null,
         cashAppPay: CashAppPay? = null,
         swish: Swish? = null,
+        externalPaymentMethod: ExternalPaymentMethod? = null,
         billingDetails: PaymentMethod.BillingDetails? = null,
         metadata: Map<String, String>? = null,
         productUsage: Set<String> = emptySet(),
@@ -87,6 +89,7 @@ data class PaymentMethodCreateParams internal constructor(
         link,
         cashAppPay,
         swish,
+        externalPaymentMethod,
         billingDetails,
         metadata,
         productUsage,
@@ -657,6 +660,12 @@ data class PaymentMethodCreateParams internal constructor(
         }
     }
 
+    @Parcelize
+    data class ExternalPaymentMethod(
+        val type : String,
+        val handler : () -> Unit // TODO: can't depend on PaymentSheet here
+    ) : Parcelable
+
     companion object {
         private const val PARAM_TYPE = "type"
         private const val PARAM_BILLING_DETAILS = "billing_details"
@@ -1110,6 +1119,20 @@ data class PaymentMethodCreateParams internal constructor(
                     consumerSessionClientSecret,
                     extraParams
                 )
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun createExternalPaymentMethod(
+            type : String,
+            billingDetails: PaymentMethod.BillingDetails? = null,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.ExternalPaymentMethod,
+                externalPaymentMethod = ExternalPaymentMethod(
+                    type
+                ) {},
+                billingDetails = billingDetails
             )
         }
 

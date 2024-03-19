@@ -6,7 +6,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.lpmfoundations.paymentmethod.isSupported
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSerializer
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import java.io.InputStream
@@ -62,6 +65,27 @@ internal class LpmRepository(
         )
 
         return !sharedDataSpecsResult.failedToParseServerResponse
+    }
+
+    fun getExternalPaymentMethodSpecs(stripeIntent: StripeIntent, serverExternalPaymentMethodSpecs : String?) : List<ExternalPaymentMethodSpec> {
+        val expectedExternalPaymentMethodSpecs = stripeIntent.externalPaymentMethodTypes
+        val externalPaymentMethodSpecs : MutableList<ExternalPaymentMethodSpec> = mutableListOf()
+//        var failedToParseServerResponse = false
+
+        if (!serverExternalPaymentMethodSpecs.isNullOrEmpty()) {
+            val deserializationResult = ExternalPaymentMethodSerializer.deserializeList(serverExternalPaymentMethodSpecs) // TODO: create new serializer
+//            failedToParseServerResponse = deserializationResult.isFailure
+            externalPaymentMethodSpecs += deserializationResult.getOrElse { emptyList() }
+        }
+
+        if (expectedExternalPaymentMethodSpecs.size != externalPaymentMethodSpecs.size) {
+            // TODO: here is where you'd log something client-side about the response not including the expected events.
+            // You'd want to use a better check too.
+            println("oh no!")
+        }
+
+        // TODO: propagate failure from the deserialization
+        return externalPaymentMethodSpecs
     }
 
     fun getSharedDataSpecs(

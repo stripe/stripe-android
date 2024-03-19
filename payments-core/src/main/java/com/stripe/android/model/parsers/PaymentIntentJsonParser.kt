@@ -22,6 +22,9 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         val paymentMethodTypes = jsonArrayToList(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
         )
+        val externalPaymentMethodTypes = jsonArrayToList(
+            json.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHOD_TYPES)
+        )
         val amount = StripeJsonUtils.optLong(json, FIELD_AMOUNT)
         val canceledAt = json.optLong(FIELD_CANCELED_AT)
         val cancellationReason = PaymentIntent.CancellationReason.fromCode(
@@ -80,6 +83,7 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         return PaymentIntent(
             id = id,
             paymentMethodTypes = paymentMethodTypes,
+            externalPaymentMethodTypes = externalPaymentMethodTypes,
             amount = amount,
             canceledAt = canceledAt,
             cancellationReason = cancellationReason,
@@ -185,5 +189,6 @@ class PaymentIntentJsonParser : ModelJsonParser<PaymentIntent> {
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES =
             "unactivated_payment_method_types"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        private const val FIELD_EXTERNAL_PAYMENT_METHOD_TYPES = "external_payment_method_types"
     }
 }

@@ -20,6 +20,10 @@ class DeferredSetupIntentJsonParser(
             json.optJSONArray(FIELD_PAYMENT_METHOD_TYPES)
         )
 
+        val externalPaymentMethodTypes = jsonArrayToList(
+            json.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHOD_TYPES)
+        )
+
         val unactivatedPaymentMethods = jsonArrayToList(
             json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES)
         )
@@ -35,6 +39,7 @@ class DeferredSetupIntentJsonParser(
             description = null,
             clientSecret = null,
             paymentMethodTypes = paymentMethodTypes,
+            externalPaymentMethodTypes = externalPaymentMethodTypes,
             countryCode = countryCode,
             linkFundingSources = linkFundingSources,
             unactivatedPaymentMethods = unactivatedPaymentMethods,
@@ -52,5 +57,7 @@ class DeferredSetupIntentJsonParser(
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
+        // TODO: ensure this is stored in the intent
+        private const val FIELD_EXTERNAL_PAYMENT_METHOD_TYPES = "external_payment_methods_data"
     }
 }

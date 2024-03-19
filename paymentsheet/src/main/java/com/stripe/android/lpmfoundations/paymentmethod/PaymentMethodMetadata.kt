@@ -11,6 +11,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import kotlinx.parcelize.Parcelize
 
@@ -31,6 +32,7 @@ internal data class PaymentMethodMetadata(
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
+    val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -40,7 +42,11 @@ internal data class PaymentMethodMetadata(
     }
 
     fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
-        return stripeIntent.paymentMethodTypes.mapNotNull {
+        val possiblePaymentMethodTypes = listOf(stripeIntent.paymentMethodTypes, stripeIntent.externalPaymentMethodTypes).flatten()
+        return possiblePaymentMethodTypes.mapNotNull {
+            // TODO: add EPMs to this registry???
+            // TODO: another thing is that we will need to show multiple EPMs, so we need to make sure that
+            // we are including multiple
             PaymentMethodRegistry.definitionsByCode[it]
         }.filter {
             it.isSupported(this)
@@ -48,7 +54,9 @@ internal data class PaymentMethodMetadata(
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
-            sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null
+            (sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null) ||
+                // TODO: find the right predicate here
+                (paymentMethodDefinition.type.code.equals(PaymentMethod.Type.ExternalPaymentMethod.code))
         }.run {
             if (paymentMethodOrder.isEmpty()) {
                 // Optimization to early out if we don't have a client side order.
