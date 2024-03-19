@@ -65,7 +65,6 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
@@ -85,6 +84,7 @@ import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsColors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.LoadableContent
 import kotlinx.coroutines.launch
 
 @Composable
@@ -129,19 +129,15 @@ private fun InstitutionPickerContent(
             )
         }
     ) {
-        when (payload) {
-            is Uninitialized,
-            is Loading,
-            is Fail -> FullScreenGenericLoading()
-
-            is Success -> LoadedContent(
+        LoadableContent(payload) { payload ->
+            LoadedContent(
                 listState = listState,
                 previewText = previewText,
                 selectedInstitutionId = selectedInstitutionId,
                 onQueryChanged = onQueryChanged,
                 institutions = institutions,
                 onInstitutionSelected = onInstitutionSelected,
-                payload = payload(),
+                payload = payload,
                 onManualEntryClick = onManualEntryClick,
                 onScrollChanged = onScrollChanged
             )

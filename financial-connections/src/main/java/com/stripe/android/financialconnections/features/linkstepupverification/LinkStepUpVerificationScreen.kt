@@ -24,15 +24,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
-import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
@@ -49,6 +44,7 @@ import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.LoadableContent
 
 @Composable
 internal fun LinkStepUpVerificationScreen() {
@@ -81,13 +77,12 @@ private fun LinkStepUpVerificationContent(
             )
         }
     ) {
-        when (val payload = state.payload) {
-            Uninitialized, is Loading, is Fail -> FullScreenGenericLoading()
-            is Success -> LinkStepUpVerificationLoaded(
+        LoadableContent(state.payload) { payload ->
+            LinkStepUpVerificationLoaded(
                 lazyListState = lazyListState,
                 submitError = state.submitError,
                 submitLoading = state.submitLoading,
-                payload = payload(),
+                payload = payload,
                 onCloseFromErrorClick = onCloseFromErrorClick,
                 onClickableTextClick = onClickableTextClick
             )

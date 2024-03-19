@@ -71,6 +71,7 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LoadableContent
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.DropDown
@@ -168,12 +169,11 @@ private fun NetworkingLinkSignupMainContent(
             )
         }
     ) {
-        when (val payload = state.payload) {
-            Uninitialized, is Loading, is Fail -> FullScreenGenericLoading()
-            is Success -> NetworkingLinkSignupLoaded(
+        LoadableContent(state.payload) { payload ->
+            NetworkingLinkSignupLoaded(
                 scrollState = scrollState,
                 validForm = state.valid,
-                payload = payload(),
+                payload = payload,
                 lookupAccountSync = state.lookupAccount,
                 saveAccountToLinkSync = state.saveAccountToLink,
                 showFullForm = state.showFullForm,

@@ -42,10 +42,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
@@ -264,24 +261,19 @@ private fun LoadedContent(
     onCancelClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
-    when (authenticationStatus) {
-        is Uninitialized,
-        is Loading,
-        is Fail,
-        is Success -> when (payload.authSession.isOAuth) {
-            true -> PrePaneContent(
-                // show loading prepane when authenticationStatus
-                // is Loading or Success (completing auth after redirect)
-                authenticationStatus = authenticationStatus,
-                showInModal = showInModal,
-                onContinueClick = onContinueClick,
-                onCancelClick = onCancelClick,
-                content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
-                onClickableTextClick = onClickableTextClick,
-            )
-
-            false -> SharedPartnerLoading(showInModal)
-        }
+    if (payload.authSession.isOAuth) {
+        PrePaneContent(
+            // show loading prepane when authenticationStatus
+            // is Loading or Success (completing auth after redirect)
+            authenticationStatus = authenticationStatus,
+            showInModal = showInModal,
+            onContinueClick = onContinueClick,
+            onCancelClick = onCancelClick,
+            content = requireNotNull(payload.authSession.display?.text?.oauthPrepane),
+            onClickableTextClick = onClickableTextClick,
+        )
+    } else {
+        SharedPartnerLoading(showInModal)
     }
 }
 
