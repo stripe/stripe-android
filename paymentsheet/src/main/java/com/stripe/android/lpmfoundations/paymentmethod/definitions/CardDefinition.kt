@@ -30,7 +30,7 @@ internal object CardDefinition : PaymentMethodDefinition {
         transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
-        val specs = listOfNotNull(
+        val specs = listOf(
             ContactInformationSpec(
                 collectName = false,
                 collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
@@ -41,10 +41,7 @@ internal object CardDefinition : PaymentMethodDefinition {
             ),
             CardBillingSpec(
                 collectionMode = billingDetailsCollectionConfiguration.address.toInternal(),
-            ).takeIf {
-                billingDetailsCollectionConfiguration.address !=
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-            },
+            ),
             SaveForFutureUseSpec(),
         )
         return SupportedPaymentMethod(
@@ -64,7 +61,7 @@ internal object CardDefinition : PaymentMethodDefinition {
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode?
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 .toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
     return when (this) {
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
@@ -78,7 +75,5 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectio
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         }
-
-        else -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
     }
 }

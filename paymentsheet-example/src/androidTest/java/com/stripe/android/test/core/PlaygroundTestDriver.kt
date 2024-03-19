@@ -563,11 +563,11 @@ internal class PlaygroundTestDriver(
                         .size == 1
                 }
 
-//                composeTestRule.waitUntil {
-//                    composeTestRule.onAllNodesWithText("Country or region")
-//                        .fetchSemanticsNodes()
-//                        .size == 1
-//                }
+                composeTestRule.waitUntil {
+                    composeTestRule.onAllNodesWithText("Country or region")
+                        .fetchSemanticsNodes()
+                        .size == 1
+                }
             }
             is CustomerType.Existing, is CustomerType.RETURNING -> {
                 composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
