@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -53,7 +54,8 @@ class NetworkingLinkVerificationViewModelTest {
         markLinkVerified = markLinkVerified,
         analyticsTracker = analyticsTracker,
         logger = Logger.noop(),
-        initialState = state
+        handleError = TestHandleError(),
+        initialState = state,
     )
 
     @Test

@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -58,7 +59,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         getCachedConsumerSession = getCachedConsumerSession,
         getManifest = getManifest,
         logger = Logger.noop(),
-        initialState = state
+        handleError = TestHandleError(),
+        initialState = state,
     )
 
     @Test

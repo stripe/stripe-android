@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -61,7 +62,8 @@ class NetworkingLinkSignupViewModelTest {
         lookupAccount = lookupAccount,
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         sync = sync,
-        saveAccountToLink = saveAccountToLink
+        saveAccountToLink = saveAccountToLink,
+        handleError = TestHandleError(),
     )
 
     @Test

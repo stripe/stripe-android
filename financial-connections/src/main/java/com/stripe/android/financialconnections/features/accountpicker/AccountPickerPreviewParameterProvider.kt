@@ -1,11 +1,8 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.Bullet
@@ -13,7 +10,6 @@ import com.stripe.android.financialconnections.model.ConnectedAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.PartnerAccount
 
@@ -21,7 +17,6 @@ internal class AccountPickerPreviewParameterProvider :
     PreviewParameterProvider<AccountPickerState> {
     override val values = sequenceOf(
         loading(),
-        error(),
         multiSelect(),
         singleSelect(),
     )
@@ -31,27 +26,6 @@ internal class AccountPickerPreviewParameterProvider :
 
     private fun loading() = AccountPickerState(
         payload = Loading(),
-        selectedIds = emptySet(),
-    )
-
-    private fun error() = AccountPickerState(
-        payload = Fail(
-            AccountNoneEligibleForPaymentMethodError(
-                accountsCount = 1,
-                institution = FinancialConnectionsInstitution(
-                    id = "2",
-                    name = "Institution 2",
-                    url = "Institution 2 url",
-                    featured = false,
-                    featuredOrder = null,
-                    icon = null,
-                    logo = null,
-                    mobileHandoffCapable = false
-                ),
-                merchantName = "Merchant name",
-                stripeException = APIException()
-            )
-        ),
         selectedIds = emptySet(),
     )
 
