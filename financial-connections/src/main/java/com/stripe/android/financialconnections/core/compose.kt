@@ -6,7 +6,7 @@ import androidx.activity.ComponentActivity
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
-internal fun Context.activityViewModel() : FinancialConnectionsSheetNativeViewModel {
+internal fun Context.activityViewModel(): FinancialConnectionsSheetNativeViewModel {
     val activity = extractActivityFromContext(this) as FinancialConnectionsSheetNativeActivity
     return activity.viewModel
 }

@@ -12,7 +12,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.core.execute
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
@@ -43,48 +42,47 @@ internal class ConsentViewModel @Inject constructor(
 ) : FinancialConnectionsViewModel<ConsentState>(initialState) {
 
     init {
-        execute(
-            block = {
-                val sync = getOrFetchSync()
-                val manifest = sync.manifest
-                val shouldShowMerchantLogos: Boolean = manifest
-                    .experimentAssignment(CONNECTIONS_CONSENT_COMBINED_LOGO) == "treatment"
-                eventTracker.trackExposure(CONNECTIONS_CONSENT_COMBINED_LOGO, manifest)
-                ConsentState.Payload(
-                    consent = sync.text!!.consent!!,
-                    shouldShowMerchantLogos = shouldShowMerchantLogos,
-                    merchantLogos = sync.visual.merchantLogos
-                )
-            },
-            onResultUpdated = { stateFlow.update { state -> state.copy(consent = it) } },
-            onFail = { logger.error("Error retrieving consent content", it) },
-            onSuccess = { eventTracker.track(PaneLoaded(Pane.CONSENT)) }
-        )
-    }
-
-    fun onContinueClick() {
-        execute(
-            block = {
-                eventTracker.track(ConsentAgree)
-                FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
-                acceptConsent()
-            },
-            onResultUpdated = {
-                stateFlow.update { state -> state.copy(acceptConsent = it) }
-            },
+        suspend {
+            val sync = getOrFetchSync()
+            val manifest = sync.manifest
+            val shouldShowMerchantLogos: Boolean = manifest
+                .experimentAssignment(CONNECTIONS_CONSENT_COMBINED_LOGO) == "treatment"
+            eventTracker.trackExposure(CONNECTIONS_CONSENT_COMBINED_LOGO, manifest)
+            ConsentState.Payload(
+                consent = sync.text!!.consent!!,
+                shouldShowMerchantLogos = shouldShowMerchantLogos,
+                merchantLogos = sync.visual.merchantLogos
+            )
+        }.execute(
+            reducer = { copy(consent = it) },
+            onSuccess = { eventTracker.track(PaneLoaded(Pane.CONSENT)) },
             onFail = {
                 eventTracker.logError(
-                    extraMessage = "Error accepting consent",
+                    extraMessage = "Error retrieving consent content",
                     error = it,
                     logger = logger,
                     pane = Pane.CONSENT
                 )
             },
-            onSuccess = { manifest ->
-                navigationManager.tryNavigateTo(manifest.nextPane.destination(referrer = Pane.CONSENT))
-            }
         )
     }
+
+    fun onContinueClick() = suspend {
+        eventTracker.track(ConsentAgree)
+        FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
+        acceptConsent()
+    }.execute(
+        reducer = { copy(acceptConsent = it) },
+        onSuccess = { navigationManager.tryNavigateTo(it.nextPane.destination(referrer = Pane.CONSENT)) },
+        onFail = {
+            eventTracker.logError(
+                extraMessage = "Error accepting consent",
+                error = it,
+                logger = logger,
+                pane = Pane.CONSENT
+            )
+        },
+    )
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
         val date = Date()

@@ -2,7 +2,9 @@ package com.stripe.android.financialconnections.core
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 internal abstract class FinancialConnectionsViewModel<S>(
@@ -10,6 +12,26 @@ internal abstract class FinancialConnectionsViewModel<S>(
 ) : ViewModel() {
 
     val stateFlow: MutableStateFlow<S> = MutableStateFlow(initialState)
+
+    protected open fun <T : Any?> (suspend () -> T).execute(
+        reducer: S.(Result<T>) -> S,
+        onSuccess: (T) -> Unit = {},
+        onFail: (Throwable) -> Unit = {}
+    ): Job {
+        return viewModelScope.launch {
+            stateFlow.update { state -> state.reducer(Result(loading = true)) }
+            val result = kotlin.runCatching { this@execute() }
+            stateFlow.update { state ->
+                state.reducer(
+                    Result(
+                        loading = false,
+                        data = result.getOrNull(),
+                        error = result.exceptionOrNull()
+                    )
+                )
+            }
+        }
+    }
 }
 
 internal data class Result<T>(
@@ -18,27 +40,4 @@ internal data class Result<T>(
     val error: Throwable? = null
 ) {
     operator fun invoke(): T? = data
-}
-
-
-internal fun <T> FinancialConnectionsViewModel<*>.execute(
-    block: suspend () -> T,
-    onResultUpdated: (Result<T>) -> Unit,
-    onSuccess: (T) -> Unit = {},
-    onFail: (Throwable) -> Unit = {}
-) {
-    onResultUpdated(Result(loading = true))
-    viewModelScope.launch {
-        val result = runCatching { block() }
-        onResultUpdated(
-            Result(
-                loading = false,
-                data = result.getOrNull(),
-                error = result.exceptionOrNull()
-            )
-        )
-        result
-            .onSuccess { onSuccess(it) }
-            .onFailure { onFail(it) }
-    }
 }
