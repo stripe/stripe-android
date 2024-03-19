@@ -15,6 +15,8 @@ object RealIsWorkManagerAvailable : IsWorkManagerAvailable {
             Class.forName("androidx.work.WorkManager")
         }.isSuccess
 
-        return workManagerInClasspath && WorkManager.isInitialized()
+        return FeatureFlags.workManagerForAnalytics.isEnabled &&
+            workManagerInClasspath &&
+            WorkManager.isInitialized()
     }
 }
