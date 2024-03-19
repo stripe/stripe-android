@@ -21,6 +21,7 @@ internal abstract class FinancialConnectionsViewModel<S>(
         return viewModelScope.launch {
             stateFlow.update { state -> state.reducer(Result(loading = true)) }
             val result = kotlin.runCatching { this@execute() }
+            // update state.
             stateFlow.update { state ->
                 state.reducer(
                     Result(
@@ -30,6 +31,10 @@ internal abstract class FinancialConnectionsViewModel<S>(
                     )
                 )
             }
+            // trigger side effects.
+            result
+                .onSuccess(onSuccess)
+                .onFailure(onFail)
         }
     }
 }
