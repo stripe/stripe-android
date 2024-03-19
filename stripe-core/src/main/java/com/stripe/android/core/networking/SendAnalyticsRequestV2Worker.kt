@@ -19,10 +19,8 @@ internal class SendAnalyticsRequestV2Worker(
 ) : CoroutineWorker(appContext, params) {
 
     override suspend fun doWork(): Result = withRequest { request ->
-        val stripeNetworkClient = getNetworkClient()
-
         return runCatching {
-            stripeNetworkClient.executeRequest(request)
+            networkClient.executeRequest(request)
         }.fold(
             onSuccess = {
                 Result.success()
@@ -47,14 +45,8 @@ internal class SendAnalyticsRequestV2Worker(
 
         const val TAG = "SendAnalyticsRequestV2Worker"
 
-        private var networkClient: StripeNetworkClient? = null
-
-        fun getNetworkClient(): StripeNetworkClient {
-            if (networkClient == null) {
-                networkClient = DefaultStripeNetworkClient()
-            }
-            return networkClient!!
-        }
+        var networkClient: StripeNetworkClient = DefaultStripeNetworkClient()
+            private set
 
         fun createInputData(request: AnalyticsRequestV2): Data {
             val encodedRequest = Json.encodeToString(request)
