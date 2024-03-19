@@ -83,7 +83,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Test
     fun testPaymentSheetNewCustomer() {
         testDriver.screenshotRegression(
-            testParams.copy()
+            testParams
         )
     }
 

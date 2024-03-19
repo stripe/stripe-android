@@ -45,7 +45,7 @@ internal data class TestParameters(
             )
         }
 
-        fun playgroundSettings(block: (PlaygroundSettings) -> Unit = {}): PlaygroundSettings {
+        private fun playgroundSettings(block: (PlaygroundSettings) -> Unit = {}): PlaygroundSettings {
             val settings = PlaygroundSettings.createFromDefaults()
             settings[CustomerSettingsDefinition] = CustomerType.NEW
             settings[LinkSettingsDefinition] = false
