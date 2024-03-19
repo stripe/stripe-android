@@ -37,7 +37,7 @@ class AnalyticsRequestV2Factory(
         eventName: String,
         additionalParams: Map<String, Any?> = mapOf(),
         includeSDKParams: Boolean = true
-    ) = AnalyticsRequestV2(
+    ) = AnalyticsRequestV2.create(
         eventName = eventName,
         clientId = clientId,
         origin = origin,
