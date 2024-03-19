@@ -24,13 +24,10 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
-import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
@@ -42,6 +39,7 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.LoadableContent
 
 @Composable
 internal fun NetworkingLinkVerificationScreen() {
@@ -68,10 +66,9 @@ private fun NetworkingLinkVerificationContent(
             )
         }
     ) {
-        when (val payload = state.payload) {
-            Uninitialized, is Loading, is Fail -> FullScreenGenericLoading()
-            is Success -> NetworkingLinkVerificationLoaded(
-                payload = payload(),
+        LoadableContent(state.payload) { payload ->
+            NetworkingLinkVerificationLoaded(
+                payload = payload,
                 confirmVerificationAsync = state.confirmVerification,
                 onCloseFromErrorClick = onCloseFromErrorClick
             )

@@ -31,10 +31,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
@@ -60,6 +57,7 @@ import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.ui.theme.LoadableContent
 import kotlinx.coroutines.launch
 
 @ExperimentalMaterialApi
@@ -112,10 +110,12 @@ private fun ConsentContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    when (val consent = state.consent) {
-        Uninitialized, is Loading, is Fail -> ConsentLoadingContent()
-        is Success -> LoadedContent(
-            payload = consent(),
+    LoadableContent(
+        async = state.consent,
+        loading = { ConsentLoadingContent() },
+    ) { payload ->
+        LoadedContent(
+            payload = payload,
             bottomSheetMode = state.currentBottomSheet,
             acceptConsent = state.acceptConsent,
             bottomSheetState = bottomSheetState,

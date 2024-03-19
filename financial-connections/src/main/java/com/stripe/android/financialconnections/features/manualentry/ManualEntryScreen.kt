@@ -27,13 +27,10 @@ import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -48,6 +45,7 @@ import com.stripe.android.financialconnections.ui.components.TestModeBanner
 import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Layout
+import com.stripe.android.financialconnections.ui.theme.LoadableContent
 
 @Composable
 internal fun ManualEntryScreen() {
@@ -103,29 +101,27 @@ private fun ManualEntryContent(
             )
         }
     ) {
-        when (payload) {
-            is Loading, Uninitialized, is Fail -> FullScreenGenericLoading()
-
-            is Success -> when (payload().customManualEntry) {
-                true -> FullScreenGenericLoading()
-                false -> ManualEntryLoaded(
-                    scrollState = scrollState,
-                    linkPaymentAccountStatus = linkPaymentAccountStatus,
-                    payload = payload(),
-                    routing = routing,
-                    routingError = routingError,
-                    account = account,
-                    accountError = accountError,
-                    accountConfirm = accountConfirm,
-                    accountConfirmError = accountConfirmError,
-                    onRoutingEntered = onRoutingEntered,
-                    onAccountEntered = onAccountEntered,
-                    onAccountConfirmEntered = onAccountConfirmEntered,
-                    isValidForm = isValidForm,
-                    onSubmit = onSubmit,
-                    onTestFill = onTestFill
-                )
-            }
+        LoadableContent(
+            async = payload,
+            showLoadingInSuccessState = { it.customManualEntry },
+        ) { payload ->
+            ManualEntryLoaded(
+                scrollState = scrollState,
+                linkPaymentAccountStatus = linkPaymentAccountStatus,
+                payload = payload,
+                routing = routing,
+                routingError = routingError,
+                account = account,
+                accountError = accountError,
+                accountConfirm = accountConfirm,
+                accountConfirmError = accountConfirmError,
+                onRoutingEntered = onRoutingEntered,
+                onAccountEntered = onAccountEntered,
+                onAccountConfirmEntered = onAccountConfirmEntered,
+                isValidForm = isValidForm,
+                onSubmit = onSubmit,
+                onTestFill = onTestFill
+            )
         }
     }
 }
