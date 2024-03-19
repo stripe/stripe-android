@@ -97,12 +97,10 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
     @OptIn(DelicateCoroutinesApi::class)
     override fun track(event: FinancialConnectionsAnalyticsEvent) {
         GlobalScope.launch(Dispatchers.IO) {
-            val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
-            val commonParams = commonParams()
             val request = requestFactory.createRequest(
                 eventName = event.eventName,
-                additionalParams = eventParams + commonParams,
-                includeSDKParams = true
+                additionalParams = event.params.orEmpty() + commonParams(),
+                includeSDKParams = true,
             )
             requestExecutor.enqueue(request)
         }
