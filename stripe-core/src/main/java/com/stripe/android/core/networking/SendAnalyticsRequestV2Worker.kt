@@ -6,7 +6,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.Data
 import androidx.work.WorkerParameters
 import androidx.work.workDataOf
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.InvalidRequestException
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -78,4 +77,4 @@ internal class SendAnalyticsRequestV2Worker(
 }
 
 private val Throwable.shouldRetry: Boolean
-    get() = this !is APIException && this !is InvalidRequestException
+    get() = this !is InvalidRequestException
