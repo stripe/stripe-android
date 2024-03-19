@@ -123,7 +123,7 @@ class PrimaryButtonScreenshotTest {
         customThemePaparazziRule.snapshotWithCustomTheme {
             PrimaryButton(
                 label = "Pay $50.99",
-                processingState = PrimaryButtonProcessingState.Idle(null),
+                processingState = PrimaryButtonProcessingState.Idle,
                 locked = false,
                 enabled = true
             ) {}
@@ -135,7 +135,7 @@ class PrimaryButtonScreenshotTest {
         customThemePaparazziRule.snapshotWithCustomTheme {
             PrimaryButton(
                 label = "Pay $50.99",
-                processingState = PrimaryButtonProcessingState.Idle(null),
+                processingState = PrimaryButtonProcessingState.Idle,
                 locked = false,
                 enabled = false
             ) {}

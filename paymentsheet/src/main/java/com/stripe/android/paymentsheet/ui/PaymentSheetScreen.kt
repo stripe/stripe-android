@@ -35,23 +35,14 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.disabled
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.viewinterop.AndroidViewBinding
 import com.stripe.android.link.ui.LinkButton
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsPrimaryButtonBinding
-import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
-import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
-import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
@@ -62,7 +53,6 @@ import kotlinx.coroutines.delay
 @Composable
 internal fun PaymentSheetScreen(
     viewModel: BaseSheetViewModel,
-    type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
     val contentVisible by viewModel.contentVisible.collectAsState()
@@ -86,7 +76,7 @@ internal fun PaymentSheetScreen(
         },
         content = {
             AnimatedVisibility(visible = contentVisible) {
-                PaymentSheetScreenContent(viewModel, type)
+                PaymentSheetScreenContent(viewModel)
             }
         },
         modifier = modifier.onGloballyPositioned {
@@ -128,7 +118,6 @@ private fun DismissKeyboardOnProcessing(processing: Boolean) {
 @Composable
 internal fun PaymentSheetScreenContent(
     viewModel: BaseSheetViewModel,
-    type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
     val headerText by viewModel.headerText.collectAsState(null)
@@ -141,7 +130,6 @@ internal fun PaymentSheetScreenContent(
     Column(modifier) {
         PaymentSheetContent(
             viewModel = viewModel,
-            type = type,
             headerText = headerText,
             walletsState = walletsState,
             walletsProcessingState = walletsProcessingState,
@@ -169,7 +157,7 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
             )
             is WalletsProcessingState.Completed -> {
                 LaunchedEffect(processingState) {
-                    delay(POST_SUCCESS_ANIMATION_DELAY)
+                    delay(POST_SUCCESS_OVERLAY_ANIMATION_DELAY)
                     processingState.onComplete()
                 }
 
@@ -189,7 +177,6 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
-    type: PaymentSheetFlowType,
     headerText: Int?,
     walletsState: WalletsState?,
     walletsProcessingState: WalletsProcessingState?,
@@ -229,7 +216,9 @@ private fun PaymentSheetContent(
     if (mandateText?.showAbovePrimaryButton == true) {
         Mandate(
             mandateText = mandateText.text,
-            modifier = Modifier.padding(horizontal = horizontalPadding),
+            modifier = Modifier
+                .padding(horizontal = horizontalPadding)
+                .testTag(PAYMENT_SHEET_MANDATE_TEST_TAG),
         )
     }
 
@@ -240,14 +229,15 @@ private fun PaymentSheetContent(
         )
     }
 
-    PrimaryButton(viewModel, type)
+    PaymentSheetPrimaryButton(viewModel)
 
     if (mandateText?.showAbovePrimaryButton == false) {
         Mandate(
             mandateText = mandateText.text,
             modifier = Modifier
                 .padding(top = 8.dp)
-                .padding(horizontal = horizontalPadding),
+                .padding(horizontal = horizontalPadding)
+                .testTag(PAYMENT_SHEET_MANDATE_TEST_TAG),
         )
     }
 }
@@ -304,36 +294,47 @@ internal fun Wallet(
 }
 
 @Composable
-private fun PrimaryButton(viewModel: BaseSheetViewModel, type: PaymentSheetFlowType) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState()
+private fun PaymentSheetPrimaryButton(viewModel: BaseSheetViewModel) {
+    val topPadding = dimensionResource(R.dimen.stripe_paymentsheet_button_container_spacing)
+    val horizontalPadding = dimensionResource(R.dimen.stripe_paymentsheet_outer_spacing_horizontal)
 
-    val modifier = Modifier
-        .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
-        .semantics {
-            role = Role.Button
+    val primaryButtonState by viewModel.primaryButtonState.collectAsState()
+    val primaryButtonUiState by viewModel.primaryButtonUiState.collectAsState()
 
-            val currentState = uiState.value
+    primaryButtonUiState?.let { uiState ->
+        PrimaryButton(
+            modifier = Modifier
+                .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+                .padding(
+                    top = topPadding,
+                    start = horizontalPadding,
+                    end = horizontalPadding,
+                ),
+            label = uiState.label,
+            locked = uiState.lockVisible,
+            enabled = uiState.enabled,
+            processingState = primaryButtonState.processingState,
+            onClick = uiState.onClick,
+            onProcessingCompleted = primaryButtonState::onProcessingComplete
+        )
+    }
+}
 
-            if (currentState == null || !currentState.enabled) {
-                disabled()
-            }
-        }
+private val PrimaryButton.State?.processingState: PrimaryButtonProcessingState
+    get() = when (this) {
+        null,
+        is PrimaryButton.State.Ready -> PrimaryButtonProcessingState.Idle
+        is PrimaryButton.State.StartProcessing -> PrimaryButtonProcessingState.Processing
+        is PrimaryButton.State.FinishProcessing -> PrimaryButtonProcessingState.Completed
+    }
 
-    when (type) {
-        Complete -> {
-            AndroidViewBinding(
-                factory = StripeFragmentPaymentSheetPrimaryButtonBinding::inflate,
-                modifier = modifier,
-            )
-        }
-        Custom -> {
-            AndroidViewBinding(
-                factory = StripeFragmentPaymentOptionsPrimaryButtonBinding::inflate,
-                modifier = modifier,
-            )
-        }
+private fun PrimaryButton.State?.onProcessingComplete() {
+    when (this) {
+        is PrimaryButton.State.FinishProcessing -> onComplete()
+        else -> Unit
     }
 }
 
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
-private const val POST_SUCCESS_ANIMATION_DELAY = 1500L
+internal const val PAYMENT_SHEET_MANDATE_TEST_TAG = "PAYMENT_SHEET_MANDATE"
+private const val POST_SUCCESS_OVERLAY_ANIMATION_DELAY = 1500L

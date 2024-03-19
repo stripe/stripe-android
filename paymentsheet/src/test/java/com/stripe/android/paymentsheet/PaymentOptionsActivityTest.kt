@@ -2,19 +2,20 @@ package com.stripe.android.paymentsheet
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.ColorStateList
 import android.os.Build
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.test.SemanticsNodeInteraction
+import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
-import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.unit.dp
 import androidx.core.os.bundleOf
-import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
@@ -34,11 +35,12 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.PAYMENT_OPTIONS_CONTRACT_ARGS
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_MANDATE_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
-import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.utils.doesNotHaveDrawable
+import com.stripe.android.paymentsheet.utils.hasBackground
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.InjectableActivityScenario
@@ -76,8 +78,8 @@ internal class PaymentOptionsActivityTest {
 
     private val eventReporter = mock<EventReporter>()
 
-    private val PaymentOptionsActivity.continueButton: PrimaryButton
-        get() = findViewById(R.id.primary_button)
+    private val continueButton: SemanticsNodeInteraction
+        get() = composeTestRule.onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
     @BeforeTest
     fun setup() {
@@ -153,8 +155,8 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isFalse()
+            it.onActivity {
+                continueButton.assertDoesNotExist()
             }
         }
     }
@@ -166,8 +168,8 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isTrue()
+            it.onActivity {
+                continueButton.assertExists()
             }
         }
     }
@@ -179,20 +181,20 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isFalse()
+            it.onActivity {
+                continueButton.assertDoesNotExist()
 
                 // Navigate to "Add Payment Method" fragment
                 composeTestRule
                     .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add")
                     .performClick()
 
-                assertThat(activity.continueButton.isVisible).isTrue()
+                continueButton.assertExists()
 
                 // Navigate back to payment options list
                 pressBack()
 
-                assertThat(activity.continueButton.isVisible).isFalse()
+                continueButton.assertDoesNotExist()
             }
         }
     }
@@ -201,13 +203,13 @@ internal class PaymentOptionsActivityTest {
     fun `Verify Ready state updates the add button label`() {
         runActivityScenario {
             it.onActivity { activity ->
-                val addBinding = StripePrimaryButtonBinding.bind(activity.continueButton)
+                continueButton.assert(
+                    doesNotHaveDrawable(
+                        R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark
+                    )
+                )
 
-                assertThat(addBinding.confirmedIcon.isVisible)
-                    .isFalse()
-
-                assertThat(activity.continueButton.externalLabel)
-                    .isEqualTo("Continue")
+                continueButton.assertTextEquals("Continue")
 
                 activity.finish()
             }
@@ -293,7 +295,9 @@ internal class PaymentOptionsActivityTest {
                             onBackground = Color.Magenta,
                             border = Color.Magenta
                         ),
-                        shape = PaymentSheet.PrimaryButtonShape(),
+                        shape = PaymentSheet.PrimaryButtonShape(
+                            cornerRadiusDp = 4f
+                        ),
                         typography = PaymentSheet.PrimaryButtonTypography()
                     )
                 )
@@ -301,10 +305,13 @@ internal class PaymentOptionsActivityTest {
         )
 
         runActivityScenario(args) {
-            it.onActivity { activity ->
-                assertThat(activity.continueButton.isVisible).isTrue()
-                assertThat(activity.continueButton.defaultTintList).isEqualTo(
-                    ColorStateList.valueOf(Color.Magenta.toArgb())
+            it.onActivity {
+                continueButton.assertExists()
+                continueButton.assert(
+                    hasBackground(
+                        color = Color.Magenta,
+                        shape = RoundedCornerShape(4f.dp)
+                    )
                 )
             }
         }
@@ -350,25 +357,28 @@ internal class PaymentOptionsActivityTest {
     fun `mandate text is shown below primary button when showAbove is false`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
             state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
-                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                customerPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    PaymentMethodFixtures.US_BANK_ACCOUNT
+                )
             )
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->
                 val viewModel = activity.viewModel
-                val text = "some text"
-                val mandateNode = composeTestRule.onNode(hasText(text))
+                val mandateNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_MANDATE_TEST_TAG)
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, false)
+                viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.US_BANK_ACCOUNT))
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, false)
+                viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
                 mandateNode.assertDoesNotExist()
             }
         }
@@ -378,25 +388,28 @@ internal class PaymentOptionsActivityTest {
     fun `mandate text is shown above primary button when showAbove is true`() {
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
             state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
-                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+                customerPaymentMethods = listOf(
+                    PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
+                )
             )
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->
                 val viewModel = activity.viewModel
-                val text = "some text"
-                val mandateNode = composeTestRule.onNode(hasText(text))
+                val mandateNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_MANDATE_TEST_TAG)
                 val primaryButtonNode = composeTestRule
                     .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
 
-                viewModel.updateMandateText(text, true)
+                viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD))
                 mandateNode.assertIsDisplayed()
 
                 val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
                 val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
                 assertThat(mandatePosition).isLessThan(primaryButtonPosition)
 
-                viewModel.updateMandateText(null, true)
+                viewModel.updateSelection(PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD))
                 mandateNode.assertDoesNotExist()
             }
         }

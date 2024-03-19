@@ -441,7 +441,7 @@ internal abstract class BaseSheetViewModel(
         customPrimaryButtonUiState.value = null
     }
 
-    fun updatePrimaryButtonState(state: PrimaryButton.State) {
+    fun updatePrimaryButtonState(state: PrimaryButton.State?) {
         _primaryButtonState.value = state
     }
 

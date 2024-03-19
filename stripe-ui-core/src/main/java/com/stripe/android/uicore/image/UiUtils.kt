@@ -12,6 +12,8 @@ import android.text.TextUtils
 import android.util.Log
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -119,5 +121,8 @@ internal enum class ImageType(
                 }
     }
 }
+
+val DrawableId = SemanticsPropertyKey<Int>("DrawableResId")
+var SemanticsPropertyReceiver.drawableId by DrawableId
 
 private const val TAG = "stripe_ui_core_utils"

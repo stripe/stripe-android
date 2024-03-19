@@ -28,6 +28,7 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentAlpha
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
@@ -48,15 +49,15 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.semantics.SemanticsPropertyKey
+import androidx.compose.ui.semantics.SemanticsPropertyReceiver
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.LoadingIndicator
-import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.image.drawableId
 import kotlinx.coroutines.delay
 
 private const val FADE_ANIMATION_DURATION = 100
@@ -65,18 +66,18 @@ private const val FADE_OUT_ANIMATION_DELAY = 90
 private val fadeAnimation = fadeIn(animationSpec = tween(FADE_ANIMATION_DURATION)) togetherWith
     fadeOut(animationSpec = tween(FADE_ANIMATION_DURATION, FADE_OUT_ANIMATION_DELAY))
 
-private const val PRE_SUCCESS_ANIMATION_DELAY = 250L
-private const val POST_SUCCESS_ANIMATION_DELAY = 1500L
+internal const val PRE_SUCCESS_ANIMATION_DELAY = 250L
+internal const val POST_SUCCESS_ANIMATION_DELAY = 1500L
 
 private const val RIGHT_ALIGNED = 1f
 private const val CENTER_ALIGNED = 0f
 
 internal sealed interface PrimaryButtonProcessingState {
-    data class Idle(val error: ResolvableString?) : PrimaryButtonProcessingState
+    data object Idle : PrimaryButtonProcessingState
 
-    object Processing : PrimaryButtonProcessingState
+    data object Processing : PrimaryButtonProcessingState
 
-    object Completed : PrimaryButtonProcessingState
+    data object Completed : PrimaryButtonProcessingState
 }
 
 @Composable
@@ -84,7 +85,8 @@ internal fun PrimaryButton(
     label: String,
     locked: Boolean,
     enabled: Boolean,
-    processingState: PrimaryButtonProcessingState = PrimaryButtonProcessingState.Idle(null),
+    modifier: Modifier = Modifier,
+    processingState: PrimaryButtonProcessingState = PrimaryButtonProcessingState.Idle,
     onProcessingCompleted: () -> Unit = {},
     onClick: () -> Unit,
 ) {
@@ -114,32 +116,30 @@ internal fun PrimaryButton(
     CompositionLocalProvider(
         LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled,
     ) {
-        Box(
-            modifier = Modifier.fillMaxWidth(),
-            contentAlignment = Alignment.Center,
-        ) {
-            TextButton(
-                onClick = onClick,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .defaultMinSize(
-                        minHeight = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)
-                    ),
-                enabled = enabled,
-                shape = RoundedCornerShape(shape.cornerRadius),
-                border = BorderStroke(shape.borderStrokeWidth, colors.border),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = animatedBackground,
-                    disabledBackgroundColor = animatedBackground,
-                ),
-            ) {
-                Content(
-                    label = label,
-                    processingState = processingState,
-                    locked = locked,
-                    onProcessingCompleted = onProcessingCompleted,
+        TextButton(
+            onClick = onClick,
+            modifier = modifier
+                .fillMaxWidth()
+                .defaultMinSize(
+                    minHeight = dimensionResource(id = R.dimen.stripe_paymentsheet_primary_button_height)
                 )
-            }
+                .semantics {
+                    primaryButtonProcessingState = processingState
+                },
+            enabled = enabled,
+            shape = RoundedCornerShape(shape.cornerRadius),
+            border = BorderStroke(shape.borderStrokeWidth, colors.border),
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = animatedBackground,
+                disabledBackgroundColor = animatedBackground,
+            ),
+        ) {
+            Content(
+                label = label,
+                processingState = processingState,
+                locked = locked,
+                onProcessingCompleted = onProcessingCompleted,
+            )
         }
     }
 }
@@ -189,10 +189,10 @@ private fun BoxScope.StaticIncompleteProcessing(
     val colors = PrimaryButtonTheme.colors
     val typography = PrimaryButtonTheme.typography
 
-    val textStyle = TextStyle(
-        fontFamily = typography.fontFamily ?: FontFamily.Default,
+    val textStyle = MaterialTheme.typography.h5.copy(
+        fontFamily = typography.fontFamily
+            ?: MaterialTheme.typography.h5.fontFamily,
         fontSize = typography.fontSize,
-        fontWeight = FontWeight.Medium,
     )
 
     val onBackground = colors.onBackground.copy(LocalContentAlpha.current)
@@ -217,6 +217,9 @@ private fun BoxScope.StaticIncompleteProcessing(
             tint = onBackground,
             contentDescription = null,
             modifier = Modifier
+                .semantics {
+                    drawableId = R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_lock
+                }
                 .align(Alignment.CenterEnd)
         )
     }
@@ -280,7 +283,9 @@ private fun BoxScope.AnimatedCompleteProcessing(
                 horizontalBias = animatedAlignment,
                 verticalBias = CENTER_ALIGNED
             )
-        ),
+        ).semantics {
+            drawableId = R.drawable.stripe_ic_paymentsheet_googlepay_primary_button_checkmark
+        },
         tint = PrimaryButtonTheme.colors.onSuccessBackground,
         contentDescription = null
     )
@@ -290,7 +295,7 @@ private fun BoxScope.AnimatedCompleteProcessing(
 @Preview(showBackground = true)
 private fun PrimaryButtonPreview() {
     var processingState by remember {
-        mutableStateOf<PrimaryButtonProcessingState>(PrimaryButtonProcessingState.Idle(null))
+        mutableStateOf<PrimaryButtonProcessingState>(PrimaryButtonProcessingState.Idle)
     }
 
     StripeTheme {
@@ -299,7 +304,7 @@ private fun PrimaryButtonPreview() {
                 RadioButton(
                     selected = processingState is PrimaryButtonProcessingState.Idle,
                     onClick = {
-                        processingState = PrimaryButtonProcessingState.Idle(null)
+                        processingState = PrimaryButtonProcessingState.Idle
                     }
                 )
                 Text(text = "Idle")
@@ -338,3 +343,9 @@ private fun PrimaryButtonPreview() {
         }
     }
 }
+
+internal val PrimaryButtonProcessingStateKey = SemanticsPropertyKey<PrimaryButtonProcessingState>(
+    name = "PrimaryButtonProcessingState"
+)
+
+internal var SemanticsPropertyReceiver.primaryButtonProcessingState by PrimaryButtonProcessingStateKey
