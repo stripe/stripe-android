@@ -19,7 +19,11 @@ tags:
 # Common: web AuthFlow - connect institution
 - tapOn: "Agree and continue"
 # SELECT OAUTH INSTITUTION
-- tapOn: ".*Test Institution.*"
+- tapOn: ".*Test OAuth Institution.*"
+# Bottom Sheet is not properly detected on Mobile Web, use coords to tap Continue instead
+- waitForAnimationToEnd
+- tapOn:
+    point: "50%,85%"
 # SELECT ALL ACCOUNTS
 - extendedWaitUntil:
     visible: "Connect accounts"
