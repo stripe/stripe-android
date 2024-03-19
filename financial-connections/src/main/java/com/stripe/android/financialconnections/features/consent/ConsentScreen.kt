@@ -23,7 +23,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
@@ -32,9 +31,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.financialconnections.core.Result
-import com.stripe.android.financialconnections.core.activityViewModel
+import com.stripe.android.financialconnections.core.rememberPaneViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
@@ -66,8 +64,8 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun ConsentScreen() {
     // update step state when manifest changes
-    val viewModel: ConsentViewModel = viewModel(
-        factory = ConsentViewModel.factory(parentViewModel = LocalContext.current.activityViewModel())
+    val viewModel: ConsentViewModel = rememberPaneViewModel(
+        factory = { ConsentViewModel.factory(it) }
     )
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
