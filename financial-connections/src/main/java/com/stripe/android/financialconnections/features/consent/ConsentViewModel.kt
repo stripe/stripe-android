@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.features.consent
 
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
@@ -125,21 +125,16 @@ internal class ConsentViewModel @Inject constructor(
 
     companion object {
 
-        fun factory(parentViewModel: FinancialConnectionsSheetNativeViewModel): ViewModelProvider.Factory {
-            return object : ViewModelProvider.Factory {
-                override fun <T : ViewModel> create(
-                    modelClass: Class<T>,
-                    extras: CreationExtras
-                ): T {
-                    return parentViewModel
+        fun factory(parentViewModel: FinancialConnectionsSheetNativeViewModel): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentViewModel
                         .activityRetainedComponent
                         .consentBuilder
                         .initialState(ConsentState())
                         .build()
-                        .viewModel as T
+                        .viewModel
                 }
             }
-        }
-
     }
 }
