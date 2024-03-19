@@ -19,14 +19,14 @@ internal object CashAppPayDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
-        val requiresMandate = metadata.hasIntentToSetup()
-
-        val localLayoutSpecs = if (requiresMandate) {
+        val localLayoutSpecs = if (requiresMandate(metadata)) {
             listOf(CashAppPayMandateTextSpec())
         } else {
             emptyList()
@@ -34,15 +34,13 @@ internal object CashAppPayDefinition : PaymentMethodDefinition {
 
         return SupportedPaymentMethod(
             code = "cashapp",
-            requiresMandate = requiresMandate,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields + localLayoutSpecs,
-                requiresMandate = requiresMandate
+                specs = sharedDataSpec.fields + localLayoutSpecs
             ),
         )
     }

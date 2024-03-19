@@ -44,5 +44,6 @@ object FormControllerModule {
         context = context,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        requiresMandate = false,
     )
 }

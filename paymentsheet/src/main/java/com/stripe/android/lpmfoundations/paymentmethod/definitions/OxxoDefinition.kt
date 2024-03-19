@@ -21,6 +21,8 @@ internal object OxxoDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -28,7 +30,6 @@ internal object OxxoDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "oxxo",
-            requiresMandate = false,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_oxxo,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,
             lightThemeIconUrl = null,
@@ -36,7 +37,6 @@ internal object OxxoDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = false,
             ),
         )
     }

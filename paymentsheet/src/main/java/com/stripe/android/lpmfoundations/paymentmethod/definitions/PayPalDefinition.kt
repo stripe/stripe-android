@@ -20,6 +20,8 @@ internal object PayPalDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -33,7 +35,6 @@ internal object PayPalDefinition : PaymentMethodDefinition {
 
         return SupportedPaymentMethod(
             code = "paypal",
-            requiresMandate = metadata.hasIntentToSetup(),
             displayNameResource = R.string.stripe_paymentsheet_payment_method_paypal,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_paypal,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -41,7 +42,6 @@ internal object PayPalDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields + localLayoutSpecs,
-                requiresMandate = metadata.hasIntentToSetup()
             ),
         )
     }

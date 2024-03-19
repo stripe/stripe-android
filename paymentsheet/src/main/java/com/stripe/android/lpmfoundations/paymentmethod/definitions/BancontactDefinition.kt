@@ -21,6 +21,8 @@ internal object BancontactDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.takeIf { hasIntentToSetup },
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -28,7 +30,6 @@ internal object BancontactDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "bancontact",
-            requiresMandate = metadata.hasIntentToSetup(),
             displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -36,7 +37,6 @@ internal object BancontactDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = metadata.hasIntentToSetup(),
                 placeholderOverrideList = if (metadata.hasIntentToSetup()) {
                     listOf(IdentifierSpec.Name, IdentifierSpec.Email)
                 } else {

@@ -39,7 +39,6 @@ internal object MockPaymentMethodsFactory {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = code,
-            requiresMandate = false,
             displayNameResource = displayNameResource,
             iconResource = iconResource,
             lightThemeIconUrl = null,

@@ -68,10 +68,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
     ): Boolean {
         val code = currentSelection.paymentMethodCreateParams.typeCode
 
-        val paymentMethodRequiresMandate = metadata.supportedPaymentMethodForCode(
-            code = code,
-            context = context
-        )?.requiresMandate ?: false
+        val paymentMethodRequiresMandate = metadata.requiresMandate(code)
 
         return if (paymentMethodRequiresMandate) {
             !currentSelection.customerAcknowledgedMandate

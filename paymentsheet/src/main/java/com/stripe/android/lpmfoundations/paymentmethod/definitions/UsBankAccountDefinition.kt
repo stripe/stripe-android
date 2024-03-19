@@ -22,6 +22,8 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -29,7 +31,6 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "us_bank_account",
-            requiresMandate = true,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -37,7 +38,6 @@ internal object UsBankAccountDefinition : PaymentMethodDefinition {
             tintIconOnSelection = true,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = true,
             ),
         )
     }

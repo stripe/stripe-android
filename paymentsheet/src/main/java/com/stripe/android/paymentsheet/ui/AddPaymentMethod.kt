@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -129,11 +130,14 @@ internal fun AddPaymentMethod(
                     onError = sheetViewModel::onError
                 ),
                 onFormFieldValuesChanged = { formValues ->
-                    val newSelection = formValues?.transformToPaymentSelection(
-                        resources = context.resources,
-                        paymentMethod = selectedItem,
-                    )
-                    sheetViewModel.updateSelection(newSelection)
+                    paymentMethodMetadata?.let { paymentMethodMetadata ->
+                        val newSelection = formValues?.transformToPaymentSelection(
+                            resources = context.resources,
+                            paymentMethod = selectedItem,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                        )
+                        sheetViewModel.updateSelection(newSelection)
+                    }
                 },
                 onInteractionEvent = {
                     sheetViewModel.reportFieldInteraction(selectedPaymentMethodCode)
@@ -144,7 +148,8 @@ internal fun AddPaymentMethod(
 }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(
-    paymentMethod: SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod,
+    paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
@@ -153,7 +158,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
         code = paymentMethod.code,
-        requiresMandate = paymentMethod.requiresMandate,
+        requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethod.code),
     )
 }
 
@@ -181,9 +186,10 @@ internal fun FormFieldValues.transformToExtraParams(
 
 internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
-    paymentMethod: SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod,
+    paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection.New {
-    val params = transformToPaymentMethodCreateParams(paymentMethod)
+    val params = transformToPaymentMethodCreateParams(paymentMethod, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     val extras = transformToExtraParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {

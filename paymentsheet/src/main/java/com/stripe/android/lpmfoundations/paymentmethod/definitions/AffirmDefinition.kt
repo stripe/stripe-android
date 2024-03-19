@@ -21,6 +21,8 @@ internal object AffirmDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -28,7 +30,6 @@ internal object AffirmDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "affirm",
-            requiresMandate = false,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_affirm,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_affirm,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -36,7 +37,6 @@ internal object AffirmDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = false,
             ),
         )
     }

@@ -7,7 +7,6 @@ import com.stripe.android.ui.core.R
 object LpmRepositoryTestHelpers {
     val card: SupportedPaymentMethod = cardFromPaymentMethodMetadata() ?: SupportedPaymentMethod(
         code = "card",
-        requiresMandate = false,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
         lightThemeIconUrl = null,
@@ -18,7 +17,6 @@ object LpmRepositoryTestHelpers {
 
     val usBankAccount: SupportedPaymentMethod = SupportedPaymentMethod(
         code = "us_bank_account",
-        requiresMandate = true,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
         lightThemeIconUrl = null,
