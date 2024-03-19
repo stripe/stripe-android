@@ -32,8 +32,8 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withPlatformLogos() =
         ConsentState(
-            consent = Result(
-                data = ConsentState.Payload(
+            consent = Result.Success(
+                ConsentState.Payload(
                     consent = sampleConsent().copy(belowCta = null),
                     merchantLogos = listOf(
                         "www.logo1.com",
@@ -46,8 +46,8 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withConnectedAccountLogos() =
         ConsentState(
-            consent = Result(
-                data = ConsentState.Payload(
+            consent = Result.Success(
+                ConsentState.Payload(
                     consent = sampleConsent().copy(belowCta = null),
                     merchantLogos = listOf(
                         "www.logo1.com",
@@ -60,8 +60,8 @@ internal class ConsentPreviewParameterProvider :
         )
 
     private fun manualEntryPlusMicrodeposits() = ConsentState(
-        consent = Result(
-            data = ConsentState.Payload(
+        consent = Result.Success(
+            ConsentState.Payload(
                 consent = sampleConsent(),
                 merchantLogos = listOf(
                     "www.logo1.com",
@@ -74,8 +74,8 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withDataBottomSheet() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.DATA,
-        consent = Result(
-            data = ConsentState.Payload(
+        consent = Result.Success(
+            ConsentState.Payload(
                 consent = sampleConsent().copy(
                     dataAccessNotice = sampleConsent().dataAccessNotice.copy(
                         connectedAccountNotice = null
@@ -92,8 +92,8 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withDataBottomSheetAndConnectedAccount() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.DATA,
-        consent = Result(
-            data = ConsentState.Payload(
+        consent = Result.Success(
+            ConsentState.Payload(
                 consent = sampleConsent(),
                 merchantLogos = listOf(
                     "www.logo1.com",
@@ -106,8 +106,8 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withLegalDetailsBottomSheet() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.LEGAL,
-        consent = Result(
-            data = ConsentState.Payload(
+        consent = Result.Success(
+            ConsentState.Payload(
                 consent = sampleConsent().copy(belowCta = null),
                 merchantLogos = listOf(
                     "www.logo1.com",

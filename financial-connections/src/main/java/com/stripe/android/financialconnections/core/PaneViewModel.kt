@@ -19,30 +19,30 @@ internal abstract class PaneViewModel<S>(
         onFail: (Throwable) -> Unit = {}
     ): Job {
         return viewModelScope.launch {
-            stateFlow.update { state -> state.reducer(Result(loading = true)) }
+            stateFlow.update { state -> state.reducer(Result.Loading) }
             val result = kotlin.runCatching { this@execute() }
             // update state.
-            stateFlow.update { state ->
-                state.reducer(
-                    Result(
-                        loading = false,
-                        data = result.getOrNull(),
-                        error = result.exceptionOrNull()
-                    )
-                )
-            }
-            // trigger side effects.
-            result
-                .onSuccess(onSuccess)
-                .onFailure(onFail)
+            result.fold(
+                onSuccess = { data ->
+                    stateFlow.update { state -> state.reducer(Result.Success(data)) }
+                    onSuccess(data)
+                },
+                onFailure = { throwable ->
+                    stateFlow.update { state -> state.reducer(Result.Error(throwable)) }
+                    onFail(throwable)
+                }
+            )
         }
     }
 }
 
-internal data class Result<T>(
-    val loading: Boolean = false,
-    val data: T? = null,
-    val error: Throwable? = null
+internal sealed class Result<out T>(
+    private val value: T?
 ) {
-    operator fun invoke(): T? = data
+    data object Uninitialized : Result<Nothing>(value = null)
+    data object Loading : Result<Nothing>(value = null)
+    data class Success<out T>(val value: T) : Result<T>(value = value)
+    data class Error<out T>(val throwable: Throwable) : Result<T>(value = null)
+
+    open operator fun invoke(): T? = value
 }

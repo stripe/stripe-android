@@ -109,18 +109,18 @@ private fun ConsentContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    when {
-        state.consent.loading -> {
+    when (val result = state.consent) {
+        Result.Uninitialized, Result.Loading -> {
             ConsentLoadingContent()
         }
 
-        state.consent.error != null -> {
-            UnclassifiedErrorContent { onCloseFromErrorClick(state.consent.error) }
+        is Result.Error -> {
+            UnclassifiedErrorContent { onCloseFromErrorClick(result.throwable) }
         }
 
-        state.consent() != null -> {
+        is Result.Success -> {
             LoadedContent(
-                payload = state.consent()!!,
+                payload = result.value,
                 bottomSheetState = bottomSheetState,
                 acceptConsent = state.acceptConsent,
                 bottomSheetMode = state.currentBottomSheet,
@@ -297,7 +297,7 @@ private fun ConsentFooter(
         )
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
-            loading = acceptConsent.loading,
+            loading = acceptConsent is Result.Loading,
             onClick = onContinueClick,
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }

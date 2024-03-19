@@ -5,10 +5,10 @@ import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 internal data class ConsentState(
-    val consent: Result<Payload> = Result(),
+    val consent: Result<Payload> = Result.Uninitialized,
     val merchantLogos: List<String> = emptyList(),
     val currentBottomSheet: BottomSheetContent = BottomSheetContent.DATA,
-    val acceptConsent: Result<FinancialConnectionsSessionManifest> = Result(),
+    val acceptConsent: Result<FinancialConnectionsSessionManifest> = Result.Uninitialized,
     val viewEffect: ViewEffect? = null
 ) {
 
