@@ -208,12 +208,13 @@ data class AnalyticsRequestV2 private constructor(
             origin: String,
             params: Map<String, *>,
         ): AnalyticsRequestV2 {
+            val initialParams = params + mapOf(PARAM_USES_WORK_MANAGER to false)
             return AnalyticsRequestV2(
                 eventName = eventName,
                 clientId = clientId,
                 origin = origin,
                 created = System.currentTimeMillis().milliseconds.toDouble(SECONDS),
-                params = params.toJsonElement(),
+                params = initialParams.toJsonElement(),
             )
         }
     }
