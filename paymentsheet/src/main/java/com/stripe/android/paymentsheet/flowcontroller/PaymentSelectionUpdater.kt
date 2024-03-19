@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
-import android.content.Context
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.containsVolatileDifferences
@@ -16,9 +15,7 @@ internal fun interface PaymentSelectionUpdater {
     ): PaymentSelection?
 }
 
-internal class DefaultPaymentSelectionUpdater @Inject constructor(
-    private val context: Context
-) : PaymentSelectionUpdater {
+internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSelectionUpdater {
 
     override operator fun invoke(
         currentSelection: PaymentSelection?,
