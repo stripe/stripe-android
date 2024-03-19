@@ -98,6 +98,7 @@ object CountryUtils {
 
     @Volatile
     private var cachedCountriesLocale: Locale? = null
+
     @Volatile
     private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
 
