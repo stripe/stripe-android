@@ -1,23 +1,18 @@
 package com.stripe.android.financialconnections.core
 
-import android.content.Context
-import android.content.ContextWrapper
-import androidx.activity.ComponentActivity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
-abstract class FinancialConnectionsViewModel<S>(
+internal abstract class FinancialConnectionsViewModel<S>(
     initialState: S
 ) : ViewModel() {
 
     val stateFlow: MutableStateFlow<S> = MutableStateFlow(initialState)
 }
 
-data class Result<T>(
+internal data class Result<T>(
     val loading: Boolean = false,
     val data: T? = null,
     val error: Throwable? = null
@@ -26,7 +21,7 @@ data class Result<T>(
 }
 
 
-fun <T> FinancialConnectionsViewModel<*>.executeAsync(
+internal fun <T> FinancialConnectionsViewModel<*>.executeAsync(
     block: suspend () -> T,
     updateAsync: (Result<T>) -> Unit,
     onSuccess: (T) -> Unit = {},
