@@ -135,16 +135,16 @@ private fun AccountPickerContent(
         },
         content = {
             AccountPickerMainContent(
-                onCloseClick,
-                lazyListState,
-                state,
-                onSelectAnotherBank,
-                onEnterDetailsManually,
-                onLoadAccountsAgain,
-                onCloseFromErrorClick,
-                onAccountClicked,
-                onClickableTextClick,
-                onSubmit
+                onCloseClick = onCloseClick,
+                lazyListState = lazyListState,
+                state = state,
+                onSelectAnotherBank = onSelectAnotherBank,
+                onEnterDetailsManually = onEnterDetailsManually,
+                onLoadAccountsAgain = onLoadAccountsAgain,
+                onCloseFromErrorClick = onCloseFromErrorClick,
+                onAccountClicked = onAccountClicked,
+                onClickableTextClick = onClickableTextClick,
+                onSubmit = onSubmit
             )
         },
     )
@@ -167,7 +167,13 @@ private fun AccountPickerMainContent(
         topBar = {
             FinancialConnectionsTopAppBar(
                 allowBackNavigation = false,
-                onCloseClick = onCloseClick,
+                onCloseClick = {
+                    if (state.payload is Fail) {
+                        onCloseFromErrorClick(state.payload.error)
+                    } else {
+                        onCloseClick()
+                    }
+                },
                 elevation = lazyListState.elevation
             )
         }
