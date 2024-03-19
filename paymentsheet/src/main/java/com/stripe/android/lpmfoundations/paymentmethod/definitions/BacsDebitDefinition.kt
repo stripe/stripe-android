@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -8,7 +9,6 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -27,7 +27,8 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
 
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         val localFields = listOfNotNull(
             PlaceholderSpec(
@@ -58,12 +59,15 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = true,
-            formSpec = LayoutSpec(items = sharedDataSpec.fields + localFields),
-            placeholderOverrideList = listOf(
-                IdentifierSpec.Name,
-                IdentifierSpec.Email,
-                IdentifierSpec.BillingAddress
-            )
+            formElements = transformSpecToElements.transform(
+                specs = sharedDataSpec.fields + localFields,
+                requiresMandate = true,
+                placeholderOverrideList = listOf(
+                    IdentifierSpec.Name,
+                    IdentifierSpec.Email,
+                    IdentifierSpec.BillingAddress
+                )
+            ),
         )
     }
 }

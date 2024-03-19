@@ -806,6 +806,9 @@ internal class PlaygroundTestDriver(
     }
 
     private fun doUSBankAccountAuthorization() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
         }

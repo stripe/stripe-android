@@ -1,18 +1,28 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import android.content.Context
 import android.os.Parcelable
+import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.address.AddressRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The metadata we need to determine what payment methods are supported, as well as being able to display them.
@@ -32,6 +42,12 @@ internal data class PaymentMethodMetadata(
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
+    @IgnoredOnParcel
+    private val addressRepositoryLock: Any = Any()
+
+    @IgnoredOnParcel
+    private val addressRepositoryReference = AtomicReference<AddressRepository?>()
+
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.setupFutureUsage != null
@@ -70,19 +86,38 @@ internal data class PaymentMethodMetadata(
         }
     }
 
-    fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod? {
+    fun supportedPaymentMethodForCode(
+        code: String,
+        context: Context,
+        paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+    ): SupportedPaymentMethod? {
         val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
         val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
-        return definition.supportedPaymentMethod(this, sharedDataSpec)
+        return definition.supportedPaymentMethod(
+            metadata = this,
+            sharedDataSpec = sharedDataSpec,
+            transformSpecToElements = transformSpecToElements(
+                context = context,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+            ),
+        )
     }
 
-    fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
+    fun sortedSupportedPaymentMethods(
+        context: Context,
+    ): List<SupportedPaymentMethod> {
         return supportedPaymentMethodDefinitions().mapNotNull { paymentMethodDefinition ->
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code }
             if (sharedDataSpec == null) {
                 null
             } else {
-                paymentMethodDefinition.supportedPaymentMethod(this, sharedDataSpec)
+                paymentMethodDefinition.supportedPaymentMethod(
+                    metadata = this,
+                    sharedDataSpec = sharedDataSpec,
+                    transformSpecToElements = transformSpecToElements(context),
+                )
             }
         }
     }
@@ -118,5 +153,37 @@ internal data class PaymentMethodMetadata(
             )
         }
         return null
+    }
+
+    private fun transformSpecToElements(
+        context: Context,
+        paymentMethodCreateParams: PaymentMethodCreateParams? = null,
+        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
+    ): TransformSpecToElements {
+        var addressRepository = addressRepositoryReference.get()
+        if (addressRepository == null) {
+            synchronized(addressRepositoryLock) {
+                addressRepository = addressRepositoryReference.get()
+                if (addressRepository == null) {
+                    addressRepository = AddressRepository(context.resources, Dispatchers.IO)
+                    addressRepositoryReference.set(addressRepository)
+                }
+            }
+        }
+        return TransformSpecToElements(
+            amount = amount(),
+            merchantName = merchantName,
+            cbcEligibility = cbcEligibility,
+            initialValues = InitialValuesFactory.create(
+                defaultBillingDetails = defaultBillingDetails,
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+            ),
+            shippingValues = shippingDetails?.toIdentifierMap(defaultBillingDetails),
+            saveForFutureUseInitialValue = false,
+            context = context.applicationContext,
+            addressRepository = requireNotNull(addressRepository),
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        )
     }
 }

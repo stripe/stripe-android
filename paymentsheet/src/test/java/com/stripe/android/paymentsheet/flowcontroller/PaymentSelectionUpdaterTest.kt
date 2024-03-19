@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.res.ColorStateList
 import android.graphics.Color
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -345,6 +346,6 @@ class PaymentSelectionUpdaterTest {
     }
 
     private fun createUpdater(): PaymentSelectionUpdater {
-        return DefaultPaymentSelectionUpdater()
+        return DefaultPaymentSelectionUpdater(ApplicationProvider.getApplicationContext())
     }
 }

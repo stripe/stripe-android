@@ -96,7 +96,10 @@ object CountryUtils {
         return CARD_POSTAL_CODE_COUNTRIES.contains(countryCode.value)
     }
 
+    @Volatile
     private var cachedCountriesLocale: Locale? = null
+
+    @Volatile
     private var cachedOrderedLocalizedCountries: List<Country> = emptyList()
 
     /**

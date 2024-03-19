@@ -12,17 +12,11 @@ import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.util.CustomerSheetHacks
-import com.stripe.android.customersheet.utils.CustomerSheetTestHelper
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.luxe.update
-import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSessionParams
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -30,7 +24,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.testing.FeatureFlagTestRule
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -61,24 +54,7 @@ class DefaultCustomerSheetLoaderTest {
         arguments = LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
         ),
-        lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-    ).apply {
-        this.update(
-            PaymentIntentFactory.create(
-                paymentMethodTypes = listOf(
-                    PaymentMethod.Type.Card.code,
-                    PaymentMethod.Type.USBankAccount.code,
-                ),
-            ).copy(
-                shipping = PaymentIntent.Shipping(
-                    name = "Example buyer",
-                    address = Address(line1 = "123 Main st.", country = "US", postalCode = "12345"),
-                ),
-                clientSecret = null,
-            ),
-            null
-        )
-    }
+    )
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()
@@ -139,7 +115,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
-        assertThat(state.supportedPaymentMethods).containsExactly(LpmRepositoryTestHelpers.card)
+        assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.isGooglePayReady).isTrue()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
@@ -190,7 +166,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             PaymentMethodFixtures.US_BANK_ACCOUNT,
         )
-        assertThat(state.supportedPaymentMethods).containsExactly(LpmRepositoryTestHelpers.card)
+        assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.isGooglePayReady).isTrue()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
@@ -226,7 +202,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.customerPaymentMethods).containsExactly(
             PaymentMethodFixtures.CARD_PAYMENT_METHOD,
         )
-        assertThat(state.supportedPaymentMethods).containsExactly(LpmRepositoryTestHelpers.card)
+        assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
@@ -321,7 +297,7 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_1"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
         )
-        assertThat(state.supportedPaymentMethods).containsExactly(LpmRepositoryTestHelpers.card)
+        assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isEqualTo(
             PaymentSelection.Saved(
@@ -357,32 +333,11 @@ class DefaultCustomerSheetLoaderTest {
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_2"),
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = "pm_3"),
         )
-        assertThat(state.supportedPaymentMethods).containsExactly(LpmRepositoryTestHelpers.card)
+        assertThat(state.supportedPaymentMethods.map { it.code }).containsExactly("card")
         assertThat(state.isGooglePayReady).isFalse()
         assertThat(state.paymentSelection).isNull()
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
-    }
-
-    @Test
-    fun `LPM repository is initialized with the necessary payment methods`() = runTest {
-        val lpmRepository = LpmRepository(
-            arguments = LpmRepository.LpmRepositoryArguments(
-                resources = CustomerSheetTestHelper.application.resources,
-            ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData()
-        )
-
-        var card = lpmRepository.fromCode("card")
-        assertThat(card).isNull()
-
-        val loader = createCustomerSheetLoader(
-            lpmRepository = lpmRepository,
-        )
-        loader.load(CustomerSheet.Configuration(merchantDisplayName = "Example"))
-
-        card = lpmRepository.fromCode("card")
-        assertThat(card).isNotNull()
     }
 
     @Test
@@ -406,8 +361,8 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
+            loader.load(config).getOrThrow().supportedPaymentMethods.map { it.code }
+        ).doesNotContain("us_bank_account")
     }
 
     @Test
@@ -431,8 +386,8 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
+            loader.load(config).getOrThrow().supportedPaymentMethods.map { it.code }
+        ).doesNotContain("us_bank_account")
     }
 
     @Test
@@ -456,8 +411,8 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
+            loader.load(config).getOrThrow().supportedPaymentMethods.map { it.code }
+        ).doesNotContain("us_bank_account")
     }
 
     @Test
@@ -481,8 +436,8 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
+            loader.load(config).getOrThrow().supportedPaymentMethods.map { it.code }
+        ).doesNotContain("us_bank_account")
     }
 
     @Test
@@ -506,8 +461,8 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
+            loader.load(config).getOrThrow().supportedPaymentMethods.map { it.code }
+        ).doesNotContain("us_bank_account")
     }
 
     @Test
@@ -531,8 +486,8 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
+            loader.load(config).getOrThrow().supportedPaymentMethods.map { it.code }
+        ).doesNotContain("us_bank_account")
     }
 
     @Test
@@ -556,8 +511,8 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         assertThat(
-            loader.load(config).getOrThrow().supportedPaymentMethods
-        ).doesNotContain(LpmRepositoryTestHelpers.usBankAccount)
+            loader.load(config).getOrThrow().supportedPaymentMethods.map { it.code }
+        ).doesNotContain("us_bank_account")
     }
 
     @Test
@@ -589,7 +544,7 @@ class DefaultCustomerSheetLoaderTest {
         val config = CustomerSheet.Configuration(merchantDisplayName = "Example")
 
         val supportedPaymentMethods = loader.load(config).getOrThrow().supportedPaymentMethods
-        assertThat(supportedPaymentMethods).contains(LpmRepositoryTestHelpers.usBankAccount)
+        assertThat(supportedPaymentMethods.map { it.code }).contains("us_bank_account")
     }
 
     @Test
@@ -629,6 +584,7 @@ class DefaultCustomerSheetLoaderTest {
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            context = ApplicationProvider.getApplicationContext(),
         )
 
         val completable = CompletableDeferred<Unit>()
@@ -665,6 +621,7 @@ class DefaultCustomerSheetLoaderTest {
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            context = ApplicationProvider.getApplicationContext(),
         )
 
         val result = loader.load(configuration)
@@ -695,6 +652,7 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             customerAdapterProvider = CompletableDeferred(customerAdapter),
+            context = ApplicationProvider.getApplicationContext(),
         )
     }
 

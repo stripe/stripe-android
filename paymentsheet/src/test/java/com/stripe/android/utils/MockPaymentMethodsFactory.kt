@@ -2,7 +2,6 @@ package com.stripe.android.utils
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.LayoutSpec
 
 internal object MockPaymentMethodsFactory {
 
@@ -46,7 +45,7 @@ internal object MockPaymentMethodsFactory {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             tintIconOnSelection = tintIconOnSelection,
-            formSpec = LayoutSpec(items = emptyList()),
+            formElements = emptyList(),
         )
     }
 }

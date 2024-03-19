@@ -27,7 +27,6 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     }.copy(
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,
-        snapshotReturningCustomer = true,
     )
 
     private val colors = PaymentSheet.Colors(
@@ -84,7 +83,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Test
     fun testPaymentSheetNewCustomer() {
         testDriver.screenshotRegression(
-            testParams.copy()
+            testParams
         )
     }
 

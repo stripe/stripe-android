@@ -13,6 +13,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
@@ -307,19 +308,19 @@ internal class CustomerSheetActivityTest {
         enabled: Boolean = true,
         isProcessing: Boolean = false,
     ): CustomerSheetViewState.AddPaymentMethod {
+        val card = LpmRepositoryTestHelpers.card
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
-            supportedPaymentMethods = listOf(),
+            supportedPaymentMethods = listOf(card),
             formViewData = formViewData,
             formArguments = FormArguments(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
                 showCheckbox = false,
-                saveForFutureUseInitialValue = false,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = ""
             ),
             usBankAccountFormArguments = mock(),
-            selectedPaymentMethod = mock(),
+            selectedPaymentMethod = card,
             enabled = enabled,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,

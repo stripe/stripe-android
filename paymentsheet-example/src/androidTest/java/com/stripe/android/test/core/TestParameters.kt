@@ -22,7 +22,6 @@ internal data class TestParameters(
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
-    val snapshotReturningCustomer: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
 ) {
     fun copyPlaygroundSettings(block: (PlaygroundSettings) -> Unit): TestParameters {
@@ -46,7 +45,7 @@ internal data class TestParameters(
             )
         }
 
-        fun playgroundSettings(block: (PlaygroundSettings) -> Unit = {}): PlaygroundSettings {
+        private fun playgroundSettings(block: (PlaygroundSettings) -> Unit = {}): PlaygroundSettings {
             val settings = PlaygroundSettings.createFromDefaults()
             settings[CustomerSettingsDefinition] = CustomerType.NEW
             settings[LinkSettingsDefinition] = false

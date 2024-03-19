@@ -1,6 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -11,7 +12,6 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CardBillingSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -26,15 +26,11 @@ internal object CardDefinition : PaymentMethodDefinition {
 
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
-        return hardcodedCardSpec(metadata.billingDetailsCollectionConfiguration)
-    }
-
-    fun hardcodedCardSpec(
-        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration
-    ): SupportedPaymentMethod {
-        val specs = listOfNotNull(
+        val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
+        val specs = listOf(
             ContactInformationSpec(
                 collectName = false,
                 collectEmail = billingDetailsCollectionConfiguration.collectsEmail,
@@ -45,10 +41,7 @@ internal object CardDefinition : PaymentMethodDefinition {
             ),
             CardBillingSpec(
                 collectionMode = billingDetailsCollectionConfiguration.address.toInternal(),
-            ).takeIf {
-                billingDetailsCollectionConfiguration.address !=
-                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
-            },
+            ),
             SaveForFutureUseSpec(),
         )
         return SupportedPaymentMethod(
@@ -59,12 +52,16 @@ internal object CardDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             tintIconOnSelection = true,
-            formSpec = LayoutSpec(specs),
+            formElements = transformSpecToElements.transform(
+                specs = specs,
+                requiresMandate = false,
+                replacePlaceholders = false,
+            ),
         )
     }
 }
 
-internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode?
+internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 .toInternal(): BillingDetailsCollectionConfiguration.AddressCollectionMode {
     return when (this) {
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
@@ -78,7 +75,5 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectio
         PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
             BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         }
-
-        else -> BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic
     }
 }

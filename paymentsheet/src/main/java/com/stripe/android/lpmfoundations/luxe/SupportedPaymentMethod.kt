@@ -6,8 +6,7 @@ import androidx.annotation.StringRes
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.FormElement
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SupportedPaymentMethod(
@@ -38,14 +37,9 @@ data class SupportedPaymentMethod(
     val tintIconOnSelection: Boolean,
 
     /**
-     * This describes how the UI should look.
+     * This describes how the form UI should look.
      */
-    val formSpec: LayoutSpec,
-
-    /**
-     * This forces the UI to render the required fields
-     */
-    val placeholderOverrideList: List<IdentifierSpec> = emptyList(),
+    val formElements: List<FormElement>,
 ) {
     internal fun paymentMethodDefinition(): PaymentMethodDefinition {
         return requireNotNull(PaymentMethodRegistry.definitionsByCode[code])

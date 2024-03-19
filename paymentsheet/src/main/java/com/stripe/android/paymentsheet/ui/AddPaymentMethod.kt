@@ -45,9 +45,7 @@ internal fun AddPaymentMethod(
     }
     val supportedPaymentMethods: List<SupportedPaymentMethod> = sheetViewModel.supportedPaymentMethods
     val selectedItem = remember(selectedPaymentMethodCode) {
-        supportedPaymentMethods.first {
-            it.code == selectedPaymentMethodCode
-        }
+        sheetViewModel.supportedPaymentMethodForCode(selectedPaymentMethodCode)
     }
     val arguments = remember(selectedItem) {
         sheetViewModel.createFormArguments(selectedItem)
@@ -99,7 +97,6 @@ internal fun AddPaymentMethod(
             val stripeIntent = paymentMethodMetadata?.stripeIntent
 
             PaymentElement(
-                formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
                 enabled = !processing,
                 supportedPaymentMethods = supportedPaymentMethods,
                 selectedItem = selectedItem,

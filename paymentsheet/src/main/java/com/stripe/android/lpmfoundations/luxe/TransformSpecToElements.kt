@@ -2,6 +2,8 @@ package com.stripe.android.lpmfoundations.luxe
 
 import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.AddressSpec
@@ -58,10 +60,26 @@ class TransformSpecToElements(
     private val saveForFutureUseInitialValue: Boolean,
     private val merchantName: String,
     private val context: Context,
-    private val cbcEligibility: CardBrandChoiceEligibility
+    private val cbcEligibility: CardBrandChoiceEligibility,
+    private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
 ) {
-    fun transform(list: List<FormItemSpec>): List<FormElement> =
-        list.mapNotNull {
+    fun transform(
+        specs: List<FormItemSpec>,
+        requiresMandate: Boolean,
+        placeholderOverrideList: List<IdentifierSpec> = emptyList(),
+        replacePlaceholders: Boolean = true,
+    ): List<FormElement> {
+        val specsWithoutPlaceholders = if (replacePlaceholders) {
+            specsForConfiguration(
+                configuration = billingDetailsCollectionConfiguration,
+                placeholderOverrideList = placeholderOverrideList,
+                requiresMandate = requiresMandate,
+                specs = specs,
+            )
+        } else {
+            specs
+        }
+        return specsWithoutPlaceholders.mapNotNull {
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(
                     saveForFutureUseInitialValue,
@@ -112,4 +130,5 @@ class TransformSpecToElements(
                 is CashAppPayMandateTextSpec -> it.transform(merchantName)
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
+    }
 }

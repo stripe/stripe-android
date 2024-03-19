@@ -709,7 +709,6 @@ internal class PaymentOptionsViewModelTest {
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             linkConfigurationCoordinator = linkInteractor,
-            formViewModelSubComponentBuilderProvider = mock(),
             editInteractorFactory = editInteractorFactory,
         )
     }
