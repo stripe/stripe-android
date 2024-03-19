@@ -3,8 +3,8 @@ package com.stripe.android.financialconnections.analytics
 import android.content.Context
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
-import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
@@ -81,12 +81,11 @@ private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
 }
 
 internal class FinancialConnectionsAnalyticsTrackerImpl(
-    private val stripeNetworkClient: StripeNetworkClient,
     private val getManifest: GetManifest,
     private val configuration: FinancialConnectionsSheet.Configuration,
-    private val logger: Logger,
     private val locale: Locale,
     context: Context,
+    private val requestExecutor: AnalyticsRequestV2Executor,
 ) : FinancialConnectionsAnalyticsTracker {
 
     private val requestFactory = AnalyticsRequestV2Factory(
@@ -98,21 +97,12 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
     @OptIn(DelicateCoroutinesApi::class)
     override fun track(event: FinancialConnectionsAnalyticsEvent) {
         GlobalScope.launch(Dispatchers.IO) {
-            runCatching {
-                val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
-                val commonParams = commonParams()
-                val request = requestFactory.createRequest(
-                    eventName = event.eventName,
-                    additionalParams = eventParams + commonParams,
-                    includeSDKParams = true
-                )
-                stripeNetworkClient.executeRequest(
-                    request
-                )
-                logger.debug("EVENT: ${request.eventName}: ${request.params}")
-            }.onFailure {
-                logger.error("Exception while making analytics request", it)
-            }
+            val request = requestFactory.createRequest(
+                eventName = event.eventName,
+                additionalParams = event.params.orEmpty() + commonParams(),
+                includeSDKParams = true,
+            )
+            requestExecutor.enqueue(request)
         }
     }
 
