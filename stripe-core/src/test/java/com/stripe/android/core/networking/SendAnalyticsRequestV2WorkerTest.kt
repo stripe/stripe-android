@@ -6,7 +6,7 @@ import androidx.work.ListenableWorker
 import androidx.work.testing.TestListenableWorkerBuilder
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
+import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.utils.FakeStripeNetworkClient
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -37,7 +37,7 @@ internal class SendAnalyticsRequestV2WorkerTest {
     @Test
     fun `Returns failure upon network response that can't be retried`() = runTest {
         runWorkerTest(
-            executeRequest = { throw APIException() },
+            executeRequest = { throw InvalidRequestException() },
             expectedResult = ListenableWorker.Result.failure(),
         )
     }
