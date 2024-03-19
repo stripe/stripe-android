@@ -20,14 +20,14 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
-        val requiresMandate = metadata.hasIntentToSetup()
-
-        val localLayoutSpecs: List<FormItemSpec> = if (requiresMandate) {
+        val localLayoutSpecs: List<FormItemSpec> = if (requiresMandate(metadata)) {
             listOf(MandateTextSpec(stringResId = R.string.stripe_amazon_pay_mandate))
         } else {
             emptyList()
@@ -35,7 +35,6 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
 
         return SupportedPaymentMethod(
             code = "amazon_pay",
-            requiresMandate = requiresMandate,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_amazon_pay,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_amazon_pay,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -43,7 +42,6 @@ internal object AmazonPayDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields + localLayoutSpecs,
-                requiresMandate = requiresMandate,
             ),
         )
     }

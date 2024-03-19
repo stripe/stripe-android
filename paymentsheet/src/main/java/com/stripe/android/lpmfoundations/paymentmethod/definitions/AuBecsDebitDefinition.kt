@@ -20,6 +20,8 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -27,7 +29,6 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "au_becs_debit",
-            requiresMandate = true,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_au_becs_debit,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -35,7 +36,6 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
             tintIconOnSelection = true,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = true,
             ),
         )
     }

@@ -17,6 +17,8 @@ internal interface PaymentMethodDefinition {
 
     val supportedAsSavedPaymentMethod: Boolean
 
+    fun requiresMandate(metadata: PaymentMethodMetadata): Boolean
+
     /**
      * The requirements that need to be met in order for this Payment Method to be available for selection by the buyer.
      * For example emptySet() if no requirements exist.

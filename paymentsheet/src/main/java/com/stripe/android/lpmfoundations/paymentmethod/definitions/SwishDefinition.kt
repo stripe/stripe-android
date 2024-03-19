@@ -20,6 +20,8 @@ internal object SwishDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -27,7 +29,6 @@ internal object SwishDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "swish",
-            requiresMandate = false,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_swish,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_swish,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -35,7 +36,6 @@ internal object SwishDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = false,
             ),
         )
     }

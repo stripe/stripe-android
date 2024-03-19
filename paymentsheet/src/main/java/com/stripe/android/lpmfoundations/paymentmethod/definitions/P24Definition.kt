@@ -20,6 +20,8 @@ internal object P24Definition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -27,7 +29,6 @@ internal object P24Definition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "p24",
-            requiresMandate = false,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_p24,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_p24,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -35,7 +36,6 @@ internal object P24Definition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = false,
             ),
         )
     }

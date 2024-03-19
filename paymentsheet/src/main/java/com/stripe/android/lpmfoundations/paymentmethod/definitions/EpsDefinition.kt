@@ -20,6 +20,8 @@ internal object EpsDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -27,7 +29,6 @@ internal object EpsDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "eps",
-            requiresMandate = true,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_eps,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_eps,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -35,7 +36,6 @@ internal object EpsDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = true,
             ),
         )
     }

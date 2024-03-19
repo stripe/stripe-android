@@ -441,17 +441,20 @@ internal class CustomerSheetViewModel(
     }
 
     private fun onFormFieldValuesCompleted(formFieldValues: FormFieldValues?) {
-        updateViewState<CustomerSheetViewState.AddPaymentMethod> {
-            it.copy(
-                formViewData = it.formViewData.copy(
-                    completeFormValues = formFieldValues,
-                ),
-                primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
-                draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
-                    resources = resources,
-                    paymentMethod = it.selectedPaymentMethod,
+        paymentMethodMetadata?.let { paymentMethodMetadata ->
+            updateViewState<CustomerSheetViewState.AddPaymentMethod> {
+                it.copy(
+                    formViewData = it.formViewData.copy(
+                        completeFormValues = formFieldValues,
+                    ),
+                    primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
+                    draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
+                        resources = resources,
+                        paymentMethod = it.selectedPaymentMethod,
+                        paymentMethodMetadata = paymentMethodMetadata
+                    )
                 )
-            )
+            }
         }
     }
 
@@ -692,7 +695,10 @@ internal class CustomerSheetViewModel(
                     val formData = currentViewState.formViewData
                     if (formData.completeFormValues == null) error("completeFormValues cannot be null")
                     val params = formData.completeFormValues
-                        .transformToPaymentMethodCreateParams(paymentMethodSpec)
+                        .transformToPaymentMethodCreateParams(
+                            paymentMethod = paymentMethodSpec,
+                            paymentMethodMetadata = requireNotNull(paymentMethodMetadata)
+                        )
                     createAndAttach(params)
                 } ?: error("${currentViewState.paymentMethodCode} is not supported")
             }

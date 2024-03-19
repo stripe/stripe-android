@@ -24,6 +24,8 @@ internal object CardDefinition : PaymentMethodDefinition {
         hasIntentToSetup: Boolean
     ): Set<AddPaymentMethodRequirement> = setOf()
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -46,7 +48,6 @@ internal object CardDefinition : PaymentMethodDefinition {
         )
         return SupportedPaymentMethod(
             code = "card",
-            requiresMandate = false,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
             lightThemeIconUrl = null,
@@ -54,7 +55,6 @@ internal object CardDefinition : PaymentMethodDefinition {
             tintIconOnSelection = true,
             formElements = transformSpecToElements.transform(
                 specs = specs,
-                requiresMandate = false,
                 replacePlaceholders = false,
             ),
         )

@@ -21,6 +21,8 @@ internal object IdealDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods.takeIf { hasIntentToSetup },
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -28,7 +30,6 @@ internal object IdealDefinition : PaymentMethodDefinition {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "ideal",
-            requiresMandate = metadata.hasIntentToSetup(),
             displayNameResource = R.string.stripe_paymentsheet_payment_method_ideal,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_ideal,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -36,7 +37,6 @@ internal object IdealDefinition : PaymentMethodDefinition {
             tintIconOnSelection = false,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields,
-                requiresMandate = metadata.hasIntentToSetup(),
                 placeholderOverrideList = if (metadata.hasIntentToSetup()) {
                     listOf(IdentifierSpec.Name, IdentifierSpec.Email)
                 } else {

@@ -16,9 +16,6 @@ data class SupportedPaymentMethod(
      */
     val code: PaymentMethodCode,
 
-    /** This describes if the LPM requires a mandate see [ConfirmPaymentIntentParams.mandateDataParams]. */
-    val requiresMandate: Boolean,
-
     /** This describes the name that appears under the selector. */
     @StringRes val displayNameResource: Int,
 

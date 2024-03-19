@@ -25,6 +25,8 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
@@ -53,7 +55,6 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
 
         return SupportedPaymentMethod(
             code = "bacs_debit",
-            requiresMandate = true,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
@@ -61,7 +62,6 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
             tintIconOnSelection = true,
             formElements = transformSpecToElements.transform(
                 specs = sharedDataSpec.fields + localFields,
-                requiresMandate = true,
                 placeholderOverrideList = listOf(
                     IdentifierSpec.Name,
                     IdentifierSpec.Email,

@@ -45,6 +45,7 @@ class FormControllerTest {
         shippingValues = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+        requiresMandate = false,
     )
 
     @Test

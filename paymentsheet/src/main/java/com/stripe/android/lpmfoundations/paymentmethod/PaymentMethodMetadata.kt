@@ -55,6 +55,10 @@ internal data class PaymentMethodMetadata(
         }
     }
 
+    fun requiresMandate(paymentMethodCode: String): Boolean {
+        return PaymentMethodRegistry.definitionsByCode[paymentMethodCode]?.requiresMandate(this) ?: false
+    }
+
     fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
         return stripeIntent.paymentMethodTypes.mapNotNull {
             PaymentMethodRegistry.definitionsByCode[it]
@@ -99,6 +103,7 @@ internal data class PaymentMethodMetadata(
             sharedDataSpec = sharedDataSpec,
             transformSpecToElements = transformSpecToElements(
                 context = context,
+                requiresMandate = definition.requiresMandate(this),
                 paymentMethodCreateParams = paymentMethodCreateParams,
                 paymentMethodExtraParams = paymentMethodExtraParams,
             ),
@@ -116,7 +121,10 @@ internal data class PaymentMethodMetadata(
                 paymentMethodDefinition.supportedPaymentMethod(
                     metadata = this,
                     sharedDataSpec = sharedDataSpec,
-                    transformSpecToElements = transformSpecToElements(context),
+                    transformSpecToElements = transformSpecToElements(
+                        context = context,
+                        requiresMandate = paymentMethodDefinition.requiresMandate(this),
+                    ),
                 )
             }
         }
@@ -157,6 +165,7 @@ internal data class PaymentMethodMetadata(
 
     private fun transformSpecToElements(
         context: Context,
+        requiresMandate: Boolean,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
     ): TransformSpecToElements {
@@ -184,6 +193,7 @@ internal data class PaymentMethodMetadata(
             context = context.applicationContext,
             addressRepository = requireNotNull(addressRepository),
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            requiresMandate = requiresMandate,
         )
     }
 }

@@ -62,10 +62,10 @@ class TransformSpecToElements(
     private val context: Context,
     private val cbcEligibility: CardBrandChoiceEligibility,
     private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    private val requiresMandate: Boolean,
 ) {
     fun transform(
         specs: List<FormItemSpec>,
-        requiresMandate: Boolean,
         placeholderOverrideList: List<IdentifierSpec> = emptyList(),
         replacePlaceholders: Boolean = true,
     ): List<FormElement> {

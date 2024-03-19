@@ -70,6 +70,7 @@ internal class TransformSpecToElementTest {
                 shippingValues = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+                requiresMandate = false,
             )
     }
 
@@ -79,7 +80,6 @@ internal class TransformSpecToElementTest {
             val countrySection = CountrySpec(allowedCountryCodes = setOf("AT"))
             val formElement = transformSpecToElements.transform(
                 listOf(countrySection),
-                requiresMandate = false,
             )
 
             val countrySectionElement = formElement.first() as SectionElement
@@ -102,7 +102,6 @@ internal class TransformSpecToElementTest {
             val idealSection = IDEAL_BANK_CONFIG
             val formElement = transformSpecToElements.transform(
                 listOf(idealSection),
-                requiresMandate = false,
             )
 
             val idealSectionElement = formElement.first() as SectionElement
@@ -120,7 +119,6 @@ internal class TransformSpecToElementTest {
     fun `Add a name section spec sets up the name element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
             listOf(nameSection),
-            requiresMandate = false,
         )
 
         val nameElement = (formElement.first() as SectionElement)
@@ -150,7 +148,6 @@ internal class TransformSpecToElementTest {
                     capitalization = Capitalization.Words
                 )
             ),
-            requiresMandate = false,
         )
 
         val nameElement = (formElement.first() as SectionElement).fields[0]
@@ -166,7 +163,6 @@ internal class TransformSpecToElementTest {
     fun `Add a email section spec sets up the email element correctly`() = runBlocking {
         val formElement = transformSpecToElements.transform(
             listOf(emailSection),
-            requiresMandate = false,
         )
 
         val emailSectionElement = formElement.first() as SectionElement
@@ -185,7 +181,6 @@ internal class TransformSpecToElementTest {
         )
         val formElement = transformSpecToElements.transform(
             listOf(staticText),
-            requiresMandate = false,
         )
 
         val staticTextElement = formElement.first() as StaticTextElement
@@ -199,7 +194,6 @@ internal class TransformSpecToElementTest {
     fun `Empty spec is transformed to single EmptyFormElement`() {
         val formElement = transformSpecToElements.transform(
             emptyList(),
-            requiresMandate = false,
         )
 
         assertThat(formElement).containsExactly(EmptyFormElement())
@@ -208,7 +202,7 @@ internal class TransformSpecToElementTest {
     @Test
     fun `UPI spec is transformed into UPI element wrapped in section`() {
         val upiSpec = UpiSpec()
-        val formElement = transformSpecToElements.transform(listOf(upiSpec), requiresMandate = false)
+        val formElement = transformSpecToElements.transform(listOf(upiSpec))
 
         val sectionElement = formElement.first() as SectionElement
         val upiElement = sectionElement.fields.first() as UpiElement
@@ -221,7 +215,6 @@ internal class TransformSpecToElementTest {
         val phoneSpec = PhoneSpec()
         val formElement = transformSpecToElements.transform(
             listOf(phoneSpec),
-            requiresMandate = false,
         )
 
         val phoneSectionElement = formElement.first() as SectionElement
@@ -240,7 +233,6 @@ internal class TransformSpecToElementTest {
         )
         val formElement = transformSpecToElements.transform(
             listOf(contactInfoSpec),
-            requiresMandate = false,
         )
 
         val sectionElement = formElement.first() as SectionElement
