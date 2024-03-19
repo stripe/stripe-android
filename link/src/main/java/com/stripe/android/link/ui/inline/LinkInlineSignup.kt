@@ -229,7 +229,7 @@ private fun LinkCheckbox(
 }
 
 @Composable
-private fun LinkFields(
+internal fun LinkFields(
     expanded: Boolean,
     enabled: Boolean,
     signUpState: SignUpState,
