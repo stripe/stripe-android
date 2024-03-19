@@ -164,7 +164,7 @@ internal data class PaymentMethodMetadata(
             shippingValues = shippingDetails?.toIdentifierMap(defaultBillingDetails),
             saveForFutureUseInitialValue = false,
             context = context.applicationContext,
-            addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
+            addressRepository = AddressRepository(context.resources, Dispatchers.IO),
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         )
     }
