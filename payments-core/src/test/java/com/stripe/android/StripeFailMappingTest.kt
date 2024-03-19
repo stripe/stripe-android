@@ -11,7 +11,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 
 @RunWith(RobolectricTestRunner::class)
-class StripeErrorMappingTest {
+class StripeFailMappingTest {
 
     private val context: Context = ApplicationProvider.getApplicationContext()
 

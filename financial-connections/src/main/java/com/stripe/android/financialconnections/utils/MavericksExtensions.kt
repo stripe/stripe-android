@@ -12,6 +12,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.MavericksViewModelProvider
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.financialconnections.core.Result
 import kotlinx.coroutines.CancellationException
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KClass
@@ -67,5 +68,12 @@ internal fun Async<*>.isCancellationError(): Boolean = when {
     this !is Fail -> false
     error is CancellationException -> true
     error is StripeException && error.cause is CancellationException -> true
+    else -> false
+}
+
+internal fun Result<*>.isCancellationError(): Boolean = when {
+    this !is Result.Fail -> false
+    throwable is CancellationException -> true
+    throwable is StripeException && throwable.cause is CancellationException -> true
     else -> false
 }

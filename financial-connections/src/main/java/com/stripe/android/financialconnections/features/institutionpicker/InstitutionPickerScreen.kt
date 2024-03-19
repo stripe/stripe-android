@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -58,14 +59,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.Result
+import com.stripe.android.financialconnections.core.Result.Fail
+import com.stripe.android.financialconnections.core.Result.Loading
+import com.stripe.android.financialconnections.core.Result.Success
+import com.stripe.android.financialconnections.core.Result.Uninitialized
+import com.stripe.android.financialconnections.core.rememberPaneViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
@@ -91,9 +91,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun InstitutionPickerScreen() {
-    val viewModel: InstitutionPickerViewModel = mavericksViewModel()
+    val viewModel: InstitutionPickerViewModel = rememberPaneViewModel { InstitutionPickerViewModel.factory(it) }
     val parentViewModel = parentViewModel()
-    val state: InstitutionPickerState by viewModel.collectAsState()
+    val state: InstitutionPickerState by viewModel.stateFlow.collectAsState()
     val listState = rememberLazyListState()
 
     InstitutionPickerContent(
@@ -114,8 +114,8 @@ internal fun InstitutionPickerScreen() {
 @Composable
 private fun InstitutionPickerContent(
     listState: LazyListState,
-    payload: Async<Payload>,
-    institutions: Async<InstitutionResponse>,
+    payload: Result<Payload>,
+    institutions: Result<InstitutionResponse>,
     previewText: String?,
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
@@ -135,7 +135,6 @@ private fun InstitutionPickerContent(
             is Uninitialized,
             is Loading,
             is Fail -> FullScreenGenericLoading()
-
             is Success -> LoadedContent(
                 listState = listState,
                 previewText = previewText,
@@ -143,7 +142,7 @@ private fun InstitutionPickerContent(
                 onQueryChanged = onQueryChanged,
                 institutions = institutions,
                 onInstitutionSelected = onInstitutionSelected,
-                payload = payload(),
+                payload = payload.value,
                 onManualEntryClick = onManualEntryClick,
                 onScrollChanged = onScrollChanged
             )
@@ -158,7 +157,7 @@ private fun LoadedContent(
     previewText: String?,
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
-    institutions: Async<InstitutionResponse>,
+    institutions: Result<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Payload,
     onManualEntryClick: () -> Unit,
@@ -226,7 +225,7 @@ private fun LazyListScope.searchResults(
     payload: Payload,
     selectedInstitutionId: String?,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
-    institutions: Async<InstitutionResponse>,
+    institutions: Result<InstitutionResponse>,
     onManualEntryClick: () -> Unit,
     onSearchMoreClick: () -> Unit
 ) {

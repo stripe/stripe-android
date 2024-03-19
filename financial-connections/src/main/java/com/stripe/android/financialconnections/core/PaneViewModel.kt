@@ -28,7 +28,7 @@ internal abstract class PaneViewModel<S>(
                     onSuccess(data)
                 },
                 onFailure = { throwable ->
-                    stateFlow.update { state -> state.reducer(Result.Error(throwable)) }
+                    stateFlow.update { state -> state.reducer(Result.Fail(throwable)) }
                     onFail(throwable)
                 }
             )
@@ -41,8 +41,10 @@ internal sealed class Result<out T>(
 ) {
     data object Uninitialized : Result<Nothing>(value = null)
     data object Loading : Result<Nothing>(value = null)
-    data class Success<out T>(val value: T) : Result<T>(value = value)
-    data class Error<out T>(val throwable: Throwable) : Result<T>(value = null)
+    data class Success<out T>(val value: T) : Result<T>(value = value) {
+        override operator fun invoke(): T = value
+    }
+    data class Fail<out T>(val throwable: Throwable) : Result<T>(value = null)
 
     open operator fun invoke(): T? = value
 }

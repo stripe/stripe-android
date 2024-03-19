@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
+import com.stripe.android.financialconnections.core.Result.Fail
+import com.stripe.android.financialconnections.core.Result.Loading
+import com.stripe.android.financialconnections.core.Result.Success
+import com.stripe.android.financialconnections.core.Result.Uninitialized
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 
@@ -28,7 +28,7 @@ internal class InstitutionPickerPreviewParameterProvider :
     private fun initialLoading() = InstitutionPreviewState(
         state = InstitutionPickerState(
             previewText = null,
-            payload = Loading(),
+            payload = Loading,
             searchInstitutions = Uninitialized,
         ),
         initialScroll = 0
@@ -47,7 +47,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload()),
-            searchInstitutions = Loading(),
+            searchInstitutions = Loading,
         ),
         initialScroll = 0
     )
@@ -102,7 +102,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload(manualEntry = true)),
-            searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
+            searchInstitutions = Fail(Exception("Something went wrong")),
         ),
         initialScroll = 0
     )
@@ -111,7 +111,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload(manualEntry = false)),
-            searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
+            searchInstitutions = Fail(Exception("Something went wrong")),
         ),
         initialScroll = 0
     )
@@ -122,7 +122,7 @@ internal class InstitutionPickerPreviewParameterProvider :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse(FEW_INSTITUTIONS)),
             selectedInstitutionId = "2",
-            createSessionForInstitution = Loading(),
+            createSessionForInstitution = Loading,
         ),
         initialScroll = 0
     )

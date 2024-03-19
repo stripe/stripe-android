@@ -114,7 +114,7 @@ private fun ConsentContent(
             ConsentLoadingContent()
         }
 
-        is Result.Error -> {
+        is Result.Fail -> {
             UnclassifiedErrorContent { onCloseFromErrorClick(result.throwable) }
         }
 
