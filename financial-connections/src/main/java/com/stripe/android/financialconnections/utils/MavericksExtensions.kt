@@ -72,7 +72,7 @@ internal fun Async<*>.isCancellationError(): Boolean = when {
 }
 
 internal fun Result<*>.isCancellationError(): Boolean = when {
-    this !is Result.Fail -> false
+    this !is Result.Error -> false
     throwable is CancellationException -> true
     throwable is StripeException && throwable.cause is CancellationException -> true
     else -> false

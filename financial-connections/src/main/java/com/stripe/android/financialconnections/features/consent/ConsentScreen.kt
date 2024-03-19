@@ -32,6 +32,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.core.Result
+import com.stripe.android.financialconnections.core.Result.Error
+import com.stripe.android.financialconnections.core.Result.Loading
+import com.stripe.android.financialconnections.core.Result.Success
+import com.stripe.android.financialconnections.core.Result.Uninitialized
 import com.stripe.android.financialconnections.core.rememberPaneViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
@@ -110,15 +114,15 @@ private fun ConsentContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (val result = state.consent) {
-        Result.Uninitialized, Result.Loading -> {
+        Uninitialized, Loading -> {
             ConsentLoadingContent()
         }
 
-        is Result.Fail -> {
+        is Error -> {
             UnclassifiedErrorContent { onCloseFromErrorClick(result.throwable) }
         }
 
-        is Result.Success -> {
+        is Success -> {
             LoadedContent(
                 payload = result.value,
                 bottomSheetState = bottomSheetState,
@@ -297,7 +301,7 @@ private fun ConsentFooter(
         )
         Spacer(modifier = Modifier.size(16.dp))
         FinancialConnectionsButton(
-            loading = acceptConsent is Result.Loading,
+            loading = acceptConsent is Loading,
             onClick = onContinueClick,
             modifier = Modifier
                 .semantics { testTagsAsResourceId = true }

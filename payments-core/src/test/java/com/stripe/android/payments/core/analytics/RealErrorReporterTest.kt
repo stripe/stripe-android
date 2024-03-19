@@ -14,7 +14,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class RealFailReporterTest {
+class RealErrorReporterTest {
     val analyticsRequestExecutor = FakeAnalyticsRequestExecutor()
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val analyticsRequestFactory = AnalyticsRequestFactory(

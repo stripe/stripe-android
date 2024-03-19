@@ -61,7 +61,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.core.Result
-import com.stripe.android.financialconnections.core.Result.Fail
+import com.stripe.android.financialconnections.core.Result.Error
 import com.stripe.android.financialconnections.core.Result.Loading
 import com.stripe.android.financialconnections.core.Result.Success
 import com.stripe.android.financialconnections.core.Result.Uninitialized
@@ -134,7 +134,7 @@ private fun InstitutionPickerContent(
         when (payload) {
             is Uninitialized,
             is Loading,
-            is Fail -> FullScreenGenericLoading()
+            is Error -> FullScreenGenericLoading()
             is Success -> LoadedContent(
                 listState = listState,
                 previewText = previewText,
@@ -257,7 +257,7 @@ private fun LazyListScope.searchResults(
 
         else -> when (institutions) {
             // Load failure: Display error message.
-            is Fail -> item {
+            is Error -> item {
                 NoResultsTile(
                     modifier = Modifier.padding(8.dp),
                     showManualEntry = payload.featuredInstitutions.showManualEntry,

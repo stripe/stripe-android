@@ -21,7 +21,7 @@ import org.mockito.kotlin.verify
 import kotlin.test.Test
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class LogFailTest {
+class LogErrorTest {
 
     private val liveEvents = mutableListOf<FinancialConnectionsEvent>()
 

@@ -7,7 +7,7 @@ import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-class FailMessageScreenshotTest {
+class ErrorMessageScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(

@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
-internal class StripeFailMessageTest {
+internal class StripeErrorMessageTest {
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
 
