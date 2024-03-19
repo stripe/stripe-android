@@ -21,6 +21,8 @@ import java.util.UUID
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit.SECONDS
 
+internal const val InstantAnalyticsExecutionCutOff = 5
+
 /**
  * Analytics request sent to r.stripe.com, which is the preferred service for analytics.
  * This is a POST request with [MimeType.Form] ContentType.
@@ -179,7 +181,7 @@ data class AnalyticsRequestV2 private constructor(
 
         // Our very scientific formula to determine if an event was fired immediately or
         // with a delay due to unsatisfied conditions.
-        val wasDelayed = currentTimeInSeconds - created > 5
+        val wasDelayed = currentTimeInSeconds - created > InstantAnalyticsExecutionCutOff
 
         return mapOf(
             PARAM_USES_WORK_MANAGER to true,
