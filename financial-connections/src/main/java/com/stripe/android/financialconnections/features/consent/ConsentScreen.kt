@@ -63,10 +63,7 @@ import kotlinx.coroutines.launch
 @ExperimentalMaterialApi
 @Composable
 internal fun ConsentScreen() {
-    // update step state when manifest changes
-    val viewModel: ConsentViewModel = rememberPaneViewModel(
-        factory = { ConsentViewModel.factory(it) }
-    )
+    val viewModel: ConsentViewModel = rememberPaneViewModel { ConsentViewModel.factory(it) }
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
 
