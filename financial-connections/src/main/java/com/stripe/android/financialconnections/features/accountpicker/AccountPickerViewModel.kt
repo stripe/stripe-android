@@ -8,7 +8,6 @@ import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
-import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsAutoSelected
@@ -23,7 +22,6 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
-import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
@@ -40,7 +38,6 @@ import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.measureTimeMillis
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -70,20 +67,6 @@ internal class AccountPickerViewModel @Inject constructor(
             val dataAccessNotice = sync.text?.consent?.dataAccessNotice
             val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
-
-            // TODO: For testing only!
-            if (shouldFail) {
-                shouldFail = false
-                delay(2_000)
-                throw AccountLoadError(
-                    showManualEntry = true,
-                    canRetry = state.canRetry,
-                    institution = manifest.activeInstitution!!,
-                    stripeException = APIConnectionException(),
-                )
-            } else {
-                delay(2_000)
-            }
 
             val (partnerAccountList, millis) = measureTimeMillis {
                 pollAuthorizationSessionAccounts(
@@ -330,9 +313,6 @@ internal class AccountPickerViewModel @Inject constructor(
 
     companion object :
         MavericksViewModelFactory<AccountPickerViewModel, AccountPickerState> {
-
-//            TODO: For testing only!
-            var shouldFail: Boolean = true
 
         override fun create(
             viewModelContext: ViewModelContext,
