@@ -53,6 +53,7 @@ com.stripe.android.payments
 com.stripe.android.payments.bankaccount
 com.stripe.android.payments.bankaccount.navigation
 com.stripe.android.payments.core
+com.stripe.android.payments.core.analytics
 com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
 com.stripe.android.payments.financialconnections
@@ -78,7 +79,6 @@ com.stripe.android.ui.core.elements.autocomplete.model
 com.stripe.android.ui.core.elements.events
 com.stripe.android.ui.core.forms
 com.stripe.android.ui.core.forms.resources.injection
-com.stripe.android.ui.core.injection
 module:paymentsheet
 com.stripe.android
 com.stripe.android.customersheet
