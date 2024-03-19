@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 
 @Composable
-internal inline fun <reified T : FinancialConnectionsViewModel<S>, S> rememberPaneViewModel(
+internal inline fun <reified T : PaneViewModel<S>, S> rememberPaneViewModel(
     factory: (FinancialConnectionsSheetNativeViewModel) -> ViewModelProvider.Factory
 ): T {
     val parentActivity = extractActivityFromContext(LocalContext.current) as FinancialConnectionsSheetNativeActivity

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal abstract class FinancialConnectionsViewModel<S>(
+internal abstract class PaneViewModel<S>(
     initialState: S
 ) : ViewModel() {
 

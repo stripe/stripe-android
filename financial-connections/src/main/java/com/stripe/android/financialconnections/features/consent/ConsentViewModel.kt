@@ -11,7 +11,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.core.PaneViewModel
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
@@ -39,7 +39,7 @@ internal class ConsentViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ConsentState>(initialState) {
+) : PaneViewModel<ConsentState>(initialState) {
 
     init {
         suspend {
