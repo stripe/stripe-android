@@ -21,16 +21,16 @@ internal data class Result<T>(
 }
 
 
-internal fun <T> FinancialConnectionsViewModel<*>.executeAsync(
+internal fun <T> FinancialConnectionsViewModel<*>.execute(
     block: suspend () -> T,
-    updateAsync: (Result<T>) -> Unit,
+    onResultUpdated: (Result<T>) -> Unit,
     onSuccess: (T) -> Unit = {},
     onFail: (Throwable) -> Unit = {}
 ) {
-    updateAsync(Result(loading = true))
+    onResultUpdated(Result(loading = true))
     viewModelScope.launch {
         val result = runCatching { block() }
-        updateAsync(
+        onResultUpdated(
             Result(
                 loading = false,
                 data = result.getOrNull(),

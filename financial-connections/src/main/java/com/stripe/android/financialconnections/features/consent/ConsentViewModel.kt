@@ -12,7 +12,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.core.executeAsync
+import com.stripe.android.financialconnections.core.execute
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
@@ -43,7 +43,7 @@ internal class ConsentViewModel @Inject constructor(
 ) : FinancialConnectionsViewModel<ConsentState>(initialState) {
 
     init {
-        executeAsync(
+        execute(
             block = {
                 val sync = getOrFetchSync()
                 val manifest = sync.manifest
@@ -56,20 +56,20 @@ internal class ConsentViewModel @Inject constructor(
                     merchantLogos = sync.visual.merchantLogos
                 )
             },
-            updateAsync = { stateFlow.update { state -> state.copy(consent = it) } },
+            onResultUpdated = { stateFlow.update { state -> state.copy(consent = it) } },
             onFail = { logger.error("Error retrieving consent content", it) },
             onSuccess = { eventTracker.track(PaneLoaded(Pane.CONSENT)) }
         )
     }
 
     fun onContinueClick() {
-        executeAsync(
+        execute(
             block = {
                 eventTracker.track(ConsentAgree)
                 FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
                 acceptConsent()
             },
-            updateAsync = {
+            onResultUpdated = {
                 stateFlow.update { state -> state.copy(acceptConsent = it) }
             },
             onFail = {
