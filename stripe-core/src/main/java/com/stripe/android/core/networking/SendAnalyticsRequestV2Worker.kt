@@ -11,6 +11,7 @@ import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 private const val DataKey = "data"
+private const val MaxAttempts = 5
 
 internal class SendAnalyticsRequestV2Worker(
     appContext: Context,
@@ -27,7 +28,7 @@ internal class SendAnalyticsRequestV2Worker(
                 Result.success()
             },
             onFailure = { error ->
-                if (error.shouldRetry) {
+                if (error.shouldRetry && runAttemptCount < MaxAttempts) {
                     Result.retry()
                 } else {
                     Result.failure()
