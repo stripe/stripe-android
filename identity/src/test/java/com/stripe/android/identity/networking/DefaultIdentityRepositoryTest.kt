@@ -9,6 +9,7 @@ import com.stripe.android.core.model.Country
 import com.stripe.android.core.model.CountryCode
 import com.stripe.android.core.model.StripeFile
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.HEADER_AUTHORIZATION
 import com.stripe.android.core.networking.StripeNetworkClient
@@ -46,10 +47,12 @@ class DefaultIdentityRepositoryTest {
         whenever(it.createTFLiteFile(any())).thenReturn(mock())
     }
     private val mockStripeNetworkClient: StripeNetworkClient = mock()
+    private val fakeAnalyticsRequestExecutor: AnalyticsRequestV2Executor = mock()
     private val identityRepository = DefaultIdentityRepository(
         mockStripeNetworkClient,
         mockIO,
-        ApplicationProvider.getApplicationContext()
+        ApplicationProvider.getApplicationContext(),
+        fakeAnalyticsRequestExecutor,
     )
 
     private val requestCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
