@@ -20,7 +20,9 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The metadata we need to determine what payment methods are supported, as well as being able to display them.
@@ -40,6 +42,12 @@ internal data class PaymentMethodMetadata(
     val sharedDataSpecs: List<SharedDataSpec>,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
+    @IgnoredOnParcel
+    private val addressRepositoryLock: Any = Any()
+
+    @IgnoredOnParcel
+    private val addressRepositoryReference = AtomicReference<AddressRepository?>()
+
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.setupFutureUsage != null
@@ -152,6 +160,16 @@ internal data class PaymentMethodMetadata(
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
     ): TransformSpecToElements {
+        var addressRepository = addressRepositoryReference.get()
+        if (addressRepository == null) {
+            synchronized(addressRepositoryLock) {
+                addressRepository = addressRepositoryReference.get()
+                if (addressRepository == null) {
+                    addressRepository = AddressRepository(context.resources, Dispatchers.IO)
+                    addressRepositoryReference.set(addressRepository)
+                }
+            }
+        }
         return TransformSpecToElements(
             amount = amount(),
             merchantName = merchantName,
@@ -164,7 +182,7 @@ internal data class PaymentMethodMetadata(
             shippingValues = shippingDetails?.toIdentifierMap(defaultBillingDetails),
             saveForFutureUseInitialValue = false,
             context = context.applicationContext,
-            addressRepository = AddressRepository(context.resources, Dispatchers.IO),
+            addressRepository = requireNotNull(addressRepository),
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
         )
     }
