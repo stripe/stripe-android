@@ -13,6 +13,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.stripeColors
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val MANDATE_TEST_TAG = "mandate_test_tag"
+
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun MandateTextUI(
@@ -25,6 +28,6 @@ fun MandateTextUI(
         modifier = Modifier
             .padding(vertical = 8.dp)
             .semantics(mergeDescendants = true) {} // makes it a separate accessibile item
-            .testTag("mandate")
+            .testTag(MANDATE_TEST_TAG)
     )
 }
