@@ -26,8 +26,6 @@
   <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
   <!-- Cash App mandate text -->
   <string name="stripe_cash_app_pay_mandate">By continuing, you authorize %1$s to debit your Cash App account for this payment and future payments in accordance with %2$s\'s terms, until this authorization is revoked. You can change this anytime in your Cash App Settings.</string>
-  <!-- Klarna mandate text -->
-  <string name="stripe_klarna_mandate">By continuing to Klarna, you allow %1$s to charge your Klarna account for future payments in accordance with their terms and Klarna\'s terms. You can change this at any time in your Klarna app or by reaching out to %2$s.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Contact information</string>
   <!-- Text for continue button -->
@@ -53,6 +51,8 @@
   <string name="stripe_invalid_upi_id">Invalid UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Buy now or pay later with Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">By continuing to Klarna, you allow %1$s to charge your Klarna account for future payments in accordance with their terms and Klarna\'s terms. You can change this at any time in your Klarna app or by reaching out to %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Pay later with Klarna.</string>
   <!-- Caption for Phone field on address form -->
