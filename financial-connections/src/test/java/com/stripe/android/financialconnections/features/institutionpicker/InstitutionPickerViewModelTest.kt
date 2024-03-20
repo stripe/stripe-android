@@ -1,12 +1,11 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.core.Result
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -22,10 +21,12 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verifyNoInteractions
@@ -38,7 +39,7 @@ import kotlin.test.assertTrue
 internal class InstitutionPickerViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val searchInstitutions = mock<SearchInstitutions>()
     private val featuredInstitutions = mock<FeaturedInstitutions>()
@@ -92,9 +93,9 @@ internal class InstitutionPickerViewModelTest {
 
         val viewModel = buildViewModel(InstitutionPickerState())
 
-        withState(viewModel) { state ->
+        viewModel.stateFlow.value.let { state ->
             assertEquals(state.payload()!!.featuredInstitutions, institutionResponse)
-            assertIs<Uninitialized>(state.searchInstitutions)
+            assertIs<Result.Uninitialized>(state.searchInstitutions)
         }
     }
 
@@ -108,10 +109,8 @@ internal class InstitutionPickerViewModelTest {
 
         val viewModel = buildViewModel(InstitutionPickerState())
 
-        withState(viewModel) { state ->
-            // payload with empty list
-            assertTrue(state.payload()!!.featuredInstitutions.data.isEmpty())
-        }
+        // payload with empty list
+        assertTrue(viewModel.stateFlow.value.payload()!!.featuredInstitutions.data.isEmpty())
     }
 
     @Test
@@ -121,7 +120,7 @@ internal class InstitutionPickerViewModelTest {
 
         val viewModel = buildViewModel(InstitutionPickerState())
 
-        withState(viewModel) { state ->
+        viewModel.stateFlow.value.let { state ->
             assertTrue(state.payload() == null)
             handleError.assertError(
                 error = error,
@@ -170,7 +169,7 @@ internal class InstitutionPickerViewModelTest {
         viewModel.onQueryChanged(query)
         advanceUntilIdle()
 
-        withState(viewModel) { state ->
+        viewModel.stateFlow.value.let { state ->
             assertEquals(state.payload()!!.featuredInstitutions, featuredResults)
             assertEquals(state.searchInstitutions()!!, searchResults)
             eventTracker.assertContainsEvent(
@@ -193,7 +192,7 @@ internal class InstitutionPickerViewModelTest {
         viewModel.onQueryChanged(query)
         advanceUntilIdle()
 
-        withState(viewModel) { state ->
+        viewModel.stateFlow.value.let { state ->
             verifyNoInteractions(searchInstitutions)
             assertTrue(eventTracker.sentEvents.none { it.eventName == "linked_accounts.search.succeeded" })
             assertEquals(state.searchInstitutions()!!.data, emptyList())

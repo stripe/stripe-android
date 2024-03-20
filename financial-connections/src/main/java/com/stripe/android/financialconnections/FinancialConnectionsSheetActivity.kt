@@ -113,9 +113,11 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
                         )
 
                         is FinishWithResult -> {
-                            viewEffect.finishToast?.let {
+                            viewEffect.finishToast?.let { resId ->
                                 Toast.makeText(
-                                    this@FinancialConnectionsSheetActivity, it, Toast.LENGTH_LONG
+                                    this@FinancialConnectionsSheetActivity,
+                                    resId,
+                                    Toast.LENGTH_LONG
                                 ).show()
                             }
                             finishWithResult(viewEffect.result)
