@@ -23,7 +23,6 @@ internal object CashAppPayDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(

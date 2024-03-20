@@ -29,7 +29,6 @@ internal interface PaymentMethodDefinition {
     fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
 
     fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod
 

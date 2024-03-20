@@ -23,16 +23,13 @@ internal object OxxoDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "oxxo",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_oxxo,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            tintIconOnSelection = false,
         )
     }
 }

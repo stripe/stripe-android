@@ -22,16 +22,13 @@ internal object P24Definition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "p24",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_p24,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_p24,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
         )
     }
 }

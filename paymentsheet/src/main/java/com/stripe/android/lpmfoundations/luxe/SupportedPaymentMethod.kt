@@ -1,14 +1,13 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.ui.core.elements.SharedDataSpec
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class SupportedPaymentMethod(
+internal data class SupportedPaymentMethod(
     /**
      * This describes the PaymentMethod Type as described
      * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
@@ -32,6 +31,21 @@ data class SupportedPaymentMethod(
      */
     val tintIconOnSelection: Boolean,
 ) {
+    constructor(
+        paymentMethodDefinition: PaymentMethodDefinition,
+        sharedDataSpec: SharedDataSpec,
+        @StringRes displayNameResource: Int,
+        @DrawableRes iconResource: Int,
+        tintIconOnSelection: Boolean = false,
+    ) : this(
+        code = paymentMethodDefinition.type.code,
+        displayNameResource = displayNameResource,
+        iconResource = iconResource,
+        lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+        darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+        tintIconOnSelection = tintIconOnSelection,
+    )
+
     internal fun paymentMethodDefinition(): PaymentMethodDefinition {
         return requireNotNull(PaymentMethodRegistry.definitionsByCode[code])
     }

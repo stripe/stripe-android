@@ -3,7 +3,7 @@ package com.stripe.android.lpmfoundations.luxe
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.ui.core.R
 
-object LpmRepositoryTestHelpers {
+internal object LpmRepositoryTestHelpers {
     val card: SupportedPaymentMethod = cardFromPaymentMethodMetadata() ?: SupportedPaymentMethod(
         code = "card",
         displayNameResource = R.string.stripe_paymentsheet_payment_method_card,

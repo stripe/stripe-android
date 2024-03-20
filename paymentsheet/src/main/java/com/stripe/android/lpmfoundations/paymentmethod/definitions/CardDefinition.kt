@@ -28,15 +28,13 @@ internal object CardDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "card",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
             tintIconOnSelection = true,
         )
     }

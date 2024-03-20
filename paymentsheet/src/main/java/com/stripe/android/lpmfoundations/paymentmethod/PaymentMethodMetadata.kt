@@ -97,7 +97,6 @@ internal data class PaymentMethodMetadata(
         val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
         val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
         return definition.supportedPaymentMethod(
-            metadata = this,
             sharedDataSpec = sharedDataSpec,
         )
     }
@@ -109,7 +108,6 @@ internal data class PaymentMethodMetadata(
                 null
             } else {
                 paymentMethodDefinition.supportedPaymentMethod(
-                    metadata = this,
                     sharedDataSpec = sharedDataSpec,
                 )
             }

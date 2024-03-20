@@ -24,20 +24,17 @@ internal object AfterpayClearpayDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "afterpay_clearpay",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = if (AfterpayClearpayHeaderElement.isClearpay()) {
                 R.string.stripe_paymentsheet_payment_method_clearpay
             } else {
                 R.string.stripe_paymentsheet_payment_method_afterpay
             },
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
         )
     }
 }
