@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.parentViewModel
 import javax.inject.Inject
@@ -42,6 +43,14 @@ internal class ResetViewModel @Inject constructor(
                 popUpTo = PopUpToBehavior.Current(inclusive = true),
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: ResetState): TopAppBarStateUpdate {
+        // TODO(tillh-stripe) This preserves behavior, but it should probably not allow back navigation, right?
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = true,
+        )
     }
 
     private fun logErrors() {

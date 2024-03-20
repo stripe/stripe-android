@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Networking
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -82,6 +83,13 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                     .createPhoneNumberController(manifest.accountholderPhoneNumber ?: ""),
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: NetworkingLinkSignupState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun observeAsyncs() {

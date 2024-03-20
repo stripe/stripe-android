@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.ui.components
 
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -39,10 +40,9 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalNavHostController
-import com.stripe.android.financialconnections.ui.LocalReducedBranding
-import com.stripe.android.financialconnections.ui.LocalTestMode
 import com.stripe.android.financialconnections.ui.theme.Attention200
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
@@ -58,10 +58,29 @@ private const val PILL_RADIUS = 8f
 
 @Composable
 internal fun FinancialConnectionsTopAppBar(
-    hideStripeLogo: Boolean = LocalReducedBranding.current,
-    testMode: Boolean = LocalTestMode.current,
-    elevation: Dp = 0.dp,
-    allowBackNavigation: Boolean = true,
+    state: TopAppBarState,
+    onCloseClick: () -> Unit
+) {
+    val elevation by animateDpAsState(
+        targetValue = if (state.isElevated) 8.dp else 0.dp,
+        label = "TopAppBarElevation",
+    )
+
+    FinancialConnectionsTopAppBar(
+        hideStripeLogo = state.hideStripeLogo || state.forceHideStripeLogo,
+        testMode = state.isTestMode,
+        elevation = elevation,
+        allowBackNavigation = state.allowBackNavigation,
+        onCloseClick = onCloseClick,
+    )
+}
+
+@Composable
+private fun FinancialConnectionsTopAppBar(
+    hideStripeLogo: Boolean,
+    testMode: Boolean,
+    elevation: Dp,
+    allowBackNavigation: Boolean,
     onCloseClick: () -> Unit
 ) {
     val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
@@ -226,7 +245,10 @@ private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {
 @Composable
 internal fun TopAppBarNoStripeLogoPreview() {
     FinancialConnectionsPreview {
-        FinancialConnectionsTopAppBar {}
+        FinancialConnectionsTopAppBar(
+            state = TopAppBarState(hideStripeLogo = false),
+            onCloseClick = {},
+        )
     }
 }
 
@@ -235,7 +257,8 @@ internal fun TopAppBarNoStripeLogoPreview() {
 internal fun FinancialConnectionsTopAppBarPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsTopAppBar(
-            hideStripeLogo = true
-        ) {}
+            state = TopAppBarState(hideStripeLogo = true),
+            onCloseClick = {},
+        )
     }
 }

@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.exception.AccountNumberRetrievalE
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -315,7 +316,12 @@ internal fun ErrorContent(
 internal fun NoAccountsAvailableErrorContentPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar { } }
+            topBar = {
+                FinancialConnectionsTopAppBar(
+                    state = TopAppBarState(),
+                    onCloseClick = {},
+                )
+            }
         ) {
             NoAccountsAvailableErrorContent(
                 exception = AccountLoadError(

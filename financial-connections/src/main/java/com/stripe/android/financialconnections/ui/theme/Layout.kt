@@ -22,17 +22,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
+import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.components.DragHandle
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 /**
@@ -59,6 +61,7 @@ internal fun Layout(
 ) {
     LayoutScaffold(
         canScrollForward = scrollState.canScrollForward,
+        canScrollBackward = scrollState.canScrollBackward,
         inModal = inModal,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
@@ -102,6 +105,7 @@ internal fun LazyLayout(
 ) {
     LayoutScaffold(
         canScrollForward = lazyListState.canScrollForward,
+        canScrollBackward = lazyListState.canScrollBackward,
         inModal = inModal,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
@@ -119,12 +123,19 @@ internal fun LazyLayout(
 @Composable
 private fun LayoutScaffold(
     canScrollForward: Boolean,
+    canScrollBackward: Boolean,
     inModal: Boolean,
     showFooterShadowWhenScrollable: Boolean,
     modifier: Modifier = Modifier,
     footer: (@Composable () -> Unit)?,
     body: @Composable () -> Unit,
 ) {
+    val topAppBarHost = LocalTopAppBarHost.current
+
+    LaunchedEffect(canScrollBackward) {
+        topAppBarHost.updateTopAppBarElevation(isElevated = canScrollBackward)
+    }
+
     Column(
         modifier
             .also { if (inModal.not()) it.fillMaxSize() }
@@ -195,9 +206,11 @@ internal fun LayoutPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    hideStripeLogo = false,
-                    elevation = state.elevation,
-                    onCloseClick = {}
+                    state = TopAppBarState(
+                        hideStripeLogo = false,
+                        isContentScrolled = state.canScrollBackward,
+                    ),
+                    onCloseClick = {},
                 )
             },
             content = {

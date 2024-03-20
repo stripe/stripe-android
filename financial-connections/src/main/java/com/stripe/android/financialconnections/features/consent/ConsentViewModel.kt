@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
@@ -55,6 +56,14 @@ internal class ConsentViewModel @Inject constructor(
                 merchantLogos = sync.visual.merchantLogos
             )
         }.execute { copy(consent = it) }
+    }
+
+    override fun updateTopAppBar(state: ConsentState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = Pane.CONSENT,
+            hideStripeLogo = state.consent()?.shouldShowMerchantLogos ?: true,
+            allowBackNavigation = true,
+        )
     }
 
     private fun logErrors() {

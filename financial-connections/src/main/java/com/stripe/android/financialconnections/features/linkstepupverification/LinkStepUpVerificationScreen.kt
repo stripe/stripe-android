@@ -14,6 +14,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,6 +40,7 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -45,7 +48,6 @@ import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
@@ -53,11 +55,13 @@ import com.stripe.android.financialconnections.ui.theme.LazyLayout
 @Composable
 internal fun LinkStepUpVerificationScreen() {
     val viewModel: LinkStepUpVerificationViewModel = mavericksViewModel()
+    val topAppBarState by viewModel.topAppBarState.collectAsState()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     BackHandler(enabled = true) {}
     LinkStepUpVerificationContent(
         state = state.value,
+        topAppBarState = topAppBarState,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.LINK_STEP_UP_VERIFICATION) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick
@@ -67,6 +71,7 @@ internal fun LinkStepUpVerificationScreen() {
 @Composable
 private fun LinkStepUpVerificationContent(
     state: LinkStepUpVerificationState,
+    topAppBarState: TopAppBarState,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit
@@ -75,8 +80,7 @@ private fun LinkStepUpVerificationContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
-                elevation = lazyListState.elevation,
+                state = topAppBarState,
                 onCloseClick = onCloseClick
             )
         }
@@ -199,6 +203,7 @@ internal fun LinkStepUpVerificationPreview(
     FinancialConnectionsPreview {
         LinkStepUpVerificationContent(
             state = state,
+            topAppBarState = TopAppBarState(),
             onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {}

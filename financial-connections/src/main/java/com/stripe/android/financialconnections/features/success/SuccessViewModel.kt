@@ -18,6 +18,7 @@ import com.stripe.android.financialconnections.features.common.useContinueWithMe
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
@@ -52,6 +53,13 @@ internal class SuccessViewModel @Inject constructor(
         }.execute {
             copy(payload = it)
         }
+    }
+
+    override fun updateTopAppBar(state: SuccessState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun observeAsyncs() {

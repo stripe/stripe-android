@@ -7,6 +7,7 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
+import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairViewModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -22,7 +23,17 @@ internal data class SharedPartnerAuthState(
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
     val authenticationStatus: Async<AuthenticationStatus> = Uninitialized,
+    val inModal: Boolean = false,
 ) : MavericksState {
+
+    constructor(args: PartnerAuthViewModel.Args) : this(
+        pane = args.pane,
+        inModal = args.inModal,
+    )
+
+    constructor(args: BankAuthRepairViewModel.Args) : this(
+        pane = args.pane,
+    )
 
     data class Payload(
         val isStripeDirect: Boolean,

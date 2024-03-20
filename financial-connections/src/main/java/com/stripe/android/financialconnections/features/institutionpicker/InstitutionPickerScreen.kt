@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -75,6 +76,7 @@ import com.stripe.android.financialconnections.features.institutionpicker.Instit
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -92,6 +94,7 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun InstitutionPickerScreen() {
     val viewModel: InstitutionPickerViewModel = mavericksViewModel()
+    val topAppBarState by viewModel.topAppBarState.collectAsState()
     val parentViewModel = parentViewModel()
     val state: InstitutionPickerState by viewModel.collectAsState()
     val listState = rememberLazyListState()
@@ -99,6 +102,7 @@ internal fun InstitutionPickerScreen() {
     InstitutionPickerContent(
         listState = listState,
         payload = state.payload,
+        topAppBarState = topAppBarState,
         institutions = state.searchInstitutions,
         // This is just used to provide a text in Compose previews
         previewText = state.previewText,
@@ -115,6 +119,7 @@ internal fun InstitutionPickerScreen() {
 private fun InstitutionPickerContent(
     listState: LazyListState,
     payload: Async<Payload>,
+    topAppBarState: TopAppBarState,
     institutions: Async<InstitutionResponse>,
     previewText: String?,
     selectedInstitutionId: String?,
@@ -127,6 +132,7 @@ private fun InstitutionPickerContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
+                state = topAppBarState,
                 onCloseClick = onCloseClick
             )
         }
@@ -613,6 +619,7 @@ internal fun InstitutionPickerPreview(
         InstitutionPickerContent(
             listState = listState,
             payload = state.payload,
+            topAppBarState = TopAppBarState(),
             institutions = state.searchInstitutions,
             previewText = state.previewText,
             selectedInstitutionId = state.selectedInstitutionId,
@@ -620,6 +627,7 @@ internal fun InstitutionPickerPreview(
             onInstitutionSelected = { _, _ -> },
             onCloseClick = {},
             onManualEntryClick = {},
-        ) {}
+            onScrollChanged = {},
+        )
     }
 }

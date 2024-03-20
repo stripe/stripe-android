@@ -47,14 +47,15 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.success.SuccessState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import kotlinx.coroutines.delay
@@ -67,6 +68,7 @@ private const val SLIDE_IN_ANIMATION_FRACTION = 4
 internal fun SuccessContent(
     completeSessionAsync: Async<FinancialConnectionsSession>,
     payloadAsync: Async<Payload>,
+    topAppBarState: TopAppBarState,
     onDoneClick: () -> Unit,
     onCloseClick: () -> Unit,
 ) {
@@ -74,6 +76,7 @@ internal fun SuccessContent(
         // Just enabled on Compose Previews: allows to preview the post-animation state.
         overrideAnimationForPreview = false,
         payloadAsync = payloadAsync,
+        topAppBarState = topAppBarState,
         onCloseClick = onCloseClick,
         completeSessionAsync = completeSessionAsync,
         onDoneClick = onDoneClick
@@ -84,13 +87,19 @@ internal fun SuccessContent(
 private fun SuccessContentInternal(
     overrideAnimationForPreview: Boolean,
     payloadAsync: Async<Payload>,
+    topAppBarState: TopAppBarState,
     onCloseClick: () -> Unit,
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
 ) {
+    val topAppBarHost = LocalTopAppBarHost.current
     val scrollState = rememberScrollState()
     var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
     val payload by remember(payloadAsync) { mutableStateOf(payloadAsync()) }
+
+    LaunchedEffect(scrollState.canScrollBackward) {
+        topAppBarHost.updateTopAppBarElevation(isElevated = scrollState.canScrollBackward)
+    }
 
     payload?.let {
         if (it.skipSuccessPane.not()) {
@@ -104,9 +113,8 @@ private fun SuccessContentInternal(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
+                state = topAppBarState,
                 onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
             )
         }
     ) {
@@ -275,6 +283,7 @@ internal fun SuccessScreenPreview(
             overrideAnimationForPreview = false,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
+            topAppBarState = TopAppBarState(),
             onDoneClick = {},
             onCloseClick = {}
         )
@@ -294,6 +303,7 @@ internal fun SuccessScreenAnimationCompletedPreview(
             overrideAnimationForPreview = true,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
+            topAppBarState = TopAppBarState(),
             onDoneClick = {},
             onCloseClick = {}
         )

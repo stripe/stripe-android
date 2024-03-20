@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import android.os.Parcelable
 import android.webkit.URLUtil
 import androidx.core.net.toUri
 import com.airbnb.mvrx.Fail
@@ -48,11 +49,13 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Named
@@ -81,6 +84,17 @@ internal class PartnerAuthViewModel @Inject constructor(
         handleErrors()
         launchBrowserIfNonOauth()
         restoreOrCreateAuthSession()
+    }
+
+    override fun updateTopAppBar(state: SharedPartnerAuthState): TopAppBarStateUpdate? {
+        return if (state.inModal) {
+            null
+        } else {
+            TopAppBarStateUpdate(
+                pane = PANE,
+                allowBackNavigation = state.canNavigateBack,
+            )
+        }
     }
 
     private fun restoreOrCreateAuthSession() = suspend {
@@ -439,10 +453,10 @@ internal class PartnerAuthViewModel @Inject constructor(
         navigationManager.tryNavigateBack()
     }
 
-    companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
+    @Parcelize
+    data class Args(val inModal: Boolean, val pane: Pane) : Parcelable
 
-        override fun initialState(viewModelContext: ViewModelContext) =
-            SharedPartnerAuthState(pane = PANE)
+    companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
 
         override fun create(
             viewModelContext: ViewModelContext,

@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.utils.parentViewModel
@@ -45,6 +46,13 @@ internal class ErrorViewModel @Inject constructor(
                 allowManualEntry = getManifest().allowManualEntry
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: ErrorState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun logErrors() {

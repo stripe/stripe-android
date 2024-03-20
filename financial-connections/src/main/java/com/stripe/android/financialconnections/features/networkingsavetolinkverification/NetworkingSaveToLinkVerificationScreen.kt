@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -38,22 +40,24 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationState.Payload
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationViewModel.Companion.PANE
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 
 @Composable
 internal fun NetworkingSaveToLinkVerificationScreen() {
     val viewModel: NetworkingSaveToLinkVerificationViewModel = mavericksViewModel()
+    val topAppBarState by viewModel.topAppBarState.collectAsState()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     NetworkingSaveToLinkVerificationContent(
         state = state.value,
+        topAppBarState = topAppBarState,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onSkipClick = viewModel::onSkipClick
@@ -63,6 +67,7 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
 @Composable
 private fun NetworkingSaveToLinkVerificationContent(
     state: NetworkingSaveToLinkVerificationState,
+    topAppBarState: TopAppBarState,
     onCloseClick: () -> Unit,
     onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
@@ -71,8 +76,8 @@ private fun NetworkingSaveToLinkVerificationContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
+                state = topAppBarState,
                 onCloseClick = onCloseClick,
-                elevation = rememberLazyListState().elevation
             )
         }
     ) {
@@ -183,6 +188,7 @@ internal fun SaveToLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingSaveToLinkVerificationContent(
             state = state,
+            topAppBarState = TopAppBarState(),
             onCloseClick = {},
             onSkipClick = {},
             onCloseFromErrorClick = {}

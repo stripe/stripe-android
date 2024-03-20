@@ -46,9 +46,18 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriUtils
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -74,6 +83,26 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
+
+    private val defaultTopAppBarState: TopAppBarState by lazy {
+        // The consent pane may choose to hide the Stripe logo. Therefore, let's hide it by default
+        // until the consent pane has received its payload with the show/hide information.
+        val forceHideStripeLogo = initialState.initialPane == Pane.CONSENT
+        initialState.toTopAppBarState(forceHideStripeLogo)
+    }
+
+    private val currentPane = MutableStateFlow(initialState.initialPane)
+    private val topAppBarStateUpdatesByPane = MutableStateFlow(
+        value = mapOf(initialState.initialPane to defaultTopAppBarState),
+    )
+
+    override val topAppBarState: StateFlow<TopAppBarState> = topAppBarStateUpdatesByPane.getValueFromKeyFlow(
+        keyFlow = currentPane,
+    ).stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = defaultTopAppBarState,
+    )
 
     init {
         setState { copy(firstInit = false) }
@@ -322,6 +351,23 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
+    override fun updateTopAppBarState(update: TopAppBarStateUpdate?) {
+        if (update != null) {
+            val updatedState = defaultTopAppBarState.apply(update)
+            topAppBarStateUpdatesByPane.updateWithNewEntry(update.pane to updatedState)
+        }
+    }
+
+    override fun updateTopAppBarElevation(isElevated: Boolean) {
+        topAppBarStateUpdatesByPane.updateWithNewEntry(currentPane.value) {
+            it.copy(isContentScrolled = isElevated)
+        }
+    }
+
+    fun handlePaneChanged(pane: Pane) {
+        currentPane.value = pane
+    }
+
     companion object :
         MavericksViewModelFactory<FinancialConnectionsSheetNativeViewModel, FinancialConnectionsSheetNativeState> {
 
@@ -448,4 +494,39 @@ internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     data class Finish(
         val result: FinancialConnectionsSheetActivityResult
     ) : FinancialConnectionsSheetNativeViewEffect
+}
+
+private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
+    forceHideStripeLogo: Boolean,
+): TopAppBarState {
+    return TopAppBarState(
+        hideStripeLogo = reducedBranding,
+        forceHideStripeLogo = forceHideStripeLogo,
+        isTestMode = testMode,
+    )
+}
+
+private fun <K, V> Flow<Map<K, V>>.getValueFromKeyFlow(keyFlow: Flow<K>): Flow<V> {
+    return combineTransform(keyFlow) { map, key ->
+        val result = map[key]
+        if (result != null) {
+            emit(result)
+        }
+    }
+}
+
+private fun <K, V> MutableStateFlow<Map<K, V>>.updateWithNewEntry(entry: Pair<K, V>) {
+    update { it + mapOf(entry) }
+}
+
+private fun <K, V> MutableStateFlow<Map<K, V>>.updateWithNewEntry(key: K, transform: (V) -> V) {
+    update {
+        val oldValue = it[key]
+        if (oldValue != null) {
+            val newValue = transform(oldValue)
+            it + mapOf(key to newValue)
+        } else {
+            it
+        }
+    }
 }

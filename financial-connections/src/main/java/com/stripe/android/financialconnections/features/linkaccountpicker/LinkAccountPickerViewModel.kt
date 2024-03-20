@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -96,6 +97,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 merchantDataAccess = merchantDataAccess.copy(isStripeDirect = false)
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: LinkAccountPickerState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun observeAsyncs() {
