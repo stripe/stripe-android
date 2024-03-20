@@ -130,9 +130,7 @@ internal sealed class Destination(
 
     data object LinkAccountPicker : Destination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
-        composable = {
-            LinkAccountPickerScreen()
-        },
+        composable = { LinkAccountPickerScreen() },
     )
 
     data object LinkStepUpVerification : Destination(
