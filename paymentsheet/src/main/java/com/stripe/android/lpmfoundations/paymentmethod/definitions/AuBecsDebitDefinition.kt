@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -23,20 +22,14 @@ internal object AuBecsDebitDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "au_becs_debit",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_au_becs_debit,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = true,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields,
-            ),
         )
     }
 }

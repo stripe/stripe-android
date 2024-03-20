@@ -9,6 +9,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 
 internal object CashAppPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.CashAppPay
@@ -22,16 +23,8 @@ internal object CashAppPayDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
-        val localLayoutSpecs = if (requiresMandate(metadata)) {
-            listOf(CashAppPayMandateTextSpec())
-        } else {
-            emptyList()
-        }
-
         return SupportedPaymentMethod(
             code = "cashapp",
             displayNameResource = R.string.stripe_paymentsheet_payment_method_cashapp,
@@ -39,9 +32,21 @@ internal object CashAppPayDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields + localLayoutSpecs
-            ),
+        )
+    }
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
+        val localLayoutSpecs = if (requiresMandate(metadata)) {
+            listOf(CashAppPayMandateTextSpec())
+        } else {
+            emptyList()
+        }
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields + localLayoutSpecs
         )
     }
 }

@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal object BancontactDefinition : PaymentMethodDefinition {
@@ -24,25 +25,28 @@ internal object BancontactDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "bancontact",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields,
-                placeholderOverrideList = if (metadata.hasIntentToSetup()) {
-                    listOf(IdentifierSpec.Name, IdentifierSpec.Email)
-                } else {
-                    emptyList()
-                }
-            ),
+        )
+    }
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields,
+            placeholderOverrideList = if (metadata.hasIntentToSetup()) {
+                listOf(IdentifierSpec.Name, IdentifierSpec.Email)
+            } else {
+                emptyList()
+            }
         )
     }
 }

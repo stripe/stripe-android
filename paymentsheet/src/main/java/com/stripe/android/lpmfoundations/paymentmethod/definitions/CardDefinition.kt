@@ -14,6 +14,7 @@ import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 
 internal object CardDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Card
@@ -27,10 +28,22 @@ internal object CardDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun supportedPaymentMethod(
+        sharedDataSpec: SharedDataSpec,
+    ): SupportedPaymentMethod {
+        return SupportedPaymentMethod(
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+            tintIconOnSelection = true,
+        )
+    }
+
+    override fun createFormElements(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
-    ): SupportedPaymentMethod {
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
         val billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration
         val specs = listOf(
             ContactInformationSpec(
@@ -46,17 +59,9 @@ internal object CardDefinition : PaymentMethodDefinition {
             ),
             SaveForFutureUseSpec(),
         )
-        return SupportedPaymentMethod(
-            code = "card",
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            tintIconOnSelection = true,
-            formElements = transformSpecToElements.transform(
-                specs = specs,
-                replacePlaceholders = false,
-            ),
+        return transformSpecToElements.transform(
+            specs = specs,
+            replacePlaceholders = false,
         )
     }
 }

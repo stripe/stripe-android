@@ -131,7 +131,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna", context)?.code).isEqualTo("klarna")
+        assertThat(metadata.supportedPaymentMethodForCode("klarna")?.code).isEqualTo("klarna")
     }
 
     @Test
@@ -142,7 +142,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = emptyList(),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna", context)).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
     }
 
     @Test
@@ -153,7 +153,7 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("klarna")),
         )
-        assertThat(metadata.supportedPaymentMethodForCode("klarna", context)).isNull()
+        assertThat(metadata.supportedPaymentMethodForCode("klarna")).isNull()
     }
 
     @Test
@@ -169,7 +169,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("klarna"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
@@ -189,7 +189,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("klarna"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
@@ -208,7 +208,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(2)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
@@ -229,7 +229,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(2)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
@@ -249,7 +249,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("klarna")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
@@ -270,7 +270,7 @@ internal class PaymentMethodMetadataTest {
                 SharedDataSpec("card"),
             ),
         )
-        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(sortedSupportedPaymentMethods).hasSize(3)
         assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
         assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("klarna")
@@ -355,7 +355,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `supportedPaymentMethod fields are constructed correctly`() = runTest {
+    fun `formElementsForCode is constructed correctly`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
@@ -368,8 +368,7 @@ internal class PaymentMethodMetadataTest {
                 attachDefaultsToPaymentMethod = false,
             )
         )
-        val supportedPaymentMethod = metadata.supportedPaymentMethodForCode("bancontact", context)!!
-        val formElement = supportedPaymentMethod.formElements
+        val formElement = metadata.formElementsForCode("bancontact", context, null, null)!!
 
         val nameSection = formElement[0] as SectionElement
         val nameElement = nameSection.fields[0] as SimpleTextElement
@@ -395,7 +394,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `supportedPaymentMethod replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
@@ -408,8 +407,7 @@ internal class PaymentMethodMetadataTest {
                 attachDefaultsToPaymentMethod = false,
             )
         )
-        val supportedPaymentMethod = metadata.supportedPaymentMethodForCode("klarna", context)!!
-        val formElement = supportedPaymentMethod.formElements
+        val formElement = metadata.formElementsForCode("klarna", context, null, null)!!
 
         val countrySection = formElement[4] as SectionElement
         val countryElement = countrySection.fields[0] as CountryElement

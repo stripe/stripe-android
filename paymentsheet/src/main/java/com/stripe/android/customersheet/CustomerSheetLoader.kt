@@ -1,6 +1,5 @@
 package com.stripe.android.customersheet
 
-import android.content.Context
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.utils.FeatureFlags.customerSheetACHv2
 import com.stripe.android.customersheet.util.CustomerSheetHacks
@@ -40,7 +39,6 @@ internal class DefaultCustomerSheetLoader(
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
     private val customerAdapterProvider: Deferred<CustomerAdapter>,
-    private val context: Context,
 ) : CustomerSheetLoader {
 
     @Inject constructor(
@@ -49,7 +47,6 @@ internal class DefaultCustomerSheetLoader(
         elementsSessionRepository: ElementsSessionRepository,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         lpmRepository: LpmRepository,
-        context: Context,
     ) : this(
         isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
@@ -57,7 +54,6 @@ internal class DefaultCustomerSheetLoader(
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
         customerAdapterProvider = CustomerSheetHacks.adapter,
-        context = context,
     )
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -175,7 +171,7 @@ internal class DefaultCustomerSheetLoader(
                 val elementsSession = elementsSessionWithMetadata.elementsSession
                 val metadata = elementsSessionWithMetadata.metadata
 
-                val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods(context)
+                val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
 
                 val validSupportedPaymentMethods = filterSupportedPaymentMethods(
                     supportedPaymentMethods,

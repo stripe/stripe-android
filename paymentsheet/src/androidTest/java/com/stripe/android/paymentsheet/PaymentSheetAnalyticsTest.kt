@@ -53,7 +53,6 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_complete_init_default")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
@@ -105,7 +104,6 @@ internal class PaymentSheetAnalyticsTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_init_default")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")

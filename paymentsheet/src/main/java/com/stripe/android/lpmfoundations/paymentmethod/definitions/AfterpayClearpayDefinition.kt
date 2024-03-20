@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -25,24 +24,17 @@ internal object AfterpayClearpayDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "afterpay_clearpay",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = if (AfterpayClearpayHeaderElement.isClearpay()) {
                 R.string.stripe_paymentsheet_payment_method_clearpay
             } else {
                 R.string.stripe_paymentsheet_payment_method_afterpay
             },
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_afterpay_clearpay,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields,
-            ),
         )
     }
 }

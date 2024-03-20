@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 
 internal interface PaymentMethodDefinition {
     /**
@@ -28,10 +29,18 @@ internal interface PaymentMethodDefinition {
     fun requirementsToBeUsedAsNewPaymentMethod(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement>
 
     fun supportedPaymentMethod(
+        sharedDataSpec: SharedDataSpec,
+    ): SupportedPaymentMethod
+
+    fun createFormElements(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements,
-    ): SupportedPaymentMethod
+    ): List<FormElement> {
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields,
+        )
+    }
 }
 
 internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata): Boolean {

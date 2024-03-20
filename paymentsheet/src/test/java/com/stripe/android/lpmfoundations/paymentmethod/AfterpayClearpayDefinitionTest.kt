@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.testing.LocaleTestRule
@@ -35,7 +34,6 @@ internal class AfterpayClearpayDefinitionTest {
         )
         val supportedPaymentMethod = paymentMethodMetadata.supportedPaymentMethodForCode(
             code = "afterpay_clearpay",
-            context = ApplicationProvider.getApplicationContext(),
         )!!
         assertThat(supportedPaymentMethod.displayNameResource)
             .isEqualTo(resourceId)

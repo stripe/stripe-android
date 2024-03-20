@@ -96,11 +96,15 @@ internal fun AddPaymentMethod(
             val context = LocalContext.current
             val paymentMethodMetadata by sheetViewModel.paymentMethodMetadata.collectAsState()
             val stripeIntent = paymentMethodMetadata?.stripeIntent
+            val formElements = remember(selectedItem.code) {
+                sheetViewModel.formElementsForCode(selectedItem.code)
+            }
 
             PaymentElement(
                 enabled = !processing,
                 supportedPaymentMethods = supportedPaymentMethods,
                 selectedItem = selectedItem,
+                formElements = formElements,
                 linkSignupMode = linkInlineSignupMode,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 showCheckboxFlow = showCheckboxFlow,

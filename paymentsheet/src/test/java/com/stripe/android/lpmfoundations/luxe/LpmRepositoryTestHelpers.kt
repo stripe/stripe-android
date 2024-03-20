@@ -1,10 +1,9 @@
 package com.stripe.android.lpmfoundations.luxe
 
-import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.ui.core.R
 
-object LpmRepositoryTestHelpers {
+internal object LpmRepositoryTestHelpers {
     val card: SupportedPaymentMethod = cardFromPaymentMethodMetadata() ?: SupportedPaymentMethod(
         code = "card",
         displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
@@ -12,7 +11,6 @@ object LpmRepositoryTestHelpers {
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
         tintIconOnSelection = true,
-        formElements = emptyList(),
     )
 
     val usBankAccount: SupportedPaymentMethod = SupportedPaymentMethod(
@@ -22,13 +20,11 @@ object LpmRepositoryTestHelpers {
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
         tintIconOnSelection = true,
-        formElements = emptyList(),
     )
 
     private fun cardFromPaymentMethodMetadata(): SupportedPaymentMethod? = runCatching {
         PaymentMethodMetadataFactory.create().supportedPaymentMethodForCode(
             code = "card",
-            context = ApplicationProvider.getApplicationContext(),
         )
     }.getOrNull()
 }

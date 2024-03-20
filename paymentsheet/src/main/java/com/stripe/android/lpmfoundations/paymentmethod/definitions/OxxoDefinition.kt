@@ -1,7 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -24,20 +23,13 @@ internal object OxxoDefinition : PaymentMethodDefinition {
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
 
     override fun supportedPaymentMethod(
-        metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            code = "oxxo",
+            paymentMethodDefinition = this,
+            sharedDataSpec = sharedDataSpec,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_oxxo,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
-            tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields,
-            ),
         )
     }
 }

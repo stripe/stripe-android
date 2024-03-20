@@ -44,7 +44,6 @@ internal object MockPaymentMethodsFactory {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             tintIconOnSelection = tintIconOnSelection,
-            formElements = emptyList(),
         )
     }
 }

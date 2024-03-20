@@ -268,6 +268,7 @@ internal fun AddPaymentMethodWithPaymentElement(
                     enabled = viewState.enabled,
                     supportedPaymentMethods = viewState.supportedPaymentMethods,
                     selectedItem = viewState.selectedPaymentMethod,
+                    formElements = viewState.formElements,
                     linkSignupMode = null,
                     linkConfigurationCoordinator = null,
                     showCheckboxFlow = flowOf(false),
