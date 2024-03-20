@@ -40,7 +40,8 @@ class PaymentSheet internal constructor(
      */
     constructor(
         activity: ComponentActivity,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        externalPaymentMethodsConfirmHandler: ExternalPaymentMethodsConfirmHandler? = null
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     )
@@ -58,6 +59,7 @@ class PaymentSheet internal constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
+        externalPaymentMethodsConfirmHandler: ExternalPaymentMethodsConfirmHandler? = null
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
@@ -72,7 +74,8 @@ class PaymentSheet internal constructor(
      */
     constructor(
         fragment: Fragment,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        externalPaymentMethodsConfirmHandler: ExternalPaymentMethodsConfirmHandler? = null
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     )
@@ -90,6 +93,7 @@ class PaymentSheet internal constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
+        externalPaymentMethodsConfirmHandler: ExternalPaymentMethodsConfirmHandler? = null
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
@@ -437,6 +441,8 @@ class PaymentSheet internal constructor(
          * the network.
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
+
+        val externalPaymentMethods : List<String> = emptyList<String>(),
 
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
