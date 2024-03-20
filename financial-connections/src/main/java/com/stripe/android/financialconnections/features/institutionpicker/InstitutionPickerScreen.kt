@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -36,6 +36,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -85,6 +86,7 @@ import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsColors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import kotlinx.coroutines.launch
 
 @Composable
@@ -162,7 +164,7 @@ private fun LoadedContent(
     onManualEntryClick: () -> Unit,
     onScrollChanged: () -> Unit,
 ) {
-    var input by remember { mutableStateOf(previewText ?: "") }
+    var input by rememberSaveable { mutableStateOf(previewText ?: "") }
     var shouldEmitScrollEvent by remember { mutableStateOf(true) }
     val searchInputFocusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -184,39 +186,38 @@ private fun LoadedContent(
         // Disable overscroll as it does not play well with sticky headers.
         LocalOverscrollConfiguration provides null
     ) {
-        LazyColumn(
-            Modifier.padding(horizontal = 16.dp),
-            state = listState,
-            content = {
-                item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
-                item { Spacer(modifier = Modifier.height(24.dp)) }
-                stickyHeader(key = "searchRow") {
-                    SearchRow(
-                        focusRequester = searchInputFocusRequester,
-                        query = input,
-                        onQueryChanged = {
-                            input = it
-                            onQueryChanged(input)
-                        },
-                    )
-                }
-                item { Spacer(modifier = Modifier.height(8.dp)) }
-
-                searchResults(
-                    isInputEmpty = input.isBlank(),
-                    payload = payload,
-                    selectedInstitutionId = selectedInstitutionId,
-                    onInstitutionSelected = onInstitutionSelected,
-                    institutions = institutions,
-                    onManualEntryClick = onManualEntryClick,
-                    onSearchMoreClick = {
-                        // Scroll to the top of the list and focus on the search input
-                        coroutineScope.launch { listState.animateScrollToItem(index = 1) }
-                        searchInputFocusRequester.requestFocus()
-                    }
+        LazyLayout(
+            lazyListState = listState,
+            bodyPadding = PaddingValues(horizontal = 16.dp),
+        ) {
+            item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
+            item { Spacer(modifier = Modifier.height(24.dp)) }
+            stickyHeader(key = "searchRow") {
+                SearchRow(
+                    focusRequester = searchInputFocusRequester,
+                    query = input,
+                    onQueryChanged = {
+                        input = it
+                        onQueryChanged(input)
+                    },
                 )
             }
-        )
+            item { Spacer(modifier = Modifier.height(8.dp)) }
+
+            searchResults(
+                isInputEmpty = input.isBlank(),
+                payload = payload,
+                selectedInstitutionId = selectedInstitutionId,
+                onInstitutionSelected = onInstitutionSelected,
+                institutions = institutions,
+                onManualEntryClick = onManualEntryClick,
+                onSearchMoreClick = {
+                    // Scroll to the top of the list and focus on the search input
+                    coroutineScope.launch { listState.animateScrollToItem(index = 1) }
+                    searchInputFocusRequester.requestFocus()
+                }
+            )
+        }
     }
 }
 
