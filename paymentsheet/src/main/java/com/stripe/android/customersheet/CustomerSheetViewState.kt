@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.FormElement
 
 internal sealed class CustomerSheetViewState(
     open val savedPaymentMethods: List<PaymentMethod>,
@@ -111,6 +112,7 @@ internal sealed class CustomerSheetViewState(
     data class AddPaymentMethod(
         val paymentMethodCode: PaymentMethodCode,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
+        val formElements: List<FormElement>,
         val formViewData: FormViewModel.ViewData,
         val formArguments: FormArguments,
         val usBankAccountFormArguments: USBankAccountFormArguments,

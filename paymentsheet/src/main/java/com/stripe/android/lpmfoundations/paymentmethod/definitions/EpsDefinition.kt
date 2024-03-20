@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 
 internal object EpsDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Eps
@@ -25,7 +26,6 @@ internal object EpsDefinition : PaymentMethodDefinition {
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "eps",
@@ -34,9 +34,16 @@ internal object EpsDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields,
-            ),
+        )
+    }
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields,
         )
     }
 }

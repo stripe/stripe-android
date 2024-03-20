@@ -10,6 +10,7 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 
 internal object RevolutPayDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.RevolutPay
@@ -25,14 +26,7 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
-        val localLayoutSpecs: List<FormItemSpec> = if (requiresMandate(metadata)) {
-            listOf(MandateTextSpec(stringResId = R.string.stripe_revolut_mandate))
-        } else {
-            emptyList()
-        }
-
         return SupportedPaymentMethod(
             code = "revolut_pay",
             displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
@@ -40,9 +34,22 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields + localLayoutSpecs,
-            ),
+        )
+    }
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
+        val localLayoutSpecs: List<FormItemSpec> = if (requiresMandate(metadata)) {
+            listOf(MandateTextSpec(stringResId = R.string.stripe_revolut_mandate))
+        } else {
+            emptyList()
+        }
+
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields + localLayoutSpecs,
         )
     }
 }

@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 
 internal object OxxoDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Oxxo
@@ -26,7 +27,6 @@ internal object OxxoDefinition : PaymentMethodDefinition {
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "oxxo",
@@ -35,9 +35,16 @@ internal object OxxoDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields,
-            ),
+        )
+    }
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields,
         )
     }
 }

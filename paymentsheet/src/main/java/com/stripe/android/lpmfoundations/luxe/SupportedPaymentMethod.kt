@@ -6,7 +6,6 @@ import androidx.annotation.StringRes
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.uicore.elements.FormElement
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SupportedPaymentMethod(
@@ -32,11 +31,6 @@ data class SupportedPaymentMethod(
      * on selection.
      */
     val tintIconOnSelection: Boolean,
-
-    /**
-     * This describes how the form UI should look.
-     */
-    val formElements: List<FormElement>,
 ) {
     internal fun paymentMethodDefinition(): PaymentMethodDefinition {
         return requireNotNull(PaymentMethodRegistry.definitionsByCode[code])

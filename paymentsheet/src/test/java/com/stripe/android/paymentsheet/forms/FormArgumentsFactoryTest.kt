@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -17,9 +15,6 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class FormArgumentsFactoryTest {
-
-    private val context = ApplicationProvider.getApplicationContext<Application>()
-
     @Test
     fun `Create correct FormArguments for new generic payment method with customer requested save`() {
         val metadata = PaymentMethodMetadataFactory.create(
@@ -28,7 +23,7 @@ class FormArgumentsFactoryTest {
             )
         )
         val actualArgs = FormArgumentsFactory.create(
-            paymentMethod = metadata.supportedPaymentMethodForCode("bancontact", context)!!,
+            paymentMethod = metadata.supportedPaymentMethodForCode("bancontact")!!,
             metadata = metadata,
             customerConfig = null,
         )
@@ -44,7 +39,7 @@ class FormArgumentsFactoryTest {
             ),
         )
         assertThat(BancontactDefinition.supportedAsSavedPaymentMethod).isFalse()
-        val supportedPaymentMethod = metadata.supportedPaymentMethodForCode("bancontact", context)!!
+        val supportedPaymentMethod = metadata.supportedPaymentMethodForCode("bancontact")!!
 
         val actualArgs = FormArgumentsFactory.create(
             paymentMethod = supportedPaymentMethod,

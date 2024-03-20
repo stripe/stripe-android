@@ -19,6 +19,7 @@ import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
@@ -92,27 +93,16 @@ internal data class PaymentMethodMetadata(
 
     fun supportedPaymentMethodForCode(
         code: String,
-        context: Context,
-        paymentMethodCreateParams: PaymentMethodCreateParams? = null,
-        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
     ): SupportedPaymentMethod? {
         val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
         val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
         return definition.supportedPaymentMethod(
             metadata = this,
             sharedDataSpec = sharedDataSpec,
-            transformSpecToElements = transformSpecToElements(
-                context = context,
-                requiresMandate = definition.requiresMandate(this),
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                paymentMethodExtraParams = paymentMethodExtraParams,
-            ),
         )
     }
 
-    fun sortedSupportedPaymentMethods(
-        context: Context,
-    ): List<SupportedPaymentMethod> {
+    fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
         return supportedPaymentMethodDefinitions().mapNotNull { paymentMethodDefinition ->
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code }
             if (sharedDataSpec == null) {
@@ -121,10 +111,6 @@ internal data class PaymentMethodMetadata(
                 paymentMethodDefinition.supportedPaymentMethod(
                     metadata = this,
                     sharedDataSpec = sharedDataSpec,
-                    transformSpecToElements = transformSpecToElements(
-                        context = context,
-                        requiresMandate = paymentMethodDefinition.requiresMandate(this),
-                    ),
                 )
             }
         }
@@ -194,6 +180,27 @@ internal data class PaymentMethodMetadata(
             addressRepository = requireNotNull(addressRepository),
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = requiresMandate,
+        )
+    }
+
+    fun formElementsForCode(
+        code: String,
+        context: Context,
+        paymentMethodCreateParams: PaymentMethodCreateParams?,
+        paymentMethodExtraParams: PaymentMethodExtraParams?,
+    ): List<FormElement>? {
+        val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+        val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
+
+        return definition.createFormElements(
+            metadata = this,
+            sharedDataSpec = sharedDataSpec,
+            transformSpecToElements = transformSpecToElements(
+                context = context,
+                requiresMandate = definition.requiresMandate(this),
+                paymentMethodCreateParams = paymentMethodCreateParams,
+                paymentMethodExtraParams = paymentMethodExtraParams,
+            ),
         )
     }
 }

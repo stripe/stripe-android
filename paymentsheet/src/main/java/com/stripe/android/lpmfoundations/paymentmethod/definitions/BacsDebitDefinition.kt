@@ -11,6 +11,7 @@ import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal object BacsDebitDefinition : PaymentMethodDefinition {
@@ -30,8 +31,22 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
+        return SupportedPaymentMethod(
+            code = "bacs_debit",
+            displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
+            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+            tintIconOnSelection = true,
+        )
+    }
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
         val localFields = listOfNotNull(
             PlaceholderSpec(
                 apiPath = IdentifierSpec.Name,
@@ -53,21 +68,13 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
             BacsDebitConfirmSpec()
         )
 
-        return SupportedPaymentMethod(
-            code = "bacs_debit",
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = true,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields + localFields,
-                placeholderOverrideList = listOf(
-                    IdentifierSpec.Name,
-                    IdentifierSpec.Email,
-                    IdentifierSpec.BillingAddress
-                )
-            ),
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields + localFields,
+            placeholderOverrideList = listOf(
+                IdentifierSpec.Name,
+                IdentifierSpec.Email,
+                IdentifierSpec.BillingAddress
+            )
         )
     }
 }

@@ -48,6 +48,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.FormElement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -216,7 +217,7 @@ internal abstract class BaseSheetViewModel(
 
     private fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
-            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code, getApplication())
+            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
         }?.displayNameResource?.let {
             getApplication<Application>().getString(it)
         }.orEmpty()
@@ -371,7 +372,7 @@ internal abstract class BaseSheetViewModel(
 
     protected fun setPaymentMethodMetadata(paymentMethodMetadata: PaymentMethodMetadata?) {
         _paymentMethodMetadata.value = paymentMethodMetadata
-        supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods(getApplication()) ?: emptyList()
+        supportedPaymentMethods = paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
     }
 
     protected fun reportDismiss() {
@@ -657,16 +658,22 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
-        val currentSelection = newPaymentSelection?.takeIf { it.paymentMethodCreateParams.typeCode == code }
-
         return requireNotNull(
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(
                 code = code,
-                context = getApplication(),
-                paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
-                paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
             )
         )
+    }
+
+    fun formElementsForCode(code: String): List<FormElement> {
+        val currentSelection = newPaymentSelection?.takeIf { it.paymentMethodCreateParams.typeCode == code }
+
+        return paymentMethodMetadata.value?.formElementsForCode(
+            code = code,
+            context = getApplication(),
+            paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
+            paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+        ) ?: emptyList()
     }
 
     fun createFormArguments(

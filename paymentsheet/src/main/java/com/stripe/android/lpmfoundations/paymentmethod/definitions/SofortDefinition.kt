@@ -8,6 +8,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal object SofortDefinition : PaymentMethodDefinition {
@@ -26,7 +27,6 @@ internal object SofortDefinition : PaymentMethodDefinition {
     override fun supportedPaymentMethod(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
-        transformSpecToElements: TransformSpecToElements,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = "sofort",
@@ -35,14 +35,21 @@ internal object SofortDefinition : PaymentMethodDefinition {
             lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
             darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
             tintIconOnSelection = false,
-            formElements = transformSpecToElements.transform(
-                specs = sharedDataSpec.fields,
-                placeholderOverrideList = if (metadata.hasIntentToSetup()) {
-                    listOf(IdentifierSpec.Name, IdentifierSpec.Email)
-                } else {
-                    emptyList()
-                }
-            ),
+        )
+    }
+
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields,
+            placeholderOverrideList = if (metadata.hasIntentToSetup()) {
+                listOf(IdentifierSpec.Name, IdentifierSpec.Email)
+            } else {
+                emptyList()
+            }
         )
     }
 }

@@ -584,7 +584,6 @@ class DefaultCustomerSheetLoaderTest {
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
-            context = ApplicationProvider.getApplicationContext(),
         )
 
         val completable = CompletableDeferred<Unit>()
@@ -621,7 +620,6 @@ class DefaultCustomerSheetLoaderTest {
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
-            context = ApplicationProvider.getApplicationContext(),
         )
 
         val result = loader.load(configuration)
@@ -652,7 +650,6 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             customerAdapterProvider = CompletableDeferred(customerAdapter),
-            context = ApplicationProvider.getApplicationContext(),
         )
     }
 

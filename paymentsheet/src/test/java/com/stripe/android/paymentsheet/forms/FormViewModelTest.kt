@@ -6,7 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
@@ -487,7 +487,7 @@ internal class FormViewModelTest {
 
         val viewModel = createViewModel(
             args,
-            LpmRepositoryTestHelpers.card.formElements,
+            emptyList(),
         )
 
         assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
@@ -524,7 +524,7 @@ internal class FormViewModelTest {
 
         val viewModel = createViewModel(
             args,
-            LpmRepositoryTestHelpers.card.formElements,
+            emptyList(),
         )
 
         assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
@@ -561,7 +561,7 @@ internal class FormViewModelTest {
 
         val viewModel = createViewModel(
             args,
-            LpmRepositoryTestHelpers.card.formElements,
+            emptyList(),
         )
 
         assertThat(viewModel.defaultValuesToInclude).isEmpty()
@@ -584,9 +584,16 @@ internal class FormViewModelTest {
                 billingDetails = PaymentSheet.BillingDetails(),
             )
 
+            val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
+                code = "card",
+                context = context,
+                paymentMethodCreateParams = null,
+                paymentMethodExtraParams = null,
+            )!!
+
             val formViewModel = createViewModel(
                 args,
-                LpmRepositoryTestHelpers.card.formElements + PhoneSpec().transform(emptyMap()),
+                cardFormElements + PhoneSpec().transform(emptyMap()),
             )
 
             val elements = formViewModel.elements
@@ -675,7 +682,12 @@ internal class FormViewModelTest {
             COMPOSE_FRAGMENT_ARGS.copy(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
             ),
-            LpmRepositoryTestHelpers.card.formElements,
+            PaymentMethodMetadataFactory.create().formElementsForCode(
+                code = "card",
+                context = context,
+                paymentMethodCreateParams = null,
+                paymentMethodExtraParams = null,
+            )!!,
         )
 
         formViewModel.viewDataFlow.test {

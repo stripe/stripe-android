@@ -214,7 +214,7 @@ internal class CustomerSheetViewModel(
 
     fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
-            paymentMethodMetadata?.supportedPaymentMethodForCode(code, application)
+            paymentMethodMetadata?.supportedPaymentMethodForCode(code)
         }?.displayNameResource?.let {
             resources.getString(it)
         }.orEmpty()
@@ -690,7 +690,6 @@ internal class CustomerSheetViewModel(
                 }
                 paymentMethodMetadata?.supportedPaymentMethodForCode(
                     code = currentViewState.paymentMethodCode,
-                    context = application,
                 )?.let { paymentMethodSpec ->
                     val formData = currentViewState.formViewData
                     if (formData.completeFormValues == null) error("completeFormValues cannot be null")
@@ -763,14 +762,21 @@ internal class CustomerSheetViewModel(
         )
 
         val selectedPaymentMethod = previouslySelectedPaymentMethod
-            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode, application))
+            ?: requireNotNull(paymentMethodMetadata?.supportedPaymentMethodForCode(paymentMethodCode))
 
         val stripeIntent = paymentMethodMetadata?.stripeIntent
+        val formElements = paymentMethodMetadata?.formElementsForCode(
+            code = selectedPaymentMethod.code,
+            context = application,
+            paymentMethodCreateParams = null,
+            paymentMethodExtraParams = null,
+        ) ?: emptyList()
 
         transition(
             to = CustomerSheetViewState.AddPaymentMethod(
                 paymentMethodCode = paymentMethodCode,
                 supportedPaymentMethods = supportedPaymentMethods,
+                formElements = formElements,
                 formViewData = FormViewModel.ViewData(),
                 formArguments = formArguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(

@@ -101,6 +101,7 @@ internal object CustomerSheetTestHelper {
             LpmRepositoryTestHelpers.usBankAccount,
         ),
         selectedPaymentMethod = LpmRepositoryTestHelpers.card,
+        formElements = emptyList(),
         enabled = true,
         isLiveMode = false,
         isProcessing = false,
