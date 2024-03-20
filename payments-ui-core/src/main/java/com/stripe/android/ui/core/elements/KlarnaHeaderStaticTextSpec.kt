@@ -1,6 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.parcelize.Parcelize
@@ -22,6 +23,6 @@ data class KlarnaHeaderStaticTextSpec(
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.apiPath,
-            stringResId = KlarnaHelper.getKlarnaHeader()
+            stringResId = R.string.stripe_klarna_buy_now_pay_later
         )
 }

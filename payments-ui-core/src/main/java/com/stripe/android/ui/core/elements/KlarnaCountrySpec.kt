@@ -20,13 +20,12 @@ data class KlarnaCountrySpec(
     override val apiPath: IdentifierSpec = IdentifierSpec.Country
 ) : FormItemSpec() {
     fun transform(
-        currencyCode: String?,
         initialValues: Map<IdentifierSpec, String?>
     ) = createSectionElement(
         CountryElement(
             this.apiPath,
             DropdownFieldController(
-                CountryConfig(KlarnaHelper.getAllowedCountriesForCurrency(currencyCode)),
+                CountryConfig(),
                 initialValues[IdentifierSpec.Country]
             )
         )

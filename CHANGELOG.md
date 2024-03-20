@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### PaymentSheet
+* [Added] Support for Klarna with SetupIntents and PaymentIntents with `setup_future_usage`.
+
 ## 20.40.0 - 2024-03-18
 
 ### PaymentSheet

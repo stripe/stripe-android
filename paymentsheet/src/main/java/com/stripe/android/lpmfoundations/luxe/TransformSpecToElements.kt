@@ -29,6 +29,7 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
+import com.stripe.android.ui.core.elements.KlarnaMandateTextSpec
 import com.stripe.android.ui.core.elements.KonbiniConfirmationNumberSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
@@ -107,7 +108,7 @@ class TransformSpecToElements(
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
                 is KlarnaHeaderStaticTextSpec -> it.transform()
-                is KlarnaCountrySpec -> it.transform(amount?.currencyCode, initialValues)
+                is KlarnaCountrySpec -> it.transform(initialValues)
                 is DropdownSpec -> it.transform(initialValues)
                 is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
@@ -128,6 +129,7 @@ class TransformSpecToElements(
                 is ContactInformationSpec -> it.transform(initialValues)
                 is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
                 is CashAppPayMandateTextSpec -> it.transform(merchantName)
+                is KlarnaMandateTextSpec -> it.transform(merchantName)
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
     }
