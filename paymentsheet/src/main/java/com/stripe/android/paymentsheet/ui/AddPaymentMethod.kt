@@ -186,6 +186,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
     paymentMethod: SupportedPaymentMethod
 ): PaymentSelection.New {
+    // TODO: here is where you would turn the SPM into a PaymentSelection.ExternalPaymentMethod
     val params = transformToPaymentMethodCreateParams(paymentMethod)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     val extras = transformToExtraParams(paymentMethod)
@@ -197,6 +198,14 @@ internal fun FormFieldValues.transformToPaymentSelection(
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
+        )
+    } else if (paymentMethod.isExternalPaymentMethod) {
+        PaymentSelection.New.ExternalPaymentMethod(
+            paymentMethodCreateParams = params,
+            externalPaymentMethodType = paymentMethod.code,
+            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
+            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
+            displayName = resources.getString(paymentMethod.displayNameResource), // TODO: this will not be a resource
         )
     } else {
         PaymentSelection.New.GenericPaymentMethod(

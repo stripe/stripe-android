@@ -15,6 +15,7 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
@@ -24,6 +25,7 @@ import com.stripe.android.paymentsheet.model.SetupIntentClientSecret
 import com.stripe.android.uicore.PRIMARY_BUTTON_SUCCESS_BACKGROUND_COLOR
 import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.uicore.getRawValueFromDimenResource
+import kotlinx.coroutines.CompletionHandler
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -438,7 +440,7 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
-        val externalPaymentMethods : ExternalPaymentMethodsConfiguration = ConfigurationDefaults.externalPaymentMethodsConfiguration,
+        val externalPaymentMethods : ExternalPaymentMethodsConfiguration? = ConfigurationDefaults.externalPaymentMethodsConfiguration,
 
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
@@ -1186,14 +1188,18 @@ class PaymentSheet internal constructor(
 
             fun build() = BillingDetails(address, email, name, phone)
         }
+
+        fun ofPaymentMethodBillingDetails(billingDetails: PaymentMethod.BillingDetails): BillingDetails {
+           return BillingDetails(email = billingDetails.email)
+        }
     }
 
     // TODO: fill in fields
     @Parcelize
     data class ExternalPaymentMethodsConfiguration(
-        val externalPaymentMethods: List<String> = emptyList(),
-        val callback : ExternalPaymentMethodConfirmHandler
-        ) : Parcelable
+        val externalPaymentMethods: List<String>,
+        val callback: (String, BillingDetails?, (PaymentSheetResult) -> Unit) -> Unit
+    ) : Parcelable
 
     /**
      * Configuration for how billing details are collected during checkout.

@@ -3,7 +3,9 @@ package com.stripe.android.common.configuration
 import android.content.res.ColorStateList
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
+import kotlinx.coroutines.CompletionHandler
 
 internal object ConfigurationDefaults {
     const val allowsDelayedPaymentMethods: Boolean = false
@@ -22,5 +24,10 @@ internal object ConfigurationDefaults {
     val primaryButtonColor: ColorStateList? = null
     val primaryButtonLabel: String? = null
     val shippingDetails: AddressDetails? = null
-    val externalPaymentMethodsConfiguration = PaymentSheet.ExternalPaymentMethodsConfiguration()
+    val externalPaymentMethodsConfiguration = PaymentSheet.ExternalPaymentMethodsConfiguration(
+        externalPaymentMethods = listOf("external_example"),
+        callback = fun(externalPaymentMethod : String, billingDetails: PaymentSheet.BillingDetails?, completionHandler : (PaymentSheetResult) -> Unit) {
+            System.out.println(externalPaymentMethod)
+        }
+    )
 }

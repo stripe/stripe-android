@@ -9,6 +9,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
     paymentSelection: PaymentSelection?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
 ): IntentConfirmationInterceptor.NextStep {
+    // this which is good
     return when (paymentSelection) {
         is PaymentSelection.New -> {
             intercept(

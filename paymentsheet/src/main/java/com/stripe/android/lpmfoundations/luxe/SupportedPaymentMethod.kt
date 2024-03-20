@@ -47,6 +47,8 @@ data class SupportedPaymentMethod(
      * This forces the UI to render the required fields
      */
     val placeholderOverrideList: List<IdentifierSpec> = emptyList(),
+
+    val isExternalPaymentMethod : Boolean = false
 ) {
     internal fun paymentMethodDefinition(): PaymentMethodDefinition {
         return requireNotNull(PaymentMethodRegistry.definitionsByCode[code])

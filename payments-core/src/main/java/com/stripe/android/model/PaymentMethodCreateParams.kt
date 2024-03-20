@@ -1122,20 +1122,6 @@ data class PaymentMethodCreateParams internal constructor(
             )
         }
 
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun createExternalPaymentMethod(
-            type : String,
-            billingDetails: PaymentMethod.BillingDetails? = null,
-        ): PaymentMethodCreateParams {
-            return PaymentMethodCreateParams(
-                type = PaymentMethod.Type.ExternalPaymentMethod,
-                externalPaymentMethod = ExternalPaymentMethod(
-                    type
-                ) {},
-                billingDetails = billingDetails
-            )
-        }
-
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createWithOverride(
             code: PaymentMethodCode,

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.registerForActivityResult
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -19,6 +20,8 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
+import com.stripe.android.customersheet.CustomerSheet.Companion.toPaymentOptionSelection
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -559,6 +562,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     ) {
         linkHandler.registerFromActivity(activityResultCaller)
 
+        // TODO: create an event like this?????
         val bacsActivityResultLauncher = activityResultCaller.registerForActivityResult(
             BacsMandateConfirmationContract(),
             ::onBacsMandateResult
@@ -594,34 +598,55 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
         viewModelScope.launch {
-            val stripeIntent = awaitStripeIntent()
-
-            val nextStep = intentConfirmationInterceptor.intercept(
-                initializationMode = args.initializationMode,
-                paymentSelection = paymentSelection,
-                shippingValues = args.config.shippingDetails?.toConfirmPaymentIntentShipping(),
-            )
-
-            deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
-
-            when (nextStep) {
-                is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
-                    handleNextAction(
-                        clientSecret = nextStep.clientSecret,
-                        stripeIntent = stripeIntent,
+        when (paymentSelection) {
+            // TODO: how to create this PaymentSelection?
+            is PaymentSelection.New.ExternalPaymentMethod ->
+                ExternalPaymentMethodCallback.callback?.let {
+                    it(
+                        paymentSelection.externalPaymentMethodType,
+                        paymentSelection.paymentMethodCreateParams.billingDetails?.toPaymentSheetBillingDetails(),
+                        _paymentSheetResult::tryEmit
                     )
                 }
-                is IntentConfirmationInterceptor.NextStep.Confirm -> {
-                    confirmStripeIntent(nextStep.confirmParams)
-                }
-                is IntentConfirmationInterceptor.NextStep.Fail -> {
-                    onError(nextStep.message)
-                }
-                is IntentConfirmationInterceptor.NextStep.Complete -> {
-                    processPayment(stripeIntent, PaymentResult.Completed)
+
+            else -> {
+                    val stripeIntent = awaitStripeIntent()
+
+                    val nextStep = intentConfirmationInterceptor.intercept(
+                        initializationMode = args.initializationMode,
+                        paymentSelection = paymentSelection,
+                        shippingValues = args.config.shippingDetails?.toConfirmPaymentIntentShipping(),
+                    )
+
+                    deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
+
+                    when (nextStep) {
+                        is IntentConfirmationInterceptor.NextStep.HandleNextAction -> {
+                            handleNextAction(
+                                clientSecret = nextStep.clientSecret,
+                                stripeIntent = stripeIntent,
+                            )
+                        }
+
+                        is IntentConfirmationInterceptor.NextStep.Confirm -> {
+                            confirmStripeIntent(nextStep.confirmParams)
+                        }
+
+                        is IntentConfirmationInterceptor.NextStep.Fail -> {
+                            onError(nextStep.message)
+                        }
+
+                        is IntentConfirmationInterceptor.NextStep.Complete -> {
+                            processPayment(stripeIntent, PaymentResult.Completed)
+                        }
+                    }
                 }
             }
         }
+    }
+
+    fun PaymentMethod.BillingDetails.toPaymentSheetBillingDetails(): PaymentSheet.BillingDetails {
+        return PaymentSheet.BillingDetails(email = this.email, /* TODO: ... */)
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {

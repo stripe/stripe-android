@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
@@ -115,6 +116,7 @@ internal sealed class PaymentSelection : Parcelable {
         NoRequest(null)
     }
 
+
     sealed class New : PaymentSelection() {
 
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
@@ -132,6 +134,22 @@ internal sealed class PaymentSelection : Parcelable {
             isSetupFlow: Boolean,
         ): String? {
             return null
+        }
+
+        @Parcelize
+        data class ExternalPaymentMethod(
+            val externalPaymentMethodType: String,
+            val displayName: String,
+            val lightThemeIconUrl: String?,
+            val darkThemeIconUrl: String?,
+            override val paymentMethodCreateParams: PaymentMethodCreateParams,
+        ) : New() {
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+                get() = null
+            override val paymentMethodExtraParams: PaymentMethodExtraParams?
+                get() = null
+            override val customerRequestedSave: CustomerRequestedSave
+                get() = CustomerRequestedSave.RequestNoReuse
         }
 
         @Parcelize
@@ -227,9 +245,11 @@ internal sealed class PaymentSelection : Parcelable {
 
 internal val PaymentSelection.isLink: Boolean
     get() = when (this) {
-        is PaymentSelection.GooglePay -> false
+        is PaymentSelection.New.LinkInline,
         is PaymentSelection.Link -> true
-        is PaymentSelection.New.LinkInline -> true
+
+        is PaymentSelection.GooglePay,
         is PaymentSelection.New -> false
+
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
     }

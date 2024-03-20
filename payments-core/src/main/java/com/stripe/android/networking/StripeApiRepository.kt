@@ -1471,6 +1471,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
         )
     }
 
+    // this is where we retrieve elements session
     private suspend fun retrieveElementsSession(
         params: ElementsSessionParams,
         options: ApiRequest.Options,
@@ -1501,7 +1502,8 @@ class StripeApiRepository @JvmOverloads internal constructor(
             apiRequest = apiRequestFactory.createGet(
                 url = getApiUrl("elements/sessions"),
                 options = options,
-                params = requestParams + createExpandParam(params.expandFields),
+                params = requestParams + createExpandParam(params.expandFields)
+                    + mapOf("external_payment_methods" to listOf("external_interac")),
             ),
             jsonParser = parser,
         ) {

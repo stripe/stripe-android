@@ -15,6 +15,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.getSetupFutureUsageFieldC
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.ExternalPaymentMethodCallback
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -70,8 +72,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): Result<PaymentSheetState.Full> = withContext(workContext) {
         eventReporter.onLoadStarted()
 
+        ExternalPaymentMethodCallback.callback = paymentSheetConfiguration.externalPaymentMethods?.callback
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
+            externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods?.externalPaymentMethods ?: emptyList()
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
@@ -245,8 +249,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
+        externalPaymentMethods : List<String>
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode)
+        return elementsSessionRepository.get(initializationMode, externalPaymentMethods)
     }
 
     private suspend fun loadLinkState(

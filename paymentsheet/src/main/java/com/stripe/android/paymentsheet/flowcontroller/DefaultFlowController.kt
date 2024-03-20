@@ -8,6 +8,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
+import androidx.compose.material.ExtendedFloatingActionButton
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
@@ -35,6 +36,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ExternalPaymentMethodCallback
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -321,6 +323,15 @@ internal class DefaultFlowController @Inject internal constructor(
                     confirmPaymentSelection(paymentSelection, state)
                 }
             }
+            is PaymentSelection.New.ExternalPaymentMethod -> {
+                ExternalPaymentMethodCallback.callback?.let {
+                    it(
+                        paymentSelection.externalPaymentMethodType,
+                        null/*paymentSelection.paymentMethodCreateParams.billingDetails?.toPaymentSheetType() */,
+                        paymentResultCallback::onPaymentSheetResult
+                    )
+                }
+            }
             is PaymentSelection.New,
             null -> confirmPaymentSelection(paymentSelection, state)
             is PaymentSelection.Saved -> {
@@ -349,6 +360,8 @@ internal class DefaultFlowController @Inject internal constructor(
     ) {
         viewModelScope.launch {
             val stripeIntent = requireNotNull(state.stripeIntent)
+
+            ExternalPaymentMethodCallback.callback?.invoke("EPM type", null, {})
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = initializationMode!!,

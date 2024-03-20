@@ -19,7 +19,8 @@ internal object DeferredIntentValidator {
         intentConfiguration: PaymentSheet.IntentConfiguration,
         isFlowController: Boolean,
     ): StripeIntent {
-        val params = mapToDeferredIntentParams(intentConfiguration)
+        // TODO: to support deferred intents, you also need to include the external payment methods in intent configuration??
+        val params = mapToDeferredIntentParams(intentConfiguration, externalPaymentMethods = emptyList())
 
         when (stripeIntent) {
             is PaymentIntent -> {
@@ -73,9 +74,10 @@ internal object DeferredIntentValidator {
 
     private fun mapToDeferredIntentParams(
         intentConfiguration: PaymentSheet.IntentConfiguration,
+        externalPaymentMethods : List<String>
     ): DeferredIntentParams {
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration)
-        val params = initializationMode.toElementsSessionParams()
+        val params = initializationMode.toElementsSessionParams(externalPaymentMethods)
         return (params as ElementsSessionParams.DeferredIntentType).deferredIntentParams
     }
 }

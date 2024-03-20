@@ -5,6 +5,6 @@ typealias ExternalPaymentMethodConfirmHandler = (
 ) -> Unit
 class ExternalPaymentMethodCallback {
     companion object {
-        var callback: ExternalPaymentMethodConfirmHandler? = null
+        var callback: ((String, PaymentSheet.BillingDetails?, (PaymentSheetResult) -> Unit) -> Unit)? = null
     }
 }

@@ -122,6 +122,15 @@ internal class PaymentOptionFactory @Inject constructor(
                     imageLoader = ::loadPaymentOption,
                 )
             }
+            is PaymentSelection.New.ExternalPaymentMethod -> {
+                PaymentOption(
+                    drawableResourceId = 0, // TODO: placeholder
+                    lightThemeIconUrl = selection.externalPaymentMethodType, // TODO: incl the SPM in the PaymentSelection?
+                    darkThemeIconUrl = selection.externalPaymentMethodType,
+                    label = selection.externalPaymentMethodType,
+                    imageLoader = ::loadPaymentOption
+                )
+            }
         }
     }
 
