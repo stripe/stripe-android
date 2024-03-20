@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-internal abstract class PaneViewModel<S>(
+internal abstract class FinancialConnectionsViewModel<S>(
     initialState: S
 ) : ViewModel() {
 
@@ -19,20 +19,24 @@ internal abstract class PaneViewModel<S>(
         onFail: (Throwable) -> Unit = {}
     ): Job {
         return viewModelScope.launch {
-            stateFlow.update { state -> state.reducer(Result.Loading) }
+            setState { reducer(Result.Loading) }
             val result = kotlin.runCatching { this@execute() }
             // update state.
             result.fold(
                 onSuccess = { data ->
-                    stateFlow.update { state -> state.reducer(Result.Success(data)) }
+                    setState { reducer(Result.Success(data)) }
                     onSuccess(data)
                 },
                 onFailure = { throwable ->
-                    stateFlow.update { state -> state.reducer(Result.Error(throwable)) }
+                    setState { reducer(Result.Error(throwable)) }
                     onFail(throwable)
                 }
             )
         }
+    }
+
+    protected fun setState(reducer: S.() -> S) {
+        stateFlow.update { state -> state.reducer() }
     }
 }
 

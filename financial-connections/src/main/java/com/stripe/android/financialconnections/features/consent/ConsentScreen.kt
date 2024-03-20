@@ -36,7 +36,7 @@ import com.stripe.android.financialconnections.core.Result.Error
 import com.stripe.android.financialconnections.core.Result.Loading
 import com.stripe.android.financialconnections.core.Result.Success
 import com.stripe.android.financialconnections.core.Result.Uninitialized
-import com.stripe.android.financialconnections.core.rememberPaneViewModel
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
@@ -67,7 +67,7 @@ import kotlinx.coroutines.launch
 @ExperimentalMaterialApi
 @Composable
 internal fun ConsentScreen() {
-    val viewModel: ConsentViewModel = rememberPaneViewModel { ConsentViewModel.factory(it) }
+    val viewModel: ConsentViewModel = paneViewModel { ConsentViewModel.factory(it) }
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
 

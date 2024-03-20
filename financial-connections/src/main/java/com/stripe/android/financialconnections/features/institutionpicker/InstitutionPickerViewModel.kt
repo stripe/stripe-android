@@ -16,10 +16,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.core.PaneViewModel
+import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.core.Result
 import com.stripe.android.financialconnections.core.Result.Loading
 import com.stripe.android.financialconnections.core.Result.Uninitialized
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
@@ -35,7 +36,6 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -55,7 +55,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
     initialState: InstitutionPickerState
-) : PaneViewModel<InstitutionPickerState>(initialState) {
+) : FinancialConnectionsViewModel<InstitutionPickerState>(initialState) {
 
     private var searchJob = ConflatedJob()
 
@@ -228,11 +228,10 @@ internal class InstitutionPickerViewModel @Inject constructor(
     }
 
     companion object {
-        fun factory(parentViewModel: FinancialConnectionsSheetNativeViewModel): ViewModelProvider.Factory =
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentViewModel
-                        .activityRetainedComponent
+                    parentComponent
                         .institutionPickerBuilder
                         .initialState(InstitutionPickerState())
                         .build()

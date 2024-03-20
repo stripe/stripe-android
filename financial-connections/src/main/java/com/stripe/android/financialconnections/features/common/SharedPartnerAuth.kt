@@ -46,8 +46,8 @@ import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.collectAsState
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus
@@ -55,6 +55,7 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -83,7 +84,7 @@ internal fun SharedPartnerAuth(
 ) {
     val viewModel = parentViewModel()
 
-    val webAuthFlow = viewModel.collectAsState { it.webAuthFlow }
+    val webAuthFlow = viewModel.collectAsState(FinancialConnectionsSheetNativeState::webAuthFlow)
     val uriHandler = LocalUriHandler.current
 
     val bottomSheetState = rememberModalBottomSheetState(

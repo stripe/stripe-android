@@ -11,7 +11,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.core.PaneViewModel
+import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
@@ -21,12 +22,10 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -39,7 +38,7 @@ internal class ConsentViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : PaneViewModel<ConsentState>(initialState) {
+) : FinancialConnectionsViewModel<ConsentState>(initialState) {
 
     init {
         suspend {
@@ -89,12 +88,12 @@ internal class ConsentViewModel @Inject constructor(
         handleClickableUrl(
             currentPane = Pane.CONSENT,
             uri = uri,
-            onNetworkUrlClicked = { stateFlow.update { it.copy(viewEffect = OpenUrl(uri, date.time)) } },
+            onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri, date.time)) } },
             knownDeeplinkActions = mapOf(
                 // Clicked on the "Data Access" link -> Open the Data Access bottom sheet
                 ConsentClickableText.DATA.value to {
-                    stateFlow.update {
-                        it.copy(
+                    setState {
+                        copy(
                             currentBottomSheet = BottomSheetContent.DATA,
                             viewEffect = ViewEffect.OpenBottomSheet(date.time)
                         )
@@ -102,8 +101,8 @@ internal class ConsentViewModel @Inject constructor(
                 },
                 // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
                 ConsentClickableText.LEGAL_DETAILS.value to {
-                    stateFlow.update {
-                        it.copy(
+                    setState {
+                        copy(
                             viewEffect = ViewEffect.OpenBottomSheet(date.time),
                             currentBottomSheet = BottomSheetContent.LEGAL
                         )
@@ -118,16 +117,15 @@ internal class ConsentViewModel @Inject constructor(
     }
 
     fun onViewEffectLaunched() {
-        stateFlow.update { it.copy(viewEffect = null) }
+        setState { copy(viewEffect = null) }
     }
 
     companion object {
 
-        fun factory(parentViewModel: FinancialConnectionsSheetNativeViewModel): ViewModelProvider.Factory =
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentViewModel
-                        .activityRetainedComponent
+                    parentComponent
                         .consentBuilder
                         .initialState(ConsentState())
                         .build()

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -71,6 +72,11 @@ internal interface FinancialConnectionsSheetNativeComponent {
         @BindsInstance
         fun initialSyncResponse(
             @Named(INITIAL_SYNC_RESPONSE) initialSyncResponse: SynchronizeSessionResponse?
+        ): Builder
+
+        @BindsInstance
+        fun savedStateHandle(
+            savedStateHandle: SavedStateHandle
         ): Builder
 
         @BindsInstance

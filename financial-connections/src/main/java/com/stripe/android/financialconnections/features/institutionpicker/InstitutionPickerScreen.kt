@@ -65,7 +65,7 @@ import com.stripe.android.financialconnections.core.Result.Error
 import com.stripe.android.financialconnections.core.Result.Loading
 import com.stripe.android.financialconnections.core.Result.Success
 import com.stripe.android.financialconnections.core.Result.Uninitialized
-import com.stripe.android.financialconnections.core.rememberPaneViewModel
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
@@ -91,7 +91,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun InstitutionPickerScreen() {
-    val viewModel: InstitutionPickerViewModel = rememberPaneViewModel { InstitutionPickerViewModel.factory(it) }
+    val viewModel: InstitutionPickerViewModel = paneViewModel { InstitutionPickerViewModel.factory(it) }
     val parentViewModel = parentViewModel()
     val state: InstitutionPickerState by viewModel.stateFlow.collectAsState()
     val listState = rememberLazyListState()

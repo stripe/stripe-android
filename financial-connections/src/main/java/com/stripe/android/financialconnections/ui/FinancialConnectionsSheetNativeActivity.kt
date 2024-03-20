@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -21,14 +23,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
-import com.airbnb.mvrx.MavericksView
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
@@ -49,18 +51,22 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
-import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
+internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
     val args by argsOrNull<FinancialConnectionsSheetNativeActivityArgs>()
 
-    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModelLazy()
+    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModels(
+        factoryProducer = { FinancialConnectionsSheetNativeViewModel.Factory }
+    )
 
     @Inject
     lateinit var logger: Logger
@@ -77,44 +83,43 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
             finish()
         } else {
             viewModel.activityRetainedComponent.inject(this)
-            viewModel.onEach { postInvalidate() }
             onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
+            observeViewEffects()
             setContent {
                 FinancialConnectionsTheme {
-                    val firstPane by viewModel.collectAsState { it.initialPane }
-                    val reducedBranding by viewModel.collectAsState { it.reducedBranding }
-                    val testMode by viewModel.collectAsState { it.testMode }
+                    val state by viewModel.stateFlow.collectAsState()
                     NavHost(
-                        initialPane = firstPane,
-                        testMode = testMode,
-                        reducedBranding = reducedBranding
+                        initialPane = state.initialPane,
+                        testMode = state.testMode,
+                        reducedBranding = state.reducedBranding
                     )
                 }
             }
         }
     }
 
-    /**
-     * handle state changes here.
-     */
-    override fun invalidate() {
-        withState(viewModel) { state ->
-            state.viewEffect?.let { viewEffect ->
-                when (viewEffect) {
-                    is OpenUrl -> startActivity(
-                        browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
-                    )
-
-                    is Finish -> {
-                        setResult(
-                            Activity.RESULT_OK,
-                            Intent().putExtra(EXTRA_RESULT, viewEffect.result)
+    private fun observeViewEffects() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.stateFlow
+                .map { it.viewEffect }
+                .distinctUntilChanged()
+                .collect { viewEffect ->
+                    if (viewEffect == null) return@collect
+                    when (viewEffect) {
+                        is OpenUrl -> startActivity(
+                            browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
                         )
-                        finish()
+
+                        is Finish -> {
+                            setResult(
+                                Activity.RESULT_OK,
+                                Intent().putExtra(EXTRA_RESULT, viewEffect.result)
+                            )
+                            finish()
+                        }
                     }
+                    viewModel.onViewEffectLaunched()
                 }
-                viewModel.onViewEffectLaunched()
-            }
         }
     }
 
