@@ -27,7 +27,6 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.EmptyFormSpec
 import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
-import com.stripe.android.ui.core.elements.KlarnaCountrySpec
 import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
 import com.stripe.android.ui.core.elements.KlarnaMandateTextSpec
 import com.stripe.android.ui.core.elements.KonbiniConfirmationNumberSpec
@@ -108,7 +107,6 @@ class TransformSpecToElements(
                 is AuBankAccountNumberSpec -> it.transform(initialValues)
                 is IbanSpec -> it.transform(initialValues)
                 is KlarnaHeaderStaticTextSpec -> it.transform()
-                is KlarnaCountrySpec -> it.transform(initialValues)
                 is DropdownSpec -> it.transform(initialValues)
                 is CountrySpec -> it.transform(initialValues)
                 is AddressSpec -> it.transform(
