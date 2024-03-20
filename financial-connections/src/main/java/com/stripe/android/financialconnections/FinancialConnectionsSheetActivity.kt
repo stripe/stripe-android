@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,9 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.airbnb.mvrx.Mavericks
-import com.airbnb.mvrx.MavericksView
-import com.airbnb.mvrx.withState
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
@@ -29,11 +31,15 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.argsOrNull
-import com.stripe.android.financialconnections.utils.viewModelLazy
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.launch
 
-internal class FinancialConnectionsSheetActivity : AppCompatActivity(), MavericksView {
+internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
-    val viewModel: FinancialConnectionsSheetViewModel by viewModelLazy()
+    val viewModel: FinancialConnectionsSheetViewModel by viewModels(
+        factoryProducer = { FinancialConnectionsSheetViewModel.Factory }
+    )
 
     val args by argsOrNull<FinancialConnectionsSheetActivityArgs>()
 
@@ -52,7 +58,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity(), Maverick
         if (args == null) {
             finish()
         } else {
-            viewModel.onEach { postInvalidate() }
+            observeViewEffects()
             browserManager = BrowserManager(application)
             if (savedInstanceState != null) viewModel.onActivityRecreated()
         }
@@ -91,42 +97,53 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity(), Maverick
     /**
      * handle state changes here.
      */
-    override fun invalidate() {
-        withState(viewModel) { state ->
-            state.viewEffect?.let { viewEffect ->
-                when (viewEffect) {
-                    is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
-                        browserManager.createBrowserIntentForUrl(
-                            uri = Uri.parse(viewEffect.url)
-                        )
-                    )
 
-                    is FinishWithResult -> {
-                        viewEffect.finishToast?.let {
-                            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
-                        }
-                        finishWithResult(viewEffect.result)
-                    }
-
-                    is OpenNativeAuthFlow -> startNativeAuthFlowForResult.launch(
-                        Intent(
-                            this,
-                            FinancialConnectionsSheetNativeActivity::class.java
-                        ).also {
-                            it.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
-                            it.putExtra(
-                                Mavericks.KEY_ARG,
-                                FinancialConnectionsSheetNativeActivityArgs(
-                                    initialSyncResponse = viewEffect.initialSyncResponse,
-                                    configuration = viewEffect.configuration
-                                )
+    private fun observeViewEffects() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.stateFlow
+                .map { it.viewEffect }
+                .distinctUntilChanged()
+                .collect { viewEffect ->
+                    if (viewEffect == null) return@collect
+                    when (viewEffect) {
+                        is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
+                            browserManager.createBrowserIntentForUrl(
+                                uri = Uri.parse(viewEffect.url)
                             )
+                        )
+
+                        is FinishWithResult -> {
+                            viewEffect.finishToast?.let {
+                                Toast.makeText(
+                                    this@FinancialConnectionsSheetActivity, it, Toast.LENGTH_LONG
+                                ).show()
+                            }
+                            finishWithResult(viewEffect.result)
                         }
-                    )
+
+                        is OpenNativeAuthFlow -> openNativeAuthFlow(viewEffect)
+                    }
+                    viewModel.onViewEffectLaunched()
                 }
-                viewModel.onViewEffectLaunched()
-            }
         }
+    }
+
+    private fun openNativeAuthFlow(viewEffect: OpenNativeAuthFlow) {
+        startNativeAuthFlowForResult.launch(
+            Intent(
+                this@FinancialConnectionsSheetActivity,
+                FinancialConnectionsSheetNativeActivity::class.java
+            ).also {
+                it.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                it.putExtra(
+                    Mavericks.KEY_ARG,
+                    FinancialConnectionsSheetNativeActivityArgs(
+                        initialSyncResponse = viewEffect.initialSyncResponse,
+                        configuration = viewEffect.configuration
+                    )
+                )
+            }
+        )
     }
 
     private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {

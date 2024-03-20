@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import android.os.Bundle
 import androidx.annotation.StringRes
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.PersistState
@@ -13,7 +14,7 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
  */
 internal data class FinancialConnectionsSheetState(
     val initialArgs: FinancialConnectionsSheetActivityArgs,
-    val activityRecreated: Boolean = false,
+    val activityRecreated: Boolean,
     @PersistState val manifest: FinancialConnectionsSessionManifest? = null,
     @PersistState val webAuthFlowStatus: AuthFlowStatus = AuthFlowStatus.NONE,
     val viewEffect: FinancialConnectionsSheetViewEffect? = null
@@ -21,6 +22,19 @@ internal data class FinancialConnectionsSheetState(
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret
+
+    /**
+     * Constructor used to build the initial state.
+     */
+    constructor(args: FinancialConnectionsSheetActivityArgs, savedState: Bundle?) : this(
+        initialArgs = args,
+        activityRecreated = false,
+        manifest = savedState?.getParcelable(KEY_MANIFEST),
+        webAuthFlowStatus = savedState?.getSerializable(KEY_WEB_AUTH_FLOW_STATUS)
+            as? AuthFlowStatus
+            ?: AuthFlowStatus.NONE,
+        viewEffect = null
+    )
 
     enum class AuthFlowStatus {
         /**
@@ -47,12 +61,11 @@ internal data class FinancialConnectionsSheetState(
         NONE
     }
 
-    /**
-     * Constructor used by Mavericks to build the initial state.
-     */
-    constructor(args: FinancialConnectionsSheetActivityArgs) : this(
-        initialArgs = args
-    )
+    companion object {
+        const val KEY_SAVED_STATE = "financial_connections_sheet_state"
+        const val KEY_MANIFEST = "financial_connections_sheet_manifest"
+        const val KEY_WEB_AUTH_FLOW_STATUS = "financial_connections_sheet_web_auth_flow_status"
+    }
 }
 
 /**

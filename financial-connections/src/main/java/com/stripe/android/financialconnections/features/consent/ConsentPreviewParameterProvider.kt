@@ -3,7 +3,7 @@ package com.stripe.android.financialconnections.features.consent
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.stripe.android.financialconnections.core.Result
+import com.stripe.android.financialconnections.core.Result.Success
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.ConnectedAccessNotice
 import com.stripe.android.financialconnections.model.ConsentPane
@@ -32,7 +32,7 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withPlatformLogos() =
         ConsentState(
-            consent = Result.Success(
+            consent = Success(
                 ConsentState.Payload(
                     consent = sampleConsent().copy(belowCta = null),
                     merchantLogos = listOf(
@@ -46,7 +46,7 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withConnectedAccountLogos() =
         ConsentState(
-            consent = Result.Success(
+            consent = Success(
                 ConsentState.Payload(
                     consent = sampleConsent().copy(belowCta = null),
                     merchantLogos = listOf(
@@ -60,7 +60,7 @@ internal class ConsentPreviewParameterProvider :
         )
 
     private fun manualEntryPlusMicrodeposits() = ConsentState(
-        consent = Result.Success(
+        consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent(),
                 merchantLogos = listOf(
@@ -74,7 +74,7 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withDataBottomSheet() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.DATA,
-        consent = Result.Success(
+        consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent().copy(
                     dataAccessNotice = sampleConsent().dataAccessNotice.copy(
@@ -92,7 +92,7 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withDataBottomSheetAndConnectedAccount() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.DATA,
-        consent = Result.Success(
+        consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent(),
                 merchantLogos = listOf(
@@ -106,7 +106,7 @@ internal class ConsentPreviewParameterProvider :
 
     private fun withLegalDetailsBottomSheet() = ConsentState(
         currentBottomSheet = ConsentState.BottomSheetContent.LEGAL,
-        consent = Result.Success(
+        consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent().copy(belowCta = null),
                 merchantLogos = listOf(
