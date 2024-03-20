@@ -1,8 +1,8 @@
 package com.stripe.android.cards
 
 import com.stripe.android.model.AccountRange
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 
 internal class NullCardAccountRangeRepository : CardAccountRangeRepository {
     override suspend fun getAccountRange(
@@ -13,5 +13,5 @@ internal class NullCardAccountRangeRepository : CardAccountRangeRepository {
         cardNumber: CardNumber.Unvalidated
     ): List<AccountRange>? = null
 
-    override val loading: Flow<Boolean> = flowOf(false)
+    override val loading: StateFlow<Boolean> = stateFlowOf(false)
 }

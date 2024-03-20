@@ -121,11 +121,9 @@ internal class SimpleTextFieldControllerTest {
             assertThat(awaitItem()).isEqualTo(false)
 
             controller.onValueChange("full")
-            assertThat(awaitItem()).isEqualTo(false)
+            expectNoEvents()
 
-            createControllerWithState()
             controller.onValueChange("invalid")
-            shadowOf(getMainLooper()).idle()
             assertThat(awaitItem()).isEqualTo(true)
         }
     }

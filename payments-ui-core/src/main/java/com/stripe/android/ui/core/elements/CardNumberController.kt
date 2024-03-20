@@ -31,21 +31,24 @@ import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.elements.TextFieldStateConstants
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.map
 import kotlin.coroutines.CoroutineContext
 import com.stripe.android.R as PaymentsCoreR
 
 internal sealed class CardNumberController : TextFieldController, SectionFieldErrorController {
-    abstract val cardBrandFlow: Flow<CardBrand>
+    abstract val cardBrandFlow: StateFlow<CardBrand>
 
-    abstract val selectedCardBrandFlow: Flow<CardBrand>
+    abstract val selectedCardBrandFlow: StateFlow<CardBrand>
 
     abstract val cardScanEnabled: Boolean
 
@@ -93,16 +96,16 @@ internal class DefaultCardNumberController(
     override val visualTransformation = cardTextFieldConfig.visualTransformation
     override val debugLabel = cardTextFieldConfig.debugLabel
 
-    override val label: Flow<Int> = MutableStateFlow(cardTextFieldConfig.label)
+    override val label: StateFlow<Int> = stateFlowOf(cardTextFieldConfig.label)
 
     private val _fieldValue = MutableStateFlow("")
-    override val fieldValue: Flow<String> = _fieldValue
+    override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
-    override val rawFieldValue: Flow<String> =
-        _fieldValue.map { cardTextFieldConfig.convertToRaw(it) }
+    override val rawFieldValue: StateFlow<String> =
+        _fieldValue.mapAsStateFlow { cardTextFieldConfig.convertToRaw(it) }
 
     // This makes the screen reader read out numbers digit by digit
-    override val contentDescription: Flow<String> = _fieldValue.map { it.asIndividualDigits() }
+    override val contentDescription: StateFlow<String> = _fieldValue.mapAsStateFlow { it.asIndividualDigits() }
 
     private val isEligibleForCardBrandChoice = cardBrandChoiceConfig is CardBrandChoiceConfig.Eligible
     private val brandChoices = MutableStateFlow<List<CardBrand>>(listOf())
@@ -127,8 +130,9 @@ internal class DefaultCardNumberController(
         }
     )
 
-    override val selectedCardBrandFlow: Flow<CardBrand> = mostRecentUserSelectedBrand.combine(
-        brandChoices
+    override val selectedCardBrandFlow: StateFlow<CardBrand> = combineAsStateFlow(
+        mostRecentUserSelectedBrand,
+        brandChoices,
     ) { previous, choices ->
         when (previous) {
             CardBrand.Unknown -> previous
@@ -147,14 +151,14 @@ internal class DefaultCardNumberController(
      * option  of not determining the card brand unless the user selects one. We use an implied
      * card brand (VISA, Mastercard) internally to pass state validation.
      */
-    private val impliedCardBrand = _fieldValue.map {
+    private val impliedCardBrand = _fieldValue.mapAsStateFlow {
         accountRangeService.accountRange?.brand
             ?: CardBrand.getCardBrands(it).firstOrNull()
             ?: CardBrand.Unknown
     }
 
     override val cardBrandFlow = if (isEligibleForCardBrandChoice) {
-        combine(
+        combineAsStateFlow(
             brandChoices,
             selectedCardBrandFlow
         ) { choices, selected ->
@@ -188,7 +192,7 @@ internal class DefaultCardNumberController(
         isCbcEligible = { isEligibleForCardBrandChoice },
     )
 
-    override val trailingIcon: Flow<TextFieldIcon?> = combine(
+    override val trailingIcon: StateFlow<TextFieldIcon?> = combineAsStateFlow(
         _fieldValue,
         brandChoices,
         selectedCardBrandFlow
@@ -251,9 +255,9 @@ internal class DefaultCardNumberController(
                 animatedIcons = animatedIcons
             )
         }
-    }.distinctUntilChanged()
+    }
 
-    private val _fieldState = combine(impliedCardBrand, _fieldValue) { brand, fieldValue ->
+    private val _fieldState = combineAsStateFlow(impliedCardBrand, _fieldValue) { brand, fieldValue ->
         cardTextFieldConfig.determineState(
             brand,
             fieldValue,
@@ -262,14 +266,14 @@ internal class DefaultCardNumberController(
             )
         )
     }
-    override val fieldState: Flow<TextFieldState> = _fieldState
+    override val fieldState: StateFlow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
 
-    override val loading: Flow<Boolean> = accountRangeService.isLoading
+    override val loading: StateFlow<Boolean> = accountRangeService.isLoading
 
-    override val visibleError: Flow<Boolean> =
-        combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+    override val visibleError: StateFlow<Boolean> =
+        combineAsStateFlow(_fieldState, _hasFocus) { fieldState, hasFocus ->
             fieldState.shouldShowError(hasFocus)
         }
 
@@ -281,10 +285,10 @@ internal class DefaultCardNumberController(
             fieldState.getError()?.takeIf { visibleError }
         }
 
-    override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
+    override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }
 
-    override val formFieldValue: Flow<FormFieldEntry> =
-        combine(isComplete, rawFieldValue) { complete, value ->
+    override val formFieldValue: StateFlow<FormFieldEntry> =
+        combineAsStateFlow(isComplete, rawFieldValue) { complete, value ->
             FormFieldEntry(value, complete)
         }
 

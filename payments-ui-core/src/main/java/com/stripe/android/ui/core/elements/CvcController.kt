@@ -13,17 +13,20 @@ import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.elements.TextFieldState
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import com.stripe.android.R as StripeR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CvcController constructor(
     private val cvcTextFieldConfig: CvcConfig = CvcConfig(),
-    cardBrandFlow: Flow<CardBrand>,
+    cardBrandFlow: StateFlow<CardBrand>,
     override val initialValue: String? = null,
     override val showOptionalLabel: Boolean = false
 ) : TextFieldController, SectionFieldErrorController {
@@ -31,14 +34,14 @@ class CvcController constructor(
     override val keyboardType: KeyboardType = cvcTextFieldConfig.keyboard
     override val visualTransformation = cvcTextFieldConfig.visualTransformation
 
-    private val _label = cardBrandFlow.map { cardBrand ->
+    private val _label = cardBrandFlow.mapAsStateFlow { cardBrand ->
         if (cardBrand == CardBrand.AmericanExpress) {
             StripeR.string.stripe_cvc_amex_hint
         } else {
             StripeR.string.stripe_cvc_number_hint
         }
     }
-    override val label: Flow<Int> = _label
+    override val label: StateFlow<Int> = _label
 
     override val debugLabel = cvcTextFieldConfig.debugLabel
 
@@ -46,25 +49,25 @@ class CvcController constructor(
     override val autofillType: AutofillType = AutofillType.CreditCardSecurityCode
 
     private val _fieldValue = MutableStateFlow("")
-    override val fieldValue: Flow<String> = _fieldValue
+    override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
-    override val rawFieldValue: Flow<String> =
-        _fieldValue.map { cvcTextFieldConfig.convertToRaw(it) }
+    override val rawFieldValue: StateFlow<String> =
+        _fieldValue.mapAsStateFlow { cvcTextFieldConfig.convertToRaw(it) }
 
     // This makes the screen reader read out numbers digit by digit
-    override val contentDescription: Flow<String> = _fieldValue.map { it.asIndividualDigits() }
+    override val contentDescription: StateFlow<String> = _fieldValue.mapAsStateFlow { it.asIndividualDigits() }
 
-    private val _fieldState = combine(cardBrandFlow, _fieldValue) { brand, fieldValue ->
+    private val _fieldState = combineAsStateFlow(cardBrandFlow, _fieldValue) { brand, fieldValue ->
         cvcTextFieldConfig.determineState(brand, fieldValue, brand.maxCvcLength)
     }
-    override val fieldState: Flow<TextFieldState> = _fieldState
+    override val fieldState: StateFlow<TextFieldState> = _fieldState
 
     private val _hasFocus = MutableStateFlow(false)
 
-    override val visibleError: Flow<Boolean> =
-        combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+    override val visibleError: StateFlow<Boolean> =
+        combineAsStateFlow(_fieldState, _hasFocus) { fieldState, hasFocus ->
             fieldState.shouldShowError(hasFocus)
-        }.distinctUntilChanged()
+        }
 
     /**
      * An error must be emitted if it is visible or not visible.
@@ -74,18 +77,18 @@ class CvcController constructor(
             fieldState.getError()?.takeIf { visibleError }
         }
 
-    override val isComplete: Flow<Boolean> = _fieldState.map { it.isValid() }
+    override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow { it.isValid() }
 
-    override val formFieldValue: Flow<FormFieldEntry> =
-        combine(isComplete, rawFieldValue) { complete, value ->
+    override val formFieldValue: StateFlow<FormFieldEntry> =
+        combineAsStateFlow(isComplete, rawFieldValue) { complete, value ->
             FormFieldEntry(value, complete)
         }
 
-    override val trailingIcon: Flow<TextFieldIcon?> = cardBrandFlow.map {
+    override val trailingIcon: StateFlow<TextFieldIcon?> = cardBrandFlow.mapAsStateFlow {
         TextFieldIcon.Trailing(it.cvcIcon, isTintable = false)
     }
 
-    override val loading: Flow<Boolean> = MutableStateFlow(false)
+    override val loading: StateFlow<Boolean> = stateFlowOf(false)
 
     init {
         onRawValueChange(initialValue ?: "")
