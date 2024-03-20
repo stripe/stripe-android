@@ -27,6 +27,21 @@ internal class TestKlarna : BasePlaygroundTest() {
     fun testKlarnaInCustomFlow() {
         testDriver.confirmCustom(
             testParameters = testParameters,
+            verifyCustomLpmFields = {
+                verifyMandateFieldDoesNotExists()
+            },
+        )
+    }
+
+    @Test
+    fun testKlarnaSetupFutureUsage() {
+        testDriver.confirmCustom(
+            testParameters = testParameters.copyPlaygroundSettings { settings ->
+                settings[CheckoutModeSettingsDefinition] = CheckoutMode.PAYMENT_WITH_SETUP
+            },
+            verifyCustomLpmFields = {
+                verifyMandateFieldExists()
+            },
         )
     }
 
@@ -35,6 +50,9 @@ internal class TestKlarna : BasePlaygroundTest() {
         testDriver.confirmCustom(
             testParameters = testParameters.copyPlaygroundSettings { settings ->
                 settings[CheckoutModeSettingsDefinition] = CheckoutMode.SETUP
+            },
+            verifyCustomLpmFields = {
+                verifyMandateFieldExists()
             },
         )
     }

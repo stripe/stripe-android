@@ -57,6 +57,8 @@ internal class Selectors(
         testParameters.paymentMethodCode
     )
 
+    val mandateText = composeTestRule.onNodeWithTag("mandate")
+
     val buyButton = BuyButton(
         composeTestRule = composeTestRule,
         processingCompleteTimeout = if (testParameters.paymentMethodCode == CashAppPay.code) {
