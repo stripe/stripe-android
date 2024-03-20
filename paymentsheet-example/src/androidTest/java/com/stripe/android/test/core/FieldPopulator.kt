@@ -2,6 +2,7 @@ package com.stripe.android.test.core
 
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertContentDescriptionEquals
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsOff
 import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.assertIsToggleable
@@ -265,6 +266,14 @@ internal class FieldPopulator(
             .ifExistsAssertContentDescriptionEquals(values.cardExpiration)
         selectors.getCardCvc()
             .ifExistsAssertContentDescriptionEquals(accessibleCvc)
+    }
+
+    fun verifyMandateFieldExists() {
+        selectors.mandateText.assertIsDisplayed()
+    }
+
+    fun verifyMandateFieldDoesNotExists() {
+        selectors.mandateText.assertDoesNotExist()
     }
 
     private fun SemanticsNodeInteraction.ifExistsAssertContentDescriptionEquals(contentDescription: String) {

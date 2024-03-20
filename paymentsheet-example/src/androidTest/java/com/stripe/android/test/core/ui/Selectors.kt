@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
+import com.stripe.android.ui.core.elements.MANDATE_TEST_TAG
 import com.stripe.android.ui.core.elements.SAVE_FOR_FUTURE_CHECKBOX_TEST_TAG
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.R as StripeR
@@ -56,6 +57,8 @@ internal class Selectors(
         composeTestRule,
         testParameters.paymentMethodCode
     )
+
+    val mandateText = composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
 
     val buyButton = BuyButton(
         composeTestRule = composeTestRule,

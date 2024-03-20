@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
@@ -19,10 +20,10 @@ internal class PaymentMethodDefinitionTest {
     fun `isSupported returns false for PaymentMethodDefinitions that do not meet add requirements`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD.copy(
-                paymentMethodTypes = listOf("card", "klarna")
+                paymentMethodTypes = listOf("card", "grabpay")
             )
         )
-        assertThat(KlarnaDefinition.isSupported(metadata)).isFalse()
+        assertThat(GrabPayDefinition.isSupported(metadata)).isFalse()
     }
 
     @Test
