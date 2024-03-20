@@ -355,7 +355,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `supportedPaymentMethod fields are constructed correctly`() = runTest {
+    fun `formElementsForCode is constructed correctly`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "bancontact")
@@ -394,7 +394,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `supportedPaymentMethod replaces country placeholder fields correctly`() = runTest {
+    fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")

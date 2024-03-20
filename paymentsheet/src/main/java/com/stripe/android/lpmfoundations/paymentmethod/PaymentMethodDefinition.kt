@@ -37,7 +37,11 @@ internal interface PaymentMethodDefinition {
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements,
-    ): List<FormElement>
+    ): List<FormElement> {
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields,
+        )
+    }
 }
 
 internal fun PaymentMethodDefinition.isSupported(metadata: PaymentMethodMetadata): Boolean {
