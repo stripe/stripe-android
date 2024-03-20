@@ -37,6 +37,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHos
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import com.stripe.android.financialconnections.utils.parentViewModel
@@ -98,6 +99,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
             pane = PANE,
             allowBackNavigation = true,
             allowElevation = false,
+            error = state.payload.error,
         )
     }
 

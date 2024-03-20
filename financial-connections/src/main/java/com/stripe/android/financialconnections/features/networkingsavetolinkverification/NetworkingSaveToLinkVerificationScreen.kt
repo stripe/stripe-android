@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -39,13 +38,9 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationState.Payload
-import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationViewModel.Companion.PANE
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 
@@ -57,8 +52,6 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
     val state = viewModel.collectAsState()
     NetworkingSaveToLinkVerificationContent(
         state = state.value,
-        topAppBarState = topAppBarState,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onSkipClick = viewModel::onSkipClick
     )
@@ -67,24 +60,13 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
 @Composable
 private fun NetworkingSaveToLinkVerificationContent(
     state: NetworkingSaveToLinkVerificationState,
-    topAppBarState: TopAppBarState,
-    onCloseClick: () -> Unit,
     onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
-    val lazyListState = rememberLazyListState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                state = topAppBarState,
-                onCloseClick = onCloseClick,
-            )
-        }
-    ) {
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingSaveToLinkVerificationLoaded(
-                lazyListState = lazyListState,
                 payload = payload(),
                 confirmVerificationAsync = state.confirmVerification,
                 onCloseFromErrorClick = onCloseFromErrorClick,
@@ -99,11 +81,11 @@ private fun NetworkingSaveToLinkVerificationContent(
 @Composable
 private fun NetworkingSaveToLinkVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
-    lazyListState: LazyListState,
     payload: Payload,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onSkipClick: () -> Unit,
 ) {
+    val lazyListState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
     val focusRequester: FocusRequester = remember { FocusRequester() }
     val textInputService = LocalTextInputService.current
@@ -188,8 +170,6 @@ internal fun SaveToLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingSaveToLinkVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(hideStripeLogo = false),
-            onCloseClick = {},
             onSkipClick = {},
             onCloseFromErrorClick = {}
         )

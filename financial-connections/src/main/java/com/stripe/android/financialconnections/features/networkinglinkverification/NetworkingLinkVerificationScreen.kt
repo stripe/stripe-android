@@ -11,8 +11,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,25 +35,18 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 
 @Composable
 internal fun NetworkingLinkVerificationScreen() {
     val viewModel: NetworkingLinkVerificationViewModel = mavericksViewModel()
-    val topAppBarState by viewModel.topAppBarState.collectAsState()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
     NetworkingLinkVerificationContent(
         state = state.value,
-        topAppBarState = topAppBarState,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_VERIFICATION) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
@@ -63,18 +54,9 @@ internal fun NetworkingLinkVerificationScreen() {
 @Composable
 private fun NetworkingLinkVerificationContent(
     state: NetworkingLinkVerificationState,
-    topAppBarState: TopAppBarState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                state = topAppBarState,
-                onCloseClick = onCloseClick
-            )
-        }
-    ) {
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkVerificationLoaded(
@@ -160,8 +142,6 @@ internal fun NetworkingLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingLinkVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(hideStripeLogo = false),
-            onCloseClick = {},
             onCloseFromErrorClick = {}
         )
     }

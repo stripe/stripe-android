@@ -76,3 +76,6 @@ internal fun Async<*>.isCancellationError(): Boolean = when {
 internal fun ViewModelContext.parentViewModel(): FinancialConnectionsSheetNativeViewModel {
     return activity<FinancialConnectionsSheetNativeActivity>().viewModel
 }
+
+internal val <T> Async<T>.error: Throwable?
+    get() = (this as? Fail)?.error

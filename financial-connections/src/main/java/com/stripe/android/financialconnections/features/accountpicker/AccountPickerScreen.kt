@@ -22,8 +22,6 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,14 +53,10 @@ import com.stripe.android.financialconnections.features.common.MerchantDataAcces
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
 import com.stripe.android.financialconnections.ui.theme.Neutral900
@@ -73,7 +67,6 @@ internal fun AccountPickerScreen() {
     val viewModel: AccountPickerViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state: State<AccountPickerState> = viewModel.collectAsState()
-    val topAppBarState by viewModel.topAppBarState.collectAsState()
     BackHandler(true) {}
 
     val bottomSheetState = rememberModalBottomSheetState(
@@ -94,14 +87,12 @@ internal fun AccountPickerScreen() {
 
     AccountPickerContent(
         state = state.value,
-        topAppBarState = topAppBarState,
         bottomSheetState = bottomSheetState,
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
         onSelectAnotherBank = viewModel::selectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onLoadAccountsAgain = viewModel::onLoadAccountsAgain,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.ACCOUNT_PICKER) },
         onClickableTextClick = viewModel::onClickableTextClick,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
     )
@@ -109,7 +100,6 @@ internal fun AccountPickerScreen() {
 
 @Composable
 private fun AccountPickerContent(
-    topAppBarState: TopAppBarState,
     state: AccountPickerState,
     bottomSheetState: ModalBottomSheetState,
     onAccountClicked: (PartnerAccount) -> Unit,
@@ -118,7 +108,6 @@ private fun AccountPickerContent(
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onLoadAccountsAgain: () -> Unit,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     val scope = rememberCoroutineScope()
@@ -140,9 +129,7 @@ private fun AccountPickerContent(
         },
         content = {
             AccountPickerMainContent(
-                onCloseClick = onCloseClick,
                 lazyListState = lazyListState,
-                topAppBarState = topAppBarState,
                 state = state,
                 onSelectAnotherBank = onSelectAnotherBank,
                 onEnterDetailsManually = onEnterDetailsManually,
@@ -158,9 +145,7 @@ private fun AccountPickerContent(
 
 @Composable
 private fun AccountPickerMainContent(
-    onCloseClick: () -> Unit,
     lazyListState: LazyListState,
-    topAppBarState: TopAppBarState,
     state: AccountPickerState,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -170,20 +155,7 @@ private fun AccountPickerMainContent(
     onClickableTextClick: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                state = topAppBarState,
-                onCloseClick = {
-                    if (state.payload is Fail) {
-                        onCloseFromErrorClick(state.payload.error)
-                    } else {
-                        onCloseClick()
-                    }
-                },
-            )
-        }
-    ) {
+    Box {
         when (val payload = state.payload) {
             is Fail -> {
                 when (val error = payload.error) {
@@ -353,13 +325,11 @@ internal fun AccountPickerPreview(
     FinancialConnectionsPreview {
         AccountPickerContent(
             state = state,
-            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onAccountClicked = {},
             onSubmit = {},
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
             onLoadAccountsAgain = {},
-            onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {},
             bottomSheetState = rememberModalBottomSheetState(

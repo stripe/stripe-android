@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHos
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -52,6 +53,7 @@ internal class ErrorViewModel @Inject constructor(
         return TopAppBarStateUpdate(
             pane = PANE,
             allowBackNavigation = false,
+            error = state.payload.error,
         )
     }
 

@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
@@ -21,6 +22,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
         return TopAppBarStateUpdate(
             pane = Pane.BANK_AUTH_REPAIR,
             allowBackNavigation = state.canNavigateBack,
+            error = state.payload.error,
         )
     }
 

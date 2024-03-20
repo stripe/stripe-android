@@ -38,6 +38,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHos
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
@@ -66,6 +67,7 @@ internal class AccountPickerViewModel @Inject constructor(
         return TopAppBarStateUpdate(
             pane = PANE,
             allowBackNavigation = false,
+            error = state.payload.error,
         )
     }
 

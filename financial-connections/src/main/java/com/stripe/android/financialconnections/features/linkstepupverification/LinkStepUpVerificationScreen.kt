@@ -5,6 +5,7 @@ package com.stripe.android.financialconnections.features.linkstepupverification
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -39,14 +40,10 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
@@ -61,8 +58,6 @@ internal fun LinkStepUpVerificationScreen() {
     BackHandler(enabled = true) {}
     LinkStepUpVerificationContent(
         state = state.value,
-        topAppBarState = topAppBarState,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.LINK_STEP_UP_VERIFICATION) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick
     )
@@ -71,20 +66,11 @@ internal fun LinkStepUpVerificationScreen() {
 @Composable
 private fun LinkStepUpVerificationContent(
     state: LinkStepUpVerificationState,
-    topAppBarState: TopAppBarState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                state = topAppBarState,
-                onCloseClick = onCloseClick
-            )
-        }
-    ) {
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
@@ -203,8 +189,6 @@ internal fun LinkStepUpVerificationPreview(
     FinancialConnectionsPreview {
         LinkStepUpVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(hideStripeLogo = false),
-            onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {}
         )

@@ -12,7 +12,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 internal fun BankAuthRepairScreen() {
     // step view model
     val viewModel: BankAuthRepairViewModel = mavericksViewModel(
-        argsFactory = { BankAuthRepairViewModel.Args(Pane.BANK_AUTH_REPAIR) }
+        argsFactory = { BankAuthRepairViewModel.Args(Pane.BANK_AUTH_REPAIR) },
     )
     val state: State<SharedPartnerAuthState> = viewModel.collectAsState()
 

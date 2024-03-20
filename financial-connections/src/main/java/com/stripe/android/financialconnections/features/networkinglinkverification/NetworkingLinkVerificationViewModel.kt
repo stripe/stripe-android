@@ -32,6 +32,7 @@ import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.parentViewModel
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -94,6 +95,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
         return TopAppBarStateUpdate(
             pane = PANE,
             allowBackNavigation = false,
+            error = state.payload.error,
         )
     }
 

@@ -24,6 +24,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.parentViewModel
 import com.stripe.android.financialconnections.utils.trackExposure
@@ -63,6 +64,7 @@ internal class ConsentViewModel @Inject constructor(
             pane = Pane.CONSENT,
             hideStripeLogo = state.consent()?.shouldShowMerchantLogos ?: true,
             allowBackNavigation = true,
+            error = state.consent.error,
         )
     }
 

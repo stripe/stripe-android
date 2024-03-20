@@ -62,11 +62,11 @@ internal fun FinancialConnectionsTopAppBar(
     onCloseClick: () -> Unit
 ) {
     val elevation by animateDpAsState(
-        targetValue = if (state.isElevated) 8.dp else 0.dp,
+        targetValue = if (state.isElevated) AppBarDefaults.TopAppBarElevation else 0.dp,
         label = "TopAppBarElevation",
     )
 
-    FinancialConnectionsTopAppBar(
+    FinancialConnectionsTopAppBarInternal(
         hideStripeLogo = state.hideStripeLogo || state.forceHideStripeLogo,
         testMode = state.isTestMode,
         elevation = elevation,
@@ -76,7 +76,7 @@ internal fun FinancialConnectionsTopAppBar(
 }
 
 @Composable
-private fun FinancialConnectionsTopAppBar(
+private fun FinancialConnectionsTopAppBarInternal(
     hideStripeLogo: Boolean,
     testMode: Boolean,
     elevation: Dp,

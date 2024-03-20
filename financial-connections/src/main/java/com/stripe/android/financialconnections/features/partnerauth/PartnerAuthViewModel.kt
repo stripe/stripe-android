@@ -53,6 +53,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -93,6 +94,7 @@ internal class PartnerAuthViewModel @Inject constructor(
             TopAppBarStateUpdate(
                 pane = PANE,
                 allowBackNavigation = state.canNavigateBack,
+                error = state.payload.error,
             )
         }
     }

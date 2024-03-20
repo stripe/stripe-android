@@ -23,8 +23,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -57,7 +55,6 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -66,8 +63,6 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
@@ -85,7 +80,6 @@ internal fun SharedPartnerAuth(
     inModal: Boolean
 ) {
     val viewModel = parentViewModel()
-    val topAppBarState by viewModel.topAppBarState.collectAsState()
 
     val webAuthFlow = viewModel.collectAsState { it.webAuthFlow }
     val uriHandler = LocalUriHandler.current
@@ -113,10 +107,8 @@ internal fun SharedPartnerAuth(
     SharedPartnerAuthContent(
         inModal = inModal,
         state = state,
-        topAppBarState = topAppBarState,
         onClickableTextClick = onClickableTextClick,
         onContinueClick = onContinueClick,
-        onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
         onCancelClick = onCancelClick,
     )
 }
@@ -124,18 +116,14 @@ internal fun SharedPartnerAuth(
 @Composable
 private fun SharedPartnerAuthContent(
     state: SharedPartnerAuthState,
-    topAppBarState: TopAppBarState,
     inModal: Boolean,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
 ) {
     SharedPartnerAuthBody(
         inModal = inModal,
         state = state,
-        topAppBarState = topAppBarState,
-        onCloseClick = onCloseClick,
         onClickableTextClick = onClickableTextClick,
         onCancelClick = onCancelClick,
         onContinueClick = onContinueClick,
@@ -207,17 +195,13 @@ private fun SharedPartnerLoading(inModal: Boolean) {
 @Composable
 private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
-    topAppBarState: TopAppBarState,
     inModal: Boolean,
-    onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
     SharedPartnerAuthContentWrapper(
         inModal = inModal,
-        topAppBarState = topAppBarState,
-        onCloseClick = onCloseClick
     ) {
         state.payload()?.let {
             LoadedContent(
@@ -238,9 +222,7 @@ private fun SharedPartnerAuthBody(
  */
 @Composable
 private fun SharedPartnerAuthContentWrapper(
-    topAppBarState: TopAppBarState,
     inModal: Boolean,
-    onCloseClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     if (inModal) {
@@ -250,16 +232,7 @@ private fun SharedPartnerAuthContentWrapper(
             content()
         }
     } else {
-        FinancialConnectionsScaffold(
-            topBar = {
-                FinancialConnectionsTopAppBar(
-                    state = topAppBarState,
-                    onCloseClick = onCloseClick
-                )
-            }
-        ) {
-            content()
-        }
+        content()
     }
 }
 
@@ -544,11 +517,9 @@ internal fun PartnerAuthPreview(
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
             state = state,
-            topAppBarState = TopAppBarState(hideStripeLogo = false),
             inModal = false,
             onClickableTextClick = {},
             onContinueClick = {},
-            onCloseClick = {},
             onCancelClick = {}
         )
     }
@@ -566,11 +537,9 @@ internal fun PartnerAuthDrawerPreview(
         Box(modifier = Modifier.background(Color.White)) {
             SharedPartnerAuthContent(
                 state = state,
-                topAppBarState = TopAppBarState(hideStripeLogo = false),
                 inModal = true,
                 onClickableTextClick = {},
                 onContinueClick = {},
-                onCloseClick = {},
                 onCancelClick = {}
             )
         }
