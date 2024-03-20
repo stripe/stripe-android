@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -28,6 +29,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     private val handleError = TestHandleError()
     private val disableNetworking = mock<DisableNetworking>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: NetworkingLinkLoginWarmupState
@@ -37,7 +39,8 @@ class NetworkingLinkLoginWarmupViewModelTest {
         handleError = handleError,
         disableNetworking = disableNetworking,
         eventTracker = eventTracker,
-        initialState = state
+        initialState = state,
+        topAppBarHost = topAppBarHost,
     )
 
     @Test

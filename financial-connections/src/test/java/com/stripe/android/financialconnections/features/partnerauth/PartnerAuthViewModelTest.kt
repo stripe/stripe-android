@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSessi
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -57,6 +58,7 @@ internal class PartnerAuthViewModelTest {
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
     private val handleError = TestHandleError()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     @Test
     fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
@@ -295,7 +297,8 @@ internal class PartnerAuthViewModelTest {
             browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
             handleError = handleError,
-            applicationId = applicationId
+            applicationId = applicationId,
+            topAppBarHost = topAppBarHost,
         )
     }
 }

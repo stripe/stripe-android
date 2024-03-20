@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -42,6 +43,7 @@ class NetworkingLinkVerificationViewModelTest {
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()
@@ -53,7 +55,8 @@ class NetworkingLinkVerificationViewModelTest {
         markLinkVerified = markLinkVerified,
         analyticsTracker = analyticsTracker,
         logger = Logger.noop(),
-        initialState = state
+        initialState = state,
+        topAppBarHost = topAppBarHost,
     )
 
     @Test

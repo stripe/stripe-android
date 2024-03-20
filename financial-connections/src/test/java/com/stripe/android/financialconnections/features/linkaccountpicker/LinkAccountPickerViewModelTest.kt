@@ -25,6 +25,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,6 +53,7 @@ class LinkAccountPickerViewModelTest {
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: LinkAccountPickerState
@@ -67,7 +69,8 @@ class LinkAccountPickerViewModelTest {
         updateCachedAccounts = updateCachedAccounts,
         initialState = state,
         handleClickableUrl = mock(),
-        coreAuthorizationPendingNetworkingRepair = mock()
+        coreAuthorizationPendingNetworkingRepair = mock(),
+        topAppBarHost = topAppBarHost,
     )
 
     @Test
