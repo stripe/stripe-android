@@ -2,6 +2,9 @@ package com.stripe.android.financialconnections.core
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.financialconnections.core.Result.Fail
+import com.stripe.android.financialconnections.core.Result.Loading
+import com.stripe.android.financialconnections.core.Result.Success
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -19,16 +22,16 @@ internal abstract class FinancialConnectionsViewModel<S>(
         onFail: (Throwable) -> Unit = {}
     ): Job {
         return viewModelScope.launch {
-            setState { reducer(Result.Loading) }
+            setState { reducer(Loading) }
             val result = kotlin.runCatching { this@execute() }
             // update state.
             result.fold(
                 onSuccess = { data ->
-                    setState { reducer(Result.Success(data)) }
+                    setState { reducer(Success(data)) }
                     onSuccess(data)
                 },
                 onFailure = { throwable ->
-                    setState { reducer(Result.Error(throwable)) }
+                    setState { reducer(Fail(throwable)) }
                     onFail(throwable)
                 }
             )
@@ -48,7 +51,7 @@ internal sealed class Result<out T>(
     data class Success<out T>(val value: T) : Result<T>(value = value) {
         override operator fun invoke(): T = value
     }
-    data class Error<out T>(val throwable: Throwable) : Result<T>(value = null)
+    data class Fail<out T>(val error: Throwable) : Result<T>(value = null)
 
     open operator fun invoke(): T? = value
 }

@@ -32,7 +32,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.core.Result
-import com.stripe.android.financialconnections.core.Result.Error
+import com.stripe.android.financialconnections.core.Result.Fail
 import com.stripe.android.financialconnections.core.Result.Loading
 import com.stripe.android.financialconnections.core.Result.Success
 import com.stripe.android.financialconnections.core.Result.Uninitialized
@@ -114,26 +114,20 @@ private fun ConsentContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (val result = state.consent) {
-        Uninitialized, Loading -> {
-            ConsentLoadingContent()
-        }
+        Uninitialized, Loading -> ConsentLoadingContent()
 
-        is Error -> {
-            UnclassifiedErrorContent { onCloseFromErrorClick(result.throwable) }
-        }
+        is Success -> LoadedContent(
+            payload = result.value,
+            bottomSheetState = bottomSheetState,
+            acceptConsent = state.acceptConsent,
+            bottomSheetMode = state.currentBottomSheet,
+            onClickableTextClick = onClickableTextClick,
+            onContinueClick = onContinueClick,
+            onCloseClick = onCloseClick,
+            onConfirmModalClick = onConfirmModalClick
+        )
 
-        is Success -> {
-            LoadedContent(
-                payload = result.value,
-                bottomSheetState = bottomSheetState,
-                acceptConsent = state.acceptConsent,
-                bottomSheetMode = state.currentBottomSheet,
-                onClickableTextClick = onClickableTextClick,
-                onContinueClick = onContinueClick,
-                onCloseClick = onCloseClick,
-                onConfirmModalClick = onConfirmModalClick
-            )
-        }
+        is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(result.error) }
     }
 }
 

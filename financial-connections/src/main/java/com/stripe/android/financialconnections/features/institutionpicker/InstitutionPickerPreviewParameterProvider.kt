@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.stripe.android.financialconnections.core.Result.Error
+import com.stripe.android.financialconnections.core.Result.Fail
 import com.stripe.android.financialconnections.core.Result.Loading
 import com.stripe.android.financialconnections.core.Result.Success
 import com.stripe.android.financialconnections.core.Result.Uninitialized
@@ -102,7 +102,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload(manualEntry = true)),
-            searchInstitutions = Error(Exception("Something went wrong")),
+            searchInstitutions = Fail(Exception("Something went wrong")),
         ),
         initialScroll = 0
     )
@@ -111,7 +111,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload(manualEntry = false)),
-            searchInstitutions = Error(Exception("Something went wrong")),
+            searchInstitutions = Fail(Exception("Something went wrong")),
         ),
         initialScroll = 0
     )

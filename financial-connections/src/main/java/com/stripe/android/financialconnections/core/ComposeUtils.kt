@@ -26,6 +26,9 @@ internal inline fun <reified T : FinancialConnectionsViewModel<S>, S> paneViewMo
     factory: (FinancialConnectionsSheetNativeComponent) -> ViewModelProvider.Factory
 ): T { return viewModel<T>(factory = factory(parentActivity().viewModel.activityRetainedComponent)) }
 
+/**
+ * Retrieves the parent [FinancialConnectionsSheetNativeActivity] from the current Compose context.
+ */
 @Composable
 internal fun parentActivity(): FinancialConnectionsSheetNativeActivity {
     return extractActivityFromContext(LocalContext.current) as FinancialConnectionsSheetNativeActivity
