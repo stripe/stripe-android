@@ -26,10 +26,12 @@ internal object OxxoDefinition : PaymentMethodDefinition {
         sharedDataSpec: SharedDataSpec,
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
-            paymentMethodDefinition = this,
-            sharedDataSpec = sharedDataSpec,
+            code = type.code,
             displayNameResource = R.string.stripe_paymentsheet_payment_method_oxxo,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,
+            lightThemeIconUrl = null,
+            darkThemeIconUrl = null,
+            tintIconOnSelection = false,
         )
     }
 }
