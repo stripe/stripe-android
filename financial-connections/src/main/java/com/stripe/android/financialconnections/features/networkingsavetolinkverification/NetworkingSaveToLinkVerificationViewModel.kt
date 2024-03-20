@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.networkingsavetolinkver
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -25,7 +24,9 @@ import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.utils.parentViewModel
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -36,6 +37,7 @@ import javax.inject.Inject
 
 internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingSaveToLinkVerificationState,
+    topAppBarHost: TopAppBarHost,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val startVerification: StartVerification,
@@ -46,7 +48,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<NetworkingSaveToLinkVerificationState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingSaveToLinkVerificationState>(initialState, topAppBarHost) {
 
     init {
         logErrors()
@@ -145,11 +147,12 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: NetworkingSaveToLinkVerificationState
         ): NetworkingSaveToLinkVerificationViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .networkingSaveToLinkVerificationSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

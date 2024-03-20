@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.reset
 
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -13,6 +14,9 @@ internal interface ResetSubcomponent {
 
         @BindsInstance
         fun initialState(initialState: ResetState): Builder
+
+        @BindsInstance
+        fun topAppBarHost(topAppBarHost: TopAppBarHost): Builder
 
         fun build(): ResetSubcomponent
     }

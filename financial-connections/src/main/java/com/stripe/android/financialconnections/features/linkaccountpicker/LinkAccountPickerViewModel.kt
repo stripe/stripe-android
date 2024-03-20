@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -32,16 +31,19 @@ import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
+import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
 internal class LinkAccountPickerViewModel @Inject constructor(
     initialState: LinkAccountPickerState,
+    topAppBarHost: TopAppBarHost,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val handleClickableUrl: HandleClickableUrl,
@@ -53,7 +55,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<LinkAccountPickerState>(initialState) {
+) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, topAppBarHost) {
 
     init {
         observeAsyncs()
@@ -209,11 +211,12 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: LinkAccountPickerState
         ): LinkAccountPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .linkAccountPickerSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

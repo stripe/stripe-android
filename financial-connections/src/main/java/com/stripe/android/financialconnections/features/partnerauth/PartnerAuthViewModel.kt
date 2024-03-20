@@ -4,7 +4,6 @@ import android.webkit.URLUtil
 import androidx.core.net.toUri
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -47,10 +46,12 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -72,8 +73,9 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
-    initialState: SharedPartnerAuthState
-) : MavericksViewModel<SharedPartnerAuthState>(initialState) {
+    initialState: SharedPartnerAuthState,
+    topAppBarHost: TopAppBarHost,
+) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, topAppBarHost) {
 
     init {
         handleErrors()
@@ -446,11 +448,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: SharedPartnerAuthState
         ): PartnerAuthViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .partnerAuthSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.networkinglinksignup
 import android.webkit.URLUtil
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -29,10 +28,12 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.isCancellationError
+import com.stripe.android.financialconnections.utils.parentViewModel
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
@@ -49,6 +50,7 @@ import javax.inject.Inject
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
+    topAppBarHost: TopAppBarHost,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
     private val uriUtils: UriUtils,
@@ -58,7 +60,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 
@@ -263,11 +265,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: NetworkingLinkSignupState
         ): NetworkingLinkSignupViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .networkingLinkSignupSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

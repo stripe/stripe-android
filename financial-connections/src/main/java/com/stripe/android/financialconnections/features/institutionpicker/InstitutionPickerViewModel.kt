@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.institutionpicker
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -34,10 +33,12 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -53,8 +54,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
-    initialState: InstitutionPickerState
-) : MavericksViewModel<InstitutionPickerState>(initialState) {
+    initialState: InstitutionPickerState,
+    topAppBarHost: TopAppBarHost,
+) : FinancialConnectionsViewModel<InstitutionPickerState>(initialState, topAppBarHost) {
 
     private var searchJob = ConflatedJob()
 
@@ -244,11 +246,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: InstitutionPickerState
         ): InstitutionPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .institutionPickerBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

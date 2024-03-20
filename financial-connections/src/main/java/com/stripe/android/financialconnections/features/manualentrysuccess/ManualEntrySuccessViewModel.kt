@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.manualentrysuccess
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -15,18 +14,21 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ManualEntrySuccessViewModel @Inject constructor(
     initialState: ManualEntrySuccessState,
+    topAppBarHost: TopAppBarHost,
     private val getManifest: GetManifest,
     private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-) : MavericksViewModel<ManualEntrySuccessState>(initialState) {
+) : FinancialConnectionsViewModel<ManualEntrySuccessState>(initialState, topAppBarHost) {
 
     init {
         suspend {
@@ -57,11 +59,12 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ManualEntrySuccessState
         ): ManualEntrySuccessViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .manualEntrySuccessBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

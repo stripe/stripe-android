@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.error
 
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -10,6 +11,9 @@ internal interface ErrorSubcomponent {
 
     @Subcomponent.Factory
     interface Factory {
-        fun create(@BindsInstance initialState: ErrorState): ErrorSubcomponent
+        fun create(
+            @BindsInstance initialState: ErrorState,
+            @BindsInstance topAppBarHost: TopAppBarHost,
+        ): ErrorSubcomponent
     }
 }

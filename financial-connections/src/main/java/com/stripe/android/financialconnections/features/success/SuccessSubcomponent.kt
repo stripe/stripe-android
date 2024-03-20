@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.success
 
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -13,6 +14,9 @@ internal interface SuccessSubcomponent {
 
         @BindsInstance
         fun initialState(initialState: SuccessState): Builder
+
+        @BindsInstance
+        fun topAppBarHost(host: TopAppBarHost): Builder
 
         fun build(): SuccessSubcomponent
     }

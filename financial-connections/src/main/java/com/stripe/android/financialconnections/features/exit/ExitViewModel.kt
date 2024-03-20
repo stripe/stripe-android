@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.exit
 import android.os.Bundle
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -18,19 +17,22 @@ import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ExitViewModel @Inject constructor(
     initialState: ExitState,
+    topAppBarHost: TopAppBarHost,
     private val getManifest: GetManifest,
     private val coordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<ExitState>(initialState) {
+) : FinancialConnectionsViewModel<ExitState>(initialState, topAppBarHost) {
 
     init {
         logErrors()
@@ -91,11 +93,11 @@ internal class ExitViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ExitState
         ): ExitViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .exitSubcomponent
-                .create(state)
+                .create(state, parentViewModel)
                 .viewModel
         }
 

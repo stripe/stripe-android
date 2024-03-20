@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.features.networkinglinkloginwarm
 import android.os.Bundle
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -20,19 +19,22 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     initialState: NetworkingLinkLoginWarmupState,
+    topAppBarHost: TopAppBarHost,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleError: HandleError,
     private val getManifest: GetManifest,
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager
-) : MavericksViewModel<NetworkingLinkLoginWarmupState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, topAppBarHost) {
 
     init {
         logErrors()
@@ -115,11 +117,12 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: NetworkingLinkLoginWarmupState
         ): NetworkingLinkLoginWarmupViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .networkingLinkLoginWarmupSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

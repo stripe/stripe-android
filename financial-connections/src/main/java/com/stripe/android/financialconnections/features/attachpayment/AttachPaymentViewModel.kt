@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.attachpayment
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -21,15 +20,18 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import com.stripe.android.financialconnections.utils.parentViewModel
 import javax.inject.Inject
 
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
+    topAppBarHost: TopAppBarHost,
     private val successContentRepository: SuccessContentRepository,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -38,7 +40,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val logger: Logger
-) : MavericksViewModel<AttachPaymentState>(initialState) {
+) : FinancialConnectionsViewModel<AttachPaymentState>(initialState, topAppBarHost) {
 
     init {
         logErrors()
@@ -109,11 +111,12 @@ internal class AttachPaymentViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: AttachPaymentState
         ): AttachPaymentViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .attachPaymentSubcomponent
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

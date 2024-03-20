@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
 import com.stripe.android.core.Logger
@@ -19,11 +18,13 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.experimentAssignment
+import com.stripe.android.financialconnections.utils.parentViewModel
 import com.stripe.android.financialconnections.utils.trackExposure
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -31,13 +32,14 @@ import javax.inject.Inject
 
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
+    topAppBarHost: TopAppBarHost,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : MavericksViewModel<ConsentState>(initialState) {
+) : FinancialConnectionsViewModel<ConsentState>(initialState, topAppBarHost) {
 
     init {
         logErrors()
@@ -123,11 +125,12 @@ internal class ConsentViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ConsentState
         ): ConsentViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
+            val parentViewModel = viewModelContext.parentViewModel()
+            return parentViewModel
                 .activityRetainedComponent
                 .consentBuilder
                 .initialState(state)
+                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }
