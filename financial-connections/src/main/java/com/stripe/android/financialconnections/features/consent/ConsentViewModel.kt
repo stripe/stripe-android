@@ -66,22 +66,24 @@ internal class ConsentViewModel @Inject constructor(
         )
     }
 
-    fun onContinueClick() = suspend {
-        eventTracker.track(ConsentAgree)
-        FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
-        acceptConsent()
-    }.execute(
-        reducer = { copy(acceptConsent = it) },
-        onSuccess = { navigationManager.tryNavigateTo(it.nextPane.destination(referrer = Pane.CONSENT)) },
-        onFail = {
-            eventTracker.logError(
-                extraMessage = "Error accepting consent",
-                error = it,
-                logger = logger,
-                pane = Pane.CONSENT
-            )
-        },
-    )
+    fun onContinueClick() {
+        suspend {
+            eventTracker.track(ConsentAgree)
+            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
+            acceptConsent()
+        }.execute(
+            reducer = { copy(acceptConsent = it) },
+            onSuccess = { navigationManager.tryNavigateTo(it.nextPane.destination(referrer = Pane.CONSENT)) },
+            onFail = {
+                eventTracker.logError(
+                    extraMessage = "Error accepting consent",
+                    error = it,
+                    logger = logger,
+                    pane = Pane.CONSENT
+                )
+            },
+        )
+    }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
         val date = Date()
