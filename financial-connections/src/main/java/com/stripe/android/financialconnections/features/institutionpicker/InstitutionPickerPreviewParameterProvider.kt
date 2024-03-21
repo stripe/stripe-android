@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.stripe.android.financialconnections.core.Result.Fail
-import com.stripe.android.financialconnections.core.Result.Loading
-import com.stripe.android.financialconnections.core.Result.Success
-import com.stripe.android.financialconnections.core.Result.Uninitialized
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
 

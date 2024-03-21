@@ -1,14 +1,14 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.stripe.android.financialconnections.core.Result
+import com.stripe.android.financialconnections.core.Async
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 internal data class ConsentState(
-    val consent: Result<Payload> = Result.Uninitialized,
+    val consent: Async<Payload> = Async.Uninitialized,
     val merchantLogos: List<String> = emptyList(),
     val currentBottomSheet: BottomSheetContent = BottomSheetContent.DATA,
-    val acceptConsent: Result<FinancialConnectionsSessionManifest> = Result.Uninitialized,
+    val acceptConsent: Async<FinancialConnectionsSessionManifest> = Async.Uninitialized,
     val viewEffect: ViewEffect? = null
 ) {
 

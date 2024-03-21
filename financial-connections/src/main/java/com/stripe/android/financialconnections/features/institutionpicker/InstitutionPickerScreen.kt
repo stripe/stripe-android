@@ -60,11 +60,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.core.Result
-import com.stripe.android.financialconnections.core.Result.Fail
-import com.stripe.android.financialconnections.core.Result.Loading
-import com.stripe.android.financialconnections.core.Result.Success
-import com.stripe.android.financialconnections.core.Result.Uninitialized
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
@@ -114,8 +114,8 @@ internal fun InstitutionPickerScreen() {
 @Composable
 private fun InstitutionPickerContent(
     listState: LazyListState,
-    payload: Result<Payload>,
-    institutions: Result<InstitutionResponse>,
+    payload: Async<Payload>,
+    institutions: Async<InstitutionResponse>,
     previewText: String?,
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
@@ -157,7 +157,7 @@ private fun LoadedContent(
     previewText: String?,
     selectedInstitutionId: String?,
     onQueryChanged: (String) -> Unit,
-    institutions: Result<InstitutionResponse>,
+    institutions: Async<InstitutionResponse>,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
     payload: Payload,
     onManualEntryClick: () -> Unit,
@@ -225,7 +225,7 @@ private fun LazyListScope.searchResults(
     payload: Payload,
     selectedInstitutionId: String?,
     onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit,
-    institutions: Result<InstitutionResponse>,
+    institutions: Async<InstitutionResponse>,
     onManualEntryClick: () -> Unit,
     onSearchMoreClick: () -> Unit
 ) {

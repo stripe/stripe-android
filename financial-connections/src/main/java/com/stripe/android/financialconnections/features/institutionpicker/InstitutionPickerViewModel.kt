@@ -16,10 +16,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.core.Result
-import com.stripe.android.financialconnections.core.Result.Loading
-import com.stripe.android.financialconnections.core.Result.Uninitialized
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -248,9 +248,9 @@ internal data class InstitutionPickerState(
     // This is just used to provide a text in Compose previews
     val previewText: String? = null,
     val selectedInstitutionId: String? = null,
-    val payload: Result<Payload> = Uninitialized,
-    val searchInstitutions: Result<InstitutionResponse> = Uninitialized,
-    val createSessionForInstitution: Result<Unit> = Uninitialized
+    val payload: Async<Payload> = Uninitialized,
+    val searchInstitutions: Async<InstitutionResponse> = Uninitialized,
+    val createSessionForInstitution: Async<Unit> = Uninitialized
 ) {
 
     data class Payload(

@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.core
 
-import android.annotation.SuppressLint
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState

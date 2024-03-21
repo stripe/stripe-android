@@ -5,7 +5,7 @@
     <ID>ConstructorParameterNaming:FinancialConnectionsAuthorizationSession.kt$FinancialConnectionsAuthorizationSession$@SerialName(value = "is_oauth") private val _isOAuth: Boolean? = false</ID>
     <ID>ConstructorParameterNaming:PartnerAccountsList.kt$PartnerAccount$@SerialName(value = "allow_selection") private val _allowSelection: Boolean? = null</ID>
     <ID>LongMethod:AccountItem.kt$@Composable @Preview internal fun AccountItemPreview()</ID>
-    <ID>LongMethod:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Result&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
+    <ID>LongMethod:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Async&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
     <ID>LongMethod:LinkAccountPickerPreviewParameterProvider.kt$LinkAccountPickerPreviewParameterProvider$private fun partnerAccountList()</ID>
     <ID>MagicNumber:AccountPickerScreen.kt$3</ID>
     <ID>MagicNumber:ConsentLogoHeader.kt$3</ID>
@@ -30,7 +30,7 @@
     <ID>MaximumLineLength:com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls.kt:41</ID>
     <ID>MaximumLineLength:com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls.kt:46</ID>
     <ID>MaximumLineLength:com.stripe.android.financialconnections.presentation.FinancialConnectionsUrls.kt:9</ID>
-    <ID>NestedBlockDepth:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Result&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
+    <ID>NestedBlockDepth:InstitutionPickerScreen.kt$private fun LazyListScope.searchResults( isInputEmpty: Boolean, payload: Payload, selectedInstitutionId: String?, onInstitutionSelected: (FinancialConnectionsInstitution, Boolean) -> Unit, institutions: Async&lt;InstitutionResponse>, onManualEntryClick: () -> Unit, onSearchMoreClick: () -> Unit )</ID>
     <ID>SwallowedException:PollAttachPaymentAccount.kt$PollAttachPaymentAccount$e: StripeException</ID>
     <ID>SwallowedException:PollAuthorizationSessionAccounts.kt$PollAuthorizationSessionAccounts$e: StripeException</ID>
     <ID>SwallowedException:PostAuthorizationSession.kt$PostAuthorizationSession$e: StripeException</ID>

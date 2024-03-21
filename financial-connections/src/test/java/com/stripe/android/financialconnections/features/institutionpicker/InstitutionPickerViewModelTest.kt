@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.core.Result
+import com.stripe.android.financialconnections.core.Async
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -95,7 +95,7 @@ internal class InstitutionPickerViewModelTest {
 
         viewModel.stateFlow.value.let { state ->
             assertEquals(state.payload()!!.featuredInstitutions, institutionResponse)
-            assertIs<Result.Uninitialized>(state.searchInstitutions)
+            assertIs<Async.Uninitialized>(state.searchInstitutions)
         }
     }
 

@@ -5,7 +5,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNull
 
-class GooglePayResultTest {
+class GooglePayAsyncTest {
 
     @Test
     fun fromJson_withFullBillingAddress() {

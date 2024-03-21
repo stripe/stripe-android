@@ -31,11 +31,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.core.Result
-import com.stripe.android.financialconnections.core.Result.Fail
-import com.stripe.android.financialconnections.core.Result.Loading
-import com.stripe.android.financialconnections.core.Result.Success
-import com.stripe.android.financialconnections.core.Result.Uninitialized
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
@@ -148,7 +148,7 @@ private fun ConsentLoadingContent() {
 @Composable
 private fun ConsentMainContent(
     payload: ConsentState.Payload,
-    acceptConsent: Result<FinancialConnectionsSessionManifest>,
+    acceptConsent: Async<FinancialConnectionsSessionManifest>,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit
@@ -231,7 +231,7 @@ private fun LazyListScope.consentBody(
 private fun LoadedContent(
     payload: ConsentState.Payload,
     bottomSheetState: ModalBottomSheetState,
-    acceptConsent: Result<FinancialConnectionsSessionManifest>,
+    acceptConsent: Async<FinancialConnectionsSessionManifest>,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
@@ -272,7 +272,7 @@ private fun LoadedContent(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun ConsentFooter(
-    acceptConsent: Result<FinancialConnectionsSessionManifest>,
+    acceptConsent: Async<FinancialConnectionsSessionManifest>,
     consent: ConsentPane,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
