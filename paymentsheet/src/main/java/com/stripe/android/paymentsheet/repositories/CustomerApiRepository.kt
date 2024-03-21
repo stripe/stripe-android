@@ -92,10 +92,15 @@ internal class CustomerApiRepository @Inject constructor(
                     }
                 },
                 onSuccess = { customerPaymentMethods ->
+                    val linkPaymentMethods = getLinkPaymentMethods(customerPaymentMethods)
+
+                    paymentMethods.addAll(linkPaymentMethods)
+
                     val walletTypesToRemove = setOf(
                         Wallet.Type.ApplePay,
                         Wallet.Type.GooglePay,
                         Wallet.Type.SamsungPay,
+                        Wallet.Type.Link,
                     )
                     paymentMethods.addAll(
                         customerPaymentMethods.filter { paymentMethod ->
@@ -157,4 +162,15 @@ internal class CustomerApiRepository @Inject constructor(
         ).onFailure {
             logger.error("Failed to update payment method $paymentMethodId.", it)
         }
+
+    private fun getLinkPaymentMethods(paymentMethods: List<PaymentMethod>): List<PaymentMethod> {
+        return paymentMethods.filter { paymentMethod ->
+            paymentMethod.type == PaymentMethod.Type.Card &&
+                paymentMethod.card?.wallet?.walletType == Wallet.Type.Link
+        }.distinctBy { paymentMethod ->
+            val card = paymentMethod.card
+
+            "${card?.last4}-${card?.expiryMonth}-${card?.expiryYear}-${card?.brand?.code}"
+        }
+    }
 }

@@ -172,7 +172,7 @@ internal class CustomerRepositoryTest {
         }
 
     @Test
-    fun `getPaymentsMethods() should keep cards from Link wallet`() = runTest {
+    fun `getPaymentsMethods() should keep cards from Link wallet and dedupe them`() = runTest {
         givenGetPaymentMethodsReturns(
             Result.success(emptyList())
         )
@@ -196,7 +196,7 @@ internal class CustomerRepositoryTest {
             initialCard.copy(
                 id = "pm_4",
                 card = initialCard.card?.copy(
-                    wallet = Wallet.LinkWallet("5000")
+                    wallet = Wallet.LinkWallet("4000")
                 )
             ),
         )
@@ -225,10 +225,9 @@ internal class CustomerRepositoryTest {
             true,
         ).getOrThrow()
 
-        assertThat(result).hasSize(3)
-        assertThat(result[0].id).isEqualTo("pm_1")
-        assertThat(result[1].id).isEqualTo("pm_3")
-        assertThat(result[2].id).isEqualTo("pm_4")
+        assertThat(result).hasSize(2)
+        assertThat(result[0].id).isEqualTo("pm_3")
+        assertThat(result[1].id).isEqualTo("pm_1")
     }
 
     @Test
