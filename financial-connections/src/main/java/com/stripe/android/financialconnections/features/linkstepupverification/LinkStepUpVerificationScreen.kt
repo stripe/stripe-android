@@ -203,7 +203,7 @@ internal fun LinkStepUpVerificationPreview(
     FinancialConnectionsPreview {
         LinkStepUpVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {}

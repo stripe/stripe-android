@@ -417,7 +417,7 @@ internal fun LinkAccountPickerScreenPreview(
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
             state = state,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             bottomSheetState = bottomSheetState,
             onCloseClick = {},
             onCloseFromErrorClick = {},

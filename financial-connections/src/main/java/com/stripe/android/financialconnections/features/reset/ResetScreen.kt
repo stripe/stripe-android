@@ -67,7 +67,7 @@ internal fun ResetScreenPreview() {
     FinancialConnectionsPreview {
         ResetContent(
             payload = Uninitialized,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onCloseClick = {},
             onCloseFromErrorClick = {},
         )

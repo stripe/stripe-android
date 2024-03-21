@@ -149,7 +149,7 @@ internal fun LoadingSpinnerPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    state = TopAppBarState(),
+                    state = TopAppBarState(hideStripeLogo = false),
                     onCloseClick = {},
                 )
             },
@@ -171,7 +171,7 @@ internal fun LoadingShimmerPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    state = TopAppBarState(),
+                    state = TopAppBarState(hideStripeLogo = false),
                     onCloseClick = {},
                 )
             },

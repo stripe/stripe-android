@@ -283,7 +283,7 @@ internal fun SuccessScreenPreview(
             overrideAnimationForPreview = false,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onDoneClick = {},
             onCloseClick = {}
         )
@@ -303,7 +303,7 @@ internal fun SuccessScreenAnimationCompletedPreview(
             overrideAnimationForPreview = true,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onDoneClick = {},
             onCloseClick = {}
         )

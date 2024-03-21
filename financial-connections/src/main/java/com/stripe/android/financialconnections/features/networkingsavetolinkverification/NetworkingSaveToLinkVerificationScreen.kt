@@ -188,7 +188,7 @@ internal fun SaveToLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingSaveToLinkVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onCloseClick = {},
             onSkipClick = {},
             onCloseFromErrorClick = {}

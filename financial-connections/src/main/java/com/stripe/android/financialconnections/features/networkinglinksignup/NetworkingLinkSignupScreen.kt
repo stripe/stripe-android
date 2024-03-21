@@ -394,7 +394,7 @@ internal fun NetworkingLinkSignupScreenPreview(
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = state,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             bottomSheetState = rememberModalBottomSheetState(
                 initialValue = ModalBottomSheetValue.Hidden
             ),

@@ -619,7 +619,7 @@ internal fun InstitutionPickerPreview(
         InstitutionPickerContent(
             listState = listState,
             payload = state.payload,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             institutions = state.searchInstitutions,
             previewText = state.previewText,
             selectedInstitutionId = state.selectedInstitutionId,

@@ -318,7 +318,7 @@ internal fun NoAccountsAvailableErrorContentPreview() {
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    state = TopAppBarState(),
+                    state = TopAppBarState(hideStripeLogo = false),
                     onCloseClick = {},
                 )
             }

@@ -160,7 +160,7 @@ internal fun NetworkingLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingLinkVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onCloseClick = {},
             onCloseFromErrorClick = {}
         )

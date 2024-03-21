@@ -353,7 +353,7 @@ internal fun AccountPickerPreview(
     FinancialConnectionsPreview {
         AccountPickerContent(
             state = state,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onAccountClicked = {},
             onSubmit = {},
             onSelectAnotherBank = {},

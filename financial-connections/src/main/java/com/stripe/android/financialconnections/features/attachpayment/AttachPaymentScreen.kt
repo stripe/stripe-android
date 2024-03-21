@@ -99,7 +99,7 @@ internal fun AttachPaymentScreenPreview() {
     FinancialConnectionsPreview {
         AttachPaymentContent(
             attachPayment = Loading(),
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
             onCloseClick = {},

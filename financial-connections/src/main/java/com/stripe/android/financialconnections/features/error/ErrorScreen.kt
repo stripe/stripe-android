@@ -169,7 +169,7 @@ internal fun ErrorScreenPreview(
     FinancialConnectionsPreview {
         ErrorContent(
             payload = state.payload,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onSelectBankClick = {},
             onManualEntryClick = {},
             onCloseFromErrorClick = {}

@@ -331,7 +331,7 @@ internal fun ContentPreview(
     FinancialConnectionsPreview {
         ConsentContent(
             state = state.second,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = state.second.consent()?.shouldShowMerchantLogos ?: true),
             bottomSheetState = rememberModalBottomSheetState(
                 state.first,
                 skipHalfExpanded = true

@@ -544,7 +544,7 @@ internal fun PartnerAuthPreview(
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
             state = state,
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             inModal = false,
             onClickableTextClick = {},
             onContinueClick = {},
@@ -566,7 +566,7 @@ internal fun PartnerAuthDrawerPreview(
         Box(modifier = Modifier.background(Color.White)) {
             SharedPartnerAuthContent(
                 state = state,
-                topAppBarState = TopAppBarState(),
+                topAppBarState = TopAppBarState(hideStripeLogo = false),
                 inModal = true,
                 onClickableTextClick = {},
                 onContinueClick = {},

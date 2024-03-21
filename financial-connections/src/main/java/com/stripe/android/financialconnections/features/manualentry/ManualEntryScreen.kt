@@ -340,7 +340,7 @@ internal fun ManualEntryPreview(
 ) {
     FinancialConnectionsPreview {
         ManualEntryContent(
-            topAppBarState = TopAppBarState(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             routing = previewState.routing,
             routingError = previewState.routingError,
             account = previewState.account,
