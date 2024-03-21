@@ -49,6 +49,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
@@ -459,11 +460,11 @@ class CustomerSheetViewModelTest {
             val item = awaitItem()
             assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
 
-            val formElements = (item as AddPaymentMethod).formViewData.elements
+            val formElements = item.asAddState().formViewData.elements
 
             assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
             assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
-            assertThat((formElements[1] as SectionElement).fields[0])
+            assertThat(formElements[1].asSectionElement().fields[0])
                 .isInstanceOf(CardBillingAddressElement::class.java)
             assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
         }
@@ -485,11 +486,11 @@ class CustomerSheetViewModelTest {
             val item = awaitItem()
             assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
 
-            val formElements = (item as AddPaymentMethod).formViewData.elements
+            val formElements = item.asAddState().formViewData.elements
 
             assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
             assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
-            assertThat((formElements[1] as SectionElement).fields[0])
+            assertThat(formElements[1].asSectionElement().fields[0])
                 .isInstanceOf(CardBillingAddressElement::class.java)
             assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
         }
@@ -2938,6 +2939,14 @@ class CustomerSheetViewModelTest {
         return CollectBankAccountResultInternal.Completed(
             response = bankAccountResponse,
         )
+    }
+
+    private fun CustomerSheetViewState.asAddState(): AddPaymentMethod {
+        return this as AddPaymentMethod
+    }
+
+    private fun FormElement.asSectionElement(): SectionElement {
+        return this as SectionElement
     }
 
     @Suppress("UNCHECKED_CAST")

@@ -20,8 +20,6 @@ import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.screenshots.FontSize
 import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
@@ -224,80 +222,6 @@ internal class CustomerSheetScreenshotTest {
                     primaryButtonLabel = "Continue",
                     primaryButtonVisible = true,
                     mandateText = "Some mandate text."
-                ),
-                paymentMethodNameProvider = { it!! },
-            )
-        }
-    }
-
-    @Test
-    fun testAddPaymentMethodDisabled() {
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = addPaymentMethodViewState.copy(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
-                    errorMessage = "This is an error message.",
-                ),
-                paymentMethodNameProvider = { it!! },
-            )
-        }
-    }
-
-    @Test
-    fun testAddPaymentMethodEnabled() {
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = addPaymentMethodViewState.copy(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(
-                        completeFormValues = FormFieldValues(
-                            fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
-                            ),
-                            showsMandate = true,
-                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                        )
-                    ),
-                    primaryButtonEnabled = true,
-                ),
-                paymentMethodNameProvider = { it!! },
-            )
-        }
-    }
-
-    @Test
-    fun testAddFirstPaymentMethodDisabled() {
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = addPaymentMethodViewState.copy(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
-                    errorMessage = "This is an error message.",
-                    isFirstPaymentMethod = true
-                ),
-                paymentMethodNameProvider = { it!! },
-            )
-        }
-    }
-
-    @Test
-    fun testAddFirstPaymentMethodEnabled() {
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = addPaymentMethodViewState.copy(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(
-                        completeFormValues = FormFieldValues(
-                            fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
-                            ),
-                            showsMandate = true,
-                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                        )
-                    ),
-                    isFirstPaymentMethod = true,
-                    primaryButtonEnabled = true,
                 ),
                 paymentMethodNameProvider = { it!! },
             )
