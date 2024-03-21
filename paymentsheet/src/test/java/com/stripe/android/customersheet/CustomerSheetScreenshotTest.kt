@@ -96,7 +96,6 @@ internal class CustomerSheetScreenshotTest {
             LpmRepositoryTestHelpers.usBankAccount,
         ),
         selectedPaymentMethod = LpmRepositoryTestHelpers.card,
-        formElements = emptyList(),
         enabled = true,
         isLiveMode = false,
         isProcessing = false,

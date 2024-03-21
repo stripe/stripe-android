@@ -442,7 +442,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod`() = runTest(testDispatcher) {
+    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher
         )
@@ -451,8 +451,29 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isInstanceOf(SelectPaymentMethod::class.java)
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat((item as AddPaymentMethod).formViewData.elements).isNotEmpty()
+        }
+    }
+
+    @Test
+    fun `When CustomerViewAction#OnAddCardPressed & ACHv2 disabled, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
+        featureFlagTestRule.setEnabled(false)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher
+        )
+
+        viewModel.viewState.test {
             assertThat(awaitItem())
-                .isInstanceOf(AddPaymentMethod::class.java)
+                .isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
+            assertThat((item as AddPaymentMethod).formViewData.elements).isNotEmpty()
         }
     }
 
