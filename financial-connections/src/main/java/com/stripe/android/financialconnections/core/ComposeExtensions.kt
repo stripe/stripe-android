@@ -59,7 +59,7 @@ private fun extractActivityFromContext(context: Context): ComponentActivity? {
  */
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
-fun <VM : FinancialConnectionsViewModel<S>, S, A> VM.collectAsState(prop1: KProperty1<S, A>): State<A> {
+internal fun <VM : FinancialConnectionsViewModel<S>, S, A> VM.collectAsState(prop1: KProperty1<S, A>): State<A> {
     val mappedFlow = remember(prop1) { stateFlow.map { prop1.get(it) }.distinctUntilChanged() }
     return mappedFlow.collectAsState(initial = prop1.get(stateFlow.value))
 }
