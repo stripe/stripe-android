@@ -69,7 +69,7 @@ internal data class PaymentMethodMetadata(
             stripeIntent.isLiveMode &&
                 stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
         }.filter { paymentMethodDefinition ->
-            sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code } != null
+            paymentMethodDefinition.uiDefinitionFactory().canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
         }.run {
             if (paymentMethodOrder.isEmpty()) {
                 // Optimization to early out if we don't have a client side order.
@@ -95,22 +95,12 @@ internal data class PaymentMethodMetadata(
         code: String,
     ): SupportedPaymentMethod? {
         val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-        val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
-        return definition.supportedPaymentMethod(
-            sharedDataSpec = sharedDataSpec,
-        )
+        return definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
     }
 
     fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
-        return supportedPaymentMethodDefinitions().mapNotNull { paymentMethodDefinition ->
-            val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == paymentMethodDefinition.type.code }
-            if (sharedDataSpec == null) {
-                null
-            } else {
-                paymentMethodDefinition.supportedPaymentMethod(
-                    sharedDataSpec = sharedDataSpec,
-                )
-            }
+        return supportedPaymentMethodDefinitions().mapNotNull { definition ->
+            definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
         }
     }
 
@@ -188,11 +178,11 @@ internal data class PaymentMethodMetadata(
         paymentMethodExtraParams: PaymentMethodExtraParams?,
     ): List<FormElement>? {
         val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-        val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == code } ?: return null
 
-        return definition.createFormElements(
+        return definition.uiDefinitionFactory().formElements(
             metadata = this,
-            sharedDataSpec = sharedDataSpec,
+            definition = definition,
+            sharedDataSpecs = sharedDataSpecs,
             transformSpecToElements = transformSpecToElements(
                 context = context,
                 requiresMandate = definition.requiresMandate(this),

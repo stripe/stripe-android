@@ -6,11 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
-import com.stripe.android.model.PaymentMethod.Type.Card
-import com.stripe.android.model.PaymentMethod.Type.CashAppPay
-import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.testing.PaymentIntentFactory
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -177,87 +173,11 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify that us_bank_account is supported when is payment intent and financial connections sdk available`() {
-        lpmRepository.getSharedDataSpecs(
-            stripeIntent = PaymentIntentFactory.create(
-                paymentMethodTypes = listOf("us_bank_account")
-            ),
-            serverLpmSpecs = """
-              [
-                {
-                  "type": "us_bank_account"
-                }
-              ]
-            """.trimIndent(),
-        ).verifyContainsTypes("us_bank_account")
-    }
-
-    @Test
     fun `Verify that UPI is supported when it's expected`() {
         lpmRepository.getSharedDataSpecs(
             stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("upi")),
             serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
         ).verifyContainsTypes("upi")
-    }
-
-    @Test
-    fun `Verify LpmRepository filters out USBankAccount if verification method is unsupported`() = runTest {
-        val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
-        ).copy(
-            paymentMethodOptionsJsonString = """
-                {
-                    "us_bank_account": {
-                        "verification_method": "microdeposit"
-                    }
-                }
-            """.trimIndent()
-        )
-
-        lpmRepository.getSharedDataSpecs(
-            stripeIntent = paymentIntent,
-            serverLpmSpecs = null,
-        ).verifyContainsTypes(Card.code, CashAppPay.code)
-    }
-
-    @Test
-    fun `Verify LpmRepository does not filter out USBankAccount if verification method is supported`() = runTest {
-        val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
-        ).copy(
-            paymentMethodOptionsJsonString = """
-                {
-                    "us_bank_account": {
-                        "verification_method": "automatic"
-                    }
-                }
-            """.trimIndent()
-        )
-
-        lpmRepository.getSharedDataSpecs(
-            stripeIntent = paymentIntent,
-            serverLpmSpecs = null,
-        ).verifyContainsTypes(Card.code, USBankAccount.code, CashAppPay.code)
-    }
-
-    @Test
-    fun `Verify LpmRepository does filter out USBankAccount if verification method is not supported`() = runTest {
-        val paymentIntent = PaymentIntentFactory.create(
-            paymentMethodTypes = listOf("card", "us_bank_account", "cashapp"),
-        ).copy(
-            paymentMethodOptionsJsonString = """
-                {
-                    "us_bank_account": {
-                        "verification_method": "something else"
-                    }
-                }
-            """.trimIndent()
-        )
-
-        lpmRepository.getSharedDataSpecs(
-            stripeIntent = paymentIntent,
-            serverLpmSpecs = null,
-        ).verifyContainsTypes(Card.code, CashAppPay.code)
     }
 
     @Test

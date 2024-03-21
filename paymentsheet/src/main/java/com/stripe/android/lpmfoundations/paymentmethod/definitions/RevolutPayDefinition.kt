@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.FormItemSpec
@@ -23,23 +24,23 @@ internal object RevolutPayDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
 
-    override fun supportedPaymentMethod(
-        sharedDataSpec: SharedDataSpec,
-    ): SupportedPaymentMethod {
-        return SupportedPaymentMethod(
-            paymentMethodDefinition = this,
-            sharedDataSpec = sharedDataSpec,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
-        )
-    }
+    override fun uiDefinitionFactory(): UiDefinitionFactory = RevolutPayUiDefinitionFactory
+}
+
+private object RevolutPayUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
+    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+        paymentMethodDefinition = RevolutPayDefinition,
+        sharedDataSpec = sharedDataSpec,
+        displayNameResource = R.string.stripe_paymentsheet_payment_method_revolut_pay,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_revolut_pay,
+    )
 
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
         sharedDataSpec: SharedDataSpec,
         transformSpecToElements: TransformSpecToElements
     ): List<FormElement> {
-        val localLayoutSpecs: List<FormItemSpec> = if (requiresMandate(metadata)) {
+        val localLayoutSpecs: List<FormItemSpec> = if (RevolutPayDefinition.requiresMandate(metadata)) {
             listOf(MandateTextSpec(stringResId = R.string.stripe_revolut_mandate))
         } else {
             emptyList()

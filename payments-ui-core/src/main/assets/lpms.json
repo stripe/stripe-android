@@ -911,11 +911,6 @@
     ]
   },
   {
-    "type": "us_bank_account",
-    "async": true,
-    "fields": []
-  },
-  {
     "type": "grabpay",
     "async": false,
     "fields": [],
