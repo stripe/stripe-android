@@ -175,21 +175,20 @@ fun TextField(
         ),
         loading = loading,
         onValueChange = { newValue ->
-            when (val newTextValue = newValue.text) {
-                value -> {
+            val newTextValue = newValue.text
+
+            if (newTextValue == value) {
+                selection = newValue.selection
+            } else {
+                val acceptInput = fieldState.canAcceptInput(value, newTextValue)
+
+                if (acceptInput) {
                     selection = newValue.selection
-                }
-                else -> {
-                    val acceptInput = fieldState.canAcceptInput(value, newTextValue)
 
-                    if (acceptInput) {
-                        selection = newValue.selection
+                    val newTextState = textFieldController.onValueChange(newTextValue)
 
-                        val newTextState = textFieldController.onValueChange(newTextValue)
-
-                        if (newTextState != null) {
-                            onTextStateChanged(newTextState)
-                        }
+                    if (newTextState != null) {
+                        onTextStateChanged(newTextState)
                     }
                 }
             }
