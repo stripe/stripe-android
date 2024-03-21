@@ -1,7 +1,6 @@
 package com.stripe.android.identity.networking
 
 import android.content.Context
-import android.util.Log
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.core.exception.APIConnectionException
@@ -14,6 +13,7 @@ import com.stripe.android.core.model.parsers.ModelJsonParser
 import com.stripe.android.core.model.parsers.StripeErrorJsonParser
 import com.stripe.android.core.model.parsers.StripeFileJsonParser
 import com.stripe.android.core.networking.AnalyticsRequestV2
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeRequest
@@ -34,7 +34,8 @@ import javax.inject.Inject
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val identityIO: IdentityIO,
-    private val context: Context
+    private val context: Context,
+    private val analyticsRequestExecutor: AnalyticsRequestV2Executor,
 ) : IdentityRepository {
 
     @VisibleForTesting
@@ -239,11 +240,7 @@ internal class DefaultIdentityRepository @Inject constructor(
     )
 
     override suspend fun sendAnalyticsRequest(analyticsRequestV2: AnalyticsRequestV2) {
-        runCatching {
-            stripeNetworkClient.executeRequest(analyticsRequestV2)
-        }.onFailure {
-            Log.e(TAG, "Exception while making analytics request")
-        }
+        analyticsRequestExecutor.enqueue(analyticsRequestV2)
     }
 
     private suspend fun <Response> executeRequestWithKSerializer(
