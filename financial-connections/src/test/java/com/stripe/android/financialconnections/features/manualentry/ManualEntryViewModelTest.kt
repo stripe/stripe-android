@@ -17,7 +17,7 @@ import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.ManualEntryMode
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest

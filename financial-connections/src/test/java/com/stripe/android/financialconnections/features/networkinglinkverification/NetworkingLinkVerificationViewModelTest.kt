@@ -15,7 +15,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType

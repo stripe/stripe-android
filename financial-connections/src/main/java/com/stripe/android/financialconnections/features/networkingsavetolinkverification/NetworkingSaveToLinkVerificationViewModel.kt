@@ -24,7 +24,7 @@ import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.parentViewModel
 import com.stripe.android.uicore.elements.IdentifierSpec

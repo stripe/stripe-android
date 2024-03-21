@@ -19,7 +19,7 @@ import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi

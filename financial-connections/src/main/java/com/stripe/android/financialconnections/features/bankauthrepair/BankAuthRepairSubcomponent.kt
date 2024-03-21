@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.bankauthrepair
 
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 

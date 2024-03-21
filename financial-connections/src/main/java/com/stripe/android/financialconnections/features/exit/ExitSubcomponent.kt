@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.features.exit
 
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 

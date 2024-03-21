@@ -46,8 +46,8 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.Destination.AccountPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.UriUtils

@@ -25,8 +25,8 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest

@@ -2,7 +2,7 @@ package com.stripe.android.financialconnections.presentation
 
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 
 @Suppress("UNUSED_PARAMETER", "UnnecessaryAbstractClass")
 internal abstract class FinancialConnectionsViewModel<S : MavericksState>(

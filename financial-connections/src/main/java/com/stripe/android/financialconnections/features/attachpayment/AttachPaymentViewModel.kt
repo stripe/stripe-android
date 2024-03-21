@@ -20,8 +20,8 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination.ManualEntry
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource.PluralId

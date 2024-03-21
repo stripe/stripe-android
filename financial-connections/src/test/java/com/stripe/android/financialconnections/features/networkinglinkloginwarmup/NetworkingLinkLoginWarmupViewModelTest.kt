@@ -8,8 +8,8 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
-import com.stripe.android.financialconnections.navigation.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.test.runTest
