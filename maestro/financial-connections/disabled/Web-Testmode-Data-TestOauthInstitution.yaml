@@ -1,3 +1,5 @@
+# Disabled until Test Institution is fixed on Edge merchants.
+# https://jira.corp.stripe.com/browse/RUN_BANKCON_AUX-1237
 appId: com.stripe.android.financialconnections.example
 tags:
   - all
