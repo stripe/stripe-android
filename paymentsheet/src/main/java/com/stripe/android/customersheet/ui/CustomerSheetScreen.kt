@@ -73,7 +73,7 @@ internal fun CustomerSheetScreen(
                         PaymentSheetContentPadding()
                     }
                     is CustomerSheetViewState.AddPaymentMethod -> {
-                        AddPaymentMethodWithPaymentElement(
+                        AddPaymentMethod(
                             viewState = viewState,
                             viewActionHandler = viewActionHandler,
                             displayForm = displayAddForm,
@@ -172,7 +172,8 @@ internal fun SelectPaymentMethod(
 }
 
 @Composable
-internal fun AddPaymentMethodWithPaymentElement(
+@Suppress("LongMethod")
+internal fun AddPaymentMethod(
     viewState: CustomerSheetViewState.AddPaymentMethod,
     viewActionHandler: (CustomerSheetViewAction) -> Unit,
     displayForm: Boolean,

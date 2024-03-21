@@ -46,7 +46,11 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import kotlinx.coroutines.test.TestCoroutineScheduler
@@ -454,7 +458,14 @@ class CustomerSheetViewModelTest {
 
             val item = awaitItem()
             assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
-            assertThat((item as AddPaymentMethod).formViewData.elements).isNotEmpty()
+
+            val formElements = (item as AddPaymentMethod).formViewData.elements
+
+            assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
+            assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
+            assertThat((formElements[1] as SectionElement).fields[0])
+                .isInstanceOf(CardBillingAddressElement::class.java)
+            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
         }
     }
 
@@ -473,7 +484,14 @@ class CustomerSheetViewModelTest {
 
             val item = awaitItem()
             assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
-            assertThat((item as AddPaymentMethod).formViewData.elements).isNotEmpty()
+
+            val formElements = (item as AddPaymentMethod).formViewData.elements
+
+            assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
+            assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
+            assertThat((formElements[1] as SectionElement).fields[0])
+                .isInstanceOf(CardBillingAddressElement::class.java)
+            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
         }
     }
 
