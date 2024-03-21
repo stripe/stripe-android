@@ -25,7 +25,7 @@ internal abstract class FinancialConnectionsViewModel<S>(
     ): Job {
         return viewModelScope.launch {
             setState { reducer(Loading) }
-            val result = kotlin.runCatching { this@execute() }
+            val result = runCatching { this@execute() }
             // update state.
             result.fold(
                 onSuccess = { data ->
