@@ -7,6 +7,7 @@ import com.stripe.android.financialconnections.core.Result.Loading
 import com.stripe.android.financialconnections.core.Result.Success
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
@@ -14,7 +15,9 @@ internal abstract class FinancialConnectionsViewModel<S>(
     initialState: S
 ) : ViewModel() {
 
-    val stateFlow: MutableStateFlow<S> = MutableStateFlow(initialState)
+    private val _stateFlow: MutableStateFlow<S> = MutableStateFlow(initialState)
+    val stateFlow: StateFlow<S> = _stateFlow
+
 
     protected open fun <T : Any?> (suspend () -> T).execute(
         reducer: S.(Result<T>) -> S,
@@ -38,9 +41,7 @@ internal abstract class FinancialConnectionsViewModel<S>(
         }
     }
 
-    protected fun setState(reducer: S.() -> S) {
-        stateFlow.update { state -> state.reducer() }
-    }
+    protected fun setState(reducer: S.() -> S) = _stateFlow.update(reducer)
 }
 
 internal sealed class Result<out T>(
