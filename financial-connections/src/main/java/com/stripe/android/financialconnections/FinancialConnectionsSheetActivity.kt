@@ -32,6 +32,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.argsOrNull
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
@@ -103,8 +104,8 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
             viewModel.stateFlow
                 .map { it.viewEffect }
                 .distinctUntilChanged()
+                .filterNotNull()
                 .collect { viewEffect ->
-                    if (viewEffect == null) return@collect
                     when (viewEffect) {
                         is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
                             browserManager.createBrowserIntentForUrl(

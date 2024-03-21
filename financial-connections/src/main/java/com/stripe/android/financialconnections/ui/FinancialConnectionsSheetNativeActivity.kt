@@ -54,6 +54,7 @@ import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
@@ -103,8 +104,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
             viewModel.stateFlow
                 .map { it.viewEffect }
                 .distinctUntilChanged()
+                .filterNotNull()
                 .collect { viewEffect ->
-                    if (viewEffect == null) return@collect
                     when (viewEffect) {
                         is OpenUrl -> startActivity(
                             browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
