@@ -4,6 +4,7 @@
 
 ### PaymentSheet
 * [Added] Support for Klarna with SetupIntents and PaymentIntents with `setup_future_usage`.
+* [FIXED][8142](https://github.com/stripe/stripe-android/pull/8142) Fixed an issue with `CustomerSheet` where the form fields were not displayed when adding a payment method.
 
 ## 20.40.0 - 2024-03-18
 
