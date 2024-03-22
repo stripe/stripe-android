@@ -776,8 +776,9 @@ internal class CustomerSheetViewModel(
             to = CustomerSheetViewState.AddPaymentMethod(
                 paymentMethodCode = paymentMethodCode,
                 supportedPaymentMethods = supportedPaymentMethods,
-                formElements = formElements,
-                formViewData = FormViewModel.ViewData(),
+                formViewData = FormViewModel.ViewData(
+                    elements = formElements
+                ),
                 formArguments = formArguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     onBehalfOf = null,

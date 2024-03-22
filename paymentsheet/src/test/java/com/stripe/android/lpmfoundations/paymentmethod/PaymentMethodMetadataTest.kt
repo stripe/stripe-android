@@ -236,6 +236,23 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `sortedSupportedPaymentMethods keeps us_bank_account without a sharedDataSpec`() {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "us_bank_account"),
+                paymentMethodOptionsJsonString = """{"us_bank_account":{"verification_method":"automatic"}}""",
+            ),
+            sharedDataSpecs = listOf(
+                SharedDataSpec("card"),
+            ),
+        )
+        val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+        assertThat(sortedSupportedPaymentMethods).hasSize(2)
+        assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
+        assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("us_bank_account")
+    }
+
+    @Test
     fun `sortedSupportedPaymentMethods sorts on custom sort`() {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

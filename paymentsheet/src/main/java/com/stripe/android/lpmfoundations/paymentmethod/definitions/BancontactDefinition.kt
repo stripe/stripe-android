@@ -5,6 +5,7 @@ import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -24,16 +25,16 @@ internal object BancontactDefinition : PaymentMethodDefinition {
 
     override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = metadata.hasIntentToSetup()
 
-    override fun supportedPaymentMethod(
-        sharedDataSpec: SharedDataSpec,
-    ): SupportedPaymentMethod {
-        return SupportedPaymentMethod(
-            paymentMethodDefinition = this,
-            sharedDataSpec = sharedDataSpec,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
-        )
-    }
+    override fun uiDefinitionFactory(): UiDefinitionFactory = BancontactUiDefinitionFactory
+}
+
+private object BancontactUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
+    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+        paymentMethodDefinition = BancontactDefinition,
+        sharedDataSpec = sharedDataSpec,
+        displayNameResource = R.string.stripe_paymentsheet_payment_method_bancontact,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_bancontact,
+    )
 
     override fun createFormElements(
         metadata: PaymentMethodMetadata,
