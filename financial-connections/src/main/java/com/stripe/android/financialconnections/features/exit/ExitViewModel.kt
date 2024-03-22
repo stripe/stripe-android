@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
@@ -61,6 +62,10 @@ internal class ExitViewModel @Inject constructor(
                 description = description,
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: ExitState): TopAppBarStateUpdate? {
+        return null
     }
 
     fun onCloseConfirm() = viewModelScope.launch {

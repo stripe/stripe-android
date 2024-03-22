@@ -31,6 +31,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
@@ -62,6 +63,13 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     init {
         logErrors()
         viewModelScope.launch { lookupAndStartVerification() }
+    }
+
+    override fun updateTopAppBar(state: LinkStepUpVerificationState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private suspend fun lookupAndStartVerification() = runCatching {

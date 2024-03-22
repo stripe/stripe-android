@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections.features.attachpayment
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
@@ -16,6 +18,7 @@ import com.stripe.android.financialconnections.features.common.FullScreenGeneric
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.ATTACH_LINKED_PAYMENT_ACCOUNT
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -26,9 +29,11 @@ internal fun AttachPaymentScreen() {
     val viewModel: AttachPaymentViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(enabled = true) {}
     AttachPaymentContent(
         attachPayment = state.value.linkPaymentAccount,
+        topAppBarState = topAppBarState,
         onSelectAnotherBank = viewModel::onSelectAnotherBank,
         onEnterDetailsManually = viewModel::onEnterDetailsManually,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(ATTACH_LINKED_PAYMENT_ACCOUNT) },
@@ -39,6 +44,7 @@ internal fun AttachPaymentScreen() {
 @Composable
 private fun AttachPaymentContent(
     attachPayment: Async<LinkAccountSessionPaymentAccount>,
+    topAppBarState: TopAppBarState,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
     onCloseClick: () -> Unit,
@@ -47,7 +53,7 @@ private fun AttachPaymentContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
+                state = topAppBarState,
                 onCloseClick = onCloseClick
             )
         }
@@ -93,9 +99,11 @@ internal fun AttachPaymentScreenPreview() {
     FinancialConnectionsPreview {
         AttachPaymentContent(
             attachPayment = Loading(),
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onSelectAnotherBank = {},
             onEnterDetailsManually = {},
-            onCloseClick = {}
-        ) {}
+            onCloseClick = {},
+            onCloseFromErrorClick = {},
+        )
     }
 }

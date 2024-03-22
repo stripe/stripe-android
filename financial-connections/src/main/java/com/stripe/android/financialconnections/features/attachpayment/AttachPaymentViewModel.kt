@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -83,6 +84,13 @@ internal class AttachPaymentViewModel @Inject constructor(
             navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
             result
         }.execute { copy(linkPaymentAccount = it) }
+    }
+
+    override fun updateTopAppBar(state: AttachPaymentState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun logErrors() {

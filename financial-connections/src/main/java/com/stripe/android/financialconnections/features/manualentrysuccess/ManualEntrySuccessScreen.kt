@@ -2,6 +2,7 @@ package com.stripe.android.financialconnections.features.manualentrysuccess
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
@@ -14,10 +15,12 @@ internal fun ManualEntrySuccessScreen() {
     val parentViewModel = parentViewModel()
     val viewModel: ManualEntrySuccessViewModel = mavericksViewModel()
     val state by viewModel.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(true) {}
     SuccessContent(
         completeSessionAsync = state.completeSession,
         payloadAsync = state.payload,
+        topAppBarState = topAppBarState,
         onDoneClick = viewModel::onSubmit,
         onCloseClick = {
             parentViewModel.onCloseNoConfirmationClick(

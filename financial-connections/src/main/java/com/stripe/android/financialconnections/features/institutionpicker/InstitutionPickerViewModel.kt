@@ -34,6 +34,7 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
@@ -90,6 +91,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 searchDisabled = manifest.institutionSearchDisabled,
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: InstitutionPickerState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = true,
+            allowElevation = false,
+        )
     }
 
     private fun logErrors() {
