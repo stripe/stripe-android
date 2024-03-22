@@ -13,7 +13,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.mock
 
-class FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
+class FakeLinkConfigurationCoordinator(
+    private val attachNewCardToAccountResult: Result<LinkPaymentDetails> = Result.success(
+        LinkPaymentDetails.New(
+            paymentDetails = ConsumerPaymentDetails.Card(
+                id = "pm_123",
+                last4 = "4242",
+            ),
+            paymentMethodCreateParams = mock(),
+            originalParams = mock(),
+        )
+    ),
+    private val accountStatus: AccountStatus = AccountStatus.SignedOut,
+) : LinkConfigurationCoordinator {
 
     override val component: LinkComponent?
         get() = mock()
@@ -22,7 +34,7 @@ class FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
         get() = flowOf(null)
 
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
-        return flowOf(AccountStatus.SignedOut)
+        return flowOf(accountStatus)
     }
 
     override suspend fun signInWithUserInput(configuration: LinkConfiguration, userInput: UserInput): Result<Boolean> {
@@ -33,16 +45,7 @@ class FakeLinkConfigurationCoordinator : LinkConfigurationCoordinator {
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
     ): Result<LinkPaymentDetails> {
-        return Result.success(
-            LinkPaymentDetails.New(
-                paymentDetails = ConsumerPaymentDetails.Card(
-                    id = "pm_123",
-                    last4 = "4242",
-                ),
-                paymentMethodCreateParams = mock(),
-                originalParams = mock(),
-            )
-        )
+        return attachNewCardToAccountResult
     }
 
     override suspend fun logOut(configuration: LinkConfiguration): Result<ConsumerSession> {

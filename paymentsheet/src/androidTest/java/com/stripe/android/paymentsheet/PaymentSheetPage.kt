@@ -41,6 +41,14 @@ internal class PaymentSheetPage(
         clickViewWithText("Save your info for secure 1-click checkout with Link")
     }
 
+    fun clickOnSaveForFutureUsage(merchantName: String) {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Save for future $merchantName payments", true)
+        clickViewWithText("Save for future $merchantName payments")
+    }
+
     fun clickOnLinkCheckbox() {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -72,8 +80,8 @@ internal class PaymentSheetPage(
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
-        waitForText("Phone number")
-        replaceText("Phone number", phoneNumber)
+        waitForText("Phone number", true)
+        replaceText("Phone number", phoneNumber, true)
     }
 
     fun fillOutLinkName() {
@@ -147,8 +155,8 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
-    fun replaceText(label: String, text: String) {
-        composeTestRule.onNode(hasText(label))
+    fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
+        composeTestRule.onNode(hasText(label, substring = isLabelSubstring))
             .performScrollTo()
             .performTextReplacement(text)
     }

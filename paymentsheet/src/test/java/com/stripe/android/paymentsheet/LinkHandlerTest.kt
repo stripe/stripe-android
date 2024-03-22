@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet
 import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.ReceiveTurbine
 import app.cash.turbine.test
-import app.cash.turbine.testIn
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.LinkActivityResult
@@ -22,6 +21,7 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -280,6 +280,66 @@ class LinkHandlerTest {
     }
 
     @Test
+    fun `payWithLinkInline requests payment is saved if selection requested reuse`() = runLinkInlineTest(
+        accountStatusFlow = MutableSharedFlow(replay = 0),
+        shouldCompleteLinkFlowValues = listOf(false),
+    ) {
+        setupBasicLink()
+
+        handler.processingState.test {
+            ensureAllEventsConsumed()
+
+            payWithLinkInline(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
+            accountStatusFlow.emit(AccountStatus.Verified)
+
+            val linkInlineSelection = assertAndGetInlineLinkSelection(awaitItem())
+
+            assertThat(linkInlineSelection.customerRequestedSave).isEqualTo(
+                PaymentSelection.CustomerRequestedSave.RequestReuse
+            )
+
+            cancelAndConsumeRemainingEvents()
+        }
+
+        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
+        processingStateTurbine.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
+    fun `payWithLinkInline requests payment is not saved if selection doesn't request it`() = runLinkInlineTest(
+        accountStatusFlow = MutableSharedFlow(replay = 0),
+        shouldCompleteLinkFlowValues = listOf(false),
+    ) {
+        setupBasicLink()
+
+        handler.processingState.test {
+            ensureAllEventsConsumed()
+
+            payWithLinkInline(
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+
+            assertThat(awaitItem()).isEqualTo(LinkHandler.ProcessingState.Started)
+            accountStatusFlow.emit(AccountStatus.Verified)
+
+            val linkInlineSelection = assertAndGetInlineLinkSelection(awaitItem())
+
+            assertThat(linkInlineSelection.customerRequestedSave).isEqualTo(
+                PaymentSelection.CustomerRequestedSave.RequestNoReuse
+            )
+
+            cancelAndConsumeRemainingEvents()
+        }
+
+        accountStatusTurbine.cancelAndIgnoreRemainingEvents()
+        processingStateTurbine.cancelAndIgnoreRemainingEvents()
+    }
+
+    @Test
     fun `payWithLinkInline collects payment details in passthrough mode`() = runLinkInlineTest(
         accountStatusFlow = MutableSharedFlow(replay = 0),
         shouldCompleteLinkFlowValues = listOf(false),
@@ -322,10 +382,16 @@ class LinkHandlerTest {
                         paymentMethod = PaymentMethod.Builder()
                             .setId("pm_123")
                             .setCode("card")
-                            .setCard(PaymentMethod.Card(last4 = "4242"))
+                            .setCard(
+                                PaymentMethod.Card(
+                                    last4 = "4242",
+                                    wallet = Wallet.LinkWallet("4242")
+                                )
+                            )
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
+                        requiresSaveOnConfirmation = true,
                     ),
                 )
             )
@@ -491,6 +557,32 @@ class LinkHandlerTest {
 
         accountStatusTurbine.cancelAndIgnoreRemainingEvents()
     }
+
+    private suspend fun LinkInlineTestData.setupBasicLink() {
+        handler.setupLink(
+            state = LinkState(
+                loginState = LinkState.LoginState.LoggedIn,
+                configuration = configuration,
+            )
+        )
+
+        whenever(linkConfigurationCoordinator.signInWithUserInput(any(), any()))
+            .thenReturn(Result.success(true))
+    }
+
+    private suspend fun LinkInlineTestData.payWithLinkInline(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave
+    ) {
+        testScope.launch {
+            handler.payWithLinkInline(
+                UserInput.SignIn(email = "example@example.com"),
+                cardSelection().copy(
+                    customerRequestedSave = customerRequestedSave
+                ),
+                shouldCompleteLinkFlow
+            )
+        }
+    }
 }
 
 // Used to run through both complete flow, and custom flow for link inline tests.
@@ -519,6 +611,19 @@ private fun runLinkInlineTest(
             }
         }
     }
+}
+
+private fun assertAndGetInlineLinkSelection(
+    processingState: LinkHandler.ProcessingState
+): PaymentSelection.New.LinkInline {
+    assertThat(processingState).isInstanceOf(LinkHandler.ProcessingState.PaymentDetailsCollected::class.java)
+
+    val paymentDetailsCollectedState = processingState as LinkHandler.ProcessingState.PaymentDetailsCollected
+    val selection = paymentDetailsCollectedState.paymentSelection
+
+    assertThat(selection).isInstanceOf(PaymentSelection.New.LinkInline::class.java)
+
+    return selection as PaymentSelection.New.LinkInline
 }
 
 private fun runLinkTest(
