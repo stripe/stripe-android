@@ -8,6 +8,7 @@ import com.stripe.android.financialconnections.core.Async.Success
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
@@ -19,7 +20,7 @@ internal abstract class FinancialConnectionsViewModel<S>(
 ) : ViewModel() {
 
     private val _stateFlow: MutableStateFlow<S> = MutableStateFlow(initialState)
-    val stateFlow: StateFlow<S> = _stateFlow
+    val stateFlow: StateFlow<S> = _stateFlow.asStateFlow()
 
     protected open fun <T : Any?> (suspend () -> T).execute(
         onSuccess: (T) -> Unit = {},
