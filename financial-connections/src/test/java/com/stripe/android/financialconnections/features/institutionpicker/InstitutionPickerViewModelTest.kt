@@ -245,7 +245,6 @@ internal class InstitutionPickerViewModelTest {
         val error = InstitutionPlannedDowntimeError(
             institution,
             showManualEntry = true,
-            isToday = true,
             backUpAt = 10000L,
             stripeException = mock()
         )

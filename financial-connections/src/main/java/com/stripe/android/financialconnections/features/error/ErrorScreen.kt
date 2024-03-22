@@ -11,13 +11,16 @@ import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.exception.AccountLoadError
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
+import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
-import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.InstitutionPlannedDowntimeErrorContent
-import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
+import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
+import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -53,7 +56,8 @@ private fun ErrorContent(
             allowManualEntry = payload().allowManualEntry,
             onSelectAnotherBank = onSelectBankClick,
             onEnterDetailsManually = onManualEntryClick,
-            onCloseFromErrorClick = onCloseFromErrorClick
+            onCloseFromErrorClick = onCloseFromErrorClick,
+            onTryAgain = {},
         )
 
         // Something wrong happened while trying to retrieve the error, render the unclassified error
@@ -62,17 +66,19 @@ private fun ErrorContent(
             allowManualEntry = false,
             onSelectAnotherBank = onSelectBankClick,
             onEnterDetailsManually = onManualEntryClick,
-            onCloseFromErrorClick = onCloseFromErrorClick
+            onCloseFromErrorClick = onCloseFromErrorClick,
+            onTryAgain = {},
         )
     }
 }
 
 @Composable
-private fun ErrorContent(
+internal fun ErrorContent(
     error: Throwable,
-    allowManualEntry: Boolean,
+    allowManualEntry: Boolean = (error as? FinancialConnectionsError)?.allowManualEntry ?: false,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
+    onTryAgain: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     when (error) {
@@ -88,8 +94,17 @@ private fun ErrorContent(
             onEnterDetailsManually = onEnterDetailsManually
         )
 
-        is PartnerAuthError -> InstitutionUnknownErrorContent(
-            onSelectAnotherBank = onSelectAnotherBank,
+        is AccountNoneEligibleForPaymentMethodError ->
+            NoSupportedPaymentMethodTypeAccountsErrorContent(
+                exception = error,
+                onSelectAnotherBank = onSelectAnotherBank
+            )
+
+        is AccountLoadError -> NoAccountsAvailableErrorContent(
+            exception = error,
+            onEnterDetailsManually = onEnterDetailsManually,
+            onTryAgain = onTryAgain,
+            onSelectAnotherBank = onSelectAnotherBank
         )
 
         else -> UnclassifiedErrorContent(

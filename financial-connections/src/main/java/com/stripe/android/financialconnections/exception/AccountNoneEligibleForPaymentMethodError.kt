@@ -10,5 +10,6 @@ internal class AccountNoneEligibleForPaymentMethodError(
     stripeException: StripeException,
 ) : FinancialConnectionsError(
     name = "AccountNoneEligibleForPaymentMethodError",
-    stripeException = stripeException
+    stripeException = stripeException,
+    allowManualEntry = false,
 )

@@ -64,7 +64,6 @@ internal class PostAuthorizationSession @Inject constructor(
                 else -> InstitutionPlannedDowntimeError(
                     institution = institution,
                     showManualEntry = showManualEntry,
-                    isToday = true,
                     backUpAt = availableAt.toLong().seconds.inWholeMilliseconds,
                     stripeException = this
                 )

@@ -9,5 +9,6 @@ internal class InstitutionUnplannedDowntimeError(
     stripeException: StripeException
 ) : FinancialConnectionsError(
     name = "InstitutionUnplannedDowntimeError",
-    stripeException = stripeException
+    stripeException = stripeException,
+    allowManualEntry = showManualEntry,
 )
