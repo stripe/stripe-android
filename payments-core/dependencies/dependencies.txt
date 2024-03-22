@@ -313,6 +313,32 @@
 +--- project :stripe-ui-core
 |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.9.22 (*)
 |    +--- project :stripe-core (*)
+|    +--- androidx.activity:activity-ktx:1.8.2
+|    |    +--- androidx.activity:activity:1.8.2 (*)
+|    |    +--- androidx.core:core-ktx:1.9.0 -> 1.12.0 (*)
+|    |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.6.1 -> 2.7.0
+|    |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.7.1 (*)
+|    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.7.0 (*)
+|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 1.9.22 (*)
+|    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1 -> 1.7.3 (*)
+|    |    |    +--- androidx.lifecycle:lifecycle-common:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-runtime:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0 (c)
+|    |    |    +--- androidx.lifecycle:lifecycle-livedata:2.7.0 (c)
+|    |    |    \--- androidx.lifecycle:lifecycle-process:2.7.0 (c)
+|    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1 -> 2.7.0 (*)
+|    |    +--- androidx.savedstate:savedstate-ktx:1.2.1
+|    |    |    +--- androidx.savedstate:savedstate:1.2.1 (*)
+|    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.9.22 (*)
+|    |    |    \--- androidx.savedstate:savedstate:1.2.1 (c)
+|    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 1.9.22 (*)
+|    |    +--- androidx.activity:activity:1.8.2 (c)
+|    |    \--- androidx.activity:activity-compose:1.8.2 (c)
 |    +--- androidx.annotation:annotation:1.7.1 (*)
 |    +--- androidx.core:core-ktx:1.12.0 (*)
 |    +--- androidx.compose.foundation:foundation:1.5.4
@@ -334,32 +360,7 @@
 |    |         |         |         |         \--- androidx.compose.runtime:runtime-saveable:1.5.4 (c)
 |    |         |         |         +--- androidx.compose.ui:ui:1.5.4
 |    |         |         |         |    \--- androidx.compose.ui:ui-android:1.5.4
-|    |         |         |         |         +--- androidx.activity:activity-ktx:1.7.0 -> 1.8.2
-|    |         |         |         |         |    +--- androidx.activity:activity:1.8.2 (*)
-|    |         |         |         |         |    +--- androidx.core:core-ktx:1.9.0 -> 1.12.0 (*)
-|    |         |         |         |         |    +--- androidx.lifecycle:lifecycle-runtime-ktx:2.6.1 -> 2.7.0
-|    |         |         |         |         |    |    +--- androidx.annotation:annotation:1.0.0 -> 1.7.1 (*)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-runtime:2.7.0 (*)
-|    |         |         |         |         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 1.9.22 (*)
-|    |         |         |         |         |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.1 -> 1.7.3 (*)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-common:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-livedata-core:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-livedata-core-ktx:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-livedata-ktx:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-runtime:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-viewmodel:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-viewmodel-savedstate:2.7.0 (c)
-|    |         |         |         |         |    |    +--- androidx.lifecycle:lifecycle-livedata:2.7.0 (c)
-|    |         |         |         |         |    |    \--- androidx.lifecycle:lifecycle-process:2.7.0 (c)
-|    |         |         |         |         |    +--- androidx.lifecycle:lifecycle-viewmodel-ktx:2.6.1 -> 2.7.0 (*)
-|    |         |         |         |         |    +--- androidx.savedstate:savedstate-ktx:1.2.1
-|    |         |         |         |         |    |    +--- androidx.savedstate:savedstate:1.2.1 (*)
-|    |         |         |         |         |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.10 -> 1.9.22 (*)
-|    |         |         |         |         |    |    \--- androidx.savedstate:savedstate:1.2.1 (c)
-|    |         |         |         |         |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.8.22 -> 1.9.22 (*)
-|    |         |         |         |         |    +--- androidx.activity:activity:1.8.2 (c)
-|    |         |         |         |         |    \--- androidx.activity:activity-compose:1.8.2 (c)
+|    |         |         |         |         +--- androidx.activity:activity-ktx:1.7.0 -> 1.8.2 (*)
 |    |         |         |         |         +--- androidx.annotation:annotation:1.5.0 -> 1.7.1 (*)
 |    |         |         |         |         +--- androidx.autofill:autofill:1.0.0
 |    |         |         |         |         |    \--- androidx.core:core:1.1.0 -> 1.12.0 (*)
