@@ -17,24 +17,22 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class SuccessViewModel @Inject constructor(
     initialState: SuccessState,
-    topAppBarHost: TopAppBarHost,
     getCachedAccounts: GetCachedAccounts,
     getManifest: GetManifest,
     private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
-) : FinancialConnectionsViewModel<SuccessState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<SuccessState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         observeAsyncs()
@@ -86,12 +84,11 @@ internal class SuccessViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: SuccessState
         ): SuccessViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .successSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

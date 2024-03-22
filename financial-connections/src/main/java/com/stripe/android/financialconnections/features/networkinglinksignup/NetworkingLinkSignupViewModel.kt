@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
@@ -28,12 +29,11 @@ import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.isCancellationError
-import com.stripe.android.financialconnections.utils.parentViewModel
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
@@ -50,7 +50,7 @@ import javax.inject.Inject
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
-    topAppBarHost: TopAppBarHost,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
     private val uriUtils: UriUtils,
@@ -60,7 +60,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private var searchJob = ConflatedJob()
 
@@ -265,12 +265,11 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: NetworkingLinkSignupState
         ): NetworkingLinkSignupViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .networkingLinkSignupSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

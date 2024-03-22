@@ -2,17 +2,17 @@ package com.stripe.android.financialconnections.features.bankauthrepair
 
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.ViewModelContext
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.utils.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
 internal class BankAuthRepairViewModel @Inject constructor(
     initialState: SharedPartnerAuthState,
-    topAppBarHost: TopAppBarHost,
-) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, topAppBarHost) {
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
 
     internal companion object :
         MavericksViewModelFactory<BankAuthRepairViewModel, SharedPartnerAuthState> {
@@ -24,12 +24,11 @@ internal class BankAuthRepairViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: SharedPartnerAuthState
         ): BankAuthRepairViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .bankAuthRepairSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

@@ -25,11 +25,10 @@ import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
-import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -38,7 +37,6 @@ import javax.inject.Inject
 
 internal class ManualEntryViewModel @Inject constructor(
     initialState: ManualEntryState,
-    topAppBarHost: TopAppBarHost,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val successContentRepository: SuccessContentRepository,
@@ -46,7 +44,7 @@ internal class ManualEntryViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ManualEntryState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<ManualEntryState>(initialState, nativeAuthFlowCoordinator) {
 
     // Keep form fields outside of State for immediate updates.
     private var _routing: String? by mutableStateOf(null)
@@ -167,12 +165,11 @@ internal class ManualEntryViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ManualEntryState
         ): ManualEntryViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .manualEntryBuilder
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

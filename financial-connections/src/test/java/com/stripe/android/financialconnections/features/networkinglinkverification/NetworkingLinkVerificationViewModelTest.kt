@@ -12,10 +12,10 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -43,7 +43,7 @@ class NetworkingLinkVerificationViewModelTest {
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val topAppBarHost = mock<TopAppBarHost>()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel(
         state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()
@@ -56,7 +56,7 @@ class NetworkingLinkVerificationViewModelTest {
         analyticsTracker = analyticsTracker,
         logger = Logger.noop(),
         initialState = state,
-        topAppBarHost = topAppBarHost,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test

@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.manualentry
 
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -14,9 +13,6 @@ internal interface ManualEntrySubcomponent {
 
         @BindsInstance
         fun initialState(initialState: ManualEntryState): Builder
-
-        @BindsInstance
-        fun topAppBarHost(host: TopAppBarHost): Builder
 
         fun build(): ManualEntrySubcomponent
     }

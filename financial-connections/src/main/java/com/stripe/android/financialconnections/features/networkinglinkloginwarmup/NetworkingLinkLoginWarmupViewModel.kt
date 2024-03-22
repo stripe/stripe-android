@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -20,21 +21,20 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.utils.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     initialState: NetworkingLinkLoginWarmupState,
-    topAppBarHost: TopAppBarHost,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleError: HandleError,
     private val getManifest: GetManifest,
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager
-) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -117,12 +117,11 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: NetworkingLinkLoginWarmupState
         ): NetworkingLinkLoginWarmupViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .networkingLinkLoginWarmupSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

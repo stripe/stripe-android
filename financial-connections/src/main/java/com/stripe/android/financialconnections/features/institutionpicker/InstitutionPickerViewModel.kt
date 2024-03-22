@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -33,12 +34,11 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
-import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -55,8 +55,8 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
     initialState: InstitutionPickerState,
-    topAppBarHost: TopAppBarHost,
-) : FinancialConnectionsViewModel<InstitutionPickerState>(initialState, topAppBarHost) {
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+) : FinancialConnectionsViewModel<InstitutionPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     private var searchJob = ConflatedJob()
 
@@ -246,12 +246,11 @@ internal class InstitutionPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: InstitutionPickerState
         ): InstitutionPickerViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .institutionPickerBuilder
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

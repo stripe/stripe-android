@@ -16,20 +16,18 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.utils.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import javax.inject.Inject
 
 internal class ResetViewModel @Inject constructor(
     initialState: ResetState,
-    topAppBarHost: TopAppBarHost,
     private val linkMoreAccounts: LinkMoreAccounts,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ResetState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<ResetState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -64,12 +62,11 @@ internal class ResetViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ResetState
         ): ResetViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .resetSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

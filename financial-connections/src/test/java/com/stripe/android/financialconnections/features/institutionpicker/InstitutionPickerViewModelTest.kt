@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -19,7 +20,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,7 +49,7 @@ internal class InstitutionPickerViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val postAuthorizationSession = mock<PostAuthorizationSession>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val topAppBarHost = mock<TopAppBarHost>()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val defaultConfiguration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
@@ -70,7 +70,7 @@ internal class InstitutionPickerViewModelTest {
             postAuthorizationSession = postAuthorizationSession,
             handleError = handleError,
             initialState = state,
-            topAppBarHost = topAppBarHost,
+            nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         )
     }
 

@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -14,9 +13,6 @@ internal interface ConsentSubcomponent {
 
         @BindsInstance
         fun initialState(state: ConsentState): Builder
-
-        @BindsInstance
-        fun topAppBarHost(host: TopAppBarHost): Builder
 
         fun build(): ConsentSubcomponent
     }

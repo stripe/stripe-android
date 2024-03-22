@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
@@ -19,7 +20,6 @@ import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationIntent
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -49,7 +49,7 @@ class NetworkingLinkSignupViewModelTest {
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val sync = mock<SynchronizeFinancialConnectionsSession>()
-    private val topAppBarHost = mock<TopAppBarHost>()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState
@@ -64,7 +64,7 @@ class NetworkingLinkSignupViewModelTest {
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         sync = sync,
         saveAccountToLink = saveAccountToLink,
-        topAppBarHost = topAppBarHost,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test

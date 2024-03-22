@@ -12,12 +12,12 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.navigation.Destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -45,7 +45,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val getManifest = mock<GetManifest>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val topAppBarHost = mock<TopAppBarHost>()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel(
         state: NetworkingSaveToLinkVerificationState = NetworkingSaveToLinkVerificationState()
@@ -61,7 +61,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         getManifest = getManifest,
         logger = Logger.noop(),
         initialState = state,
-        topAppBarHost = topAppBarHost,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test

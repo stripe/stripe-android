@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
@@ -34,18 +35,17 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.measureTimeMillis
-import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
 internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
-    topAppBarHost: TopAppBarHost,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
@@ -53,7 +53,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
-) : FinancialConnectionsViewModel<AccountPickerState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -317,12 +317,11 @@ internal class AccountPickerViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: AccountPickerState
         ): AccountPickerViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .accountPickerBuilder
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

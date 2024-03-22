@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -47,11 +48,10 @@ import com.stripe.android.financialconnections.navigation.Destination.AccountPic
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
-import com.stripe.android.financialconnections.utils.parentViewModel
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -74,8 +74,8 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
     initialState: SharedPartnerAuthState,
-    topAppBarHost: TopAppBarHost,
-) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, topAppBarHost) {
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         handleErrors()
@@ -448,12 +448,11 @@ internal class PartnerAuthViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: SharedPartnerAuthState
         ): PartnerAuthViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .partnerAuthSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

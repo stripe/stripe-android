@@ -13,6 +13,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -21,17 +22,16 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import com.stripe.android.financialconnections.utils.measureTimeMillis
-import com.stripe.android.financialconnections.utils.parentViewModel
 import javax.inject.Inject
 
 internal class AttachPaymentViewModel @Inject constructor(
     initialState: AttachPaymentState,
-    topAppBarHost: TopAppBarHost,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val successContentRepository: SuccessContentRepository,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -40,7 +40,7 @@ internal class AttachPaymentViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val logger: Logger
-) : FinancialConnectionsViewModel<AttachPaymentState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<AttachPaymentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -111,12 +111,11 @@ internal class AttachPaymentViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: AttachPaymentState
         ): AttachPaymentViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .attachPaymentSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

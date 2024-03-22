@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -26,7 +27,6 @@ import com.stripe.android.financialconnections.model.ReturningNetworkingUserAcco
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -53,7 +53,7 @@ class LinkAccountPickerViewModelTest {
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val topAppBarHost = mock<TopAppBarHost>()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel(
         state: LinkAccountPickerState
@@ -70,7 +70,7 @@ class LinkAccountPickerViewModelTest {
         initialState = state,
         handleClickableUrl = mock(),
         coreAuthorizationPendingNetworkingRepair = mock(),
-        topAppBarHost = topAppBarHost,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test

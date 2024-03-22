@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -22,7 +23,6 @@ import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSessi
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
@@ -58,7 +58,7 @@ internal class PartnerAuthViewModelTest {
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
     private val handleError = TestHandleError()
-    private val topAppBarHost = mock<TopAppBarHost>()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     @Test
     fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
@@ -298,7 +298,7 @@ internal class PartnerAuthViewModelTest {
             uriUtils = UriUtils(Logger.noop(), mock()),
             handleError = handleError,
             applicationId = applicationId,
-            topAppBarHost = topAppBarHost,
+            nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         )
     }
 }

@@ -15,23 +15,22 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
-import com.stripe.android.financialconnections.utils.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ErrorViewModel @Inject constructor(
     initialState: ErrorState,
-    topAppBarHost: TopAppBarHost,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val coordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val errorRepository: FinancialConnectionsErrorRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ErrorState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<ErrorState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -107,11 +106,11 @@ internal class ErrorViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ErrorState
         ): ErrorViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .errorSubcomponent
-                .create(state, parentViewModel)
+                .create(state)
                 .viewModel
         }
 

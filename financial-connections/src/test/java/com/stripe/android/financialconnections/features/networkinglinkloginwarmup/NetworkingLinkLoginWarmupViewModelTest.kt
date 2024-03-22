@@ -5,11 +5,11 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.test.runTest
@@ -29,7 +29,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     private val handleError = TestHandleError()
     private val disableNetworking = mock<DisableNetworking>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val topAppBarHost = mock<TopAppBarHost>()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel(
         state: NetworkingLinkLoginWarmupState
@@ -40,7 +40,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         disableNetworking = disableNetworking,
         eventTracker = eventTracker,
         initialState = state,
-        topAppBarHost = topAppBarHost,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test

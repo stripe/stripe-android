@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.exit
 
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -13,7 +12,6 @@ internal interface ExitSubcomponent {
     interface Factory {
         fun create(
             @BindsInstance initialState: ExitState,
-            @BindsInstance topAppBarHost: TopAppBarHost,
         ): ExitSubcomponent
     }
 }

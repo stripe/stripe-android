@@ -13,7 +13,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -37,7 +36,6 @@ internal class SuccessViewModelTest {
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
-    private val topAppBarHost = mock<TopAppBarHost>()
 
     private fun buildViewModel(
         state: SuccessState
@@ -49,7 +47,6 @@ internal class SuccessViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         successContentRepository = TestSuccessContentRepository(),
         getCachedAccounts = getCachedAccounts,
-        topAppBarHost = topAppBarHost,
     )
 
     @Test

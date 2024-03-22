@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -14,9 +13,6 @@ internal interface LinkStepUpVerificationSubcomponent {
 
         @BindsInstance
         fun initialState(initialState: LinkStepUpVerificationState): Builder
-
-        @BindsInstance
-        fun topAppBarHost(host: TopAppBarHost): Builder
 
         fun build(): LinkStepUpVerificationSubcomponent
     }

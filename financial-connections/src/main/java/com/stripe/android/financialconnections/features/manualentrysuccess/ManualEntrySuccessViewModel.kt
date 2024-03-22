@@ -14,21 +14,19 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.utils.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ManualEntrySuccessViewModel @Inject constructor(
     initialState: ManualEntrySuccessState,
-    topAppBarHost: TopAppBarHost,
     private val getManifest: GetManifest,
     private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-) : FinancialConnectionsViewModel<ManualEntrySuccessState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<ManualEntrySuccessState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         suspend {
@@ -59,12 +57,11 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: ManualEntrySuccessState
         ): ManualEntrySuccessViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .manualEntrySuccessBuilder
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }

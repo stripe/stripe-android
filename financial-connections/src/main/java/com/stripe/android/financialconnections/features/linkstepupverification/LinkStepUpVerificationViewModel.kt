@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -30,9 +31,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.utils.parentViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -45,7 +45,7 @@ import javax.inject.Inject
 
 internal class LinkStepUpVerificationViewModel @Inject constructor(
     initialState: LinkStepUpVerificationState,
-    topAppBarHost: TopAppBarHost,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
@@ -57,7 +57,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<LinkStepUpVerificationState>(initialState, topAppBarHost) {
+) : FinancialConnectionsViewModel<LinkStepUpVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -212,12 +212,11 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             viewModelContext: ViewModelContext,
             state: LinkStepUpVerificationState
         ): LinkStepUpVerificationViewModel {
-            val parentViewModel = viewModelContext.parentViewModel()
-            return parentViewModel
+            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
+                .viewModel
                 .activityRetainedComponent
                 .linkStepUpVerificationSubcomponent
                 .initialState(state)
-                .topAppBarHost(parentViewModel)
                 .build()
                 .viewModel
         }
