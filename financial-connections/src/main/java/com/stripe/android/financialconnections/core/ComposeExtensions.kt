@@ -7,9 +7,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.stripe.android.core.utils.ContextUtils.extractActivityFromContext
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.uicore.utils.extractActivity
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlin.reflect.KProperty1
@@ -28,7 +28,7 @@ internal inline fun <reified T : FinancialConnectionsViewModel<S>, S> paneViewMo
  */
 @Composable
 internal fun parentActivity(): FinancialConnectionsSheetNativeActivity {
-    return extractActivityFromContext(LocalContext.current) as FinancialConnectionsSheetNativeActivity
+    return LocalContext.current.extractActivity() as FinancialConnectionsSheetNativeActivity
 }
 
 /**
