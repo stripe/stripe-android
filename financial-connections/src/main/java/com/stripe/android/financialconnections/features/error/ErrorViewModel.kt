@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.error
 
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
@@ -16,6 +15,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -23,13 +23,14 @@ import javax.inject.Inject
 
 internal class ErrorViewModel @Inject constructor(
     initialState: ErrorState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val coordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val errorRepository: FinancialConnectionsErrorRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<ErrorState>(initialState) {
+) : FinancialConnectionsViewModel<ErrorState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()

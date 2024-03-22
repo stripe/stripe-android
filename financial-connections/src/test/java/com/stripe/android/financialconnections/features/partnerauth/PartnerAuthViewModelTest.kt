@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -57,6 +58,7 @@ internal class PartnerAuthViewModelTest {
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
     private val handleError = TestHandleError()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     @Test
     fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
@@ -295,7 +297,8 @@ internal class PartnerAuthViewModelTest {
             browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
             handleError = handleError,
-            applicationId = applicationId
+            applicationId = applicationId,
+            nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         )
     }
 }

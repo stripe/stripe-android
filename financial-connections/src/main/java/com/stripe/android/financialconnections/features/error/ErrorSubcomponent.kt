@@ -10,6 +10,8 @@ internal interface ErrorSubcomponent {
 
     @Subcomponent.Factory
     interface Factory {
-        fun create(@BindsInstance initialState: ErrorState): ErrorSubcomponent
+        fun create(
+            @BindsInstance initialState: ErrorState,
+        ): ErrorSubcomponent
     }
 }

@@ -11,6 +11,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -36,6 +37,7 @@ internal class AccountPickerViewModelTest {
     private val navigationManager = mock<NavigationManager>()
     private val selectAccounts = mock<SelectAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
 
     private fun buildViewModel(
         state: AccountPickerState
@@ -47,7 +49,8 @@ internal class AccountPickerViewModelTest {
         navigationManager = navigationManager,
         logger = Logger.noop(),
         handleClickableUrl = mock(),
-        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts
+        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test
