@@ -117,7 +117,7 @@ private fun ConsentContent(
         Uninitialized, Loading -> ConsentLoadingContent()
 
         is Success -> LoadedContent(
-            payload = result.value,
+            payload = result(),
             bottomSheetState = bottomSheetState,
             acceptConsent = state.acceptConsent,
             bottomSheetMode = state.currentBottomSheet,

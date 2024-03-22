@@ -60,6 +60,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private var searchJob = ConflatedJob()
 
     init {
+        logErrors()
         suspend {
             val manifest = getOrFetchSync().manifest
             val (featuredInstitutions: InstitutionResponse, duration: Long) = runCatching {
@@ -87,8 +88,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 featuredInstitutions = featuredInstitutions,
                 searchDisabled = manifest.institutionSearchDisabled,
             )
-        }.execute(
-            reducer = { result -> copy(payload = result) },
+        }.execute { copy(payload = it) }
+    }
+
+    private fun logErrors() {
+        onAsync(
+            InstitutionPickerState::payload,
             onSuccess = { payload ->
                 eventTracker.track(PaneLoaded(PANE))
                 eventTracker.track(
@@ -102,6 +107,28 @@ internal class InstitutionPickerViewModel @Inject constructor(
             onFail = {
                 handleError(
                     extraMessage = "Error fetching initial payload",
+                    error = it,
+                    pane = PANE,
+                    displayErrorScreen = true
+                )
+            }
+        )
+        onAsync(
+            InstitutionPickerState::searchInstitutions,
+            onFail = {
+                handleError(
+                    extraMessage = "Error searching institutions",
+                    error = it,
+                    pane = PANE,
+                    displayErrorScreen = false // don't show error screen for search errors.
+                )
+            }
+        )
+        onAsync(
+            InstitutionPickerState::createSessionForInstitution,
+            onFail = {
+                handleError(
+                    extraMessage = "Error selecting or creating session for institution",
                     error = it,
                     pane = PANE,
                     displayErrorScreen = true
@@ -136,17 +163,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
                     showManualEntry = false
                 )
             }
-        }.execute(
-            reducer = { copy(searchInstitutions = if (it.isCancellationError()) Loading else it) },
-            onFail = {
-                handleError(
-                    extraMessage = "Error searching institutions",
-                    error = it,
-                    pane = PANE,
-                    displayErrorScreen = false // don't show error screen for search errors.
-                )
-            }
-        )
+        }.execute {
+            copy(searchInstitutions = if (it.isCancellationError()) Loading else it)
+        }
     }
 
     fun onInstitutionSelected(institution: FinancialConnectionsInstitution, fromFeatured: Boolean) {
@@ -172,22 +191,12 @@ internal class InstitutionPickerViewModel @Inject constructor(
             // navigate to next step
             val authSession = postAuthorizationSession(institution, getOrFetchSync())
             navigateToPartnerAuth(authSession)
-        }.execute(
-            reducer = { result ->
-                copy(
-                    selectedInstitutionId = institution.id.takeIf { result is Loading },
-                    createSessionForInstitution = result
-                )
-            },
-            onFail = {
-                handleError(
-                    extraMessage = "Error selecting or creating session for institution",
-                    error = it,
-                    pane = PANE,
-                    displayErrorScreen = true
-                )
-            }
-        )
+        }.execute { async ->
+            copy(
+                selectedInstitutionId = institution.id.takeIf { async is Loading },
+                createSessionForInstitution = async
+            )
+        }
     }
 
     /**

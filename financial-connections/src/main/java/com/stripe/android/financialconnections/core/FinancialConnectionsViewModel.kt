@@ -8,8 +8,11 @@ import com.stripe.android.financialconnections.core.Async.Success
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlin.reflect.KProperty1
 
 internal abstract class FinancialConnectionsViewModel<S>(
     initialState: S
@@ -19,9 +22,9 @@ internal abstract class FinancialConnectionsViewModel<S>(
     val stateFlow: StateFlow<S> = _stateFlow
 
     protected open fun <T : Any?> (suspend () -> T).execute(
-        reducer: S.(Async<T>) -> S,
         onSuccess: (T) -> Unit = {},
-        onFail: (Throwable) -> Unit = {}
+        onFail: (Throwable) -> Unit = {},
+        reducer: S.(Async<T>) -> S
     ): Job {
         return viewModelScope.launch {
             setState { reducer(Loading) }
@@ -40,6 +43,25 @@ internal abstract class FinancialConnectionsViewModel<S>(
         }
     }
 
+    protected open fun <T> onAsync(
+        prop: KProperty1<S, Async<T>>,
+        onSuccess: (T) -> Unit = {},
+        onFail: (Throwable) -> Unit = {}
+    ) {
+        viewModelScope.launch {
+            stateFlow.map { prop.get(it) }
+                .distinctUntilChanged()
+                .collect { async ->
+                    when (async) {
+                        is Success -> onSuccess(async())
+                        is Fail -> onFail(async.error)
+                        Loading -> Unit
+                        Async.Uninitialized -> Unit
+                    }
+                }
+        }
+    }
+
     protected fun setState(reducer: S.() -> S) = _stateFlow.update(reducer)
 }
 
@@ -51,6 +73,7 @@ internal sealed class Async<out T>(
     data class Success<out T>(private val value: T) : Async<T>(value = value) {
         override operator fun invoke(): T = value
     }
+
     data class Fail<out T>(val error: Throwable) : Async<T>(value = null)
 
     open operator fun invoke(): T? = value

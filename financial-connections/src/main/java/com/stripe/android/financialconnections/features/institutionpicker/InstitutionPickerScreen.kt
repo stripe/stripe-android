@@ -142,7 +142,7 @@ private fun InstitutionPickerContent(
                 onQueryChanged = onQueryChanged,
                 institutions = institutions,
                 onInstitutionSelected = onInstitutionSelected,
-                payload = payload.value,
+                payload = payload(),
                 onManualEntryClick = onManualEntryClick,
                 onScrollChanged = onScrollChanged
             )
