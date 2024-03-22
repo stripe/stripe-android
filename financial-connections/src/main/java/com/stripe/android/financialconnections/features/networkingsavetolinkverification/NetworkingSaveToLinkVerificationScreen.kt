@@ -14,10 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
@@ -87,8 +91,15 @@ private fun NetworkingSaveToLinkVerificationLoaded(
 ) {
     val lazyListState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
-    val focusRequester: FocusRequester = remember { FocusRequester() }
     val textInputService = LocalTextInputService.current
+
+    val focusRequester: FocusRequester = remember { FocusRequester() }
+    var shouldRequestFocus by rememberSaveable { mutableStateOf(false) }
+
+    if (shouldRequestFocus) {
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    }
+
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {
             focusManager.clearFocus(true)
@@ -96,7 +107,11 @@ private fun NetworkingSaveToLinkVerificationLoaded(
             textInputService?.hideSoftwareKeyboard()
         }
     }
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    if (shouldRequestFocus) {
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    }
+
     if (confirmVerificationAsync is Fail && confirmVerificationAsync.error !is ConfirmVerification.OTPError) {
         UnclassifiedErrorContent { onCloseFromErrorClick(confirmVerificationAsync.error) }
     } else {
@@ -110,7 +125,10 @@ private fun NetworkingSaveToLinkVerificationLoaded(
                         focusRequester = focusRequester,
                         otpElement = payload.otpElement,
                         enabled = confirmVerificationAsync !is Loading,
-                        confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
+                        confirmVerificationError = (confirmVerificationAsync as? Fail)?.error,
+                        modifier = Modifier.onGloballyPositioned {
+                            shouldRequestFocus = true
+                        },
                     )
                 }
                 if (confirmVerificationAsync is Loading) {

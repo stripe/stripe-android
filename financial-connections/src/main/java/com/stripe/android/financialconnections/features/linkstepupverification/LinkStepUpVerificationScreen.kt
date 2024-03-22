@@ -17,10 +17,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
@@ -96,9 +100,15 @@ private fun LinkStepUpVerificationLoaded(
     onClickableTextClick: (String) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val focusRequester: FocusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
     val textInputService = LocalTextInputService.current
+
+    val focusRequester: FocusRequester = remember { FocusRequester() }
+    var shouldRequestFocus by rememberSaveable { mutableStateOf(false) }
+
+    if (shouldRequestFocus) {
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    }
+
     LaunchedEffect(submitLoading) {
         if (submitLoading) {
             focusManager.clearFocus(true)
@@ -106,6 +116,7 @@ private fun LinkStepUpVerificationLoaded(
             textInputService?.hideSoftwareKeyboard()
         }
     }
+
     if (submitError != null && submitError !is OTPError) {
         UnclassifiedErrorContent { onCloseFromErrorClick(submitError) }
     } else {
@@ -121,7 +132,10 @@ private fun LinkStepUpVerificationLoaded(
                         focusRequester = focusRequester,
                         otpElement = payload.otpElement,
                         enabled = !submitLoading,
-                        confirmVerificationError = submitError
+                        confirmVerificationError = submitError,
+                        modifier = Modifier.onGloballyPositioned {
+                            shouldRequestFocus = true
+                        },
                     )
                 }
                 item {
