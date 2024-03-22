@@ -126,8 +126,9 @@ internal data class PopupPayload(
                     country = merchantCountryCode,
                 ),
                 customerInfo = CustomerInfo(
-                    email = customerInfo?.email,
-                    country = customerInfo?.billingCountryCode ?: merchantCountryCode,
+                    email = customerInfo.email,
+                    country = customerInfo.billingCountryCode
+                        ?: context.currentLocale(),
                 ),
                 paymentInfo = stripeIntent.toPaymentInfo(),
                 appId = context.applicationInfo.packageName,
