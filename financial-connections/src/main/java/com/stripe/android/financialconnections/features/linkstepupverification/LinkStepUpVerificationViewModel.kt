@@ -17,10 +17,10 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.StartVerificationError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
@@ -54,7 +54,8 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val markLinkStepUpVerified: MarkLinkStepUpVerified,
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val handleError: HandleError,
 ) : MavericksViewModel<LinkStepUpVerificationState>(initialState) {
 
     init {
@@ -111,22 +112,22 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error fetching payload",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )
         onAsync(
             LinkStepUpVerificationState::confirmVerification,
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error confirming verification",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )

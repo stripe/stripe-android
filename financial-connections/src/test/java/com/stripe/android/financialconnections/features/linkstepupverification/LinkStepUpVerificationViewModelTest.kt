@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -64,7 +65,8 @@ class LinkStepUpVerificationViewModelTest {
         updateLocalManifest = updateLocalManifest,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         logger = Logger.noop(),
-        initialState = state
+        handleError = TestHandleError(),
+        initialState = state,
     )
 
     @Test

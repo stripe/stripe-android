@@ -34,7 +34,6 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -105,8 +104,7 @@ private fun ManualEntryContent(
         }
     ) {
         when (payload) {
-            is Loading, Uninitialized -> FullScreenGenericLoading()
-            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
+            is Loading, Uninitialized, is Fail -> FullScreenGenericLoading()
 
             is Success -> when (payload().customManualEntry) {
                 true -> FullScreenGenericLoading()

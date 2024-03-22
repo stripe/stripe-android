@@ -6,6 +6,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.ViewModelContext
+import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
@@ -16,6 +17,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -37,10 +39,12 @@ internal class ErrorViewModel @Inject constructor(
             // Clear the partner web auth state if it exists, so that if the user lands back in the partner_auth
             // pane after an error, they will be able to start over.
             coordinator().emit(Message.ClearPartnerWebAuth)
+            val errorState = errorRepository.get()
             ErrorState.Payload(
-                error = requireNotNull(errorRepository.get()),
+                error = requireNotNull(errorState.error),
                 disableLinkMoreAccounts = getManifest().disableLinkMoreAccounts,
-                allowManualEntry = getManifest().allowManualEntry
+                allowManualEntry = getManifest().allowManualEntry,
+                allowRetry = errorState.retryPane != null,
             )
         }.execute { copy(payload = it) }
     }
@@ -94,6 +98,14 @@ internal class ErrorViewModel @Inject constructor(
         }
     }
 
+    fun onTryAgain() {
+        withState(errorRepository) { state ->
+            val retryPane = state.retryPane ?: return@withState
+            val destination = retryPane.destination(referrer = PANE)
+            navigationManager.tryNavigateTo(destination)
+        }
+    }
+
     override fun onCleared() {
         errorRepository.clear()
         super.onCleared()
@@ -123,6 +135,7 @@ internal data class ErrorState(
     data class Payload(
         val error: Throwable,
         val disableLinkMoreAccounts: Boolean,
-        val allowManualEntry: Boolean
+        val allowManualEntry: Boolean,
+        val allowRetry: Boolean,
     )
 }

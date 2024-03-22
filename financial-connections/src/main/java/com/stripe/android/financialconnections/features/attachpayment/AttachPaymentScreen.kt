@@ -4,10 +4,7 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.exception.AccountNumberRetrievalError
@@ -52,17 +49,7 @@ private fun AttachPaymentContent(
             )
         }
     ) {
-        when (attachPayment) {
-            is Loading,
-            is Uninitialized,
-            is Success -> FullScreenGenericLoading()
-            is Fail -> ErrorContent(
-                error = attachPayment.error,
-                onSelectAnotherBank = onSelectAnotherBank,
-                onEnterDetailsManually = onEnterDetailsManually,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
-        }
+        FullScreenGenericLoading()
     }
 }
 

@@ -12,6 +12,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
@@ -36,7 +37,8 @@ internal class ConsentViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
-    private val logger: Logger
+    private val logger: Logger,
+    private val handleError: HandleError,
 ) : MavericksViewModel<ConsentState>(initialState) {
 
     init {
@@ -59,7 +61,14 @@ internal class ConsentViewModel @Inject constructor(
         onAsync(
             ConsentState::consent,
             onSuccess = { eventTracker.track(PaneLoaded(Pane.CONSENT)) },
-            onFail = { logger.error("Error retrieving consent content", it) }
+            onFail = { error ->
+                handleError(
+                    extraMessage = "Error retrieving consent content",
+                    error = error,
+                    pane = Pane.CONSENT,
+                    displayErrorScreen = true,
+                )
+            }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
             eventTracker.logError(

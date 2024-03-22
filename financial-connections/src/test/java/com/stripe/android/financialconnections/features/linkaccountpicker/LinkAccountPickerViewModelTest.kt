@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
@@ -26,6 +25,7 @@ import com.stripe.android.financialconnections.model.ReturningNetworkingUserAcco
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -58,7 +58,6 @@ class LinkAccountPickerViewModelTest {
     ) = LinkAccountPickerViewModel(
         navigationManager = navigationManager,
         getSync = getSync,
-        logger = Logger.noop(),
         eventTracker = eventTracker,
         getCachedConsumerSession = getCachedConsumerSession,
         fetchNetworkedAccounts = fetchNetworkedAccounts,
@@ -67,7 +66,8 @@ class LinkAccountPickerViewModelTest {
         updateCachedAccounts = updateCachedAccounts,
         initialState = state,
         handleClickableUrl = mock(),
-        coreAuthorizationPendingNetworkingRepair = mock()
+        coreAuthorizationPendingNetworkingRepair = mock(),
+        handleError = TestHandleError(),
     )
 
     @Test

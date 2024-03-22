@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.ManualEntryMode
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.test.runTest
@@ -45,6 +46,7 @@ class ManualEntryViewModelTest {
         pollAttachPaymentAccount = pollAttachPaymentAccount,
         successContentRepository = TestSuccessContentRepository(),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        handleError = TestHandleError(),
     )
 
     @Test

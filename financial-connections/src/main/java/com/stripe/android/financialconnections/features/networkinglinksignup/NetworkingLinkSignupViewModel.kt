@@ -17,6 +17,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
@@ -57,7 +58,8 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val handleError: HandleError,
 ) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
 
     private var searchJob = ConflatedJob()
@@ -145,11 +147,11 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                eventTracker.logError(
+                handleError(
                     extraMessage = "Error fetching payload",
                     error = error,
-                    logger = logger,
-                    pane = PANE
+                    pane = PANE,
+                    displayErrorScreen = true,
                 )
             },
         )

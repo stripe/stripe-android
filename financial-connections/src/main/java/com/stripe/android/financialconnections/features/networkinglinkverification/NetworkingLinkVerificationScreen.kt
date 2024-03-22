@@ -69,14 +69,12 @@ private fun NetworkingLinkVerificationContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> FullScreenGenericLoading()
+            Uninitialized, is Loading, is Fail -> FullScreenGenericLoading()
             is Success -> NetworkingLinkVerificationLoaded(
                 payload = payload(),
                 confirmVerificationAsync = state.confirmVerification,
                 onCloseFromErrorClick = onCloseFromErrorClick
             )
-
-            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }

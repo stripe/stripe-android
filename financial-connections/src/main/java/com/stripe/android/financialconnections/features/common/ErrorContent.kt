@@ -285,9 +285,9 @@ internal fun ErrorContent(
             Column(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                secondaryCta?.let { (text, onClick) ->
+                primaryCta?.let { (text, onClick) ->
                     FinancialConnectionsButton(
-                        type = FinancialConnectionsButton.Type.Secondary,
+                        type = FinancialConnectionsButton.Type.Primary,
                         onClick = onClick,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -295,9 +295,10 @@ internal fun ErrorContent(
                         Text(text = text)
                     }
                 }
-                primaryCta?.let { (text, onClick) ->
+
+                secondaryCta?.let { (text, onClick) ->
                     FinancialConnectionsButton(
-                        type = FinancialConnectionsButton.Type.Primary,
+                        type = FinancialConnectionsButton.Type.Secondary,
                         onClick = onClick,
                         modifier = Modifier
                             .fillMaxWidth()

@@ -4,14 +4,10 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsState
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -44,10 +40,7 @@ private fun ResetContent(
             )
         }
     ) {
-        when (payload) {
-            Uninitialized, is Loading, is Success -> FullScreenGenericLoading()
-            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
-        }
+        FullScreenGenericLoading()
     }
 }
 

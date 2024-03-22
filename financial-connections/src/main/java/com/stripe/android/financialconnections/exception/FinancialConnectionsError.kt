@@ -9,6 +9,7 @@ import com.stripe.android.core.exception.StripeException
 internal abstract class FinancialConnectionsError(
     val name: String,
     val stripeException: StripeException,
+    val allowRetry: Boolean = false,
 ) : StripeException(
     stripeException.stripeError,
     stripeException.requestId,
@@ -25,9 +26,11 @@ internal abstract class FinancialConnectionsError(
         requestId: String? = null,
         statusCode: Int = 0,
         cause: Throwable? = null,
-        message: String? = stripeError?.message
+        message: String? = stripeError?.message,
+        allowRetry: Boolean = false,
     ) : this(
         name = name,
+        allowRetry = allowRetry,
         stripeException = object : StripeException(
             stripeError = stripeError,
             requestId = requestId,

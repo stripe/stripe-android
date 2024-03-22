@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.utils.TestHandleError
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -47,7 +48,8 @@ internal class AccountPickerViewModelTest {
         navigationManager = navigationManager,
         logger = Logger.noop(),
         handleClickableUrl = mock(),
-        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts
+        pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts,
+        handleError = TestHandleError(),
     )
 
     @Test

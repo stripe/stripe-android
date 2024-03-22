@@ -10,5 +10,6 @@ internal class AccountLoadError(
     stripeException: StripeException
 ) : FinancialConnectionsError(
     name = "AccountLoadError",
-    stripeException = stripeException
+    stripeException = stripeException,
+    allowRetry = canRetry,
 )

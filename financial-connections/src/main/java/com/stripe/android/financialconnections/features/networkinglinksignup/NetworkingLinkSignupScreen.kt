@@ -52,7 +52,6 @@ import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
-import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
@@ -170,7 +169,7 @@ private fun NetworkingLinkSignupMainContent(
         }
     ) {
         when (val payload = state.payload) {
-            Uninitialized, is Loading -> FullScreenGenericLoading()
+            Uninitialized, is Loading, is Fail -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
                 scrollState = scrollState,
                 validForm = state.valid,
@@ -182,8 +181,6 @@ private fun NetworkingLinkSignupMainContent(
                 onClickableTextClick = onClickableTextClick,
                 onSkipClick = onSkipClick
             )
-
-            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }
