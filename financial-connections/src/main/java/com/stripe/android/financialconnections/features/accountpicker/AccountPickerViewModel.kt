@@ -19,12 +19,16 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenBottomSheet
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerViewAction.OnAccountClicked
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerViewAction.OnClickableTextClicked
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerViewAction.OnSubmitClicked
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -36,6 +40,11 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsErrorAction
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsErrorAction.Close
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsErrorAction.EnterDetailsManually
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsErrorAction.SelectAnotherBank
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsErrorAction.TryAgain
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.error
@@ -54,7 +63,8 @@ internal class AccountPickerViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
-    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
+    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
+    private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, topAppBarHost) {
 
     init {
@@ -69,6 +79,29 @@ internal class AccountPickerViewModel @Inject constructor(
             allowBackNavigation = false,
             error = state.payload.error,
         )
+    }
+
+    fun handleViewAction(action: AccountPickerViewAction) {
+        when (action) {
+            is OnAccountClicked -> onAccountClicked(action.account)
+            is OnClickableTextClicked -> onClickableTextClick(action.text)
+            is OnSubmitClicked -> onSubmit()
+        }
+    }
+
+    override fun handleErrorAction(action: FinancialConnectionsErrorAction) {
+        when (action) {
+            is Close -> onCloseWithError(action.error)
+            is EnterDetailsManually -> onEnterDetailsManually()
+            is SelectAnotherBank -> selectAnotherBank()
+            is TryAgain -> onLoadAccountsAgain()
+        }
+    }
+
+    private fun onCloseWithError(error: Throwable) {
+        viewModelScope.launch {
+            nativeAuthFlowCoordinator().emit(NativeAuthFlowCoordinator.Message.CloseWithError(error))
+        }
     }
 
     private fun loadAccounts() {
@@ -192,7 +225,7 @@ internal class AccountPickerViewModel @Inject constructor(
         )
     }
 
-    fun onAccountClicked(account: PartnerAccount) = withState { state ->
+    private fun onAccountClicked(account: PartnerAccount) = withState { state ->
         state.payload()?.let { payload ->
             val selectedIds = state.selectedIds
             val newSelectedIds = when (payload.selectionMode) {
@@ -243,7 +276,7 @@ internal class AccountPickerViewModel @Inject constructor(
         }
     }
 
-    fun onSubmit() {
+    private fun onSubmit() {
         viewModelScope.launch {
             eventTracker.track(ClickLinkAccounts(PANE))
         }
@@ -288,13 +321,13 @@ internal class AccountPickerViewModel @Inject constructor(
         }
     }
 
-    fun selectAnotherBank() =
+    private fun selectAnotherBank() =
         navigationManager.tryNavigateTo(Reset(referrer = PANE))
 
-    fun onEnterDetailsManually() =
+    private fun onEnterDetailsManually() =
         navigationManager.tryNavigateTo(ManualEntry(referrer = PANE))
 
-    fun onLoadAccountsAgain() {
+    private fun onLoadAccountsAgain() {
         setState { copy(canRetry = false) }
         loadAccounts()
     }

@@ -48,7 +48,6 @@ internal class ErrorPreviewParameterProvider :
                 error = InstitutionPlannedDowntimeError(
                     institution = institution(),
                     showManualEntry = true,
-                    isToday = true,
                     backUpAt = 10000L,
                     stripeException = APIException()
                 ),
