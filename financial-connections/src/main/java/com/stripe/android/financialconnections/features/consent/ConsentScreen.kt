@@ -17,6 +17,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -30,13 +31,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
@@ -45,6 +45,7 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.consent.ui.ConsentLogoHeader
 import com.stripe.android.financialconnections.model.ConsentPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -66,10 +67,9 @@ import kotlinx.coroutines.launch
 @ExperimentalMaterialApi
 @Composable
 internal fun ConsentScreen() {
-    // update step state when manifest changes
-    val viewModel: ConsentViewModel = mavericksViewModel()
+    val viewModel: ConsentViewModel = paneViewModel { ConsentViewModel.factory(it) }
     val parentViewModel = parentViewModel()
-    val state = viewModel.collectAsState()
+    val state = viewModel.stateFlow.collectAsState()
 
     val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
@@ -113,20 +113,21 @@ private fun ConsentContent(
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    when (val consent = state.consent) {
-        Uninitialized, is Loading -> ConsentLoadingContent()
+    when (val result = state.consent) {
+        Uninitialized, Loading -> ConsentLoadingContent()
+
         is Success -> LoadedContent(
-            payload = consent(),
-            bottomSheetMode = state.currentBottomSheet,
-            acceptConsent = state.acceptConsent,
+            payload = result(),
             bottomSheetState = bottomSheetState,
+            acceptConsent = state.acceptConsent,
+            bottomSheetMode = state.currentBottomSheet,
             onClickableTextClick = onClickableTextClick,
+            onContinueClick = onContinueClick,
             onCloseClick = onCloseClick,
-            onConfirmModalClick = onConfirmModalClick,
-            onContinueClick = onContinueClick
+            onConfirmModalClick = onConfirmModalClick
         )
 
-        is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(consent.error) }
+        is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(result.error) }
     }
 }
 
@@ -147,7 +148,7 @@ private fun ConsentLoadingContent() {
 @Composable
 private fun ConsentMainContent(
     payload: ConsentState.Payload,
-    acceptConsent: Async<Unit>,
+    acceptConsent: Async<FinancialConnectionsSessionManifest>,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit
@@ -230,7 +231,7 @@ private fun LazyListScope.consentBody(
 private fun LoadedContent(
     payload: ConsentState.Payload,
     bottomSheetState: ModalBottomSheetState,
-    acceptConsent: Async<Unit>,
+    acceptConsent: Async<FinancialConnectionsSessionManifest>,
     onContinueClick: () -> Unit,
     onCloseClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
@@ -271,7 +272,7 @@ private fun LoadedContent(
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 private fun ConsentFooter(
-    acceptConsent: Async<Unit>,
+    acceptConsent: Async<FinancialConnectionsSessionManifest>,
     consent: ConsentPane,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,

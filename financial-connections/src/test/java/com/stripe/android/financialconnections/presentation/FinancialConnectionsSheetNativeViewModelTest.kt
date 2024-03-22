@@ -2,13 +2,13 @@ package com.stripe.android.financialconnections.presentation
 
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
@@ -38,6 +38,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -50,7 +51,7 @@ import kotlin.test.assertIs
 internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
@@ -87,7 +88,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
             messagesFlow.emit(Complete(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
 
-            withState(viewModel) {
+            viewModel.stateFlow.value.let {
                 require(it.viewEffect is Finish)
                 require(it.viewEffect.result is Failed)
                 assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
@@ -107,7 +108,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         messagesFlow.emit(Complete(null))
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             require(it.viewEffect is Finish)
             require(it.viewEffect.result is Completed)
         }
@@ -133,7 +134,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         messagesFlow.emit(Complete(null))
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             require(it.viewEffect is Finish)
             require(it.viewEffect.result is Canceled)
         }
@@ -165,7 +166,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         messagesFlow.emit(Complete(null))
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             require(it.viewEffect is Finish)
             require(it.viewEffect.result is Failed)
         }
@@ -186,7 +187,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/$applicationId?status=success")
         viewModel.handleOnNewIntent(intent)
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             assertThat(it.webAuthFlow).isEqualTo(WebAuthFlowState.Success(intent.data!!.toString()))
         }
     }
@@ -201,7 +202,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
         viewModel.handleOnNewIntent(intent)
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Failed>(webAuthFlow)
             assertThat(webAuthFlow.reason).isEqualTo(errorReason)
@@ -217,7 +218,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
         viewModel.handleOnNewIntent(intent)
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Failed>(webAuthFlow)
         }
@@ -232,7 +233,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
         viewModel.handleOnNewIntent(intent)
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Success>(webAuthFlow)
         }
@@ -245,7 +246,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/$applicationId?status=unknown")
         viewModel.handleOnNewIntent(intent)
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
@@ -258,7 +259,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/$applicationId?status=cancel")
         viewModel.handleOnNewIntent(intent)
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
@@ -271,7 +272,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/other-app-id?code=success")
         viewModel.handleOnNewIntent(intent)
 
-        withState(viewModel) {
+        viewModel.stateFlow.value.let {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
@@ -286,10 +287,11 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     private fun createViewModel(
         initialState: FinancialConnectionsSheetNativeState = FinancialConnectionsSheetNativeState(
-            FinancialConnectionsSheetNativeActivityArgs(
+            args = FinancialConnectionsSheetNativeActivityArgs(
                 configuration = configuration,
                 initialSyncResponse = ApiKeyFixtures.syncResponse(),
-            )
+            ),
+            savedState = null
         )
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = mock(),
@@ -300,6 +302,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
         navigationManager = TestNavigationManager(),
+        savedStateHandle = SavedStateHandle(),
         initialState = initialState
     )
 }

@@ -36,6 +36,6 @@
     <ID>SwallowedException:PostAuthorizationSession.kt$PostAuthorizationSession$e: StripeException</ID>
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepositoryImpl : FinancialConnectionsManifestRepository</ID>
-    <ID>TooManyFunctions:FinancialConnectionsSheetNativeViewModel.kt$FinancialConnectionsSheetNativeViewModel : MavericksViewModel</ID>
+    <ID>TooManyFunctions:FinancialConnectionsSheetNativeViewModel.kt$FinancialConnectionsSheetNativeViewModel : FinancialConnectionsViewModel</ID>
   </CurrentIssues>
 </SmellBaseline>
