@@ -53,9 +53,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -128,8 +126,8 @@ fun TextFieldSection(
  * attribute of [textFieldController] is also taken into account to decide if the UI should be
  * enabled.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
+@Suppress("LongMethod")
 fun TextField(
     textFieldController: TextFieldController,
     enabled: Boolean,
@@ -176,20 +174,17 @@ fun TextField(
         loading = loading,
         onValueChange = { newValue ->
             val newTextValue = newValue.text
+            val acceptInput = fieldState.canAcceptInput(value, newTextValue)
 
-            if (newTextValue == value) {
+            if (newTextValue == value || acceptInput) {
                 selection = newValue.selection
-            } else {
-                val acceptInput = fieldState.canAcceptInput(value, newTextValue)
+            }
 
-                if (acceptInput) {
-                    selection = newValue.selection
+            if (acceptInput) {
+                val newTextState = textFieldController.onValueChange(newTextValue)
 
-                    val newTextState = textFieldController.onValueChange(newTextValue)
-
-                    if (newTextState != null) {
-                        onTextStateChanged(newTextState)
-                    }
+                if (newTextState != null) {
+                    onTextStateChanged(newTextState)
                 }
             }
         },
@@ -211,7 +206,6 @@ fun TextField(
             .focusRequester(focusRequester)
             .semantics {
                 this.contentDescription = contentDescription
-                this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
         label = label?.let {

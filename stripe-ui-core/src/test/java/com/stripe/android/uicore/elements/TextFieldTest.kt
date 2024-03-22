@@ -12,6 +12,7 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasInsertTextAtCursorAction
 import androidx.compose.ui.test.hasRequestFocusAction
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.isFocused
 import androidx.compose.ui.test.junit4.createComposeRule
@@ -36,7 +37,7 @@ class TextFieldTest {
     val composeTestRule = createComposeRule()
 
     @Test
-    fun `On initial value passed, selection should be at the start of the field`() {
+    fun `On initial value passed, selection should be at the end of the field`() {
         composeTestRule.setContent {
             TestTextField(initialValue = "A1B")
         }
@@ -58,6 +59,7 @@ class TextFieldTest {
         textField.performTextInput("C")
 
         textField.assert(hasTextSelection(TextRange(5)))
+        textField.assert(hasText("A1B2C"))
     }
 
     @Test
@@ -74,6 +76,7 @@ class TextFieldTest {
         textField.performTextInput("C")
 
         textField.assert(hasTextSelection(TextRange(3)))
+        textField.assert(hasText("A2C1B"))
     }
 
     @Test
@@ -85,6 +88,7 @@ class TextFieldTest {
         val textField = composeTestRule.onNodeWithTag(TEST_TAG)
 
         textField.performTextInput("A1B2C3")
+        textField.assert(hasText("A1B2C3"))
 
         textField.performTextInputSelection(TextRange(4))
         textField.assert(hasTextSelection(TextRange(4)))
@@ -99,7 +103,10 @@ class TextFieldTest {
     @Test
     fun `On text complete and attempted input, selection should not change`() {
         composeTestRule.setContent {
-            TestTextField(initialValue = null)
+            TestTextField(
+                initialValue = null,
+                maxInputLength = 6
+            )
         }
 
         val textField = composeTestRule.onNodeWithTag(TEST_TAG)
@@ -108,12 +115,15 @@ class TextFieldTest {
         textField.performTextInput("D4E")
 
         textField.assert(hasTextSelection(TextRange(6)))
+        textField.assert(hasText("A1B2C3"))
     }
 
     @Test
     fun `On text complete and attempted input from middle of text, selection should not change`() {
         composeTestRule.setContent {
-            TestTextField(initialValue = null)
+            TestTextField(
+                initialValue = null,
+            )
         }
 
         val textField = composeTestRule.onNodeWithTag(TEST_TAG)
@@ -123,15 +133,19 @@ class TextFieldTest {
         textField.performTextInput("D4E")
 
         textField.assert(hasTextSelection(TextRange(3)))
+        textField.assert(hasText("A1B2C3"))
     }
 
     @Composable
-    private fun TestTextField(initialValue: String?) {
+    private fun TestTextField(
+        initialValue: String?,
+        maxInputLength: Int = 6,
+    ) {
         TextField(
             modifier = Modifier.testTag(TEST_TAG),
             textFieldController = SimpleTextFieldController(
                 textFieldConfig = TestTextFieldConfig(
-                    maxInputLength = MAX_INPUT_LENGTH
+                    maxInputLength = maxInputLength
                 ),
                 initialValue = initialValue
             ),
@@ -198,6 +212,5 @@ class TextFieldTest {
     companion object {
         private const val TEST_TAG = "CORE_TEXT_FIELD"
         private const val ERROR_ON_FAIL = "Failed to perform text selection."
-        private const val MAX_INPUT_LENGTH = 6
     }
 }
