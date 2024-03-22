@@ -55,6 +55,8 @@ dependencies {
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines
