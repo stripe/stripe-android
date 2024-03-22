@@ -37,5 +37,6 @@
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepositoryImpl : FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsSheetNativeViewModel.kt$FinancialConnectionsSheetNativeViewModel : MavericksViewModel</ID>
+    <ID>TooManyFunctions:FinancialConnectionsSheetSharedModule.kt$FinancialConnectionsSheetSharedModule$Companion</ID>
   </CurrentIssues>
 </SmellBaseline>
