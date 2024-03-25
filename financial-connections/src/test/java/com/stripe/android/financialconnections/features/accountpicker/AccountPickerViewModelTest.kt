@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
@@ -68,7 +67,7 @@ internal class AccountPickerViewModelTest {
 
             val viewModel = buildViewModel(AccountPickerState())
 
-            withState(viewModel) { state ->
+            viewModel.stateFlow.value.let { state ->
                 assertEquals(state.payload()!!.skipAccountSelection, true)
             }
         }
@@ -91,7 +90,7 @@ internal class AccountPickerViewModelTest {
 
         val viewModel = buildViewModel(AccountPickerState())
 
-        withState(viewModel) { state ->
+        viewModel.stateFlow.value.let { state ->
             val payload = state.payload()!!
             assertEquals(payload.skipAccountSelection, true)
             assertEquals(payload.shouldSkipPane, true)
@@ -118,7 +117,7 @@ internal class AccountPickerViewModelTest {
 
             val viewModel = buildViewModel(AccountPickerState())
 
-            withState(viewModel) { state ->
+            viewModel.stateFlow.value.let { state ->
                 assertEquals(state.payload()!!.userSelectedSingleAccountInInstitution, true)
                 assertEquals(state.payload()!!.shouldSkipPane, true)
             }
@@ -144,7 +143,7 @@ internal class AccountPickerViewModelTest {
 
         val viewModel = buildViewModel(AccountPickerState())
 
-        withState(viewModel) { state ->
+        viewModel.stateFlow.value.let { state ->
             assertThat(state.selectedIds).isEqualTo(setOf("selectable"))
         }
 
@@ -178,7 +177,7 @@ internal class AccountPickerViewModelTest {
 
         val viewModel = buildViewModel(AccountPickerState())
 
-        withState(viewModel) { state ->
+        viewModel.stateFlow.value.let { state ->
             assertThat(state.selectedIds).isEqualTo(setOf("selectable_1", "selectable_2"))
         }
 

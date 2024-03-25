@@ -164,7 +164,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 )
             }
         }.execute {
-            copy(searchInstitutions = if (it.isCancellationError()) Loading else it)
+            copy(searchInstitutions = if (it.isCancellationError()) Loading() else it)
         }
     }
 

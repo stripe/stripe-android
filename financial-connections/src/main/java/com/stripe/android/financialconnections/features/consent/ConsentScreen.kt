@@ -114,7 +114,8 @@ private fun ConsentContent(
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (val result = state.consent) {
-        Uninitialized, Loading -> ConsentLoadingContent()
+        Uninitialized,
+        is Loading -> ConsentLoadingContent()
 
         is Success -> LoadedContent(
             payload = result(),

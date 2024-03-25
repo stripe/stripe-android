@@ -1,12 +1,9 @@
 package com.stripe.android.financialconnections.repository
 
-import com.airbnb.mvrx.ExperimentalMavericksApi
-import com.airbnb.mvrx.MavericksRepository
-import com.airbnb.mvrx.MavericksState
-import com.stripe.android.financialconnections.BuildConfig
 import com.stripe.android.financialconnections.repository.SuccessContentRepository.State
 import com.stripe.android.financialconnections.ui.TextResource
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 internal interface SuccessContentRepository {
@@ -15,21 +12,16 @@ internal interface SuccessContentRepository {
 
     data class State(
         val customSuccessMessage: TextResource? = null
-    ) : MavericksState
+    )
 }
 
-@OptIn(ExperimentalMavericksApi::class)
-internal class SuccessContentRepositoryImpl @Inject constructor(
-    coroutineScope: CoroutineScope
-) : SuccessContentRepository, MavericksRepository<State>(
-    initialState = State(),
-    coroutineScope = coroutineScope,
-    performCorrectnessValidations = BuildConfig.DEBUG,
-) {
+internal class SuccessContentRepositoryImpl @Inject constructor() : SuccessContentRepository {
 
-    override suspend fun get() = awaitState()
+    private val state = MutableStateFlow(State())
+
+    override suspend fun get() = state.value
 
     override fun update(reducer: State.() -> State) {
-        setState(reducer)
+        state.update { reducer(it) }
     }
 }
