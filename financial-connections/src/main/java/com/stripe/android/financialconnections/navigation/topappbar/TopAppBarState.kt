@@ -24,7 +24,6 @@ internal data class TopAppBarState(
     }
 }
 
-// TODO(tillh-stripe) Consider `pendingError` or similar for account picker screen
 internal data class TopAppBarStateUpdate(
     val pane: Pane,
     val hideStripeLogo: Boolean? = null,
