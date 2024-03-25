@@ -48,7 +48,8 @@ data class AnalyticsRequestV2 private constructor(
     private val clientId: String,
     private val origin: String,
     private val created: Double,
-    private val params: JsonElement,
+    @get:VisibleForTesting
+    val params: JsonElement,
 ) : StripeRequest() {
 
     // Note: nested params are calculated as a json string, which is different from other requests
