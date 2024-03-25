@@ -6,7 +6,6 @@ import com.stripe.android.core.BuildConfig
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object FeatureFlags {
     val customerSheetACHv2 = FeatureFlag()
-    val workManagerForAnalytics = FeatureFlag()
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.features.common.enableWorkManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import dagger.Binds
@@ -147,8 +148,12 @@ internal interface FinancialConnectionsSheetSharedModule {
 
         @Provides
         @Singleton
-        internal fun providesIsWorkManagerAvailable(): IsWorkManagerAvailable {
-            return RealIsWorkManagerAvailable
+        internal fun providesIsWorkManagerAvailable(
+            getManifest: GetManifest,
+        ): IsWorkManagerAvailable {
+            return RealIsWorkManagerAvailable(
+                isEnabledForMerchant = { getManifest().enableWorkManager() },
+            )
         }
 
         @Provides
