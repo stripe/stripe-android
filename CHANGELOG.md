@@ -2,7 +2,7 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
-## 20.41.0 - 2024-03-25
+## 20.40.2 - 2024-03-25
 
 ### PaymentSheet
 * [Fixed][8147](https://github.com/stripe/stripe-android/pull/8147) Use device locale in Link popup request rather than merchant locale for customer billing country.
