@@ -20,7 +20,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .bankAuthRepairSubcomponent
-                        .initialState(SharedPartnerAuthState(pane = PANE, savedState = null))
+                        .initialState(SharedPartnerAuthState(pane = PANE))
                         .build()
                         .viewModel
                 }

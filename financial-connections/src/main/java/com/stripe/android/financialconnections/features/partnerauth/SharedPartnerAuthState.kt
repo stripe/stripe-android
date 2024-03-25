@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import android.os.Bundle
 import com.stripe.android.financialconnections.core.Async
 import com.stripe.android.financialconnections.core.Async.Fail
 import com.stripe.android.financialconnections.core.Async.Loading
@@ -11,19 +10,13 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsInstitu
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 
 internal data class SharedPartnerAuthState(
-    /**
-     * The active auth session id. Used across process kills to prevent re-creating the session
-     * if one is already active.
-     */
-    val activeAuthSession: String?,
     val pane: Pane,
     val payload: Async<Payload>,
     val viewEffect: ViewEffect?,
     val authenticationStatus: Async<AuthenticationStatus>,
 ) {
 
-    constructor(pane: Pane, savedState: Bundle?) : this(
-        activeAuthSession = savedState?.getString(KEY_ACTIVE_AUTH_SESSION),
+    constructor(pane: Pane) : this(
         pane = pane,
         payload = Uninitialized,
         viewEffect = null,
@@ -70,10 +63,5 @@ internal data class SharedPartnerAuthState(
 
     internal enum class ClickableText(val value: String) {
         DATA("stripe://data-access-notice"),
-    }
-
-    companion object {
-        const val KEY_SAVED_STATE = "SharedPartnerAuthState"
-        const val KEY_ACTIVE_AUTH_SESSION = "activeAuthSession"
     }
 }

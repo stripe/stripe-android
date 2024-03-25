@@ -46,7 +46,6 @@ internal class PartnerAuthPreviewParameterProvider :
         ),
         authenticationStatus = Uninitialized,
         viewEffect = null,
-        activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
     )
 
@@ -54,7 +53,6 @@ internal class PartnerAuthPreviewParameterProvider :
         payload = Loading(),
         authenticationStatus = Uninitialized,
         viewEffect = null,
-        activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
     )
 
@@ -78,7 +76,6 @@ internal class PartnerAuthPreviewParameterProvider :
         // While browser is showing, this Async is loading.
         authenticationStatus = Loading(),
         viewEffect = null,
-        activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
     )
 
