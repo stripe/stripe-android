@@ -79,7 +79,6 @@ internal class PartnerAuthViewModelTest {
                 pane = Pane.PARTNER_AUTH,
                 displayErrorScreen = true
             )
-
         }
 
     @Test
