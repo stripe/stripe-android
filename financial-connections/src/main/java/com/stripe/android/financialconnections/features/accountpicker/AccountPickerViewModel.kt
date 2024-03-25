@@ -181,7 +181,7 @@ internal class AccountPickerViewModel @Inject constructor(
         )
     }
 
-    fun onAccountClicked(account: PartnerAccount) = stateFlow.value.let { state ->
+    fun onAccountClicked(account: PartnerAccount) = withState { state ->
         state.payload()?.let { payload ->
             val selectedIds = state.selectedIds
             val newSelectedIds = when (payload.selectionMode) {
@@ -237,7 +237,7 @@ internal class AccountPickerViewModel @Inject constructor(
             eventTracker.track(ClickLinkAccounts(PANE))
         }
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
-        stateFlow.value.let { state ->
+        withState { state ->
             state.payload()?.let {
                 submitAccounts(
                     selectedIds = state.selectedIds,

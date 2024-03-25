@@ -9,6 +9,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.core.withState
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts
@@ -67,7 +68,7 @@ internal class AccountPickerViewModelTest {
 
             val viewModel = buildViewModel(AccountPickerState())
 
-            viewModel.stateFlow.value.let { state ->
+            withState(viewModel) { state ->
                 assertEquals(state.payload()!!.skipAccountSelection, true)
             }
         }
@@ -90,7 +91,7 @@ internal class AccountPickerViewModelTest {
 
         val viewModel = buildViewModel(AccountPickerState())
 
-        viewModel.stateFlow.value.let { state ->
+        withState(viewModel) { state ->
             val payload = state.payload()!!
             assertEquals(payload.skipAccountSelection, true)
             assertEquals(payload.shouldSkipPane, true)
@@ -117,7 +118,7 @@ internal class AccountPickerViewModelTest {
 
             val viewModel = buildViewModel(AccountPickerState())
 
-            viewModel.stateFlow.value.let { state ->
+            withState(viewModel) { state ->
                 assertEquals(state.payload()!!.userSelectedSingleAccountInInstitution, true)
                 assertEquals(state.payload()!!.shouldSkipPane, true)
             }
@@ -143,7 +144,7 @@ internal class AccountPickerViewModelTest {
 
         val viewModel = buildViewModel(AccountPickerState())
 
-        viewModel.stateFlow.value.let { state ->
+        withState(viewModel) { state ->
             assertThat(state.selectedIds).isEqualTo(setOf("selectable"))
         }
 
@@ -177,7 +178,7 @@ internal class AccountPickerViewModelTest {
 
         val viewModel = buildViewModel(AccountPickerState())
 
-        viewModel.stateFlow.value.let { state ->
+        withState(viewModel) { state ->
             assertThat(state.selectedIds).isEqualTo(setOf("selectable_1", "selectable_2"))
         }
 

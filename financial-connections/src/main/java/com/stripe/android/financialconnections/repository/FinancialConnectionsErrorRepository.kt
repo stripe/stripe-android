@@ -1,17 +1,15 @@
 package com.stripe.android.financialconnections.repository
 
 import com.airbnb.mvrx.MavericksState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 
 internal class FinancialConnectionsErrorRepository {
 
-    private val state = MutableStateFlow(State())
+    private var state = State()
 
-    suspend fun get() = state.value.error
+    fun get() = state.error
 
     fun update(reducer: State.() -> State) {
-        state.update { reducer(it) }
+        state = reducer(state)
     }
 
     fun set(error: Throwable) {

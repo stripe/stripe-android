@@ -2,8 +2,6 @@ package com.stripe.android.financialconnections.repository
 
 import com.stripe.android.financialconnections.repository.SuccessContentRepository.State
 import com.stripe.android.financialconnections.ui.TextResource
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 internal interface SuccessContentRepository {
@@ -17,11 +15,11 @@ internal interface SuccessContentRepository {
 
 internal class SuccessContentRepositoryImpl @Inject constructor() : SuccessContentRepository {
 
-    private val state = MutableStateFlow(State())
+    private var state = State()
 
-    override suspend fun get() = state.value
+    override suspend fun get() = state
 
     override fun update(reducer: State.() -> State) {
-        state.update { reducer(it) }
+        state = reducer(state)
     }
 }

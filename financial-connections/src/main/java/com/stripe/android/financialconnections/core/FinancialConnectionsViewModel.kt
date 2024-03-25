@@ -42,6 +42,8 @@ internal abstract class FinancialConnectionsViewModel<S>(
         }
     }
 
+    protected fun withState(action: (state: S) -> Unit) = stateFlow.value.let(action)
+
     protected open fun <T> onAsync(
         prop: KProperty1<S, Async<T>>,
         onSuccess: suspend (T) -> Unit = {},
@@ -77,3 +79,6 @@ internal sealed class Async<out T>(
 
     open operator fun invoke(): T? = value
 }
+
+fun <A : FinancialConnectionsViewModel<B>, B, C> withState(viewModel: A, block: (B) -> C) =
+    block(viewModel.stateFlow.value)

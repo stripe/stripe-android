@@ -172,7 +172,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     fun onLaunchAuthClick() {
         setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
 
-        stateFlow.value.let { state ->
+        withState { state ->
             val authSession = requireNotNull(state.payload()?.authSession) {
                 "Payload shouldn't be null when the user launches the auth flow"
             }

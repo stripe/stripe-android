@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.browser.BrowserManager
+import com.stripe.android.financialconnections.core.withState
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
@@ -106,7 +107,7 @@ class FinancialConnectionsSheetViewModelTest {
         val viewModel = createViewModel(defaultInitialState)
 
         // Then
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
             require(it.viewEffect is FinishWithResult)
             require(it.viewEffect.result is Failed)
@@ -161,12 +162,10 @@ class FinancialConnectionsSheetViewModelTest {
             )
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
-                assertThat(viewEffect.result).isEqualTo(
-                    Completed(linkedAccountId = linkedAccountId)
-                )
+                assertThat(viewEffect.result).isEqualTo(Completed(linkedAccountId = linkedAccountId))
             }
         }
     }
@@ -189,7 +188,7 @@ class FinancialConnectionsSheetViewModelTest {
             )
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
             }
@@ -233,7 +232,7 @@ class FinancialConnectionsSheetViewModelTest {
             // end auth flow
             viewModel.handleOnNewIntent(cancelIntent())
 
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
             }
@@ -260,7 +259,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(cancelIntent())
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 require(it.viewEffect is FinishWithResult)
                 require(it.viewEffect.result is Failed)
                 assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
@@ -281,7 +280,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(errorIntent)
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isInstanceOf(Failed::class.java)
@@ -304,7 +303,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(successIntent())
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(
@@ -331,7 +330,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(Intent().apply { data = Uri.parse(nativeRedirectUrl) })
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.INTERMEDIATE_DEEPLINK)
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
                 assertThat(viewEffect.url).isEqualTo(aggregatorUrl)
@@ -357,7 +356,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(Intent().apply { data = Uri.parse(returnUrl) })
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.INTERMEDIATE_DEEPLINK)
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
                 assertThat(viewEffect.url).isEqualTo(
@@ -381,7 +380,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(successIntent())
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Failed(apiException))
@@ -401,8 +400,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(successIntent())
 
             // Then
-            // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Failed(APIException()))
@@ -429,7 +427,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.onResume()
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
@@ -456,7 +454,7 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.onBrowserActivityResult()
 
             // Then
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.ON_EXTERNAL_ACTIVITY)
                 val viewEffect = it.viewEffect as FinishWithResult
                 assertThat(viewEffect.result).isEqualTo(Canceled)
