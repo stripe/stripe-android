@@ -56,6 +56,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combineTransform
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -516,7 +517,7 @@ private fun <K, V> Flow<Map<K, V>>.getValueFromKeyFlow(keyFlow: Flow<K>): Flow<V
         if (result != null) {
             emit(result)
         }
-    }
+    }.distinctUntilChanged()
 }
 
 private fun <K, V> MutableStateFlow<Map<K, V>>.updateWithNewEntry(entry: Pair<K, V>) {

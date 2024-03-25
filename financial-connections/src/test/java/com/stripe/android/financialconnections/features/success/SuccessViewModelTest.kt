@@ -14,14 +14,13 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import kotlin.test.assertEquals
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("MaxLineLength")
@@ -34,7 +33,7 @@ internal class SuccessViewModelTest {
 
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val getCachedAccounts = mock<GetCachedAccounts>()
 
     private fun buildViewModel(
@@ -60,9 +59,7 @@ internal class SuccessViewModelTest {
         whenever(getCachedAccounts()).thenReturn(accounts)
         whenever(getManifest()).thenReturn(manifest)
 
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
-
-        nativeAuthFlowCoordinator().test {
+        nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {
             buildViewModel(SuccessState())
             // Triggers flow termination.
             assertThat(eventTracker.sentEvents).isEmpty()
@@ -81,9 +78,7 @@ internal class SuccessViewModelTest {
         whenever(getCachedAccounts()).thenReturn(accounts.data)
         whenever(getManifest()).thenReturn(manifest)
 
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
-
-        nativeAuthFlowCoordinator().test {
+        nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {
             buildViewModel(SuccessState())
             assertThat(eventTracker.sentEvents).containsExactly(
                 PaneLoaded(
@@ -96,13 +91,9 @@ internal class SuccessViewModelTest {
 
     @Test
     fun `onDoneClick - complete session is triggered`() = runTest {
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
-        nativeAuthFlowCoordinator().test {
+        nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {
             buildViewModel(SuccessState()).onDoneClick()
-            assertEquals(
-                expected = Complete(),
-                actual = awaitItem(),
-            )
+            assertThat(awaitItem()).isEqualTo(Complete())
         }
     }
 }

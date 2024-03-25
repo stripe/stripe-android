@@ -58,7 +58,7 @@ internal class PartnerAuthViewModelTest {
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
     private val handleError = TestHandleError()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     @Test
     fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
