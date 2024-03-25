@@ -194,36 +194,33 @@ private fun LinkCheckbox(
     contentAlpha: Float,
     toggleExpanded: () -> Unit,
 ) {
-    Column(
-        modifier = Modifier.clickable(enabled = enabled) { toggleExpanded() },
+    Row(
+        modifier = Modifier
+            .clickable(enabled = enabled) { toggleExpanded() }
+            .padding(16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .padding(16.dp)
-        ) {
-            Checkbox(
-                checked = expanded,
-                onCheckedChange = null, // needs to be null for accessibility on row click to work
-                modifier = Modifier.padding(end = 8.dp),
-                enabled = enabled
+        Checkbox(
+            checked = expanded,
+            onCheckedChange = null, // needs to be null for accessibility on row click to work
+            modifier = Modifier.padding(end = 8.dp),
+            enabled = enabled
+        )
+        Column {
+            Text(
+                text = stringResource(id = R.string.stripe_inline_sign_up_header),
+                style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colors.onSurface
+                    .copy(alpha = contentAlpha)
             )
-            Column {
-                Text(
-                    text = stringResource(id = R.string.stripe_inline_sign_up_header),
-                    style = MaterialTheme.typography.body1.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colors.onSurface
-                        .copy(alpha = contentAlpha)
-                )
-                Text(
-                    text = stringResource(R.string.stripe_sign_up_message, merchantName),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 4.dp),
-                    style = MaterialTheme.typography.body1,
-                    color = MaterialTheme.colors.onSurface
-                        .copy(alpha = contentAlpha)
-                )
-            }
+            Text(
+                text = stringResource(R.string.stripe_sign_up_message, merchantName),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp),
+                style = MaterialTheme.typography.body1,
+                color = MaterialTheme.colors.onSurface
+                    .copy(alpha = contentAlpha)
+            )
         }
     }
 }
