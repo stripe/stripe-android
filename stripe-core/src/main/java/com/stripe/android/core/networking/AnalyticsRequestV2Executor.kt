@@ -37,7 +37,6 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
 
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(true)
             .build()
 
         val workRequest = OneTimeWorkRequestBuilder<SendAnalyticsRequestV2Worker>()
