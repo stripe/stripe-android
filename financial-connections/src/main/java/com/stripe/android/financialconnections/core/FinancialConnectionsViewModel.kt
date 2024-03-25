@@ -80,5 +80,5 @@ internal sealed class Async<out T>(
     open operator fun invoke(): T? = value
 }
 
-fun <A : FinancialConnectionsViewModel<B>, B, C> withState(viewModel: A, block: (B) -> C) =
+internal fun <A : FinancialConnectionsViewModel<B>, B, C> withState(viewModel: A, block: (B) -> C) =
     block(viewModel.stateFlow.value)
