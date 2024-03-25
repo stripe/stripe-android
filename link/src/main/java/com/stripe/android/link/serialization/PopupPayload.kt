@@ -5,6 +5,7 @@ import android.os.Build
 import android.util.Base64
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.serialization.PopupPayload.Companion.isSetupForFutureUsage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -40,6 +41,12 @@ internal data class PopupPayload(
 
     @SerialName("paymentObject")
     val paymentObject: String,
+
+    @SerialName("intentMode")
+    val intentMode: String,
+
+    @SerialName("setupFutureUsage")
+    val setupFutureUsage: Boolean,
 
     @SerialName("flags")
     val flags: Map<String, Boolean>,
@@ -84,6 +91,11 @@ internal data class PopupPayload(
         @SerialName("amount")
         val amount: Long,
     )
+
+    enum class IntentMode(val type: String) {
+        Payment("payment"),
+        Setup("setup")
+    }
 
     fun toUrl(): String {
         val json = PopupPayloadJson.encodeToString(serializer(), this)
@@ -135,6 +147,8 @@ internal data class PopupPayload(
                 locale = context.currentLocale(),
                 paymentUserAgent = paymentUserAgent,
                 paymentObject = paymentObject(),
+                intentMode = stripeIntent.toIntentMode().type,
+                setupFutureUsage = stripeIntent.isSetupForFutureUsage(),
                 flags = flags,
             )
         }
@@ -156,6 +170,29 @@ internal data class PopupPayload(
                 }
 
                 is SetupIntent -> null
+            }
+        }
+
+        private fun StripeIntent.toIntentMode(): IntentMode {
+            return when (this) {
+                is PaymentIntent -> IntentMode.Payment
+                is SetupIntent -> IntentMode.Setup
+            }
+        }
+
+        private fun StripeIntent.isSetupForFutureUsage(): Boolean {
+            return when (this) {
+                is PaymentIntent -> setupFutureUsage.isSetupForFutureUsage()
+                is SetupIntent -> true
+            }
+        }
+
+        private fun StripeIntent.Usage?.isSetupForFutureUsage(): Boolean {
+            return when (this) {
+                null,
+                StripeIntent.Usage.OneTime -> false
+                StripeIntent.Usage.OffSession,
+                StripeIntent.Usage.OnSession -> true
             }
         }
 
