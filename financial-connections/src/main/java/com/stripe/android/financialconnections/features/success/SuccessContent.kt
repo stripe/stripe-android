@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.Icon
 import androidx.compose.material.Text
@@ -49,7 +48,6 @@ import com.stripe.android.financialconnections.features.success.SuccessState.Pay
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -92,14 +90,8 @@ private fun SuccessContentInternal(
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
 ) {
-    val topAppBarHost = LocalTopAppBarHost.current
-    val scrollState = rememberScrollState()
     var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
     val payload by remember(payloadAsync) { mutableStateOf(payloadAsync()) }
-
-    LaunchedEffect(scrollState.canScrollBackward) {
-        topAppBarHost.updateTopAppBarElevation(isElevated = scrollState.canScrollBackward)
-    }
 
     payload?.let {
         if (it.skipSuccessPane.not()) {

@@ -51,14 +51,12 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriUtils
-import kotlinx.coroutines.flow.Flow
+import com.stripe.android.financialconnections.utils.get
+import com.stripe.android.financialconnections.utils.updateWithNewEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combineTransform
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
@@ -86,10 +84,9 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     val navigationFlow = navigationManager.navigationFlow
 
     private val defaultTopAppBarState: TopAppBarState by lazy {
-        // The consent pane may choose to hide the Stripe logo. Therefore, let's hide it by default
-        // until the consent pane has received its payload with the show/hide information.
-        val forceHideStripeLogo = initialState.initialPane == Pane.CONSENT
-        initialState.toTopAppBarState(forceHideStripeLogo)
+        // The first pane may choose to hide the Stripe logo. Therefore, let's hide it by default
+        // on the first pane.
+        initialState.toTopAppBarState(forceHideStripeLogo = true)
     }
 
     private val currentPane = MutableStateFlow(initialState.initialPane)
@@ -97,7 +94,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         value = mapOf(initialState.initialPane to defaultTopAppBarState),
     )
 
-    override val topAppBarState: StateFlow<TopAppBarState> = topAppBarStateUpdatesByPane.getValueFromKeyFlow(
+    override val topAppBarState: StateFlow<TopAppBarState> = topAppBarStateUpdatesByPane.get(
         keyFlow = currentPane,
     ).stateIn(
         scope = viewModelScope,
@@ -509,29 +506,4 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
     )
-}
-
-private fun <K, V> Flow<Map<K, V>>.getValueFromKeyFlow(keyFlow: Flow<K>): Flow<V> {
-    return combineTransform(keyFlow) { map, key ->
-        val result = map[key]
-        if (result != null) {
-            emit(result)
-        }
-    }.distinctUntilChanged()
-}
-
-private fun <K, V> MutableStateFlow<Map<K, V>>.updateWithNewEntry(entry: Pair<K, V>) {
-    update { it + mapOf(entry) }
-}
-
-private fun <K, V> MutableStateFlow<Map<K, V>>.updateWithNewEntry(key: K, transform: (V) -> V) {
-    update {
-        val oldValue = it[key]
-        if (oldValue != null) {
-            val newValue = transform(oldValue)
-            it + mapOf(key to newValue)
-        } else {
-            it
-        }
-    }
 }
