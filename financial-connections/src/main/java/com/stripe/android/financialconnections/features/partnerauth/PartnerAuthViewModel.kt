@@ -1,13 +1,14 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import android.os.Bundle
 import android.webkit.URLUtil
 import androidx.core.net.toUri
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
@@ -23,7 +24,12 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.APPLICATION_ID
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -37,6 +43,8 @@ import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus.Action
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Companion.KEY_ACTIVE_AUTH_SESSION
+import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Companion.KEY_SAVED_STATE
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
@@ -49,7 +57,6 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -72,10 +79,12 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
+    savedStateHandle: SavedStateHandle,
     initialState: SharedPartnerAuthState
-) : MavericksViewModel<SharedPartnerAuthState>(initialState) {
+) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState) {
 
     init {
+        savedStateHandle.registerSavedStateProvider()
         handleErrors()
         launchBrowserIfNonOauth()
         restoreOrCreateAuthSession()
@@ -97,7 +106,12 @@ internal class PartnerAuthViewModel @Inject constructor(
             institution = requireNotNull(manifest.activeInstitution),
             authSession = authSession,
         )
-    }.execute { copy(payload = it) }
+    }.execute {
+        copy(
+            payload = it,
+            activeAuthSession = it()?.authSession?.id
+        )
+    }
 
     private fun recreateAuthSession() = suspend {
         val launchedEvent = Launched(Date())
@@ -130,9 +144,18 @@ internal class PartnerAuthViewModel @Inject constructor(
         )
     }
 
+    private fun SavedStateHandle.registerSavedStateProvider() {
+        setSavedStateProvider(KEY_SAVED_STATE) {
+            val state = stateFlow.value
+            Bundle().apply {
+                putString(KEY_ACTIVE_AUTH_SESSION, state.activeAuthSession)
+            }
+        }
+    }
+
     private fun launchBrowserIfNonOauth() {
         onAsync(
-            asyncProp = SharedPartnerAuthState::payload,
+            prop = SharedPartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
                 if (!it.authSession.isOAuth) {
@@ -171,7 +194,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     fun onLaunchAuthClick() {
         setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
 
-        withState { state ->
+        stateFlow.value.let { state ->
             val authSession = requireNotNull(state.payload()?.authSession) {
                 "Payload shouldn't be null when the user launches the auth flow"
             }
@@ -437,23 +460,20 @@ internal class PartnerAuthViewModel @Inject constructor(
         navigationManager.tryNavigateBack()
     }
 
-    companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
+    companion object {
 
-        override fun initialState(viewModelContext: ViewModelContext) =
-            SharedPartnerAuthState(pane = PANE)
-
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: SharedPartnerAuthState
-        ): PartnerAuthViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .partnerAuthSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    val savedStateHandle: SavedStateHandle = createSavedStateHandle()
+                    val savedState = savedStateHandle.get<Bundle>(KEY_SAVED_STATE)
+                    parentComponent
+                        .partnerAuthSubcomponent
+                        .initialState(SharedPartnerAuthState(pane = PANE, savedState = savedState))
+                        .build()
+                        .viewModel
+                }
+            }
 
         private val PANE = Pane.PARTNER_AUTH
     }

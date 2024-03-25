@@ -24,10 +24,11 @@ internal abstract class FinancialConnectionsViewModel<S>(
     val stateFlow: StateFlow<S> = _stateFlow.asStateFlow()
 
     protected open fun <T : Any?> (suspend () -> T).execute(
-        reducer: S.(Async<T>) -> S
+        retainValue: KProperty1<S, Async<T>>? = null,
+        reducer: S.(Async<T>) -> S,
     ): Job {
         return viewModelScope.launch {
-            setState { reducer(Loading()) }
+            setState { reducer(Loading(value = retainValue?.get(this)?.invoke())) }
             val result = runCatching { this@execute() }
             // update state.
             result.fold(

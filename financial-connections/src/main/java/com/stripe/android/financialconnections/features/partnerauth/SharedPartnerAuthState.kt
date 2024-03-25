@@ -1,28 +1,34 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.PersistState
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
+import android.os.Bundle
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 
 internal data class SharedPartnerAuthState(
     /**
      * The active auth session id. Used across process kills to prevent re-creating the session
      * if one is already active.
      */
-    @PersistState
-    val activeAuthSession: String? = null,
-    val pane: FinancialConnectionsSessionManifest.Pane,
-    val payload: Async<Payload> = Uninitialized,
-    val viewEffect: ViewEffect? = null,
-    val authenticationStatus: Async<AuthenticationStatus> = Uninitialized,
-) : MavericksState {
+    val activeAuthSession: String?,
+    val pane: Pane,
+    val payload: Async<Payload>,
+    val viewEffect: ViewEffect?,
+    val authenticationStatus: Async<AuthenticationStatus>,
+) {
+
+    constructor(pane: Pane, savedState: Bundle?) : this(
+        activeAuthSession = savedState?.getString(KEY_ACTIVE_AUTH_SESSION),
+        pane = pane,
+        payload = Uninitialized,
+        viewEffect = null,
+        authenticationStatus = Uninitialized
+    )
 
     data class Payload(
         val isStripeDirect: Boolean,
@@ -64,5 +70,10 @@ internal data class SharedPartnerAuthState(
 
     internal enum class ClickableText(val value: String) {
         DATA("stripe://data-access-notice"),
+    }
+
+    companion object {
+        const val KEY_SAVED_STATE = "SharedPartnerAuthState"
+        const val KEY_ACTIVE_AUTH_SESSION = "activeAuthSession"
     }
 }
