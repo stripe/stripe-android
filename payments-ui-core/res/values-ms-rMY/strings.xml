@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Bayar dalam <num_installments/> kali pembayaran tanpa faedah sebanyak <installment_price/> dengan <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Dengan mengesahkan pembayaran anda menggunakan Amazon Pay, anda membenarkan %s mengecaj akaun Amazon Pay anda bagi pembayaran masa hadapan menurut terma mereka.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Undur</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">ID UPI tidak sah</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Beli sekarang atau bayar kemudian dengan Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Dengan meneruskan langkah ke Klarna, anda membenarkan %1$s mengecaj akaun Klarna anda bagi pembayaran masa hadapan menurut terma mereka dan terma Klarna. Anda boleh mengubah tetapan ini pada bila-bila masa dalam app Klarna anda atau dengan menghubungi %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Bayar kemudian dengan Klarna.</string>
   <!-- Caption for Phone field on address form -->

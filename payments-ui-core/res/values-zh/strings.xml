@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[用 <img/> 分 <num_installments/> 支付，无利息，每期 <installment_price/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">确认您的 Amazon Pay 付款即表示您允许 %s 按照其条款从您的 Amazon Pay 账户扣取未来款项。</string>
   <!-- Text for back button -->
   <string name="stripe_back">返回</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">UPI ID 无效</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">用 Klarna 先买后付。</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">继续前往 Klarna 即表示您允许 %1$s 按照他们的条款和 Klarna 的条款从您的 Klarna 账户扣取未来款项。您可以在您的 Klarna 应用程序中随时对其进行修改，也可以联系 %2$s。</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">用 Klarna 延后支付。</string>
   <!-- Caption for Phone field on address form -->

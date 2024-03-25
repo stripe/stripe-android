@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betal med <num_installments/> rentefri avdrag på <installment_price/> med <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Ved å bekrefte betalingen med Amazon Pay, tillater du %s å belaste Amazon Pay-kontoen for fremtidige betalinger i samsvar med vilkårene deres.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Tilbake</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">Ugyldig UPI-ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Kjøp nå eller betal senere med Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Ved å fortsette til Klarna tillater du at %1$s belaster Klarna-kontoen din for fremtidige betalinger i samsvar med deres vilkår og Klarnas vilkår. Du kan når som helst endre dette i Klarna-appen din eller ved å kontakte %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Betal senere med Klarna.</string>
   <!-- Caption for Phone field on address form -->

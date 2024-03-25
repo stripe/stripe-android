@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Betaal in <num_installments/> rentevrije termijnen van <installment_price/> met <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Als je je betaling op Amazon Pay bevestigt, geef je %s toestemming om toekomstige betalingen in rekening te brengen op je Amazon Pay-account in overeenstemming met hun voorwaarden.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Terug</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">Ongeldige UPI-ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Koop nu of betaal later met Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Als je doorgaat naar Klarna, geef je %1$s toestemming om toekomstige betalingen in rekening te brengen op je Klarna-account in overeenstemming met hun voorwaarden en de voorwaarden van Klarna. Je kunt dit altijd wijzigen in je Klarna-app of door contact op te nemen met %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Betaal later met Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -76,7 +80,7 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">SEPA-incasso</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Als je je betaling met PayPal bevestigt, geef je %s toestemming om toekomstige betalingen in rekening te brengen op je PayPal-account in overeenstemming met hun voorwaarden.</string>
+  <string name="stripe_paypal_mandate">Als je je betaling met PayPal bevestigt, geef je %s toestemming om toekomstige betalingen af te schrijven van je PayPal-rekening in overeenstemming met hun voorwaarden.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Als je je betaling op RevolutPay bevestigt, geef je %s toestemming om toekomstige betalingen in rekening te brengen op je RevolutPay-account in overeenstemming met hun voorwaarden.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
