@@ -1,8 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -73,16 +71,15 @@ internal class PartnerAuthViewModelTest {
                 throw unplannedDowntimeError
             }
 
-            val viewModel = createViewModel()
+            createViewModel()
 
-            withState(viewModel) {
-                handleError.assertError(
-                    extraMessage = "Error fetching payload / posting AuthSession",
-                    error = unplannedDowntimeError,
-                    pane = Pane.PARTNER_AUTH,
-                    displayErrorScreen = true
-                )
-            }
+            handleError.assertError(
+                extraMessage = "Error fetching payload / posting AuthSession",
+                error = unplannedDowntimeError,
+                pane = Pane.PARTNER_AUTH,
+                displayErrorScreen = true
+            )
+
         }
 
     @Test
@@ -272,13 +269,7 @@ internal class PartnerAuthViewModelTest {
         }
 
     private fun createViewModel(
-        initialState: SharedPartnerAuthState = SharedPartnerAuthState(
-            activeAuthSession = null,
-            pane = Pane.PARTNER_AUTH,
-            payload = Uninitialized,
-            viewEffect = null,
-            authenticationStatus = Uninitialized
-        )
+        initialState: SharedPartnerAuthState = SharedPartnerAuthState(Pane.PARTNER_AUTH)
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
             navigationManager = TestNavigationManager(),
