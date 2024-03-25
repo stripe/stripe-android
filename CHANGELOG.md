@@ -4,6 +4,12 @@
 
 ## 20.41.0 - 2024-03-25
 
+### PaymentSheet
+* [Added][8148](https://github.com/stripe/stripe-android/pull/8148) Added `intentMode` & `setupToFutureUsage` fields to Link popup request to update `Link` confirm button based on intent information.
+* [Fixed][8147](https://github.com/stripe/stripe-android/pull/8147) Used device locale in Link popup request rather than merchant locale for customer billing country.
+* [Added][8118](https://github.com/stripe/stripe-android/pull/8118) Show `Link` wallet payment methods in saved payment methods screen.
+* [Fixed][8117](https://github.com/stripe/stripe-android/pull/8117) Fix `Link` payment methods not being saved properly in PM and passthrough mode.
+
 ## 20.40.1 - 2024-03-21
 
 ### PaymentSheet
