@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[ผ่อนชำระ <num_installments/> งวดแบบปลอดดอกเบี้ย งวดละ <installment_price/> ด้วย <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">การยืนยันการการชำระเงินด้วย Amazon Pay หมายความว่าคุณอนุญาตให้ %s เรียกเก็บเงินจากบัญชี Amazon Pay ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว</string>
   <!-- Text for back button -->
   <string name="stripe_back">ย้อนกลับ</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">UPI ID ไม่ถูกต้อง</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">ซื้อตอนนี้หรือจ่ายทีหลังด้วย Klarna</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">การดำเนินการต่อที่ Klana หมายความว่าคุณอนุญาตให้ %1$s เรียกเก็บเงินจากบัญชี Klana ของคุณสำหรับการชำระเงินในอนาคตตามเงื่อนไขของผู้ค้ารายดังกล่าว คุณสามารถเปลี่ยนการอนุญาตนี้ได้ทุกเมื่อในแอป Klana หรือติดต่อที่ %2$s</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">จ่ายทีหลังด้วย Klarna</string>
   <!-- Caption for Phone field on address form -->

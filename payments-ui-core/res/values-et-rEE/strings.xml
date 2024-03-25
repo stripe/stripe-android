@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Makske <num_installments/> <installment_price/> suuruse intressivaba osamaksega <img/> abil]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">AmazonPay makse kinnitamisega lubate ettevõttel %s oma AmazonPay kontot vastavalt tema tingimustele tulevasteks makseteks debiteerida.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Tagasi</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">Kehtetu UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Ostke nüüd või makske hiljem Klarnaga.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Klarnaga jätkates, lubate ettevõttel %1$s oma Klarna kontot vastavalt tema tingimustele ja vastavalt Klarna tingimustele tulevasteks makseteks debiteerida. Saate seda igal ajal oma Klarna rakenduses või ettevõtte %2$s poole pöördudes muuta.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Makske hiljem Klarnaga.</string>
   <!-- Caption for Phone field on address form -->

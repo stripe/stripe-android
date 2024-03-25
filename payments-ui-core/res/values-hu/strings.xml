@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Fizetés <num_installments/>, egyenként <installment_price/> összegű kamatmentes részletben <img/> használatával]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">A fizetés megerősítésével az Amazon Pay engedélyezi, hogy a(z) %s a feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje az Amazon Pay-számláját.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Vissza</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">Érvénytelen UPI-azonosító</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Megvásárlás most, vagy fizetés később Klarnával.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">A Klarna fizetési módra történő továbblépéssel Ön engedélyezi, hogy a(z) %1$s és a Klarna feltételeinek megfelelően a jövőbeni kifizetésekkel megterhelje a Klarna-számláját. Ezt bármikor megváltoztathatja a Klarna alkalmazásban vagy a(z) %2$s felkeresésével.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Fizetés később Klarnával.</string>
   <!-- Caption for Phone field on address form -->
