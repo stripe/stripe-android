@@ -43,7 +43,7 @@ class NetworkingLinkVerificationViewModelTest {
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()

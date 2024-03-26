@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
@@ -46,6 +47,10 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                 email = requireNotNull(manifest.getRedactedEmail())
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: NetworkingLinkLoginWarmupState): TopAppBarStateUpdate? {
+        return null
     }
 
     private fun logErrors() {

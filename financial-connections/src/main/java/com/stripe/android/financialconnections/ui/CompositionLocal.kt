@@ -17,7 +17,6 @@ import com.stripe.android.uicore.image.StripeImageLoader
  */
 @Composable
 internal fun FinancialConnectionsPreview(
-    reducedBrandingOverride: Boolean = false,
     testMode: Boolean = false,
     content: @Composable () -> Unit
 ) {
@@ -26,7 +25,6 @@ internal fun FinancialConnectionsPreview(
         CompositionLocalProvider(
             LocalNavHostController provides navController,
             LocalTestMode provides testMode,
-            LocalReducedBranding provides reducedBrandingOverride,
             LocalImageLoader provides StripeImageLoader(
                 context = LocalContext.current,
                 logger = Logger.noop(),

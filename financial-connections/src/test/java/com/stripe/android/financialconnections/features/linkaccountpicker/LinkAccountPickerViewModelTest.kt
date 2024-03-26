@@ -53,7 +53,7 @@ class LinkAccountPickerViewModelTest {
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: LinkAccountPickerState

@@ -45,7 +45,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     private val getManifest = mock<GetManifest>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: NetworkingSaveToLinkVerificationState = NetworkingSaveToLinkVerificationState()

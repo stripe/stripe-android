@@ -49,7 +49,7 @@ internal class InstitutionPickerViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val postAuthorizationSession = mock<PostAuthorizationSession>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val defaultConfiguration = FinancialConnectionsSheet.Configuration(
         ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
         ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY

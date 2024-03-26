@@ -12,6 +12,7 @@ import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.financialconnections.getMetadata
+import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.utils.TimeZoneRule
 import org.junit.Rule
 import org.junit.Test
@@ -58,6 +59,7 @@ class PaparazziSampleScreenshotTest {
         paparazzi.snapshot {
             CompositionLocalProvider(
                 LocalInspectionMode provides true,
+                LocalTopAppBarHost provides FakeTopAppBarHost(),
             ) {
                 Box {
                     componentTestPreview.Content()

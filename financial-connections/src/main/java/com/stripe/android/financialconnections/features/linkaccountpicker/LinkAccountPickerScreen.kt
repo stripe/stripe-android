@@ -28,6 +28,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -62,6 +64,7 @@ import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -71,7 +74,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.clickableSingle
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
@@ -97,6 +99,7 @@ internal fun LinkAccountPickerScreen() {
     val viewModel: LinkAccountPickerViewModel = mavericksViewModel()
     val parentViewModel = parentViewModel()
     val state = viewModel.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(enabled = true) {}
 
     val bottomSheetState = rememberModalBottomSheetState(
@@ -117,6 +120,7 @@ internal fun LinkAccountPickerScreen() {
 
     LinkAccountPickerContent(
         state = state.value,
+        topAppBarState = topAppBarState,
         bottomSheetState = bottomSheetState,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.LINK_ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
@@ -130,6 +134,7 @@ internal fun LinkAccountPickerScreen() {
 @Composable
 private fun LinkAccountPickerContent(
     state: LinkAccountPickerState,
+    topAppBarState: TopAppBarState,
     bottomSheetState: ModalBottomSheetState,
     onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
@@ -160,6 +165,7 @@ private fun LinkAccountPickerContent(
                 scrollState = scrollState,
                 onCloseClick = onCloseClick,
                 state = state,
+                topAppBarState = topAppBarState,
                 onClickableTextClick = onClickableTextClick,
                 onSelectAccountClick = onSelectAccountClick,
                 onNewBankAccountClick = onNewBankAccountClick,
@@ -175,6 +181,7 @@ private fun LinkAccountPickerMainContent(
     scrollState: LazyListState,
     onCloseClick: () -> Unit,
     state: LinkAccountPickerState,
+    topAppBarState: TopAppBarState,
     onClickableTextClick: (String) -> Unit,
     onSelectAccountClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
@@ -184,8 +191,7 @@ private fun LinkAccountPickerMainContent(
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = false,
-                elevation = scrollState.elevation,
+                state = topAppBarState,
                 onCloseClick = onCloseClick
             )
         }
@@ -411,6 +417,7 @@ internal fun LinkAccountPickerScreenPreview(
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
             state = state,
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             bottomSheetState = bottomSheetState,
             onCloseClick = {},
             onCloseFromErrorClick = {},

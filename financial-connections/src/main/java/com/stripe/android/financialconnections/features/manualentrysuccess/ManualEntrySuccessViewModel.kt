@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
@@ -40,6 +41,13 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
                 eventTracker.track(PaneLoaded(Pane.MANUAL_ENTRY_SUCCESS))
             }
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: ManualEntrySuccessState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = Pane.MANUAL_ENTRY_SUCCESS,
+            allowBackNavigation = false,
+        )
     }
 
     fun onSubmit() {
