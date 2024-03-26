@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.repository
 
-import com.airbnb.mvrx.MavericksState
 import com.stripe.android.core.Logger
 
 /**
@@ -24,5 +23,5 @@ internal class CoreAuthorizationPendingNetworkingRepairRepository(
 
     data class State(
         val coreAuthorization: String? = null
-    ) : MavericksState
+    )
 }

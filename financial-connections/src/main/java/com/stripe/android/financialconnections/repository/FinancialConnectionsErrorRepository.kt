@@ -1,7 +1,5 @@
 package com.stripe.android.financialconnections.repository
 
-import com.airbnb.mvrx.MavericksState
-
 internal class FinancialConnectionsErrorRepository {
 
     private var state = State()
@@ -26,5 +24,5 @@ internal class FinancialConnectionsErrorRepository {
 
     data class State(
         val error: Throwable? = null
-    ) : MavericksState
+    )
 }

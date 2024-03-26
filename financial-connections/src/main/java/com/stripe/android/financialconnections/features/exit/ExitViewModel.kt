@@ -109,7 +109,6 @@ internal data class ExitState(
         val description: TextResource,
     )
 
-    @Suppress("unused") // used by mavericks to create initial state.
     constructor(args: Bundle?) : this(
         referrer = Destination.referrer(args),
         payload = Uninitialized,

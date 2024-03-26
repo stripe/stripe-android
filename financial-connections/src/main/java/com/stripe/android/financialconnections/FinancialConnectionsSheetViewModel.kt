@@ -13,8 +13,8 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import com.airbnb.mvrx.Mavericks
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity.Companion.getArgs
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
@@ -485,7 +485,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 val savedState = savedStateHandle.get<Bundle>(FinancialConnectionsSheetState.KEY_SAVED_STATE)
                 val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
                 // Arguments passed to the activity
-                val args: FinancialConnectionsSheetActivityArgs = requireNotNull(savedStateHandle[Mavericks.KEY_ARG])
+                val args: FinancialConnectionsSheetActivityArgs = requireNotNull(getArgs(savedStateHandle))
                 val state = FinancialConnectionsSheetState(args, savedState)
                 DaggerFinancialConnectionsSheetComponent
                     .builder()

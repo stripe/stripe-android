@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.ui
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -25,6 +26,7 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
@@ -49,7 +51,6 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
-import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
@@ -62,8 +63,6 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
-
-    val args by argsOrNull<FinancialConnectionsSheetNativeActivityArgs>()
 
     val viewModel: FinancialConnectionsSheetNativeViewModel by viewModels(
         factoryProducer = { FinancialConnectionsSheetNativeViewModel.Factory }
@@ -80,7 +79,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (args == null) {
+        if (getArgs(intent) == null) {
             finish()
         } else {
             viewModel.activityRetainedComponent.inject(this)
@@ -263,6 +262,20 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
     internal companion object {
         internal const val EXTRA_RESULT = "result"
+
+        private const val EXTRA_ARGS = "FinancialConnectionsSheetNativeActivityArgs"
+        fun intent(context: Context, args: FinancialConnectionsSheetNativeActivityArgs): Intent {
+            return Intent(context, FinancialConnectionsSheetNativeActivity::class.java).apply {
+                putExtra(EXTRA_ARGS, args)
+            }
+        }
+
+        fun getArgs(savedStateHandle: SavedStateHandle) =
+            savedStateHandle.get<FinancialConnectionsSheetNativeActivityArgs>(EXTRA_ARGS)
+
+        fun getArgs(intent: Intent): FinancialConnectionsSheetNativeActivityArgs? {
+            return intent.getParcelableExtra(EXTRA_ARGS)
+        }
     }
 }
 
