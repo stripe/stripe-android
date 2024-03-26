@@ -50,10 +50,14 @@ internal class ErrorViewModel @Inject constructor(
     }
 
     override fun updateTopAppBar(state: ErrorState): TopAppBarStateUpdate {
+        // Either the error that we correctly retrieved from the repository, or the error
+        // that occurred during retrieval.
+        val error = state.payload()?.error ?: state.payload.error
+
         return TopAppBarStateUpdate(
             pane = PANE,
             allowBackNavigation = false,
-            error = state.payload.error,
+            error = error,
         )
     }
 
