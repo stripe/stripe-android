@@ -1,9 +1,9 @@
 package com.stripe.android.financialconnections.features.error
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
 import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution

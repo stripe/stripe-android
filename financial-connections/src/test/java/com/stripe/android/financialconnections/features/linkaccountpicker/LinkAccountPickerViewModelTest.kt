@@ -1,12 +1,12 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
@@ -28,6 +28,7 @@ import com.stripe.android.financialconnections.navigation.Destination.LinkStepUp
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -42,7 +43,7 @@ import org.mockito.kotlin.whenever
 class LinkAccountPickerViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val getSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
@@ -93,7 +94,7 @@ class LinkAccountPickerViewModelTest {
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
-        assertThat(viewModel.awaitState().payload()!!.accounts)
+        assertThat(viewModel.stateFlow.value.payload()!!.accounts)
             .isEqualTo(
                 listOf(
                     partnerAccount().copy(id = "id1", _allowSelection = null) to

@@ -24,15 +24,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
@@ -52,16 +51,18 @@ import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
 internal fun ManualEntryScreen() {
-    val viewModel: ManualEntryViewModel = mavericksViewModel()
+    val viewModel: ManualEntryViewModel = paneViewModel {
+        ManualEntryViewModel.factory(it)
+    }
     val parentViewModel = parentViewModel()
-    val state: ManualEntryState by viewModel.collectAsState()
+    val state: ManualEntryState by viewModel.stateFlow.collectAsState()
     val form by viewModel.form.collectAsState()
     ManualEntryContent(
-        routing = viewModel.routing ?: "",
+        routing = viewModel.routing,
         routingError = form.routingError,
-        account = viewModel.account ?: "",
+        account = viewModel.account,
         accountError = form.accountError,
-        accountConfirm = viewModel.accountConfirm ?: "",
+        accountConfirm = viewModel.accountConfirm,
         accountConfirmError = form.accountConfirmError,
         isValidForm = form.isValid,
         payload = state.payload,

@@ -1,14 +1,16 @@
 package com.stripe.android.financialconnections.features.error
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
@@ -17,7 +19,6 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -29,7 +30,7 @@ internal class ErrorViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<ErrorState>(initialState) {
+) : FinancialConnectionsViewModel<ErrorState>(initialState) {
 
     init {
         logErrors()
@@ -83,7 +84,7 @@ internal class ErrorViewModel @Inject constructor(
 
     fun onSelectAnotherBank() = viewModelScope.launch {
         kotlin.runCatching {
-            val payload = requireNotNull(awaitState().payload())
+            val payload = requireNotNull(stateFlow.value.payload())
             if (payload.disableLinkMoreAccounts) {
                 close(payload.error)
             } else {
@@ -99,19 +100,17 @@ internal class ErrorViewModel @Inject constructor(
         super.onCleared()
     }
 
-    companion object : MavericksViewModelFactory<ErrorViewModel, ErrorState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: ErrorState
-        ): ErrorViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .errorSubcomponent
-                .create(state)
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .errorSubcomponent
+                        .create(ErrorState())
+                        .viewModel
+                }
+            }
 
         internal val PANE = Pane.UNEXPECTED_ERROR
     }
@@ -119,7 +118,7 @@ internal class ErrorViewModel @Inject constructor(
 
 internal data class ErrorState(
     val payload: Async<Payload> = Uninitialized
-) : MavericksState {
+) {
     data class Payload(
         val error: Throwable,
         val disableLinkMoreAccounts: Boolean,

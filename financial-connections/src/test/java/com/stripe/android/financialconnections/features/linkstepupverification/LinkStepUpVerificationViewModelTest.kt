@@ -1,13 +1,13 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.core.Async.Loading
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -37,7 +37,7 @@ import org.mockito.kotlin.whenever
 @ExperimentalCoroutinesApi
 class LinkStepUpVerificationViewModelTest {
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val navigationManager = TestNavigationManager()
@@ -92,7 +92,7 @@ class LinkStepUpVerificationViewModelTest {
         onStartVerificationCaptor.firstValue()
         onVerificationStartedCaptor.firstValue(consumerSession)
 
-        val state = viewModel.awaitState()
+        val state = viewModel.stateFlow.value
 
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
@@ -109,7 +109,7 @@ class LinkStepUpVerificationViewModelTest {
 
         val viewModel = buildViewModel()
 
-        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
+        assertThat(viewModel.stateFlow.value.payload).isInstanceOf(Loading::class.java)
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
@@ -124,7 +124,7 @@ class LinkStepUpVerificationViewModelTest {
 
         onConsumerNotFoundCaptor.firstValue()
 
-        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
+        assertThat(viewModel.stateFlow.value.payload).isInstanceOf(Loading::class.java)
         navigationManager.assertNavigatedTo(
             destination = Destination.InstitutionPicker,
             pane = Pane.LINK_STEP_UP_VERIFICATION
@@ -173,7 +173,7 @@ class LinkStepUpVerificationViewModelTest {
             onStartVerificationCaptor.firstValue()
             onVerificationStartedCaptor.firstValue(consumerSession)
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {

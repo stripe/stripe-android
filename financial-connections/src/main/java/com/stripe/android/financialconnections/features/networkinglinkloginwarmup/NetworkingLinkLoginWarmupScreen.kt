@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -33,10 +34,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -50,10 +50,10 @@ import com.stripe.android.financialconnections.ui.theme.LinkColors
 internal fun NetworkingLinkLoginWarmupScreen(
     backStackEntry: NavBackStackEntry,
 ) {
-    val viewModel: NetworkingLinkLoginWarmupViewModel = mavericksViewModel(
-        argsFactory = { backStackEntry.arguments },
-    )
-    val state by viewModel.collectAsState()
+    val viewModel: NetworkingLinkLoginWarmupViewModel = paneViewModel {
+        NetworkingLinkLoginWarmupViewModel.factory(it, backStackEntry.arguments)
+    }
+    val state by viewModel.stateFlow.collectAsState()
     NetworkingLinkLoginWarmupContent(
         state = state,
         onSkipClicked = viewModel::onSkipClicked,

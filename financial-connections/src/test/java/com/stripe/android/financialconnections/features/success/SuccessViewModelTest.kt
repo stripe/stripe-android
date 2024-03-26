@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.features.success
 
 import app.cash.turbine.test
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -15,7 +15,6 @@ import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -27,10 +26,8 @@ import kotlin.test.assertEquals
 @Suppress("MaxLineLength")
 internal class SuccessViewModelTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
     @get:Rule
-    val mavericksRule = MavericksTestRule(testDispatcher = testDispatcher)
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()

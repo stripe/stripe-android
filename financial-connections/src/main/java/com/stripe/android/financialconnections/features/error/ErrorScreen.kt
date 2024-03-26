@@ -2,15 +2,16 @@ package com.stripe.android.financialconnections.features.error
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.exception.PartnerAuthError
@@ -26,12 +27,12 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 
 @Composable
 internal fun ErrorScreen() {
-    val viewModel: ErrorViewModel = mavericksViewModel()
+    val viewModel: ErrorViewModel = paneViewModel(ErrorViewModel.Companion::factory)
     val parentViewModel = parentViewModel()
     BackHandler(true) { }
-    val payload = viewModel.collectAsState { it.payload }
+    val state by viewModel.stateFlow.collectAsState()
     ErrorContent(
-        payload = payload.value,
+        payload = state.payload,
         onManualEntryClick = viewModel::onManualEntryClick,
         onSelectBankClick = viewModel::onSelectAnotherBank,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick

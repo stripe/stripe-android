@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -14,9 +15,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -29,9 +29,11 @@ import com.stripe.android.financialconnections.ui.theme.Layout
 internal fun ExitModal(
     backStackEntry: NavBackStackEntry
 ) {
-    val viewModel: ExitViewModel = mavericksViewModel(argsFactory = { backStackEntry.arguments })
+    val viewModel: ExitViewModel = paneViewModel {
+        ExitViewModel.factory(it, backStackEntry.arguments)
+    }
 
-    val state by viewModel.collectAsState()
+    val state by viewModel.stateFlow.collectAsState()
     state.payload()?.let {
         ExitModalContent(
             description = it.description,
