@@ -93,6 +93,8 @@ internal fun List<PaymentOptionsItem>.findInitialSelectedPosition(
 private fun List<PaymentOptionsItem>.findSelectedPosition(paymentSelection: PaymentSelection): Int {
     return indexOfFirst { item ->
         when (paymentSelection) {
+            // TODO: update here
+            is PaymentSelection.ExternalPaymentMethod -> item is PaymentOptionsItem.ExternalPaymentMethod
             is PaymentSelection.GooglePay -> item is PaymentOptionsItem.GooglePay
             is PaymentSelection.Link -> item is PaymentOptionsItem.Link
             is PaymentSelection.Saved -> {
@@ -114,5 +116,6 @@ internal fun PaymentOptionsItem.toPaymentSelection(): PaymentSelection? {
         is PaymentOptionsItem.GooglePay -> PaymentSelection.GooglePay
         is PaymentOptionsItem.Link -> PaymentSelection.Link
         is PaymentOptionsItem.SavedPaymentMethod -> PaymentSelection.Saved(paymentMethod)
+        is PaymentOptionsItem.ExternalPaymentMethod -> PaymentSelection.ExternalPaymentMethod(name, paymentMethod, handler, requiresConfirmation)
     }
 }

@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
@@ -226,6 +227,25 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New()
     }
+
+    // TODO: move to new?
+    @Parcelize
+    data class ExternalPaymentMethod(
+        val name: String,
+        val paymentMethod: PaymentMethod,
+        val handler: ExternalPaymentMethodConfirmHandler,
+        override val requiresConfirmation: Boolean,
+    ) :
+        PaymentSelection() {
+        override fun mandateText(
+            context: Context,
+            merchantName: String,
+            isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean
+        ): String? {
+            TODO("Not yet implemented")
+        }
+    }
 }
 
 internal val PaymentSelection.isLink: Boolean
@@ -235,4 +255,5 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.New.LinkInline -> true
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
+        is PaymentSelection.ExternalPaymentMethod -> false
     }

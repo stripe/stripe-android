@@ -122,6 +122,17 @@ internal class PaymentOptionFactory @Inject constructor(
                     imageLoader = ::loadPaymentOption,
                 )
             }
+            is PaymentSelection.ExternalPaymentMethod -> {
+                // TODO: what are all of these params and what are we actually going to get in the response from
+                // elementsSession for saving it?
+                PaymentOption(
+                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                    label = "TODO: have a label",
+                    imageLoader = ::loadPaymentOption
+                )
+            }
         }
     }
 

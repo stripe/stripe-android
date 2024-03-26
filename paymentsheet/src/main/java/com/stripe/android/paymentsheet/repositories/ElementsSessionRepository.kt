@@ -20,6 +20,7 @@ import javax.inject.Inject
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
+// TODO: presumably this is the repository where we will send EPMs to the backend through
 internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
@@ -105,6 +106,7 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 }
 
 internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsSessionParams {
+    // TODO: include the external payment methods here always
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(clientSecret = clientSecret)

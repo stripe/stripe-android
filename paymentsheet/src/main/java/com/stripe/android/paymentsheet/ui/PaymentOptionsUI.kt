@@ -187,6 +187,15 @@ private fun PaymentOption(
                 modifier = modifier,
             )
         }
+        is PaymentOptionsItem.ExternalPaymentMethod -> {
+            ExternalPaymentMethod(
+                width = width,
+                isEnabled = isEnabled,
+                isSelected = isSelected,
+                onItemSelected = onItemSelected,
+                modifier = modifier,
+            )
+        }
         is PaymentOptionsItem.SavedPaymentMethod -> {
             SavedPaymentMethod(
                 paymentMethod = item,
@@ -275,6 +284,28 @@ private fun Link(
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_link_mark,
         iconTint = linkLogoColor,
+        labelText = stringResource(StripeR.string.stripe_link),
+        description = stringResource(StripeR.string.stripe_link),
+        onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
+        modifier = modifier,
+    )
+}
+
+@Composable
+private fun ExternalPaymentMethod(
+    width: Dp,
+    isEnabled: Boolean,
+    isSelected: Boolean,
+    onItemSelected: (PaymentSelection?) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    PaymentOptionUi(
+        viewWidth = width,
+        editState = PaymentOptionEditState.None,
+        isSelected = isSelected,
+        isEnabled = isEnabled,
+        // TODO: obvi don't use the link stuff here
+        iconRes = R.drawable.stripe_link_mark,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
