@@ -351,8 +351,8 @@ private fun SelectNewAccount(
                 color = colors.border,
                 shape = shape
             )
-            .padding(16.dp)
             .clickableSingle { onClick() }
+            .padding(16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
