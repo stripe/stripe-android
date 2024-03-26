@@ -39,6 +39,7 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.delay
@@ -99,6 +100,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
             pane = PANE,
             allowBackNavigation = true,
             allowElevation = false,
+            error = state.payload.error,
         )
     }
 
