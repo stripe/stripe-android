@@ -994,15 +994,6 @@
 |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 -> 1.9.10 (*)
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:{require 1.6.4; reject _} -> 1.7.3 (*)
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 -> 1.9.10 (*)
-|    +--- com.airbnb.android:mavericks-compose:3.0.9
-|    |    +--- androidx.lifecycle:lifecycle-common-java8:{require 2.6.1; reject _} -> 2.7.0 (*)
-|    |    +--- androidx.fragment:fragment:{require 1.5.2; reject _} -> 1.6.2 (*)
-|    |    +--- androidx.appcompat:appcompat:{require 1.5.0; reject _} -> 1.6.1 (*)
-|    |    +--- androidx.compose.foundation:foundation:{require 1.2.1; reject _} -> 1.5.4 (*)
-|    |    +--- androidx.compose.ui:ui:{require 1.2.1; reject _} -> 1.5.4 (*)
-|    |    +--- androidx.lifecycle:lifecycle-viewmodel-compose:{require 2.6.1; reject _} -> 2.7.0 (*)
-|    |    +--- com.airbnb.android:mavericks:3.0.9 (*)
-|    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22 -> 1.9.10 (*)
 |    \--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.22 (*)
 +--- com.google.accompanist:accompanist-themeadapter-material:0.32.0 (*)
 +--- com.alipay.sdk:alipaysdk-android:15.8.12
