@@ -201,9 +201,7 @@ private fun SharedPartnerAuthBody(
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit
 ) {
-    SharedPartnerAuthContentWrapper(
-        inModal = inModal,
-    ) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         state.payload()?.let {
             LoadedContent(
                 showInModal = inModal,
@@ -214,26 +212,6 @@ private fun SharedPartnerAuthBody(
                 onClickableTextClick = onClickableTextClick,
             )
         } ?: SharedPartnerLoading(inModal)
-    }
-}
-
-/**
- * Wrapper for the content of the partner auth screen, that based on the [inModal] parameter
- * will render the content in a modal or in a full screen.
- */
-@Composable
-private fun SharedPartnerAuthContentWrapper(
-    inModal: Boolean,
-    content: @Composable () -> Unit
-) {
-    if (inModal) {
-        Box(
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            content()
-        }
-    } else {
-        content()
     }
 }
 
