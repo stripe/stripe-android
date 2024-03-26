@@ -51,6 +51,8 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
@@ -132,6 +134,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val context = LocalContext.current
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
         val initialDestination = remember(initialPane) { initialPane.destination }
+        val topAppBarState by viewModel.topAppBarState.collectAsState()
 
         val sheetState = rememberModalBottomSheetState(
             ModalBottomSheetValue.Hidden,
@@ -159,29 +162,38 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
             FinancialConnectionsModalBottomSheetLayout(
                 bottomSheetNavigator = bottomSheetNavigator,
             ) {
-                NavHost(
-                    navController,
-                    startDestination = initialDestination.fullRoute,
+                FinancialConnectionsScaffold(
+                    topBar = {
+                        FinancialConnectionsTopAppBar(
+                            state = topAppBarState,
+                            onCloseClick = viewModel::handleOnCloseClick,
+                        )
+                    },
                 ) {
-                    composable(Destination.Consent)
-                    composable(Destination.ManualEntry)
-                    composable(Destination.PartnerAuth)
-                    bottomSheet(Destination.PartnerAuthDrawer)
-                    bottomSheet(Destination.Exit)
-                    composable(Destination.InstitutionPicker)
-                    composable(Destination.AccountPicker)
-                    composable(Destination.Success)
-                    composable(Destination.Reset)
-                    composable(Destination.Error)
-                    composable(Destination.AttachLinkedPaymentAccount)
-                    composable(Destination.NetworkingLinkSignup)
-                    bottomSheet(Destination.NetworkingLinkLoginWarmup)
-                    composable(Destination.NetworkingLinkVerification)
-                    composable(Destination.NetworkingSaveToLinkVerification)
-                    composable(Destination.LinkAccountPicker)
-                    composable(Destination.BankAuthRepair)
-                    composable(Destination.LinkStepUpVerification)
-                    composable(Destination.ManualEntrySuccess)
+                    NavHost(
+                        navController = navController,
+                        startDestination = initialDestination.fullRoute,
+                    ) {
+                        composable(Destination.Consent)
+                        composable(Destination.ManualEntry)
+                        composable(Destination.PartnerAuth)
+                        bottomSheet(Destination.PartnerAuthDrawer)
+                        bottomSheet(Destination.Exit)
+                        composable(Destination.InstitutionPicker)
+                        composable(Destination.AccountPicker)
+                        composable(Destination.Success)
+                        composable(Destination.Reset)
+                        composable(Destination.Error)
+                        composable(Destination.AttachLinkedPaymentAccount)
+                        composable(Destination.NetworkingLinkSignup)
+                        bottomSheet(Destination.NetworkingLinkLoginWarmup)
+                        composable(Destination.NetworkingLinkVerification)
+                        composable(Destination.NetworkingSaveToLinkVerification)
+                        composable(Destination.LinkAccountPicker)
+                        composable(Destination.BankAuthRepair)
+                        composable(Destination.LinkStepUpVerification)
+                        composable(Destination.ManualEntrySuccess)
+                    }
                 }
             }
         }

@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,6 +59,7 @@ internal class SuccessViewModel @Inject constructor(
         return TopAppBarStateUpdate(
             pane = PANE,
             allowBackNavigation = false,
+            error = state.payload.error,
         )
     }
 

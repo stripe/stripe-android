@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -48,6 +49,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
         return TopAppBarStateUpdate(
             pane = Pane.MANUAL_ENTRY_SUCCESS,
             allowBackNavigation = false,
+            error = state.payload.error,
         )
     }
 
