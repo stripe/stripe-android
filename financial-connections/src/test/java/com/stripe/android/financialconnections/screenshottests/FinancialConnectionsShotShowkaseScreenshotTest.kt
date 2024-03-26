@@ -1,18 +1,24 @@
 package com.stripe.android.financialconnections.screenshottests
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.LocalContentColor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.detectEnvironment
 import com.airbnb.android.showkase.models.Showkase
 import com.airbnb.android.showkase.models.ShowkaseBrowserComponent
+import com.android.ide.common.rendering.api.SessionParams
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.financialconnections.getMetadata
 import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.TimeZoneRule
 import org.junit.Rule
 import org.junit.Test
@@ -44,6 +50,8 @@ class PaparazziSampleScreenshotTest {
         environment = detectEnvironment().run {
             copy(compileSdkVersion = 33, platformDir = platformDir.replace("34", "33"))
         },
+        // Needed to shrink the screenshot to the height of the composable
+        renderingMode = SessionParams.RenderingMode.SHRINK,
     )
 
     @Test
@@ -57,12 +65,19 @@ class PaparazziSampleScreenshotTest {
             )
         )
         paparazzi.snapshot {
-            CompositionLocalProvider(
-                LocalInspectionMode provides true,
-                LocalTopAppBarHost provides FakeTopAppBarHost(),
-            ) {
-                Box {
-                    componentTestPreview.Content()
+            FinancialConnectionsTheme {
+                CompositionLocalProvider(
+                    LocalInspectionMode provides true,
+                    LocalTopAppBarHost provides FakeTopAppBarHost(),
+                    LocalContentColor provides FinancialConnectionsTheme.colors.textDefault,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .wrapContentSize()
+                            .background(FinancialConnectionsTheme.colors.backgroundSurface),
+                    ) {
+                        componentTestPreview.Content()
+                    }
                 }
             }
         }
