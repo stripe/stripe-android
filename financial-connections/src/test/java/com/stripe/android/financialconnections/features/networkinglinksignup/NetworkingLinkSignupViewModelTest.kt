@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -37,7 +36,7 @@ import org.mockito.kotlin.whenever
 class NetworkingLinkSignupViewModelTest {
 
     @get:Rule
-    val testRule = CoroutineTestRule(UnconfinedTestDispatcher())
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()

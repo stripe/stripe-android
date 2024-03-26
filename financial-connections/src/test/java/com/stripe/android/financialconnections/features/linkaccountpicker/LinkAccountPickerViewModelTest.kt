@@ -28,7 +28,6 @@ import com.stripe.android.financialconnections.navigation.Destination.LinkStepUp
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -43,7 +42,7 @@ import org.mockito.kotlin.whenever
 class LinkAccountPickerViewModelTest {
 
     @get:Rule
-    val testRule = CoroutineTestRule(UnconfinedTestDispatcher())
+    val testRule = CoroutineTestRule()
 
     private val getSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
