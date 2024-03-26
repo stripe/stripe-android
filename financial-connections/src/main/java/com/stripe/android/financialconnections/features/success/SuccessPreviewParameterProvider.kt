@@ -1,8 +1,8 @@
 package com.stripe.android.financialconnections.features.success
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.ui.TextResource
 
 internal class SuccessPreviewParameterProvider :

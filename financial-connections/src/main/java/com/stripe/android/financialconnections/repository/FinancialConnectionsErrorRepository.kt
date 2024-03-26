@@ -1,30 +1,25 @@
 package com.stripe.android.financialconnections.repository
 
-import com.airbnb.mvrx.ExperimentalMavericksApi
-import com.airbnb.mvrx.MavericksRepository
 import com.airbnb.mvrx.MavericksState
-import com.stripe.android.financialconnections.BuildConfig
-import kotlinx.coroutines.CoroutineScope
 
-@OptIn(ExperimentalMavericksApi::class)
-internal class FinancialConnectionsErrorRepository(
-    coroutineScope: CoroutineScope
-) : MavericksRepository<FinancialConnectionsErrorRepository.State>(
-    initialState = State(),
-    coroutineScope = coroutineScope,
-    performCorrectnessValidations = BuildConfig.DEBUG,
-) {
+internal class FinancialConnectionsErrorRepository {
 
-    suspend fun get() = awaitState().error
+    private var state = State()
+
+    fun get() = state.error
+
+    fun update(reducer: State.() -> State) {
+        state = reducer(state)
+    }
 
     fun set(error: Throwable) {
-        setState {
+        update {
             copy(error = error)
         }
     }
 
     fun clear() {
-        setState {
+        update {
             copy(error = null)
         }
     }

@@ -28,7 +28,7 @@ internal class InstitutionPickerPreviewParameterProvider :
     private fun initialLoading() = InstitutionPreviewState(
         state = InstitutionPickerState(
             previewText = null,
-            payload = Loading,
+            payload = Loading(),
             searchInstitutions = Uninitialized,
         ),
         initialScroll = 0
@@ -47,7 +47,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload()),
-            searchInstitutions = Loading,
+            searchInstitutions = Loading(),
         ),
         initialScroll = 0
     )
@@ -122,7 +122,7 @@ internal class InstitutionPickerPreviewParameterProvider :
             payload = Success(payload()),
             searchInstitutions = Success(institutionResponse(FEW_INSTITUTIONS)),
             selectedInstitutionId = "2",
-            createSessionForInstitution = Loading,
+            createSessionForInstitution = Loading(),
         ),
         initialScroll = 0
     )

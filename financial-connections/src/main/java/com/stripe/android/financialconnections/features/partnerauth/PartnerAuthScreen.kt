@@ -2,14 +2,14 @@ package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
+import androidx.compose.runtime.collectAsState
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
 
 @Composable
 internal fun PartnerAuthScreen(inModal: Boolean) {
-    val viewModel: PartnerAuthViewModel = mavericksViewModel()
-    val state: State<SharedPartnerAuthState> = viewModel.collectAsState()
+    val viewModel: PartnerAuthViewModel = paneViewModel { PartnerAuthViewModel.factory(it) }
+    val state: State<SharedPartnerAuthState> = viewModel.stateFlow.collectAsState()
 
     SharedPartnerAuth(
         inModal = inModal,

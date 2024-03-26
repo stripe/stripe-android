@@ -153,19 +153,11 @@ internal interface FinancialConnectionsSheetNativeModule {
 
         @Singleton
         @Provides
-        fun providesSaveToLinkWithStripeSucceededRepository(
-            @IOContext workContext: CoroutineContext
-        ): SuccessContentRepository = SuccessContentRepositoryImpl(
-            CoroutineScope(SupervisorJob() + workContext)
-        )
+        fun providesSaveToLinkWithStripeSucceededRepository(): SuccessContentRepository = SuccessContentRepositoryImpl()
 
         @Singleton
         @Provides
-        fun providesFinancialConnectionsErrorRepository(
-            @IOContext workContext: CoroutineContext
-        ) = FinancialConnectionsErrorRepository(
-            CoroutineScope(SupervisorJob() + workContext)
-        )
+        fun providesFinancialConnectionsErrorRepository() = FinancialConnectionsErrorRepository()
 
         @Singleton
         @Provides

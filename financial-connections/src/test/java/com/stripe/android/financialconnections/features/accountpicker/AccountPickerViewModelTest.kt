@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
@@ -10,6 +9,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.core.withState
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SelectAccounts

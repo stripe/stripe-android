@@ -22,6 +22,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,14 +32,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
@@ -68,9 +68,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun AccountPickerScreen() {
-    val viewModel: AccountPickerViewModel = mavericksViewModel()
+    val viewModel: AccountPickerViewModel = paneViewModel { AccountPickerViewModel.factory(it) }
     val parentViewModel = parentViewModel()
-    val state: State<AccountPickerState> = viewModel.collectAsState()
+    val state: State<AccountPickerState> = viewModel.stateFlow.collectAsState()
     BackHandler(true) {}
 
     val bottomSheetState = rememberModalBottomSheetState(

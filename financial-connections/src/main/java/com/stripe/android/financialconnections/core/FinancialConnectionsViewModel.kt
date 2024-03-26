@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.stripe.android.financialconnections.core.Async.Fail
 import com.stripe.android.financialconnections.core.Async.Loading
 import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,31 +24,30 @@ internal abstract class FinancialConnectionsViewModel<S>(
     val stateFlow: StateFlow<S> = _stateFlow.asStateFlow()
 
     protected open fun <T : Any?> (suspend () -> T).execute(
-        onSuccess: (T) -> Unit = {},
-        onFail: (Throwable) -> Unit = {},
-        reducer: S.(Async<T>) -> S
+        retainValue: KProperty1<S, Async<T>>? = null,
+        reducer: S.(Async<T>) -> S,
     ): Job {
         return viewModelScope.launch {
-            setState { reducer(Loading) }
+            setState { reducer(Loading(value = retainValue?.get(this)?.invoke())) }
             val result = runCatching { this@execute() }
             // update state.
             result.fold(
                 onSuccess = { data ->
                     setState { reducer(Success(data)) }
-                    onSuccess(data)
                 },
                 onFailure = { throwable ->
                     setState { reducer(Fail(throwable)) }
-                    onFail(throwable)
                 }
             )
         }
     }
 
+    protected fun withState(action: (state: S) -> Unit) = stateFlow.value.let(action)
+
     protected open fun <T> onAsync(
         prop: KProperty1<S, Async<T>>,
-        onSuccess: (T) -> Unit = {},
-        onFail: (Throwable) -> Unit = {}
+        onSuccess: suspend (T) -> Unit = {},
+        onFail: suspend (Throwable) -> Unit = {}
     ) {
         viewModelScope.launch {
             stateFlow.map { prop.get(it) }
@@ -56,8 +56,8 @@ internal abstract class FinancialConnectionsViewModel<S>(
                     when (async) {
                         is Success -> onSuccess(async())
                         is Fail -> onFail(async.error)
-                        Loading -> Unit
-                        Async.Uninitialized -> Unit
+                        is Loading -> Unit
+                        Uninitialized -> Unit
                     }
                 }
         }
@@ -70,7 +70,7 @@ internal sealed class Async<out T>(
     private val value: T?
 ) {
     data object Uninitialized : Async<Nothing>(value = null)
-    data object Loading : Async<Nothing>(value = null)
+    data class Loading<T>(val value: T? = null) : Async<T>(value = value)
     data class Success<out T>(private val value: T) : Async<T>(value = value) {
         override operator fun invoke(): T = value
     }
@@ -79,3 +79,6 @@ internal sealed class Async<out T>(
 
     open operator fun invoke(): T? = value
 }
+
+internal fun <A : FinancialConnectionsViewModel<B>, B, C> withState(viewModel: A, block: (B) -> C) =
+    block(viewModel.stateFlow.value)

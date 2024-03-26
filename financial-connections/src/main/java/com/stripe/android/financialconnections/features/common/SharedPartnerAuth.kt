@@ -41,12 +41,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Fail
+import com.stripe.android.financialconnections.core.Async.Loading
+import com.stripe.android.financialconnections.core.Async.Success
+import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.core.collectAsState
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState

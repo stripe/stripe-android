@@ -41,9 +41,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Loading
 import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Loading
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.success.SuccessState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession

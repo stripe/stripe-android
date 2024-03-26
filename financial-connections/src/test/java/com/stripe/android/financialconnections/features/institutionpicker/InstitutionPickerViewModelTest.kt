@@ -6,6 +6,7 @@ import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.withState
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -93,7 +94,7 @@ internal class InstitutionPickerViewModelTest {
 
         val viewModel = buildViewModel(InstitutionPickerState())
 
-        viewModel.stateFlow.value.let { state ->
+        withState(viewModel) { state ->
             assertEquals(state.payload()!!.featuredInstitutions, institutionResponse)
             assertIs<Async.Uninitialized>(state.searchInstitutions)
         }
@@ -120,7 +121,7 @@ internal class InstitutionPickerViewModelTest {
 
         val viewModel = buildViewModel(InstitutionPickerState())
 
-        viewModel.stateFlow.value.let { state ->
+        withState(viewModel) { state ->
             assertTrue(state.payload() == null)
             handleError.assertError(
                 error = error,
@@ -169,7 +170,7 @@ internal class InstitutionPickerViewModelTest {
         viewModel.onQueryChanged(query)
         advanceUntilIdle()
 
-        viewModel.stateFlow.value.let { state ->
+        withState(viewModel) { state ->
             assertEquals(state.payload()!!.featuredInstitutions, featuredResults)
             assertEquals(state.searchInstitutions()!!, searchResults)
             eventTracker.assertContainsEvent(
@@ -192,7 +193,7 @@ internal class InstitutionPickerViewModelTest {
         viewModel.onQueryChanged(query)
         advanceUntilIdle()
 
-        viewModel.stateFlow.value.let { state ->
+        withState(viewModel) { state ->
             verifyNoInteractions(searchInstitutions)
             assertTrue(eventTracker.sentEvents.none { it.eventName == "linked_accounts.search.succeeded" })
             assertEquals(state.searchInstitutions()!!.data, emptyList())

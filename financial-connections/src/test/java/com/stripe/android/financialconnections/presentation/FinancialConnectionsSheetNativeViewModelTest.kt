@@ -14,6 +14,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.core.withState
 import com.stripe.android.financialconnections.domain.CompleteFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
@@ -88,7 +89,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
             messagesFlow.emit(Complete(EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY))
 
-            viewModel.stateFlow.value.let {
+            withState(viewModel) {
                 require(it.viewEffect is Finish)
                 require(it.viewEffect.result is Failed)
                 assertThat(it.viewEffect.result.error).isInstanceOf(CustomManualEntryRequiredError::class.java)
@@ -108,7 +109,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         messagesFlow.emit(Complete(null))
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             require(it.viewEffect is Finish)
             require(it.viewEffect.result is Completed)
         }
@@ -134,7 +135,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         messagesFlow.emit(Complete(null))
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             require(it.viewEffect is Finish)
             require(it.viewEffect.result is Canceled)
         }
@@ -166,7 +167,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
         messagesFlow.emit(Complete(null))
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             require(it.viewEffect is Finish)
             require(it.viewEffect.result is Failed)
         }
@@ -187,7 +188,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/$applicationId?status=success")
         viewModel.handleOnNewIntent(intent)
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             assertThat(it.webAuthFlow).isEqualTo(WebAuthFlowState.Success(intent.data!!.toString()))
         }
     }
@@ -202,7 +203,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
         viewModel.handleOnNewIntent(intent)
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Failed>(webAuthFlow)
             assertThat(webAuthFlow.reason).isEqualTo(errorReason)
@@ -218,7 +219,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
         viewModel.handleOnNewIntent(intent)
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Failed>(webAuthFlow)
         }
@@ -233,7 +234,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         )
         viewModel.handleOnNewIntent(intent)
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Success>(webAuthFlow)
         }
@@ -246,7 +247,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/$applicationId?status=unknown")
         viewModel.handleOnNewIntent(intent)
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
@@ -259,7 +260,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/$applicationId?status=cancel")
         viewModel.handleOnNewIntent(intent)
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
@@ -272,7 +273,7 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         val intent = intent("stripe://auth-redirect/other-app-id?code=success")
         viewModel.handleOnNewIntent(intent)
 
-        viewModel.stateFlow.value.let {
+        withState(viewModel) {
             val webAuthFlow = it.webAuthFlow
             assertIs<WebAuthFlowState.Canceled>(webAuthFlow)
         }
