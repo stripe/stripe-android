@@ -16,8 +16,10 @@ import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.KeyboardType
+import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
+import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SimpleDropdownElement
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
@@ -25,6 +27,7 @@ import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
 import com.stripe.android.ui.core.elements.UpiElement
 import com.stripe.android.ui.core.elements.UpiSpec
+import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -40,16 +43,12 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import kotlin.test.assertFailsWith
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
 
 @RunWith(RobolectricTestRunner::class)
-internal class TransformSpecToElementTest {
-
-    private val context = ContextThemeWrapper(
-        ApplicationProvider.getApplicationContext(),
-        StripeR.style.StripeDefaultTheme
-    )
+internal class TransformSpecToElementsTest {
 
     private val nameSection = NameSpec()
 
@@ -59,19 +58,7 @@ internal class TransformSpecToElementTest {
 
     @Before
     fun beforeTest() {
-        transformSpecToElements =
-            TransformSpecToElements(
-                addressRepository = mock(),
-                initialValues = mapOf(),
-                amount = null,
-                saveForFutureUseInitialValue = true,
-                merchantName = "Merchant, Inc.",
-                context = context,
-                shippingValues = null,
-                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-                requiresMandate = false,
-            )
+        transformSpecToElements = TransformSpecToElementsFactory.create()
     }
 
     @Test
@@ -245,6 +232,144 @@ internal class TransformSpecToElementTest {
         assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
     }
 
+    @Test
+    fun `Address placeholders get transformed to correct fields`() {
+        val placeholderSpec = PlaceholderSpec(
+            apiPath = IdentifierSpec.Generic("foobar"),
+            field = PlaceholderSpec.PlaceholderField.BillingAddress,
+        )
+        val formElement = TransformSpecToElementsFactory.create(
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            )
+        ).transform(
+            listOf(placeholderSpec),
+        )
+
+        assertThat(formElement).hasSize(1)
+        val sectionElement = formElement.first() as SectionElement
+        assertThat(sectionElement.fields.size).isEqualTo(1)
+        val addressElement = sectionElement.fields.first() as AddressElement
+        assertThat(addressElement.identifier.v1).isEqualTo("billing_details[address]")
+    }
+
+    @Test
+    fun `Phone placeholders get transformed to correct fields`() {
+        val placeholderSpec = PlaceholderSpec(
+            apiPath = IdentifierSpec.Generic("foobar"),
+            field = PlaceholderSpec.PlaceholderField.Phone,
+        )
+        val formElement = TransformSpecToElementsFactory.create(
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            )
+        ).transform(
+            listOf(placeholderSpec),
+        )
+
+        assertThat(formElement).hasSize(1)
+        val sectionElement = formElement.first() as SectionElement
+        assertThat(sectionElement.fields.size).isEqualTo(1)
+        val phoneNumberElement = sectionElement.fields.first() as PhoneNumberElement
+        assertThat(phoneNumberElement.identifier.v1).isEqualTo("billing_details[phone]")
+    }
+
+    @Test
+    fun `Name placeholders get transformed to correct fields`() {
+        val placeholderSpec = PlaceholderSpec(
+            apiPath = IdentifierSpec.Generic("foobar"),
+            field = PlaceholderSpec.PlaceholderField.Name,
+        )
+        val formElement = TransformSpecToElementsFactory.create(
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            )
+        ).transform(
+            listOf(placeholderSpec),
+        )
+
+        assertThat(formElement).hasSize(1)
+        val sectionElement = formElement.first() as SectionElement
+        assertThat(sectionElement.fields.size).isEqualTo(1)
+        val nameElement = sectionElement.fields.first() as SimpleTextElement
+        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
+    }
+
+    @Test
+    fun `Email placeholders get transformed to correct fields`() {
+        val placeholderSpec = PlaceholderSpec(
+            apiPath = IdentifierSpec.Generic("foobar"),
+            field = PlaceholderSpec.PlaceholderField.Email,
+        )
+        val formElement = TransformSpecToElementsFactory.create(
+            PaymentSheet.BillingDetailsCollectionConfiguration(
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+            )
+        ).transform(
+            listOf(placeholderSpec),
+        )
+
+        assertThat(formElement).hasSize(1)
+        val sectionElement = formElement.first() as SectionElement
+        assertThat(sectionElement.fields.size).isEqualTo(1)
+        val emailElement = sectionElement.fields.first() as EmailElement
+        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
+    }
+
+    @Test
+    fun `SepaMandateSpec required get transformed to correct fields`() {
+        val placeholderSpec = PlaceholderSpec(
+            apiPath = IdentifierSpec.Generic("foobar"),
+            field = PlaceholderSpec.PlaceholderField.SepaMandate,
+        )
+        val formElement = TransformSpecToElementsFactory.create(
+            requiresMandate = true
+        ).transform(
+            listOf(placeholderSpec),
+        )
+
+        assertThat(formElement).hasSize(1)
+        val mandateTextElement = formElement.first() as MandateTextElement
+        assertThat(mandateTextElement.identifier.v1).isEqualTo("sepa_mandate")
+    }
+
+    @Test
+    fun `SepaMandateSpec when not required get transformed empty field`() {
+        val placeholderSpec = PlaceholderSpec(
+            apiPath = IdentifierSpec.Generic("foobar"),
+            field = PlaceholderSpec.PlaceholderField.SepaMandate,
+        )
+        val formElement = TransformSpecToElementsFactory.create(
+            requiresMandate = false
+        ).transform(
+            listOf(placeholderSpec),
+        )
+
+        assertThat(formElement).hasSize(1)
+        val emptyFormElement = formElement.first() as EmptyFormElement
+        assertThat(emptyFormElement.identifier.v1).isEqualTo("empty_form")
+    }
+
+    @Test
+    fun `Non transformed placeholders throw`() {
+        val placeholderSpec = PlaceholderSpec(
+            apiPath = IdentifierSpec.Generic("foobar"),
+            field = PlaceholderSpec.PlaceholderField.Email,
+        )
+
+        val exception = assertFailsWith<IllegalStateException> {
+            TransformSpecToElementsFactory.create(
+                PaymentSheet.BillingDetailsCollectionConfiguration(
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                )
+            ).transform(
+                specs = listOf(placeholderSpec),
+                replacePlaceholders = false,
+            )
+        }
+        assertThat(exception).hasMessageThat().isEqualTo("Placeholders should be processed before calling transform.")
+    }
+
     companion object {
         val IDEAL_BANK_CONFIG = DropdownSpec(
             IdentifierSpec.Generic("ideal[bank]"),
@@ -303,6 +428,32 @@ internal class TransformSpecToElementTest {
                     displayText = "Other"
                 )
             )
+        )
+    }
+}
+
+private object TransformSpecToElementsFactory {
+    fun create(
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
+        requiresMandate: Boolean = false,
+    ): TransformSpecToElements {
+        val context = ContextThemeWrapper(
+            ApplicationProvider.getApplicationContext(),
+            StripeR.style.StripeDefaultTheme
+        )
+
+        return TransformSpecToElements(
+            addressRepository = mock(),
+            initialValues = mapOf(),
+            amount = null,
+            saveForFutureUseInitialValue = true,
+            merchantName = "Merchant, Inc.",
+            context = context,
+            shippingValues = null,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            requiresMandate = requiresMandate,
         )
     }
 }

@@ -43,13 +43,10 @@ internal class ResetViewModel @Inject constructor(
         }.execute { copy(payload = it) }
     }
 
-    override fun updateTopAppBar(state: ResetState): TopAppBarStateUpdate {
-        // TODO(tillh-stripe) This preserves behavior, but it should probably not allow back navigation, right?
-        return TopAppBarStateUpdate(
-            pane = PANE,
-            allowBackNavigation = true,
-        )
-    }
+    override fun updateTopAppBar(state: ResetState): TopAppBarStateUpdate = TopAppBarStateUpdate(
+        pane = PANE,
+        allowBackNavigation = false,
+    )
 
     private fun logErrors() {
         onAsync(
