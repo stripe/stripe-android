@@ -9,12 +9,8 @@ internal interface BankAuthRepairSubcomponent {
 
     val viewModel: BankAuthRepairViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: SharedPartnerAuthState): Builder
-
-        fun build(): BankAuthRepairSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: SharedPartnerAuthState): BankAuthRepairSubcomponent
     }
 }

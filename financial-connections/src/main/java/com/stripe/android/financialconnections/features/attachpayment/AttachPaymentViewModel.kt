@@ -120,8 +120,7 @@ internal class AttachPaymentViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .attachPaymentSubcomponent
-                        .initialState(AttachPaymentState())
-                        .build()
+                        .create(AttachPaymentState())
                         .viewModel
                 }
             }

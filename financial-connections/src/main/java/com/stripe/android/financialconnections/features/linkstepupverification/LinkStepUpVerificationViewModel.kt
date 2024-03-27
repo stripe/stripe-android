@@ -221,8 +221,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .linkStepUpVerificationSubcomponent
-                        .initialState(LinkStepUpVerificationState())
-                        .build()
+                        .create(LinkStepUpVerificationState())
                         .viewModel
                 }
             }

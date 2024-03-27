@@ -8,12 +8,8 @@ internal interface ManualEntrySubcomponent {
 
     val viewModel: ManualEntryViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: ManualEntryState): Builder
-
-        fun build(): ManualEntrySubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: ManualEntryState): ManualEntrySubcomponent
     }
 }

@@ -69,8 +69,7 @@ internal class ResetViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .resetSubcomponent
-                        .initialState(ResetState())
-                        .build()
+                        .create(ResetState())
                         .viewModel
                 }
             }

@@ -173,9 +173,8 @@ internal class ManualEntryViewModel @Inject constructor(
             viewModelFactory {
                 initializer {
                     parentComponent
-                        .manualEntryBuilder
-                        .initialState(ManualEntryState())
-                        .build()
+                        .manualEntrySubcomponent
+                        .create(ManualEntryState())
                         .viewModel
                 }
             }

@@ -274,8 +274,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .networkingLinkSignupSubcomponent
-                        .initialState(NetworkingLinkSignupState())
-                        .build()
+                        .create(NetworkingLinkSignupState())
                         .viewModel
                 }
             }

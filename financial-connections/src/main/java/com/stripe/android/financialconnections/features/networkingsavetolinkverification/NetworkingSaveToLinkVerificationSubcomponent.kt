@@ -8,12 +8,10 @@ internal interface NetworkingSaveToLinkVerificationSubcomponent {
 
     val viewModel: NetworkingSaveToLinkVerificationViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: NetworkingSaveToLinkVerificationState): Builder
-
-        fun build(): NetworkingSaveToLinkVerificationSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance initialState: NetworkingSaveToLinkVerificationState,
+        ): NetworkingSaveToLinkVerificationSubcomponent
     }
 }

@@ -8,12 +8,10 @@ internal interface NetworkingLinkSignupSubcomponent {
 
     val viewModel: NetworkingLinkSignupViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: NetworkingLinkSignupState): Builder
-
-        fun build(): NetworkingLinkSignupSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance initialState: NetworkingLinkSignupState,
+        ): NetworkingLinkSignupSubcomponent
     }
 }

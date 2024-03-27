@@ -168,8 +168,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .networkingLinkVerificationSubcomponent
-                        .initialState(NetworkingLinkVerificationState())
-                        .build()
+                        .create(NetworkingLinkVerificationState())
                         .viewModel
                 }
             }

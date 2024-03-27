@@ -34,8 +34,7 @@ internal class BankAuthRepairViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .bankAuthRepairSubcomponent
-                        .initialState(SharedPartnerAuthState(Args(PANE)))
-                        .build()
+                        .create(SharedPartnerAuthState(Args(PANE)))
                         .viewModel
                 }
             }

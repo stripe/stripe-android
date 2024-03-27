@@ -156,8 +156,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .networkingSaveToLinkVerificationSubcomponent
-                        .initialState(NetworkingSaveToLinkVerificationState())
-                        .build()
+                        .create(NetworkingSaveToLinkVerificationState())
                         .viewModel
                 }
             }

@@ -137,9 +137,8 @@ internal class ConsentViewModel @Inject constructor(
             viewModelFactory {
                 initializer {
                     parentComponent
-                        .consentBuilder
-                        .initialState(ConsentState())
-                        .build()
+                        .consentSubcomponent
+                        .create(ConsentState())
                         .viewModel
                 }
             }
