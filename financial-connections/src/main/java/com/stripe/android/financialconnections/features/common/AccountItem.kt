@@ -108,7 +108,7 @@ internal fun AccountItem(
             }
             Icon(
                 modifier = Modifier
-                    .size(16.dp)
+                    .size(24.dp)
                     .alpha(if (selected) 1f else 0f),
                 imageVector = Icons.Default.Check,
                 tint = colors.iconBrand,
