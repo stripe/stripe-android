@@ -26,12 +26,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.core.Async
-import com.stripe.android.financialconnections.core.Async.Fail
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Success
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.LoadingSpinner

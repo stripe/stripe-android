@@ -29,7 +29,6 @@ import com.stripe.android.financialconnections.navigation.Destination.LinkStepUp
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test

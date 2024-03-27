@@ -35,8 +35,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.ShapedIcon
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.paneViewModel
