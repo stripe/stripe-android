@@ -17,9 +17,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
+import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -49,6 +51,8 @@ internal class AccountPickerViewModel @Inject constructor(
     initialState: AccountPickerState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val saveAccountToLink: SaveAccountToLink,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
@@ -279,6 +283,15 @@ internal class AccountPickerViewModel @Inject constructor(
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
+
+            val consumerSessionClientSecret = getCachedConsumerSession()?.clientSecret
+
+            if (consumerSessionClientSecret != null) {
+                saveAccountToLink.existing(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    selectedAccounts = selectedIds.toList(),
+                )
+            }
 
             navigationManager.tryNavigateTo(accountsList.nextPane.destination(referrer = PANE))
             accountsList

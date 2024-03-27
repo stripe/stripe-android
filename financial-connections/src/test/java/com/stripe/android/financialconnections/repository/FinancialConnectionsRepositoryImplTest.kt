@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.repository
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
@@ -28,7 +29,8 @@ class FinancialConnectionsRepositoryImplTest {
         requestExecutor = FinancialConnectionsRequestExecutor(
             json = testJson(),
             eventEmitter = mock(),
-            stripeNetworkClient = mockStripeNetworkClient
+            stripeNetworkClient = mockStripeNetworkClient,
+            logger = Logger.noop(),
         ),
         apiRequestFactory = apiRequestFactory,
         apiOptions = ApiRequest.Options(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY)

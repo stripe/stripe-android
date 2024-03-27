@@ -3,26 +3,34 @@ package com.stripe.android.financialconnections.features.accountpicker
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
+import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
+import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
-import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.model.ConsumerSession
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.assertEquals
 
@@ -34,10 +42,12 @@ internal class AccountPickerViewModelTest {
 
     private val pollAuthorizationSessionAccounts = mock<PollAuthorizationSessionAccounts>()
     private val getSync = mock<GetOrFetchSync>()
-    private val navigationManager = mock<NavigationManager>()
+    private val navigationManager = TestNavigationManager()
     private val selectAccounts = mock<SelectAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
+    private val saveAccountToLink = mock<SaveAccountToLink>()
+    private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
 
     private fun buildViewModel(
         state: AccountPickerState
@@ -51,6 +61,8 @@ internal class AccountPickerViewModelTest {
         handleClickableUrl = mock(),
         pollAuthorizationSessionAccounts = pollAuthorizationSessionAccounts,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        saveAccountToLink = saveAccountToLink,
+        getCachedConsumerSession = getCachedConsumerSession,
     )
 
     @Test
@@ -161,7 +173,7 @@ internal class AccountPickerViewModelTest {
     }
 
     @Test
-    fun `init - if not singleAccount, pre-selects first available account`() = runTest {
+    fun `init - if not singleAccount, pre-selects all accounts`() = runTest {
         givenManifestReturns(
             sessionManifest().copy(
                 singleAccount = false,
@@ -194,6 +206,69 @@ internal class AccountPickerViewModelTest {
         )
     }
 
+    @Test
+    fun `Does not save selected accounts to Link if we don't have a consumer session`() = runTest {
+        val accounts = partnerAccountList(size = 2)
+
+        givenManifestReturns(
+            sessionManifest().copy(
+                singleAccount = false,
+                activeAuthSession = authorizationSession(),
+            )
+        )
+
+        givenGetCachedConsumerSessionReturns(null)
+        givenPollAccountsReturns(accounts)
+        givenSelectAccountsReturns(accounts)
+
+        val viewModel = buildViewModel(AccountPickerState())
+
+        viewModel.onSubmit()
+
+        verify(saveAccountToLink, never()).existing(
+            consumerSessionClientSecret = any(),
+            selectedAccounts = any(),
+        )
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.CONSENT.destination,
+            pane = Pane.ACCOUNT_PICKER,
+            popUpTo = null,
+        )
+    }
+
+    @Test
+    fun `Saves selected accounts to Link if we have a consumer session`() = runTest {
+        val consumerSession = consumerSession()
+        val accounts = partnerAccountList(size = 2)
+
+        givenManifestReturns(
+            sessionManifest().copy(
+                singleAccount = false,
+                activeAuthSession = authorizationSession(),
+            )
+        )
+
+        givenGetCachedConsumerSessionReturns(consumerSession)
+        givenPollAccountsReturns(accounts)
+        givenSelectAccountsReturns(accounts)
+
+        val viewModel = buildViewModel(AccountPickerState())
+
+        viewModel.onSubmit()
+
+        verify(saveAccountToLink).existing(
+            consumerSessionClientSecret = consumerSession.clientSecret,
+            selectedAccounts = accounts.data.map { it.id },
+        )
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.CONSENT.destination,
+            pane = Pane.ACCOUNT_PICKER,
+            popUpTo = null,
+        )
+    }
+
     private suspend fun givenManifestReturns(manifest: FinancialConnectionsSessionManifest) {
         whenever(getSync()).thenReturn(syncResponse(manifest))
     }
@@ -207,5 +282,21 @@ internal class AccountPickerViewModelTest {
                 sync = any()
             )
         ).thenReturn(response)
+    }
+
+    private suspend fun givenSelectAccountsReturns(
+        response: PartnerAccountsList
+    ) {
+        whenever(
+            selectAccounts(
+                selectedAccountIds = any(),
+                sessionId = any(),
+                updateLocalCache = any(),
+            )
+        ).thenReturn(response)
+    }
+
+    private suspend fun givenGetCachedConsumerSessionReturns(response: ConsumerSession?) {
+        whenever(getCachedConsumerSession()).thenReturn(response)
     }
 }
