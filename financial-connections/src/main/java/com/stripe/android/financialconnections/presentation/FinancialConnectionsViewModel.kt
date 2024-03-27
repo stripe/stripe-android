@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.reflect.KProperty1
@@ -25,9 +24,8 @@ internal abstract class FinancialConnectionsViewModel<S>(
 
     init {
         updateHostWithTopAppBarState(initialState)
-        // TODO
-        stateFlow.onEach { state ->
-            updateHostWithTopAppBarState(state)
+        viewModelScope.launch {
+            stateFlow.collect(::updateHostWithTopAppBarState)
         }
     }
 
@@ -36,7 +34,11 @@ internal abstract class FinancialConnectionsViewModel<S>(
     private fun updateHostWithTopAppBarState(state: S) {
         viewModelScope.launch {
             val update = updateTopAppBar(state) ?: return@launch
-            nativeAuthFlowCoordinator().emit(NativeAuthFlowCoordinator.Message.UpdateTopAppBar(update))
+            nativeAuthFlowCoordinator().emit(
+                NativeAuthFlowCoordinator.Message.UpdateTopAppBar(
+                    update
+                )
+            )
         }
     }
 

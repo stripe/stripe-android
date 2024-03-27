@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
-import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
@@ -15,10 +14,10 @@ class FinancialConnectionsSheetForLinkContract :
     override fun createIntent(
         context: Context,
         input: FinancialConnectionsSheetActivityArgs.ForLink
-    ): Intent {
-        return Intent(context, FinancialConnectionsSheetActivity::class.java)
-            .putExtra(Mavericks.KEY_ARG, input)
-    }
+    ): Intent = FinancialConnectionsSheetActivity.intent(
+        context = context,
+        args = input
+    )
 
     override fun parseResult(
         resultCode: Int,

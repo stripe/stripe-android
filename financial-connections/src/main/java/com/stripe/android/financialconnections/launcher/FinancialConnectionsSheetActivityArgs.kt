@@ -1,9 +1,7 @@
 package com.stripe.android.financialconnections.launcher
 
-import android.content.Intent
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -51,10 +49,4 @@ sealed class FinancialConnectionsSheetActivityArgs constructor(
     }
 
     internal fun isValid(): Boolean = kotlin.runCatching { validate() }.isSuccess
-
-    companion object {
-        internal fun fromIntent(intent: Intent): FinancialConnectionsSheetActivityArgs? {
-            return intent.getParcelableExtra(Mavericks.KEY_ARG)
-        }
-    }
 }

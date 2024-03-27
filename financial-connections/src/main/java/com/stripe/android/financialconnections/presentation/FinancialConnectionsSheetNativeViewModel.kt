@@ -14,7 +14,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
-import com.airbnb.mvrx.Mavericks
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -57,6 +56,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_WEB_AUTH_FLOW
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity.Companion.getArgs
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.get
 import com.stripe.android.financialconnections.utils.updateWithNewEntry
@@ -410,7 +410,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 val app = this[APPLICATION_KEY] as Application
                 // Arguments passed to the activity
                 val args: FinancialConnectionsSheetNativeActivityArgs =
-                    requireNotNull(savedStateHandle[Mavericks.KEY_ARG])
+                    requireNotNull(getArgs(savedStateHandle))
                 // If the ViewModel is recreated, it will be provided with the saved state.
                 val savedState = savedStateHandle.get<Bundle>(KEY_SAVED_STATE)
                 val state = FinancialConnectionsSheetNativeState(
