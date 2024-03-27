@@ -3,6 +3,7 @@ package com.stripe.android.identity.states
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_MB_STATUS
 import com.stripe.android.identity.networking.IdentityRepository
@@ -43,9 +44,9 @@ class MBDetectorTest {
             argWhere {
                 it.eventName == EVENT_MB_STATUS &&
                     (
-                    it.params[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA]
+                    it.params.toMap()[IdentityAnalyticsRequestFactory.PARAM_EVENT_META_DATA]
                         as Map<*, *>
-                    )[IdentityAnalyticsRequestFactory.PARAM_REQUIRED] == false
+                    )[IdentityAnalyticsRequestFactory.PARAM_REQUIRED] == "false"
             }
         )
     }

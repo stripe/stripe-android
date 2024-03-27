@@ -99,7 +99,7 @@ class IdentityAnalyticsRequestFactoryTest {
             argWhere {
                 it.eventName == EVENT_SHEET_CLOSED &&
                     (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SESSION_RESULT] == sessionResult &&
-                    (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_LIVE_MODE] == true
+                    (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_LIVE_MODE] == "true"
             }
         )
     }
