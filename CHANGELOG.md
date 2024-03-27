@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### Financial Connections
+* [CHANGED][8157](https://github.com/stripe/stripe-android/pull/8157) Removed Mavericks dependency on Financial Connections.
+
 ## 20.40.2 - 2024-03-25
 
 ### PaymentSheet
