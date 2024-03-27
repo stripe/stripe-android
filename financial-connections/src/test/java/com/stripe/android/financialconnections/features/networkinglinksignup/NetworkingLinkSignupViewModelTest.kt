@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.TestFinancialConnectionsAnalytics
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
@@ -23,7 +24,6 @@ import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -37,7 +37,7 @@ import org.mockito.kotlin.whenever
 class NetworkingLinkSignupViewModelTest {
 
     @get:Rule
-    val testRule = CoroutineTestRule(UnconfinedTestDispatcher())
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -46,6 +46,7 @@ class NetworkingLinkSignupViewModelTest {
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val sync = mock<SynchronizeFinancialConnectionsSession>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState
@@ -59,7 +60,8 @@ class NetworkingLinkSignupViewModelTest {
         lookupAccount = lookupAccount,
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         sync = sync,
-        saveAccountToLink = saveAccountToLink
+        saveAccountToLink = saveAccountToLink,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test

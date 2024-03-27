@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.domain
 
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -41,6 +42,10 @@ internal class NativeAuthFlowCoordinator @Inject constructor() {
          */
         data class CloseWithError(
             val cause: Throwable
+        ) : Message
+
+        data class UpdateTopAppBar(
+            val update: TopAppBarStateUpdate,
         ) : Message
     }
 }

@@ -10,6 +10,8 @@ internal interface ExitSubcomponent {
 
     @Subcomponent.Factory
     interface Factory {
-        fun create(@BindsInstance initialState: ExitState): ExitSubcomponent
+        fun create(
+            @BindsInstance initialState: ExitState,
+        ): ExitSubcomponent
     }
 }

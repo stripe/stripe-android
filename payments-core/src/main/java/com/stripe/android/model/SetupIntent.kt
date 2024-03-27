@@ -16,7 +16,9 @@ import java.util.regex.Pattern
  * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
 @Parcelize
-data class SetupIntent internal constructor(
+data class SetupIntent
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      */

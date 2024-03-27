@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.stripe.android.financialconnections.core.Async.Fail
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Success
-import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 
 internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
     PreviewParameterProvider<NetworkingLinkLoginWarmupState> {

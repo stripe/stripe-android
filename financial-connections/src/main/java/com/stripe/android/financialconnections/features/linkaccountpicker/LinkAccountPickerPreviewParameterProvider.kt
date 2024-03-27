@@ -1,8 +1,6 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Success
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.Bullet
@@ -17,6 +15,8 @@ import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
 
 internal class LinkAccountPickerPreviewParameterProvider :
     PreviewParameterProvider<LinkAccountPickerState> {

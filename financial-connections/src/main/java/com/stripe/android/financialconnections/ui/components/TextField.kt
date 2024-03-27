@@ -79,20 +79,15 @@ internal fun FinancialConnectionsOutlinedTextField(
 @Composable
 internal fun FinancialConnectionsOutlinedTextFieldPreview() {
     FinancialConnectionsPreview {
-        FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar { } },
-            content = {
-                Column(
-                    Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FinancialConnectionsOutlinedTextField(
-                        value = "test",
-                        enabled = true,
-                        onValueChange = {}
-                    )
-                }
-            }
-        )
+        Column(
+            Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FinancialConnectionsOutlinedTextField(
+                value = "test",
+                enabled = true,
+                onValueChange = {}
+            )
+        }
     }
 }

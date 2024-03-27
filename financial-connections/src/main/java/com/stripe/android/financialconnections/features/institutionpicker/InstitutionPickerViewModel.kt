@@ -16,14 +16,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.core.Async
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.FeaturedInstitutions
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
 import com.stripe.android.financialconnections.domain.SearchInstitutions
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -36,6 +33,11 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuth
 import com.stripe.android.financialconnections.navigation.Destination.PartnerAuthDrawer
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -54,8 +56,9 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
-    initialState: InstitutionPickerState
-) : FinancialConnectionsViewModel<InstitutionPickerState>(initialState) {
+    initialState: InstitutionPickerState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+) : FinancialConnectionsViewModel<InstitutionPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     private var searchJob = ConflatedJob()
 
@@ -89,6 +92,14 @@ internal class InstitutionPickerViewModel @Inject constructor(
                 searchDisabled = manifest.institutionSearchDisabled,
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: InstitutionPickerState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = true,
+            allowElevation = false,
+        )
     }
 
     private fun logErrors() {

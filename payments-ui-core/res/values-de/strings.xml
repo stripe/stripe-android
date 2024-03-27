@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Zahlen Sie mit <img/> in <num_installments/> zinslosen Raten zu je <installment_price/>.]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Indem Sie Ihre Zahlung bei Amazon Pay bestätigen, erklären Sie sich damit einverstanden, dass %s Ihr Amazon Pay-Konto zur Durchführung zukünftiger Zahlungen gemäß den Nutzungsbedingungen belastet.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Zurück</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">Ungültige UPI-ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Jetzt kaufen oder später mit Klarna bezahlen.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Indem Sie zur Klarna-Website wechseln, erklären Sie sich damit einverstanden, dass %1$s Ihr Klarna-Konto zur Durchführung zukünftiger Zahlungen gemäß den eigenen AGB und den AGB von Klarna belastet. Sie können Ihr Einverständnis jederzeit in Ihrer Klarna-App widerrufen oder indem Sie sich an %2$s wenden.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Später mit Klarna bezahlen.</string>
   <!-- Caption for Phone field on address form -->

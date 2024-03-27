@@ -7,9 +7,6 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.core.Async
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -18,19 +15,24 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ErrorViewModel @Inject constructor(
     initialState: ErrorState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val coordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val errorRepository: FinancialConnectionsErrorRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ErrorState>(initialState) {
+) : FinancialConnectionsViewModel<ErrorState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -44,6 +46,13 @@ internal class ErrorViewModel @Inject constructor(
                 allowManualEntry = getManifest().allowManualEntry
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: ErrorState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun logErrors() {

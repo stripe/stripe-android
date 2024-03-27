@@ -8,13 +8,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.core.Async
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -23,17 +21,22 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     initialState: NetworkingLinkLoginWarmupState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleError: HandleError,
     private val getManifest: GetManifest,
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager
-) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -45,6 +48,10 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                 email = requireNotNull(manifest.getRedactedEmail())
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: NetworkingLinkLoginWarmupState): TopAppBarStateUpdate? {
+        return null
     }
 
     private fun logErrors() {

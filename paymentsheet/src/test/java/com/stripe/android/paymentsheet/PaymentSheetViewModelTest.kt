@@ -23,6 +23,8 @@ import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfiguration
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
@@ -81,6 +83,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.PaymentIntentFactory
@@ -661,20 +664,7 @@ internal class PaymentSheetViewModelTest {
 
     @Test
     fun `On inline link payment, should process with primary button`() = runTest {
-        val linkConfiguration = LinkConfiguration(
-            stripeIntent = mock {
-                on { linkFundingSources } doReturn listOf(
-                    PaymentMethod.Type.Card.code
-                )
-            },
-            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
-            customerInfo = LinkConfiguration.CustomerInfo(null, null, null, null),
-            flags = mapOf(),
-            merchantName = "Test merchant inc.",
-            merchantCountryCode = "US",
-            passthroughModeEnabled = false,
-            shippingValues = mapOf(),
-        )
+        val linkConfiguration = LinkTestUtils.createLinkConfiguration()
 
         val viewModel = createViewModel(
             linkState = LinkState(
@@ -730,6 +720,52 @@ internal class PaymentSheetViewModelTest {
             walletsProcessingStateTurbine.cancel()
         }
     }
+
+    @Test
+    fun `On inline link payment with save requested, should set with 'requireSaveOnConfirmation' set to 'true'`() =
+        runTest {
+            val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
+
+            val viewModel = createLinkViewModel(intentConfirmationInterceptor)
+
+            viewModel.linkHandler.payWithLinkInline(
+                userInput = UserInput.SignIn("email@email.com"),
+                paymentSelection = createCardPaymentSelection(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                ),
+                shouldCompleteLinkInlineFlow = false
+            )
+
+            verify(intentConfirmationInterceptor).intercept(
+                initializationMode = any(),
+                paymentMethod = any(),
+                shippingValues = isNull(),
+                requiresSaveOnConfirmation = eq(true),
+            )
+        }
+
+    @Test
+    fun `On inline link payment with save not requested, should set with 'requireSaveOnConfirmation' set to 'false'`() =
+        runTest {
+            val intentConfirmationInterceptor = spy(fakeIntentConfirmationInterceptor)
+
+            val viewModel = createLinkViewModel(intentConfirmationInterceptor)
+
+            viewModel.linkHandler.payWithLinkInline(
+                userInput = UserInput.SignIn("email@email.com"),
+                paymentSelection = createCardPaymentSelection(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                ),
+                shouldCompleteLinkInlineFlow = false
+            )
+
+            verify(intentConfirmationInterceptor).intercept(
+                initializationMode = any(),
+                paymentMethod = any(),
+                shippingValues = isNull(),
+                requiresSaveOnConfirmation = eq(false),
+            )
+        }
 
     @Test
     fun `On link payment through launcher, should process with wallets processing state`() = runTest {
@@ -2506,6 +2542,8 @@ internal class PaymentSheetViewModelTest {
         args: PaymentSheetContractV2.Args = ARGS_CUSTOMER_WITH_GOOGLEPAY,
         stripeIntent: StripeIntent = PAYMENT_INTENT,
         customerPaymentMethods: List<PaymentMethod> = PAYMENT_METHODS,
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+        linkConfigurationCoordinator: LinkConfigurationCoordinator = this.linkConfigurationCoordinator,
         customerRepository: CustomerRepository = FakeCustomerRepository(customerPaymentMethods),
         shouldFailLoad: Boolean = false,
         linkState: LinkState? = null,
@@ -2548,10 +2586,28 @@ internal class PaymentSheetViewModelTest {
                 savedStateHandle = thisSavedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+                intentConfirmationInterceptor = intentConfirmationInterceptor,
                 editInteractorFactory = fakeEditPaymentMethodInteractorFactory
             )
         }
+    }
+
+    private fun createLinkViewModel(
+        intentConfirmationInterceptor: IntentConfirmationInterceptor = fakeIntentConfirmationInterceptor
+    ): PaymentSheetViewModel {
+        val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_SAVED_PAYMENT_DETAILS),
+            accountStatus = AccountStatus.Verified,
+        )
+
+        return createViewModel(
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+            intentConfirmationInterceptor = intentConfirmationInterceptor,
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut
+            )
+        )
     }
 
     private fun createViewModelForDeferredIntent(
@@ -2588,6 +2644,16 @@ internal class PaymentSheetViewModelTest {
         viewModel.walletsState.test {
             assertThat(awaitItem()?.googlePay?.buttonType).isEqualTo(googlePayButtonType)
         }
+    }
+
+    private fun createCardPaymentSelection(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave
+    ): PaymentSelection {
+        return PaymentSelection.New.Card(
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+            brand = CardBrand.Visa,
+            customerRequestedSave = customerRequestedSave,
+        )
     }
 
     private fun createBacsPaymentSelection(): PaymentSelection {

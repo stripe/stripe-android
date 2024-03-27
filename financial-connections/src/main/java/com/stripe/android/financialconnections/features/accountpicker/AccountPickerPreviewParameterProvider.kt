@@ -2,9 +2,6 @@ package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.financialconnections.core.Async.Fail
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Success
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
@@ -16,6 +13,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
 
 internal class AccountPickerPreviewParameterProvider :
     PreviewParameterProvider<AccountPickerState> {

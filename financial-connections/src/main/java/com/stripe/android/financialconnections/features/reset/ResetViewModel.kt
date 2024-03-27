@@ -7,9 +7,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.core.Async
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.LinkMoreAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -18,6 +15,10 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import javax.inject.Inject
 
 internal class ResetViewModel @Inject constructor(
@@ -27,7 +28,7 @@ internal class ResetViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ResetState>(initialState) {
+) : FinancialConnectionsViewModel<ResetState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -40,6 +41,14 @@ internal class ResetViewModel @Inject constructor(
                 popUpTo = PopUpToBehavior.Current(inclusive = true),
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: ResetState): TopAppBarStateUpdate {
+        // TODO(tillh-stripe) This preserves behavior, but it should probably not allow back navigation, right?
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = true,
+        )
     }
 
     private fun logErrors() {

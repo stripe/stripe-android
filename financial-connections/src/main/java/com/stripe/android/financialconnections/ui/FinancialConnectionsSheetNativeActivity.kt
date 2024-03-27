@@ -32,6 +32,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
@@ -45,6 +46,7 @@ import com.stripe.android.financialconnections.navigation.bottomsheet.BottomShee
 import com.stripe.android.financialconnections.navigation.composable
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.pane
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
@@ -91,7 +93,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                     NavHost(
                         initialPane = state.initialPane,
                         testMode = state.testMode,
-                        reducedBranding = state.reducedBranding
                     )
                 }
             }
@@ -127,7 +128,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
     fun NavHost(
         initialPane: Pane,
         testMode: Boolean,
-        reducedBranding: Boolean
     ) {
         val context = LocalContext.current
         val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
@@ -146,11 +146,11 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         NavigationEffects(viewModel.navigationFlow, navController, keyboardController)
 
         CompositionLocalProvider(
-            LocalReducedBranding provides reducedBranding,
             LocalTestMode provides testMode,
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
-            LocalUriHandler provides uriHandler
+            LocalUriHandler provides uriHandler,
+            LocalTopAppBarHost provides viewModel,
         ) {
             BackHandler(true) {
                 viewModel.onBackClick(navController.currentDestination?.pane)
@@ -227,6 +227,13 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         keyboardController: KeyboardController,
     ) {
         val activity = (LocalContext.current as? Activity)
+        val backStackEntry by navHostController.currentBackStackEntryAsState()
+
+        LaunchedEffect(backStackEntry) {
+            val pane = backStackEntry?.destination?.pane ?: return@LaunchedEffect
+            viewModel.handlePaneChanged(pane)
+        }
+
         LaunchedEffect(activity, navHostController, navigationChannel) {
             navigationChannel.onEach { intent ->
                 if (activity?.isFinishing == true) {
@@ -283,16 +290,16 @@ internal val LocalNavHostController = staticCompositionLocalOf<NavHostController
     error("No NavHostController provided")
 }
 
-internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
-    error("No ReducedBranding provided")
-}
-
 internal val LocalTestMode = staticCompositionLocalOf<Boolean> {
     error("No TestMode provided")
 }
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
     error("No ImageLoader provided")
+}
+
+internal val LocalTopAppBarHost = staticCompositionLocalOf<TopAppBarHost> {
+    error("No TopAppBarHost provided")
 }
 
 /**

@@ -69,6 +69,7 @@ internal sealed class PaymentSelection : Parcelable {
     data class Saved(
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
+        val requiresSaveOnConfirmation: Boolean = false,
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {
@@ -178,10 +179,10 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails) : New() {
-            @IgnoredOnParcel
-            override val customerRequestedSave = CustomerRequestedSave.NoRequest
-
+        data class LinkInline(
+            val linkPaymentDetails: LinkPaymentDetails,
+            override val customerRequestedSave: CustomerRequestedSave,
+        ) : New() {
             @IgnoredOnParcel
             private val paymentDetails = linkPaymentDetails.paymentDetails
 
@@ -189,7 +190,9 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
 
             @IgnoredOnParcel
-            override val paymentMethodOptionsParams = null
+            override val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = customerRequestedSave.setupFutureUsage
+            )
 
             @IgnoredOnParcel
             override val paymentMethodExtraParams = null

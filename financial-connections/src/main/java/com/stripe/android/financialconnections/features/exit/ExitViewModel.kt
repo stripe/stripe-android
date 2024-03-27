@@ -8,9 +8,6 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.core.Async
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -19,18 +16,23 @@ import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class ExitViewModel @Inject constructor(
     initialState: ExitState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val coordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ExitState>(initialState) {
+) : FinancialConnectionsViewModel<ExitState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -60,6 +62,10 @@ internal class ExitViewModel @Inject constructor(
                 description = description,
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: ExitState): TopAppBarStateUpdate? {
+        return null
     }
 
     fun onCloseConfirm() = viewModelScope.launch {

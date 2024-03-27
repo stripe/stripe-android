@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
@@ -13,12 +14,14 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -49,6 +52,7 @@ class LinkStepUpVerificationViewModelTest {
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: LinkStepUpVerificationState = LinkStepUpVerificationState()
@@ -64,7 +68,8 @@ class LinkStepUpVerificationViewModelTest {
         updateLocalManifest = updateLocalManifest,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         logger = Logger.noop(),
-        initialState = state
+        initialState = state,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test
@@ -103,39 +108,41 @@ class LinkStepUpVerificationViewModelTest {
         val email = "test@test.com"
         val onConsumerNotFoundCaptor = argumentCaptor<suspend () -> Unit>()
 
-        whenever(getManifest()).thenReturn(
-            sessionManifest().copy(accountholderCustomerEmailAddress = email)
-        )
+        whenever(getManifest())
+            .thenReturn(sessionManifest().copy(accountholderCustomerEmailAddress = email))
 
-        val viewModel = buildViewModel()
+        buildViewModel().stateFlow.test {
+            assertThat(awaitItem().payload).isInstanceOf(Loading::class.java)
 
-        assertThat(viewModel.stateFlow.value.payload).isInstanceOf(Loading::class.java)
-
-        verify(lookupConsumerAndStartVerification).invoke(
-            email = eq(email),
-            businessName = anyOrNull(),
-            verificationType = eq(VerificationType.EMAIL),
-            onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
-            onLookupError = any(),
-            onStartVerification = any(),
-            onVerificationStarted = any(),
-            onStartVerificationError = any()
-        )
-
-        onConsumerNotFoundCaptor.firstValue()
-
-        assertThat(viewModel.stateFlow.value.payload).isInstanceOf(Loading::class.java)
-        navigationManager.assertNavigatedTo(
-            destination = Destination.InstitutionPicker,
-            pane = Pane.LINK_STEP_UP_VERIFICATION
-        )
-        eventTracker.assertContainsEvent(
-            "linked_accounts.networking.verification.step_up.error",
-            mapOf(
-                "pane" to "networking_link_step_up_verification",
-                "error" to "ConsumerNotFoundError"
+            verify(lookupConsumerAndStartVerification).invoke(
+                email = eq(email),
+                businessName = anyOrNull(),
+                verificationType = eq(VerificationType.EMAIL),
+                onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
+                onLookupError = any(),
+                onStartVerification = any(),
+                onVerificationStarted = any(),
+                onStartVerificationError = any()
             )
-        )
+
+            onConsumerNotFoundCaptor.firstValue()
+
+            // we don't expect any state updates if the consumer is not found
+            expectNoEvents()
+
+            navigationManager.assertNavigatedTo(
+                destination = Destination.InstitutionPicker,
+                pane = Pane.LINK_STEP_UP_VERIFICATION
+            )
+
+            eventTracker.assertContainsEvent(
+                "linked_accounts.networking.verification.step_up.error",
+                mapOf(
+                    "pane" to "networking_link_step_up_verification",
+                    "error" to "ConsumerNotFoundError"
+                )
+            )
+        }
     }
 
     @Test
