@@ -3,11 +3,11 @@ package com.stripe.android.financialconnections.features.manualentry
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.core.Async.Fail
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Success
-import com.stripe.android.financialconnections.core.Async.Uninitialized
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 
 internal class ManualEntryPreviewParameterProvider : PreviewParameterProvider<PreviewState> {
     override val values = sequenceOf(

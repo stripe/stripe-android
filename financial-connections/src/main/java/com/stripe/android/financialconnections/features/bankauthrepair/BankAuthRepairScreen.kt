@@ -3,19 +3,15 @@ package com.stripe.android.financialconnections.features.bankauthrepair
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.presentation.paneViewModel
 
 @Composable
 internal fun BankAuthRepairScreen() {
     // step view model
     val viewModel: BankAuthRepairViewModel = paneViewModel { BankAuthRepairViewModel.factory(it) }
     val state: State<SharedPartnerAuthState> = viewModel.stateFlow.collectAsState()
-    TODO manage PANE
-    argsFactory = { BankAuthRepairViewModel.Args(FinancialConnectionsSessionManifest.Pane.BANK_AUTH_REPAIR) }
 
     SharedPartnerAuth(
         state = state.value,

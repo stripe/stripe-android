@@ -26,8 +26,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.core.parentActivity
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
@@ -51,12 +49,12 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.pane
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_FIRST_INIT
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_SAVED_STATE
-import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_WEB_AUTH_FLOW
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_FIRST_INIT
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_SAVED_STATE
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_WEB_AUTH_FLOW
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -87,8 +85,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     @Named(APPLICATION_ID) private val applicationId: String,
-    initialState: FinancialConnectionsSheetNativeState
-) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(initialState), TopAppBarHost {
+    initialState: FinancialConnectionsSheetNativeState,
+) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
+    initialState,
+    nativeAuthFlowCoordinator
+),
+    TopAppBarHost {
 
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
@@ -427,6 +429,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             }
         }
     }
+
+    // TODO avoid?
+    override fun updateTopAppBar(state: FinancialConnectionsSheetNativeState): TopAppBarStateUpdate? {
+        return null
+    }
 }
 
 internal data class FinancialConnectionsSheetNativeState(
@@ -450,7 +457,8 @@ internal data class FinancialConnectionsSheetNativeState(
         args: FinancialConnectionsSheetNativeActivityArgs,
         savedState: Bundle?
     ) : this(
-        webAuthFlow = savedState?.getParcelable<WebAuthFlowState>(KEY_WEB_AUTH_FLOW) ?: WebAuthFlowState.Uninitialized,
+        webAuthFlow = savedState?.getParcelable<WebAuthFlowState>(KEY_WEB_AUTH_FLOW)
+            ?: WebAuthFlowState.Uninitialized,
         reducedBranding = args.initialSyncResponse.visual.reducedBranding,
         testMode = args.initialSyncResponse.manifest.livemode.not(),
         firstInit = savedState?.getBoolean(KEY_FIRST_INIT, true) ?: true,
@@ -515,7 +523,8 @@ internal sealed class WebAuthFlowState : Parcelable {
 }
 
 @Composable
-internal fun parentViewModel(): FinancialConnectionsSheetNativeViewModel = parentActivity().viewModel
+internal fun parentViewModel(): FinancialConnectionsSheetNativeViewModel =
+    parentActivity().viewModel
 
 internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     /**

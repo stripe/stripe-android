@@ -22,10 +22,6 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
-import com.stripe.android.financialconnections.core.Async.Fail
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
@@ -54,6 +50,9 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -459,13 +458,12 @@ internal class PartnerAuthViewModel @Inject constructor(
     data class Args(val inModal: Boolean, val pane: Pane) : Parcelable
 
     companion object {
-        TODO Args
-        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent, args: Args): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
                     parentComponent
                         .partnerAuthSubcomponent
-                        .initialState(SharedPartnerAuthState(pane = PANE))
+                        .initialState(SharedPartnerAuthState(args))
                         .build()
                         .viewModel
                 }

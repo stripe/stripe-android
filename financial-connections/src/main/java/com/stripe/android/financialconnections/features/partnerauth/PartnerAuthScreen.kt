@@ -3,15 +3,18 @@ package com.stripe.android.financialconnections.features.partnerauth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.presentation.paneViewModel
 
 @Composable
 internal fun PartnerAuthScreen(inModal: Boolean) {
-    argsFactory = { PartnerAuthViewModel.Args(inModal, FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH) }
-    val viewModel: PartnerAuthViewModel = paneViewModel { PartnerAuthViewModel.factory(it) }
+    val viewModel: PartnerAuthViewModel = paneViewModel {
+        PartnerAuthViewModel.factory(
+            parentComponent = it,
+            args = PartnerAuthViewModel.Args(inModal, Pane.PARTNER_AUTH)
+        )
+    }
     val state: State<SharedPartnerAuthState> = viewModel.stateFlow.collectAsState()
 
     SharedPartnerAuth(

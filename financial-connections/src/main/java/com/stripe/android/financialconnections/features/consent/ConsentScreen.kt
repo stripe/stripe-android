@@ -32,12 +32,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.core.Async
-import com.stripe.android.financialconnections.core.Async.Fail
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Success
-import com.stripe.android.financialconnections.core.Async.Uninitialized
-import com.stripe.android.financialconnections.core.paneViewModel
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
@@ -49,6 +43,12 @@ import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -124,10 +124,8 @@ private fun ConsentContent(
             payload = result(),
             topAppBarState = topAppBarState,
             bottomSheetMode = state.currentBottomSheet,
-            acceptConsent = state.acceptConsent,
             bottomSheetState = bottomSheetState,
             acceptConsent = state.acceptConsent,
-            bottomSheetMode = state.currentBottomSheet,
             onClickableTextClick = onClickableTextClick,
             onContinueClick = onContinueClick,
             onCloseClick = onCloseClick,

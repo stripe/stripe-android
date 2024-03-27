@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.core
+package com.stripe.android.financialconnections.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State

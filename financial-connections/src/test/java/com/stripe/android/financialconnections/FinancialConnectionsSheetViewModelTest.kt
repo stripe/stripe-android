@@ -14,7 +14,6 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffe
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.browser.BrowserManager
-import com.stripe.android.financialconnections.core.withState
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
@@ -29,6 +28,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
+import com.stripe.android.financialconnections.presentation.withState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -516,6 +516,7 @@ class FinancialConnectionsSheetViewModelTest {
             analyticsTracker = analyticsTracker,
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
+            nativeAuthFlowCoordinator = mock(),
             logger = Logger.noop()
         )
     }

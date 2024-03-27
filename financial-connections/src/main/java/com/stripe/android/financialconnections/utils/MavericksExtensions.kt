@@ -5,7 +5,7 @@ import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Mavericks
 import com.stripe.android.core.exception.StripeException
-import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.presentation.Async
 import kotlinx.coroutines.CancellationException
 import kotlin.properties.ReadOnlyProperty
 import kotlin.reflect.KProperty

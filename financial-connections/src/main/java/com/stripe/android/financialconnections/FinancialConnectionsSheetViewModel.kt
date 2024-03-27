@@ -26,11 +26,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
-import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.AppInitializationError
@@ -48,6 +48,8 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
@@ -67,8 +69,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeRouter: NativeAuthFlowRouter,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     initialState: FinancialConnectionsSheetState
-) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState) {
+) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
 
@@ -499,5 +502,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
         internal const val MAX_ACCOUNTS = 100
         internal const val QUERY_PARAM_LINKED_ACCOUNT = "linked_account"
+    }
+
+    override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
+        return null
     }
 }

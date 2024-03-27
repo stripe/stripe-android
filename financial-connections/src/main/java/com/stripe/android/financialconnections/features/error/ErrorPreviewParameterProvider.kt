@@ -2,11 +2,11 @@ package com.stripe.android.financialconnections.features.error
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.core.exception.APIException
-import com.stripe.android.financialconnections.core.Async.Loading
-import com.stripe.android.financialconnections.core.Async.Success
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
 
 internal class ErrorPreviewParameterProvider :
     PreviewParameterProvider<ErrorState> {
