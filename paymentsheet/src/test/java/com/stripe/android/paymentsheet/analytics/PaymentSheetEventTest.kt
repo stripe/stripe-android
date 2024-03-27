@@ -394,7 +394,8 @@ class PaymentSheetEventTest {
                     PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                     mock(),
                     mock()
-                )
+                ),
+                PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Success,
@@ -575,7 +576,8 @@ class PaymentSheetEventTest {
                     PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                     mock(),
                     mock()
-                )
+                ),
+                PaymentSelection.CustomerRequestedSave.NoRequest,
             ),
             duration = 1.milliseconds,
             result = PaymentSheetEvent.Payment.Result.Failure(

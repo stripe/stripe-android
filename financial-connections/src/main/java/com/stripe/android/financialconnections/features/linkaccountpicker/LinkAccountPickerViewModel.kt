@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
@@ -35,6 +36,8 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import kotlinx.coroutines.launch
@@ -43,6 +46,7 @@ import javax.inject.Inject
 
 internal class LinkAccountPickerViewModel @Inject constructor(
     initialState: LinkAccountPickerState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val handleClickableUrl: HandleClickableUrl,
@@ -54,7 +58,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState) {
+) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         observeAsyncs()
@@ -95,6 +99,13 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 merchantDataAccess = merchantDataAccess.copy(isStripeDirect = false)
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: LinkAccountPickerState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun observeAsyncs() {

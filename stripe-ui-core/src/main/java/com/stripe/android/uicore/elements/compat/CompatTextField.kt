@@ -130,8 +130,8 @@ import androidx.compose.ui.R as ComposeUiR
  */
 @Composable
 internal fun CompatTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
+    value: TextFieldValue,
+    onValueChange: (TextFieldValue) -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
     readOnly: Boolean = false,
@@ -184,7 +184,7 @@ internal fun CompatTextField(
         decorationBox = @Composable { innerTextField ->
             // places leading icon, text field with label and placeholder, trailing icon
             CommonDecorationBox(
-                value = value,
+                value = value.text,
                 visualTransformation = visualTransformation,
                 innerTextField = innerTextField,
                 placeholder = placeholder,

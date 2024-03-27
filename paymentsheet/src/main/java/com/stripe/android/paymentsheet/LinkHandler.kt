@@ -17,6 +17,7 @@ import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
@@ -132,6 +133,7 @@ internal class LinkHandler @Inject constructor(
                     completeLinkInlinePayment(
                         configuration,
                         params,
+                        paymentSelection.customerRequestedSave,
                         userInput is UserInput.SignIn && shouldCompleteLinkInlineFlow
                     )
                 }
@@ -168,6 +170,7 @@ internal class LinkHandler @Inject constructor(
     private suspend fun completeLinkInlinePayment(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         shouldCompleteLinkInlineFlow: Boolean
     ) {
         if (shouldCompleteLinkInlineFlow) {
@@ -181,7 +184,7 @@ internal class LinkHandler @Inject constructor(
 
             val paymentSelection = when (linkPaymentDetails) {
                 is LinkPaymentDetails.New -> {
-                    PaymentSelection.New.LinkInline(linkPaymentDetails)
+                    PaymentSelection.New.LinkInline(linkPaymentDetails, customerRequestedSave)
                 }
                 is LinkPaymentDetails.Saved -> {
                     val last4 = when (val paymentDetails = linkPaymentDetails.paymentDetails) {
@@ -195,10 +198,17 @@ internal class LinkHandler @Inject constructor(
                         paymentMethod = PaymentMethod.Builder()
                             .setId(linkPaymentDetails.paymentDetails.id)
                             .setCode(paymentMethodCreateParams.typeCode)
-                            .setCard(PaymentMethod.Card(last4 = last4))
+                            .setCard(
+                                PaymentMethod.Card(
+                                    last4 = last4,
+                                    wallet = Wallet.LinkWallet(last4)
+                                )
+                            )
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
+                        requiresSaveOnConfirmation = customerRequestedSave ==
+                            PaymentSelection.CustomerRequestedSave.RequestReuse,
                     )
                 }
                 null -> null

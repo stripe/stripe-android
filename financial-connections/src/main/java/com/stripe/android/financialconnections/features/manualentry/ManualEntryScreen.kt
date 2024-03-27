@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.manualentry
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -38,6 +37,7 @@ import com.stripe.android.financialconnections.features.manualentry.ManualEntryP
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -45,7 +45,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.TestModeBanner
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Layout
 
@@ -56,8 +55,10 @@ internal fun ManualEntryScreen() {
     }
     val parentViewModel = parentViewModel()
     val state: ManualEntryState by viewModel.stateFlow.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     val form by viewModel.form.collectAsState()
     ManualEntryContent(
+        topAppBarState = topAppBarState,
         routing = viewModel.routing,
         routingError = form.routingError,
         account = viewModel.account,
@@ -79,6 +80,7 @@ internal fun ManualEntryScreen() {
 
 @Composable
 private fun ManualEntryContent(
+    topAppBarState: TopAppBarState,
     routing: String,
     routingError: Int?,
     account: String,
@@ -96,12 +98,11 @@ private fun ManualEntryContent(
     onCloseFromErrorClick: (Throwable) -> Unit,
     onTestFill: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
+                state = topAppBarState,
                 onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
             )
         }
     ) {
@@ -112,7 +113,6 @@ private fun ManualEntryContent(
             is Success -> when (payload().customManualEntry) {
                 true -> FullScreenGenericLoading()
                 false -> ManualEntryLoaded(
-                    scrollState = scrollState,
                     linkPaymentAccountStatus = linkPaymentAccountStatus,
                     payload = payload(),
                     routing = routing,
@@ -135,7 +135,6 @@ private fun ManualEntryContent(
 
 @Composable
 private fun ManualEntryLoaded(
-    scrollState: ScrollState,
     payload: Payload,
     linkPaymentAccountStatus: Async<LinkAccountSessionPaymentAccount>,
     routing: String,
@@ -152,6 +151,7 @@ private fun ManualEntryLoaded(
     onTestFill: () -> Unit
 ) {
     val loading = linkPaymentAccountStatus is Loading
+    val scrollState = rememberScrollState()
     Layout(
         scrollState = scrollState,
         body = {
@@ -341,6 +341,7 @@ internal fun ManualEntryPreview(
 ) {
     FinancialConnectionsPreview {
         ManualEntryContent(
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             routing = previewState.routing,
             routingError = previewState.routingError,
             account = previewState.account,

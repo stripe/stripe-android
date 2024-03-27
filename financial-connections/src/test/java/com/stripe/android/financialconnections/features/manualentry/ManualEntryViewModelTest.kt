@@ -19,13 +19,12 @@ import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import kotlin.test.assertEquals
 
 @ExperimentalCoroutinesApi
 class ManualEntryViewModelTest {
@@ -36,7 +35,7 @@ class ManualEntryViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val pollAttachPaymentAccount = mock<PollAttachPaymentAccount>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
-    private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel() = ManualEntryViewModel(
         getOrFetchSync = getSync,
@@ -56,13 +55,11 @@ class ManualEntryViewModelTest {
         )
 
         whenever(getSync()).thenReturn(sync)
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
 
-        nativeAuthFlowCoordinator().test {
+        nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {
             val viewModel = buildViewModel()
-            assertEquals(
-                expected = Complete(USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY),
-                actual = awaitItem(),
+            assertThat(awaitItem()).isEqualTo(
+                Complete(USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY)
             )
             withState(viewModel) {
                 assertThat(it.payload).isEqualTo(

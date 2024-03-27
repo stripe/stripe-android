@@ -22,10 +22,14 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
@@ -37,6 +41,7 @@ import com.stripe.android.financialconnections.navigation.Destination.Success as
 
 internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     initialState: NetworkingSaveToLinkVerificationState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val startVerification: StartVerification,
@@ -47,7 +52,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<NetworkingSaveToLinkVerificationState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingSaveToLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -72,6 +77,13 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 )
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: NetworkingSaveToLinkVerificationState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = true,
+        )
     }
 
     private fun logErrors() {

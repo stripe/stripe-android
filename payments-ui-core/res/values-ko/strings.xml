@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[<img/>로 <installment_price/>의 <num_installments/>회 무이자 결제로 대금을 지급하십시오.]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">AmazonPay 결제를 확인하면 %s에서 해당 회사의 약관에 따라 향후 AmazonPay 계정에 결제 대금을 청구할 수 있습니다.</string>
   <!-- Text for back button -->
   <string name="stripe_back">뒤로</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">잘못된 UPI ID</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">지금 구매하거나 Klarna로 나중에 결제</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Klarna를 계속 사용하면 %1$s에서 해당 회사 및 Klarna의 약관에 따라 향후 Klarna 계정에 결제 대금을 청구할 수 있습니다. 이 설정은 언제든지 Klarna 앱에서 또는 %2$s에 문의하여 변경할 수 있습니다.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Klarna로 나중에 결제</string>
   <!-- Caption for Phone field on address form -->

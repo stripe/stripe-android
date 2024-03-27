@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
+import android.os.Parcelable
 import android.webkit.URLUtil
 import androidx.core.net.toUri
 import androidx.lifecycle.ViewModelProvider
@@ -31,6 +32,7 @@ import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -51,9 +53,12 @@ import com.stripe.android.financialconnections.navigation.Destination.AccountPic
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 import javax.inject.Inject
 import javax.inject.Named
@@ -74,13 +79,25 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
-    initialState: SharedPartnerAuthState
-) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState) {
+    initialState: SharedPartnerAuthState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
+) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         handleErrors()
         launchBrowserIfNonOauth()
         restoreOrCreateAuthSession()
+    }
+
+    override fun updateTopAppBar(state: SharedPartnerAuthState): TopAppBarStateUpdate? {
+        return if (state.inModal) {
+            null
+        } else {
+            TopAppBarStateUpdate(
+                pane = PANE,
+                allowBackNavigation = state.canNavigateBack,
+            )
+        }
     }
 
     private fun restoreOrCreateAuthSession() = suspend {
@@ -438,8 +455,11 @@ internal class PartnerAuthViewModel @Inject constructor(
         navigationManager.tryNavigateBack()
     }
 
-    companion object {
+    @Parcelize
+    data class Args(val inModal: Boolean, val pane: Pane) : Parcelable
 
+    companion object {
+        TODO Args
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {

@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.core.FinancialConnectionsViewMode
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
@@ -23,6 +24,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.experimentAssignment
@@ -33,13 +37,14 @@ import javax.inject.Inject
 
 internal class ConsentViewModel @Inject constructor(
     initialState: ConsentState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ConsentState>(initialState) {
+) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -55,6 +60,14 @@ internal class ConsentViewModel @Inject constructor(
                 merchantLogos = sync.visual.merchantLogos
             )
         }.execute { copy(consent = it) }
+    }
+
+    override fun updateTopAppBar(state: ConsentState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = Pane.CONSENT,
+            hideStripeLogo = state.consent()?.shouldShowMerchantLogos ?: true,
+            allowBackNavigation = true,
+        )
     }
 
     private fun logErrors() {

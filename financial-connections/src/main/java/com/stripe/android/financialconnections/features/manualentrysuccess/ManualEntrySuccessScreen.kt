@@ -14,10 +14,12 @@ internal fun ManualEntrySuccessScreen() {
     val parentViewModel = parentViewModel()
     val viewModel: ManualEntrySuccessViewModel = paneViewModel { ManualEntrySuccessViewModel.factory(it) }
     val state by viewModel.stateFlow.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(true) {}
     SuccessContent(
         completeSessionAsync = state.completeSession,
         payloadAsync = state.payload,
+        topAppBarState = topAppBarState,
         onDoneClick = viewModel::onSubmit,
         onCloseClick = {
             parentViewModel.onCloseNoConfirmationClick(

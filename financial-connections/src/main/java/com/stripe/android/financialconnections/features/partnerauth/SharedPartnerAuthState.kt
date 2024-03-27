@@ -14,13 +14,16 @@ internal data class SharedPartnerAuthState(
     val payload: Async<Payload>,
     val viewEffect: ViewEffect?,
     val authenticationStatus: Async<AuthenticationStatus>,
+    val inModal: Boolean
 ) {
 
-    constructor(pane: Pane) : this(
-        pane = pane,
-        payload = Uninitialized,
-        viewEffect = null,
-        authenticationStatus = Uninitialized
+    constructor(args: PartnerAuthViewModel.Args) : this(
+        pane = args.pane,
+        inModal = args.inModal,
+    )
+
+    constructor(args: BankAuthRepairViewModel.Args) : this(
+        pane = args.pane,
     )
 
     data class Payload(

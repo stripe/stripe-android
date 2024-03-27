@@ -20,6 +20,7 @@ import com.stripe.android.financialconnections.features.common.InstitutionPlanne
 import com.stripe.android.financialconnections.features.common.InstitutionUnknownErrorContent
 import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -31,8 +32,10 @@ internal fun ErrorScreen() {
     val parentViewModel = parentViewModel()
     BackHandler(true) { }
     val state by viewModel.stateFlow.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     ErrorContent(
         payload = state.payload,
+        topAppBarState = topAppBarState,
         onManualEntryClick = viewModel::onManualEntryClick,
         onSelectBankClick = viewModel::onSelectAnotherBank,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
@@ -42,6 +45,7 @@ internal fun ErrorScreen() {
 @Composable
 private fun ErrorContent(
     payload: Async<ErrorState.Payload>,
+    topAppBarState: TopAppBarState,
     onSelectBankClick: () -> Unit,
     onManualEntryClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
@@ -49,7 +53,7 @@ private fun ErrorContent(
     when (payload) {
         Uninitialized,
         is Loading -> FullScreenError(
-            showBack = false,
+            topAppBarState = topAppBarState,
             onCloseClick = { },
             content = { FullScreenGenericLoading() }
         )
@@ -57,6 +61,7 @@ private fun ErrorContent(
         // Render error successfully retrieved from a previous pane
         is Success -> ErrorContent(
             payload().error,
+            topAppBarState = topAppBarState,
             allowManualEntry = payload().allowManualEntry,
             onSelectAnotherBank = onSelectBankClick,
             onEnterDetailsManually = onManualEntryClick,
@@ -66,6 +71,7 @@ private fun ErrorContent(
         // Something wrong happened while trying to retrieve the error, render the unclassified error
         is Fail -> ErrorContent(
             payload.error,
+            topAppBarState = topAppBarState,
             allowManualEntry = false,
             onSelectAnotherBank = onSelectBankClick,
             onEnterDetailsManually = onManualEntryClick,
@@ -77,6 +83,7 @@ private fun ErrorContent(
 @Composable
 private fun ErrorContent(
     error: Throwable,
+    topAppBarState: TopAppBarState,
     allowManualEntry: Boolean,
     onSelectAnotherBank: () -> Unit,
     onEnterDetailsManually: () -> Unit,
@@ -84,7 +91,7 @@ private fun ErrorContent(
 ) {
     when (error) {
         is InstitutionPlannedDowntimeError -> FullScreenError(
-            showBack = false,
+            topAppBarState = topAppBarState,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 InstitutionPlannedDowntimeErrorContent(
@@ -96,7 +103,7 @@ private fun ErrorContent(
         )
 
         is InstitutionUnplannedDowntimeError -> FullScreenError(
-            showBack = false,
+            topAppBarState = topAppBarState,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 InstitutionUnplannedDowntimeErrorContent(
@@ -108,7 +115,7 @@ private fun ErrorContent(
         )
 
         is PartnerAuthError -> FullScreenError(
-            showBack = false,
+            topAppBarState = topAppBarState,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 InstitutionUnknownErrorContent(
@@ -118,7 +125,7 @@ private fun ErrorContent(
         )
 
         else -> FullScreenError(
-            showBack = false,
+            topAppBarState = topAppBarState,
             onCloseClick = { onCloseFromErrorClick(error) },
             content = {
                 UnclassifiedErrorContent(
@@ -137,14 +144,14 @@ private fun ErrorContent(
 
 @Composable
 private fun FullScreenError(
-    showBack: Boolean,
+    topAppBarState: TopAppBarState,
     onCloseClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
     FinancialConnectionsScaffold(
         topBar = {
             FinancialConnectionsTopAppBar(
-                allowBackNavigation = showBack,
+                state = topAppBarState,
                 onCloseClick = onCloseClick
             )
         }
@@ -161,6 +168,7 @@ internal fun ErrorScreenPreview(
     FinancialConnectionsPreview {
         ErrorContent(
             payload = state.payload,
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onSelectBankClick = {},
             onManualEntryClick = {},
             onCloseFromErrorClick = {}

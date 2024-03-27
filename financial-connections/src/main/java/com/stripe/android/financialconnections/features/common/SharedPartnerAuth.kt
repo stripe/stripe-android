@@ -23,6 +23,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -56,6 +58,7 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
@@ -83,6 +86,7 @@ internal fun SharedPartnerAuth(
     inModal: Boolean
 ) {
     val viewModel = parentViewModel()
+    val topAppBarState by viewModel.topAppBarState.collectAsState()
 
     val webAuthFlow = viewModel.collectAsState(FinancialConnectionsSheetNativeState::webAuthFlow)
     val uriHandler = LocalUriHandler.current
@@ -110,6 +114,7 @@ internal fun SharedPartnerAuth(
     SharedPartnerAuthContent(
         inModal = inModal,
         state = state,
+        topAppBarState = topAppBarState,
         onClickableTextClick = onClickableTextClick,
         onContinueClick = onContinueClick,
         onCloseClick = { viewModel.onCloseWithConfirmationClick(state.pane) },
@@ -120,6 +125,7 @@ internal fun SharedPartnerAuth(
 @Composable
 private fun SharedPartnerAuthContent(
     state: SharedPartnerAuthState,
+    topAppBarState: TopAppBarState,
     inModal: Boolean,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
@@ -129,6 +135,7 @@ private fun SharedPartnerAuthContent(
     SharedPartnerAuthBody(
         inModal = inModal,
         state = state,
+        topAppBarState = topAppBarState,
         onCloseClick = onCloseClick,
         onClickableTextClick = onClickableTextClick,
         onCancelClick = onCancelClick,
@@ -201,6 +208,7 @@ private fun SharedPartnerLoading(inModal: Boolean) {
 @Composable
 private fun SharedPartnerAuthBody(
     state: SharedPartnerAuthState,
+    topAppBarState: TopAppBarState,
     inModal: Boolean,
     onCloseClick: () -> Unit,
     onCancelClick: () -> Unit,
@@ -209,7 +217,7 @@ private fun SharedPartnerAuthBody(
 ) {
     SharedPartnerAuthContentWrapper(
         inModal = inModal,
-        canNavigateBack = state.canNavigateBack,
+        topAppBarState = topAppBarState,
         onCloseClick = onCloseClick
     ) {
         state.payload()?.let {
@@ -231,8 +239,8 @@ private fun SharedPartnerAuthBody(
  */
 @Composable
 private fun SharedPartnerAuthContentWrapper(
+    topAppBarState: TopAppBarState,
     inModal: Boolean,
-    canNavigateBack: Boolean,
     onCloseClick: () -> Unit,
     content: @Composable () -> Unit
 ) {
@@ -246,7 +254,7 @@ private fun SharedPartnerAuthContentWrapper(
         FinancialConnectionsScaffold(
             topBar = {
                 FinancialConnectionsTopAppBar(
-                    allowBackNavigation = canNavigateBack,
+                    state = topAppBarState,
                     onCloseClick = onCloseClick
                 )
             }
@@ -537,6 +545,7 @@ internal fun PartnerAuthPreview(
     FinancialConnectionsPreview {
         SharedPartnerAuthContent(
             state = state,
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             inModal = false,
             onClickableTextClick = {},
             onContinueClick = {},
@@ -558,6 +567,7 @@ internal fun PartnerAuthDrawerPreview(
         Box(modifier = Modifier.background(Color.White)) {
             SharedPartnerAuthContent(
                 state = state,
+                topAppBarState = TopAppBarState(hideStripeLogo = false),
                 inModal = true,
                 onClickableTextClick = {},
                 onContinueClick = {},

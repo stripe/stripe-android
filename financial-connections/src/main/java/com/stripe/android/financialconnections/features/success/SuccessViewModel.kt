@@ -20,6 +20,8 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.launch
@@ -33,7 +35,7 @@ internal class SuccessViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator
-) : FinancialConnectionsViewModel<SuccessState>(initialState) {
+) : FinancialConnectionsViewModel<SuccessState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         observeAsyncs()
@@ -51,6 +53,13 @@ internal class SuccessViewModel @Inject constructor(
         }.execute {
             copy(payload = it)
         }
+    }
+
+    override fun updateTopAppBar(state: SuccessState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+        )
     }
 
     private fun observeAsyncs() {

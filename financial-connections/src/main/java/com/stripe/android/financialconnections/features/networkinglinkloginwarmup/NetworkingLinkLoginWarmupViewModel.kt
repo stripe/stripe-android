@@ -15,6 +15,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.getRedactedEmail
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -28,12 +29,13 @@ import javax.inject.Inject
 
 internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     initialState: NetworkingLinkLoginWarmupState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleError: HandleError,
     private val getManifest: GetManifest,
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager
-) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -45,6 +47,10 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                 email = requireNotNull(manifest.getRedactedEmail())
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: NetworkingLinkLoginWarmupState): TopAppBarStateUpdate? {
+        return null
     }
 
     private fun logErrors() {

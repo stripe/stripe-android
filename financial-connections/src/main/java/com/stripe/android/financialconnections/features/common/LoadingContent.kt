@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
@@ -146,7 +147,12 @@ private const val LOADING_SPINNER_ROTATION_MS = 1000
 internal fun LoadingSpinnerPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = {}) },
+            topBar = {
+                FinancialConnectionsTopAppBar(
+                    state = TopAppBarState(hideStripeLogo = false),
+                    onCloseClick = {},
+                )
+            },
             content = {
                 FullScreenGenericLoading()
             }
@@ -163,7 +169,12 @@ internal fun LoadingSpinnerPreview() {
 internal fun LoadingShimmerPreview() {
     FinancialConnectionsPreview {
         FinancialConnectionsScaffold(
-            topBar = { FinancialConnectionsTopAppBar(onCloseClick = {}) },
+            topBar = {
+                FinancialConnectionsTopAppBar(
+                    state = TopAppBarState(hideStripeLogo = false),
+                    onCloseClick = {},
+                )
+            },
             content = {
                 Column(
                     modifier = Modifier.padding(16.dp),

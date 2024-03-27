@@ -17,7 +17,10 @@ import com.stripe.android.model.SetupIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams> {
 
-    abstract fun create(paymentMethod: PaymentMethod): T
+    abstract fun create(
+        paymentMethod: PaymentMethod,
+        requiresSaveOnConfirmation: Boolean = false,
+    ): T
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
@@ -29,7 +32,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
 
         fun createFactory(
             clientSecret: String,
-            shipping: ConfirmPaymentIntentParams.Shipping?
+            shipping: ConfirmPaymentIntentParams.Shipping?,
         ) = when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
                 ConfirmPaymentIntentParamsFactory(clientSecret, shipping)
@@ -49,14 +52,16 @@ internal class ConfirmPaymentIntentParamsFactory(
     private val shipping: ConfirmPaymentIntentParams.Shipping?
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
 
-    override fun create(paymentMethod: PaymentMethod): ConfirmPaymentIntentParams {
+    override fun create(paymentMethod: PaymentMethod, requiresSaveOnConfirmation: Boolean): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentMethod.id.orEmpty(),
             clientSecret = clientSecret,
             paymentMethodOptions = when (paymentMethod.type) {
                 PaymentMethod.Type.Card -> {
                     PaymentMethodOptionsParams.Card(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
+                            requiresSaveOnConfirmation
+                        } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                     )
                 }
                 PaymentMethod.Type.USBankAccount -> {
@@ -90,7 +95,7 @@ internal class ConfirmPaymentIntentParamsFactory(
 internal class ConfirmSetupIntentParamsFactory(
     private val clientSecret: String,
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
-    override fun create(paymentMethod: PaymentMethod): ConfirmSetupIntentParams {
+    override fun create(paymentMethod: PaymentMethod, requiresSaveOnConfirmation: Boolean): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             clientSecret = clientSecret,

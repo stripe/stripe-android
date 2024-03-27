@@ -24,7 +24,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 initializationMode = initializationMode,
                 paymentMethod = paymentSelection.paymentMethod,
                 shippingValues = shippingValues,
-                customerRequestedSave = false,
+                requiresSaveOnConfirmation = paymentSelection.requiresSaveOnConfirmation,
             )
         }
         else -> {
