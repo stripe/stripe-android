@@ -46,25 +46,25 @@ internal interface FinancialConnectionsSheetNativeComponent {
 
     val viewModel: FinancialConnectionsSheetNativeViewModel
 
-    // Exposed subcomponent builders.
-    val consentBuilder: ConsentSubcomponent.Builder
-    val institutionPickerBuilder: InstitutionPickerSubcomponent.Builder
-    val accountPickerBuilder: AccountPickerSubcomponent.Builder
-    val manualEntryBuilder: ManualEntrySubcomponent.Builder
-    val manualEntrySuccessBuilder: ManualEntrySuccessSubcomponent.Builder
-    val partnerAuthSubcomponent: PartnerAuthSubcomponent.Builder
-    val bankAuthRepairSubcomponent: BankAuthRepairSubcomponent.Builder
-    val successSubcomponent: SuccessSubcomponent.Builder
-    val attachPaymentSubcomponent: AttachPaymentSubcomponent.Builder
-    val resetSubcomponent: ResetSubcomponent.Builder
+    // Exposed subcomponent factories.
+    val consentSubcomponent: ConsentSubcomponent.Factory
+    val institutionPickerSubcomponent: InstitutionPickerSubcomponent.Factory
+    val accountPickerSubcomponent: AccountPickerSubcomponent.Factory
+    val manualEntrySubcomponent: ManualEntrySubcomponent.Factory
+    val manualEntrySuccessSubcomponent: ManualEntrySuccessSubcomponent.Factory
+    val partnerAuthSubcomponent: PartnerAuthSubcomponent.Factory
+    val bankAuthRepairSubcomponent: BankAuthRepairSubcomponent.Factory
+    val successSubcomponent: SuccessSubcomponent.Factory
+    val attachPaymentSubcomponent: AttachPaymentSubcomponent.Factory
+    val resetSubcomponent: ResetSubcomponent.Factory
     val errorSubcomponent: ErrorSubcomponent.Factory
     val exitSubcomponent: ExitSubcomponent.Factory
-    val networkingLinkSignupSubcomponent: NetworkingLinkSignupSubcomponent.Builder
-    val networkingLinkLoginWarmupSubcomponent: NetworkingLinkLoginWarmupSubcomponent.Builder
-    val networkingLinkVerificationSubcomponent: NetworkingLinkVerificationSubcomponent.Builder
-    val networkingSaveToLinkVerificationSubcomponent: NetworkingSaveToLinkVerificationSubcomponent.Builder
-    val linkAccountPickerSubcomponent: LinkAccountPickerSubcomponent.Builder
-    val linkStepUpVerificationSubcomponent: LinkStepUpVerificationSubcomponent.Builder
+    val networkingLinkSignupSubcomponent: NetworkingLinkSignupSubcomponent.Factory
+    val networkingLinkLoginWarmupSubcomponent: NetworkingLinkLoginWarmupSubcomponent.Factory
+    val networkingLinkVerificationSubcomponent: NetworkingLinkVerificationSubcomponent.Factory
+    val networkingSaveToLinkVerificationSubcomponent: NetworkingSaveToLinkVerificationSubcomponent.Factory
+    val linkAccountPickerSubcomponent: LinkAccountPickerSubcomponent.Factory
+    val linkStepUpVerificationSubcomponent: LinkStepUpVerificationSubcomponent.Factory
 
     @Component.Builder
     interface Builder {

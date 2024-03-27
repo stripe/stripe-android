@@ -8,12 +8,10 @@ internal interface LinkStepUpVerificationSubcomponent {
 
     val viewModel: LinkStepUpVerificationViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: LinkStepUpVerificationState): Builder
-
-        fun build(): LinkStepUpVerificationSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(
+            @BindsInstance initialState: LinkStepUpVerificationState,
+        ): LinkStepUpVerificationSubcomponent
     }
 }

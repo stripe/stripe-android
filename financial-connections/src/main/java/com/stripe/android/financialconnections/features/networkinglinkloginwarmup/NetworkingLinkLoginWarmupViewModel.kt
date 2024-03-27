@@ -123,8 +123,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .networkingLinkLoginWarmupSubcomponent
-                        .initialState(NetworkingLinkLoginWarmupState(arguments))
-                        .build()
+                        .create(NetworkingLinkLoginWarmupState(arguments))
                         .viewModel
                 }
             }

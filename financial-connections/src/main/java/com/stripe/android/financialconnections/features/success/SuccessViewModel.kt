@@ -94,8 +94,7 @@ internal class SuccessViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .successSubcomponent
-                        .initialState(SuccessState())
-                        .build()
+                        .create(SuccessState())
                         .viewModel
                 }
             }

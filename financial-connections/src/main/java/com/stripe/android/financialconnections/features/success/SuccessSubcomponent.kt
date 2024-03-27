@@ -8,12 +8,8 @@ internal interface SuccessSubcomponent {
 
     val viewModel: SuccessViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: SuccessState): Builder
-
-        fun build(): SuccessSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: SuccessState): SuccessSubcomponent
     }
 }

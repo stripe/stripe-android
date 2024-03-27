@@ -8,12 +8,8 @@ internal interface ResetSubcomponent {
 
     val viewModel: ResetViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: ResetState): Builder
-
-        fun build(): ResetSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: ResetState): ResetSubcomponent
     }
 }

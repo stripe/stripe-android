@@ -463,8 +463,7 @@ internal class PartnerAuthViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .partnerAuthSubcomponent
-                        .initialState(SharedPartnerAuthState(args))
-                        .build()
+                        .create(SharedPartnerAuthState(args))
                         .viewModel
                 }
             }

@@ -325,9 +325,8 @@ internal class AccountPickerViewModel @Inject constructor(
             viewModelFactory {
                 initializer {
                     parentComponent
-                        .accountPickerBuilder
-                        .initialState(AccountPickerState())
-                        .build()
+                        .accountPickerSubcomponent
+                        .create(AccountPickerState())
                         .viewModel
                 }
             }

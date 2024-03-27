@@ -8,12 +8,8 @@ internal interface AccountPickerSubcomponent {
 
     val viewModel: AccountPickerViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: AccountPickerState): Builder
-
-        fun build(): AccountPickerSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: AccountPickerState): AccountPickerSubcomponent
     }
 }

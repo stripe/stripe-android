@@ -252,9 +252,8 @@ internal class InstitutionPickerViewModel @Inject constructor(
             viewModelFactory {
                 initializer {
                     parentComponent
-                        .institutionPickerBuilder
-                        .initialState(InstitutionPickerState())
-                        .build()
+                        .institutionPickerSubcomponent
+                        .create(InstitutionPickerState())
                         .viewModel
                 }
             }

@@ -65,9 +65,8 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
             viewModelFactory {
                 initializer {
                     parentComponent
-                        .manualEntrySuccessBuilder
-                        .initialState(ManualEntrySuccessState())
-                        .build()
+                        .manualEntrySuccessSubcomponent
+                        .create(ManualEntrySuccessState())
                         .viewModel
                 }
             }

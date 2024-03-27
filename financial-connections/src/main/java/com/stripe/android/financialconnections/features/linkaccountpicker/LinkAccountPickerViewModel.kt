@@ -220,8 +220,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                 initializer {
                     parentComponent
                         .linkAccountPickerSubcomponent
-                        .initialState(LinkAccountPickerState())
-                        .build()
+                        .create(LinkAccountPickerState())
                         .viewModel
                 }
             }

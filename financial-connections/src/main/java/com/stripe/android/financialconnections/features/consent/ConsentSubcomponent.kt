@@ -8,12 +8,8 @@ internal interface ConsentSubcomponent {
 
     val viewModel: ConsentViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(state: ConsentState): Builder
-
-        fun build(): ConsentSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance state: ConsentState): ConsentSubcomponent
     }
 }

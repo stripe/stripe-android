@@ -8,12 +8,8 @@ internal interface AttachPaymentSubcomponent {
 
     val viewModel: AttachPaymentViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: AttachPaymentState): Builder
-
-        fun build(): AttachPaymentSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: AttachPaymentState): AttachPaymentSubcomponent
     }
 }

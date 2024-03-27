@@ -8,12 +8,8 @@ internal interface PartnerAuthSubcomponent {
 
     val viewModel: PartnerAuthViewModel
 
-    @Subcomponent.Builder
-    interface Builder {
-
-        @BindsInstance
-        fun initialState(initialState: SharedPartnerAuthState): Builder
-
-        fun build(): PartnerAuthSubcomponent
+    @Subcomponent.Factory
+    interface Factory {
+        fun create(@BindsInstance initialState: SharedPartnerAuthState): PartnerAuthSubcomponent
     }
 }
