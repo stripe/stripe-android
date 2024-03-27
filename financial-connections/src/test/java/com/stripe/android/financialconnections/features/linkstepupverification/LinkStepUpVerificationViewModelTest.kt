@@ -1,13 +1,14 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.test.MavericksTestRule
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.core.Async.Loading
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -37,7 +38,7 @@ import org.mockito.kotlin.whenever
 @ExperimentalCoroutinesApi
 class LinkStepUpVerificationViewModelTest {
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val navigationManager = TestNavigationManager()
@@ -92,7 +93,7 @@ class LinkStepUpVerificationViewModelTest {
         onStartVerificationCaptor.firstValue()
         onVerificationStartedCaptor.firstValue(consumerSession)
 
-        val state = viewModel.awaitState()
+        val state = viewModel.stateFlow.value
 
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
@@ -103,39 +104,41 @@ class LinkStepUpVerificationViewModelTest {
         val email = "test@test.com"
         val onConsumerNotFoundCaptor = argumentCaptor<suspend () -> Unit>()
 
-        whenever(getManifest()).thenReturn(
-            sessionManifest().copy(accountholderCustomerEmailAddress = email)
-        )
+        whenever(getManifest())
+            .thenReturn(sessionManifest().copy(accountholderCustomerEmailAddress = email))
 
-        val viewModel = buildViewModel()
+        buildViewModel().stateFlow.test {
+            assertThat(awaitItem().payload).isInstanceOf(Loading::class.java)
 
-        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-
-        verify(lookupConsumerAndStartVerification).invoke(
-            email = eq(email),
-            businessName = anyOrNull(),
-            verificationType = eq(VerificationType.EMAIL),
-            onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
-            onLookupError = any(),
-            onStartVerification = any(),
-            onVerificationStarted = any(),
-            onStartVerificationError = any()
-        )
-
-        onConsumerNotFoundCaptor.firstValue()
-
-        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
-        navigationManager.assertNavigatedTo(
-            destination = Destination.InstitutionPicker,
-            pane = Pane.LINK_STEP_UP_VERIFICATION
-        )
-        eventTracker.assertContainsEvent(
-            "linked_accounts.networking.verification.step_up.error",
-            mapOf(
-                "pane" to "networking_link_step_up_verification",
-                "error" to "ConsumerNotFoundError"
+            verify(lookupConsumerAndStartVerification).invoke(
+                email = eq(email),
+                businessName = anyOrNull(),
+                verificationType = eq(VerificationType.EMAIL),
+                onConsumerNotFound = onConsumerNotFoundCaptor.capture(),
+                onLookupError = any(),
+                onStartVerification = any(),
+                onVerificationStarted = any(),
+                onStartVerificationError = any()
             )
-        )
+
+            onConsumerNotFoundCaptor.firstValue()
+
+            // we don't expect any state updates if the consumer is not found
+            expectNoEvents()
+
+            navigationManager.assertNavigatedTo(
+                destination = Destination.InstitutionPicker,
+                pane = Pane.LINK_STEP_UP_VERIFICATION
+            )
+
+            eventTracker.assertContainsEvent(
+                "linked_accounts.networking.verification.step_up.error",
+                mapOf(
+                    "pane" to "networking_link_step_up_verification",
+                    "error" to "ConsumerNotFoundError"
+                )
+            )
+        }
     }
 
     @Test
@@ -173,7 +176,7 @@ class LinkStepUpVerificationViewModelTest {
             onStartVerificationCaptor.firstValue()
             onVerificationStartedCaptor.firstValue(consumerSession)
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {

@@ -1,11 +1,11 @@
 package com.stripe.android.financialconnections.features.networkingsavetolinkverification
 
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
@@ -33,7 +33,7 @@ import org.mockito.kotlin.whenever
 class NetworkingSaveToLinkVerificationViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule()
 
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
@@ -69,7 +69,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
         val viewModel = buildViewModel()
 
-        val state = viewModel.awaitState()
+        val state = viewModel.stateFlow.value
         verify(startVerification).sms(consumerSession.clientSecret)
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
@@ -88,14 +88,14 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
             val viewModel = buildViewModel()
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {
                 otpController.onValueChanged(i, "1")
             }
 
-            val state = viewModel.awaitState()
+            val state = viewModel.stateFlow.value
             verify(saveAccountToLink).existing(
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(listOf(selectedAccount.id))
@@ -128,14 +128,14 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
             val viewModel = buildViewModel()
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {
                 otpController.onValueChanged(i, "1")
             }
 
-            val state = viewModel.awaitState()
+            val state = viewModel.stateFlow.value
             verify(saveAccountToLink).existing(
                 eq(state.payload()!!.consumerSessionClientSecret),
                 eq(listOf(selectedAccount.id))

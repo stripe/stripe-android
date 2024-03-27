@@ -1,15 +1,17 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
 import android.os.Bundle
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider.Factory
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.DisableNetworking
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.HandleError
@@ -21,7 +23,6 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -32,7 +33,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager
-) : MavericksViewModel<NetworkingLinkLoginWarmupState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState) {
 
     init {
         logErrors()
@@ -93,7 +94,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         // Skipping disables networking, which means we don't want the user to navigate back to
         // the warm-up pane. Since the warmup pane is displayed as a bottom sheet, we need to
         // pop up all the way to the pane that opened it.
-        val referrer = awaitState().referrer
+        val referrer = stateFlow.value.referrer
 
         return if (referrer != null) {
             PopUpToBehavior.Route(
@@ -106,23 +107,20 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         }
     }
 
-    companion object :
-        MavericksViewModelFactory<NetworkingLinkLoginWarmupViewModel, NetworkingLinkLoginWarmupState> {
+    companion object {
 
         internal val PANE = Pane.NETWORKING_LINK_LOGIN_WARMUP
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: NetworkingLinkLoginWarmupState
-        ): NetworkingLinkLoginWarmupViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .networkingLinkLoginWarmupSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent, arguments: Bundle?): Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .networkingLinkLoginWarmupSubcomponent
+                        .initialState(NetworkingLinkLoginWarmupState(arguments))
+                        .build()
+                        .viewModel
+                }
+            }
     }
 }
 
@@ -130,9 +128,8 @@ internal data class NetworkingLinkLoginWarmupState(
     val referrer: Pane? = null,
     val payload: Async<Payload> = Uninitialized,
     val disableNetworkingAsync: Async<FinancialConnectionsSessionManifest> = Uninitialized,
-) : MavericksState {
+) {
 
-    @Suppress("unused") // used by mavericks to create initial state.
     constructor(args: Bundle?) : this(
         referrer = Destination.referrer(args),
         payload = Uninitialized,

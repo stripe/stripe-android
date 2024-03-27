@@ -4,17 +4,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.core.Async
+import com.stripe.android.financialconnections.core.Async.Uninitialized
+import com.stripe.android.financialconnections.core.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
@@ -27,7 +29,6 @@ import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -44,7 +45,7 @@ internal class ManualEntryViewModel @Inject constructor(
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<ManualEntryState>(initialState) {
+) : FinancialConnectionsViewModel<ManualEntryState>(initialState) {
 
     // Keep form fields outside of State for immediate updates.
     private var _routing: String? by mutableStateOf(null)
@@ -158,21 +159,18 @@ internal class ManualEntryViewModel @Inject constructor(
         onSubmit()
     }
 
-    companion object :
-        MavericksViewModelFactory<ManualEntryViewModel, ManualEntryState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: ManualEntryState
-        ): ManualEntryViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .manualEntryBuilder
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .manualEntryBuilder
+                        .initialState(ManualEntryState())
+                        .build()
+                        .viewModel
+                }
+            }
 
         private val PANE = Pane.MANUAL_ENTRY
     }
@@ -181,7 +179,7 @@ internal class ManualEntryViewModel @Inject constructor(
 internal data class ManualEntryState(
     val payload: Async<Payload> = Uninitialized,
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
-) : MavericksState {
+) {
 
     data class Payload(
         val verifyWithMicrodeposits: Boolean,

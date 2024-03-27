@@ -1,11 +1,11 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import app.cash.turbine.test
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -23,7 +23,6 @@ import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -36,10 +35,8 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 class NetworkingLinkSignupViewModelTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
     @get:Rule
-    val mavericksTestRule = MavericksTestRule(testDispatcher = testDispatcher)
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -83,7 +80,7 @@ class NetworkingLinkSignupViewModelTest {
         whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
-        val state = viewModel.awaitState()
+        val state = viewModel.stateFlow.value
         val payload = requireNotNull(state.payload())
         assertThat(payload.emailController.fieldValue.first()).isEqualTo("test@test.com")
     }
@@ -106,7 +103,7 @@ class NetworkingLinkSignupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkSignupState())
 
         navigationManager.navigationFlow.test {
-            val state = viewModel.awaitState()
+            val state = viewModel.stateFlow.value
             val payload = requireNotNull(state.payload())
             payload.emailController.onValueChange("email@email.com")
 
@@ -138,7 +135,7 @@ class NetworkingLinkSignupViewModelTest {
         val viewModel = buildViewModel(NetworkingLinkSignupState())
 
         navigationManager.navigationFlow.test {
-            val state = viewModel.awaitState()
+            val state = viewModel.stateFlow.value
             val payload = requireNotNull(state.payload())
             payload.emailController.onValueChange("email@email.com")
 

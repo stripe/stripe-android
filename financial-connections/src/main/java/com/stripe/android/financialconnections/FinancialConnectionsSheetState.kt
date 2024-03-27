@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections
 
 import android.os.Bundle
 import androidx.annotation.StringRes
-import com.airbnb.mvrx.MavericksState
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -17,7 +16,7 @@ internal data class FinancialConnectionsSheetState(
     val manifest: FinancialConnectionsSessionManifest?,
     val webAuthFlowStatus: AuthFlowStatus,
     val viewEffect: FinancialConnectionsSheetViewEffect?
-) : MavericksState {
+) {
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret

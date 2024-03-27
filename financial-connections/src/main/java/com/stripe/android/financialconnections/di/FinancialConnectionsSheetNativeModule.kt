@@ -3,11 +3,9 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
@@ -37,12 +35,9 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
 @Module(
     subcomponents = [
@@ -162,13 +157,9 @@ internal interface FinancialConnectionsSheetNativeModule {
         @Singleton
         @Provides
         fun providesPartnerToCoreAuthsRepository(
-            logger: Logger,
-            @IOContext workContext: CoroutineContext,
-            analyticsTracker: FinancialConnectionsAnalyticsTracker
+            logger: Logger
         ) = CoreAuthorizationPendingNetworkingRepairRepository(
-            coroutineScope = CoroutineScope(SupervisorJob() + workContext),
-            logger = logger,
-            analyticsTracker = analyticsTracker
+            logger = logger
         )
 
         @Provides
