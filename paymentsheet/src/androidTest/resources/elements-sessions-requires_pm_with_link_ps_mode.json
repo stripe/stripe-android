@@ -1,5 +1,4 @@
 {
-  "apple_pay_preference": "enabled",
   "business_name": "Mobile Example Account",
   "experiments": {
     "elements_link_aa": "control",
@@ -25,7 +24,6 @@
     "elements_web_lpm_server_driven_ui": true,
     "financial_connections_enable_deferred_intent_flow": false
   },
-  "google_pay_preference": "enabled",
   "link_consumer_info": null,
   "link_settings": {
     "link_authenticated_change_event_enabled": false,

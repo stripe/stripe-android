@@ -444,9 +444,7 @@ class ElementsSessionJsonParserTest {
             assertThat(parser.parse(json)?.isGooglePayEnabled).isEqualTo(expectedValue)
         }
 
-        assertIsGooglePayEnabled(true) { remove(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE) }
-        assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "enabled") }
-        assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
-        assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
+        assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_ORDERED_PAYMENT_METHOD_TYPES_AND_WALLETS, ["google_pay"]) }
+        assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_ORDERED_PAYMENT_METHOD_TYPES_AND_WALLETS, ["card"]) }
     }
 }

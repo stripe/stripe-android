@@ -1,6 +1,5 @@
 {
   "account_id": null,
-  "apple_pay_preference": "enabled",
   "business_name": "Mobile Example Account",
   "experiments_data": {
     "arb_id": "ea1e8f38-7612-421f-b082-35a88d0cb908",
@@ -33,7 +32,6 @@
     "elements_web_lpm_server_driven_ui": true,
     "financial_connections_enable_deferred_intent_flow": false
   },
-  "google_pay_preference": "enabled",
   "link_consumer_info": null,
   "link_settings": {
     "link_authenticated_change_event_enabled": false,

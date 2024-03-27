@@ -1,7 +1,6 @@
 {
   "account_id": "acct_1JtgfQKG6vc7r7YC",
   "apple_pay_merchant_token_webhook_url": "https://pm-hooks.stripe.com/apple_pay/merchant_token/pDq7tf9uieoQWMVJixFwuOve/acct_1JtgfQKG6vc7r7YC/",
-  "apple_pay_preference": "enabled",
   "business_name": "France Merchant",
   "card_brand_choice": {
     "eligible": true,
@@ -134,7 +133,6 @@
     "elements_web_lpm_server_driven_ui": true,
     "financial_connections_enable_deferred_intent_flow": true
   },
-  "google_pay_preference": "enabled",
   "legacy_customer": null,
   "link_consumer_info": null,
   "link_settings": {

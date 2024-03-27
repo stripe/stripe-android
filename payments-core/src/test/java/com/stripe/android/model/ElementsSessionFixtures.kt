@@ -594,7 +594,6 @@ internal object ElementsSessionFixtures {
     val PI_WITH_CARD_AFTERPAY_AU_BECS by lazy {
         """
             {
-              "apple_pay_preference": "enabled",
               "business_name": "AU Mobile Example Account",
               "experiments": {
                 "miui_payment_element_aa_experiment": "control"
@@ -605,7 +604,6 @@ internal object ElementsSessionFixtures {
                 "elements_enable_br_card_installments": false,
                 "elements_enable_bacs_debit_pm": false
               },
-              "google_pay_preference": "enabled",
               "link_consumer_info": null,
               "link_settings": {
                 "instant_debits_inline_institution": true,
@@ -695,7 +693,6 @@ internal object ElementsSessionFixtures {
     val PI_WITH_CARD_AFTERPAY_AU_BECS_NO_ORDERED_LPMS by lazy {
         """
             {
-              "apple_pay_preference": "enabled",
               "business_name": "AU Mobile Example Account",
               "experiments": {
                 "miui_payment_element_aa_experiment": "control"
@@ -706,7 +703,6 @@ internal object ElementsSessionFixtures {
                 "elements_enable_br_card_installments": false,
                 "elements_enable_bacs_debit_pm": false
               },
-              "google_pay_preference": "enabled",
               "link_consumer_info": null,
               "link_settings": {
                 "instant_debits_inline_institution": true,
@@ -792,7 +788,6 @@ internal object ElementsSessionFixtures {
         """
             {
               "account_id": null,
-              "apple_pay_preference": "enabled",
               "business_name": "Mobile Example Account",
               "experiments": {
                 "element_link_autofill_in_link_authentication_element": "control_test",
@@ -834,7 +829,6 @@ internal object ElementsSessionFixtures {
                 "financial_connections_enable_deferred_intent_flow": false,
                 "merchant_success_log_element_is_visible": true
               },
-              "google_pay_preference": "enabled",
               "link_consumer_info": null,
               "link_settings": {
                 "link_authenticated_change_event_enabled": false,
