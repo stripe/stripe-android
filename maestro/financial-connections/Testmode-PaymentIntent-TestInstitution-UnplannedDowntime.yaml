@@ -16,9 +16,13 @@ tags:
     timeout: 30000
 - tapOn:
     id: "consent_cta"
-# SELECT INSTITUTION WITH DOWNTIME
+# Select Down institution
 - tapOn: "Down Bank (unscheduled)"
-# CLOSE FLOW FROM ERROR PAGE
+# Selecting another bank resets the flow
+- tapOn: "Select another bank"
+# Assert flow correctly returns to institution picker
+- tapOn: "Down Bank (unscheduled)"
+# Close flow from error page
 - tapOn: "Close icon"
 - assertVisible: "Failed! Request-id: .*"
 - stopRecording

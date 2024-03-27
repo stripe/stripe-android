@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.presentation
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.UpdateTopAppBar
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import kotlinx.coroutines.launch
 
@@ -24,7 +25,7 @@ internal abstract class FinancialConnectionsViewModel<S : MavericksState>(
     private fun updateHostWithTopAppBarState(state: S) {
         viewModelScope.launch {
             val update = updateTopAppBar(state) ?: return@launch
-            nativeAuthFlowCoordinator().emit(NativeAuthFlowCoordinator.Message.UpdateTopAppBar(update))
+            nativeAuthFlowCoordinator().emit(UpdateTopAppBar(update))
         }
     }
 }
