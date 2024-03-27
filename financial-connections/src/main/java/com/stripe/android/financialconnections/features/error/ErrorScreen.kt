@@ -6,13 +6,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.exception.InstitutionPlannedDowntimeError
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.exception.PartnerAuthError
@@ -22,6 +15,12 @@ import com.stripe.android.financialconnections.features.common.InstitutionUnknow
 import com.stripe.android.financialconnections.features.common.InstitutionUnplannedDowntimeErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
@@ -29,13 +28,13 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 
 @Composable
 internal fun ErrorScreen() {
-    val viewModel: ErrorViewModel = mavericksViewModel()
+    val viewModel: ErrorViewModel = paneViewModel(ErrorViewModel.Companion::factory)
     val parentViewModel = parentViewModel()
     BackHandler(true) { }
-    val payload = viewModel.collectAsState { it.payload }
+    val state by viewModel.stateFlow.collectAsState()
     val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     ErrorContent(
-        payload = payload.value,
+        payload = state.payload,
         topAppBarState = topAppBarState,
         onManualEntryClick = viewModel::onManualEntryClick,
         onSelectBankClick = viewModel::onSelectAnotherBank,

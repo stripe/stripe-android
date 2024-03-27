@@ -1,10 +1,10 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 
 internal class NetworkingLinkLoginWarmupPreviewParameterProvider :
     PreviewParameterProvider<NetworkingLinkLoginWarmupState> {

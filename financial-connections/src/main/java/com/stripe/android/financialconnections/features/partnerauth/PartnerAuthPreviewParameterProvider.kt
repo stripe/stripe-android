@@ -1,9 +1,6 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.Body
 import com.stripe.android.financialconnections.model.Cta
 import com.stripe.android.financialconnections.model.Display
@@ -15,6 +12,9 @@ import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.model.PartnerNotice
 import com.stripe.android.financialconnections.model.TextUpdate
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 
 internal class PartnerAuthPreviewParameterProvider :
     PreviewParameterProvider<SharedPartnerAuthState> {
@@ -46,7 +46,6 @@ internal class PartnerAuthPreviewParameterProvider :
         ),
         authenticationStatus = Uninitialized,
         viewEffect = null,
-        activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
     )
 
@@ -54,7 +53,6 @@ internal class PartnerAuthPreviewParameterProvider :
         payload = Loading(),
         authenticationStatus = Uninitialized,
         viewEffect = null,
-        activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
     )
 
@@ -78,7 +76,6 @@ internal class PartnerAuthPreviewParameterProvider :
         // While browser is showing, this Async is loading.
         authenticationStatus = Loading(),
         viewEffect = null,
-        activeAuthSession = null,
         pane = Pane.PARTNER_AUTH
     )
 

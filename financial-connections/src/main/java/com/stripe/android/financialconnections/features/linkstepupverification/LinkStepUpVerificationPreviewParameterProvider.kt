@@ -1,11 +1,11 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.domain.ConfirmVerification
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement

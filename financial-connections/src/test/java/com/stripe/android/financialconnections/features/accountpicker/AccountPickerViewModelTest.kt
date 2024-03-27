@@ -1,7 +1,5 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
-import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSession
@@ -9,6 +7,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -17,6 +16,7 @@ import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.presentation.withState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
@@ -30,7 +30,7 @@ import kotlin.test.assertEquals
 internal class AccountPickerViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule()
 
     private val pollAuthorizationSessionAccounts = mock<PollAuthorizationSessionAccounts>()
     private val getSync = mock<GetOrFetchSync>()

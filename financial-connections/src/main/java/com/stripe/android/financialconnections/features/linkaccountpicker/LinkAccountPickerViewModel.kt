@@ -1,10 +1,9 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
@@ -14,6 +13,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -34,9 +34,10 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import kotlinx.coroutines.launch
 import java.util.Date
@@ -151,12 +152,12 @@ internal class LinkAccountPickerViewModel @Inject constructor(
 
     fun onNewBankAccountClick() = viewModelScope.launch {
         eventTracker.track(Click("click.new_account", PANE))
-        val nextPane = awaitState().payload()?.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
+        val nextPane = stateFlow.value.payload()?.nextPaneOnNewAccount ?: Pane.INSTITUTION_PICKER
         navigationManager.tryNavigateTo(nextPane.destination(referrer = PANE))
     }
 
     fun onSelectAccountClick() = suspend {
-        val state = awaitState()
+        val state = stateFlow.value
         val payload = requireNotNull(state.payload())
         val (account, _) =
             requireNotNull(payload.accounts.first { it.first.id == state.selectedAccountId })
@@ -210,23 +211,20 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    companion object :
-        MavericksViewModelFactory<LinkAccountPickerViewModel, LinkAccountPickerState> {
+    companion object {
 
         internal val PANE = Pane.LINK_ACCOUNT_PICKER
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: LinkAccountPickerState
-        ): LinkAccountPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .linkAccountPickerSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .linkAccountPickerSubcomponent
+                        .initialState(LinkAccountPickerState())
+                        .build()
+                        .viewModel
+                }
+            }
     }
 }
 
@@ -235,7 +233,7 @@ internal data class LinkAccountPickerState(
     val selectNetworkedAccountAsync: Async<Unit> = Uninitialized,
     val selectedAccountId: String? = null,
     val viewEffect: ViewEffect? = null
-) : MavericksState {
+) {
 
     data class Payload(
         val title: String,

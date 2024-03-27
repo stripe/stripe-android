@@ -1,13 +1,9 @@
 package com.stripe.android.financialconnections.features.networkinglinkverification
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError.Error.ConsumerNotFoundError
@@ -17,6 +13,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
@@ -31,8 +28,12 @@ import com.stripe.android.financialconnections.navigation.Destination.Institutio
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -131,7 +132,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
     }
 
     private fun onOTPEntered(otp: String) = suspend {
-        val payload = requireNotNull(awaitState().payload())
+        val payload = requireNotNull(stateFlow.value.payload())
         confirmVerification.sms(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
             verificationCode = otp
@@ -160,21 +161,18 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             )
     }.execute { copy(confirmVerification = it) }
 
-    companion object :
-        MavericksViewModelFactory<NetworkingLinkVerificationViewModel, NetworkingLinkVerificationState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: NetworkingLinkVerificationState
-        ): NetworkingLinkVerificationViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .networkingLinkVerificationSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .networkingLinkVerificationSubcomponent
+                        .initialState(NetworkingLinkVerificationState())
+                        .build()
+                        .viewModel
+                }
+            }
 
         internal val PANE = Pane.NETWORKING_LINK_VERIFICATION
     }
@@ -183,7 +181,7 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
 internal data class NetworkingLinkVerificationState(
     val payload: Async<Payload> = Uninitialized,
     val confirmVerification: Async<Unit> = Uninitialized
-) : MavericksState {
+) {
 
     data class Payload(
         val email: String,

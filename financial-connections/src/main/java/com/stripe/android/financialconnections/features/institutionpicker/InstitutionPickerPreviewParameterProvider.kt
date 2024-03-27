@@ -1,12 +1,12 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.InstitutionResponse
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 
 internal class InstitutionPickerPreviewParameterProvider :
     PreviewParameterProvider<InstitutionPickerPreviewParameterProvider.InstitutionPreviewState> {
@@ -102,7 +102,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload(manualEntry = true)),
-            searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
+            searchInstitutions = Fail(Exception("Something went wrong")),
         ),
         initialScroll = 0
     )
@@ -111,7 +111,7 @@ internal class InstitutionPickerPreviewParameterProvider :
         state = InstitutionPickerState(
             previewText = "Some query",
             payload = Success(payload(manualEntry = false)),
-            searchInstitutions = Fail(java.lang.Exception("Something went wrong")),
+            searchInstitutions = Fail(Exception("Something went wrong")),
         ),
         initialScroll = 0
     )

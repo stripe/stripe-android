@@ -1,11 +1,9 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
@@ -18,6 +16,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
@@ -36,8 +35,10 @@ import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import kotlinx.coroutines.launch
@@ -71,7 +72,7 @@ internal class AccountPickerViewModel @Inject constructor(
 
     private fun loadAccounts() {
         suspend {
-            val state = awaitState()
+            val state = stateFlow.value
             val sync = getOrFetchSync()
             val dataAccessNotice = sync.text?.consent?.dataAccessNotice
             val manifest = sync.manifest
@@ -318,21 +319,18 @@ internal class AccountPickerViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    companion object :
-        MavericksViewModelFactory<AccountPickerViewModel, AccountPickerState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: AccountPickerState
-        ): AccountPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .accountPickerBuilder
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .accountPickerBuilder
+                        .initialState(AccountPickerState())
+                        .build()
+                        .viewModel
+                }
+            }
 
         private val PANE = Pane.ACCOUNT_PICKER
     }
@@ -344,7 +342,7 @@ internal data class AccountPickerState(
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
     val selectedIds: Set<String> = emptySet(),
     val viewEffect: ViewEffect? = null
-) : MavericksState {
+) {
 
     val submitLoading: Boolean
         get() = payload is Loading || selectAccounts is Loading

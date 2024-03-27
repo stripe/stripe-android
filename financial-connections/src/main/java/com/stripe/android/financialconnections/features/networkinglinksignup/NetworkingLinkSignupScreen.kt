@@ -43,13 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
@@ -60,6 +53,12 @@ import com.stripe.android.financialconnections.features.networkinglinksignup.Net
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
@@ -83,9 +82,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
-    val viewModel: NetworkingLinkSignupViewModel = mavericksViewModel()
+    val viewModel: NetworkingLinkSignupViewModel = paneViewModel(NetworkingLinkSignupViewModel.Companion::factory)
     val parentViewModel = parentViewModel()
-    val state = viewModel.collectAsState()
+    val state = viewModel.stateFlow.collectAsState()
     val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(enabled = true) {}
     val uriHandler = LocalUriHandler.current

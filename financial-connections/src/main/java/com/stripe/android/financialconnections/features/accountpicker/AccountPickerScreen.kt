@@ -33,13 +33,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.exception.AccountLoadError
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
@@ -58,6 +51,12 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -70,9 +69,9 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun AccountPickerScreen() {
-    val viewModel: AccountPickerViewModel = mavericksViewModel()
+    val viewModel: AccountPickerViewModel = paneViewModel { AccountPickerViewModel.factory(it) }
     val parentViewModel = parentViewModel()
-    val state: State<AccountPickerState> = viewModel.collectAsState()
+    val state: State<AccountPickerState> = viewModel.stateFlow.collectAsState()
     val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(true) {}
 

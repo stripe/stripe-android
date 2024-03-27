@@ -3,11 +3,10 @@ package com.stripe.android.financialconnections.features.partnerauth
 import android.os.Parcelable
 import android.webkit.URLUtil
 import androidx.core.net.toUri
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
@@ -24,6 +23,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -50,9 +50,11 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.PopUpToBehavior
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
@@ -113,7 +115,9 @@ internal class PartnerAuthViewModel @Inject constructor(
             institution = requireNotNull(manifest.activeInstitution),
             authSession = authSession,
         )
-    }.execute { copy(payload = it) }
+    }.execute {
+        copy(payload = it)
+    }
 
     private fun recreateAuthSession() = suspend {
         val launchedEvent = Launched(Date())
@@ -140,15 +144,12 @@ internal class PartnerAuthViewModel @Inject constructor(
         // keeps existing payload to prevent showing full-screen loading.
         retainValue = SharedPartnerAuthState::payload
     ) {
-        copy(
-            payload = it,
-            activeAuthSession = it()?.authSession?.id
-        )
+        copy(payload = it)
     }
 
     private fun launchBrowserIfNonOauth() {
         onAsync(
-            asyncProp = SharedPartnerAuthState::payload,
+            prop = SharedPartnerAuthState::payload,
             onSuccess = {
                 // launch auth for non-OAuth (skip pre-pane).
                 if (!it.authSession.isOAuth) {
@@ -456,20 +457,17 @@ internal class PartnerAuthViewModel @Inject constructor(
     @Parcelize
     data class Args(val inModal: Boolean, val pane: Pane) : Parcelable
 
-    companion object : MavericksViewModelFactory<PartnerAuthViewModel, SharedPartnerAuthState> {
-
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: SharedPartnerAuthState
-        ): PartnerAuthViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .partnerAuthSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+    companion object {
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent, args: Args): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .partnerAuthSubcomponent
+                        .initialState(SharedPartnerAuthState(args))
+                        .build()
+                        .viewModel
+                }
+            }
 
         private val PANE = Pane.PARTNER_AUTH
     }

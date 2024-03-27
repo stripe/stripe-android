@@ -1,11 +1,10 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import android.webkit.URLUtil
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
@@ -14,6 +13,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
@@ -27,11 +27,11 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
-import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.isCancellationError
@@ -48,6 +48,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
+import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
 internal class NetworkingLinkSignupViewModel @Inject constructor(
     initialState: NetworkingLinkSignupState,
@@ -124,7 +125,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         onAsync(
             NetworkingLinkSignupState::saveAccountToLink,
             onSuccess = {
-                navigationManager.tryNavigateTo(Success(referrer = PANE))
+                navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
             },
             onFail = { error ->
                 eventTracker.logError(
@@ -133,7 +134,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                     logger = logger,
                     pane = PANE
                 )
-                navigationManager.tryNavigateTo(Success(referrer = PANE))
+                navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
             },
         )
     }
@@ -195,7 +196,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 
     fun onSkipClick() = viewModelScope.launch {
         eventTracker.track(Click(eventName = "click.not_now", pane = PANE))
-        navigationManager.tryNavigateTo(Success(referrer = PANE))
+        navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
     }
 
     fun onSaveAccount() {
@@ -214,7 +215,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private fun saveNewAccount() {
         suspend {
             eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
-            val state = awaitState()
+            val state = stateFlow.value
             val selectedAccounts = getCachedAccounts()
             val phoneController = state.payload()!!.phoneController
             require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
@@ -240,7 +241,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState { copy(viewEffect = OpenUrl(uri, date.time)) }
         } else {
-            val managedUri = NetworkingLinkSignupClickableText.values()
+            val managedUri = NetworkingLinkSignupClickableText.entries
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
                 NetworkingLinkSignupClickableText.LEGAL_DETAILS -> {
@@ -266,21 +267,18 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    companion object :
-        MavericksViewModelFactory<NetworkingLinkSignupViewModel, NetworkingLinkSignupState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: NetworkingLinkSignupState
-        ): NetworkingLinkSignupViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .networkingLinkSignupSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .networkingLinkSignupSubcomponent
+                        .initialState(NetworkingLinkSignupState())
+                        .build()
+                        .viewModel
+                }
+            }
 
         private const val SEARCH_DEBOUNCE_MS = 1000L
         private const val SEARCH_DEBOUNCE_FINISHED_EMAIL_MS = 300L
@@ -295,7 +293,7 @@ internal data class NetworkingLinkSignupState(
     val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
     val viewEffect: ViewEffect? = null
-) : MavericksState {
+) {
 
     val showFullForm: Boolean
         get() = lookupAccount()?.let { !it.exists } ?: false

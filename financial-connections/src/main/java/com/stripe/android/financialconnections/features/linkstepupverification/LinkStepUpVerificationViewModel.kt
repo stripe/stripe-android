@@ -1,13 +1,9 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider.Factory
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpError.Error.ConsumerNotFoundError
@@ -17,6 +13,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationStepUpSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -32,8 +29,12 @@ import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.Destination.InstitutionPicker
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -143,7 +144,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     }
 
     private fun onOTPEntered(otp: String) = suspend {
-        val payload = requireNotNull(awaitState().payload())
+        val payload = requireNotNull(stateFlow.value.payload())
         // Confirm email.
         confirmVerification.email(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
@@ -213,21 +214,18 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             )
         }
 
-    companion object :
-        MavericksViewModelFactory<LinkStepUpVerificationViewModel, LinkStepUpVerificationState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: LinkStepUpVerificationState
-        ): LinkStepUpVerificationViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .linkStepUpVerificationSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .linkStepUpVerificationSubcomponent
+                        .initialState(LinkStepUpVerificationState())
+                        .build()
+                        .viewModel
+                }
+            }
 
         private const val CLICKABLE_TEXT_RESEND_CODE = "resend_code"
         internal val PANE = Pane.LINK_STEP_UP_VERIFICATION
@@ -238,7 +236,7 @@ internal data class LinkStepUpVerificationState(
     val payload: Async<Payload> = Uninitialized,
     val confirmVerification: Async<Unit> = Uninitialized,
     val resendOtp: Async<Unit> = Uninitialized,
-) : MavericksState {
+) {
 
     val submitLoading: Boolean
         get() = confirmVerification is Loading || resendOtp is Loading

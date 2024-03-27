@@ -41,8 +41,6 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
-    implementation libs.mavericks
-    implementation libs.mavericksCompose
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
@@ -64,7 +62,6 @@ dependencies {
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.mavericks
     testImplementation testLibs.robolectric
     testImplementation testLibs.testParameterInjector
     testImplementation testLibs.turbine

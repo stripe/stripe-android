@@ -1,9 +1,6 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
@@ -16,6 +13,9 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
 
 internal class AccountPickerPreviewParameterProvider :
     PreviewParameterProvider<AccountPickerState> {

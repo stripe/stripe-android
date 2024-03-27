@@ -1,15 +1,14 @@
 package com.stripe.android.financialconnections.features.attachpayment
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PollAttachPaymentsSucceeded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -23,9 +22,10 @@ import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import com.stripe.android.financialconnections.utils.measureTimeMillis
 import javax.inject.Inject
@@ -113,20 +113,18 @@ internal class AttachPaymentViewModel @Inject constructor(
     fun onSelectAnotherBank() =
         navigationManager.tryNavigateTo(Reset(referrer = PANE))
 
-    companion object : MavericksViewModelFactory<AttachPaymentViewModel, AttachPaymentState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: AttachPaymentState
-        ): AttachPaymentViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .attachPaymentSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .attachPaymentSubcomponent
+                        .initialState(AttachPaymentState())
+                        .build()
+                        .viewModel
+                }
+            }
 
         private val PANE = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT
     }
@@ -134,4 +132,4 @@ internal class AttachPaymentViewModel @Inject constructor(
 
 internal data class AttachPaymentState(
     val linkPaymentAccount: Async<LinkAccountSessionPaymentAccount> = Uninitialized
-) : MavericksState
+)

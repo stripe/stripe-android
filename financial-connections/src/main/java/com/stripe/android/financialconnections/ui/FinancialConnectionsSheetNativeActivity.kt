@@ -1,12 +1,14 @@
 package com.stripe.android.financialconnections.ui
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
@@ -14,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
@@ -21,15 +24,16 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.airbnb.mvrx.MavericksView
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
@@ -49,20 +53,22 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
-import com.stripe.android.financialconnections.utils.argsOrNull
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
-import com.stripe.android.financialconnections.utils.viewModelLazy
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
+internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
-    val args by argsOrNull<FinancialConnectionsSheetNativeActivityArgs>()
-
-    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModelLazy()
+    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModels(
+        factoryProducer = { FinancialConnectionsSheetNativeViewModel.Factory }
+    )
 
     @Inject
     lateinit var logger: Logger
@@ -75,46 +81,46 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (args == null) {
+        if (getArgs(intent) == null) {
             finish()
         } else {
             viewModel.activityRetainedComponent.inject(this)
-            viewModel.onEach { postInvalidate() }
             onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
+            observeViewEffects()
             setContent {
                 FinancialConnectionsTheme {
-                    val firstPane by viewModel.collectAsState { it.initialPane }
-                    val testMode by viewModel.collectAsState { it.testMode }
+                    val state by viewModel.stateFlow.collectAsState()
                     NavHost(
-                        initialPane = firstPane,
-                        testMode = testMode,
+                        initialPane = state.initialPane,
+                        testMode = state.testMode,
                     )
                 }
             }
         }
     }
 
-    /**
-     * handle state changes here.
-     */
-    override fun invalidate() {
-        withState(viewModel) { state ->
-            state.viewEffect?.let { viewEffect ->
-                when (viewEffect) {
-                    is OpenUrl -> startActivity(
-                        browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
-                    )
-
-                    is Finish -> {
-                        setResult(
-                            Activity.RESULT_OK,
-                            Intent().putExtra(EXTRA_RESULT, viewEffect.result)
+    private fun observeViewEffects() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.stateFlow
+                .map { it.viewEffect }
+                .distinctUntilChanged()
+                .filterNotNull()
+                .collect { viewEffect ->
+                    when (viewEffect) {
+                        is OpenUrl -> startActivity(
+                            browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
                         )
-                        finish()
+
+                        is Finish -> {
+                            setResult(
+                                Activity.RESULT_OK,
+                                Intent().putExtra(EXTRA_RESULT, viewEffect.result)
+                            )
+                            finish()
+                        }
                     }
+                    viewModel.onViewEffectLaunched()
                 }
-                viewModel.onViewEffectLaunched()
-            }
         }
     }
 
@@ -263,6 +269,20 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
 
     internal companion object {
         internal const val EXTRA_RESULT = "result"
+
+        private const val EXTRA_ARGS = "FinancialConnectionsSheetNativeActivityArgs"
+        fun intent(context: Context, args: FinancialConnectionsSheetNativeActivityArgs): Intent {
+            return Intent(context, FinancialConnectionsSheetNativeActivity::class.java).apply {
+                putExtra(EXTRA_ARGS, args)
+            }
+        }
+
+        fun getArgs(savedStateHandle: SavedStateHandle) =
+            savedStateHandle.get<FinancialConnectionsSheetNativeActivityArgs>(EXTRA_ARGS)
+
+        fun getArgs(intent: Intent): FinancialConnectionsSheetNativeActivityArgs? {
+            return intent.getParcelableExtra(EXTRA_ARGS)
+        }
     }
 }
 

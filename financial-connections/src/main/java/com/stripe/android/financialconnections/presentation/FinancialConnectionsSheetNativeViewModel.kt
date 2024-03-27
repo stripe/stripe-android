@@ -1,16 +1,19 @@
 package com.stripe.android.financialconnections.presentation
 
+import android.app.Application
 import android.content.Intent
+import android.os.Bundle
 import android.os.Parcelable
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.PersistState
-import com.airbnb.mvrx.ViewModelContext
-import com.airbnb.mvrx.compose.mavericksActivityViewModel
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -48,8 +51,12 @@ import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_FIRST_INIT
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_SAVED_STATE
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState.Companion.KEY_WEB_AUTH_FLOW
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
+import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity.Companion.getArgs
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.get
 import com.stripe.android.financialconnections.utils.updateWithNewEntry
@@ -70,6 +77,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      * No other dependencies should be exposed from the viewModel
      */
     val activityRetainedComponent: FinancialConnectionsSheetNativeComponent,
+    savedStateHandle: SavedStateHandle,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val uriUtils: UriUtils,
     private val completeFinancialConnectionsSession: CompleteFinancialConnectionsSession,
@@ -77,8 +85,12 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     private val logger: Logger,
     private val navigationManager: NavigationManager,
     @Named(APPLICATION_ID) private val applicationId: String,
-    initialState: FinancialConnectionsSheetNativeState
-) : MavericksViewModel<FinancialConnectionsSheetNativeState>(initialState), TopAppBarHost {
+    initialState: FinancialConnectionsSheetNativeState,
+) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
+    initialState,
+    nativeAuthFlowCoordinator
+),
+    TopAppBarHost {
 
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow
@@ -103,6 +115,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     )
 
     init {
+        savedStateHandle.registerSavedStateProvider()
         setState { copy(firstInit = false) }
         viewModelScope.launch {
             nativeAuthFlowCoordinator().collect { message ->
@@ -123,6 +136,16 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                         updateTopAppBarState(message.update)
                     }
                 }
+            }
+        }
+    }
+
+    private fun SavedStateHandle.registerSavedStateProvider() {
+        setSavedStateProvider(KEY_SAVED_STATE) {
+            val state = stateFlow.value
+            Bundle().apply {
+                putParcelable(KEY_WEB_AUTH_FLOW, state.webAuthFlow)
+                putBoolean(KEY_FIRST_INIT, state.firstInit)
             }
         }
     }
@@ -193,7 +216,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
      */
     fun onResume() = viewModelScope.launch {
         mutex.withLock {
-            val state = awaitState()
+            val state = stateFlow.value
             if (state.webAuthFlow is WebAuthFlowState.InProgress) {
                 setState { copy(webAuthFlow = WebAuthFlowState.Canceled(url = null)) }
             }
@@ -259,7 +282,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
     ) = viewModelScope.launch {
         mutex.withLock {
             // prevents multiple complete triggers.
-            if (awaitState().completed) return@launch
+            if (stateFlow.value.completed) return@launch
             setState { copy(completed = true) }
             runCatching {
                 val session = completeFinancialConnectionsSession(earlyTerminationCause?.value)
@@ -370,8 +393,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         currentPane.value = pane
     }
 
-    companion object :
-        MavericksViewModelFactory<FinancialConnectionsSheetNativeViewModel, FinancialConnectionsSheetNativeState> {
+    companion object {
 
         private fun baseUrl(applicationId: String) =
             "stripe://auth-redirect/$applicationId"
@@ -382,30 +404,43 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         private const val STATUS_SUCCESS = "success"
         private const val STATUS_FAILURE = "failure"
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: FinancialConnectionsSheetNativeState
-        ): FinancialConnectionsSheetNativeViewModel {
-            val args = viewModelContext.args<FinancialConnectionsSheetNativeActivityArgs>()
-            return DaggerFinancialConnectionsSheetNativeComponent
-                .builder()
-                .initialSyncResponse(args.initialSyncResponse.takeIf { state.firstInit })
-                .application(viewModelContext.app())
-                .configuration(state.configuration)
-                .initialState(state)
-                .build()
-                .viewModel
+        val Factory: ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                val savedStateHandle: SavedStateHandle = createSavedStateHandle()
+                val app = this[APPLICATION_KEY] as Application
+                // Arguments passed to the activity
+                val args: FinancialConnectionsSheetNativeActivityArgs =
+                    requireNotNull(getArgs(savedStateHandle))
+                // If the ViewModel is recreated, it will be provided with the saved state.
+                val savedState = savedStateHandle.get<Bundle>(KEY_SAVED_STATE)
+                val state = FinancialConnectionsSheetNativeState(
+                    args = args,
+                    savedState = savedState
+                )
+                DaggerFinancialConnectionsSheetNativeComponent
+                    .builder()
+                    .initialSyncResponse(args.initialSyncResponse.takeIf { state.firstInit })
+                    .application(app)
+                    .configuration(state.configuration)
+                    .savedStateHandle(savedStateHandle)
+                    .initialState(state)
+                    .build()
+                    .viewModel
+            }
         }
+    }
+
+    // TODO avoid?
+    override fun updateTopAppBar(state: FinancialConnectionsSheetNativeState): TopAppBarStateUpdate? {
+        return null
     }
 }
 
 internal data class FinancialConnectionsSheetNativeState(
-    @PersistState
     val webAuthFlow: WebAuthFlowState,
     /**
      * Tracks whether this state was recreated from a process kill.
      */
-    @PersistState
     val firstInit: Boolean,
     val configuration: FinancialConnectionsSheet.Configuration,
     val reducedBranding: Boolean,
@@ -413,22 +448,31 @@ internal data class FinancialConnectionsSheetNativeState(
     val viewEffect: FinancialConnectionsSheetNativeViewEffect?,
     val completed: Boolean,
     val initialPane: Pane
-) : MavericksState {
+) {
 
     /**
-     * Used by Mavericks to build initial state based on args.
+     * Used to build initial state based on args.
      */
-    @Suppress("Unused")
-    constructor(args: FinancialConnectionsSheetNativeActivityArgs) : this(
-        webAuthFlow = WebAuthFlowState.Uninitialized,
+    constructor(
+        args: FinancialConnectionsSheetNativeActivityArgs,
+        savedState: Bundle?
+    ) : this(
+        webAuthFlow = savedState?.getParcelable<WebAuthFlowState>(KEY_WEB_AUTH_FLOW)
+            ?: WebAuthFlowState.Uninitialized,
         reducedBranding = args.initialSyncResponse.visual.reducedBranding,
         testMode = args.initialSyncResponse.manifest.livemode.not(),
-        firstInit = true,
+        firstInit = savedState?.getBoolean(KEY_FIRST_INIT, true) ?: true,
         completed = false,
         initialPane = args.initialSyncResponse.manifest.nextPane,
         configuration = args.configuration,
         viewEffect = null
     )
+
+    companion object {
+        const val KEY_SAVED_STATE = "FinancialConnectionsSheetNativeState"
+        const val KEY_WEB_AUTH_FLOW = "webAuthFlow"
+        const val KEY_FIRST_INIT = "firstInit"
+    }
 }
 
 /**
@@ -480,7 +524,7 @@ internal sealed class WebAuthFlowState : Parcelable {
 
 @Composable
 internal fun parentViewModel(): FinancialConnectionsSheetNativeViewModel =
-    mavericksActivityViewModel()
+    parentActivity().viewModel
 
 internal sealed interface FinancialConnectionsSheetNativeViewEffect {
     /**

@@ -1,23 +1,24 @@
 package com.stripe.android.financialconnections.features.manualentrysuccess
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickDone
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -58,25 +59,22 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
         }
     }
 
-    companion object :
-        MavericksViewModelFactory<ManualEntrySuccessViewModel, ManualEntrySuccessState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: ManualEntrySuccessState
-        ): ManualEntrySuccessViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .manualEntrySuccessBuilder
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .manualEntrySuccessBuilder
+                        .initialState(ManualEntrySuccessState())
+                        .build()
+                        .viewModel
+                }
+            }
     }
 }
 
 internal data class ManualEntrySuccessState(
     val payload: Async<SuccessState.Payload> = Uninitialized,
     val completeSession: Async<FinancialConnectionsSession> = Uninitialized
-) : MavericksState
+)

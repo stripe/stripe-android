@@ -1,12 +1,11 @@
 package com.stripe.android.financialconnections.features.networkinglinkverification
 
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetManifest
@@ -16,6 +15,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_VERIFICATION
 import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -35,7 +35,7 @@ import org.mockito.kotlin.whenever
 class NetworkingLinkVerificationViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val navigationManager = TestNavigationManager()
@@ -72,7 +72,7 @@ class NetworkingLinkVerificationViewModelTest {
 
         val viewModel = buildViewModel()
 
-        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
+        assertThat(viewModel.stateFlow.value.payload).isInstanceOf(Loading::class.java)
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
@@ -88,7 +88,7 @@ class NetworkingLinkVerificationViewModelTest {
         onStartVerificationCaptor.firstValue()
         onVerificationStartedCaptor.firstValue(consumerSession)
 
-        val state = viewModel.awaitState()
+        val state = viewModel.stateFlow.value
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
     }
@@ -104,7 +104,7 @@ class NetworkingLinkVerificationViewModelTest {
 
         val viewModel = buildViewModel()
 
-        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
+        assertThat(viewModel.stateFlow.value.payload).isInstanceOf(Loading::class.java)
 
         verify(lookupConsumerAndStartVerification).invoke(
             email = eq(email),
@@ -119,7 +119,7 @@ class NetworkingLinkVerificationViewModelTest {
 
         onConsumerNotFoundCaptor.firstValue()
 
-        assertThat(viewModel.awaitState().payload).isInstanceOf(Loading::class.java)
+        assertThat(viewModel.stateFlow.value.payload).isInstanceOf(Loading::class.java)
         navigationManager.assertNavigatedTo(
             destination = Destination.InstitutionPicker,
             pane = NETWORKING_LINK_VERIFICATION
@@ -165,7 +165,7 @@ class NetworkingLinkVerificationViewModelTest {
             onStartVerificationCaptor.firstValue()
             onVerificationStartedCaptor.firstValue(consumerSession)
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {
@@ -217,7 +217,7 @@ class NetworkingLinkVerificationViewModelTest {
             onStartVerificationCaptor.firstValue()
             onVerificationStartedCaptor.firstValue(consumerSession)
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {

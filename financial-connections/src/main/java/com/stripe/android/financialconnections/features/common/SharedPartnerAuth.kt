@@ -43,12 +43,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthPreviewParameterProvider
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
@@ -58,7 +52,14 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeState
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.presentation.collectAsState
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.LocalImageLoader
@@ -87,7 +88,7 @@ internal fun SharedPartnerAuth(
     val viewModel = parentViewModel()
     val topAppBarState by viewModel.topAppBarState.collectAsState()
 
-    val webAuthFlow = viewModel.collectAsState { it.webAuthFlow }
+    val webAuthFlow = viewModel.collectAsState(FinancialConnectionsSheetNativeState::webAuthFlow)
     val uriHandler = LocalUriHandler.current
 
     val bottomSheetState = rememberModalBottomSheetState(

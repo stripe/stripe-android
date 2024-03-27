@@ -1,7 +1,9 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
@@ -9,6 +11,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -22,7 +25,6 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.experimentAssignment
@@ -88,6 +90,7 @@ internal class ConsentViewModel @Inject constructor(
             FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
             navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
+            updatedManifest
         }.execute { copy(acceptConsent = it) }
     }
 
@@ -128,19 +131,17 @@ internal class ConsentViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    companion object : MavericksViewModelFactory<ConsentViewModel, ConsentState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: ConsentState
-        ): ConsentViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .consentBuilder
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent
+                        .consentBuilder
+                        .initialState(ConsentState())
+                        .build()
+                        .viewModel
+                }
+            }
     }
 }

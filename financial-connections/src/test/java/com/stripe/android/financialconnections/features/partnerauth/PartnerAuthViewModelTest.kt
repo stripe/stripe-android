@@ -1,8 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -10,6 +7,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSessi
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
@@ -28,7 +26,6 @@ import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
@@ -39,12 +36,12 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("MaxLineLength")
+@ExperimentalCoroutinesApi
 internal class PartnerAuthViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val testRule = CoroutineTestRule()
 
     private val applicationId = "com.sample.applicationid"
     private val getSync = mock<GetOrFetchSync>()
@@ -75,16 +72,14 @@ internal class PartnerAuthViewModelTest {
                 throw unplannedDowntimeError
             }
 
-            val viewModel = createViewModel()
+            createViewModel()
 
-            withState(viewModel) {
-                handleError.assertError(
-                    extraMessage = "Error fetching payload / posting AuthSession",
-                    error = unplannedDowntimeError,
-                    pane = Pane.PARTNER_AUTH,
-                    displayErrorScreen = true
-                )
-            }
+            handleError.assertError(
+                extraMessage = "Error fetching payload / posting AuthSession",
+                error = unplannedDowntimeError,
+                pane = Pane.PARTNER_AUTH,
+                displayErrorScreen = true
+            )
         }
 
     @Test
@@ -274,13 +269,7 @@ internal class PartnerAuthViewModelTest {
         }
 
     private fun createViewModel(
-        initialState: SharedPartnerAuthState = SharedPartnerAuthState(
-            activeAuthSession = null,
-            pane = Pane.PARTNER_AUTH,
-            payload = Uninitialized,
-            viewEffect = null,
-            authenticationStatus = Uninitialized
-        )
+        initialState: SharedPartnerAuthState = SharedPartnerAuthState(Pane.PARTNER_AUTH)
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
             navigationManager = TestNavigationManager(),
