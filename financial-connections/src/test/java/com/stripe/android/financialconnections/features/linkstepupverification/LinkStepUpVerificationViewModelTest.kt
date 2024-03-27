@@ -14,7 +14,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -46,7 +46,7 @@ class LinkStepUpVerificationViewModelTest {
     private val confirmVerification = mock<ConfirmVerification>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
-    private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
+    private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val markLinkVerified = mock<MarkLinkStepUpVerified>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
@@ -62,7 +62,7 @@ class LinkStepUpVerificationViewModelTest {
         confirmVerification = confirmVerification,
         markLinkStepUpVerified = markLinkVerified,
         getCachedAccounts = getCachedAccounts,
-        selectNetworkedAccount = selectNetworkedAccount,
+        selectNetworkedAccounts = selectNetworkedAccounts,
         updateCachedAccounts = updateCachedAccounts,
         updateLocalManifest = updateLocalManifest,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
@@ -188,9 +188,9 @@ class LinkStepUpVerificationViewModelTest {
 
             verify(confirmVerification).email(any(), eq("111111"))
             verify(markLinkVerified).invoke()
-            verify(selectNetworkedAccount).invoke(
+            verify(selectNetworkedAccounts).invoke(
                 consumerSession.clientSecret,
-                selectedAccount.id
+                setOf(selectedAccount.id)
             )
             navigationManager.assertNavigatedTo(
                 Destination.Success,

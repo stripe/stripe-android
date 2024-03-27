@@ -12,7 +12,7 @@ import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.AddNewAccount
@@ -51,7 +51,7 @@ class LinkAccountPickerViewModelTest {
     private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
     private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
-    private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
+    private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
@@ -64,7 +64,7 @@ class LinkAccountPickerViewModelTest {
         eventTracker = eventTracker,
         getCachedConsumerSession = getCachedConsumerSession,
         fetchNetworkedAccounts = fetchNetworkedAccounts,
-        selectNetworkedAccount = selectNetworkedAccount,
+        selectNetworkedAccounts = selectNetworkedAccounts,
         updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
         initialState = state,
@@ -148,9 +148,9 @@ class LinkAccountPickerViewModelTest {
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
         whenever(
-            selectNetworkedAccount(
+            selectNetworkedAccounts(
                 consumerSessionClientSecret = any(),
-                selectedAccountId = any()
+                selectedAccountIds = any(),
             )
         ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
@@ -191,9 +191,9 @@ class LinkAccountPickerViewModelTest {
             whenever(getCachedConsumerSession()).thenReturn(consumerSession())
             whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
             whenever(
-                selectNetworkedAccount(
+                selectNetworkedAccounts(
                     consumerSessionClientSecret = any(),
-                    selectedAccountId = any()
+                    selectedAccountIds = any(),
                 )
             ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
@@ -207,7 +207,7 @@ class LinkAccountPickerViewModelTest {
                 assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
             }
             verifyNoInteractions(updateLocalManifest)
-            verifyNoInteractions(selectNetworkedAccount)
+            verifyNoInteractions(selectNetworkedAccounts)
             navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }
 
