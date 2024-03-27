@@ -38,5 +38,8 @@ private object UsBankAccountUiDefinitionFactory : UiDefinitionFactory.Simple {
     )
 
     // US Bank Account uses it's own mechanism, not these form elements.
-    override fun createFormElements(metadata: PaymentMethodMetadata): List<FormElement> = emptyList()
+    override fun createFormElements(
+        metadata: PaymentMethodMetadata,
+        arguments: UiDefinitionFactory.Arguments,
+    ): List<FormElement> = emptyList()
 }

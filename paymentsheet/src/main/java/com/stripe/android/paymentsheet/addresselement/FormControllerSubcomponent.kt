@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.StripeIntent
@@ -17,8 +16,7 @@ import javax.inject.Named
 @Subcomponent(
     modules = [FormControllerModule::class]
 )
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-interface FormControllerSubcomponent {
+internal interface FormControllerSubcomponent {
     val formController: FormController
 
     @Subcomponent.Builder
