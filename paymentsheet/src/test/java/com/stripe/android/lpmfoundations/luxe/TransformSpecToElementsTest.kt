@@ -4,6 +4,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -444,16 +445,18 @@ private object TransformSpecToElementsFactory {
         )
 
         return TransformSpecToElements(
-            addressRepository = mock(),
-            initialValues = mapOf(),
-            amount = null,
-            saveForFutureUseInitialValue = true,
-            merchantName = "Merchant, Inc.",
-            context = context,
-            shippingValues = null,
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            requiresMandate = requiresMandate,
+            UiDefinitionFactory.Arguments(
+                addressRepository = mock(),
+                initialValues = mapOf(),
+                amount = null,
+                saveForFutureUseInitialValue = true,
+                merchantName = "Merchant, Inc.",
+                context = context,
+                shippingValues = null,
+                cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+                billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+                requiresMandate = requiresMandate,
+            )
         )
     }
 }

@@ -6,6 +6,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -36,16 +37,18 @@ class FormControllerTest {
     )
 
     private val transformSpecToElements = TransformSpecToElements(
-        addressRepository = createAddressRepository(),
-        initialValues = emptyMap(),
-        amount = null,
-        saveForFutureUseInitialValue = false,
-        merchantName = "Merchant",
-        context = context,
-        shippingValues = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-        billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-        requiresMandate = false,
+        UiDefinitionFactory.Arguments(
+            addressRepository = createAddressRepository(),
+            initialValues = emptyMap(),
+            amount = null,
+            saveForFutureUseInitialValue = false,
+            merchantName = "Merchant",
+            context = context,
+            shippingValues = null,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            requiresMandate = false,
+        )
     )
 
     @Test
