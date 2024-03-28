@@ -69,9 +69,9 @@ class LinkAccountPickerViewModelTest {
         updateCachedAccounts = updateCachedAccounts,
         initialState = state,
         handleClickableUrl = mock(),
-        coreAuthorizationPendingNetworkingRepair = mock(),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentNoticeSheet = mock(),
+        presentUpdateRequiredSheet = mock(),
     )
 
     @Test
@@ -158,7 +158,7 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
 
         viewModel.onAccountClick(selectedAccount)
-        viewModel.onSelectAccountClick()
+        viewModel.onSelectAccountsClick()
 
         with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
             verify(updateCachedAccounts).invoke(capture())
@@ -201,7 +201,7 @@ class LinkAccountPickerViewModelTest {
             val viewModel = buildViewModel(LinkAccountPickerState())
 
             viewModel.onAccountClick(selectedAccount)
-            viewModel.onSelectAccountClick()
+            viewModel.onSelectAccountsClick()
 
             with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
                 verify(updateCachedAccounts).invoke(capture())

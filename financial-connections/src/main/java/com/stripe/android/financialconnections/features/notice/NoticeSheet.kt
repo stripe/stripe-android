@@ -36,7 +36,7 @@ internal fun NoticeSheet(
     }
 
     state.content?.let { content ->
-        StaticBottomSheetContent(
+        NoticeSheetContent(
             content = content,
             onClickableTextClick = viewModel::handleClickableTextClick,
             onConfirmModalClick = viewModel::handleConfirmModalClick,
@@ -46,7 +46,7 @@ internal fun NoticeSheet(
 }
 
 @Composable
-private fun StaticBottomSheetContent(
+private fun NoticeSheetContent(
     content: NoticeSheetContent,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,

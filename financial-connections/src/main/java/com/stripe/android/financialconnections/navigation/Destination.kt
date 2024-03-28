@@ -13,6 +13,7 @@ import androidx.navigation.NavDeepLink
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
+import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredModal
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairScreen
 import com.stripe.android.financialconnections.features.consent.ConsentScreen
@@ -195,6 +196,13 @@ internal sealed class Destination(
         closeWithoutConfirmation = false,
         logPaneLaunched = false,
         composable = { NoticeSheet(it) },
+    )
+
+    data object AccountUpdateRequired : Destination(
+        route = Pane.ACCOUNT_UPDATE_REQUIRED.value,
+        closeWithoutConfirmation = false,
+        logPaneLaunched = false,
+        composable = { AccountUpdateRequiredModal(it) },
     )
 
     data object Error : Destination(

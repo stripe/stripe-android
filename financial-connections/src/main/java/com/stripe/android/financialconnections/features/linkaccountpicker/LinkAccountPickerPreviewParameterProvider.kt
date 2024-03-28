@@ -39,6 +39,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
+                singleAccount = true,
             )
         ),
     )
@@ -59,12 +60,13 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
+                singleAccount = true,
             )
         ),
     )
 
     private fun accountSelected() = LinkAccountPickerState(
-        selectedAccountId = partnerAccountList().first().first.id,
+        selectedAccountIds = listOf(partnerAccountList().first().first.id),
         payload = Success(
             LinkAccountPickerState.Payload(
                 title = display().title,
@@ -76,6 +78,7 @@ internal class LinkAccountPickerPreviewParameterProvider :
                 defaultCta = display().defaultCta,
                 nextPaneOnNewAccount = Pane.INSTITUTION_PICKER,
                 partnerToCoreAuths = emptyMap(),
+                singleAccount = true,
             )
         ),
     )

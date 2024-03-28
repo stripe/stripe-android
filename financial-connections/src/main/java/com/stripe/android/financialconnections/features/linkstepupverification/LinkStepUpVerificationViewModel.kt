@@ -154,7 +154,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         )
 
         // Get accounts selected in networked accounts picker.
-        val selectedAccount = getCachedAccounts().first()
+        val selectedAccounts = getCachedAccounts()
 
         // Mark session as verified.
         runCatching { markLinkStepUpVerified() }
@@ -172,13 +172,13 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         // Mark networked account as selected.
         val activeInstitution = selectNetworkedAccounts(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
-            selectedAccountIds = setOf(selectedAccount.id),
+            selectedAccountIds = selectedAccounts.map { it.id }.toSet(),
         )
 
         // Updates manifest active institution after account networked.
         updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
         // Updates cached accounts with the one selected.
-        updateCachedAccounts { listOf(selectedAccount) }
+        updateCachedAccounts { selectedAccounts }
         navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
     }.execute { copy(confirmVerification = it) }
 
