@@ -205,7 +205,9 @@ workflows:
     before_run:
       - start_emulator
       - prepare_all
+      - restore_gradle_output_data
     after_run:
+      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
@@ -227,7 +229,9 @@ workflows:
     before_run:
       - start_screenshot_emulator
       - prepare_all
+      - restore_gradle_output_data
     after_run:
+      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
@@ -251,7 +255,9 @@ workflows:
     before_run:
       - start_emulator
       - prepare_all
+      - restore_gradle_output_data
     after_run:
+      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
@@ -271,7 +277,9 @@ workflows:
     before_run:
       - start_emulator
       - prepare_all
+      - restore_gradle_output_data
     after_run:
+      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
@@ -419,6 +427,10 @@ workflows:
       - git-clone@8: { }
       - cache-pull@2: { }
       - restore-gradle-cache@1: { }
+      - activate-build-cache-for-gradle:
+          inputs:
+            - push: 'true'
+            - validation_level: warning
       - script-runner@0:
           # Maven doesn't like java 17, so running it before.
           run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
@@ -434,6 +446,18 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
+  save_gradle_output_data:
+    steps:
+      - script@1:
+          inputs:
+            - content: |-
+                /tmp/bin/bitrise-build-cache save-gradle-output-data
+  restore_gradle_output_data:
+    steps:
+      - script@1:
+          inputs:
+            - content: |-
+                /tmp/bin/bitrise-build-cache restore-gradle-output-data
   conclude_all:
     steps:
       - script-runner@0:
