@@ -10,7 +10,9 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.RecyclerView
 import com.stripe.android.R
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.core.analytics.ErrorReporter
 
 /**
  * A [ItemTouchHelper.SimpleCallback] subclass for enabling swiping on Payment Methods in
@@ -19,13 +21,19 @@ import com.stripe.android.model.PaymentMethod
 internal class PaymentMethodSwipeCallback(
     context: Context,
     private val adapter: PaymentMethodsAdapter,
-    private val listener: Listener
+    private val listener: Listener,
+    private val errorReporter : ErrorReporter,
 ) : ItemTouchHelper.SimpleCallback(
     0,
     ItemTouchHelper.RIGHT
 ) {
     private val trashIcon =
-        ContextCompat.getDrawable(context, R.drawable.stripe_ic_trash)!!
+        try {
+            ContextCompat.getDrawable(context, R.drawable.stripe_ic_trash)!!
+        } catch (t : Throwable) {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.PHONE_NUMBER_FORMATTER_NULL_LOCALE, StripeException.create(t))
+            throw t
+        }
     private val swipeStartColor =
         ContextCompat.getColor(context, R.color.stripe_swipe_start_payment_method)
     private val swipeThresholdColor =

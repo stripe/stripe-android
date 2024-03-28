@@ -37,7 +37,7 @@ class RealErrorReporterTest {
         val expectedAnalyticsValue = exception.analyticsValue()
         val expectedStatusCode = exception.statusCode.toString()
 
-        realErrorReporter.report(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
+        realErrorReporter.report(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
 
         val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
