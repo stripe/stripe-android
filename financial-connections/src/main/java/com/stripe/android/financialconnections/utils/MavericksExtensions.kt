@@ -16,4 +16,4 @@ internal fun Async<*>.isCancellationError(): Boolean = when {
 }
 
 internal val <T> Async<T>.error: Throwable?
-    get() = (this as? Fail)?.error
+    get() = (this as? Async.Fail)?.error
