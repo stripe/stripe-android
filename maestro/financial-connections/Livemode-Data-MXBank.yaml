@@ -31,7 +31,7 @@ tags:
 # NO ACCOUNT PICKER (skips account selection)
 # CONFIRM AND COMPLETE
 - extendedWaitUntil:
-    visible: "Your accounts were connected"
+    visible: "Your accounts were connected."
     timeout: 60000
 - tapOn:
     id: "done_button"

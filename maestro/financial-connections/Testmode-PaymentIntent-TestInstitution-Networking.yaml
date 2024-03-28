@@ -42,7 +42,7 @@ tags:
 - inputText: "6223115555"
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
-- assertVisible: "Your account was connected and saved with Link"
+- assertVisible: "Your account was connected and saved with Link."
 - tapOn:
     id: "done_button"
 - assertVisible: ".*Intent Confirmed!.*"
@@ -77,7 +77,7 @@ tags:
 - assertVisible:
     id: "OTP-0"
 - inputText: "111111"
-- assertVisible: "Your account was connected"
+- assertVisible: "Your account was connected."
 - tapOn:
     id: "done_button"
 - assertVisible: ".*Intent Confirmed!.*"
