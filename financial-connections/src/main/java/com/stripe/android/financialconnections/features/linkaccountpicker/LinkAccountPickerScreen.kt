@@ -21,7 +21,6 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue.Hidden
 import androidx.compose.material.Text
@@ -31,7 +30,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,7 +37,6 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
@@ -50,8 +47,8 @@ import com.stripe.android.financialconnections.features.common.LoadingShimmerEff
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
+import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.BottomSheetContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -70,15 +67,14 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
-import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.uicore.image.StripeImage
-import kotlinx.coroutines.launch
 
 /*
   The returning user account picker contains a lot of logic handling what happens after a user selects an account.
@@ -97,7 +93,7 @@ import kotlinx.coroutines.launch
 internal fun LinkAccountPickerScreen() {
     val viewModel: LinkAccountPickerViewModel = paneViewModel { LinkAccountPickerViewModel.factory(it) }
     val parentViewModel = parentViewModel()
-    val state = viewModel.stateFlow.collectAsState()
+    val state by viewModel.stateFlow.collectAsState()
     val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(enabled = true) {}
 
@@ -107,26 +103,35 @@ internal fun LinkAccountPickerScreen() {
     )
     val uriHandler = LocalUriHandler.current
 
-    state.value.viewEffect?.let { viewEffect ->
+    LaunchedEffect(state.bottomSheetContent) {
+        if (state.bottomSheetContent != null) {
+            bottomSheetState.show()
+        } else {
+            bottomSheetState.hide()
+        }
+    }
+
+    state.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
-                is OpenBottomSheet -> bottomSheetState.show()
             }
             viewModel.onViewEffectLaunched()
         }
     }
 
     LinkAccountPickerContent(
-        state = state.value,
+        state = state,
         topAppBarState = topAppBarState,
         bottomSheetState = bottomSheetState,
         onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.LINK_ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onNewBankAccountClick = viewModel::onNewBankAccountClick,
-        onSelectAccountClick = viewModel::onSelectAccountClick,
-        onAccountClick = viewModel::onAccountClick
+        onSelectAccountClick = viewModel::onSelectAccountsClick,
+        onAccountClick = viewModel::onAccountClick,
+        onUpdateAccount = viewModel::onUpdateAccount,
+        onBottomSheetDismiss = viewModel::onBottomSheetDismiss,
     )
 }
 
@@ -140,23 +145,30 @@ private fun LinkAccountPickerContent(
     onClickableTextClick: (String) -> Unit,
     onNewBankAccountClick: () -> Unit,
     onSelectAccountClick: () -> Unit,
-    onAccountClick: (PartnerAccount) -> Unit
+    onAccountClick: (PartnerAccount) -> Unit,
+    onUpdateAccount: (BottomSheetContent.UpdateRequired) -> Unit,
+    onBottomSheetDismiss: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    ModalBottomSheetLayout(
+    FinancialConnectionsModalBottomSheetLayout(
         sheetState = bottomSheetState,
-        sheetBackgroundColor = colors.backgroundSurface,
-        sheetShape = RoundedCornerShape(8.dp),
-        scrimColor = Neutral900.copy(alpha = 0.32f),
         sheetContent = {
-            when (val dataAccessNotice = state.payload()?.dataAccessNotice) {
+            when (val content = state.bottomSheetContent) {
+                is BottomSheetContent.Notice -> {
+                    DataAccessBottomSheetContent(
+                        dataDialog = content.content,
+                        onConfirmModalClick = onBottomSheetDismiss,
+                        onClickableTextClick = onClickableTextClick
+                    )
+                }
+                is BottomSheetContent.UpdateRequired -> {
+                    AccountUpdateRequiredBottomSheetContent(
+                        content = content,
+                        onContinue = onUpdateAccount,
+                        onCancel = onBottomSheetDismiss,
+                    )
+                }
                 null -> Unit
-                else -> DataAccessBottomSheetContent(
-                    dataDialog = dataAccessNotice,
-                    onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-                    onClickableTextClick = onClickableTextClick
-                )
             }
         },
         content = {
@@ -202,7 +214,7 @@ private fun LinkAccountPickerMainContent(
                 scrollState = scrollState,
                 payload = payload,
                 cta = state.cta,
-                selectedAccountId = state.selectedAccountId,
+                selectedAccountIds = state.selectedAccountIds,
                 selectNetworkedAccountAsync = state.selectNetworkedAccountAsync,
                 onClickableTextClick = onClickableTextClick,
                 onSelectAccountClick = onSelectAccountClick,
@@ -219,13 +231,13 @@ private fun LinkAccountPickerMainContent(
 private fun LinkAccountPickerLoaded(
     scrollState: LazyListState,
     payload: Async<Payload>,
-    selectedAccountId: String?,
+    selectedAccountIds: Set<String>,
     selectNetworkedAccountAsync: Async<Unit>,
     onAccountClick: (PartnerAccount) -> Unit,
     onNewBankAccountClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onSelectAccountClick: () -> Unit,
-    cta: String?
+    cta: TextResource,
 ) {
     LazyLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -234,7 +246,7 @@ private fun LinkAccountPickerLoaded(
             payload()?.let {
                 loadedContent(
                     payload = it,
-                    selectedAccountId = selectedAccountId,
+                    selectedAccountIds = selectedAccountIds,
                     selectNetworkedAccountAsync = selectNetworkedAccountAsync,
                     onAccountClick = onAccountClick,
                     onNewBankAccountClick = onNewBankAccountClick
@@ -250,13 +262,13 @@ private fun LinkAccountPickerLoaded(
                     )
                     Spacer(modifier = Modifier.size(12.dp))
                     FinancialConnectionsButton(
-                        enabled = selectedAccountId != null,
+                        enabled = selectedAccountIds.isNotEmpty(),
                         loading = selectNetworkedAccountAsync is Loading,
                         onClick = onSelectAccountClick,
                         modifier = Modifier
                             .fillMaxWidth()
                     ) {
-                        Text(text = cta ?: stringResource(R.string.stripe_link_account_picker_cta))
+                        Text(text = cta.toText().toString())
                     }
                 }
             }
@@ -266,7 +278,7 @@ private fun LinkAccountPickerLoaded(
 
 private fun LazyListScope.loadedContent(
     payload: Payload,
-    selectedAccountId: String?,
+    selectedAccountIds: Set<String>,
     selectNetworkedAccountAsync: Async<Unit>,
     onAccountClick: (PartnerAccount) -> Unit,
     onNewBankAccountClick: () -> Unit
@@ -281,7 +293,7 @@ private fun LazyListScope.loadedContent(
     }
     items(payload.accounts) {
         NetworkedAccountItem(
-            selected = it.first.id == selectedAccountId,
+            selected = it.first.id in selectedAccountIds,
             account = it,
             onAccountClicked = { selected ->
                 if (selectNetworkedAccountAsync !is Loading) onAccountClick(selected)
@@ -423,7 +435,9 @@ internal fun LinkAccountPickerScreenPreview(
             onClickableTextClick = {},
             onNewBankAccountClick = {},
             onSelectAccountClick = {},
-            onAccountClick = {}
+            onAccountClick = {},
+            onUpdateAccount = {},
+            onBottomSheetDismiss = {},
         )
     }
 }
