@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.network
 
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.exception.AuthenticationException
@@ -21,7 +22,8 @@ import javax.inject.Inject
 internal class FinancialConnectionsRequestExecutor @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
     private val eventEmitter: FinancialConnectionsResponseEventEmitter,
-    private val json: Json
+    private val json: Json,
+    private val logger: Logger,
 ) {
 
     @Throws(
@@ -33,6 +35,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>
     ): Response = runCatching {
+        logger.debug("Executing ${request.method.code} request to ${request.url}")
         stripeNetworkClient.executeRequest(request)
     }.fold(
         onSuccess = { response ->

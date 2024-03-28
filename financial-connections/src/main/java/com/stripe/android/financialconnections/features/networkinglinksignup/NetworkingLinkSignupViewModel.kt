@@ -223,7 +223,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 country = phoneController.getCountryCode(),
                 email = state.validEmail!!,
                 phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
-                selectedAccounts = selectedAccounts.map { it.id },
+                selectedAccounts = selectedAccounts.map { it.id }.toSet(),
             )
         }.execute { copy(saveAccountToLink = it) }
     }

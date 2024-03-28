@@ -130,7 +130,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             )
             saveAccountToLink.existing(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
-                selectedAccounts = getCachedAccounts().map { it.id },
+                selectedAccounts = getCachedAccounts().map { it.id }.toSet(),
             )
         }
             .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }

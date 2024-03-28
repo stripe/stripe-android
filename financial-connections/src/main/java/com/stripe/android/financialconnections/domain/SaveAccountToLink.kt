@@ -19,7 +19,7 @@ internal class SaveAccountToLink @Inject constructor(
     suspend fun new(
         email: String,
         phoneNumber: String,
-        selectedAccounts: List<String>,
+        selectedAccounts: Set<String>,
         country: String
     ): FinancialConnectionsSessionManifest = runCatching {
         repository.postSaveAccountsToLink(
@@ -37,7 +37,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     suspend fun existing(
         consumerSessionClientSecret: String,
-        selectedAccounts: List<String>,
+        selectedAccounts: Set<String>,
     ): FinancialConnectionsSessionManifest = runCatching {
         repository.postSaveAccountsToLink(
             clientSecret = configuration.financialConnectionsSessionClientSecret,

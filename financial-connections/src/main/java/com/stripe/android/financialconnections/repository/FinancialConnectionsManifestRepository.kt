@@ -134,7 +134,7 @@ internal interface FinancialConnectionsManifestRepository {
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: List<String>
+        selectedAccounts: Set<String>
     ): FinancialConnectionsSessionManifest
 
     /**
@@ -417,7 +417,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: List<String>,
+        selectedAccounts: Set<String>,
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = saveAccountToLinkUrl,
