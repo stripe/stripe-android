@@ -157,7 +157,7 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
 
         viewModel.onAccountClick(selectedAccount)
-        viewModel.onSelectAccountClick()
+        viewModel.onSelectAccountsClick()
 
         with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
             verify(updateCachedAccounts).invoke(capture())
@@ -200,7 +200,7 @@ class LinkAccountPickerViewModelTest {
             val viewModel = buildViewModel(LinkAccountPickerState())
 
             viewModel.onAccountClick(selectedAccount)
-            viewModel.onSelectAccountClick()
+            viewModel.onSelectAccountsClick()
 
             with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
                 verify(updateCachedAccounts).invoke(capture())
