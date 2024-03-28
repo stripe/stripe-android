@@ -46,6 +46,7 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.utils.error
 
 @Composable
 internal fun NetworkingSaveToLinkVerificationScreen() {
@@ -125,7 +126,7 @@ private fun NetworkingSaveToLinkVerificationLoaded(
                         focusRequester = focusRequester,
                         otpElement = payload.otpElement,
                         enabled = confirmVerificationAsync !is Loading,
-                        confirmVerificationError = (confirmVerificationAsync as? Fail)?.error,
+                        confirmVerificationError = confirmVerificationAsync.error,
                         modifier = Modifier.onGloballyPositioned {
                             shouldRequestFocus = true
                         },

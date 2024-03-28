@@ -242,7 +242,7 @@ internal data class LinkStepUpVerificationState(
     val submitLoading: Boolean
         get() = confirmVerification is Loading || resendOtp is Loading
     val submitError: Throwable?
-        get() = (confirmVerification as? Fail)?.error ?: (resendOtp as? Fail)?.error
+        get() = confirmVerification.error ?: resendOtp.error
 
     data class Payload(
         val email: String,
