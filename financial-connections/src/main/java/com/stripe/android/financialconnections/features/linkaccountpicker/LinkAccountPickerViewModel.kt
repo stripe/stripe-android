@@ -18,7 +18,7 @@ import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
@@ -50,7 +50,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val handleClickableUrl: HandleClickableUrl,
     private val fetchNetworkedAccounts: FetchNetworkedAccounts,
-    private val selectNetworkedAccount: SelectNetworkedAccount,
+    private val selectNetworkedAccounts: SelectNetworkedAccounts,
     private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val coreAuthorizationPendingNetworkingRepair: CoreAuthorizationPendingNetworkingRepairRepository,
@@ -173,9 +173,9 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         )
         when (nextPane) {
             Pane.SUCCESS -> {
-                val activeInstitution = selectNetworkedAccount(
+                val activeInstitution = selectNetworkedAccounts(
                     consumerSessionClientSecret = payload.consumerSessionClientSecret,
-                    selectedAccountId = account.id
+                    selectedAccountIds = setOf(account.id),
                 )
                 // Updates manifest active institution after account networked.
                 updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
