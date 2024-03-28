@@ -51,7 +51,7 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
-import com.stripe.android.financialconnections.ui.components.rememberBottomSheetDismissalController
+import com.stripe.android.financialconnections.utils.keepInSyncWithBottomSheet
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
@@ -143,14 +143,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val navController = rememberNavController(bottomSheetNavigator)
         val keyboardController = rememberKeyboardController()
 
-        val bottomSheetDismissalController = rememberBottomSheetDismissalController(
-            navController = navController,
-        )
-
-        LaunchedEffect(bottomSheetDismissalController) {
-            bottomSheetDismissalController.onDismissedBySwipe {
-                navController.popBackStack()
-            }
+        LaunchedEffect(navController) {
+            navController.keepInSyncWithBottomSheet()
         }
 
         PaneBackgroundEffects(navController)

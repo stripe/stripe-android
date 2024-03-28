@@ -3,6 +3,7 @@ package com.stripe.android.financialconnections.ui.components
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.utils.BottomSheetDismissalController
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.test.runTest

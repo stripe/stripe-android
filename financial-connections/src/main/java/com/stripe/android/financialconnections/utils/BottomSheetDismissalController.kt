@@ -1,7 +1,5 @@
-package com.stripe.android.financialconnections.ui.components
+package com.stripe.android.financialconnections.utils
 
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
 import androidx.navigation.NavHostController
 import androidx.navigation.get
@@ -13,19 +11,17 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
-@Composable
-internal fun rememberBottomSheetDismissalController(
-    navController: NavHostController,
-): BottomSheetDismissalController {
-    return remember(navController) {
-        BottomSheetDismissalController(navController)
+/**
+ * This method helps fix an issue with bottom sheets where the NavController's current
+ * destination isn't updated when the sheet is dismissed by swiping or tapping the scrim.
+ */
+internal suspend fun NavHostController.keepInSyncWithBottomSheet() {
+    val dismissalController = BottomSheetDismissalController(this)
+    dismissalController.onDismissedBySwipe {
+        popBackStack()
     }
 }
 
-/**
- * This class helps fix an issue with bottom sheets where the NavController's current
- * destination isn't updated when the sheet is dismissed by swiping or tapping the scrim.
- */
 internal class BottomSheetDismissalController(
     private val isBottomSheetVisibleFlow: Flow<Boolean>,
     private val currentPaneFlow: Flow<FinancialConnectionsSessionManifest.Pane>,
