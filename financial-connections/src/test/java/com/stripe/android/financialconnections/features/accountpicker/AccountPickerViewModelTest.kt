@@ -245,6 +245,8 @@ internal class AccountPickerViewModelTest {
             sessionManifest().copy(
                 singleAccount = false,
                 activeAuthSession = authorizationSession(),
+                accountholderIsLinkConsumer = true,
+                isNetworkingUserFlow = true,
             )
         )
 
