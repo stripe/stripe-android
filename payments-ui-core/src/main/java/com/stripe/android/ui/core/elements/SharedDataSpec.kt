@@ -16,7 +16,7 @@ data class SharedDataSpec(
     // If a form is empty, it must still have an EmptyFormSpec
     // field to get the form into a complete state (i.e. PayPal).
     @SerialName("fields")
-    val fields: ArrayList<FormItemSpec> = arrayListOf(EmptyFormSpec),
+    val fields: ArrayList<FormItemSpec> = arrayListOf(),
 
     @SerialName("selector_icon")
     val selectorIcon: SelectorIcon? = null,

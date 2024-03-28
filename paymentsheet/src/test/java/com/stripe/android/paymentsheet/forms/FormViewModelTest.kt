@@ -60,6 +60,21 @@ internal class FormViewModelTest {
     private val showCheckboxFlow = MutableStateFlow(false)
 
     @Test
+    fun `Verify completeFormValues is not null when no elements exist`() = runTest {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
+        )
+        val formViewModel = createViewModel(
+            args,
+            emptyList()
+        )
+
+        assertThat(
+            formViewModel.completeFormValues.first()
+        ).isNotNull()
+    }
+
+        @Test
     fun `Verify setting save for future use value is updated in flowable`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code

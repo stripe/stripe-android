@@ -339,7 +339,7 @@ class LpmSerializerTest {
             """.trimIndent()
 
         val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
-        assertThat(result.fields).isEqualTo(listOf(EmptyFormSpec))
+        assertThat(result.fields).isEmpty()
     }
 
     @Test

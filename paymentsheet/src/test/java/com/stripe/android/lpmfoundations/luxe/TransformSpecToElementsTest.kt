@@ -15,7 +15,6 @@ import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
-import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.ui.core.elements.KeyboardType
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.NameSpec
@@ -179,15 +178,6 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
-    fun `Empty spec is transformed to single EmptyFormElement`() {
-        val formElement = transformSpecToElements.transform(
-            emptyList(),
-        )
-
-        assertThat(formElement).containsExactly(EmptyFormElement())
-    }
-
-    @Test
     fun `UPI spec is transformed into UPI element wrapped in section`() {
         val upiSpec = UpiSpec()
         val formElement = transformSpecToElements.transform(listOf(upiSpec))
@@ -335,7 +325,7 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
-    fun `SepaMandateSpec when not required get transformed empty field`() {
+    fun `SepaMandateSpec when not required get transformed to an empty list`() {
         val placeholderSpec = PlaceholderSpec(
             apiPath = IdentifierSpec.Generic("foobar"),
             field = PlaceholderSpec.PlaceholderField.SepaMandate,
@@ -346,9 +336,7 @@ internal class TransformSpecToElementsTest {
             listOf(placeholderSpec),
         )
 
-        assertThat(formElement).hasSize(1)
-        val emptyFormElement = formElement.first() as EmptyFormElement
-        assertThat(emptyFormElement.identifier.v1).isEqualTo("empty_form")
+        assertThat(formElement).isEmpty()
     }
 
     @Test
