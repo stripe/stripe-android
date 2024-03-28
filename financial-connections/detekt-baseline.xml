@@ -22,7 +22,6 @@
     <ID>MagicNumber:LinkAccountPickerScreen.kt$3</ID>
     <ID>MagicNumber:ManualEntryViewModel.kt$ManualEntryViewModel$4</ID>
     <ID>MagicNumber:SharedPartnerAuth.kt$.50f</ID>
-    <ID>MatchingDeclarationName:FinancialConnectionsViewModel.kt$Async&lt;out T></ID>
     <ID>MatchingDeclarationName:ServerDrivenUi.kt$BulletUI</ID>
     <ID>MatchingDeclarationName:Type.kt$FinancialConnectionsTypography</ID>
     <ID>MaxLineLength:FinancialConnectionsUrls.kt$FinancialConnectionsUrls.DataPolicy$const val merchant = "https://support.stripe.com/user/questions/what-data-does-stripe-access-from-my-linked-financial-account"</ID>
@@ -38,5 +37,6 @@
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepositoryImpl : FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsSheetNativeViewModel.kt$FinancialConnectionsSheetNativeViewModel : FinancialConnectionsViewModelTopAppBarHost</ID>
+    <ID>TooManyFunctions:FinancialConnectionsSheetSharedModule.kt$FinancialConnectionsSheetSharedModule$Companion</ID>
   </CurrentIssues>
 </SmellBaseline>

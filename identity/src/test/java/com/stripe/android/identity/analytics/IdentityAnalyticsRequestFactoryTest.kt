@@ -2,6 +2,7 @@ package com.stripe.android.identity.analytics
 
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
+import com.stripe.android.core.networking.toMap
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_EXPERIMENT_EXPOSURE
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory.Companion.EVENT_SCREEN_PRESENTED
@@ -97,8 +98,8 @@ class IdentityAnalyticsRequestFactoryTest {
         verify(mockIdentityRepository).sendAnalyticsRequest(
             argWhere {
                 it.eventName == EVENT_SHEET_CLOSED &&
-                    (it.params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SESSION_RESULT] == sessionResult &&
-                    (it.params[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_LIVE_MODE] == true
+                    (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_SESSION_RESULT] == sessionResult &&
+                    (it.params.toMap()[PARAM_EVENT_META_DATA] as Map<*, *>)[PARAM_LIVE_MODE] == "true"
             }
         )
     }
@@ -120,8 +121,8 @@ class IdentityAnalyticsRequestFactoryTest {
         verify(mockIdentityRepository).sendAnalyticsRequest(
             argWhere {
                 it.eventName == EVENT_EXPERIMENT_EXPOSURE &&
-                    it.params[PARAM_ARB_ID] == USER_SESSION_ID &&
-                    it.params[PARAM_EXPERIMENT_RETRIEVED] == EXP1
+                    it.params.toMap()[PARAM_ARB_ID] == USER_SESSION_ID &&
+                    it.params.toMap()[PARAM_EXPERIMENT_RETRIEVED] == EXP1
             }
         )
     }
