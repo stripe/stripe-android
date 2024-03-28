@@ -1,11 +1,30 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import android.content.Context
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
+import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.ui.core.Amount
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal sealed interface UiDefinitionFactory {
+    class Arguments(
+        val addressRepository: AddressRepository,
+        val initialValues: Map<IdentifierSpec, String?>,
+        val shippingValues: Map<IdentifierSpec, String?>?,
+        val amount: Amount?,
+        val saveForFutureUseInitialValue: Boolean,
+        val merchantName: String,
+        val context: Context,
+        val cbcEligibility: CardBrandChoiceEligibility,
+        val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+        val requiresMandate: Boolean,
+    )
+
     interface RequiresSharedDataSpec : UiDefinitionFactory {
         fun createSupportedPaymentMethod(
             sharedDataSpec: SharedDataSpec,
@@ -24,7 +43,7 @@ internal sealed interface UiDefinitionFactory {
 
     interface Simple : UiDefinitionFactory {
         fun createSupportedPaymentMethod(): SupportedPaymentMethod
-        fun createFormElements(metadata: PaymentMethodMetadata): List<FormElement>
+        fun createFormElements(metadata: PaymentMethodMetadata, arguments: Arguments): List<FormElement>
     }
 
     fun canBeDisplayedInUi(
@@ -62,16 +81,23 @@ internal sealed interface UiDefinitionFactory {
         definition: PaymentMethodDefinition,
         metadata: PaymentMethodMetadata,
         sharedDataSpecs: List<SharedDataSpec>,
-        transformSpecToElements: TransformSpecToElements,
+        arguments: Arguments,
     ): List<FormElement>? = when (this) {
         is Simple -> {
-            createFormElements(metadata)
+            createFormElements(
+                metadata = metadata,
+                arguments = arguments,
+            )
         }
 
         is RequiresSharedDataSpec -> {
             val sharedDataSpec = sharedDataSpecs.firstOrNull { it.type == definition.type.code }
             if (sharedDataSpec != null) {
-                createFormElements(metadata, sharedDataSpec, transformSpecToElements)
+                createFormElements(
+                    metadata = metadata,
+                    sharedDataSpec = sharedDataSpec,
+                    transformSpecToElements = TransformSpecToElements(arguments),
+                )
             } else {
                 null
             }

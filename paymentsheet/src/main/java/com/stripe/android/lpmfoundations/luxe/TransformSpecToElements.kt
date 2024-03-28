@@ -1,11 +1,7 @@
 package com.stripe.android.lpmfoundations.luxe
 
-import android.content.Context
-import androidx.annotation.RestrictTo
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
-import com.stripe.android.ui.core.Amount
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.AffirmTextSpec
 import com.stripe.android.ui.core.elements.AfterpayClearpayTextSpec
@@ -41,7 +37,6 @@ import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.UpiSpec
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
@@ -51,18 +46,8 @@ import com.stripe.android.uicore.elements.IdentifierSpec
  * controller will be a pass through the field controller.
  *
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class TransformSpecToElements(
-    private val addressRepository: AddressRepository,
-    private val initialValues: Map<IdentifierSpec, String?>,
-    private val shippingValues: Map<IdentifierSpec, String?>?,
-    private val amount: Amount?,
-    private val saveForFutureUseInitialValue: Boolean,
-    private val merchantName: String,
-    private val context: Context,
-    private val cbcEligibility: CardBrandChoiceEligibility,
-    private val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
-    private val requiresMandate: Boolean,
+internal class TransformSpecToElements(
+    private val arguments: UiDefinitionFactory.Arguments,
 ) {
     fun transform(
         specs: List<FormItemSpec>,
@@ -71,9 +56,9 @@ class TransformSpecToElements(
     ): List<FormElement> {
         val specsWithoutPlaceholders = if (replacePlaceholders) {
             specsForConfiguration(
-                configuration = billingDetailsCollectionConfiguration,
+                configuration = arguments.billingDetailsCollectionConfiguration,
                 placeholderOverrideList = placeholderOverrideList,
-                requiresMandate = requiresMandate,
+                requiresMandate = arguments.requiresMandate,
                 specs = specs,
             )
         } else {
@@ -82,52 +67,52 @@ class TransformSpecToElements(
         return specsWithoutPlaceholders.mapNotNull {
             when (it) {
                 is SaveForFutureUseSpec -> it.transform(
-                    saveForFutureUseInitialValue,
-                    merchantName
+                    arguments.saveForFutureUseInitialValue,
+                    arguments.merchantName
                 )
                 is StaticTextSpec -> it.transform()
-                is AfterpayClearpayTextSpec -> it.transform(requireNotNull(amount))
+                is AfterpayClearpayTextSpec -> it.transform(requireNotNull(arguments.amount))
                 is AffirmTextSpec -> it.transform()
                 is EmptyFormSpec -> EmptyFormElement()
-                is MandateTextSpec -> it.transform(merchantName)
-                is AuBecsDebitMandateTextSpec -> it.transform(merchantName)
-                is BacsDebitBankAccountSpec -> it.transform(initialValues)
-                is BacsDebitConfirmSpec -> it.transform(merchantName, initialValues)
+                is MandateTextSpec -> it.transform(arguments.merchantName)
+                is AuBecsDebitMandateTextSpec -> it.transform(arguments.merchantName)
+                is BacsDebitBankAccountSpec -> it.transform(arguments.initialValues)
+                is BacsDebitConfirmSpec -> it.transform(arguments.merchantName, arguments.initialValues)
                 is CardDetailsSectionSpec -> it.transform(
-                    context = context,
-                    cbcEligibility = cbcEligibility,
-                    initialValues = initialValues
+                    context = arguments.context,
+                    cbcEligibility = arguments.cbcEligibility,
+                    initialValues = arguments.initialValues
                 )
-                is BsbSpec -> it.transform(initialValues)
+                is BsbSpec -> it.transform(arguments.initialValues)
                 is OTPSpec -> it.transform()
-                is NameSpec -> it.transform(initialValues)
-                is EmailSpec -> it.transform(initialValues)
-                is PhoneSpec -> it.transform(initialValues)
-                is SimpleTextSpec -> it.transform(initialValues)
-                is AuBankAccountNumberSpec -> it.transform(initialValues)
-                is IbanSpec -> it.transform(initialValues)
+                is NameSpec -> it.transform(arguments.initialValues)
+                is EmailSpec -> it.transform(arguments.initialValues)
+                is PhoneSpec -> it.transform(arguments.initialValues)
+                is SimpleTextSpec -> it.transform(arguments.initialValues)
+                is AuBankAccountNumberSpec -> it.transform(arguments.initialValues)
+                is IbanSpec -> it.transform(arguments.initialValues)
                 is KlarnaHeaderStaticTextSpec -> it.transform()
-                is DropdownSpec -> it.transform(initialValues)
-                is CountrySpec -> it.transform(initialValues)
+                is DropdownSpec -> it.transform(arguments.initialValues)
+                is CountrySpec -> it.transform(arguments.initialValues)
                 is AddressSpec -> it.transform(
-                    initialValues,
-                    addressRepository,
-                    shippingValues
+                    arguments.initialValues,
+                    arguments.addressRepository,
+                    arguments.shippingValues
                 )
                 is CardBillingSpec -> it.transform(
-                    initialValues,
-                    addressRepository,
-                    shippingValues,
+                    arguments.initialValues,
+                    arguments.addressRepository,
+                    arguments.shippingValues,
                 )
-                is BoletoTaxIdSpec -> it.transform(initialValues)
-                is KonbiniConfirmationNumberSpec -> it.transform(initialValues)
-                is SepaMandateTextSpec -> it.transform(merchantName)
+                is BoletoTaxIdSpec -> it.transform(arguments.initialValues)
+                is KonbiniConfirmationNumberSpec -> it.transform(arguments.initialValues)
+                is SepaMandateTextSpec -> it.transform(arguments.merchantName)
                 is UpiSpec -> it.transform()
                 is BlikSpec -> it.transform()
-                is ContactInformationSpec -> it.transform(initialValues)
+                is ContactInformationSpec -> it.transform(arguments.initialValues)
                 is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
-                is CashAppPayMandateTextSpec -> it.transform(merchantName)
-                is KlarnaMandateTextSpec -> it.transform(merchantName)
+                is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
+                is KlarnaMandateTextSpec -> it.transform(arguments.merchantName)
             }
         }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
     }

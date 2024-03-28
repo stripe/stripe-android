@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Parcelable
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -137,12 +136,12 @@ internal data class PaymentMethodMetadata(
         return null
     }
 
-    private fun transformSpecToElements(
+    private fun uiDefinitionFactoryArguments(
         context: Context,
         requiresMandate: Boolean,
         paymentMethodCreateParams: PaymentMethodCreateParams? = null,
         paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-    ): TransformSpecToElements {
+    ): UiDefinitionFactory.Arguments {
         var addressRepository = addressRepositoryReference.get()
         if (addressRepository == null) {
             synchronized(addressRepositoryLock) {
@@ -153,7 +152,8 @@ internal data class PaymentMethodMetadata(
                 }
             }
         }
-        return TransformSpecToElements(
+
+        return UiDefinitionFactory.Arguments(
             amount = amount(),
             merchantName = merchantName,
             cbcEligibility = cbcEligibility,
@@ -183,7 +183,7 @@ internal data class PaymentMethodMetadata(
             metadata = this,
             definition = definition,
             sharedDataSpecs = sharedDataSpecs,
-            transformSpecToElements = transformSpecToElements(
+            arguments = uiDefinitionFactoryArguments(
                 context = context,
                 requiresMandate = definition.requiresMandate(this),
                 paymentMethodCreateParams = paymentMethodCreateParams,

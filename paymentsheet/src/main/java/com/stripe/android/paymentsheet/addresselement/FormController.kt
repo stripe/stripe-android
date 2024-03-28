@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.LayoutSpec
@@ -21,8 +20,7 @@ import javax.inject.Inject
  *
  * @param: formSpec A representation of the layout which is used to display the UI fields on screen.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FormController @Inject constructor(
+internal class FormController @Inject constructor(
     formSpec: LayoutSpec,
     transformSpecToElement: TransformSpecToElements,
 ) {

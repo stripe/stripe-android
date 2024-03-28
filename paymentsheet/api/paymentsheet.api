@@ -1452,16 +1452,6 @@ public abstract interface class com/stripe/android/paymentsheet/addresselement/A
 	public abstract fun onAddressLauncherResult (Lcom/stripe/android/paymentsheet/addresselement/AddressLauncherResult;)V
 }
 
-public abstract interface class com/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent$Builder {
-	public abstract fun build ()Lcom/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent;
-	public abstract fun formSpec (Lcom/stripe/android/ui/core/elements/LayoutSpec;)Lcom/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent$Builder;
-	public abstract fun initialValues (Ljava/util/Map;)Lcom/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent$Builder;
-	public abstract fun merchantName (Ljava/lang/String;)Lcom/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent$Builder;
-	public abstract fun shippingValues (Ljava/util/Map;)Lcom/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent$Builder;
-	public abstract fun stripeIntent (Lcom/stripe/android/model/StripeIntent;)Lcom/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent$Builder;
-	public abstract fun viewModelScope (Lkotlinx/coroutines/CoroutineScope;)Lcom/stripe/android/paymentsheet/addresselement/FormControllerSubcomponent$Builder;
-}
-
 public final class com/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding : androidx/viewbinding/ViewBinding {
 	public final field paymentOptionsPrimaryButtonFragmentContainerView Landroidx/fragment/app/FragmentContainerView;
 	public static fun bind (Landroid/view/View;)Lcom/stripe/android/paymentsheet/databinding/StripeFragmentPaymentOptionsPrimaryButtonBinding;
