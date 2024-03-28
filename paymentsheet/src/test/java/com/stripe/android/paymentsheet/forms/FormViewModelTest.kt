@@ -74,7 +74,7 @@ internal class FormViewModelTest {
         ).isNotNull()
     }
 
-        @Test
+    @Test
     fun `Verify setting save for future use value is updated in flowable`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code
