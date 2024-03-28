@@ -32,7 +32,7 @@ tags:
 - tapOn: "Connect accounts" # select all accounts
 
 # CONFIRM AND COMPLETE
-- assertVisible: "Your accounts were connected"
+- assertVisible: "Your accounts were connected."
 - tapOn:
     id: "done_button"
 - assertVisible: ".*Completed!.*"
