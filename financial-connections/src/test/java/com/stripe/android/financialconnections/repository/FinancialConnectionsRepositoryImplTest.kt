@@ -23,7 +23,7 @@ import java.net.HttpURLConnection
 class FinancialConnectionsRepositoryImplTest {
 
     private val mockStripeNetworkClient = mock<StripeNetworkClient>()
-    private val apiRequestFactory = mock<ApiRequest.Factory>()
+    private val apiRequestFactory = ApiRequest.Factory()
 
     private val financialConnectionsRepositoryImpl = FinancialConnectionsRepositoryImpl(
         requestExecutor = FinancialConnectionsRequestExecutor(
@@ -145,8 +145,6 @@ class FinancialConnectionsRepositoryImplTest {
         }
 
     private suspend fun givenGetRequestReturns(successBody: String) {
-        val mock = mock<ApiRequest>()
-        whenever(apiRequestFactory.createGet(any(), any(), any(), any())).thenReturn(mock)
         whenever(mockStripeNetworkClient.executeRequest(any())).thenReturn(
             StripeResponse(
                 code = HttpURLConnection.HTTP_OK,
