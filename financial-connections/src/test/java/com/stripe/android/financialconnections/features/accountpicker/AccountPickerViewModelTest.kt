@@ -208,7 +208,7 @@ internal class AccountPickerViewModelTest {
 
     @Test
     fun `Does not save selected accounts to Link if we don't have a consumer session`() = runTest {
-        val accounts = partnerAccountList(size = 2)
+        val accounts = partnerAccountList("id_1", "id2")
 
         givenManifestReturns(
             sessionManifest().copy(
@@ -222,7 +222,6 @@ internal class AccountPickerViewModelTest {
         givenSelectAccountsReturns(accounts)
 
         val viewModel = buildViewModel(AccountPickerState())
-
         viewModel.onSubmit()
 
         verify(saveAccountToLink, never()).existing(
@@ -240,7 +239,7 @@ internal class AccountPickerViewModelTest {
     @Test
     fun `Saves selected accounts to Link if we have a consumer session`() = runTest {
         val consumerSession = consumerSession()
-        val accounts = partnerAccountList(size = 2)
+        val accounts = partnerAccountList("id_1", "id2")
 
         givenManifestReturns(
             sessionManifest().copy(
@@ -254,12 +253,11 @@ internal class AccountPickerViewModelTest {
         givenSelectAccountsReturns(accounts)
 
         val viewModel = buildViewModel(AccountPickerState())
-
         viewModel.onSubmit()
 
         verify(saveAccountToLink).existing(
             consumerSessionClientSecret = consumerSession.clientSecret,
-            selectedAccounts = accounts.data.map { it.id },
+            selectedAccounts = setOf("id_1", "id2"),
         )
 
         navigationManager.assertNavigatedTo(

@@ -87,10 +87,10 @@ internal object ApiKeyFixtures {
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
     )
 
-    fun partnerAccountList(size: Int) = PartnerAccountsList(
-        data = (0 until size).map { index ->
-            partnerAccount().copy(id = "id_$index")
-        },
+    fun partnerAccountList(
+        vararg ids: String,
+    ) = PartnerAccountsList(
+        data = ids.map { partnerAccount().copy(id = it) },
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
     )
 

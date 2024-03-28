@@ -289,7 +289,7 @@ internal class AccountPickerViewModel @Inject constructor(
             if (consumerSessionClientSecret != null) {
                 saveAccountToLink.existing(
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    selectedAccounts = selectedIds.toList(),
+                    selectedAccounts = selectedIds,
                 )
             }
 
