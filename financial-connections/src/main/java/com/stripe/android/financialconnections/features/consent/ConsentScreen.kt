@@ -18,7 +18,6 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -41,8 +40,6 @@ import com.stripe.android.financialconnections.features.consent.ConsentState.Vie
 import com.stripe.android.financialconnections.features.consent.ui.ConsentLogoHeader
 import com.stripe.android.financialconnections.model.ConsentPane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -55,8 +52,6 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -70,7 +65,6 @@ internal fun ConsentScreen() {
     val viewModel: ConsentViewModel = paneViewModel { ConsentViewModel.factory(it) }
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
-    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
 
     val uriHandler = LocalUriHandler.current
     val scope = rememberCoroutineScope()
@@ -95,25 +89,21 @@ internal fun ConsentScreen() {
 
     ConsentContent(
         state = state.value,
-        topAppBarState = topAppBarState,
         bottomSheetState = bottomSheetState,
         onContinueClick = viewModel::onContinueClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-        onCloseClick = { parentViewModel.onCloseNoConfirmationClick(Pane.CONSENT) },
-        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick
+        onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
 
 @Composable
 private fun ConsentContent(
     state: ConsentState,
-    topAppBarState: TopAppBarState,
     bottomSheetState: ModalBottomSheetState,
     onContinueClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     when (val result = state.consent) {
@@ -122,13 +112,11 @@ private fun ConsentContent(
 
         is Success -> LoadedContent(
             payload = result(),
-            topAppBarState = topAppBarState,
             bottomSheetMode = state.currentBottomSheet,
             bottomSheetState = bottomSheetState,
             acceptConsent = state.acceptConsent,
             onClickableTextClick = onClickableTextClick,
             onContinueClick = onContinueClick,
-            onCloseClick = onCloseClick,
             onConfirmModalClick = onConfirmModalClick
         )
 
@@ -153,11 +141,9 @@ private fun ConsentLoadingContent() {
 @Composable
 private fun ConsentMainContent(
     payload: ConsentState.Payload,
-    topAppBarState: TopAppBarState,
     acceptConsent: Async<FinancialConnectionsSessionManifest>,
     onClickableTextClick: (String) -> Unit,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit
 ) {
     val scrollState = rememberLazyListState()
     val title = remember(payload.consent.title) {
@@ -166,14 +152,7 @@ private fun ConsentMainContent(
     val bullets = remember(payload.consent.body.bullets) {
         payload.consent.body.bullets.map { bullet -> BulletUI.from(bullet) }
     }
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                state = topAppBarState,
-                onCloseClick = onCloseClick,
-            )
-        }
-    ) {
+    Box {
         LazyLayout(
             lazyListState = scrollState,
             body = {
@@ -232,11 +211,9 @@ private fun LazyListScope.consentBody(
 @Composable
 private fun LoadedContent(
     payload: ConsentState.Payload,
-    topAppBarState: TopAppBarState,
     bottomSheetState: ModalBottomSheetState,
     acceptConsent: Async<FinancialConnectionsSessionManifest>,
     onContinueClick: () -> Unit,
-    onCloseClick: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
     bottomSheetMode: ConsentState.BottomSheetContent?,
@@ -263,11 +240,9 @@ private fun LoadedContent(
         content = {
             ConsentMainContent(
                 acceptConsent = acceptConsent,
-                topAppBarState = topAppBarState,
                 payload = payload,
                 onClickableTextClick = onClickableTextClick,
                 onContinueClick = onContinueClick,
-                onCloseClick = onCloseClick
             )
         }
     )
@@ -332,7 +307,6 @@ internal fun ContentPreview(
     FinancialConnectionsPreview {
         ConsentContent(
             state = state.second,
-            topAppBarState = TopAppBarState(hideStripeLogo = state.second.consent()?.shouldShowMerchantLogos ?: true),
             bottomSheetState = rememberModalBottomSheetState(
                 state.first,
                 skipHalfExpanded = true
@@ -340,7 +314,6 @@ internal fun ContentPreview(
             onContinueClick = {},
             onClickableTextClick = {},
             onConfirmModalClick = {},
-            onCloseClick = {},
             onCloseFromErrorClick = {}
         )
     }

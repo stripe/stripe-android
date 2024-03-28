@@ -19,6 +19,7 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.utils.error
 import javax.inject.Inject
 
 internal class ResetViewModel @Inject constructor(
@@ -46,6 +47,7 @@ internal class ResetViewModel @Inject constructor(
     override fun updateTopAppBar(state: ResetState): TopAppBarStateUpdate = TopAppBarStateUpdate(
         pane = PANE,
         allowBackNavigation = false,
+        error = state.payload.error,
     )
 
     private fun logErrors() {

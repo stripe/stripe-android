@@ -47,6 +47,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
@@ -106,7 +107,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         value = mapOf(initialState.initialPane to defaultTopAppBarState),
     )
 
-    override val topAppBarState: StateFlow<TopAppBarState> = topAppBarStateUpdatesByPane.get(
+    val topAppBarState: StateFlow<TopAppBarState> = topAppBarStateUpdatesByPane.get(
         keyFlow = currentPane,
     ).stateIn(
         scope = viewModelScope,
@@ -183,7 +184,20 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    private suspend fun onUrlReceived(receivedUrl: String, status: String?) {
+    fun handleOnCloseClick() {
+        val pane = currentPane.value
+        val topAppBarState = topAppBarState.value
+
+        if (topAppBarState.error != null) {
+            onCloseFromErrorClick(topAppBarState.error)
+        } else if (pane.destination.closeWithoutConfirmation) {
+            onCloseNoConfirmationClick(pane)
+        } else {
+            onCloseWithConfirmationClick(pane)
+        }
+    }
+
+    private fun onUrlReceived(receivedUrl: String, status: String?) {
         when (status) {
             STATUS_SUCCESS -> setState {
                 copy(webAuthFlow = WebAuthFlowState.Success(receivedUrl))
@@ -236,7 +250,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    fun onCloseWithConfirmationClick(pane: Pane) = viewModelScope.launch {
+    private fun onCloseWithConfirmationClick(pane: Pane) = viewModelScope.launch {
         eventTracker.track(ClickNavBarClose(pane))
         navigationManager.tryNavigateTo(Destination.Exit(referrer = pane))
     }
@@ -247,7 +261,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onCloseNoConfirmationClick(pane: Pane) {
+    private fun onCloseNoConfirmationClick(pane: Pane) {
         viewModelScope.launch {
             eventTracker.track(ClickNavBarClose(pane))
         }

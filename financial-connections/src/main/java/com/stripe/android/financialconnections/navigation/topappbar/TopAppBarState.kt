@@ -9,8 +9,8 @@ internal data class TopAppBarState(
     val isTestMode: Boolean = false,
     val allowElevation: Boolean = true,
     val isContentScrolled: Boolean = false,
+    val error: Throwable? = null,
 ) {
-
     val isElevated: Boolean
         get() = allowElevation && isContentScrolled
 
@@ -19,6 +19,7 @@ internal data class TopAppBarState(
             hideStripeLogo = update.hideStripeLogo ?: hideStripeLogo,
             allowBackNavigation = update.allowBackNavigation,
             allowElevation = update.allowElevation,
+            error = update.error ?: error,
             forceHideStripeLogo = false,
         )
     }
@@ -26,7 +27,8 @@ internal data class TopAppBarState(
 
 internal data class TopAppBarStateUpdate(
     val pane: Pane,
-    val hideStripeLogo: Boolean? = null,
     val allowBackNavigation: Boolean,
+    val error: Throwable?,
+    val hideStripeLogo: Boolean? = null,
     val allowElevation: Boolean = true,
 )
