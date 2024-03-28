@@ -33,6 +33,10 @@ internal fun FinancialConnectionsSessionManifest.useContinueWithMerchantText(): 
     features
         ?.get("bank_connections_continue_with_merchant_text") == true
 
+internal fun FinancialConnectionsSessionManifest.enableWorkManager(): Boolean {
+    return features?.get("bank_connections_android_enable_work_manager") == true
+}
+
 internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
     return manifest.allowManualEntry && visual.reducedManualEntryProminenceInErrors.not()
 }
