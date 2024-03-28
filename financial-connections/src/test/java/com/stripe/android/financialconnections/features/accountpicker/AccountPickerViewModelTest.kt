@@ -16,6 +16,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
+import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -207,8 +208,43 @@ internal class AccountPickerViewModelTest {
     }
 
     @Test
+    fun `Does not save selected accounts to Link in the payment flow`() = runTest {
+        val accounts = partnerAccountList("id_1", "id2").copy(
+            nextPane = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT,
+        )
+
+        givenManifestReturns(
+            sessionManifest().copy(
+                singleAccount = false,
+                activeAuthSession = authorizationSession(),
+                paymentMethodType = FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT,
+            )
+        )
+
+        givenGetCachedConsumerSessionReturns(null)
+        givenPollAccountsReturns(accounts)
+        givenSelectAccountsReturns(accounts)
+
+        val viewModel = buildViewModel(AccountPickerState())
+        viewModel.onSubmit()
+
+        verify(saveAccountToLink, never()).existing(
+            consumerSessionClientSecret = any(),
+            selectedAccounts = any(),
+        )
+
+        navigationManager.assertNavigatedTo(
+            destination = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.destination,
+            pane = Pane.ACCOUNT_PICKER,
+            popUpTo = null,
+        )
+    }
+
+    @Test
     fun `Does not save selected accounts to Link if we don't have a consumer session`() = runTest {
-        val accounts = partnerAccountList("id_1", "id2")
+        val accounts = partnerAccountList("id_1", "id2").copy(
+            nextPane = Pane.SUCCESS,
+        )
 
         givenManifestReturns(
             sessionManifest().copy(
@@ -230,7 +266,7 @@ internal class AccountPickerViewModelTest {
         )
 
         navigationManager.assertNavigatedTo(
-            destination = Pane.CONSENT.destination,
+            destination = Pane.SUCCESS.destination,
             pane = Pane.ACCOUNT_PICKER,
             popUpTo = null,
         )
@@ -239,7 +275,9 @@ internal class AccountPickerViewModelTest {
     @Test
     fun `Saves selected accounts to Link if we have a consumer session`() = runTest {
         val consumerSession = consumerSession()
-        val accounts = partnerAccountList("id_1", "id2")
+        val accounts = partnerAccountList("id_1", "id2").copy(
+            nextPane = Pane.SUCCESS,
+        )
 
         givenManifestReturns(
             sessionManifest().copy(
@@ -263,7 +301,7 @@ internal class AccountPickerViewModelTest {
         )
 
         navigationManager.assertNavigatedTo(
-            destination = Pane.CONSENT.destination,
+            destination = Pane.SUCCESS.destination,
             pane = Pane.ACCOUNT_PICKER,
             popUpTo = null,
         )
