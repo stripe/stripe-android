@@ -214,21 +214,12 @@ internal class CustomerSheetActivityTest {
     }
 
     @Test
-    fun `When customer ACHv2 is enabled, should display form elements`() {
+    fun `When add payment method screen is shown, should display form elements`() {
         val eventReporter: CustomerSheetEventReporter = mock()
 
         runActivityScenario(
             viewState = createAddPaymentMethodViewState(),
             eventReporter = eventReporter,
-        ) {
-            page.waitForText("Card number")
-        }
-    }
-
-    @Test
-    fun `When customer ACHv2 is disabled, should display form elements`() {
-        runActivityScenario(
-            viewState = createAddPaymentMethodViewState(),
         ) {
             page.waitForText("Card number")
         }
