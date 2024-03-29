@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+### CustomerSheet
+* [Added][8176](https://github.com/stripe/stripe-android/pull/8176) Enabled ACH Direct Debit in CustomerSheet
+
 ### Financial Connections
 * [CHANGED][8157](https://github.com/stripe/stripe-android/pull/8157) Financial Connections no longer depends on the Mavericks library.
 
