@@ -15,7 +15,6 @@ import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
 import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.PaymentConfiguration
-import com.stripe.android.core.utils.FeatureFlags.customerSheetACHv2
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
@@ -230,8 +229,6 @@ class CustomerSheetPlaygroundViewModel(
                 toggleSetupIntentEnabled()
             is CustomerSheetPlaygroundViewAction.ToggleExistingCustomer ->
                 toggleExistingCustomer()
-            is CustomerSheetPlaygroundViewAction.ToggleAchEnabled ->
-                toggleAchEnabled()
             is CustomerSheetPlaygroundViewAction.ToggleUseDefaultBillingAddress ->
                 toggleUseDefaultBillingAddress()
             is CustomerSheetPlaygroundViewAction.ToggleAttachDefaultBillingAddress ->
@@ -312,15 +309,6 @@ class CustomerSheetPlaygroundViewModel(
 
         viewModelScope.launch(Dispatchers.IO) {
             fetchClientSecret()
-        }
-    }
-
-    private fun toggleAchEnabled() {
-        updateConfiguration {
-            customerSheetACHv2.setEnabled(!it.achEnabled)
-            it.copy(
-                achEnabled = !it.achEnabled,
-            )
         }
     }
 

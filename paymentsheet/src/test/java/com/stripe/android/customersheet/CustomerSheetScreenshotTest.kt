@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
@@ -17,7 +16,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.screenshots.FontSize
@@ -36,12 +34,6 @@ internal class CustomerSheetScreenshotTest {
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
-    )
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.customerSheetACHv2,
-        isEnabled = false,
     )
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
@@ -230,7 +222,6 @@ internal class CustomerSheetScreenshotTest {
 
     @Test
     fun testMandateAbovePrimaryButton() {
-        featureFlagTestRule.setEnabled(true)
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = addPaymentMethodViewState.copy(
@@ -249,7 +240,6 @@ internal class CustomerSheetScreenshotTest {
 
     @Test
     fun testMandateBelowPrimaryButton() {
-        featureFlagTestRule.setEnabled(true)
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = addPaymentMethodViewState.copy(
@@ -268,7 +258,6 @@ internal class CustomerSheetScreenshotTest {
 
     @Test
     fun testConfirmCloseDialog() {
-        featureFlagTestRule.setEnabled(true)
         paparazzi.snapshot {
             CustomerSheetScreen(
                 viewState = addPaymentMethodViewState.copy(

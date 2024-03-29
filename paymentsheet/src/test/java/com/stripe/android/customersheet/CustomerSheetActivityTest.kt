@@ -11,7 +11,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
@@ -22,7 +21,6 @@ import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
@@ -42,12 +40,6 @@ import java.util.Stack
 internal class CustomerSheetActivityTest {
     @get:Rule
     val rule = InstantTaskExecutorRule()
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        FeatureFlags.customerSheetACHv2,
-        isEnabled = true
-    )
 
     @get:Rule
     val composeTestRule = createEmptyComposeRule()
@@ -235,8 +227,6 @@ internal class CustomerSheetActivityTest {
 
     @Test
     fun `When customer ACHv2 is disabled, should display form elements`() {
-        featureFlagTestRule.setEnabled(false)
-
         runActivityScenario(
             viewState = createAddPaymentMethodViewState(),
         ) {
