@@ -4,7 +4,6 @@ import android.app.Application
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
@@ -23,7 +22,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -32,7 +30,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -44,12 +41,6 @@ import kotlin.time.Duration.Companion.milliseconds
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(RobolectricTestRunner::class)
 class DefaultCustomerSheetLoaderTest {
-    @get:Rule
-    val achFeatureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.customerSheetACHv2,
-        isEnabled = false,
-    )
-
     private val lpmRepository = LpmRepository(
         arguments = LpmRepository.LpmRepositoryArguments(
             resources = ApplicationProvider.getApplicationContext<Application>().resources,
@@ -342,8 +333,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(false)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -367,8 +356,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(false)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -392,8 +379,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(true)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -417,8 +402,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC unavailable, flag enabled, us bank in intent, then us bank account is not available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(true)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -442,8 +425,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag disabled, us bank not in intent, then us bank account is not available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(false)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -467,8 +448,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag disabled, us bank in intent, then us bank account is not available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(false)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -492,8 +471,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag enabled, us bank not in intent, then us bank account is not available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(true)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,
@@ -517,8 +494,6 @@ class DefaultCustomerSheetLoaderTest {
 
     @Test
     fun `When the FC available, flag enabled, us bank in intent, then us bank account is available`() = runTest {
-        achFeatureFlagTestRule.setEnabled(true)
-
         val loader = createCustomerSheetLoader(
             customerAdapter = FakeCustomerAdapter(
                 canCreateSetupIntents = true,

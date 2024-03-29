@@ -8,7 +8,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.strings.resolvableString
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.customersheet.CustomerSheetViewState.AddPaymentMethod
 import com.stripe.android.customersheet.CustomerSheetViewState.SelectPaymentMethod
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
@@ -44,7 +43,6 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePr
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -74,12 +72,6 @@ import com.stripe.android.ui.core.R as UiCoreR
 class CustomerSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.customerSheetACHv2,
-        isEnabled = false,
-    )
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
@@ -472,8 +464,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When CustomerViewAction#OnAddCardPressed & ACHv2 disabled, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(false)
-
         val viewModel = createViewModel(
             workContext = testDispatcher
         )
@@ -1704,8 +1694,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `Payment method form changes on user selection`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             initialBackStack = listOf(
@@ -1732,8 +1720,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `Payment method user selection saved after returning to add screen`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             initialBackStack = listOf(
@@ -1773,8 +1759,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When the payment method form is us bank account, the primary button label is continue`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             initialBackStack = listOf(

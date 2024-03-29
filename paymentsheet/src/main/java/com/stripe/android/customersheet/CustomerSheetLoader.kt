@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet
 
 import com.stripe.android.core.injection.IS_LIVE_MODE
-import com.stripe.android.core.utils.FeatureFlags.customerSheetACHv2
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -173,10 +172,7 @@ internal class DefaultCustomerSheetLoader(
 
                 val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
 
-                val validSupportedPaymentMethods = filterSupportedPaymentMethods(
-                    supportedPaymentMethods,
-                    isFinancialConnectionsAvailable,
-                )
+                val validSupportedPaymentMethods = filterSupportedPaymentMethods(supportedPaymentMethods)
 
                 Result.success(
                     CustomerSheetState.Full(
@@ -198,13 +194,10 @@ internal class DefaultCustomerSheetLoader(
 
     private fun filterSupportedPaymentMethods(
         supportedPaymentMethods: List<SupportedPaymentMethod>,
-        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     ): List<SupportedPaymentMethod> {
         val supported = setOfNotNull(
             PaymentMethod.Type.Card.code,
-            PaymentMethod.Type.USBankAccount.code.takeIf {
-                customerSheetACHv2.isEnabled && isFinancialConnectionsAvailable()
-            }
+            PaymentMethod.Type.USBankAccount.code
         )
         return supportedPaymentMethods.filter {
             supported.contains(it.code)

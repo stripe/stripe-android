@@ -4,9 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object FeatureFlags {
-    val customerSheetACHv2 = FeatureFlag()
-}
+object FeatureFlags
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FeatureFlag {
