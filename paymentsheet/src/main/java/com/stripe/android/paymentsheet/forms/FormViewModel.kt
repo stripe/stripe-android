@@ -13,6 +13,7 @@ import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -99,11 +100,8 @@ internal class FormViewModel @Inject internal constructor(
 
     // This will convert the save for future use value into a CustomerRequestedSave operation
     private val userRequestedReuse = showCheckboxFlow.map { showCheckbox ->
-        combine(
-            elements.map { it.getFormFieldValueFlow() },
-        ) { formFieldValues ->
-            formFieldValues.toList().flatten()
-                .filter { it.first == IdentifierSpec.SaveForFutureUse }
+        currentFieldValues().map { currentFieldValues ->
+            currentFieldValues.filter { it.first == IdentifierSpec.SaveForFutureUse }
                 .map { it.second.value.toBoolean() }
                 .map { saveForFutureUse ->
                     if (showCheckbox) {
@@ -122,18 +120,26 @@ internal class FormViewModel @Inject internal constructor(
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
-            combine(
-                elements.map {
-                    it.getFormFieldValueFlow()
-                }
-            ) {
-                it.toList().flatten().toMap()
-            },
+            currentFieldValues().map { it.toMap() },
             hiddenIdentifiers,
             showingMandate,
             userRequestedReuse,
             defaultValuesToInclude,
         ).filterFlow()
+
+    private fun currentFieldValues(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return if (elements.isEmpty()) {
+            flowOf(emptyList())
+        } else {
+            combine(
+                elements.map {
+                    it.getFormFieldValueFlow()
+                }
+            ) {
+                it.toList().flatten()
+            }
+        }
+    }
 
     @VisibleForTesting
     val defaultValuesToInclude

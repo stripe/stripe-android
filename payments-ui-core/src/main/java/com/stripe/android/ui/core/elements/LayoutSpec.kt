@@ -13,6 +13,6 @@ data class LayoutSpec constructor(val items: List<FormItemSpec>) {
 
         // Used for forms that have no elements (i.e. card because it is not supported
         // by compose form)
-        fun create() = LayoutSpec(listOf(EmptyFormSpec))
+        fun create() = LayoutSpec(listOf())
     }
 }

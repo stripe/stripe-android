@@ -114,6 +114,6 @@ internal class TransformSpecToElements(
                 is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
                 is KlarnaMandateTextSpec -> it.transform(arguments.merchantName)
             }
-        }.takeUnless { it.isEmpty() } ?: listOf(EmptyFormElement())
+        }
     }
 }
