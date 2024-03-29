@@ -18,6 +18,7 @@ class RealErrorReporter @Inject constructor(
         val additionalParams = mapOf(
             "analyticsValue" to stripeException.analyticsValue(),
             "statusCode" to stripeException.statusCode.toString(),
+            "requestId" to stripeException.requestId,
         ).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
