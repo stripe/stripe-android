@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
@@ -52,7 +52,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val lookupConsumerAndStartVerification: LookupConsumerAndStartVerification,
     private val confirmVerification: ConfirmVerification,
-    private val selectNetworkedAccount: SelectNetworkedAccount,
+    private val selectNetworkedAccounts: SelectNetworkedAccounts,
     private val getCachedAccounts: GetCachedAccounts,
     private val updateLocalManifest: UpdateLocalManifest,
     private val markLinkStepUpVerified: MarkLinkStepUpVerified,
@@ -168,9 +168,9 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             .getOrThrow()
 
         // Mark networked account as selected.
-        val activeInstitution = selectNetworkedAccount(
+        val activeInstitution = selectNetworkedAccounts(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
-            selectedAccountId = selectedAccount.id
+            selectedAccountIds = setOf(selectedAccount.id),
         )
 
         // Updates manifest active institution after account networked.

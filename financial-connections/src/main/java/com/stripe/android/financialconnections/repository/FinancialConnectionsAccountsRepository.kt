@@ -56,10 +56,10 @@ internal interface FinancialConnectionsAccountsRepository {
         updateLocalCache: Boolean
     ): PartnerAccountsList
 
-    suspend fun postShareNetworkedAccount(
+    suspend fun postShareNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-        selectedAccountId: String
+        selectedAccountIds: Set<String>,
     ): InstitutionResponse
 
     companion object {
@@ -140,10 +140,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
-    override suspend fun postShareNetworkedAccount(
+    override suspend fun postShareNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-        selectedAccountId: String
+        selectedAccountIds: Set<String>
     ): InstitutionResponse {
         val request = apiRequestFactory.createPost(
             url = shareNetworkedAccountsUrl,
@@ -151,8 +151,9 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
-                "$PARAM_SELECTED_ACCOUNTS[0]" to selectedAccountId,
-            )
+            ) + selectedAccountIds.mapIndexed { index, selectedAccountId ->
+                "$PARAM_SELECTED_ACCOUNTS[$index]" to selectedAccountId
+            },
         )
         return requestExecutor.execute(
             request,
