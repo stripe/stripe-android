@@ -21,7 +21,9 @@ interface ErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class UnexpectedErrorEvent(val partialEventName: String) : ErrorEvent {
-        PHONE_NUMBER_FORMATTER_NULL_LOCALE(partialEventName = "elements.phone_number_formatter.user_locale_null");
+        PAYMENT_AND_SETUP_INTENT_MISSING_US_BANK_ACTIVITY(
+            partialEventName = "elements.manual_us_bank_activity.payment_and_setup_intent_missing"
+        );
 
         override val eventName: String
             get() = "unexpected_error.$partialEventName"

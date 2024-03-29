@@ -1,4 +1,4 @@
-package com.stripe.example.activity
+package com.stripe.example.activiy
 
 import android.os.Bundle
 import androidx.activity.compose.setContent
@@ -28,11 +28,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.ApiResultCallback
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.example.StripeFactory
 import com.stripe.example.theme.DefaultExampleTheme
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -321,7 +323,9 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
             )
             Text(
                 text = status,
-                modifier = Modifier.fillMaxWidth().padding(8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp)
             )
         }
     }
@@ -356,7 +360,9 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
                 )
                 Text(
                     text = "--- OR ---",
-                    modifier = Modifier.fillMaxWidth().padding(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp),
                     textAlign = TextAlign.Center
                 )
                 OutlinedTextField(
@@ -390,7 +396,9 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
                 )
                 Text(
                     text = status,
-                    modifier = Modifier.fillMaxWidth().padding(8.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
                 )
             }
         }
@@ -401,10 +409,17 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
         firstAmount: Int,
         secondAmount: Int
     ) {
-        if (paymentIntentSecret != null) {
-            verifyPaymentIntent(paymentIntentSecret!!, descriptorCode, firstAmount, secondAmount)
-        } else {
-            verifySetupIntent(setupIntentSecret!!, descriptorCode, firstAmount, secondAmount)
+        try {
+            if (paymentIntentSecret != null) {
+                verifyPaymentIntent(paymentIntentSecret!!, descriptorCode, firstAmount, secondAmount)
+            } else {
+                verifySetupIntent(setupIntentSecret!!, descriptorCode, firstAmount, secondAmount)
+            }
+        } catch (t : Throwable) {
+            viewModel.errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.PAYMENT_AND_SETUP_INTENT_MISSING_US_BANK_ACTIVITY,
+                StripeException.create(t)
+            )
         }
     }
 
@@ -443,6 +458,7 @@ class ManualUSBankAccountPaymentMethodActivity : StripeIntentActivity() {
             }
         )
     }
+
 
     private fun verifySetupIntent(
         clientSecret: String,

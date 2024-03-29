@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.liveData
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.example.R
 import com.stripe.example.activity.BaseViewModel
@@ -13,7 +14,8 @@ import org.json.JSONObject
 import retrofit2.HttpException
 
 internal class StripeIntentViewModel(
-    application: Application
+    application: Application,
+    val errorReporter: ErrorReporter
 ) : BaseViewModel(application) {
     val inProgress = MutableLiveData<Boolean>()
     val status = MutableLiveData<String>()
