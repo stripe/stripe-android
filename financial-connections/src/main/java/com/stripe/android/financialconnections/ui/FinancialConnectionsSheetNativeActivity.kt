@@ -51,9 +51,9 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
-import com.stripe.android.financialconnections.utils.keepInSyncWithBottomSheet
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
+import com.stripe.android.financialconnections.utils.keepInSyncWithBottomSheet
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
