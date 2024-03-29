@@ -13,8 +13,6 @@ data class SharedDataSpec(
     @SerialName("type")
     val type: String,
 
-    // If a form is empty, it must still have an EmptyFormSpec
-    // field to get the form into a complete state (i.e. PayPal).
     @SerialName("fields")
     val fields: ArrayList<FormItemSpec> = arrayListOf(),
 

@@ -65,8 +65,8 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.Card.code
         )
         val formViewModel = createViewModel(
-            args,
-            emptyList()
+            arguments = args,
+            formElements = emptyList(),
         )
 
         assertThat(
