@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.Capitalization
-import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownItemSpec
 import com.stripe.android.ui.core.elements.DropdownSpec
@@ -43,7 +42,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
-import kotlin.test.assertFailsWith
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
 
@@ -203,27 +201,6 @@ internal class TransformSpecToElementsTest {
     }
 
     @Test
-    fun `Add a contact information spec sets up the elements correctly`() = runBlocking {
-        val contactInfoSpec = ContactInformationSpec(
-            collectName = true,
-            collectPhone = false,
-            collectEmail = true,
-        )
-        val formElement = transformSpecToElements.transform(
-            listOf(contactInfoSpec),
-        )
-
-        val sectionElement = formElement.first() as SectionElement
-        assertThat(sectionElement.fields.size).isEqualTo(2)
-        val nameElement = sectionElement.fields[0] as SimpleTextElement
-        val emailElement = sectionElement.fields[1] as EmailElement
-
-        // Verify the correct config is setup for the controller
-        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
-        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
-    }
-
-    @Test
     fun `Address placeholders get transformed to correct fields`() {
         val placeholderSpec = PlaceholderSpec(
             apiPath = IdentifierSpec.Generic("foobar"),
@@ -337,26 +314,6 @@ internal class TransformSpecToElementsTest {
         )
 
         assertThat(formElement).isEmpty()
-    }
-
-    @Test
-    fun `Non transformed placeholders throw`() {
-        val placeholderSpec = PlaceholderSpec(
-            apiPath = IdentifierSpec.Generic("foobar"),
-            field = PlaceholderSpec.PlaceholderField.Email,
-        )
-
-        val exception = assertFailsWith<IllegalStateException> {
-            TransformSpecToElementsFactory.create(
-                PaymentSheet.BillingDetailsCollectionConfiguration(
-                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-                )
-            ).transform(
-                specs = listOf(placeholderSpec),
-                replacePlaceholders = false,
-            )
-        }
-        assertThat(exception).hasMessageThat().isEqualTo("Placeholders should be processed before calling transform.")
     }
 
     companion object {

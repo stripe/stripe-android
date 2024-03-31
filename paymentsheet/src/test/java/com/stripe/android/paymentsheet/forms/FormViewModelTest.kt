@@ -22,9 +22,7 @@ import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseController
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -83,7 +81,7 @@ internal class FormViewModelTest {
             args,
             listOf(
                 SectionElement.wrap(EmailElement()),
-                SaveForFutureUseElement(IdentifierSpec.SaveForFutureUse, SaveForFutureUseController(true), ""),
+                SaveForFutureUseElement(true, ""),
             )
         )
 
@@ -128,7 +126,7 @@ internal class FormViewModelTest {
             val formViewModel = createViewModel(
                 args,
                 listOf(
-                    SaveForFutureUseElement(IdentifierSpec.SaveForFutureUse, SaveForFutureUseController(true), ""),
+                    SaveForFutureUseElement(true, ""),
                 )
             )
 
@@ -233,7 +231,7 @@ internal class FormViewModelTest {
                 listOf(
                     EmailSpec().transform(emptyMap()),
                     CountrySpec().transform(emptyMap()),
-                    SaveForFutureUseSpec().transform(true, ""),
+                    SaveForFutureUseElement(true, ""),
                 )
             )
 
@@ -285,7 +283,7 @@ internal class FormViewModelTest {
                         "NL"
                     )
                 ).transform(emptyMap()),
-                SaveForFutureUseSpec().transform(true, "")
+                SaveForFutureUseElement(true, ""),
             )
         )
 

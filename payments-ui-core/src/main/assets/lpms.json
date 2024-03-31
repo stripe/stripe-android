@@ -879,11 +879,6 @@
     }
   },
   {
-    "type": "card",
-    "async": false,
-    "fields": []
-  },
-  {
     "type": "cashapp",
     "async": false,
     "fields": [],
