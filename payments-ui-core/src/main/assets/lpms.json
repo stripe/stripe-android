@@ -1103,11 +1103,6 @@
     ]
   },
   {
-    "type": "swish",
-    "async": false,
-    "fields": []
-  },
-  {
     "type": "twint",
     "async": false,
     "selector_icon": {

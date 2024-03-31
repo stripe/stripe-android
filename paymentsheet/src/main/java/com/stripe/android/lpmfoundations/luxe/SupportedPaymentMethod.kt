@@ -33,7 +33,7 @@ internal data class SupportedPaymentMethod(
 ) {
     constructor(
         paymentMethodDefinition: PaymentMethodDefinition,
-        sharedDataSpec: SharedDataSpec,
+        sharedDataSpec: SharedDataSpec? = null,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
         tintIconOnSelection: Boolean = false,
@@ -41,8 +41,8 @@ internal data class SupportedPaymentMethod(
         code = paymentMethodDefinition.type.code,
         displayNameResource = displayNameResource,
         iconResource = iconResource,
-        lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-        darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
+        lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
+        darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
         tintIconOnSelection = tintIconOnSelection,
     )
 
