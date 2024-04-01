@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.model
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
@@ -117,6 +118,25 @@ class PaymentOptionFactoryTest {
                 "Link"
             )
         )
+    }
+
+    @Test
+    fun `create() with link using legacy branding`() {
+        LinkUi.useNewBrand = false
+        assertThat(
+            factory.create(
+                PaymentSelection.Saved(
+                    paymentMethod = card(),
+                    walletType = PaymentSelection.Saved.WalletType.Link
+                )
+            )
+        ).isEqualTo(
+            PaymentOption(
+                R.drawable.stripe_ic_paymentsheet_link,
+                "····4242"
+            )
+        )
+        LinkUi.useNewBrand = true
     }
 
     @Test
