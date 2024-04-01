@@ -87,6 +87,13 @@ internal object ApiKeyFixtures {
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
     )
 
+    fun partnerAccountList(
+        vararg ids: String,
+    ) = PartnerAccountsList(
+        data = ids.map { partnerAccount().copy(id = it) },
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+    )
+
     fun institution() = FinancialConnectionsInstitution(
         id = "id",
         name = "name",

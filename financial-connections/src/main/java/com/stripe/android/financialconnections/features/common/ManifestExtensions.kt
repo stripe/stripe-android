@@ -3,6 +3,14 @@ package com.stripe.android.financialconnections.features.common
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
+private const val EMAIL_LENGTH = 15
+
+internal val FinancialConnectionsSessionManifest.isDataFlow: Boolean
+    get() = paymentMethodType == null
+
+internal val FinancialConnectionsSessionManifest.canSaveAccountsToLink: Boolean
+    get() = accountholderIsLinkConsumer == true && isNetworkingUserFlow == true
+
 /**
  * Get the business name from the manifest.
  * If the business name is not available, use the connect platform name.
@@ -40,5 +48,3 @@ internal fun FinancialConnectionsSessionManifest.enableWorkManager(): Boolean {
 internal fun SynchronizeSessionResponse.showManualEntryInErrors(): Boolean {
     return manifest.allowManualEntry && visual.reducedManualEntryProminenceInErrors.not()
 }
-
-private const val EMAIL_LENGTH = 15
