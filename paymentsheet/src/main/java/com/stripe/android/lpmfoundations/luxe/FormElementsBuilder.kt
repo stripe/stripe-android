@@ -22,7 +22,7 @@ internal class FormElementsBuilder(
         // Setup the required contact information fields based on the merchant billingDetailsCollectionConfiguration.
         for (value in ContactInformationCollectionMode.entries) {
             if (value.isRequired(arguments.billingDetailsCollectionConfiguration)) {
-                requireContactInformation(value)
+                requireContactInformationIfAllowed(value)
             }
         }
 
@@ -30,7 +30,7 @@ internal class FormElementsBuilder(
         if (arguments.billingDetailsCollectionConfiguration.address
             == PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
         ) {
-            requireBillingAddress()
+            requireBillingAddressIfAllowed()
         }
     }
 
@@ -38,7 +38,7 @@ internal class FormElementsBuilder(
         headerFormElements += formElement
     }
 
-    fun requireContactInformation(type: ContactInformationCollectionMode): FormElementsBuilder = apply {
+    fun requireContactInformationIfAllowed(type: ContactInformationCollectionMode): FormElementsBuilder = apply {
         if (type.isAllowed(arguments.billingDetailsCollectionConfiguration)) {
             requiredContactInformationCollectionModes += type
         }
@@ -48,7 +48,7 @@ internal class FormElementsBuilder(
         uiFormElements += formElement
     }
 
-    fun requireBillingAddress(
+    fun requireBillingAddressIfAllowed(
         availableCountries: Set<String> = this.availableCountries,
     ): FormElementsBuilder = apply {
         if (arguments.billingDetailsCollectionConfiguration.address
