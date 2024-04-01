@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
+import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -287,7 +288,9 @@ internal class AccountPickerViewModel @Inject constructor(
 
             val consumerSessionClientSecret = getCachedConsumerSession()?.clientSecret
 
-            if (manifest.canSaveAccountsToLink && consumerSessionClientSecret != null) {
+            if (manifest.isDataFlow && manifest.canSaveAccountsToLink && consumerSessionClientSecret != null) {
+                // In the data flow, we save accounts to Link in this screen. In the payment flow,
+                // it happens in the AttachPaymentScreen.
                 saveAccountToLink.existing(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = selectedIds,

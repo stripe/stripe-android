@@ -5,11 +5,11 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 
 private const val EMAIL_LENGTH = 15
 
-private val FinancialConnectionsSessionManifest.shouldAttachLinkedPaymentMethod: Boolean
-    get() = paymentMethodType != null
+internal val FinancialConnectionsSessionManifest.isDataFlow: Boolean
+    get() = paymentMethodType == null
 
 internal val FinancialConnectionsSessionManifest.canSaveAccountsToLink: Boolean
-    get() = accountholderIsLinkConsumer == true && isNetworkingUserFlow == true && !shouldAttachLinkedPaymentMethod
+    get() = accountholderIsLinkConsumer == true && isNetworkingUserFlow == true
 
 /**
  * Get the business name from the manifest.
