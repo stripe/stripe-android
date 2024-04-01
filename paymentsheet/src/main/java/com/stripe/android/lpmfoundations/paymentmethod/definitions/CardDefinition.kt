@@ -71,14 +71,17 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                 )
             )
 
-            val cardBillingElement = cardBillingElement(
-                billingDetailsCollectionConfiguration.address.toInternal(),
-                arguments.initialValues,
-                arguments.addressRepository,
-                arguments.shippingValues,
-            )
-            if (cardBillingElement != null) {
-                add(cardBillingElement)
+            if (billingDetailsCollectionConfiguration.address
+                != PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+            ) {
+                add(
+                    cardBillingElement(
+                        billingDetailsCollectionConfiguration.address.toInternal(),
+                        arguments.initialValues,
+                        arguments.addressRepository,
+                        arguments.shippingValues,
+                    )
+                )
             }
             add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
         }
@@ -107,11 +110,7 @@ private fun cardBillingElement(
     initialValues: Map<IdentifierSpec, String?>,
     addressRepository: AddressRepository,
     shippingValues: Map<IdentifierSpec, String?>?,
-): SectionElement? {
-    if (collectionMode == BillingDetailsCollectionConfiguration.AddressCollectionMode.Never) {
-        return null
-    }
-
+): FormElement {
     val sameAsShippingElement =
         shippingValues?.get(IdentifierSpec.SameAsShipping)
             ?.toBooleanStrictOrNull()
