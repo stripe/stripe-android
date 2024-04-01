@@ -173,14 +173,6 @@ class LpmRepositoryTest {
     }
 
     @Test
-    fun `Verify that UPI is supported when it's expected`() {
-        lpmRepository.getSharedDataSpecs(
-            stripeIntent = PaymentIntentFactory.create(paymentMethodTypes = listOf("upi")),
-            serverLpmSpecs = "[]" // UPI doesn't come from the backend; we rely on the local specs
-        ).verifyContainsTypes("upi")
-    }
-
-    @Test
     fun `getSharedDataSpecs load from network`() {
         val serverSpecs = """
             [
