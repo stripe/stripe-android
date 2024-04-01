@@ -13,10 +13,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
@@ -30,8 +34,6 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationState.Payload
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -40,21 +42,17 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.utils.error
 
 @Composable
 internal fun NetworkingLinkVerificationScreen() {
     val viewModel: NetworkingLinkVerificationViewModel = paneViewModel(NetworkingLinkVerificationViewModel::factory)
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
-    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     NetworkingLinkVerificationContent(
         state = state.value,
-        topAppBarState = topAppBarState,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.NETWORKING_LINK_VERIFICATION) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
     )
 }
@@ -62,18 +60,9 @@ internal fun NetworkingLinkVerificationScreen() {
 @Composable
 private fun NetworkingLinkVerificationContent(
     state: NetworkingLinkVerificationState,
-    topAppBarState: TopAppBarState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                state = topAppBarState,
-                onCloseClick = onCloseClick
-            )
-        }
-    ) {
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkVerificationLoaded(
@@ -94,9 +83,15 @@ private fun NetworkingLinkVerificationLoaded(
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
-    val focusRequester: FocusRequester = remember { FocusRequester() }
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
     val textInputService = LocalTextInputService.current
+
+    val focusRequester: FocusRequester = remember { FocusRequester() }
+    var shouldRequestFocus by rememberSaveable { mutableStateOf(false) }
+
+    if (shouldRequestFocus) {
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    }
+
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {
             focusManager.clearFocus(true)
@@ -104,6 +99,7 @@ private fun NetworkingLinkVerificationLoaded(
             textInputService?.hideSoftwareKeyboard()
         }
     }
+
     if (confirmVerificationAsync is Fail && confirmVerificationAsync.error !is OTPError) {
         UnclassifiedErrorContent { onCloseFromErrorClick(confirmVerificationAsync.error) }
     } else {
@@ -116,7 +112,10 @@ private fun NetworkingLinkVerificationLoaded(
                         focusRequester = focusRequester,
                         otpElement = payload.otpElement,
                         enabled = confirmVerificationAsync !is Loading,
-                        confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
+                        confirmVerificationError = confirmVerificationAsync.error,
+                        modifier = Modifier.onGloballyPositioned {
+                            shouldRequestFocus = true
+                        },
                     )
                 }
                 if (confirmVerificationAsync is Loading) {
@@ -159,8 +158,6 @@ internal fun NetworkingLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingLinkVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(hideStripeLogo = false),
-            onCloseClick = {},
             onCloseFromErrorClick = {}
         )
     }

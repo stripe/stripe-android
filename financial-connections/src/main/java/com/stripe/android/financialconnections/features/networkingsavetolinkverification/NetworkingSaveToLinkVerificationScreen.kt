@@ -8,17 +8,20 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
@@ -32,8 +35,6 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.common.VerificationSection
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationState.Payload
-import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationViewModel.Companion.PANE
-import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -43,10 +44,9 @@ import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
+import com.stripe.android.financialconnections.utils.error
 
 @Composable
 internal fun NetworkingSaveToLinkVerificationScreen() {
@@ -55,11 +55,8 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
     }
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
-    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     NetworkingSaveToLinkVerificationContent(
         state = state.value,
-        topAppBarState = topAppBarState,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onSkipClick = viewModel::onSkipClick
     )
@@ -68,24 +65,13 @@ internal fun NetworkingSaveToLinkVerificationScreen() {
 @Composable
 private fun NetworkingSaveToLinkVerificationContent(
     state: NetworkingSaveToLinkVerificationState,
-    topAppBarState: TopAppBarState,
-    onCloseClick: () -> Unit,
     onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
 ) {
-    val lazyListState = rememberLazyListState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                state = topAppBarState,
-                onCloseClick = onCloseClick,
-            )
-        }
-    ) {
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingSaveToLinkVerificationLoaded(
-                lazyListState = lazyListState,
                 payload = payload(),
                 confirmVerificationAsync = state.confirmVerification,
                 onCloseFromErrorClick = onCloseFromErrorClick,
@@ -100,14 +86,21 @@ private fun NetworkingSaveToLinkVerificationContent(
 @Composable
 private fun NetworkingSaveToLinkVerificationLoaded(
     confirmVerificationAsync: Async<Unit>,
-    lazyListState: LazyListState,
     payload: Payload,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onSkipClick: () -> Unit,
 ) {
+    val lazyListState = rememberLazyListState()
     val focusManager = LocalFocusManager.current
-    val focusRequester: FocusRequester = remember { FocusRequester() }
     val textInputService = LocalTextInputService.current
+
+    val focusRequester: FocusRequester = remember { FocusRequester() }
+    var shouldRequestFocus by rememberSaveable { mutableStateOf(false) }
+
+    if (shouldRequestFocus) {
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    }
+
     LaunchedEffect(confirmVerificationAsync) {
         if (confirmVerificationAsync is Loading) {
             focusManager.clearFocus(true)
@@ -115,7 +108,11 @@ private fun NetworkingSaveToLinkVerificationLoaded(
             textInputService?.hideSoftwareKeyboard()
         }
     }
-    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
+    if (shouldRequestFocus) {
+        LaunchedEffect(Unit) { focusRequester.requestFocus() }
+    }
+
     if (confirmVerificationAsync is Fail && confirmVerificationAsync.error !is ConfirmVerification.OTPError) {
         UnclassifiedErrorContent { onCloseFromErrorClick(confirmVerificationAsync.error) }
     } else {
@@ -129,7 +126,10 @@ private fun NetworkingSaveToLinkVerificationLoaded(
                         focusRequester = focusRequester,
                         otpElement = payload.otpElement,
                         enabled = confirmVerificationAsync !is Loading,
-                        confirmVerificationError = (confirmVerificationAsync as? Fail)?.error
+                        confirmVerificationError = confirmVerificationAsync.error,
+                        modifier = Modifier.onGloballyPositioned {
+                            shouldRequestFocus = true
+                        },
                     )
                 }
                 if (confirmVerificationAsync is Loading) {
@@ -189,8 +189,6 @@ internal fun SaveToLinkVerificationPreview(
     FinancialConnectionsPreview {
         NetworkingSaveToLinkVerificationContent(
             state = state,
-            topAppBarState = TopAppBarState(hideStripeLogo = false),
-            onCloseClick = {},
             onSkipClick = {},
             onCloseFromErrorClick = {}
         )
