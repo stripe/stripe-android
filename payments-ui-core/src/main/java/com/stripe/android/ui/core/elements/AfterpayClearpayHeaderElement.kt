@@ -46,7 +46,7 @@ data class AfterpayClearpayHeaderElement(
             // The no break space will keep the afterpay logo and (i) on the same line.
             .replace(
                 "<img/>",
-                "<img/>$NO_BREAK_SPACE<a href=\"$infoUrl\"><b>ⓘ</b></a>"
+                "<img/>$NO_BREAK_SPACE<b>ⓘ</b>"
             )
     }
 

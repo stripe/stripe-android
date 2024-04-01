@@ -1,5 +1,7 @@
 package com.stripe.android.ui.core.elements
 
+import android.content.Intent
+import android.net.Uri
 import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
@@ -54,6 +56,10 @@ fun AfterpayClearpayElementUI(
         color = MaterialTheme.stripeColors.subtitle,
         style = MaterialTheme.typography.h6,
         urlSpanStyle = SpanStyle(),
-        imageAlign = PlaceholderVerticalAlign.Bottom
+        imageAlign = PlaceholderVerticalAlign.Bottom,
+        onClick = {
+            val openURL = Intent(Intent.ACTION_VIEW, Uri.parse(element.infoUrl))
+            context.startActivity(openURL)
+        }
     )
 }
