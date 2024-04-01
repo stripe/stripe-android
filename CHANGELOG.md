@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.40.3 - 2024-04-01
+
 ### CustomerSheet
 * [Added][8176](https://github.com/stripe/stripe-android/pull/8176) Enabled ACH Direct Debit in CustomerSheet
 
