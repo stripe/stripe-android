@@ -96,7 +96,7 @@ class PaymentOptionFactoryTest {
             )
         ).isEqualTo(
             PaymentOption(
-                R.drawable.stripe_ic_paymentsheet_link,
+                R.drawable.stripe_ic_paymentsheet_link_2024,
                 "····4242"
             )
         )
@@ -113,7 +113,7 @@ class PaymentOptionFactoryTest {
             )
         ).isEqualTo(
             PaymentOption(
-                R.drawable.stripe_ic_paymentsheet_link,
+                R.drawable.stripe_ic_paymentsheet_link_2024,
                 "Link"
             )
         )
