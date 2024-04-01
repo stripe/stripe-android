@@ -131,10 +131,12 @@ internal class IDDetectorAnalyzer(
                     )
                 } else {
                     // MB executed successfully, return Modern result
-                    IDDetectorOutput.Modern(
+                    buildModernOutput(
+                        bestBoundingBox,
                         bestCategory,
                         bestScore,
                         categoriesMapping,
+                        croppedImage,
                         mbOutput
                     )
                 }
@@ -188,6 +190,28 @@ internal class IDDetectorAnalyzer(
             categoriesMapping,
             laplacianBlurDetector.calculateBlurOutput(croppedImage)
         )
+
+    private fun buildModernOutput(
+        bestBoundingBox: FloatArray,
+        bestCategory: Category,
+        bestScore: Float,
+        categoriesMapping: List<Float>,
+        croppedImage: Bitmap,
+        mbOutput: MBDetector.DetectorResult
+    ) = IDDetectorOutput.Modern(
+        // Return Legacy output if mbDetector is not available
+        BoundingBox(
+            bestBoundingBox[0],
+            bestBoundingBox[1],
+            bestBoundingBox[2],
+            bestBoundingBox[3]
+        ),
+        bestCategory,
+        bestScore,
+        categoriesMapping,
+        laplacianBlurDetector.calculateBlurOutput(croppedImage),
+        mbOutput
+    )
 
     internal class Factory(
         private val context: Context,

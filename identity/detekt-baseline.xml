@@ -6,6 +6,7 @@
     <ID>CyclomaticComplexMethod:MBDetector.kt$MBDetector$private fun FrameAnalysisStatus.toCaptureFeedback(): CaptureFeedback</ID>
     <ID>CyclomaticComplexMethod:OTPScreen.kt$@Composable internal fun OTPScreen( navController: NavController, identityViewModel: IdentityViewModel, otpViewModelFactory: ViewModelProvider.Factory = OTPViewModel.Factory( identityRepository = identityViewModel.identityRepository, verificationArgs = identityViewModel.verificationArgs ) )</ID>
     <ID>CyclomaticComplexMethod:UploadScreen.kt$@Composable internal fun UploadScreen( navController: NavController, identityViewModel: IdentityViewModel, )</ID>
+    <ID>LargeClass:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
     <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, identityViewModel: IdentityViewModel, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
