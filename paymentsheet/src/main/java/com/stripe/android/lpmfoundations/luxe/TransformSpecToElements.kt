@@ -9,7 +9,6 @@ import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
-import com.stripe.android.ui.core.elements.BlikSpec
 import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
@@ -32,7 +31,6 @@ import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
-import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
@@ -83,8 +81,6 @@ internal class TransformSpecToElements(
                 is BoletoTaxIdSpec -> it.transform(arguments.initialValues)
                 is KonbiniConfirmationNumberSpec -> it.transform(arguments.initialValues)
                 is SepaMandateTextSpec -> it.transform(arguments.merchantName)
-                is UpiSpec -> it.transform()
-                is BlikSpec -> it.transform()
                 is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
                 is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
                 is KlarnaMandateTextSpec -> it.transform(arguments.merchantName)

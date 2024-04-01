@@ -888,24 +888,6 @@
     }
   },
   {
-    "type": "upi",
-    "async": false,
-    "fields": [
-      {
-        "type": "upi"
-      }
-    ]
-  },
-  {
-    "type": "blik",
-    "async": false,
-    "fields": [
-      {
-        "type": "blik"
-      }
-    ]
-  },
-  {
     "type": "grabpay",
     "async": false,
     "fields": [],
