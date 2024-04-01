@@ -2,7 +2,6 @@ package com.stripe.android.financialconnections.features.manualentry
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,7 +29,9 @@ import com.stripe.android.financialconnections.features.common.FullScreenGeneric
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryPreviewParameterProvider.PreviewState
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -41,6 +42,8 @@ import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsOutlinedTextField
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.TestModeBanner
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.Layout
@@ -52,8 +55,10 @@ internal fun ManualEntryScreen() {
     }
     val parentViewModel = parentViewModel()
     val state: ManualEntryState by viewModel.stateFlow.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     val form by viewModel.form.collectAsState()
     ManualEntryContent(
+        topAppBarState = topAppBarState,
         routing = viewModel.routing,
         routingError = form.routingError,
         account = viewModel.account,
@@ -69,11 +74,13 @@ internal fun ManualEntryScreen() {
         onSubmit = viewModel::onSubmit,
         onTestFill = viewModel::onTestFill,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.MANUAL_ENTRY) }
     )
 }
 
 @Composable
 private fun ManualEntryContent(
+    topAppBarState: TopAppBarState,
     routing: String,
     routingError: Int?,
     account: String,
@@ -87,10 +94,18 @@ private fun ManualEntryContent(
     onAccountEntered: (String) -> Unit,
     onAccountConfirmEntered: (String) -> Unit,
     onSubmit: () -> Unit,
+    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onTestFill: () -> Unit
 ) {
-    Box {
+    FinancialConnectionsScaffold(
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                state = topAppBarState,
+                onCloseClick = onCloseClick,
+            )
+        }
+    ) {
         when (payload) {
             is Loading, Uninitialized -> FullScreenGenericLoading()
             is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
@@ -326,6 +341,7 @@ internal fun ManualEntryPreview(
 ) {
     FinancialConnectionsPreview {
         ManualEntryContent(
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             routing = previewState.routing,
             routingError = previewState.routingError,
             account = previewState.account,
@@ -340,6 +356,7 @@ internal fun ManualEntryPreview(
             onAccountConfirmEntered = {},
             onTestFill = {},
             onSubmit = {},
+            onCloseClick = {},
             onCloseFromErrorClick = {}
         )
     }

@@ -36,7 +36,6 @@ import com.stripe.android.financialconnections.presentation.parentViewModel
 
 internal sealed class Destination(
     protected val route: String,
-    val closeWithoutConfirmation: Boolean,
     paramKeys: List<String> = listOf(KEY_REFERRER),
     protected val composable: @Composable (NavBackStackEntry) -> Unit
 ) {
@@ -70,116 +69,97 @@ internal sealed class Destination(
     ): String = route.appendParamValues(listOf(referrer.value))
 
     data object InstitutionPicker : Destination(
-        route = Pane.INSTITUTION_PICKER.value,
-        closeWithoutConfirmation = false,
+        Pane.INSTITUTION_PICKER.value,
         composable = { InstitutionPickerScreen() }
     )
 
     data object Consent : Destination(
         route = Pane.CONSENT.value,
-        closeWithoutConfirmation = true,
         composable = { ConsentScreen() }
     )
 
     data object PartnerAuthDrawer : Destination(
         route = Pane.PARTNER_AUTH_DRAWER.value,
-        closeWithoutConfirmation = false,
         composable = { PartnerAuthScreen(inModal = true) }
     )
 
     data object PartnerAuth : Destination(
         route = Pane.PARTNER_AUTH.value,
-        closeWithoutConfirmation = false,
         composable = { PartnerAuthScreen(inModal = false) }
     )
 
     data object AccountPicker : Destination(
         route = Pane.ACCOUNT_PICKER.value,
-        closeWithoutConfirmation = false,
         composable = { AccountPickerScreen() }
     )
 
     data object Success : Destination(
         route = Pane.SUCCESS.value,
-        closeWithoutConfirmation = true,
         composable = { SuccessScreen() }
     )
 
     data object ManualEntry : Destination(
         route = Pane.MANUAL_ENTRY.value,
-        closeWithoutConfirmation = false,
         composable = { ManualEntryScreen() }
     )
 
     data object AttachLinkedPaymentAccount : Destination(
         route = Pane.ATTACH_LINKED_PAYMENT_ACCOUNT.value,
-        closeWithoutConfirmation = false,
         composable = { AttachPaymentScreen() }
     )
 
     data object NetworkingLinkSignup : Destination(
         route = Pane.NETWORKING_LINK_SIGNUP_PANE.value,
-        closeWithoutConfirmation = false,
         composable = { NetworkingLinkSignupScreen() }
     )
 
     data object NetworkingLinkLoginWarmup : Destination(
         route = Pane.NETWORKING_LINK_LOGIN_WARMUP.value,
-        closeWithoutConfirmation = false,
         composable = { NetworkingLinkLoginWarmupScreen(it) }
     )
 
     data object NetworkingLinkVerification : Destination(
         route = Pane.NETWORKING_LINK_VERIFICATION.value,
-        closeWithoutConfirmation = false,
         composable = { NetworkingLinkVerificationScreen() }
     )
 
     data object NetworkingSaveToLinkVerification : Destination(
         route = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION.value,
-        closeWithoutConfirmation = false,
         composable = { NetworkingSaveToLinkVerificationScreen() }
     )
 
     data object LinkAccountPicker : Destination(
         route = Pane.LINK_ACCOUNT_PICKER.value,
-        closeWithoutConfirmation = false,
         composable = { LinkAccountPickerScreen() },
     )
 
     data object LinkStepUpVerification : Destination(
         route = Pane.LINK_STEP_UP_VERIFICATION.value,
-        closeWithoutConfirmation = false,
         composable = { LinkStepUpVerificationScreen() }
     )
 
     data object Reset : Destination(
         route = Pane.RESET.value,
-        closeWithoutConfirmation = false,
         composable = { ResetScreen() }
     )
 
     data object Exit : Destination(
         route = Pane.EXIT.value,
-        closeWithoutConfirmation = false,
         composable = { ExitModal(it) }
     )
 
     data object Error : Destination(
         route = Pane.UNEXPECTED_ERROR.value,
-        closeWithoutConfirmation = false,
         composable = { ErrorScreen() }
     )
 
     data object BankAuthRepair : Destination(
         route = Pane.BANK_AUTH_REPAIR.value,
-        closeWithoutConfirmation = false,
         composable = { BankAuthRepairScreen() }
     )
 
     data object ManualEntrySuccess : Destination(
         route = Pane.MANUAL_ENTRY_SUCCESS.value,
-        closeWithoutConfirmation = true,
         composable = { ManualEntrySuccessScreen() }
     )
 

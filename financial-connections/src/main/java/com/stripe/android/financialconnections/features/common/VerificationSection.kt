@@ -39,10 +39,9 @@ internal fun VerificationSection(
     otpElement: OTPElement,
     enabled: Boolean,
     confirmVerificationError: Throwable?,
-    modifier: Modifier = Modifier,
 ) {
     val view = LocalView.current
-    Column(modifier) {
+    Column {
         StripeThemeForConnections {
             if (LocalTestMode.current) {
                 TestModeBanner(

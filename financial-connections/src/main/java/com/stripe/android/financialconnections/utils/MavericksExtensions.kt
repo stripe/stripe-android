@@ -14,6 +14,3 @@ internal fun Async<*>.isCancellationError(): Boolean = when {
     error is StripeException && error.cause is CancellationException -> true
     else -> false
 }
-
-internal val <T> Async<T>.error: Throwable?
-    get() = (this as? Async.Fail)?.error

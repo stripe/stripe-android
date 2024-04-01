@@ -50,7 +50,9 @@ import com.stripe.android.financialconnections.features.common.UnclassifiedError
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -63,6 +65,8 @@ import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -81,6 +85,7 @@ internal fun NetworkingLinkSignupScreen() {
     val viewModel: NetworkingLinkSignupViewModel = paneViewModel(NetworkingLinkSignupViewModel.Companion::factory)
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(enabled = true) {}
     val uriHandler = LocalUriHandler.current
     val bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(
@@ -100,7 +105,9 @@ internal fun NetworkingLinkSignupScreen() {
 
     NetworkingLinkSignupContent(
         state = state.value,
+        topAppBarState = topAppBarState,
         bottomSheetState = bottomSheetState,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount,
@@ -112,6 +119,8 @@ internal fun NetworkingLinkSignupScreen() {
 private fun NetworkingLinkSignupContent(
     bottomSheetState: ModalBottomSheetState,
     state: NetworkingLinkSignupState,
+    topAppBarState: TopAppBarState,
+    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit,
@@ -133,7 +142,9 @@ private fun NetworkingLinkSignupContent(
         },
         content = {
             NetworkingLinkSignupMainContent(
+                onCloseClick = onCloseClick,
                 state = state,
+                topAppBarState = topAppBarState,
                 onSaveToLink = onSaveToLink,
                 onClickableTextClick = onClickableTextClick,
                 onSkipClick = onSkipClick,
@@ -145,16 +156,27 @@ private fun NetworkingLinkSignupContent(
 
 @Composable
 private fun NetworkingLinkSignupMainContent(
+    onCloseClick: () -> Unit,
     state: NetworkingLinkSignupState,
+    topAppBarState: TopAppBarState,
     onSaveToLink: () -> Unit,
     onClickableTextClick: (String) -> Unit,
     onSkipClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    Box {
+    val scrollState = rememberScrollState()
+    FinancialConnectionsScaffold(
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                state = topAppBarState,
+                onCloseClick = onCloseClick,
+            )
+        }
+    ) {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
+                scrollState = scrollState,
                 validForm = state.valid,
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
@@ -172,6 +194,7 @@ private fun NetworkingLinkSignupMainContent(
 
 @Composable
 private fun NetworkingLinkSignupLoaded(
+    scrollState: ScrollState,
     validForm: Boolean,
     payload: Payload,
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
@@ -181,7 +204,6 @@ private fun NetworkingLinkSignupLoaded(
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
     val phoneNumberFocusRequester = remember { FocusRequester() }
 
     LaunchedEffect(showFullForm) {
@@ -371,9 +393,11 @@ internal fun NetworkingLinkSignupScreenPreview(
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = state,
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             bottomSheetState = rememberModalBottomSheetState(
                 initialValue = ModalBottomSheetValue.Hidden
             ),
+            onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
             onCloseFromErrorClick = {},

@@ -402,6 +402,13 @@ public final class com/stripe/android/financialconnections/features/consent/ui/C
 	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/financialconnections/features/error/ComposableSingletons$ErrorScreenKt {
+	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/error/ComposableSingletons$ErrorScreenKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/financialconnections/features/exit/ComposableSingletons$ExitModalKt {
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/features/exit/ComposableSingletons$ExitModalKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;

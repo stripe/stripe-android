@@ -29,6 +29,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -53,8 +54,10 @@ import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAc
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
 import com.stripe.android.financialconnections.presentation.Async.Loading
@@ -67,6 +70,8 @@ import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
@@ -93,6 +98,7 @@ internal fun LinkAccountPickerScreen() {
     val viewModel: LinkAccountPickerViewModel = paneViewModel { LinkAccountPickerViewModel.factory(it) }
     val parentViewModel = parentViewModel()
     val state = viewModel.stateFlow.collectAsState()
+    val topAppBarState by parentViewModel.topAppBarState.collectAsState()
     BackHandler(enabled = true) {}
 
     val bottomSheetState = rememberModalBottomSheetState(
@@ -113,7 +119,9 @@ internal fun LinkAccountPickerScreen() {
 
     LinkAccountPickerContent(
         state = state.value,
+        topAppBarState = topAppBarState,
         bottomSheetState = bottomSheetState,
+        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(Pane.LINK_ACCOUNT_PICKER) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onNewBankAccountClick = viewModel::onNewBankAccountClick,
@@ -125,7 +133,9 @@ internal fun LinkAccountPickerScreen() {
 @Composable
 private fun LinkAccountPickerContent(
     state: LinkAccountPickerState,
+    topAppBarState: TopAppBarState,
     bottomSheetState: ModalBottomSheetState,
+    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onNewBankAccountClick: () -> Unit,
@@ -152,7 +162,9 @@ private fun LinkAccountPickerContent(
         content = {
             LinkAccountPickerMainContent(
                 scrollState = scrollState,
+                onCloseClick = onCloseClick,
                 state = state,
+                topAppBarState = topAppBarState,
                 onClickableTextClick = onClickableTextClick,
                 onSelectAccountClick = onSelectAccountClick,
                 onNewBankAccountClick = onNewBankAccountClick,
@@ -166,14 +178,23 @@ private fun LinkAccountPickerContent(
 @Composable
 private fun LinkAccountPickerMainContent(
     scrollState: LazyListState,
+    onCloseClick: () -> Unit,
     state: LinkAccountPickerState,
+    topAppBarState: TopAppBarState,
     onClickableTextClick: (String) -> Unit,
     onSelectAccountClick: () -> Unit,
     onNewBankAccountClick: () -> Unit,
     onAccountClick: (PartnerAccount) -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit
 ) {
-    Box {
+    FinancialConnectionsScaffold(
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                state = topAppBarState,
+                onCloseClick = onCloseClick
+            )
+        }
+    ) {
         when (val payload = state.payload) {
             Uninitialized,
             is Loading,
@@ -395,7 +416,9 @@ internal fun LinkAccountPickerScreenPreview(
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
             state = state,
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             bottomSheetState = bottomSheetState,
+            onCloseClick = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {},
             onNewBankAccountClick = {},

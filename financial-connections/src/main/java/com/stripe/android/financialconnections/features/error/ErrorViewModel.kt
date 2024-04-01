@@ -20,7 +20,6 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
-import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -50,14 +49,9 @@ internal class ErrorViewModel @Inject constructor(
     }
 
     override fun updateTopAppBar(state: ErrorState): TopAppBarStateUpdate {
-        // Either the error that we correctly retrieved from the repository, or the error
-        // that occurred during retrieval.
-        val error = state.payload()?.error ?: state.payload.error
-
         return TopAppBarStateUpdate(
             pane = PANE,
             allowBackNavigation = false,
-            error = error,
         )
     }
 

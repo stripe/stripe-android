@@ -3,10 +3,12 @@ package com.stripe.android.financialconnections.ui.components
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.AppBarDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -60,7 +62,7 @@ internal fun FinancialConnectionsTopAppBar(
     onCloseClick: () -> Unit
 ) {
     val elevation by animateDpAsState(
-        targetValue = if (state.isElevated) AppBarDefaults.TopAppBarElevation else 0.dp,
+        targetValue = if (state.isElevated) 8.dp else 0.dp,
         label = "TopAppBarElevation",
     )
 
@@ -198,6 +200,27 @@ private fun Title(hideStripeLogo: Boolean, testmode: Boolean) = Row(
         )
     }
 }
+
+/**
+ * calculates toolbar elevation based on [ScrollState]
+ */
+internal val ScrollState.elevation: Dp
+    get() {
+        return minOf(value.dp, AppBarDefaults.TopAppBarElevation)
+    }
+
+/**
+ * calculates toolbar elevation based on [LazyListState]
+ */
+internal val LazyListState.elevation: Dp
+    get() = if (firstVisibleItemIndex == 0) {
+        // For the first element, use the minimum of scroll offset and default elevation
+        // i.e. a value between 0 and 4.dp
+        minOf(firstVisibleItemScrollOffset.toFloat().dp, AppBarDefaults.TopAppBarElevation)
+    } else {
+        // If not the first element, always set elevation and show the shadow
+        AppBarDefaults.TopAppBarElevation
+    }
 
 @Composable
 private fun NavHostController.collectCanShowBackIconAsState(): State<Boolean> {

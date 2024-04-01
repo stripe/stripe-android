@@ -25,7 +25,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -45,12 +44,15 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.features.success.SuccessState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
@@ -64,12 +66,16 @@ private const val SLIDE_IN_ANIMATION_FRACTION = 4
 internal fun SuccessContent(
     completeSessionAsync: Async<FinancialConnectionsSession>,
     payloadAsync: Async<Payload>,
+    topAppBarState: TopAppBarState,
     onDoneClick: () -> Unit,
+    onCloseClick: () -> Unit,
 ) {
     SuccessContentInternal(
         // Just enabled on Compose Previews: allows to preview the post-animation state.
         overrideAnimationForPreview = false,
         payloadAsync = payloadAsync,
+        topAppBarState = topAppBarState,
+        onCloseClick = onCloseClick,
         completeSessionAsync = completeSessionAsync,
         onDoneClick = onDoneClick
     )
@@ -79,10 +85,12 @@ internal fun SuccessContent(
 private fun SuccessContentInternal(
     overrideAnimationForPreview: Boolean,
     payloadAsync: Async<Payload>,
+    topAppBarState: TopAppBarState,
+    onCloseClick: () -> Unit,
     completeSessionAsync: Async<FinancialConnectionsSession>,
     onDoneClick: () -> Unit
 ) {
-    var showSpinner by rememberSaveable { mutableStateOf(overrideAnimationForPreview.not()) }
+    var showSpinner by remember { mutableStateOf(overrideAnimationForPreview.not()) }
     val payload by remember(payloadAsync) { mutableStateOf(payloadAsync()) }
 
     payload?.let {
@@ -94,7 +102,14 @@ private fun SuccessContentInternal(
         }
     }
 
-    Box {
+    FinancialConnectionsScaffold(
+        topBar = {
+            FinancialConnectionsTopAppBar(
+                state = topAppBarState,
+                onCloseClick = onCloseClick,
+            )
+        }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -260,7 +275,9 @@ internal fun SuccessScreenPreview(
             overrideAnimationForPreview = false,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onDoneClick = {},
+            onCloseClick = {}
         )
     }
 }
@@ -278,7 +295,9 @@ internal fun SuccessScreenAnimationCompletedPreview(
             overrideAnimationForPreview = true,
             completeSessionAsync = state.completeSession,
             payloadAsync = state.payload,
+            topAppBarState = TopAppBarState(hideStripeLogo = false),
             onDoneClick = {},
+            onCloseClick = {}
         )
     }
 }

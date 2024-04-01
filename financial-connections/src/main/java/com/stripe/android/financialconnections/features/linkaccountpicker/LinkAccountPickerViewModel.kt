@@ -39,7 +39,6 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
-import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
@@ -105,7 +104,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
         return TopAppBarStateUpdate(
             pane = PANE,
             allowBackNavigation = false,
-            error = state.payload.error,
         )
     }
 
