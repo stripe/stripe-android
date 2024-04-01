@@ -60,7 +60,7 @@ class LpmRepositoryTest {
               }
          ]
             """.trimIndent()
-        ).verifyContainsTypes("afterpay_clearpay", "card")
+        ).verifyContainsTypes("afterpay_clearpay")
     }
 
     @Test
@@ -243,9 +243,8 @@ class LpmRepositoryTest {
         val result = lpmRepository.getSharedDataSpecs(paymentIntent, null)
         assertThat(result.failedToParseServerResponse).isFalse()
         val sharedDataSpecs = result.sharedDataSpecs
-        assertThat(sharedDataSpecs).hasSize(2)
-        assertThat(sharedDataSpecs[0].type).isEqualTo("card")
-        assertThat(sharedDataSpecs[1].type).isEqualTo("cashapp")
+        assertThat(sharedDataSpecs).hasSize(1)
+        assertThat(sharedDataSpecs[0].type).isEqualTo("cashapp")
     }
 
     @Test
@@ -256,9 +255,8 @@ class LpmRepositoryTest {
         val result = lpmRepository.getSharedDataSpecs(paymentIntent, "{[]}")
         assertThat(result.failedToParseServerResponse).isTrue()
         val sharedDataSpecs = result.sharedDataSpecs
-        assertThat(sharedDataSpecs).hasSize(2)
-        assertThat(sharedDataSpecs[0].type).isEqualTo("card")
-        assertThat(sharedDataSpecs[1].type).isEqualTo("cashapp")
+        assertThat(sharedDataSpecs).hasSize(1)
+        assertThat(sharedDataSpecs[0].type).isEqualTo("cashapp")
     }
 
     private fun LpmRepository.Result.verifyContainsTypes(vararg expectedTypes: String) {

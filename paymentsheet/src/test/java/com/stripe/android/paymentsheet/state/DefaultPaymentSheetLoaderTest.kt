@@ -120,7 +120,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
-                    sharedDataSpecs = PaymentMethodMetadataFactory.createSharedDataSpecsWithCardOnly(),
+                    sharedDataSpecs = emptyList(),
                 ),
             )
         )

@@ -12,10 +12,7 @@ import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
 import com.stripe.android.ui.core.elements.BlikSpec
 import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
 import com.stripe.android.ui.core.elements.BsbSpec
-import com.stripe.android.ui.core.elements.CardBillingSpec
-import com.stripe.android.ui.core.elements.CardDetailsSectionSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
-import com.stripe.android.ui.core.elements.ContactInformationSpec
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.DropdownSpec
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -32,7 +29,6 @@ import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.OTPSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.ui.core.elements.SepaMandateTextSpec
 import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextSpec
@@ -52,24 +48,14 @@ internal class TransformSpecToElements(
     fun transform(
         specs: List<FormItemSpec>,
         placeholderOverrideList: List<IdentifierSpec> = emptyList(),
-        replacePlaceholders: Boolean = true,
     ): List<FormElement> {
-        val specsWithoutPlaceholders = if (replacePlaceholders) {
-            specsForConfiguration(
-                configuration = arguments.billingDetailsCollectionConfiguration,
-                placeholderOverrideList = placeholderOverrideList,
-                requiresMandate = arguments.requiresMandate,
-                specs = specs,
-            )
-        } else {
-            specs
-        }
-        return specsWithoutPlaceholders.mapNotNull {
+        return specsForConfiguration(
+            configuration = arguments.billingDetailsCollectionConfiguration,
+            placeholderOverrideList = placeholderOverrideList,
+            requiresMandate = arguments.requiresMandate,
+            specs = specs,
+        ).mapNotNull {
             when (it) {
-                is SaveForFutureUseSpec -> it.transform(
-                    arguments.saveForFutureUseInitialValue,
-                    arguments.merchantName
-                )
                 is StaticTextSpec -> it.transform()
                 is AfterpayClearpayTextSpec -> it.transform(requireNotNull(arguments.amount))
                 is AffirmTextSpec -> it.transform()
@@ -78,11 +64,6 @@ internal class TransformSpecToElements(
                 is AuBecsDebitMandateTextSpec -> it.transform(arguments.merchantName)
                 is BacsDebitBankAccountSpec -> it.transform(arguments.initialValues)
                 is BacsDebitConfirmSpec -> it.transform(arguments.merchantName, arguments.initialValues)
-                is CardDetailsSectionSpec -> it.transform(
-                    context = arguments.context,
-                    cbcEligibility = arguments.cbcEligibility,
-                    initialValues = arguments.initialValues
-                )
                 is BsbSpec -> it.transform(arguments.initialValues)
                 is OTPSpec -> it.transform()
                 is NameSpec -> it.transform(arguments.initialValues)
@@ -99,17 +80,11 @@ internal class TransformSpecToElements(
                     arguments.addressRepository,
                     arguments.shippingValues
                 )
-                is CardBillingSpec -> it.transform(
-                    arguments.initialValues,
-                    arguments.addressRepository,
-                    arguments.shippingValues,
-                )
                 is BoletoTaxIdSpec -> it.transform(arguments.initialValues)
                 is KonbiniConfirmationNumberSpec -> it.transform(arguments.initialValues)
                 is SepaMandateTextSpec -> it.transform(arguments.merchantName)
                 is UpiSpec -> it.transform()
                 is BlikSpec -> it.transform()
-                is ContactInformationSpec -> it.transform(arguments.initialValues)
                 is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
                 is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
                 is KlarnaMandateTextSpec -> it.transform(arguments.merchantName)

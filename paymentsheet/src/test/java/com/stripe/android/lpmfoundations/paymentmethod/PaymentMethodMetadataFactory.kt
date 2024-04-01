@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -19,6 +20,7 @@ internal object PaymentMethodMetadataFactory {
         allowsPaymentMethodsRequiringShippingAddress: Boolean = false,
         financialConnectionsAvailable: Boolean = true,
         paymentMethodOrder: List<String> = emptyList(),
+        shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
     ): PaymentMethodMetadata {
@@ -32,7 +34,7 @@ internal object PaymentMethodMetadataFactory {
             cbcEligibility = cbcEligibility,
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             defaultBillingDetails = PaymentSheet.BillingDetails(),
-            shippingDetails = null,
+            shippingDetails = shippingDetails,
             sharedDataSpecs = sharedDataSpecs,
         )
     }
@@ -42,10 +44,6 @@ internal object PaymentMethodMetadataFactory {
         val specsString = resources.assets!!.open("lpms.json").bufferedReader().use { it.readText() }
         LpmSerializer.deserializeList(specsString).getOrThrow()
     }.getOrElse {
-        createSharedDataSpecsWithCardOnly()
-    }
-
-    fun createSharedDataSpecsWithCardOnly(): List<SharedDataSpec> {
-        return listOf(SharedDataSpec(type = "card", fields = ArrayList()))
+        emptyList()
     }
 }

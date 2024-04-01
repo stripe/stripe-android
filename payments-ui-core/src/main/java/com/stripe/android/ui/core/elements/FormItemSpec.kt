@@ -56,8 +56,6 @@ object FormItemSpecSerializer :
             "mandate" -> MandateTextSpec.serializer()
             "sepa_mandate" -> SepaMandateTextSpec.serializer()
             "text" -> SimpleTextSpec.serializer()
-            "card_details" -> CardDetailsSectionSpec.serializer()
-            "card_billing" -> CardBillingSpec.serializer()
             "upi" -> UpiSpec.serializer()
             "blik" -> BlikSpec.serializer()
             "placeholder" -> PlaceholderSpec.serializer()

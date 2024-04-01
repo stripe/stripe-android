@@ -31,7 +31,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -197,10 +196,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
 
-    val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseSpec().transform(
+    val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseElement(
         initialValue = defaultSaveForFutureUse,
         merchantName = args.formArgs.merchantName
-    ) as SaveForFutureUseElement
+    )
 
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
         .stateIn(
