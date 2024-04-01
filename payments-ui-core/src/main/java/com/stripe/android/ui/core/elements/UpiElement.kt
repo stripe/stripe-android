@@ -11,11 +11,11 @@ import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class UpiElement(
-    override val identifier: IdentifierSpec,
     override val controller: InputController = SimpleTextFieldController(
         textFieldConfig = UpiConfig()
     )
-) : SectionSingleFieldElement(identifier = identifier) {
+) : SectionSingleFieldElement(identifier = IdentifierSpec.Vpa) {
+    override val identifier: IdentifierSpec = IdentifierSpec.Vpa
 
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
         return controller.formFieldValue.map { entry ->

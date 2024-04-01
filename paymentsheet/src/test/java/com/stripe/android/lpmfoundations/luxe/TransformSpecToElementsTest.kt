@@ -24,8 +24,6 @@ import com.stripe.android.ui.core.elements.SimpleTextSpec
 import com.stripe.android.ui.core.elements.StaticTextElement
 import com.stripe.android.ui.core.elements.StaticTextSpec
 import com.stripe.android.ui.core.elements.TranslationId
-import com.stripe.android.ui.core.elements.UpiElement
-import com.stripe.android.ui.core.elements.UpiSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
@@ -173,17 +171,6 @@ internal class TransformSpecToElementsTest {
         assertThat(staticTextElement.controller).isNull()
         assertThat(staticTextElement.stringResId).isEqualTo(staticText.stringResId)
         assertThat(staticTextElement.identifier).isEqualTo(staticText.apiPath)
-    }
-
-    @Test
-    fun `UPI spec is transformed into UPI element wrapped in section`() {
-        val upiSpec = UpiSpec()
-        val formElement = transformSpecToElements.transform(listOf(upiSpec))
-
-        val sectionElement = formElement.first() as SectionElement
-        val upiElement = sectionElement.fields.first() as UpiElement
-
-        assertThat(sectionElement.fields).containsExactly(upiElement)
     }
 
     @Test
