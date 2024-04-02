@@ -23,8 +23,8 @@ import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
 import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -38,6 +38,7 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
+import com.stripe.android.financialconnections.repository.StaticSheetContent.DataAccess
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
@@ -57,7 +58,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val coreAuthorizationPendingNetworkingRepair: CoreAuthorizationPendingNetworkingRepairRepository,
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val presentStaticSheet: PresentStaticSheet,
 ) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -145,10 +147,18 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             },
             knownDeeplinkActions = mapOf(
                 DATA.value to {
-                    eventTracker.track(ClickLearnMoreDataAccess(PANE))
-                    setState { copy(viewEffect = OpenBottomSheet(date.time)) }
+                    presentDataAccessBottomSheet()
                 }
             )
+        )
+    }
+
+    private fun presentDataAccessBottomSheet() {
+        val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
+        eventTracker.track(ClickLearnMoreDataAccess(PANE))
+        presentStaticSheet(
+            content = DataAccess(dataAccessNotice),
+            referrer = PANE,
         )
     }
 
@@ -258,10 +268,6 @@ internal data class LinkAccountPickerState(
     sealed class ViewEffect {
         data class OpenUrl(
             val url: String,
-            val id: Long
-        ) : ViewEffect()
-
-        data class OpenBottomSheet(
             val id: Long
         ) : ViewEffect()
     }

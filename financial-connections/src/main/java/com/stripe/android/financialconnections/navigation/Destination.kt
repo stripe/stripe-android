@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.features.networkinglinkverificati
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationScreen
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
+import com.stripe.android.financialconnections.features.static_sheet.StaticSheet
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.bottomsheet.bottomSheet
@@ -163,6 +164,12 @@ internal sealed class Destination(
         route = Pane.EXIT.value,
         closeWithoutConfirmation = false,
         composable = { ExitModal(it) }
+    )
+
+    data object StaticSheet : Destination(
+        route = Pane.STATIC_SHEET.value,
+        closeWithoutConfirmation = false,
+        composable = { StaticSheet(it) },
     )
 
     data object Error : Destination(

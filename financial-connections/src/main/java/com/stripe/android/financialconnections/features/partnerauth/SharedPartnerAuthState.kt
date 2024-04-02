@@ -59,10 +59,6 @@ internal data class SharedPartnerAuthState(
             val url: String,
             val id: Long
         ) : ViewEffect
-
-        data class OpenBottomSheet(
-            val id: Long
-        ) : ViewEffect
     }
 
     internal enum class ClickableText(val value: String) {

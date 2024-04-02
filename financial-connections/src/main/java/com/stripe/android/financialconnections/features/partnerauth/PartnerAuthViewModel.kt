@@ -41,6 +41,7 @@ import com.stripe.android.financialconnections.features.partnerauth.SharedPartne
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
+import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -55,6 +56,7 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.repository.StaticSheetContent.DataAccess
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
@@ -79,6 +81,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
+    private val presentStaticSheet: PresentStaticSheet,
     initialState: SharedPartnerAuthState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
@@ -427,17 +430,19 @@ internal class PartnerAuthViewModel @Inject constructor(
             val managedUri = SharedPartnerAuthState.ClickableText.entries
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
-                SharedPartnerAuthState.ClickableText.DATA -> {
-                    setState {
-                        copy(
-                            viewEffect = ViewEffect.OpenBottomSheet(Date().time)
-                        )
-                    }
-                }
-
+                SharedPartnerAuthState.ClickableText.DATA -> presentDataAccessBottomSheet()
                 null -> logger.error("Unrecognized clickable text: $uri")
             }
         }
+    }
+
+    private fun presentDataAccessBottomSheet() {
+        val authSession = stateFlow.value.payload()?.authSession
+        val notice = authSession?.display?.text?.consent?.dataAccessNotice ?: return
+        presentStaticSheet(
+            content = DataAccess(notice),
+            referrer = PANE,
+        )
     }
 
     fun onViewEffectLaunched() {

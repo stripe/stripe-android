@@ -26,6 +26,8 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import com.stripe.android.financialconnections.repository.RealStaticSheetContentRepository
+import com.stripe.android.financialconnections.repository.StaticSheetContentRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepositoryImpl
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
@@ -55,7 +57,7 @@ internal interface FinancialConnectionsSheetNativeModule {
 
     @Singleton
     @Binds
-    fun providesNavigationManager(
+    fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
 
@@ -63,6 +65,12 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsHandleError(
         impl: RealHandleError
     ): HandleError
+
+    @Singleton
+    @Binds
+    fun bindsStaticSheetContentRepository(
+        impl: RealStaticSheetContentRepository,
+    ): StaticSheetContentRepository
 
     companion object {
         @Provides

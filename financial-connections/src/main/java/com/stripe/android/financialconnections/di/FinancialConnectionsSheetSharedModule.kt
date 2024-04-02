@@ -24,6 +24,8 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.features.common.enableWorkManager
+import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
+import com.stripe.android.financialconnections.features.static_sheet.RealPresentStaticSheet
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
 import dagger.Binds
@@ -59,6 +61,10 @@ internal interface FinancialConnectionsSheetSharedModule {
     @Binds
     @Singleton
     fun bindsAnalyticsRequestV2Executor(impl: DefaultAnalyticsRequestV2Executor): AnalyticsRequestV2Executor
+
+    @Binds
+    @Singleton
+    fun bindsPresentStaticSheet(impl: RealPresentStaticSheet): PresentStaticSheet
 
     companion object {
 
