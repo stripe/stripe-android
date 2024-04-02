@@ -163,7 +163,7 @@ internal fun BillingDetailsCollectionScreen(
             formArgs = formArgs,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
-            nameController= nameController,
+            nameController = nameController,
             emailController = emailController,
             phoneController = phoneController,
             addressController = addressController,

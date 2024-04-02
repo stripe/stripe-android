@@ -13,6 +13,8 @@ import com.stripe.android.financialconnections.features.attachpayment.AttachPaym
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.RealPresentNoticeSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
@@ -54,6 +56,9 @@ import javax.inject.Singleton
     ]
 )
 internal interface FinancialConnectionsSheetNativeModule {
+
+    @Binds
+    fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
 
     @Singleton
     @Binds
