@@ -16,9 +16,9 @@ class RealErrorReporter @Inject constructor(
 ) : ErrorReporter {
     override fun report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
         val additionalParams = mapOf(
-            "analyticsValue" to stripeException.analyticsValue(),
-            "statusCode" to stripeException.statusCode.toString(),
-            "requestId" to stripeException.requestId,
+            "analytics_value" to stripeException.analyticsValue(),
+            "status_code" to stripeException.statusCode.toString(),
+            "request_id" to stripeException.requestId,
         ).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
