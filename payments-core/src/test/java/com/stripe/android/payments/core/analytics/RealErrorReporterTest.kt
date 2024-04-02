@@ -83,6 +83,6 @@ class RealErrorReporterTest {
         val analyticsRequestParams = executedAnalyticsRequests.get(0).params
         assertThat(analyticsRequestParams.get("error_code")).isEqualTo(expectedErrorCode)
         assertThat(analyticsRequestParams.get("error_type")).isEqualTo(expectedErrorType)
-        assertThat(analyticsRequestParams.get("requestId")).isEqualTo(expectedRequestId)
+        assertThat(analyticsRequestParams.get("request_id")).isEqualTo(expectedRequestId)
     }
 }
