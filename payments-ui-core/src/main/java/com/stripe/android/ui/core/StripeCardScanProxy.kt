@@ -6,6 +6,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripecardscan.cardscan.CardScanSheet
 import com.stripe.android.stripecardscan.cardscan.CardScanSheetResult
 
@@ -31,7 +33,7 @@ internal interface StripeCardScanProxy {
             provider: () -> StripeCardScanProxy = {
                 DefaultStripeCardScanProxy(CardScanSheet.create(fragment, stripePublishableKey, onFinished))
             },
-            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
+            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
         ): StripeCardScanProxy {
             return if (isStripeCardScanAvailable()) {
                 provider()
@@ -47,7 +49,7 @@ internal interface StripeCardScanProxy {
             provider: () -> StripeCardScanProxy = {
                 DefaultStripeCardScanProxy(CardScanSheet.create(activity, stripePublishableKey, onFinished))
             },
-            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable()
+            isStripeCardScanAvailable: IsStripeCardScanAvailable = DefaultIsStripeCardScanAvailable(),
         ): StripeCardScanProxy {
             return if (isStripeCardScanAvailable()) {
                 provider()
@@ -84,13 +86,22 @@ internal class DefaultStripeCardScanProxy(
     }
 }
 
-internal class UnsupportedStripeCardScanProxy : StripeCardScanProxy {
-    override fun present() {
+internal class UnsupportedStripeCardScanProxy(private val errorReporter : ErrorReporter) : StripeCardScanProxy {
+
+    private fun handleMissingDependency() {
+        val missingDependencyException = IllegalStateException(
+            "Missing stripecardscan dependency, please add it to your apps build.gradle"
+        )
+        errorReporter.report(
+            ErrorReporter.UnexpectedErrorEvent.MISSING_CARD_SCAN_DEPENDENCY,
+            StripeException.create(missingDependencyException)
+        )
         if (BuildConfig.DEBUG) {
-            throw IllegalStateException(
-                "Missing stripecardscan dependency, please add it to your apps build.gradle"
-            )
+            throw missingDependencyException
         }
+    }
+    override fun present() {
+        handleMissingDependency()
     }
 
     override fun attachCardScanFragment(
@@ -99,10 +110,6 @@ internal class UnsupportedStripeCardScanProxy : StripeCardScanProxy {
         fragmentContainer: Int,
         onFinished: (cardScanSheetResult: CardScanSheetResult) -> Unit
     ) {
-        if (BuildConfig.DEBUG) {
-            throw IllegalStateException(
-                "Missing stripecardscan dependency, please add it to your apps build.gradle"
-            )
-        }
+        handleMissingDependency()
     }
 }

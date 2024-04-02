@@ -76,7 +76,7 @@ internal class CustomerApiRepository @Inject constructor(
                 ).onFailure {
                     logger.error("Failed to retrieve payment methods.", it)
                     errorReporter.report(
-                        ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
+                        ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
                         StripeException.create(it)
                     )
                 }
