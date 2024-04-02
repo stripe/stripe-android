@@ -15,9 +15,10 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
-import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
-import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -42,7 +43,8 @@ internal class ConsentViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
-    private val logger: Logger
+    private val logger: Logger,
+    private val presentNoticeSheet: PresentNoticeSheet,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -105,27 +107,33 @@ internal class ConsentViewModel @Inject constructor(
             knownDeeplinkActions = mapOf(
                 // Clicked on the "Data Access" link -> Open the Data Access bottom sheet
                 ConsentClickableText.DATA.value to {
-                    setState {
-                        copy(
-                            currentBottomSheet = BottomSheetContent.DATA,
-                            viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                        )
-                    }
+                    presentDataAccessBottomSheet()
                 },
                 // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
                 ConsentClickableText.LEGAL_DETAILS.value to {
-                    setState {
-                        copy(
-                            viewEffect = ViewEffect.OpenBottomSheet(date.time),
-                            currentBottomSheet = BottomSheetContent.LEGAL
-                        )
-                    }
+                    presentLegalDetailsBottomSheet()
                 },
                 // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
                 ConsentClickableText.MANUAL_ENTRY.value to {
                     navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
                 },
             )
+        )
+    }
+
+    private fun presentDataAccessBottomSheet() {
+        val dataAccessNotice = stateFlow.value.consent()?.consent?.dataAccessNotice ?: return
+        presentNoticeSheet(
+            content = DataAccess(dataAccessNotice),
+            referrer = Pane.CONSENT,
+        )
+    }
+
+    private fun presentLegalDetailsBottomSheet() {
+        val notice = stateFlow.value.consent()?.consent?.legalDetailsNotice ?: return
+        presentNoticeSheet(
+            content = Legal(notice),
+            referrer = Pane.CONSENT,
         )
     }
 

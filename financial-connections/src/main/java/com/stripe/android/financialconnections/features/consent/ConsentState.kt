@@ -7,7 +7,6 @@ import com.stripe.android.financialconnections.presentation.Async
 internal data class ConsentState(
     val consent: Async<Payload> = Async.Uninitialized,
     val merchantLogos: List<String> = emptyList(),
-    val currentBottomSheet: BottomSheetContent = BottomSheetContent.DATA,
     val acceptConsent: Async<FinancialConnectionsSessionManifest> = Async.Uninitialized,
     val viewEffect: ViewEffect? = null
 ) {
@@ -18,18 +17,9 @@ internal data class ConsentState(
         val shouldShowMerchantLogos: Boolean
     )
 
-    enum class BottomSheetContent {
-        LEGAL,
-        DATA
-    }
-
     sealed class ViewEffect {
         data class OpenUrl(
             val url: String,
-            val id: Long
-        ) : ViewEffect()
-
-        data class OpenBottomSheet(
             val id: Long
         ) : ViewEffect()
     }

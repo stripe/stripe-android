@@ -37,6 +37,8 @@ import com.stripe.android.financialconnections.exception.FinancialConnectionsErr
 import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus.Action
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
@@ -79,6 +81,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
+    private val presentNoticeSheet: PresentNoticeSheet,
     initialState: SharedPartnerAuthState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
@@ -427,17 +430,19 @@ internal class PartnerAuthViewModel @Inject constructor(
             val managedUri = SharedPartnerAuthState.ClickableText.entries
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
-                SharedPartnerAuthState.ClickableText.DATA -> {
-                    setState {
-                        copy(
-                            viewEffect = ViewEffect.OpenBottomSheet(Date().time)
-                        )
-                    }
-                }
-
+                SharedPartnerAuthState.ClickableText.DATA -> presentDataAccessBottomSheet()
                 null -> logger.error("Unrecognized clickable text: $uri")
             }
         }
+    }
+
+    private fun presentDataAccessBottomSheet() {
+        val authSession = stateFlow.value.payload()?.authSession
+        val notice = authSession?.display?.text?.consent?.dataAccessNotice ?: return
+        presentNoticeSheet(
+            content = DataAccess(notice),
+            referrer = PANE,
+        )
     }
 
     fun onViewEffectLaunched() {

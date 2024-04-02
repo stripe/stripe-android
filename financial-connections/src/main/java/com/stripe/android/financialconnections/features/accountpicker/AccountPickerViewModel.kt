@@ -26,10 +26,11 @@ import com.stripe.android.financialconnections.domain.SelectAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -61,7 +62,8 @@ internal class AccountPickerViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
-    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
+    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
+    private val presentNoticeSheet: PresentNoticeSheet,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -327,10 +329,18 @@ internal class AccountPickerViewModel @Inject constructor(
             },
             knownDeeplinkActions = mapOf(
                 DATA.value to {
-                    eventTracker.track(ClickLearnMoreDataAccess(PANE))
-                    setState { copy(viewEffect = OpenBottomSheet(date.time)) }
+                    presentDataAccessBottomSheet()
                 }
             )
+        )
+    }
+
+    private fun presentDataAccessBottomSheet() {
+        val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
+        eventTracker.track(ClickLearnMoreDataAccess(PANE))
+        presentNoticeSheet(
+            content = DataAccess(dataAccessNotice),
+            referrer = PANE,
         )
     }
 
@@ -394,10 +404,6 @@ internal data class AccountPickerState(
     sealed class ViewEffect {
         data class OpenUrl(
             val url: String,
-            val id: Long
-        ) : ViewEffect()
-
-        data class OpenBottomSheet(
             val id: Long
         ) : ViewEffect()
     }

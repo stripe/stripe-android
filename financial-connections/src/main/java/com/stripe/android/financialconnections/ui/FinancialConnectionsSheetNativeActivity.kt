@@ -193,6 +193,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                         composable(Destination.BankAuthRepair)
                         composable(Destination.LinkStepUpVerification)
                         composable(Destination.ManualEntrySuccess)
+                        bottomSheet(Destination.Notice)
                     }
                 }
             }

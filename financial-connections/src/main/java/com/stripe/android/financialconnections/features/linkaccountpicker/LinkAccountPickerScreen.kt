@@ -21,16 +21,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue.Hidden
 import androidx.compose.material.Text
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,13 +39,11 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.AccountItem
-import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.Payload
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.NetworkedAccount
@@ -71,9 +64,7 @@ import com.stripe.android.financialconnections.ui.components.clickableSingle
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.LazyLayout
-import com.stripe.android.financialconnections.ui.theme.Neutral900
 import com.stripe.android.uicore.image.StripeImage
-import kotlinx.coroutines.launch
 
 /*
   The returning user account picker contains a lot of logic handling what happens after a user selects an account.
@@ -95,17 +86,12 @@ internal fun LinkAccountPickerScreen() {
     val state = viewModel.stateFlow.collectAsState()
     BackHandler(enabled = true) {}
 
-    val bottomSheetState = rememberModalBottomSheetState(
-        initialValue = Hidden,
-        skipHalfExpanded = true
-    )
     val uriHandler = LocalUriHandler.current
 
     state.value.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
-                is OpenBottomSheet -> bottomSheetState.show()
             }
             viewModel.onViewEffectLaunched()
         }
@@ -113,7 +99,6 @@ internal fun LinkAccountPickerScreen() {
 
     LinkAccountPickerContent(
         state = state.value,
-        bottomSheetState = bottomSheetState,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onNewBankAccountClick = viewModel::onNewBankAccountClick,
@@ -125,7 +110,6 @@ internal fun LinkAccountPickerScreen() {
 @Composable
 private fun LinkAccountPickerContent(
     state: LinkAccountPickerState,
-    bottomSheetState: ModalBottomSheetState,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onNewBankAccountClick: () -> Unit,
@@ -133,46 +117,7 @@ private fun LinkAccountPickerContent(
     onAccountClick: (PartnerAccount) -> Unit
 ) {
     val scrollState = rememberLazyListState()
-    val scope = rememberCoroutineScope()
-    ModalBottomSheetLayout(
-        sheetState = bottomSheetState,
-        sheetBackgroundColor = colors.backgroundSurface,
-        sheetShape = RoundedCornerShape(8.dp),
-        scrimColor = Neutral900.copy(alpha = 0.32f),
-        sheetContent = {
-            when (val dataAccessNotice = state.payload()?.dataAccessNotice) {
-                null -> Unit
-                else -> DataAccessBottomSheetContent(
-                    dataDialog = dataAccessNotice,
-                    onConfirmModalClick = { scope.launch { bottomSheetState.hide() } },
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
-        },
-        content = {
-            LinkAccountPickerMainContent(
-                scrollState = scrollState,
-                state = state,
-                onClickableTextClick = onClickableTextClick,
-                onSelectAccountClick = onSelectAccountClick,
-                onNewBankAccountClick = onNewBankAccountClick,
-                onAccountClick = onAccountClick,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
-        },
-    )
-}
 
-@Composable
-private fun LinkAccountPickerMainContent(
-    scrollState: LazyListState,
-    state: LinkAccountPickerState,
-    onClickableTextClick: (String) -> Unit,
-    onSelectAccountClick: () -> Unit,
-    onNewBankAccountClick: () -> Unit,
-    onAccountClick: (PartnerAccount) -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
-) {
     Box {
         when (val payload = state.payload) {
             Uninitialized,
@@ -391,11 +336,9 @@ internal fun LinkAccountPickerScreenPreview(
     @PreviewParameter(LinkAccountPickerPreviewParameterProvider::class)
     state: LinkAccountPickerState
 ) {
-    val bottomSheetState = rememberModalBottomSheetState(initialValue = Hidden)
     FinancialConnectionsPreview {
         LinkAccountPickerContent(
             state = state,
-            bottomSheetState = bottomSheetState,
             onCloseFromErrorClick = {},
             onClickableTextClick = {},
             onNewBankAccountClick = {},
