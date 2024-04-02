@@ -16,6 +16,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.coroutines.CoroutineContext
 
+// TODO: add extra error analytics to this, as well as alerts for these errors
 @Singleton
 internal class DefaultEventReporter @Inject internal constructor(
     private val mode: EventReporter.Mode,
