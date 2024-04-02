@@ -91,6 +91,7 @@ internal class UnsupportedStripeCardScanProxy : StripeCardScanProxy {
                 "Missing stripecardscan dependency, please add it to your apps build.gradle"
             )
         }
+        // TODO: add an error here for if the dependency is missing?
     }
 
     override fun attachCardScanFragment(
@@ -104,5 +105,6 @@ internal class UnsupportedStripeCardScanProxy : StripeCardScanProxy {
                 "Missing stripecardscan dependency, please add it to your apps build.gradle"
             )
         }
+        // TODO: add an error here for if the dependency is missing?
     }
 }

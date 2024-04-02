@@ -43,6 +43,7 @@ fun CardDetailsSectionElementUI(
         )
         if (controller.isCardScanEnabled && controller.isStripeCardScanAvailable()) {
             ScanCardButtonUI(enabled = enabled) {
+                // TODO: handle the data in the result intent being missing?
                 controller.cardDetailsElement.controller.numberElement.controller.onCardScanResult(
                     it.getParcelableExtra(CardScanActivity.CARD_SCAN_PARCELABLE_NAME)
                         ?: CardScanSheetResult.Failed(

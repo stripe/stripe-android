@@ -34,6 +34,7 @@ internal fun ScanCardButtonUI(
     val cardScanLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             it.data?.let {
+                // TODO: log an error here if the card scanner fails?
                 onResult(it)
             }
         }
@@ -44,6 +45,7 @@ internal fun ScanCardButtonUI(
             indication = null,
             enabled = enabled,
             onClick = {
+                // TODO: run catching and log if the activity was missing?
                 cardScanLauncher.launch(
                     Intent(
                         context,

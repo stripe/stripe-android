@@ -184,6 +184,7 @@ class CardScanSheet private constructor(private val stripePublishableKey: String
                 CARD_SCAN_FRAGMENT_REQUEST_KEY,
                 lifecycleOwner
             ) { _, bundle ->
+                // TODO: add an error here for params missing?
                 val result: CardScanSheetResult = bundle.getParcelable(
                     CARD_SCAN_FRAGMENT_BUNDLE_KEY
                 ) ?: CardScanSheetResult.Failed(Throwable("Card scan params not provided"))
