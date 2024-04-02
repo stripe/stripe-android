@@ -1250,9 +1250,11 @@ internal class IdentityViewModelTest {
                 mock()
             ),
             result = IDDetectorOutput.Modern(
+                boundingBox = BOUNDING_BOX,
                 category = Category.ID_FRONT,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
+                blurScore = 1.0f,
                 mbOutput = MBDetector.DetectorResult.Captured(
                     INPUT_BITMAP,
                     EXTRACTED_BITMAP,
@@ -1270,9 +1272,11 @@ internal class IdentityViewModelTest {
                 mock()
             ),
             result = IDDetectorOutput.Modern(
+                boundingBox = BOUNDING_BOX,
                 category = Category.ID_BACK,
                 resultScore = 0.8f,
                 allScores = ALL_SCORES,
+                blurScore = 1.0f,
                 mbOutput = MBDetector.DetectorResult.Captured(
                     INPUT_BITMAP,
                     EXTRACTED_BITMAP,

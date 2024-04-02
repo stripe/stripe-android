@@ -18,9 +18,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -85,11 +83,6 @@ internal fun SharedPartnerAuth(
     val webAuthFlow = viewModel.collectAsState(FinancialConnectionsSheetNativeState::webAuthFlow)
     val uriHandler = LocalUriHandler.current
 
-    val bottomSheetState = rememberModalBottomSheetState(
-        ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
-
     LaunchedEffect(webAuthFlow.value) {
         onWebAuthFlowFinished(webAuthFlow.value)
     }
@@ -97,7 +90,6 @@ internal fun SharedPartnerAuth(
     state.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
-                is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
                 is ViewEffect.OpenUrl -> uriHandler.openUri(viewEffect.url)
                 is ViewEffect.OpenPartnerAuth -> viewModel.openPartnerAuthFlowInBrowser(viewEffect.url)
             }

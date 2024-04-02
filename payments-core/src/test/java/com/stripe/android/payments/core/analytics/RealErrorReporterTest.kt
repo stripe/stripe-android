@@ -44,9 +44,9 @@ class RealErrorReporterTest {
         val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
         val analyticsRequestParams = executedAnalyticsRequests.get(0).params
-        assertThat(analyticsRequestParams.get("analyticsValue")).isEqualTo(expectedAnalyticsValue)
-        assertThat(analyticsRequestParams.get("statusCode")).isEqualTo(expectedStatusCode)
-        assertThat(analyticsRequestParams.get("requestId")).isNull()
+        assertThat(analyticsRequestParams.get("analytics_value")).isEqualTo(expectedAnalyticsValue)
+        assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
+        assertThat(analyticsRequestParams.get("request_id")).isNull()
     }
 
     @Test
@@ -61,9 +61,9 @@ class RealErrorReporterTest {
         val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
         val analyticsRequestParams = executedAnalyticsRequests.get(0).params
-        assertThat(analyticsRequestParams.get("analyticsValue")).isEqualTo(expectedAnalyticsValue)
-        assertThat(analyticsRequestParams.get("statusCode")).isEqualTo(expectedStatusCode)
-        assertThat(analyticsRequestParams.get("requestId")).isEqualTo(expectedRequestId)
+        assertThat(analyticsRequestParams.get("analytics_value")).isEqualTo(expectedAnalyticsValue)
+        assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
+        assertThat(analyticsRequestParams.get("request_id")).isEqualTo(expectedRequestId)
     }
 
     @Test

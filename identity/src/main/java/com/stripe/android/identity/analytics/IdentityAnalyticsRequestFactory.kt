@@ -325,6 +325,15 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         )
     )
 
+    fun mbCaptureStatus(
+        capturedByMb: Boolean
+    ) = maybeLogExperimentAndSendLog(
+        eventName = EVENT_MB_CAPTURE_STATUS,
+        additionalParamWithEventMetadata(
+            PARAM_CAPTURED_BY_MB to capturedByMb
+        )
+    )
+
     private fun IdentityScanState.ScanType.toParam(): String =
         when (this) {
             IdentityScanState.ScanType.DOC_FRONT -> DOC_FRONT
@@ -370,6 +379,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val EVENT_GENERIC_ERROR = "generic_error"
         const val EVENT_MB_STATUS = "mb_status"
         const val EVENT_MB_ERROR = "mb_error"
+        const val EVENT_MB_CAPTURE_STATUS = "mb_capture_status"
         const val EVENT_EXPERIMENT_EXPOSURE = "preloaded_experiment_retrieved"
 
         const val PARAM_EVENT_META_DATA = "event_metadata"
@@ -414,6 +424,7 @@ internal class IdentityAnalyticsRequestFactory @Inject constructor(
         const val PARAM_INIT_FAILED_REASON = "init_failed_reason"
         const val PARAM_EXPERIMENT_RETRIEVED = "experiment_retrieved"
         const val PARAM_ARB_ID = "arb_id"
+        const val PARAM_CAPTURED_BY_MB = "captured_by_mb"
 
         const val SCREEN_NAME_CONSENT = "consent"
         const val SCREEN_NAME_DOC_WARMUP = "document_warmup"

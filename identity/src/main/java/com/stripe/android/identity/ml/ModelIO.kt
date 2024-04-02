@@ -37,24 +37,28 @@ internal sealed interface AnalyzerOutput
  * Output of IDDetector
  */
 internal sealed class IDDetectorOutput(
+    open val boundingBox: BoundingBox,
     open val category: Category,
     open val resultScore: Float,
     open val allScores: List<Float>,
+    open val blurScore: Float
 ) : AnalyzerOutput {
     data class Legacy(
-        val boundingBox: BoundingBox,
+        override val boundingBox: BoundingBox,
         override val category: Category,
         override val resultScore: Float,
         override val allScores: List<Float>,
-        val blurScore: Float
-    ) : IDDetectorOutput(category, resultScore, allScores)
+        override val blurScore: Float
+    ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore)
 
     data class Modern(
+        override val boundingBox: BoundingBox,
         override val category: Category,
         override val resultScore: Float,
         override val allScores: List<Float>,
+        override val blurScore: Float,
         val mbOutput: MBDetector.DetectorResult
-    ) : IDDetectorOutput(category, resultScore, allScores)
+    ) : IDDetectorOutput(boundingBox, category, resultScore, allScores, blurScore)
 
     fun blurScore(): Float? =
         when (this) {

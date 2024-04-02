@@ -151,7 +151,7 @@ internal class MBDetector private constructor(settings: MBSettings) {
     }
 
     companion object {
-        suspend fun maybeCreateMBInstance(
+        fun maybeCreateMBInstance(
             context: Context,
             settings: MBSettings?,
             identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory

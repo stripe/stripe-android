@@ -21,8 +21,9 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenBottomSheet
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
@@ -62,7 +63,8 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
+    private val logger: Logger,
+    private val presentNoticeSheet: PresentNoticeSheet,
 ) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private var searchJob = ConflatedJob()
@@ -247,14 +249,20 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
             when (managedUri) {
                 NetworkingLinkSignupClickableText.LEGAL_DETAILS -> {
-                    setState {
-                        copy(viewEffect = OpenBottomSheet(date.time))
-                    }
+                    presentLegalDetailsBottomSheet()
                 }
 
                 null -> logger.error("Unrecognized clickable text: $uri")
             }
         }
+    }
+
+    private fun presentLegalDetailsBottomSheet() {
+        val notice = stateFlow.value.payload()?.content?.legalDetailsNotice ?: return
+        presentNoticeSheet(
+            content = Legal(notice),
+            referrer = PANE,
+        )
     }
 
     /**
@@ -315,10 +323,6 @@ internal data class NetworkingLinkSignupState(
     sealed class ViewEffect {
         data class OpenUrl(
             val url: String,
-            val id: Long
-        ) : ViewEffect()
-
-        data class OpenBottomSheet(
             val id: Long
         ) : ViewEffect()
     }

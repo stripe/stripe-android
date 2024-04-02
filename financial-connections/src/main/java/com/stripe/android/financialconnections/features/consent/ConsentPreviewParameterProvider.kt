@@ -1,7 +1,5 @@
 package com.stripe.android.financialconnections.features.consent
 
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.stripe.android.financialconnections.model.Bullet
 import com.stripe.android.financialconnections.model.ConnectedAccessNotice
@@ -15,16 +13,12 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.model.ServerLink
 import com.stripe.android.financialconnections.presentation.Async.Success
 
-@OptIn(ExperimentalMaterialApi::class)
-internal class ConsentPreviewParameterProvider :
-    PreviewParameterProvider<Pair<ModalBottomSheetValue, ConsentState>> {
+internal class ConsentPreviewParameterProvider : PreviewParameterProvider<ConsentState> {
+
     override val values = sequenceOf(
-        ModalBottomSheetValue.Hidden to withPlatformLogos(),
-        ModalBottomSheetValue.Hidden to withConnectedAccountLogos(),
-        ModalBottomSheetValue.Hidden to manualEntryPlusMicrodeposits(),
-        ModalBottomSheetValue.Expanded to withDataBottomSheet(),
-        ModalBottomSheetValue.Expanded to withLegalDetailsBottomSheet(),
-        ModalBottomSheetValue.Expanded to withDataBottomSheetAndConnectedAccount()
+        withPlatformLogos(),
+        withConnectedAccountLogos(),
+        manualEntryPlusMicrodeposits(),
     )
 
     override val count: Int
@@ -63,52 +57,6 @@ internal class ConsentPreviewParameterProvider :
         consent = Success(
             ConsentState.Payload(
                 consent = sampleConsent(),
-                merchantLogos = listOf(
-                    "www.logo1.com",
-                    "www.logo2.com"
-                ),
-                shouldShowMerchantLogos = false
-            )
-        )
-    )
-
-    private fun withDataBottomSheet() = ConsentState(
-        currentBottomSheet = ConsentState.BottomSheetContent.DATA,
-        consent = Success(
-            ConsentState.Payload(
-                consent = sampleConsent().copy(
-                    dataAccessNotice = sampleConsent().dataAccessNotice.copy(
-                        connectedAccountNotice = null
-                    )
-                ),
-                merchantLogos = listOf(
-                    "www.logo1.com",
-                    "www.logo2.com"
-                ),
-                shouldShowMerchantLogos = false
-            )
-        )
-    )
-
-    private fun withDataBottomSheetAndConnectedAccount() = ConsentState(
-        currentBottomSheet = ConsentState.BottomSheetContent.DATA,
-        consent = Success(
-            ConsentState.Payload(
-                consent = sampleConsent(),
-                merchantLogos = listOf(
-                    "www.logo1.com",
-                    "www.logo2.com"
-                ),
-                shouldShowMerchantLogos = false
-            )
-        )
-    )
-
-    private fun withLegalDetailsBottomSheet() = ConsentState(
-        currentBottomSheet = ConsentState.BottomSheetContent.LEGAL,
-        consent = Success(
-            ConsentState.Payload(
-                consent = sampleConsent().copy(belowCta = null),
                 merchantLogos = listOf(
                     "www.logo1.com",
                     "www.logo2.com"

@@ -13,6 +13,8 @@ import com.stripe.android.financialconnections.features.attachpayment.AttachPaym
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.RealPresentNoticeSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
@@ -26,6 +28,8 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsCo
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
+import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
+import com.stripe.android.financialconnections.repository.RealNoticeSheetContentRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepositoryImpl
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
@@ -53,9 +57,12 @@ import javax.inject.Singleton
 )
 internal interface FinancialConnectionsSheetNativeModule {
 
+    @Binds
+    fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
+
     @Singleton
     @Binds
-    fun providesNavigationManager(
+    fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
 
@@ -63,6 +70,12 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsHandleError(
         impl: RealHandleError
     ): HandleError
+
+    @Singleton
+    @Binds
+    fun bindsNoticeSheetContentRepository(
+        impl: RealNoticeSheetContentRepository,
+    ): NoticeSheetContentRepository
 
     companion object {
         @Provides

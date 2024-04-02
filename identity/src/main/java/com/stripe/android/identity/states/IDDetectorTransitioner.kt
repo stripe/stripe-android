@@ -161,49 +161,74 @@ internal class IDDetectorTransitioner(
     private fun transitionFromFoundModern(
         foundState: Found,
         analyzerOutput: IDDetectorOutput.Modern
-    ) = when {
-        foundState.isFromLegacyDetector == true -> Unsatisfied(
-            "Expecting Modern IDDetectorOutput but received a Legacy IDDetectorOutput",
-            foundState.type,
-            foundState.transitioner
-        )
+    ): IdentityScanState {
+        // Call iOUCheckPass to update its internal state
+        val iOUCheckPassed = iOUCheckPass(analyzerOutput.boundingBox)
+        val feedbackIntRes =
+            if (analyzerOutput.mbOutput is MBDetector.DetectorResult.Capturing) {
+                analyzerOutput.mbOutput.feedback.stringResource
+            } else {
+                null
+            }
+        return when {
+            foundState.isFromLegacyDetector == true -> Unsatisfied(
+                "Expecting Modern IDDetectorOutput but received a Legacy IDDetectorOutput",
+                foundState.type,
+                foundState.transitioner
+            )
+            timeoutAt.hasPassed() -> {
+                IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
+            }
 
-        timeoutAt.hasPassed() -> {
-            IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
-        }
-
-        !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
-            "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
-            foundState.type,
-            foundState.transitioner
-        )
-
-        analyzerOutput.mbOutput is MBDetector.DetectorResult.Error -> Unsatisfied(
-            "MB detector error",
-            foundState.type,
-            foundState.transitioner
-        )
-
-        // Keep staying in Found state if MB is still Capturing
-        analyzerOutput.mbOutput is MBDetector.DetectorResult.Capturing ->
-            foundState.withFeedback(analyzerOutput.mbOutput.feedback.stringResource)
-
-        // Modern result directly transitions to Finished without Satisfied,
-        // Because the next frame analyzerOutput.mbOutput might become Capturing again, which would
-        // not contain the transformed result.
-        analyzerOutput.mbOutput is MBDetector.DetectorResult.Captured ->
-            IdentityScanState.Finished(
+            !outputMatchesTargetType(analyzerOutput.category, foundState.type) -> Unsatisfied(
+                "Type ${analyzerOutput.category} doesn't match ${foundState.type}",
                 foundState.type,
                 foundState.transitioner
             )
 
-        else -> {
-            // This should never occur
-            Unsatisfied(
-                "Unknown state! ",
+            analyzerOutput.mbOutput is MBDetector.DetectorResult.Error -> Unsatisfied(
+                "MB detector error",
                 foundState.type,
                 foundState.transitioner
             )
+
+            !iOUCheckPassed -> {
+                // reset timer of the foundState
+                foundState.reachedStateAt = Clock.markNow()
+                foundState.withFeedback(feedbackIntRes)
+            }
+
+            isBlurry(analyzerOutput.blurScore) -> {
+                // reset timer of the foundState
+                foundState.reachedStateAt = Clock.markNow()
+                foundState.withFeedback(feedbackIntRes)
+            }
+
+            moreResultsRequired(foundState) -> foundState
+
+            // Transition to Finished state if either the modern or legacy logic would have transitioned to Finished
+            analyzerOutput.mbOutput is MBDetector.DetectorResult.Captured -> {
+                IdentityScanState.Finished(
+                    foundState.type,
+                    foundState.transitioner
+                )
+            }
+
+            !isBlurry(analyzerOutput.blurScore) -> {
+                IdentityScanState.Finished(
+                    foundState.type,
+                    foundState.transitioner
+                )
+            }
+
+            else -> {
+                // This should never occur
+                Unsatisfied(
+                    "Unknown state! ",
+                    foundState.type,
+                    foundState.transitioner
+                )
+            }
         }
     }
 

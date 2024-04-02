@@ -251,6 +251,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "networking_save_to_link_verification")
         NETWORKING_SAVE_TO_LINK_VERIFICATION("networking_save_to_link_verification"),
 
+        @SerialName(value = "notice")
+        NOTICE("notice"),
+
         @SerialName(value = "reset")
         RESET("reset"),
 

@@ -16,17 +16,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -44,11 +40,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
-import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
 import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.presentation.Async
@@ -62,7 +56,6 @@ import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
@@ -74,7 +67,6 @@ import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
-import kotlinx.coroutines.launch
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
@@ -83,16 +75,11 @@ internal fun NetworkingLinkSignupScreen() {
     val state = viewModel.stateFlow.collectAsState()
     BackHandler(enabled = true) {}
     val uriHandler = LocalUriHandler.current
-    val bottomSheetState: ModalBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
 
     state.value.viewEffect?.let { viewEffect ->
         LaunchedEffect(viewEffect) {
             when (viewEffect) {
                 is OpenUrl -> uriHandler.openUri(viewEffect.url)
-                is ViewEffect.OpenBottomSheet -> bottomSheetState.show()
             }
             viewModel.onViewEffectLaunched()
         }
@@ -100,7 +87,6 @@ internal fun NetworkingLinkSignupScreen() {
 
     NetworkingLinkSignupContent(
         state = state.value,
-        bottomSheetState = bottomSheetState,
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount,
@@ -110,46 +96,11 @@ internal fun NetworkingLinkSignupScreen() {
 
 @Composable
 private fun NetworkingLinkSignupContent(
-    bottomSheetState: ModalBottomSheetState,
     state: NetworkingLinkSignupState,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
-) {
-    val coroutineScope = rememberCoroutineScope()
-
-    FinancialConnectionsModalBottomSheetLayout(
-        sheetState = bottomSheetState,
-        sheetContent = {
-            when (val legalDetails = state.payload()?.content?.legalDetailsNotice) {
-                null -> {}
-                else -> LegalDetailsBottomSheetContent(
-                    legalDetails = legalDetails,
-                    onConfirmModalClick = { coroutineScope.launch { bottomSheetState.hide() } },
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
-        },
-        content = {
-            NetworkingLinkSignupMainContent(
-                state = state,
-                onSaveToLink = onSaveToLink,
-                onClickableTextClick = onClickableTextClick,
-                onSkipClick = onSkipClick,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
-        }
-    )
-}
-
-@Composable
-private fun NetworkingLinkSignupMainContent(
-    state: NetworkingLinkSignupState,
-    onSaveToLink: () -> Unit,
-    onClickableTextClick: (String) -> Unit,
-    onSkipClick: () -> Unit,
-    onCloseFromErrorClick: (Throwable) -> Unit
 ) {
     Box {
         when (val payload = state.payload) {
@@ -371,9 +322,6 @@ internal fun NetworkingLinkSignupScreenPreview(
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = state,
-            bottomSheetState = rememberModalBottomSheetState(
-                initialValue = ModalBottomSheetValue.Hidden
-            ),
             onSaveToLink = {},
             onClickableTextClick = {},
             onCloseFromErrorClick = {},
