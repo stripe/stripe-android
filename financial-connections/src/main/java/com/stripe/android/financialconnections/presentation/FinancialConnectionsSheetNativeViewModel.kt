@@ -43,8 +43,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.EXIT
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NOTICE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
@@ -367,8 +365,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             bankAccountToken != null
 
     fun onPaneLaunched(pane: Pane, referrer: Pane?) {
-        // Do not track theses panes as they are not "real" panes.
-        if (pane != EXIT && pane != NOTICE) {
+        if (pane.destination.logPaneLaunched) {
             viewModelScope.launch {
                 eventTracker.track(
                     PaneLaunched(
