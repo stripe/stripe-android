@@ -14,10 +14,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetState
-import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Text
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
@@ -63,10 +60,6 @@ internal fun AccountPickerScreen() {
     val state: State<AccountPickerState> = viewModel.stateFlow.collectAsState()
     BackHandler(true) {}
 
-    val bottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
-        skipHalfExpanded = true
-    )
     val uriHandler = LocalUriHandler.current
 
     state.value.viewEffect?.let { viewEffect ->
@@ -80,7 +73,6 @@ internal fun AccountPickerScreen() {
 
     AccountPickerContent(
         state = state.value,
-        bottomSheetState = bottomSheetState,
         onAccountClicked = viewModel::onAccountClicked,
         onSubmit = viewModel::onSubmit,
         onSelectAnotherBank = viewModel::selectAnotherBank,
@@ -94,7 +86,6 @@ internal fun AccountPickerScreen() {
 @Composable
 private fun AccountPickerContent(
     state: AccountPickerState,
-    bottomSheetState: ModalBottomSheetState,
     onAccountClicked: (PartnerAccount) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onSubmit: () -> Unit,
@@ -282,10 +273,6 @@ internal fun AccountPickerPreview(
             onLoadAccountsAgain = {},
             onCloseFromErrorClick = {},
             onClickableTextClick = {},
-            bottomSheetState = rememberModalBottomSheetState(
-                initialValue = ModalBottomSheetValue.Hidden,
-                skipHalfExpanded = true
-            ),
         )
     }
 }

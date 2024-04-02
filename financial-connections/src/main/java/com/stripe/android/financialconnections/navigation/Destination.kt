@@ -27,9 +27,9 @@ import com.stripe.android.financialconnections.features.networkinglinkloginwarmu
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationScreen
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationScreen
+import com.stripe.android.financialconnections.features.notice.NoticeSheet
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
 import com.stripe.android.financialconnections.features.reset.ResetScreen
-import com.stripe.android.financialconnections.features.notice.NoticeSheet
 import com.stripe.android.financialconnections.features.success.SuccessScreen
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.bottomsheet.bottomSheet

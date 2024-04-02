@@ -11,7 +11,6 @@ import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthR
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.error.ErrorSubcomponent
 import com.stripe.android.financialconnections.features.exit.ExitSubcomponent
-import com.stripe.android.financialconnections.features.notice.NoticeSheetSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationSubcomponent
@@ -21,6 +20,7 @@ import com.stripe.android.financialconnections.features.networkinglinkloginwarmu
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupSubcomponent
 import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationSubcomponent
 import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationSubcomponent
+import com.stripe.android.financialconnections.features.notice.NoticeSheetSubcomponent
 import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
 import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
 import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
