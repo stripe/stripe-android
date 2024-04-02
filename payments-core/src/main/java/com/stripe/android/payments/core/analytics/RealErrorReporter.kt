@@ -19,6 +19,8 @@ class RealErrorReporter @Inject constructor(
             "analyticsValue" to stripeException.analyticsValue(),
             "statusCode" to stripeException.statusCode.toString(),
             "requestId" to stripeException.requestId,
+            "error_type" to stripeException.stripeError?.type,
+            "error_code" to stripeException.stripeError?.code,
         ).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
