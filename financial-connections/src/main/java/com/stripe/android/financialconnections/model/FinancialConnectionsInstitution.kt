@@ -37,7 +37,7 @@ internal data class FinancialConnectionsInstitution(
 
     @SerialName(value = "url") val url: String? = null
 
-) : Parcelable {
+) : Parcelable, java.io.Serializable {
 
     /**
      * This returns a cleaned up url containing only the root domain.

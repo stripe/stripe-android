@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.features.notice
 
 import android.os.Bundle
+import android.os.Parcelable
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
@@ -13,10 +14,13 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 import javax.inject.Inject
 
@@ -32,11 +36,23 @@ internal class NoticeSheetViewModel @Inject constructor(
 ) {
 
     init {
-        viewModelScope.launch {
-            val content = noticeSheetContentRepository.get()
-            setState {
-                copy(content = content.content)
-            }
+        observeErrors()
+        loadNoticeSheetContent()
+    }
+
+    private fun observeErrors() {
+        onAsync(
+            prop = NoticeSheetState::content,
+            onFail = { navigationManager.tryNavigateBack() },
+        )
+    }
+
+    private fun loadNoticeSheetContent() {
+        suspend {
+            val state = noticeSheetContentRepository.await()
+            requireNotNull(state.content)
+        }.execute {
+            copy(content = it)
         }
     }
 
@@ -73,7 +89,7 @@ internal class NoticeSheetViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        noticeSheetContentRepository.update { copy(content = null) }
+        noticeSheetContentRepository.clear()
         super.onCleared()
     }
 
@@ -97,7 +113,7 @@ internal class NoticeSheetViewModel @Inject constructor(
 
 internal data class NoticeSheetState(
     val pane: Pane,
-    val content: NoticeSheetContent? = null,
+    val content: Async<NoticeSheetContent> = Uninitialized,
     val viewEffect: ViewEffect? = null,
 ) {
 
@@ -105,12 +121,14 @@ internal data class NoticeSheetState(
         pane = Destination.referrer(arguments)!!,
     )
 
-    internal sealed interface NoticeSheetContent {
+    internal sealed interface NoticeSheetContent : Parcelable {
 
+        @Parcelize
         data class Legal(
             val legalDetails: LegalDetailsNotice,
         ) : NoticeSheetContent
 
+        @Parcelize
         data class DataAccess(
             val dataAccess: DataAccessNotice,
         ) : NoticeSheetContent

@@ -35,7 +35,7 @@ internal fun NoticeSheet(
         }
     }
 
-    state.content?.let { content ->
+    state.content()?.let { content ->
         StaticBottomSheetContent(
             content = content,
             onClickableTextClick = viewModel::handleClickableTextClick,

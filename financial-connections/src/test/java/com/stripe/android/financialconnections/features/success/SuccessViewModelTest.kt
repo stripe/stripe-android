@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.success
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -11,8 +12,9 @@ import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
-import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
+import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.runTest
@@ -41,7 +43,7 @@ internal class SuccessViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        successContentRepository = TestSuccessContentRepository(),
+        successContentRepository = fakeSuccessContentRepository(),
         getCachedAccounts = getCachedAccounts,
     )
 
@@ -92,5 +94,18 @@ internal class SuccessViewModelTest {
             buildViewModel(SuccessState()).onDoneClick()
             assertThat(awaitItem()).isEqualTo(Complete())
         }
+    }
+
+    private fun fakeSuccessContentRepository(
+        initialState: SuccessContentRepository.State = SuccessContentRepository.State(
+            customSuccessMessage = TextResource.Text("Yay!"),
+        ),
+    ): SuccessContentRepository {
+        val key = "PersistedState_${SuccessContentRepository::class.java.name}"
+        return SuccessContentRepository(
+            savedStateHandle = SavedStateHandle(
+                initialState = mapOf(key to initialState)
+            ),
+        )
     }
 }

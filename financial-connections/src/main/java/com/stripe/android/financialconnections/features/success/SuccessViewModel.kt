@@ -42,7 +42,7 @@ internal class SuccessViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val accounts = getCachedAccounts()
-            val successContent: SuccessContentRepository.State = successContentRepository.get()
+            val successContent: SuccessContentRepository.State = successContentRepository.await()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accountsCount = accounts.size,

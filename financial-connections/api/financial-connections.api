@@ -475,6 +475,22 @@ public final class com/stripe/android/financialconnections/features/networkingsa
 	public final fun getLambda-2$financial_connections_release ()Lkotlin/jvm/functions/Function3;
 }
 
+public final class com/stripe/android/financialconnections/features/notice/NoticeSheetState$NoticeSheetContent$DataAccess$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/features/notice/NoticeSheetState$NoticeSheetContent$DataAccess;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/features/notice/NoticeSheetState$NoticeSheetContent$DataAccess;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/features/notice/NoticeSheetState$NoticeSheetContent$Legal$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/features/notice/NoticeSheetState$NoticeSheetContent$Legal;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/features/notice/NoticeSheetState$NoticeSheetContent$Legal;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/financialconnections/features/partnerauth/PartnerAuthViewModel$Args$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/features/partnerauth/PartnerAuthViewModel$Args;
@@ -1724,6 +1740,62 @@ public final class com/stripe/android/financialconnections/presentation/WebAuthF
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/presentation/WebAuthFlowState$Uninitialized;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/financialconnections/presentation/WebAuthFlowState$Uninitialized;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/repository/CoreAuthorizationPendingNetworkingRepairRepository$State$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/repository/CoreAuthorizationPendingNetworkingRepairRepository$State;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/repository/CoreAuthorizationPendingNetworkingRepairRepository$State;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/repository/FinancialConnectionsErrorRepository$State$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/repository/FinancialConnectionsErrorRepository$State;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/repository/FinancialConnectionsErrorRepository$State;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/repository/NoticeSheetContentRepository$State$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/repository/NoticeSheetContentRepository$State;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/repository/NoticeSheetContentRepository$State;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/repository/SuccessContentRepository$State$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/repository/SuccessContentRepository$State;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/repository/SuccessContentRepository$State;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/ui/TextResource$PluralId$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/ui/TextResource$PluralId;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/ui/TextResource$PluralId;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/ui/TextResource$StringId$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/ui/TextResource$StringId;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/ui/TextResource$StringId;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/financialconnections/ui/TextResource$Text$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/financialconnections/ui/TextResource$Text;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/financialconnections/ui/TextResource$Text;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

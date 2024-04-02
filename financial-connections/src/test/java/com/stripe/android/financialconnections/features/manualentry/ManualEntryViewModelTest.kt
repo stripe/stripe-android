@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.manualentry
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
@@ -13,10 +14,10 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause.USER_INITIATED_WITH_CUSTOM_MANUAL_ENTRY
 import com.stripe.android.financialconnections.domain.PollAttachPaymentAccount
 import com.stripe.android.financialconnections.features.manualentry.ManualEntryState.Payload
-import com.stripe.android.financialconnections.mock.TestSuccessContentRepository
 import com.stripe.android.financialconnections.model.ManualEntryMode
 import com.stripe.android.financialconnections.presentation.Async.Success
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterIsInstance
@@ -44,7 +45,7 @@ class ManualEntryViewModelTest {
         eventTracker = eventTracker,
         initialState = ManualEntryState(),
         pollAttachPaymentAccount = pollAttachPaymentAccount,
-        successContentRepository = TestSuccessContentRepository(),
+        successContentRepository = SuccessContentRepository(SavedStateHandle()),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
