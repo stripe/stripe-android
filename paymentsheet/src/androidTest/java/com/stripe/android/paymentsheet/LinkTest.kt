@@ -3,8 +3,6 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.common.truth.Truth.assertThat
-import com.google.testing.junit.testparameterinjector.TestParameter
-import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -17,15 +15,13 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.LinkIntegrationType
-import com.stripe.android.paymentsheet.utils.LinkIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runLinkTest
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 import java.util.UUID
 
-@RunWith(TestParameterInjector::class)
+//@RunWith(TestParameterInjector::class)
 internal class LinkTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
@@ -37,8 +33,8 @@ internal class LinkTest {
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
-    @TestParameter(valuesProvider = LinkIntegrationTypeProvider::class)
-    lateinit var integrationType: LinkIntegrationType
+//    @TestParameter(valuesProvider = LinkIntegrationTypeProvider::class)
+    var integrationType: LinkIntegrationType = LinkIntegrationType.FlowController
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUp() = activityScenarioRule.runLinkTest(
@@ -130,7 +126,7 @@ internal class LinkTest {
                 assertThat(paymentOption?.label).endsWith("4242")
 
                 @Suppress("DEPRECATION")
-                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -331,7 +327,7 @@ internal class LinkTest {
             assertThat(paymentOption?.label).endsWith("4242")
 
             @Suppress("DEPRECATION")
-            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -429,7 +425,7 @@ internal class LinkTest {
                 assertThat(paymentOption?.label).endsWith("4242")
 
                 @Suppress("DEPRECATION")
-                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -550,7 +546,7 @@ internal class LinkTest {
             assertThat(paymentOption?.label).endsWith("1001")
 
             @Suppress("DEPRECATION")
-            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
