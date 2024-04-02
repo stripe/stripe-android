@@ -1059,27 +1059,6 @@
     ]
   },
   {
-    "type": "konbini",
-    "async": false,
-    "fields": [
-      {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
-      },
-      {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
-      },
-      {
-        "type": "konbini_confirmation_number"
-      }
-    ]
-  },
-  {
     "type": "twint",
     "async": false,
     "selector_icon": {
