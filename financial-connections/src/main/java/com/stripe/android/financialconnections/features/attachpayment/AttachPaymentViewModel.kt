@@ -65,14 +65,12 @@ internal class AttachPaymentViewModel @Inject constructor(
             }
             if (manifest.isNetworkingUserFlow == true && manifest.accountholderIsLinkConsumer == true) {
                 result.networkingSuccessful?.let {
-                    successContentRepository.update {
-                        copy(
-                            customSuccessMessage = PluralId(
-                                value = R.plurals.stripe_success_pane_desc_link_success,
-                                count = accounts.size
-                            )
+                    successContentRepository.set(
+                        customSuccessMessage = PluralId(
+                            value = R.plurals.stripe_success_pane_desc_link_success,
+                            count = accounts.size
                         )
-                    }
+                    )
                 }
             }
             eventTracker.track(

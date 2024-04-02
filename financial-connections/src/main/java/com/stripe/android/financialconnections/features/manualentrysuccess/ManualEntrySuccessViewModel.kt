@@ -36,7 +36,7 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
             val manifest = getManifest()
             SuccessState.Payload(
                 businessName = manifest.businessName,
-                customSuccessMessage = successContentRepository.get().customSuccessMessage,
+                customSuccessMessage = successContentRepository.await().customSuccessMessage,
                 accountsCount = 1, // on manual entry just one account is connected,
                 skipSuccessPane = false
             ).also {

@@ -148,14 +148,12 @@ internal class ManualEntryViewModel @Inject constructor(
                 )
             ).also {
                 if (sync.manifest.manualEntryUsesMicrodeposits) {
-                    successContentRepository.update {
-                        copy(
-                            customSuccessMessage = TextResource.StringId(
-                                R.string.stripe_success_pane_desc_microdeposits,
-                                listOf(account.takeLast(4))
-                            )
+                    successContentRepository.set(
+                        customSuccessMessage = TextResource.StringId(
+                            R.string.stripe_success_pane_desc_microdeposits,
+                            listOf(account.takeLast(4))
                         )
-                    }
+                    )
                 }
                 navigationManager.tryNavigateTo(Destination.ManualEntrySuccess(referrer = PANE))
             }

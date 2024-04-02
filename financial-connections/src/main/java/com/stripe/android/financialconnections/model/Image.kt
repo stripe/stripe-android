@@ -11,4 +11,4 @@ internal data class Image(
 
     @SerialName(value = "default") val default: String?
 
-) : Parcelable
+) : Parcelable, java.io.Serializable

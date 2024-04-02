@@ -22,16 +22,10 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
-import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
-import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
-import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
-import com.stripe.android.financialconnections.repository.RealNoticeSheetContentRepository
-import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.repository.SuccessContentRepositoryImpl
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
@@ -70,12 +64,6 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsHandleError(
         impl: RealHandleError
     ): HandleError
-
-    @Singleton
-    @Binds
-    fun bindsNoticeSheetContentRepository(
-        impl: RealNoticeSheetContentRepository,
-    ): NoticeSheetContentRepository
 
     companion object {
         @Provides
@@ -157,22 +145,6 @@ internal interface FinancialConnectionsSheetNativeModule {
             requestExecutor = requestExecutor,
             apiOptions = apiOptions,
             apiRequestFactory = apiRequestFactory
-        )
-
-        @Singleton
-        @Provides
-        fun providesSaveToLinkWithStripeSucceededRepository(): SuccessContentRepository = SuccessContentRepositoryImpl()
-
-        @Singleton
-        @Provides
-        fun providesFinancialConnectionsErrorRepository() = FinancialConnectionsErrorRepository()
-
-        @Singleton
-        @Provides
-        fun providesPartnerToCoreAuthsRepository(
-            logger: Logger
-        ) = CoreAuthorizationPendingNetworkingRepairRepository(
-            logger = logger
         )
 
         @Provides

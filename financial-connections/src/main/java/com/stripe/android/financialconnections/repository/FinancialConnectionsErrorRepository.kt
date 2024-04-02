@@ -1,28 +1,25 @@
 package com.stripe.android.financialconnections.repository
 
-internal class FinancialConnectionsErrorRepository {
+import android.os.Parcelable
+import androidx.lifecycle.SavedStateHandle
+import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository.State
+import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
+import javax.inject.Singleton
 
-    private var state = State()
-
-    fun get() = state.error
-
-    fun update(reducer: State.() -> State) {
-        state = reducer(state)
-    }
+@Singleton
+internal class FinancialConnectionsErrorRepository @Inject constructor(
+    savedStateHandle: SavedStateHandle,
+) : PersistingRepository<State>(
+    savedStateHandle = savedStateHandle,
+) {
 
     fun set(error: Throwable) {
-        update {
-            copy(error = error)
-        }
+        set(State(error))
     }
 
-    fun clear() {
-        update {
-            copy(error = null)
-        }
-    }
-
+    @Parcelize
     data class State(
-        val error: Throwable? = null
-    )
+        val error: Throwable,
+    ) : Parcelable
 }

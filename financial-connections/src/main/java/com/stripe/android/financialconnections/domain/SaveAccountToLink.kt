@@ -61,26 +61,22 @@ internal class SaveAccountToLink @Inject constructor(
         selectedAccounts: Int
     ): Result<FinancialConnectionsSessionManifest> =
         this.onSuccess {
-            successContentRepository.update {
-                copy(
-                    customSuccessMessage = it.displayText?.successPane?.subCaption
-                        // If backend returns a custom success message, use it
-                        ?.let { TextResource.Text(it) }
-                        // If not, build a Link success message locally
-                        ?: TextResource.PluralId(
-                            R.plurals.stripe_success_pane_desc_link_success,
-                            selectedAccounts
-                        )
-                )
-            }
-        }.onFailure {
-            successContentRepository.update {
-                copy(
-                    customSuccessMessage = TextResource.PluralId(
-                        R.plurals.stripe_success_pane_desc_link_error,
+            successContentRepository.set(
+                customSuccessMessage = it.displayText?.successPane?.subCaption
+                    // If backend returns a custom success message, use it
+                    ?.let { TextResource.Text(it) }
+                    // If not, build a Link success message locally
+                    ?: TextResource.PluralId(
+                        R.plurals.stripe_success_pane_desc_link_success,
                         selectedAccounts
                     )
+            )
+        }.onFailure {
+            successContentRepository.set(
+                customSuccessMessage = TextResource.PluralId(
+                    R.plurals.stripe_success_pane_desc_link_error,
+                    selectedAccounts
                 )
-            }
+            )
         }
 }

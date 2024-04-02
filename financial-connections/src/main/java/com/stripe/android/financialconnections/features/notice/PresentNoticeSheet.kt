@@ -17,7 +17,7 @@ internal class RealPresentNoticeSheet @Inject constructor(
 ) : PresentNoticeSheet {
 
     override fun invoke(content: NoticeSheetContent, referrer: Pane) {
-        noticeSheetContentRepository.update { copy(content = content) }
+        noticeSheetContentRepository.set(content)
         val route = Destination.Notice(referrer = referrer)
         navigationManager.tryNavigateTo(route)
     }

@@ -40,5 +40,6 @@
     <ID>TooManyFunctions:FinancialConnectionsManifestRepository.kt$FinancialConnectionsManifestRepositoryImpl : FinancialConnectionsManifestRepository</ID>
     <ID>TooManyFunctions:FinancialConnectionsSheetNativeViewModel.kt$FinancialConnectionsSheetNativeViewModel : FinancialConnectionsViewModelTopAppBarHost</ID>
     <ID>TooManyFunctions:FinancialConnectionsSheetSharedModule.kt$FinancialConnectionsSheetSharedModule$Companion</ID>
+    <ID>UnnecessaryAbstractClass:PersistingRepository.kt$PersistingRepository$PersistingRepository</ID>
   </CurrentIssues>
 </SmellBaseline>
