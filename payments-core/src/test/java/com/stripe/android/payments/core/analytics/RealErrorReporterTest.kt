@@ -71,7 +71,10 @@ class RealErrorReporterTest {
         val expectedRequestId = "some_request_ID"
         val expectedErrorType = "some_error_type"
         val expectedErrorCode = "some_error_code"
-        val exception = CardException(StripeError(type = expectedErrorType, code = expectedErrorCode), requestId = expectedRequestId)
+        val exception = CardException(
+            StripeError(type = expectedErrorType, code = expectedErrorCode),
+            requestId = expectedRequestId
+        )
 
         realErrorReporter.report(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
 
