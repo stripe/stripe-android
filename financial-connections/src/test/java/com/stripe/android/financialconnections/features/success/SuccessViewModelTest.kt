@@ -13,7 +13,6 @@ import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.repository.PersistingRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -102,11 +101,10 @@ internal class SuccessViewModelTest {
             customSuccessMessage = TextResource.Text("Yay!"),
         ),
     ): SuccessContentRepository {
+        val key = "PersistedState_${SuccessContentRepository::class.java.name}"
         return SuccessContentRepository(
             savedStateHandle = SavedStateHandle(
-                initialState = mapOf(
-                    PersistingRepository.KeyState to initialState,
-                )
+                initialState = mapOf(key to initialState)
             ),
         )
     }

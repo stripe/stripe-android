@@ -12,23 +12,25 @@ internal abstract class PersistingRepository<S : Parcelable>(
     private val savedStateHandle: SavedStateHandle,
 ) {
 
+    private val key = makeKey()
+
     suspend fun await(
         timeout: Duration = 5.seconds,
     ): S {
         return withTimeout(timeout) {
-            savedStateHandle.getStateFlow<S?>(KeyState, null).filterNotNull().first()
+            savedStateHandle.getStateFlow<S?>(key, null).filterNotNull().first()
         }
     }
 
     fun set(state: S) {
-        savedStateHandle[KeyState] = state
+        savedStateHandle[key] = state
     }
 
     fun clear() {
-        savedStateHandle.remove<S>(KeyState)
+        savedStateHandle.remove<S>(key)
     }
 
-    companion object {
-        const val KeyState = "State"
+    private fun makeKey(): String {
+        return "PersistedState_${this::class.java.name}"
     }
 }
