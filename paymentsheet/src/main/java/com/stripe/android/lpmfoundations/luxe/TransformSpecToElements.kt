@@ -9,7 +9,6 @@ import com.stripe.android.ui.core.elements.AuBankAccountNumberSpec
 import com.stripe.android.ui.core.elements.AuBecsDebitMandateTextSpec
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
-import com.stripe.android.ui.core.elements.BoletoTaxIdSpec
 import com.stripe.android.ui.core.elements.BsbSpec
 import com.stripe.android.ui.core.elements.CashAppPayMandateTextSpec
 import com.stripe.android.ui.core.elements.CountrySpec
@@ -77,7 +76,6 @@ internal class TransformSpecToElements(
                     arguments.addressRepository,
                     arguments.shippingValues
                 )
-                is BoletoTaxIdSpec -> it.transform(arguments.initialValues)
                 is SepaMandateTextSpec -> it.transform(arguments.merchantName)
                 is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
                 is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
