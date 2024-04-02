@@ -23,7 +23,7 @@ private val paneToDestination = mapOf(
     Pane.EXIT to Destination.Exit,
     Pane.BANK_AUTH_REPAIR to Destination.BankAuthRepair,
     Pane.MANUAL_ENTRY_SUCCESS to Destination.ManualEntrySuccess,
-    Pane.STATIC_SHEET to Destination.StaticSheet,
+    Pane.NOTICE to Destination.Notice,
 )
 
 internal val Pane.destination: Destination

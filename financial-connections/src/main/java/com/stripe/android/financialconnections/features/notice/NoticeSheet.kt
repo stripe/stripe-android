@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features.static_sheet
+package com.stripe.android.financialconnections.features.notice
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
@@ -10,16 +10,18 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
-import com.stripe.android.financialconnections.features.static_sheet.StaticSheetState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.paneViewModel
-import com.stripe.android.financialconnections.repository.StaticSheetContent
 
 @Composable
-internal fun StaticSheet(
+internal fun NoticeSheet(
     backStackEntry: NavBackStackEntry,
 ) {
-    val viewModel: StaticSheetViewModel = paneViewModel {
-        StaticSheetViewModel.factory(it, backStackEntry.arguments)
+    val viewModel: NoticeSheetViewModel = paneViewModel {
+        NoticeSheetViewModel.factory(it, backStackEntry.arguments)
     }
 
     val uriHandler = LocalUriHandler.current
@@ -44,20 +46,20 @@ internal fun StaticSheet(
 
 @Composable
 private fun StaticBottomSheetContent(
-    content: StaticSheetContent,
+    content: NoticeSheetContent,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier) {
         when (content) {
-            is StaticSheetContent.Legal -> LegalDetailsBottomSheetContent(
+            is Legal -> LegalDetailsBottomSheetContent(
                 legalDetails = content.legalDetails,
                 onConfirmModalClick = onConfirmModalClick,
                 onClickableTextClick = onClickableTextClick
             )
 
-            is StaticSheetContent.DataAccess -> DataAccessBottomSheetContent(
+            is DataAccess -> DataAccessBottomSheetContent(
                 dataDialog = content.dataAccess,
                 onConfirmModalClick = onConfirmModalClick,
                 onClickableTextClick = onClickableTextClick

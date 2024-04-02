@@ -29,7 +29,8 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
 import com.stripe.android.financialconnections.features.common.isDataFlow
-import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
@@ -43,7 +44,6 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.repository.StaticSheetContent.DataAccess
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
@@ -63,7 +63,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
     private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
-    private val presentStaticSheet: PresentStaticSheet,
+    private val presentNoticeSheet: PresentNoticeSheet,
 ) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -338,7 +338,7 @@ internal class AccountPickerViewModel @Inject constructor(
     private fun presentDataAccessBottomSheet() {
         val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
         eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        presentStaticSheet(
+        presentNoticeSheet(
             content = DataAccess(dataAccessNotice),
             referrer = PANE,
         )

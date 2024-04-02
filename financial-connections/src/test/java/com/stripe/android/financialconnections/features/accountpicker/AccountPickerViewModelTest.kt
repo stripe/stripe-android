@@ -64,7 +64,7 @@ internal class AccountPickerViewModelTest {
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         saveAccountToLink = saveAccountToLink,
         getCachedConsumerSession = getCachedConsumerSession,
-        presentStaticSheet = mock(),
+        presentNoticeSheet = mock(),
     )
 
     @Test

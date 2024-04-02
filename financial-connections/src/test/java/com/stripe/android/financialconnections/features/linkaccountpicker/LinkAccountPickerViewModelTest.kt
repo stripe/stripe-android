@@ -71,7 +71,7 @@ class LinkAccountPickerViewModelTest {
         handleClickableUrl = mock(),
         coreAuthorizationPendingNetworkingRepair = mock(),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        presentStaticSheet = mock(),
+        presentNoticeSheet = mock(),
     )
 
     @Test

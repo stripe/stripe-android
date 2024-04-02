@@ -16,7 +16,9 @@ import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -24,8 +26,6 @@ import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.repository.StaticSheetContent.DataAccess
-import com.stripe.android.financialconnections.repository.StaticSheetContent.Legal
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
 import com.stripe.android.financialconnections.utils.error
@@ -44,7 +44,7 @@ internal class ConsentViewModel @Inject constructor(
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
-    private val presentStaticSheet: PresentStaticSheet,
+    private val presentNoticeSheet: PresentNoticeSheet,
 ) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -123,7 +123,7 @@ internal class ConsentViewModel @Inject constructor(
 
     private fun presentDataAccessBottomSheet() {
         val dataAccessNotice = stateFlow.value.consent()?.consent?.dataAccessNotice ?: return
-        presentStaticSheet(
+        presentNoticeSheet(
             content = DataAccess(dataAccessNotice),
             referrer = Pane.CONSENT,
         )
@@ -131,7 +131,7 @@ internal class ConsentViewModel @Inject constructor(
 
     private fun presentLegalDetailsBottomSheet() {
         val notice = stateFlow.value.consent()?.consent?.legalDetailsNotice ?: return
-        presentStaticSheet(
+        presentNoticeSheet(
             content = Legal(notice),
             referrer = Pane.CONSENT,
         )

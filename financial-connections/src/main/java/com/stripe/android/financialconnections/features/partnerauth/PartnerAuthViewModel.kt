@@ -37,11 +37,12 @@ import com.stripe.android.financialconnections.exception.FinancialConnectionsErr
 import com.stripe.android.financialconnections.exception.PartnerAuthError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
 import com.stripe.android.financialconnections.features.common.enableRetrieveAuthSession
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus.Action
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.Payload
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.ViewEffect.OpenPartnerAuth
-import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -56,7 +57,6 @@ import com.stripe.android.financialconnections.presentation.Async.Loading
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
-import com.stripe.android.financialconnections.repository.StaticSheetContent.DataAccess
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
@@ -81,7 +81,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
-    private val presentStaticSheet: PresentStaticSheet,
+    private val presentNoticeSheet: PresentNoticeSheet,
     initialState: SharedPartnerAuthState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
@@ -439,7 +439,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private fun presentDataAccessBottomSheet() {
         val authSession = stateFlow.value.payload()?.authSession
         val notice = authSession?.display?.text?.consent?.dataAccessNotice ?: return
-        presentStaticSheet(
+        presentNoticeSheet(
             content = DataAccess(notice),
             referrer = PANE,
         )

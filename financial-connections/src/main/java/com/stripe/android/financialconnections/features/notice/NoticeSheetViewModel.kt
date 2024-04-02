@@ -1,4 +1,4 @@
-package com.stripe.android.financialconnections.features.static_sheet
+package com.stripe.android.financialconnections.features.notice
 
 import android.os.Bundle
 import androidx.lifecycle.ViewModelProvider
@@ -7,39 +7,40 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.repository.StaticSheetContent
-import com.stripe.android.financialconnections.repository.StaticSheetContentRepository
+import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import kotlinx.coroutines.launch
 import java.util.Date
 import javax.inject.Inject
 
-internal class StaticSheetViewModel @Inject constructor(
-    initialState: StaticSheetState,
+internal class NoticeSheetViewModel @Inject constructor(
+    initialState: NoticeSheetState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val navigationManager: NavigationManager,
-    private val staticSheetContentRepository: StaticSheetContentRepository,
+    private val noticeSheetContentRepository: NoticeSheetContentRepository,
     private val handleClickableUrl: HandleClickableUrl,
-) : FinancialConnectionsViewModel<StaticSheetState>(
+) : FinancialConnectionsViewModel<NoticeSheetState>(
     initialState = initialState,
     nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
 ) {
 
     init {
         viewModelScope.launch {
-            val content = staticSheetContentRepository.get()
+            val content = noticeSheetContentRepository.get()
             setState {
                 copy(content = content.content)
             }
         }
     }
 
-    override fun updateTopAppBar(state: StaticSheetState): TopAppBarStateUpdate? {
+    override fun updateTopAppBar(state: NoticeSheetState): TopAppBarStateUpdate? {
         return null
     }
 
@@ -53,7 +54,7 @@ internal class StaticSheetViewModel @Inject constructor(
                 uri = uri,
                 onNetworkUrlClicked = {
                     setState {
-                        copy(viewEffect = StaticSheetState.ViewEffect.OpenUrl(uri, date.time))
+                        copy(viewEffect = NoticeSheetState.ViewEffect.OpenUrl(uri, date.time))
                     }
                 },
                 knownDeeplinkActions = emptyMap(),
@@ -66,7 +67,7 @@ internal class StaticSheetViewModel @Inject constructor(
     }
 
     override fun onCleared() {
-        staticSheetContentRepository.update { copy(content = null) }
+        noticeSheetContentRepository.update { copy(content = null) }
         super.onCleared()
     }
 
@@ -79,8 +80,8 @@ internal class StaticSheetViewModel @Inject constructor(
             return viewModelFactory {
                 initializer {
                     parentComponent
-                        .staticSheetSubcomponent
-                        .create(StaticSheetState(arguments))
+                        .noticeSheetSubcomponent
+                        .create(NoticeSheetState(arguments))
                         .viewModel
                 }
             }
@@ -88,15 +89,26 @@ internal class StaticSheetViewModel @Inject constructor(
     }
 }
 
-internal data class StaticSheetState(
+internal data class NoticeSheetState(
     val pane: Pane,
-    val content: StaticSheetContent? = null,
+    val content: NoticeSheetContent? = null,
     val viewEffect: ViewEffect? = null,
 ) {
 
     constructor(arguments: Bundle?) : this(
         pane = Destination.referrer(arguments)!!,
     )
+
+    internal sealed interface NoticeSheetContent {
+
+        data class Legal(
+            val legalDetails: LegalDetailsNotice,
+        ) : NoticeSheetContent
+
+        data class DataAccess(
+            val dataAccess: DataAccessNotice,
+        ) : NoticeSheetContent
+    }
 
     internal sealed interface ViewEffect {
         data class OpenUrl(

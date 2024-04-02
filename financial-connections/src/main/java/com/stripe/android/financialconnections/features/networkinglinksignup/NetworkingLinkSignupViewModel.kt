@@ -22,7 +22,8 @@ import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
@@ -32,7 +33,6 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
-import com.stripe.android.financialconnections.repository.StaticSheetContent.Legal
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
@@ -64,7 +64,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
-    private val presentStaticSheet: PresentStaticSheet,
+    private val presentNoticeSheet: PresentNoticeSheet,
 ) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private var searchJob = ConflatedJob()
@@ -259,7 +259,7 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 
     private fun presentLegalDetailsBottomSheet() {
         val notice = stateFlow.value.payload()?.content?.legalDetailsNotice ?: return
-        presentStaticSheet(
+        presentNoticeSheet(
             content = Legal(notice),
             referrer = PANE,
         )

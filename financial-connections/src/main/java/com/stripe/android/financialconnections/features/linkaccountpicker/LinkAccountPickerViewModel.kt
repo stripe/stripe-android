@@ -24,7 +24,8 @@ import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.static_sheet.PresentStaticSheet
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -38,7 +39,6 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
-import com.stripe.android.financialconnections.repository.StaticSheetContent.DataAccess
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.error
 import kotlinx.coroutines.launch
@@ -59,7 +59,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
-    private val presentStaticSheet: PresentStaticSheet,
+    private val presentNoticeSheet: PresentNoticeSheet,
 ) : FinancialConnectionsViewModel<LinkAccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
@@ -156,7 +156,7 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private fun presentDataAccessBottomSheet() {
         val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
         eventTracker.track(ClickLearnMoreDataAccess(PANE))
-        presentStaticSheet(
+        presentNoticeSheet(
             content = DataAccess(dataAccessNotice),
             referrer = PANE,
         )
