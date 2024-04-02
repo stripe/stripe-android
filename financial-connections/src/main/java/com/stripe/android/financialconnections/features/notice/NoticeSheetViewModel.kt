@@ -66,6 +66,12 @@ internal class NoticeSheetViewModel @Inject constructor(
         navigationManager.tryNavigateBack()
     }
 
+    fun onViewEffectLaunched() {
+        setState {
+            copy(viewEffect = null)
+        }
+    }
+
     override fun onCleared() {
         noticeSheetContentRepository.update { copy(content = null) }
         super.onCleared()

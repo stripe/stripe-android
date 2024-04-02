@@ -40,6 +40,7 @@ internal fun NoticeSheet(
             content = content,
             onClickableTextClick = viewModel::handleClickableTextClick,
             onConfirmModalClick = viewModel::handleConfirmModalClick,
+            onViewEffectLaunched = viewModel::onViewEffectLaunched
         )
     }
 }
@@ -49,6 +50,7 @@ private fun StaticBottomSheetContent(
     content: NoticeSheetContent,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
+    onViewEffectLaunched: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Box(modifier) {
@@ -65,5 +67,6 @@ private fun StaticBottomSheetContent(
                 onClickableTextClick = onClickableTextClick
             )
         }
+        onViewEffectLaunched()
     }
 }
