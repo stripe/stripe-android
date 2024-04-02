@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.common.truth.Truth.assertThat
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -15,13 +17,15 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.LinkIntegrationType
+import com.stripe.android.paymentsheet.utils.LinkIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runLinkTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 import java.util.UUID
 
-//@RunWith(TestParameterInjector::class)
+@RunWith(TestParameterInjector::class)
 internal class LinkTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
@@ -33,8 +37,8 @@ internal class LinkTest {
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
-//    @TestParameter(valuesProvider = LinkIntegrationTypeProvider::class)
-    var integrationType: LinkIntegrationType = LinkIntegrationType.FlowController
+    @TestParameter(valuesProvider = LinkIntegrationTypeProvider::class)
+    lateinit var integrationType: LinkIntegrationType
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUp() = activityScenarioRule.runLinkTest(
