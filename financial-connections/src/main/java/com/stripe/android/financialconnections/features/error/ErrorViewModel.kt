@@ -26,14 +26,13 @@ import javax.inject.Inject
 
 internal class ErrorViewModel @Inject constructor(
     initialState: ErrorState,
-    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val coordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val errorRepository: FinancialConnectionsErrorRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : FinancialConnectionsViewModel<ErrorState>(initialState, nativeAuthFlowCoordinator) {
+) : FinancialConnectionsViewModel<ErrorState>(initialState, coordinator) {
 
     init {
         logErrors()
