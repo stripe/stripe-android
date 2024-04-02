@@ -21,7 +21,6 @@ import com.stripe.android.ui.core.elements.FormItemSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.KlarnaHeaderStaticTextSpec
 import com.stripe.android.ui.core.elements.KlarnaMandateTextSpec
-import com.stripe.android.ui.core.elements.KonbiniConfirmationNumberSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
@@ -79,7 +78,6 @@ internal class TransformSpecToElements(
                     arguments.shippingValues
                 )
                 is BoletoTaxIdSpec -> it.transform(arguments.initialValues)
-                is KonbiniConfirmationNumberSpec -> it.transform(arguments.initialValues)
                 is SepaMandateTextSpec -> it.transform(arguments.merchantName)
                 is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
                 is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
