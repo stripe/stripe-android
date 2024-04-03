@@ -271,7 +271,7 @@ internal class GooglePayLauncherViewModel(
             )
 
             return GooglePayLauncherViewModel(
-                PaymentsClientFactory(application).create(googlePayEnvironment),
+                DefaultPaymentsClientFactory(application).create(googlePayEnvironment),
                 ApiRequest.Options(
                     publishableKey,
                     stripeAccountId
