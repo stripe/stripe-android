@@ -26,7 +26,11 @@ import kotlin.coroutines.CoroutineContext
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface ErrorReporter {
 
-    fun report(errorEvent: ErrorEvent, stripeException: StripeException)
+    fun report(
+        errorEvent: ErrorEvent,
+        stripeException: StripeException? = null,
+        additionalNonPiiParams: Map<String, String> = emptyMap(),
+    )
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -55,7 +59,10 @@ interface ErrorReporter {
         ),
         MISSING_CARDSCAN_DEPENDENCY(
             eventName = "unexpected.cardscan.missing_dependency"
-        )
+        ),
+        MISSING_HOSTED_VOUCHER_URL(
+            eventName = "unexpected.payments.missing_hosted_voucher_url"
+        ),
     }
 }
 
