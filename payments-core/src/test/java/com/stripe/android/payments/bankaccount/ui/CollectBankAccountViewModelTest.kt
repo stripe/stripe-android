@@ -155,7 +155,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -180,7 +180,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -227,7 +227,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -236,8 +236,9 @@ class CollectBankAccountViewModelTest {
                 FinishWithResult(
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
-                            paymentIntent,
-                            paymentsFinancialConnectionsSession
+                            intent = paymentIntent,
+                            financialConnectionsSession = paymentsFinancialConnectionsSession,
+                            paymentMethodId = null
                         )
                     )
                 )
@@ -256,7 +257,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -265,8 +266,9 @@ class CollectBankAccountViewModelTest {
                 FinishWithResult(
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
-                            setupIntent,
-                            paymentsFinancialConnectionsSession
+                            intent = setupIntent,
+                            financialConnectionsSession = paymentsFinancialConnectionsSession,
+                            paymentMethodId = null
                         )
                     )
                 )
@@ -285,7 +287,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, deferredPaymentIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -295,7 +297,8 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             intent = null,
-                            financialConnectionsSession = paymentsFinancialConnectionsSession
+                            financialConnectionsSession = paymentsFinancialConnectionsSession,
+                            paymentMethodId = null
                         )
                     )
                 )
@@ -314,7 +317,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, deferredSetupIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -324,7 +327,8 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             intent = null,
-                            financialConnectionsSession = paymentsFinancialConnectionsSession
+                            financialConnectionsSession = paymentsFinancialConnectionsSession,
+                            paymentMethodId = null
                         )
                     )
                 )
@@ -343,7 +347,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -364,9 +368,11 @@ class CollectBankAccountViewModelTest {
                 forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = name,
-                    customerEmail = email,
-                    stripeAccountId = stripeAccountId
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name,
+                        email
+                    ),
+                    stripeAccountId = stripeAccountId,
                 )
             }.doReturn(result)
         }
@@ -410,8 +416,10 @@ class CollectBankAccountViewModelTest {
                 forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = name,
-                    customerEmail = email,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name,
+                        email
+                    ),
                     stripeAccountId = stripeAccountId
                 )
             }.doReturn(result)

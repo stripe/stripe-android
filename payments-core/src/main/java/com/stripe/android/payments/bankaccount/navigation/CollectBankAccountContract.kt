@@ -45,7 +45,7 @@ class CollectBankAccountContract :
         open val stripeAccountId: String?,
         open val clientSecret: String?,
         open val configuration: CollectBankAccountConfiguration,
-        open val attachToIntent: Boolean
+        open val attachToIntent: Boolean,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -56,13 +56,13 @@ class CollectBankAccountContract :
             override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
-            override val attachToIntent: Boolean
+            override val attachToIntent: Boolean,
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = configuration,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
         )
 
         @Parcelize
@@ -72,13 +72,13 @@ class CollectBankAccountContract :
             override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
-            override val attachToIntent: Boolean
+            override val attachToIntent: Boolean,
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = configuration,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
         )
 
         @Parcelize
@@ -91,13 +91,13 @@ class CollectBankAccountContract :
             val customerId: String?,
             val onBehalfOf: String?,
             val amount: Int?,
-            val currency: String?
+            val currency: String?,
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = null,
             configuration = configuration,
-            attachToIntent = false
+            attachToIntent = false,
         )
 
         @Parcelize
@@ -114,7 +114,7 @@ class CollectBankAccountContract :
             stripeAccountId = stripeAccountId,
             clientSecret = null,
             configuration = configuration,
-            attachToIntent = false
+            attachToIntent = false,
         )
 
         companion object {
@@ -149,17 +149,21 @@ internal fun CollectBankAccountResultInternal.toExposedResult(): CollectBankAcco
             CollectBankAccountResult.Cancelled
         }
         is CollectBankAccountResultInternal.Completed -> {
-            if (response.intent == null) {
-                CollectBankAccountResult.Failed(
-                    IllegalArgumentException("StripeIntent not set for this session")
-                )
-            } else {
-                CollectBankAccountResult.Completed(
-                    response = CollectBankAccountResponse(
-                        intent = response.intent,
-                        financialConnectionsSession = response.financialConnectionsSession
+            when {
+                response.intent == null -> {
+                    CollectBankAccountResult.Failed(
+                        IllegalArgumentException("StripeIntent not set for this session")
                     )
-                )
+                }
+                else -> {
+                    CollectBankAccountResult.Completed(
+                        response = CollectBankAccountResponse(
+                            intent = response.intent,
+                            financialConnectionsSession = response.financialConnectionsSession,
+                            paymentMethodId = response.paymentMethodId
+                        )
+                    )
+                }
             }
         }
         is CollectBankAccountResultInternal.Failed -> {

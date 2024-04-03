@@ -29,7 +29,8 @@ sealed class CollectBankAccountResult : Parcelable {
 @Parcelize
 data class CollectBankAccountResponse(
     val intent: StripeIntent,
-    val financialConnectionsSession: FinancialConnectionsSession
+    val financialConnectionsSession: FinancialConnectionsSession?,
+    val paymentMethodId: String?
 ) : StripeModel
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -56,5 +57,6 @@ sealed class CollectBankAccountResultInternal : Parcelable {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class CollectBankAccountResponseInternal(
     val intent: StripeIntent?,
-    val financialConnectionsSession: FinancialConnectionsSession
+    val financialConnectionsSession: FinancialConnectionsSession?,
+    val paymentMethodId: String?
 ) : StripeModel

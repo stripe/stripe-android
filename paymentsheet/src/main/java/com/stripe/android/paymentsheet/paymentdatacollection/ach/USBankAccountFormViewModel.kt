@@ -271,15 +271,34 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _collectBankAccountResult.tryEmit(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
-                when (
+                if (result.response.paymentMethodId != null) {
+                    // Instant debits
+                    // TODO fetch real fcsession from backend
+                    _currentScreenState.update {
+                        USBankAccountFormScreenState.MandateCollection(
+                            paymentAccount = FinancialConnectionsAccount(
+                                last4 = "****",
+                                institutionName = "Random Bank",
+                                created = 123456,
+                                id = "random_id",
+                                livemode = false,
+                                supportedPaymentMethodTypes = emptyList()
+                            ),
+                            financialConnectionsSessionId = "1234",
+                            intentId = result.response.intent?.id,
+                            primaryButtonText = buildPrimaryButtonText(),
+                            mandateText = buildMandateText(),
+                        )
+                    }
+                } else when (
                     val paymentAccount =
-                        result.response.financialConnectionsSession.paymentAccount
+                        result.response.financialConnectionsSession?.paymentAccount
                 ) {
                     is BankAccount -> {
                         _currentScreenState.update {
                             USBankAccountFormScreenState.VerifyWithMicrodeposits(
                                 paymentAccount = paymentAccount,
-                                financialConnectionsSessionId = result.response.financialConnectionsSession.id,
+                                financialConnectionsSessionId = result.response.financialConnectionsSession!!.id,
                                 intentId = result.response.intent?.id,
                                 primaryButtonText = buildPrimaryButtonText(),
                                 mandateText = buildMandateText(),
@@ -291,7 +310,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             USBankAccountFormScreenState.MandateCollection(
                                 paymentAccount = paymentAccount,
                                 financialConnectionsSessionId =
-                                result.response.financialConnectionsSession.id,
+                                result.response.financialConnectionsSession!!.id,
                                 intentId = result.response.intent?.id,
                                 primaryButtonText = buildPrimaryButtonText(),
                                 mandateText = buildMandateText(),
@@ -396,20 +415,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                     clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
+                    configuration = configuration()
                 )
             } else {
                 collectBankAccountLauncher?.presentWithSetupIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                     clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
+                    configuration = configuration()
                 )
             }
         } else {
@@ -419,10 +432,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     collectBankAccountLauncher?.presentWithDeferredPayment(
                         publishableKey = lazyPaymentConfig.get().publishableKey,
                         stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                        configuration = CollectBankAccountConfiguration.USBankAccount(
-                            name.value,
-                            email.value
-                        ),
+                        configuration = configuration(),
                         elementsSessionId = elementsSessionId,
                         customerId = null,
                         onBehalfOf = args.onBehalfOf,
@@ -433,10 +443,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     collectBankAccountLauncher?.presentWithDeferredSetup(
                         publishableKey = lazyPaymentConfig.get().publishableKey,
                         stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                        configuration = CollectBankAccountConfiguration.USBankAccount(
-                            name.value,
-                            email.value
-                        ),
+                        configuration = configuration(),
                         elementsSessionId = elementsSessionId,
                         customerId = null,
                         onBehalfOf = args.onBehalfOf,
@@ -445,6 +452,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
         }
     }
+
+    private fun configuration() = CollectBankAccountConfiguration.InstantDebits(
+        name.value,
+        email.value
+    )
 
     private fun updatePaymentSelection(
         linkAccountId: String,

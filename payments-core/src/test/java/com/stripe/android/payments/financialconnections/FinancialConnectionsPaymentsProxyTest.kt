@@ -1,7 +1,6 @@
 package com.stripe.android.payments.financialconnections
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -17,7 +16,6 @@ class FinancialConnectionsPaymentsProxyTest {
     }
 
     private val mockIsFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = mock()
-    private val mockFragment: Fragment = mock()
     private val mockActivity: AppCompatActivity = mock()
 
     private class FakeProxy : FinancialConnectionsPaymentsProxy {
@@ -33,16 +31,8 @@ class FinancialConnectionsPaymentsProxyTest {
     @Test
     fun `financial connections SDK availability returns null when module is not loaded`() {
         whenever(mockIsFinancialConnectionsAvailable()).thenAnswer { false }
-
         assertTrue(
-            FinancialConnectionsPaymentsProxy.create(
-                fragment = mockFragment,
-                onComplete = {},
-                isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
-            ) is UnsupportedFinancialConnectionsPaymentsProxy
-        )
-        assertTrue(
-            FinancialConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.createForACH(
                 activity = mockActivity,
                 onComplete = {},
                 isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
@@ -53,14 +43,7 @@ class FinancialConnectionsPaymentsProxyTest {
     @Test
     fun `financial connections SDK availability returns sdk when module is loaded`() {
         assertTrue(
-            FinancialConnectionsPaymentsProxy.create(
-                fragment = mockFragment,
-                onComplete = {},
-                provider = { FakeProxy() }
-            ) is FakeProxy
-        )
-        assertTrue(
-            FinancialConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.createForACH(
                 activity = mockActivity,
                 onComplete = {},
                 provider = { FakeProxy() }
@@ -71,20 +54,8 @@ class FinancialConnectionsPaymentsProxyTest {
     @Test
     fun `calling present on UnsupportedConnectionsPaymentsProxy throws an exception`() {
         whenever(mockIsFinancialConnectionsAvailable()).thenAnswer { false }
-
         assertFailsWith<IllegalStateException> {
-            FinancialConnectionsPaymentsProxy.create(
-                fragment = mockFragment,
-                onComplete = {},
-                isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable
-            ).present(
-                financialConnectionsSessionClientSecret = "",
-                publishableKey = "",
-                stripeAccountId = null
-            )
-        }
-        assertFailsWith<IllegalStateException> {
-            FinancialConnectionsPaymentsProxy.create(
+            FinancialConnectionsPaymentsProxy.createForACH(
                 activity = mockActivity,
                 onComplete = {},
                 isFinancialConnectionsAvailable = mockIsFinancialConnectionsAvailable

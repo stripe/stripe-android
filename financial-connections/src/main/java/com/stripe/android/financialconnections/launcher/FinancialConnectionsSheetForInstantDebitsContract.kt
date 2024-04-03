@@ -8,12 +8,12 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Companion.EXTRA_RESULT
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class FinancialConnectionsSheetForLinkContract :
-    ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForLink, FinancialConnectionsSheetLinkResult>() {
+class FinancialConnectionsSheetForInstantDebitsContract :
+    ActivityResultContract<FinancialConnectionsSheetActivityArgs.ForInstantDebits, FinancialConnectionsSheetInstantDebitsResult>() {
 
     override fun createIntent(
         context: Context,
-        input: FinancialConnectionsSheetActivityArgs.ForLink
+        input: FinancialConnectionsSheetActivityArgs.ForInstantDebits
     ): Intent = FinancialConnectionsSheetActivity.intent(
         context = context,
         args = input
@@ -22,28 +22,28 @@ class FinancialConnectionsSheetForLinkContract :
     override fun parseResult(
         resultCode: Int,
         intent: Intent?
-    ): FinancialConnectionsSheetLinkResult {
+    ): FinancialConnectionsSheetInstantDebitsResult {
         return intent
             ?.getParcelableExtra<FinancialConnectionsSheetActivityResult>(EXTRA_RESULT)
             ?.toExposedResult()
-            ?: FinancialConnectionsSheetLinkResult.Failed(
+            ?: FinancialConnectionsSheetInstantDebitsResult.Failed(
                 IllegalArgumentException("Failed to retrieve a ConnectionsSheetResult.")
             )
     }
 
-    private fun FinancialConnectionsSheetActivityResult.toExposedResult(): FinancialConnectionsSheetLinkResult =
+    private fun FinancialConnectionsSheetActivityResult.toExposedResult(): FinancialConnectionsSheetInstantDebitsResult =
         when (this) {
-            is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetLinkResult.Canceled
-            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetLinkResult.Failed(
+            is FinancialConnectionsSheetActivityResult.Canceled -> FinancialConnectionsSheetInstantDebitsResult.Canceled
+            is FinancialConnectionsSheetActivityResult.Failed -> FinancialConnectionsSheetInstantDebitsResult.Failed(
                 error
             )
 
-            is FinancialConnectionsSheetActivityResult.Completed -> when (linkedAccountId) {
-                null -> FinancialConnectionsSheetLinkResult.Failed(
+            is FinancialConnectionsSheetActivityResult.Completed -> when (paymentMethodId) {
+                null -> FinancialConnectionsSheetInstantDebitsResult.Failed(
                     IllegalArgumentException("linkedAccountId not set for this session")
                 )
 
-                else -> FinancialConnectionsSheetLinkResult.Completed(linkedAccountId)
+                else -> FinancialConnectionsSheetInstantDebitsResult.Completed(paymentMethodId)
             }
         }
 }

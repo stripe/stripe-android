@@ -330,7 +330,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private suspend fun loadPaymentSheetState() {
         val isReloadingAfterProcessDeath = savedStateHandle.contains(AwaitingPaymentResultKey)
 
-        val result = withContext(workContext) {
+        val result: Result<PaymentSheetState.Full> = withContext(workContext) {
             paymentSheetLoader.load(
                 initializationMode = args.initializationMode,
                 paymentSheetConfiguration = args.config,

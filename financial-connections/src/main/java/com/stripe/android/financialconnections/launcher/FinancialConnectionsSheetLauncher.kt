@@ -1,7 +1,9 @@
 package com.stripe.android.financialconnections.launcher
 
+import androidx.annotation.RestrictTo
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 
-internal interface FinancialConnectionsSheetLauncher {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface FinancialConnectionsSheetLauncher {
     fun present(configuration: FinancialConnectionsSheet.Configuration)
 }

@@ -2066,7 +2066,7 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
-    fun `paymentIntentsFinancialConnectionsSession() sends all parameters`() = runTest {
+    fun `paymentIntentsFinancialConnectionsSession() for ACH sends all parameters`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             PaymentIntentFixtures.PI_LINK_ACCOUNT_SESSION_JSON.toString(),
@@ -2081,7 +2081,7 @@ internal class StripeApiRepositoryTest {
         val customerEmailAddress = "johndoe@gmail.com"
         create().createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = id,
-            params = CreateFinancialConnectionsSessionParams(
+            params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
                 customerEmailAddress = customerEmailAddress
@@ -2109,7 +2109,49 @@ internal class StripeApiRepositoryTest {
     }
 
     @Test
-    fun `setupIntentsFinancialConnectionsSession() sends all parameters`() = runTest {
+    fun `paymentIntentsFinancialConnectionsSession() for Instant Debits sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            PaymentIntentFixtures.PI_LINK_ACCOUNT_SESSION_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val clientSecret = "pi_1234_secret_5678"
+        val id = "pi_1234"
+        val customerName = "John Doe"
+        val customerEmailAddress = "johndoe@gmail.com"
+        create().createPaymentIntentFinancialConnectionsSession(
+            paymentIntentId = id,
+            params = CreateFinancialConnectionsSessionParams.InstantDebits(
+                clientSecret = clientSecret,
+                customerEmailAddress = customerEmailAddress
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/payment_intents/pi_1234/link_account_sessions",
+            request.baseUrl
+        )
+        with(params) {
+            assertEquals(clientSecret, this["client_secret"])
+            withNestedParams("payment_method_data") {
+                assertEquals("us_bank_account", this["type"])
+                withNestedParams("billing_details") {
+                    assertEquals(customerName, this["name"])
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `setupIntentsFinancialConnectionsSession() for ACH sends all parameters`() = runTest {
         val stripeResponse = StripeResponse(
             200,
             PaymentIntentFixtures.SI_LINK_ACCOUNT_SESSION_JSON.toString(),
@@ -2124,9 +2166,53 @@ internal class StripeApiRepositoryTest {
         val customerEmailAddress = "johndoe@gmail.com"
         create().createSetupIntentFinancialConnectionsSession(
             setupIntentId = id,
-            params = CreateFinancialConnectionsSessionParams(
+            params = CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = customerName,
+                customerEmailAddress = customerEmailAddress
+            ),
+            DEFAULT_OPTIONS
+        )
+
+        verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+        val request = apiRequestArgumentCaptor.firstValue
+        val params = requireNotNull(request.params)
+
+        assertEquals(
+            "https://api.stripe.com/v1/setup_intents/seti_1234/link_account_sessions",
+            request.baseUrl
+        )
+
+        with(params) {
+            assertEquals(clientSecret, this["client_secret"])
+            withNestedParams("payment_method_data") {
+                assertEquals("us_bank_account", this["type"])
+                withNestedParams("billing_details") {
+                    assertEquals(customerName, this["name"])
+                }
+            }
+        }
+    }
+
+    @Test
+    fun `setupIntentsFinancialConnectionsSession() for Instant Debits sends all parameters`() = runTest {
+        val stripeResponse = StripeResponse(
+            200,
+            PaymentIntentFixtures.SI_LINK_ACCOUNT_SESSION_JSON.toString(),
+            emptyMap()
+        )
+        whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+            .thenReturn(stripeResponse)
+
+        val clientSecret = "seti_1234_secret_5678"
+        val id = "seti_1234"
+        val customerName = "John Doe"
+        val customerEmailAddress = "johndoe@gmail.com"
+        create().createSetupIntentFinancialConnectionsSession(
+            setupIntentId = id,
+            params = CreateFinancialConnectionsSessionParams.InstantDebits(
+                clientSecret = clientSecret,
                 customerEmailAddress = customerEmailAddress
             ),
             DEFAULT_OPTIONS

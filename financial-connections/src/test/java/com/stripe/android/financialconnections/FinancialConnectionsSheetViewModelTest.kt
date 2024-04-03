@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnec
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
@@ -151,7 +151,7 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
             val viewModel = createViewModel(
-                defaultInitialState.copy(initialArgs = ForLink(configuration))
+                defaultInitialState.copy(initialArgs = ForInstantDebits(configuration))
             )
 
             // When
@@ -177,7 +177,7 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             val viewModel = createViewModel(
-                defaultInitialState.copy(initialArgs = ForLink(configuration))
+                defaultInitialState.copy(initialArgs = ForInstantDebits(configuration))
             )
 
             // When

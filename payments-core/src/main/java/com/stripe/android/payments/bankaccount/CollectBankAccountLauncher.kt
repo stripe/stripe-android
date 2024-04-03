@@ -96,42 +96,6 @@ interface CollectBankAccountLauncher {
             )
         }
 
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
-         *
-         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
-         * to be called before the [ComponentActivity] is created.
-         */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun createInternal(
-            activity: ComponentActivity,
-            callback: (CollectBankAccountResultInternal) -> Unit
-        ): CollectBankAccountLauncher {
-            return StripeCollectBankAccountLauncher(
-                activity.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it)
-                }
-            )
-        }
-
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [Fragment].
-         *
-         * This API registers an [ActivityResultLauncher] into the [Fragment],  it needs
-         * to be called before the [Fragment] is created.
-         */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun createInternal(
-            fragment: Fragment,
-            callback: (CollectBankAccountResultInternal) -> Unit
-        ): CollectBankAccountLauncher {
-            return StripeCollectBankAccountLauncher(
-                fragment.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it)
-                }
-            )
-        }
-
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
@@ -148,7 +112,7 @@ interface CollectBankAccountLauncher {
     }
 }
 
-internal class StripeCollectBankAccountLauncher constructor(
+internal class StripeCollectBankAccountLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
 ) : CollectBankAccountLauncher {
 
@@ -156,7 +120,7 @@ internal class StripeCollectBankAccountLauncher constructor(
         publishableKey: String,
         stripeAccountId: String?,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration
+        configuration: CollectBankAccountConfiguration,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForPaymentIntent(
@@ -164,7 +128,7 @@ internal class StripeCollectBankAccountLauncher constructor(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
-                attachToIntent = true
+                attachToIntent = true,
             )
         )
     }
@@ -173,7 +137,7 @@ internal class StripeCollectBankAccountLauncher constructor(
         publishableKey: String,
         stripeAccountId: String?,
         clientSecret: String,
-        configuration: CollectBankAccountConfiguration
+        configuration: CollectBankAccountConfiguration,
     ) {
         hostActivityLauncher.launch(
             CollectBankAccountContract.Args.ForSetupIntent(
@@ -235,10 +199,17 @@ internal class StripeCollectBankAccountLauncher constructor(
     }
 }
 
-sealed class CollectBankAccountConfiguration : Parcelable {
+sealed interface CollectBankAccountConfiguration: Parcelable {
     @Parcelize
     data class USBankAccount(
         val name: String,
         val email: String?
-    ) : Parcelable, CollectBankAccountConfiguration()
+    ) : Parcelable, CollectBankAccountConfiguration
+
+
+    @Parcelize
+    data class InstantDebits(
+        val name: String,
+        val email: String?
+    ) : Parcelable, CollectBankAccountConfiguration
 }
