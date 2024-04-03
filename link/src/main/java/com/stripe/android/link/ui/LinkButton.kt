@@ -221,7 +221,7 @@ private fun RowScope.SignedOutButtonContent() {
         }.build(),
         modifier = Modifier.padding(start = 6.dp),
         color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current),
-        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else 18).sp,
+        fontSize = if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE.sp else 18.sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
     )
