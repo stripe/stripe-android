@@ -128,6 +128,8 @@ internal class CustomerApiRepository @Inject constructor(
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
+            // Add event
+
             logger.error("Failed to detach payment method $paymentMethodId.", it)
         }
 
@@ -144,6 +146,8 @@ internal class CustomerApiRepository @Inject constructor(
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
+            // Add event
+
             logger.error("Failed to attach payment method $paymentMethodId.", it)
         }
 
@@ -160,6 +164,8 @@ internal class CustomerApiRepository @Inject constructor(
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
+            // Add event
+
             logger.error("Failed to update payment method $paymentMethodId.", it)
         }
 
