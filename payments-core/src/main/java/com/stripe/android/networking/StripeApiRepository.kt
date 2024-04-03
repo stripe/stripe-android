@@ -191,6 +191,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 retrieveSetupIntent(clientSecret, options, expandFields)
             }
             else -> {
+                // NEEDS explicit error type 'InvalidClientSecretException'
                 Result.failure(IllegalStateException("Invalid client secret."))
             }
         }

@@ -137,6 +137,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 },
                 onFailure = {
                     withContext(uiContext) {
+                        // Add event here?
                         internalPaymentResult.value = InternalPaymentResult.Failed(it)
                     }
                 }
@@ -193,6 +194,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 },
                 onFailure = {
                     withContext(uiContext) {
+                        // Add event here
                         internalPaymentResult.value = InternalPaymentResult.Failed(it)
                     }
                 }
@@ -217,6 +219,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 },
                 onFailure = {
                     withContext(uiContext) {
+                        // Add event here
                         internalPaymentResult.value = InternalPaymentResult.Failed(it)
                     }
                 }
@@ -232,29 +235,37 @@ internal class PaymentLauncherViewModel @Inject constructor(
             when (stripeIntentResult.outcome) {
                 StripeIntentResult.Outcome.SUCCEEDED ->
                     InternalPaymentResult.Completed(stripeIntentResult.intent)
-                StripeIntentResult.Outcome.FAILED ->
+                StripeIntentResult.Outcome.FAILED -> {
+                    // Add event here
                     InternalPaymentResult.Failed(
                         LocalStripeException(
                             displayMessage = stripeIntentResult.failureMessage,
                             analyticsValue = "failedIntentOutcomeError",
                         )
                     )
-                StripeIntentResult.Outcome.CANCELED ->
+                }
+                StripeIntentResult.Outcome.CANCELED -> {
+                    // Add event here
                     InternalPaymentResult.Canceled
-                StripeIntentResult.Outcome.TIMEDOUT ->
+                }
+                StripeIntentResult.Outcome.TIMEDOUT -> {
+                    // Add event here
                     InternalPaymentResult.Failed(
                         LocalStripeException(
                             displayMessage = TIMEOUT_ERROR + stripeIntentResult.failureMessage,
                             analyticsValue = "timedOutIntentOutcomeError",
                         )
                     )
-                else ->
+                }
+                else -> {
+                    // Add event here
                     InternalPaymentResult.Failed(
                         LocalStripeException(
                             displayMessage = UNKNOWN_ERROR + stripeIntentResult.failureMessage,
                             analyticsValue = "unknownIntentOutcomeError",
                         )
                     )
+                }
             }
     }
 
