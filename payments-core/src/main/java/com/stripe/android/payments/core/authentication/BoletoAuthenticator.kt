@@ -22,20 +22,19 @@ internal class BoletoAuthenticator @Inject constructor(
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        (authenticatable.nextActionData as NextActionData.DisplayBoletoDetails).let { detailsData ->
-            if (detailsData.hostedVoucherUrl == null) {
-                noOpIntentAuthenticator.authenticate(
-                    host,
-                    authenticatable,
-                    requestOptions
-                )
-            } else {
-                webIntentAuthenticator.authenticate(
-                    host,
-                    authenticatable,
-                    requestOptions
-                )
-            }
+        val detailsData = authenticatable.nextActionData as NextActionData.DisplayBoletoDetails
+        if (detailsData.hostedVoucherUrl == null) {
+            noOpIntentAuthenticator.authenticate(
+                host,
+                authenticatable,
+                requestOptions
+            )
+        } else {
+            webIntentAuthenticator.authenticate(
+                host,
+                authenticatable,
+                requestOptions
+            )
         }
     }
 }

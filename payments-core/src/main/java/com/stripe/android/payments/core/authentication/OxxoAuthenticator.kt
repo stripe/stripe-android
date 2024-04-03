@@ -22,20 +22,19 @@ internal class OxxoAuthenticator @Inject constructor(
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        (authenticatable.nextActionData as NextActionData.DisplayOxxoDetails).let { oxxoDetailsData ->
-            if (oxxoDetailsData.hostedVoucherUrl == null) {
-                noOpIntentAuthenticator.authenticate(
-                    host,
-                    authenticatable,
-                    requestOptions
-                )
-            } else {
-                webIntentAuthenticator.authenticate(
-                    host,
-                    authenticatable,
-                    requestOptions
-                )
-            }
+        val oxxoDetailsData = authenticatable.nextActionData as NextActionData.DisplayOxxoDetails
+        if (oxxoDetailsData.hostedVoucherUrl == null) {
+            noOpIntentAuthenticator.authenticate(
+                host,
+                authenticatable,
+                requestOptions
+            )
+        } else {
+            webIntentAuthenticator.authenticate(
+                host,
+                authenticatable,
+                requestOptions
+            )
         }
     }
 }
