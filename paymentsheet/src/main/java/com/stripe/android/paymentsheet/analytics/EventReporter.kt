@@ -118,7 +118,7 @@ internal interface EventReporter {
     /**
      * The client was unable to parse the response from LUXE.
      */
-    fun onLpmSpecFailure()
+    fun onLpmSpecFailure(errorMessage: String?)
 
     /**
      * The user has auto-filled a text field.

@@ -15,18 +15,10 @@ class RealErrorReporter @Inject constructor(
     private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ErrorReporter {
     override fun report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
-        val additionalParams = mapOf(
-            "analytics_value" to stripeException.analyticsValue(),
-            "status_code" to stripeException.statusCode.toString(),
-            "request_id" to stripeException.requestId,
-            "error_type" to stripeException.stripeError?.type,
-            "error_code" to stripeException.stripeError?.code,
-        ).filterNotNullValues()
+        val additionalParams =
+            ErrorReporter.getAdditionalParamsFromStripeException(stripeException = stripeException)
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
         )
     }
-
-    private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
-        mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
 }
