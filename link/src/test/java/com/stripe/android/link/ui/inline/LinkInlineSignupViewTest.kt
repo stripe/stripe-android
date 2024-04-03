@@ -6,7 +6,6 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
@@ -19,8 +18,9 @@ import com.stripe.android.uicore.elements.SimpleTextFieldController
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(RobolectricTestRunner::class)
 internal class LinkInlineSignupViewTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ComponentActivity>()
