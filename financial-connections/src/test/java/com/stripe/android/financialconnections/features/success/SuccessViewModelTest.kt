@@ -14,7 +14,6 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
-import com.stripe.android.financialconnections.ui.TextResource
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.test.runTest
@@ -43,7 +42,7 @@ internal class SuccessViewModelTest {
         eventTracker = eventTracker,
         initialState = state,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
-        successContentRepository = fakeSuccessContentRepository(),
+        successContentRepository = SuccessContentRepository(SavedStateHandle()),
         getCachedAccounts = getCachedAccounts,
     )
 
@@ -94,18 +93,5 @@ internal class SuccessViewModelTest {
             buildViewModel(SuccessState()).onDoneClick()
             assertThat(awaitItem()).isEqualTo(Complete())
         }
-    }
-
-    private fun fakeSuccessContentRepository(
-        initialState: SuccessContentRepository.State = SuccessContentRepository.State(
-            customSuccessMessage = TextResource.Text("Yay!"),
-        ),
-    ): SuccessContentRepository {
-        val key = "PersistedState_${SuccessContentRepository::class.java.name}"
-        return SuccessContentRepository(
-            savedStateHandle = SavedStateHandle(
-                initialState = mapOf(key to initialState)
-            ),
-        )
     }
 }
