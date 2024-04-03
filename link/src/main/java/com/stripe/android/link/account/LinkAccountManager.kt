@@ -103,6 +103,7 @@ internal class LinkAccountManager @Inject constructor(
         }.onSuccess {
             Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
         }.onFailure { error ->
+            // Add event here?
             Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
         }
     }
@@ -189,6 +190,7 @@ internal class LinkAccountManager @Inject constructor(
                 account.email,
                 config.stripeIntent
             ).mapCatching {
+                // Add event here?
                 if (config.passthroughModeEnabled) {
                     linkRepository.shareCardPaymentDetails(
                         id = it.paymentDetails.id,
@@ -200,6 +202,7 @@ internal class LinkAccountManager @Inject constructor(
                     it
                 }
             }
+        // Add unexpected event here?
         } ?: Result.failure(
             IllegalStateException("A non-null Link account is needed to create payment details")
         )
@@ -212,6 +215,7 @@ internal class LinkAccountManager @Inject constructor(
         userEmail: String,
         stripeIntent: StripeIntent
     ): Result<LinkPaymentDetails.New> = linkAccount.value?.let { account ->
+        // Add event here?
         linkRepository.createCardPaymentDetails(
             paymentMethodCreateParams = paymentMethodCreateParams,
             userEmail = userEmail,
@@ -220,6 +224,7 @@ internal class LinkAccountManager @Inject constructor(
             consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
             active = config.passthroughModeEnabled,
         )
+    // Add unexpected event here?
     } ?: Result.failure(
         IllegalStateException("User not signed in")
     )

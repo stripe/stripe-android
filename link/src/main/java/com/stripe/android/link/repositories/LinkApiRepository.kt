@@ -79,6 +79,7 @@ internal class LinkApiRepository @Inject constructor(
         consumerPublishableKey: String?,
         active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
+        // Add event here?
         stripeRepository.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
@@ -111,6 +112,7 @@ internal class LinkApiRepository @Inject constructor(
         last4: String,
         consumerSessionClientSecret: String,
     ): Result<LinkPaymentDetails> = withContext(workContext) {
+        // Add event here?
         stripeRepository.sharePaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
@@ -134,6 +136,7 @@ internal class LinkApiRepository @Inject constructor(
         consumerSessionClientSecret: String,
         consumerAccountPublishableKey: String?,
     ): Result<ConsumerSession> = withContext(workContext) {
+        // Add event here?
         stripeRepository.logOut(
             consumerSessionClientSecret = consumerSessionClientSecret,
             consumerAccountPublishableKey = consumerAccountPublishableKey,
