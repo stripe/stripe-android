@@ -14,8 +14,6 @@ import com.stripe.android.financialconnections.model.LegalDetailsNotice
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
-import com.stripe.android.financialconnections.presentation.Async
-import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
@@ -36,23 +34,17 @@ internal class NoticeSheetViewModel @Inject constructor(
 ) {
 
     init {
-        observeErrors()
         loadNoticeSheetContent()
     }
 
-    private fun observeErrors() {
-        onAsync(
-            prop = NoticeSheetState::content,
-            onFail = { navigationManager.tryNavigateBack() },
-        )
-    }
-
     private fun loadNoticeSheetContent() {
-        suspend {
-            val state = noticeSheetContentRepository.await()
-            requireNotNull(state.content)
-        }.execute {
-            copy(content = it)
+        viewModelScope.launch {
+            val content = noticeSheetContentRepository.get()?.content
+            if (content != null) {
+                setState { copy(content = content) }
+            } else {
+                navigationManager.tryNavigateBack()
+            }
         }
     }
 
@@ -113,7 +105,7 @@ internal class NoticeSheetViewModel @Inject constructor(
 
 internal data class NoticeSheetState(
     val pane: Pane,
-    val content: Async<NoticeSheetContent> = Uninitialized,
+    val content: NoticeSheetContent? = null,
     val viewEffect: ViewEffect? = null,
 ) {
 

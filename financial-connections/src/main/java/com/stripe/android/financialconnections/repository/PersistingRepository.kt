@@ -2,11 +2,6 @@ package com.stripe.android.financialconnections.repository
 
 import android.os.Parcelable
 import androidx.lifecycle.SavedStateHandle
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.withTimeout
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 
 internal abstract class PersistingRepository<S : Parcelable>(
     private val savedStateHandle: SavedStateHandle,
@@ -14,12 +9,8 @@ internal abstract class PersistingRepository<S : Parcelable>(
 
     private val key = makeKey()
 
-    suspend fun await(
-        timeout: Duration = 5.seconds,
-    ): S {
-        return withTimeout(timeout) {
-            savedStateHandle.getStateFlow<S?>(key, null).filterNotNull().first()
-        }
+    fun get(): S? {
+        return savedStateHandle[key]
     }
 
     fun set(state: S) {
