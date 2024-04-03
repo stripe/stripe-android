@@ -59,14 +59,16 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
 import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.error
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Date
-import javax.inject.Inject
 import javax.inject.Named
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState.AuthenticationStatus as Status
 
-internal class PartnerAuthViewModel @Inject constructor(
+internal class PartnerAuthViewModel @AssistedInject constructor(
     private val completeAuthorizationSession: CompleteAuthorizationSession,
     private val createAuthorizationSession: PostAuthorizationSession,
     private val cancelAuthorizationSession: CancelAuthorizationSession,
@@ -82,7 +84,7 @@ internal class PartnerAuthViewModel @Inject constructor(
     private val pollAuthorizationSessionOAuthResults: PollAuthorizationSessionOAuthResults,
     private val logger: Logger,
     private val presentNoticeSheet: PresentNoticeSheet,
-    initialState: SharedPartnerAuthState,
+    @Assisted initialState: SharedPartnerAuthState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -464,14 +466,16 @@ internal class PartnerAuthViewModel @Inject constructor(
     @Parcelize
     data class Args(val inModal: Boolean, val pane: Pane) : Parcelable
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: SharedPartnerAuthState): PartnerAuthViewModel
+    }
+
     companion object {
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent, args: Args): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .partnerAuthSubcomponent
-                        .create(SharedPartnerAuthState(args))
-                        .viewModel
+                    parentComponent.partnerAuthViewModelFactory.create(SharedPartnerAuthState(args))
                 }
             }
 

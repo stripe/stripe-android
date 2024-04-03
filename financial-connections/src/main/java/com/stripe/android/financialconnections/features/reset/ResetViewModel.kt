@@ -20,10 +20,12 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.error
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-internal class ResetViewModel @Inject constructor(
-    initialState: ResetState,
+internal class ResetViewModel @AssistedInject constructor(
+    @Assisted initialState: ResetState,
     private val linkMoreAccounts: LinkMoreAccounts,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -64,15 +66,17 @@ internal class ResetViewModel @Inject constructor(
         )
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ResetState): ResetViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .resetSubcomponent
-                        .create(ResetState())
-                        .viewModel
+                    parentComponent.resetViewModelFactory.create(ResetState())
                 }
             }
 

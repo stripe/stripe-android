@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.features.networkinglinkloginwarmup
 
 import android.os.Bundle
-import androidx.lifecycle.ViewModelProvider.Factory
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -25,11 +25,13 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
-    initialState: NetworkingLinkLoginWarmupState,
+internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
+    @Assisted initialState: NetworkingLinkLoginWarmupState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleError: HandleError,
@@ -97,7 +99,7 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         }.execute { copy(disableNetworkingAsync = it) }
     }
 
-    private suspend fun determinePopUpToBehaviorForSkip(): PopUpToBehavior {
+    private fun determinePopUpToBehaviorForSkip(): PopUpToBehavior {
         // Skipping disables networking, which means we don't want the user to navigate back to
         // the warm-up pane. Since the warmup pane is displayed as a bottom sheet, we need to
         // pop up all the way to the pane that opened it.
@@ -114,19 +116,25 @@ internal class NetworkingLinkLoginWarmupViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingLinkLoginWarmupState): NetworkingLinkLoginWarmupViewModel
+    }
+
     companion object {
 
         internal val PANE = Pane.NETWORKING_LINK_LOGIN_WARMUP
 
-        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent, arguments: Bundle?): Factory =
-            viewModelFactory {
-                initializer {
-                    parentComponent
-                        .networkingLinkLoginWarmupSubcomponent
-                        .create(NetworkingLinkLoginWarmupState(arguments))
-                        .viewModel
-                }
+        fun factory(
+            parentComponent: FinancialConnectionsSheetNativeComponent,
+            arguments: Bundle?
+        ): ViewModelProvider.Factory = viewModelFactory {
+            initializer {
+                parentComponent.networkingLinkLoginWarmupViewModelFactory.create(
+                    NetworkingLinkLoginWarmupState(arguments)
+                )
             }
+        }
     }
 }
 

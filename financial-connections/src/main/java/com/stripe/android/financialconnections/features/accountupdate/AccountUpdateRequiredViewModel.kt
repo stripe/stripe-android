@@ -22,12 +22,14 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.AccountUpdateRequiredContentRepository
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
-import javax.inject.Inject
 
-internal class AccountUpdateRequiredViewModel @Inject constructor(
-    initialState: AccountUpdateRequiredState,
+internal class AccountUpdateRequiredViewModel @AssistedInject constructor(
+    @Assisted initialState: AccountUpdateRequiredState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val updateRequiredContentRepository: AccountUpdateRequiredContentRepository,
     private val navigationManager: NavigationManager,
@@ -107,6 +109,11 @@ internal class AccountUpdateRequiredViewModel @Inject constructor(
         super.onCleared()
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: AccountUpdateRequiredState): AccountUpdateRequiredViewModel
+    }
+
     companion object {
 
         fun factory(
@@ -115,10 +122,7 @@ internal class AccountUpdateRequiredViewModel @Inject constructor(
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
-                    parentComponent
-                        .accountUpdateRequiredSubcomponent
-                        .create(AccountUpdateRequiredState(arguments))
-                        .viewModel
+                    parentComponent.accountUpdateRequiredViewModelFactory.create(AccountUpdateRequiredState(arguments))
                 }
             }
         }

@@ -21,11 +21,13 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.FinancialConnectionsErrorRepository
 import com.stripe.android.financialconnections.utils.error
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class ErrorViewModel @Inject constructor(
-    initialState: ErrorState,
+internal class ErrorViewModel @AssistedInject constructor(
+    @Assisted initialState: ErrorState,
     private val coordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val errorRepository: FinancialConnectionsErrorRepository,
@@ -114,15 +116,17 @@ internal class ErrorViewModel @Inject constructor(
         super.onCleared()
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ErrorState): ErrorViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .errorSubcomponent
-                        .create(ErrorState())
-                        .viewModel
+                    parentComponent.errorViewModelFactory.create(ErrorState())
                 }
             }
 

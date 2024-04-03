@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
-import androidx.lifecycle.ViewModelProvider.Factory
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -41,13 +41,15 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class LinkStepUpVerificationViewModel @Inject constructor(
-    initialState: LinkStepUpVerificationState,
+internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
+    @Assisted initialState: LinkStepUpVerificationState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
@@ -216,15 +218,17 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             )
         }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: LinkStepUpVerificationState): LinkStepUpVerificationViewModel
+    }
+
     companion object {
 
-        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): Factory =
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .linkStepUpVerificationSubcomponent
-                        .create(LinkStepUpVerificationState())
-                        .viewModel
+                    parentComponent.linkStepUpVerificationViewModelFactory.create(LinkStepUpVerificationState())
                 }
             }
 

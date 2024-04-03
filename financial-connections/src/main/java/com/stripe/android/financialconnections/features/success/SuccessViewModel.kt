@@ -24,11 +24,13 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class SuccessViewModel @Inject constructor(
-    initialState: SuccessState,
+internal class SuccessViewModel @AssistedInject constructor(
+    @Assisted initialState: SuccessState,
     getCachedAccounts: GetCachedAccounts,
     getManifest: GetManifest,
     private val successContentRepository: SuccessContentRepository,
@@ -89,15 +91,17 @@ internal class SuccessViewModel @Inject constructor(
         nativeAuthFlowCoordinator().emit(Complete())
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: SuccessState): SuccessViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .successSubcomponent
-                        .create(SuccessState())
-                        .viewModel
+                    parentComponent.successViewModelFactory.create(SuccessState())
                 }
             }
 

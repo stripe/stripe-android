@@ -42,6 +42,9 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
@@ -49,11 +52,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
-import javax.inject.Inject
 import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
-internal class NetworkingLinkSignupViewModel @Inject constructor(
-    initialState: NetworkingLinkSignupState,
+internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
+    @Assisted initialState: NetworkingLinkSignupState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
@@ -277,15 +279,17 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingLinkSignupState): NetworkingLinkSignupViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .networkingLinkSignupSubcomponent
-                        .create(NetworkingLinkSignupState())
-                        .viewModel
+                    parentComponent.networkingLinkSignupViewModelFactory.create(NetworkingLinkSignupState())
                 }
             }
 

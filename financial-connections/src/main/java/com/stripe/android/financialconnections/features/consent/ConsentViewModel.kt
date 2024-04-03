@@ -31,12 +31,14 @@ import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONS
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import java.util.Date
-import javax.inject.Inject
 
-internal class ConsentViewModel @Inject constructor(
-    initialState: ConsentState,
+internal class ConsentViewModel @AssistedInject constructor(
+    @Assisted initialState: ConsentState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
@@ -141,15 +143,17 @@ internal class ConsentViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ConsentState): ConsentViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .consentSubcomponent
-                        .create(ConsentState())
-                        .viewModel
+                    parentComponent.consentViewModelFactory.create(ConsentState())
                 }
             }
     }
