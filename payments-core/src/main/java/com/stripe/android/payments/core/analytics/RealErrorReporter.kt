@@ -4,6 +4,7 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.payments.core.analytics.ErrorReporter.Companion.filterNotNullValues
 import javax.inject.Inject
 
 /**
@@ -19,9 +20,12 @@ class RealErrorReporter @Inject constructor(
         stripeException: StripeException?,
         additionalNonPiiParams: Map<String, String>,
     ) {
-        val additionalParams =
+        val paramsFromStripeException = if (stripeException == null) {
+            emptyMap()
+        } else {
             ErrorReporter.getAdditionalParamsFromStripeException(stripeException = stripeException)
-        ).plus(additionalNonPiiParams).filterNotNullValues()
+        }
+        val additionalParams = (paramsFromStripeException + additionalNonPiiParams).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
         )
