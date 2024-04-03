@@ -28,6 +28,7 @@ interface ErrorReporter {
 
     fun report(errorEvent: ErrorEvent, stripeException: StripeException)
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         /**
          * Prefer using an injected version of [ErrorReporter].
