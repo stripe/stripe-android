@@ -75,19 +75,19 @@ internal interface DefaultErrorReporterComponent {
 }
 
 @Module
-internal abstract class DefaultErrorReporterModule {
+internal interface DefaultErrorReporterModule {
     @Binds
-    abstract fun bindRealErrorReporter(
+    fun bindRealErrorReporter(
         errorReporter: RealErrorReporter
     ): ErrorReporter
 
     @Binds
-    abstract fun providesAnalyticsRequestExecutor(
+    fun providesAnalyticsRequestExecutor(
         executor: DefaultAnalyticsRequestExecutor
     ): AnalyticsRequestExecutor
 
     @Binds
-    abstract fun providePaymentAnalyticsRequestFactory(
+    fun providePaymentAnalyticsRequestFactory(
         requestFactory: PaymentAnalyticsRequestFactory
     ): AnalyticsRequestFactory
 
