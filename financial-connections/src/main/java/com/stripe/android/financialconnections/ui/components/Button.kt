@@ -35,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
@@ -46,7 +47,10 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type.Primary
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton.Type.Secondary
 import com.stripe.android.financialconnections.ui.theme.Brand400
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 import com.stripe.android.financialconnections.ui.theme.Neutral0
@@ -58,7 +62,7 @@ private val DefaultSpinnerHeight = 24.dp
 internal fun FinancialConnectionsButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    type: Type = Type.Primary,
+    type: Type = Primary,
     size: FinancialConnectionsButton.Size = FinancialConnectionsButton.Size.Regular,
     enabled: Boolean = true,
     loading: Boolean = false,
@@ -66,6 +70,7 @@ internal fun FinancialConnectionsButton(
 ) {
     val view = LocalView.current
     val density = LocalDensity.current
+    val colors = FinancialConnectionsTheme.colors
 
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
     var spinnerHeight by remember { mutableStateOf(DefaultSpinnerHeight) }
@@ -74,6 +79,15 @@ internal fun FinancialConnectionsButton(
         targetValue = if (loading) 1f else 0f,
         label = "LoadingIndicatorAlpha",
     )
+
+    val spinnerBrush = remember {
+        // We need to flip the direction of the gradient when rendering in a primary button
+        // due to its background color. Otherwise, the spinner looks inverted.
+        when (type) {
+            Primary -> Brush.sweepGradient(listOf(colors.borderBrand, colors.iconWhite))
+            Secondary -> Brush.sweepGradient(listOf(colors.iconWhite, colors.borderBrand))
+        }
+    }
 
     CompositionLocalProvider(LocalRippleTheme provides type.rippleTheme()) {
         Button(
@@ -112,6 +126,7 @@ internal fun FinancialConnectionsButton(
                         )
 
                         LoadingSpinner(
+                            gradient = spinnerBrush,
                             strokeWidth = 2.dp,
                             modifier = Modifier
                                 .size(spinnerHeight)
@@ -127,8 +142,8 @@ internal fun FinancialConnectionsButton(
 private fun Type.rippleTheme() = object : RippleTheme {
     @Composable
     override fun defaultColor() = when (this@rippleTheme) {
-        Type.Primary -> Neutral0
-        Type.Secondary -> colors.textDefault
+        Primary -> Neutral0
+        Secondary -> colors.textDefault
     }
 
     @Composable
@@ -241,7 +256,7 @@ internal fun FinancialConnectionsButtonPreview() {
             FinancialConnectionsButton(
                 onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                type = Type.Secondary,
+                type = Secondary,
                 loading = false
             ) {
                 Text(text = "Secondary")
@@ -249,7 +264,7 @@ internal fun FinancialConnectionsButtonPreview() {
             FinancialConnectionsButton(
                 onClick = { },
                 modifier = Modifier.fillMaxWidth(),
-                type = Type.Secondary,
+                type = Secondary,
                 enabled = false,
                 loading = false
             ) {
