@@ -22,20 +22,19 @@ internal class KonbiniAuthenticator @Inject constructor(
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        (authenticatable.nextActionData as NextActionData.DisplayKonbiniDetails).let { detailsData ->
-            if (detailsData.hostedVoucherUrl == null) {
-                noOpIntentAuthenticator.authenticate(
-                    host,
-                    authenticatable,
-                    requestOptions
-                )
-            } else {
-                webIntentAuthenticator.authenticate(
-                    host,
-                    authenticatable,
-                    requestOptions
-                )
-            }
+        val detailsData = authenticatable.nextActionData as NextActionData.DisplayKonbiniDetails
+        if (detailsData.hostedVoucherUrl == null) {
+            noOpIntentAuthenticator.authenticate(
+                host,
+                authenticatable,
+                requestOptions
+            )
+        } else {
+            webIntentAuthenticator.authenticate(
+                host,
+                authenticatable,
+                requestOptions
+            )
         }
     }
 }
