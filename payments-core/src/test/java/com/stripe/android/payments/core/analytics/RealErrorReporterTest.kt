@@ -65,4 +65,24 @@ class RealErrorReporterTest {
         assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
         assertThat(analyticsRequestParams.get("request_id")).isEqualTo(expectedRequestId)
     }
+
+    @Test
+    fun `RealErrorReporter logs StripeError information correctly`() {
+        val expectedRequestId = "some_request_ID"
+        val expectedErrorType = "some_error_type"
+        val expectedErrorCode = "some_error_code"
+        val exception = CardException(
+            StripeError(type = expectedErrorType, code = expectedErrorCode),
+            requestId = expectedRequestId
+        )
+
+        realErrorReporter.report(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
+
+        val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
+        assertThat(executedAnalyticsRequests.size).isEqualTo(1)
+        val analyticsRequestParams = executedAnalyticsRequests.get(0).params
+        assertThat(analyticsRequestParams.get("error_code")).isEqualTo(expectedErrorCode)
+        assertThat(analyticsRequestParams.get("error_type")).isEqualTo(expectedErrorType)
+        assertThat(analyticsRequestParams.get("request_id")).isEqualTo(expectedRequestId)
+    }
 }
