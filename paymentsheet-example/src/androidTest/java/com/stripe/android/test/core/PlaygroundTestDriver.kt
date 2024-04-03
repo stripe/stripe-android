@@ -806,6 +806,10 @@ internal class PlaygroundTestDriver(
     }
 
     private fun doUSBankAccountAuthorization() {
+        while (currentActivity[0]?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+
         Espresso.onIdle()
         composeTestRule.waitForIdle()
 
@@ -872,5 +876,7 @@ internal class PlaygroundTestDriver(
 
     private companion object {
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add"
+        const val FINANCIAL_CONNECTIONS_ACTIVITY =
+            "com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
     }
 }
