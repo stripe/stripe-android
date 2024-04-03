@@ -10,27 +10,21 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
-import kotlin.coroutines.CoroutineContext
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class PhoneNumberController constructor(
+class PhoneNumberController(
     val initialPhoneNumber: String = "",
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
     override val showOptionalLabel: Boolean = false,
     private val acceptAnyInput: Boolean = false,
-    workContext: CoroutineContext = Dispatchers.Default
 ) : InputController, SectionFieldComposable {
     override val label = stateFlowOf(CoreR.string.stripe_address_label_phone_number)
 
@@ -65,17 +59,11 @@ class PhoneNumberController constructor(
         initiallySelectedCountryCode
     )
 
-    private val phoneNumberFormatter = countryDropdownController.selectedIndex.map {
+    private val phoneNumberFormatter = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.forCountry(
             countryConfig.countries[it].code.value
         )
-    }.stateIn(
-        scope = CoroutineScope(workContext),
-        started = SharingStarted.Eagerly,
-        initialValue = PhoneNumberFormatter.forCountry(
-            countryConfig.countries[countryDropdownController.selectedIndex.value].code.value
-        )
-    )
+    }
 
     private val phoneNumberMinimumLength = countryDropdownController.selectedIndex.mapAsStateFlow {
         PhoneNumberFormatter.lengthForCountry(
@@ -143,7 +131,6 @@ class PhoneNumberController constructor(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null,
             showOptionalLabel: Boolean = false,
-            workContext: CoroutineContext = Dispatchers.Default,
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
 
@@ -168,14 +155,12 @@ class PhoneNumberController constructor(
                     initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
                     showOptionalLabel = showOptionalLabel,
-                    workContext = workContext,
                 )
             } else {
                 PhoneNumberController(
                     initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode,
                     showOptionalLabel = showOptionalLabel,
-                    workContext = workContext,
                 )
             }
         }

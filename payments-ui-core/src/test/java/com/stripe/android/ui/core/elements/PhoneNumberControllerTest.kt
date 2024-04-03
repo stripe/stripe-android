@@ -5,7 +5,6 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.elements.PhoneNumberController
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -20,7 +19,6 @@ internal class PhoneNumberControllerTest {
         val phoneNumberController = PhoneNumberController(
             initiallySelectedCountryCode = "US",
             overrideCountryCodes = setOf("US", "BR"),
-            workContext = UnconfinedTestDispatcher(),
         )
 
         turbineScope {
@@ -60,9 +58,7 @@ internal class PhoneNumberControllerTest {
 
     @Test
     fun `incomplete input is marked correctly if field is not optional`() = runTest {
-        val phoneNumberController = PhoneNumberController(
-            workContext = UnconfinedTestDispatcher(),
-        )
+        val phoneNumberController = PhoneNumberController()
 
         phoneNumberController.isComplete.test {
             assertThat(awaitItem()).isFalse()
@@ -80,7 +76,6 @@ internal class PhoneNumberControllerTest {
         val phoneNumberController = PhoneNumberController(
             showOptionalLabel = true,
             acceptAnyInput = true,
-            workContext = UnconfinedTestDispatcher(),
         )
 
         phoneNumberController.isComplete.test {
@@ -98,7 +93,6 @@ internal class PhoneNumberControllerTest {
     fun `when initial number is in E164 format then initial country is set`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "+491234567890",
-            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("DE")
@@ -110,7 +104,6 @@ internal class PhoneNumberControllerTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "+441234567890",
             initiallySelectedCountryCode = "JE",
-            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("JE")
@@ -122,7 +115,6 @@ internal class PhoneNumberControllerTest {
     fun `when initial number is in E164 format with multiple regions then locale is used`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "+11234567890",
-            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("CA")
@@ -134,7 +126,6 @@ internal class PhoneNumberControllerTest {
     fun `when initial number is not in E164 format then locale is used`() {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initialValue = "1234567890",
-            workContext = UnconfinedTestDispatcher(),
         )
 
         assertThat(phoneNumberController.getCountryCode()).isEqualTo("CA")
@@ -145,7 +136,6 @@ internal class PhoneNumberControllerTest {
     fun `when phone number is less than expected length error is emitted`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US",
-            workContext = UnconfinedTestDispatcher(),
         )
 
         phoneNumberController.error.test {
@@ -165,7 +155,6 @@ internal class PhoneNumberControllerTest {
     fun `when phone number is less than expected length field is not considered complete`() = runTest {
         val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US",
-            workContext = UnconfinedTestDispatcher(),
         )
 
         phoneNumberController.isComplete.test {
