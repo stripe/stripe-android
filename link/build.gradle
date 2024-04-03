@@ -51,9 +51,6 @@ dependencies {
     testImplementation testLibs.espresso.intents
     testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.archCore
-
-    androidTestImplementation testLibs.truth
-    androidTestImplementation testLibs.androidx.junit
 }
 
 android {
