@@ -57,6 +57,7 @@ interface ErrorReporter {
                 else -> getAdditionalParamsFromStripeException(StripeException.create(error))
             }
         }
+
         fun getAdditionalParamsFromStripeException(stripeException: StripeException): Map<String, String> {
             return mapOf(
                 "analytics_value" to stripeException.analyticsValue(),
@@ -67,7 +68,7 @@ interface ErrorReporter {
             ).filterNotNullValues()
         }
 
-        fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
+        private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
             mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
     }
 
