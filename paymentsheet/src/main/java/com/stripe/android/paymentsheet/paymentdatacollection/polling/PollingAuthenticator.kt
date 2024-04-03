@@ -62,6 +62,7 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
             AnimationConstants.FADE_OUT,
         )
 
+        // TODO: Add event when polling launcher is null.
         pollingLauncher?.launch(args, options)
     }
 

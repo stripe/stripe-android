@@ -52,6 +52,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
+            // TODO: Add event
             return
         }
 
@@ -76,6 +77,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
+            // TODO: Add event.
             return
         }
 

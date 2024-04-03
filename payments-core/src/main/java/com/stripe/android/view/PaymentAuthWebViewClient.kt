@@ -174,6 +174,7 @@ internal class PaymentAuthWebViewClient(
     ) {
         logger.debug("PaymentAuthWebViewClient#onAuthCompleted()")
         activityFinisher(error)
+        // TODO: Add event.
     }
 
     internal companion object {

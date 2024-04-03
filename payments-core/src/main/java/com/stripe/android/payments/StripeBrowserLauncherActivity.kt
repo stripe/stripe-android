@@ -33,6 +33,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
         if (args == null) {
             // handle failures
             finish()
+            // TODO: Add event.
             return
         }
 
@@ -55,6 +56,7 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             launcher.launch(intent)
             viewModel.hasLaunched = true
         } catch (e: ActivityNotFoundException) {
+            // TODO: Add event.
             finishWithFailure(args)
         }
     }

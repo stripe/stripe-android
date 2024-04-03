@@ -24,6 +24,7 @@ internal class BoletoAuthenticator @Inject constructor(
     ) {
         (authenticatable.nextActionData as NextActionData.DisplayBoletoDetails).let { detailsData ->
             if (detailsData.hostedVoucherUrl == null) {
+                // TODO: Add event.
                 noOpIntentAuthenticator.authenticate(
                     host,
                     authenticatable,
@@ -37,5 +38,6 @@ internal class BoletoAuthenticator @Inject constructor(
                 )
             }
         }
+        // TODO: Add event if nextAction isn't correct type.
     }
 }

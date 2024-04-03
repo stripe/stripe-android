@@ -24,6 +24,7 @@ internal class KonbiniAuthenticator @Inject constructor(
     ) {
         (authenticatable.nextActionData as NextActionData.DisplayKonbiniDetails).let { detailsData ->
             if (detailsData.hostedVoucherUrl == null) {
+                // TODO: Add event.
                 noOpIntentAuthenticator.authenticate(
                     host,
                     authenticatable,
@@ -37,5 +38,6 @@ internal class KonbiniAuthenticator @Inject constructor(
                 )
             }
         }
+        // TODO: Add event if nextAction isn't correct type.
     }
 }

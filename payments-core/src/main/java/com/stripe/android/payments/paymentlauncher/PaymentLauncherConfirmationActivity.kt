@@ -39,6 +39,7 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
                 EMPTY_ARG_ERROR
             }
         }.getOrElse {
+            // TODO: Add event.
             finishWithResult(InternalPaymentResult.Failed(it))
             return
         }

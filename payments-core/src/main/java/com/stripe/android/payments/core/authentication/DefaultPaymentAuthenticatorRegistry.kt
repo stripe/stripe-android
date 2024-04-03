@@ -158,6 +158,7 @@ private fun paymentSheetAuthenticators(
             emptyMap()
         }
     } catch (e: Exception) {
+        // TODO: Add event.
         emptyMap()
     }
 }

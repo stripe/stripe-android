@@ -24,6 +24,7 @@ internal class OxxoAuthenticator @Inject constructor(
     ) {
         (authenticatable.nextActionData as NextActionData.DisplayOxxoDetails).let { oxxoDetailsData ->
             if (oxxoDetailsData.hostedVoucherUrl == null) {
+                // TODO: Add event.
                 noOpIntentAuthenticator.authenticate(
                     host,
                     authenticatable,
@@ -37,5 +38,6 @@ internal class OxxoAuthenticator @Inject constructor(
                 )
             }
         }
+        // TODO: Add event if nextAction isn't correct type.
     }
 }
