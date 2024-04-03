@@ -13,6 +13,7 @@ internal class SuccessContentRepository @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : PersistingRepository<State>(
     savedStateHandle = savedStateHandle,
+    initialValue = State()
 ) {
 
     fun set(customSuccessMessage: TextResource) {
@@ -21,6 +22,6 @@ internal class SuccessContentRepository @Inject constructor(
 
     @Parcelize
     data class State(
-        val customSuccessMessage: TextResource,
+        val customSuccessMessage: TextResource? = null
     ) : Parcelable
 }

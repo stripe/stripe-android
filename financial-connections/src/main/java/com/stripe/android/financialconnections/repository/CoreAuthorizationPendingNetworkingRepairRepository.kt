@@ -17,6 +17,7 @@ internal class CoreAuthorizationPendingNetworkingRepairRepository @Inject constr
     private val logger: Logger,
 ) : PersistingRepository<State>(
     savedStateHandle = savedStateHandle,
+    initialValue = State()
 ) {
 
     fun set(coreAuthorization: String) {

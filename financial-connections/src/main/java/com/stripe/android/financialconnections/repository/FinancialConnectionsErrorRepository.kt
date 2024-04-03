@@ -12,6 +12,7 @@ internal class FinancialConnectionsErrorRepository @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : PersistingRepository<State>(
     savedStateHandle = savedStateHandle,
+    initialValue = State()
 ) {
 
     fun set(error: Throwable) {
@@ -20,6 +21,6 @@ internal class FinancialConnectionsErrorRepository @Inject constructor(
 
     @Parcelize
     data class State(
-        val error: Throwable,
+        val error: Throwable? = null
     ) : Parcelable
 }

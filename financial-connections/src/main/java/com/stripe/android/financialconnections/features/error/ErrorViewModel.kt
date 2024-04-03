@@ -41,7 +41,7 @@ internal class ErrorViewModel @Inject constructor(
             // pane after an error, they will be able to start over.
             coordinator().emit(Message.ClearPartnerWebAuth)
             ErrorState.Payload(
-                error = errorRepository.await().error,
+                error = requireNotNull(errorRepository.await().error),
                 disableLinkMoreAccounts = getManifest().disableLinkMoreAccounts,
                 allowManualEntry = getManifest().allowManualEntry
             )

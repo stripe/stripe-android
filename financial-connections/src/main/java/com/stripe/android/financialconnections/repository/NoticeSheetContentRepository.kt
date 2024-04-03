@@ -13,6 +13,7 @@ internal class NoticeSheetContentRepository @Inject constructor(
     savedStateHandle: SavedStateHandle,
 ) : PersistingRepository<State>(
     savedStateHandle = savedStateHandle,
+    initialValue = State()
 ) {
 
     fun set(content: NoticeSheetContent) {
