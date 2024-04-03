@@ -59,7 +59,10 @@ interface ErrorReporter {
         ),
         MISSING_CARDSCAN_DEPENDENCY(
             eventName = "unexpected.cardscan.missing_dependency"
-        )
+        ),
+        MISSING_HOSTED_VOUCHER_URL(
+            eventName = "unexpected.payments.missing_hosted_voucher_url"
+        ),
     }
 }
 
