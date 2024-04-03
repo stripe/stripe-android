@@ -1,8 +1,7 @@
 package com.stripe.android.link.ui.inline
 
-import androidx.activity.ComponentActivity
 import androidx.compose.ui.test.assertIsEnabled
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -23,7 +22,7 @@ import org.robolectric.RobolectricTestRunner
 @RunWith(RobolectricTestRunner::class)
 internal class LinkInlineSignupViewTest {
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ComponentActivity>()
+    val composeTestRule = createComposeRule()
 
     @Test
     fun clicking_on_checkbox_triggers_callback() {
