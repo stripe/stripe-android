@@ -42,11 +42,13 @@ import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class InstitutionPickerViewModel @Inject constructor(
+internal class InstitutionPickerViewModel @AssistedInject constructor(
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val postAuthorizationSession: PostAuthorizationSession,
     private val getOrFetchSync: GetOrFetchSync,
@@ -57,7 +59,7 @@ internal class InstitutionPickerViewModel @Inject constructor(
     private val navigationManager: NavigationManager,
     private val updateLocalManifest: UpdateLocalManifest,
     private val logger: Logger,
-    initialState: InstitutionPickerState,
+    @Assisted initialState: InstitutionPickerState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<InstitutionPickerState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -249,14 +251,16 @@ internal class InstitutionPickerViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: InstitutionPickerState): InstitutionPickerViewModel
+    }
+
     companion object {
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .institutionPickerSubcomponent
-                        .create(InstitutionPickerState())
-                        .viewModel
+                    parentComponent.institutionPickerViewModelFactory.create(InstitutionPickerState())
                 }
             }
 

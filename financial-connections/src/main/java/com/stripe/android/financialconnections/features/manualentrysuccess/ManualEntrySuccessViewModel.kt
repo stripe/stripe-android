@@ -20,11 +20,13 @@ import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.utils.error
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class ManualEntrySuccessViewModel @Inject constructor(
-    initialState: ManualEntrySuccessState,
+internal class ManualEntrySuccessViewModel @AssistedInject constructor(
+    @Assisted initialState: ManualEntrySuccessState,
     private val getManifest: GetManifest,
     private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
@@ -61,15 +63,17 @@ internal class ManualEntrySuccessViewModel @Inject constructor(
         }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ManualEntrySuccessState): ManualEntrySuccessViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .manualEntrySuccessSubcomponent
-                        .create(ManualEntrySuccessState())
-                        .viewModel
+                    parentComponent.manualEntrySuccessViewModelFactory.create(ManualEntrySuccessState())
                 }
             }
     }

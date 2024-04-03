@@ -47,12 +47,14 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import java.util.Date
-import javax.inject.Inject
 
-internal class AccountPickerViewModel @Inject constructor(
-    initialState: AccountPickerState,
+internal class AccountPickerViewModel @AssistedInject constructor(
+    @Assisted initialState: AccountPickerState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
@@ -349,15 +351,17 @@ internal class AccountPickerViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: AccountPickerState): AccountPickerViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .accountPickerSubcomponent
-                        .create(AccountPickerState())
-                        .viewModel
+                    parentComponent.accountPickerViewModelFactory.create(AccountPickerState())
                 }
             }
 

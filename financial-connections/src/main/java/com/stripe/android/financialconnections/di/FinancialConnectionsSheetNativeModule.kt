@@ -8,18 +8,10 @@ import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.RealHandleError
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
 import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
-import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
-import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
-import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
-import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.features.notice.RealPresentNoticeSheet
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
-import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
-import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
@@ -39,18 +31,7 @@ import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
 
-@Module(
-    subcomponents = [
-        ConsentSubcomponent::class,
-        ManualEntrySubcomponent::class,
-        InstitutionPickerSubcomponent::class,
-        PartnerAuthSubcomponent::class,
-        SuccessSubcomponent::class,
-        AccountPickerSubcomponent::class,
-        AttachPaymentSubcomponent::class,
-        ResetSubcomponent::class
-    ]
-)
+@Module
 internal interface FinancialConnectionsSheetNativeModule {
 
     @Binds

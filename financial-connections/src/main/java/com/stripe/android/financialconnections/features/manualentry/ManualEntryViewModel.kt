@@ -32,14 +32,16 @@ import com.stripe.android.financialconnections.presentation.FinancialConnections
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.utils.error
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 
-internal class ManualEntryViewModel @Inject constructor(
-    initialState: ManualEntryState,
+internal class ManualEntryViewModel @AssistedInject constructor(
+    @Assisted initialState: ManualEntryState,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
     private val successContentRepository: SuccessContentRepository,
@@ -167,15 +169,17 @@ internal class ManualEntryViewModel @Inject constructor(
         onSubmit()
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ManualEntryState): ManualEntryViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .manualEntrySubcomponent
-                        .create(ManualEntryState())
-                        .viewModel
+                    parentComponent.manualEntryViewModelFactory.create(ManualEntryState())
                 }
             }
 
