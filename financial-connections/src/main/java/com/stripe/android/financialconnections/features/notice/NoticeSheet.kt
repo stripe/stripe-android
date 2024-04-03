@@ -7,6 +7,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.features.common.DataAccessBottomSheetContent
 import com.stripe.android.financialconnections.features.common.LegalDetailsBottomSheetContent
@@ -15,6 +17,7 @@ import com.stripe.android.financialconnections.features.notice.NoticeSheetState.
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.paneViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 
 @Composable
 internal fun NoticeSheet(
@@ -36,7 +39,7 @@ internal fun NoticeSheet(
     }
 
     state.content?.let { content ->
-        StaticBottomSheetContent(
+        NoticeSheetContent(
             content = content,
             onClickableTextClick = viewModel::handleClickableTextClick,
             onConfirmModalClick = viewModel::handleConfirmModalClick,
@@ -46,7 +49,7 @@ internal fun NoticeSheet(
 }
 
 @Composable
-private fun StaticBottomSheetContent(
+private fun NoticeSheetContent(
     content: NoticeSheetContent,
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit,
@@ -68,5 +71,20 @@ private fun StaticBottomSheetContent(
             )
         }
         onViewEffectLaunched()
+    }
+}
+
+@Composable
+@Preview(group = "Notice Sheet")
+internal fun NoticeSheetPreview(
+    @PreviewParameter(NoticeSheetPreviewParameterProvider::class) content: NoticeSheetContent,
+) {
+    FinancialConnectionsPreview {
+        NoticeSheetContent(
+            content = content,
+            onClickableTextClick = {},
+            onConfirmModalClick = {},
+            onViewEffectLaunched = {},
+        )
     }
 }
