@@ -49,13 +49,8 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.turbine
     testImplementation testLibs.espresso.intents
-
-    androidTestImplementation testLibs.truth
-    androidTestImplementation testLibs.androidx.junit
-
-    // Test rules and transitive dependencies:
-    androidTestImplementation testLibs.androidx.composeUi
-    androidTestImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.archCore
 }
 
 android {
