@@ -59,9 +59,10 @@ private const val LINK_ARROW_ID = "LinkArrow"
 
 private const val LINK_EMAIL_TEXT_WEIGHT = 0.5f
 private const val LINK_EMAIL_FONT_SIZE = 15
+private const val LINK_REBRAND_FONT_SIZE = 20
 
 private const val LINK_ICON_ASPECT_RATIO = 33f / 13f
-private const val LINK_REBRAND_ICON_ASPECT_RATIO = 72f / 24f
+private const val LINK_REBRAND_ICON_ASPECT_RATIO = 72f / 26f
 private const val LINK_ARROW_ICON_ASPECT_RATIO = 18f / 12f
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -166,7 +167,7 @@ private fun RowScope.SignedInButtonContent(email: String) {
     Text(
         text = annotatedEmail,
         color = color,
-        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
         maxLines = 1
@@ -175,7 +176,7 @@ private fun RowScope.SignedInButtonContent(email: String) {
         Text(
             text = annotatedArrow,
             color = color,
-            fontSize = LINK_EMAIL_FONT_SIZE.sp,
+            fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
             maxLines = 1,
             inlineContent = InlineContentTemplateBuilder()
                 .addSpacer(id = LINK_SPACER_ID, width = 0.4.em)
@@ -220,7 +221,7 @@ private fun RowScope.SignedOutButtonContent() {
         }.build(),
         modifier = Modifier.padding(start = 6.dp),
         color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current),
-        fontSize = 18.sp,
+        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else 18).sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
     )
@@ -251,7 +252,7 @@ private fun LinkIconAndDivider() {
 
     Text(
         text = annotatedLinkAndDivider,
-        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
@@ -272,7 +273,8 @@ private fun LinkIcon() {
         Icon(
             painter = painterResource(R.drawable.stripe_link_logo_bw),
             contentDescription = stringResource(StripeR.string.stripe_link),
-            modifier = Modifier.aspectRatio(LINK_REBRAND_ICON_ASPECT_RATIO)
+            modifier = Modifier
+                .aspectRatio(LINK_REBRAND_ICON_ASPECT_RATIO)
                 .alpha(LocalContentAlpha.current),
             tint = Color.Unspecified,
         )

@@ -5,7 +5,6 @@ import android.os.Build
 import android.util.Base64
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
@@ -149,7 +148,7 @@ internal data class PopupPayload(
                 paymentObject = paymentObject(),
                 intentMode = stripeIntent.toIntentMode().type,
                 setupFutureUsage = stripeIntent.isSetupForFutureUsage(),
-                flags = flags.plus("link_2024_rebrand_m1" to LinkUi.useNewBrand),
+                flags = flags,
             )
         }
 

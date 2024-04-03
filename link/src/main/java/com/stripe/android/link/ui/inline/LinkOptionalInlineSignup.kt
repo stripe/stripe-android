@@ -236,7 +236,7 @@ internal fun LinkLogo() {
         ),
         contentDescription = stringResource(id = R.string.stripe_link),
         modifier = Modifier
-            .padding(end = 12.dp)
+            .padding(end = if (LinkUi.useNewBrand) 16.dp else 12.dp)
             .semantics {
                 testTag = "LinkLogoIcon"
             },
