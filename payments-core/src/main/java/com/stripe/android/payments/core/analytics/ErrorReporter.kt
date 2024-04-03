@@ -1,18 +1,112 @@
 package com.stripe.android.payments.core.analytics
 
+import android.content.Context
 import androidx.annotation.RestrictTo
+import com.stripe.android.BuildConfig
+import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
+import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import dagger.Binds
+import dagger.BindsInstance
+import dagger.Component
+import dagger.Module
+import dagger.Provides
+import kotlinx.coroutines.Dispatchers
+import javax.inject.Named
+import kotlin.coroutines.CoroutineContext
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface ErrorReporter {
 
     fun report(errorEvent: ErrorEvent, stripeException: StripeException)
 
+    companion object {
+        /**
+         * Prefer using an injected version of [ErrorReporter].
+         *
+         * This should only be used if you don't already have access to a dagger component.
+         */
+        fun createFallbackInstance(
+            context: Context,
+            productUsage: Set<String>,
+        ): ErrorReporter {
+            return DaggerDefaultErrorReporterComponent
+                .builder()
+                .context(context.applicationContext)
+                .productUsage(productUsage)
+                .build()
+                .errorReporter
+        }
+    }
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ErrorEvent(override val eventName: String) : AnalyticsEvent {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
+        ),
+        MISSING_CARDSCAN_DEPENDENCY(
+            eventName = "unexpected.cardscan.missing_dependency"
         )
+    }
+}
+
+@Component(modules = [DefaultErrorReporterModule::class])
+internal interface DefaultErrorReporterComponent {
+    val errorReporter: ErrorReporter
+
+    @Component.Builder
+    interface Builder {
+        @BindsInstance
+        fun context(context: Context): Builder
+
+        @BindsInstance
+        fun productUsage(@Named(PRODUCT_USAGE) productUsage: Set<String>): Builder
+
+        fun build(): DefaultErrorReporterComponent
+    }
+}
+
+@Module
+internal abstract class DefaultErrorReporterModule {
+    @Binds
+    abstract fun bindRealErrorReporter(
+        errorReporter: RealErrorReporter
+    ): ErrorReporter
+
+    @Binds
+    abstract fun providesAnalyticsRequestExecutor(
+        executor: DefaultAnalyticsRequestExecutor
+    ): AnalyticsRequestExecutor
+
+    @Binds
+    abstract fun providePaymentAnalyticsRequestFactory(
+        requestFactory: PaymentAnalyticsRequestFactory
+    ): AnalyticsRequestFactory
+
+    companion object {
+        @Provides
+        fun provideLogger(): Logger {
+            return Logger.getInstance(BuildConfig.DEBUG)
+        }
+
+        @Provides
+        @IOContext
+        fun provideIoContext(): CoroutineContext {
+            return Dispatchers.IO
+        }
+
+        @Provides
+        @Named(PUBLISHABLE_KEY)
+        fun providePublishableKey(context: Context): () -> String {
+            return { PaymentConfiguration.getInstance(context).publishableKey }
+        }
     }
 }
