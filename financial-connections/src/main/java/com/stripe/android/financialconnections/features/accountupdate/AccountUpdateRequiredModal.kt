@@ -11,11 +11,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavBackStackEntry
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.presentation.paneViewModel
+import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
@@ -73,9 +75,7 @@ private fun AccountUpdateRequiredModalContent(
             }
         },
         body = {
-            payload.iconUrl?.let { url ->
-                InstitutionIcon(institutionIcon = url)
-            }
+            InstitutionIcon(institutionIcon = payload.iconUrl)
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -96,4 +96,23 @@ private fun AccountUpdateRequiredModalContent(
             )
         },
     )
+}
+
+@Preview(
+    group = "Account Update Required Modal",
+)
+@Composable
+internal fun AccountUpdateRequiredModalPreview() {
+    FinancialConnectionsPreview {
+        AccountUpdateRequiredModalContent(
+            payload = AccountUpdateRequiredState.Payload(
+                iconUrl = null,
+                type = AccountUpdateRequiredState.Type.PartnerAuth(
+                    institution = null,
+                ),
+            ),
+            onContinue = {},
+            onCancel = {},
+        )
+    }
 }
