@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
@@ -24,9 +25,9 @@ import kotlinx.coroutines.sync.withLock
  */
 internal interface FinancialConnectionsAccountsRepository {
 
-    suspend fun getCachedAccounts(): List<PartnerAccount>?
+    suspend fun getCachedAccounts(): List<PartnerAccount>
 
-    suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?)
+    suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>)
 
     suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
@@ -67,22 +68,25 @@ internal interface FinancialConnectionsAccountsRepository {
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
             apiOptions: ApiRequest.Options,
-            logger: Logger
+            logger: Logger,
+            savedStateHandle: SavedStateHandle,
         ): FinancialConnectionsAccountsRepository =
             FinancialConnectionsAccountsRepositoryImpl(
                 requestExecutor,
                 apiRequestFactory,
                 apiOptions,
-                logger
+                logger,
+                savedStateHandle,
             )
     }
 }
 
 private class FinancialConnectionsAccountsRepositoryImpl(
-    val requestExecutor: FinancialConnectionsRequestExecutor,
-    val apiRequestFactory: ApiRequest.Factory,
-    val apiOptions: ApiRequest.Options,
-    val logger: Logger
+    private val requestExecutor: FinancialConnectionsRequestExecutor,
+    private val apiRequestFactory: ApiRequest.Factory,
+    private val apiOptions: ApiRequest.Options,
+    private val logger: Logger,
+    private val savedStateHandle: SavedStateHandle,
 ) : FinancialConnectionsAccountsRepository {
 
     /**
@@ -90,13 +94,17 @@ private class FinancialConnectionsAccountsRepositoryImpl(
      * current writes are running.
      */
     val mutex = Mutex()
-    private var cachedAccounts: List<PartnerAccount>? = null
 
-    override suspend fun getCachedAccounts(): List<PartnerAccount>? =
-        mutex.withLock { cachedAccounts }
+    override suspend fun getCachedAccounts(): List<PartnerAccount> {
+        return mutex.withLock { savedStateHandle[KeyCachedAccounts] ?: emptyList() }
+    }
 
-    override suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?) =
-        mutex.withLock { cachedAccounts = partnerAccountsList }
+    override suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>) =
+        mutex.withLock { setCachedAccounts(partnerAccountsList) }
+
+    private fun setCachedAccounts(partnerAccountsList: List<PartnerAccount>) {
+        savedStateHandle[KeyCachedAccounts] = partnerAccountsList
+    }
 
     override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
@@ -213,10 +221,12 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         accounts: List<PartnerAccount>
     ) {
         logger.debug("updating local partner accounts from $source")
-        cachedAccounts = accounts
+        setCachedAccounts(accounts)
     }
 
     companion object {
+        private const val KeyCachedAccounts = "KeyCachedAccounts"
+
         internal const val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 

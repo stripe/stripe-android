@@ -14,6 +14,6 @@ internal class GetCachedAccounts @Inject constructor(
 ) {
 
     suspend operator fun invoke(): List<PartnerAccount> {
-        return requireNotNull(repository.getCachedAccounts())
+        return repository.getCachedAccounts()
     }
 }

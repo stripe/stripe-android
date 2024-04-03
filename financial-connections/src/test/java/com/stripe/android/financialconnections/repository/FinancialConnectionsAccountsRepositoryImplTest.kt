@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
@@ -36,7 +37,8 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
         ),
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
-        logger = Logger.noop()
+        logger = Logger.noop(),
+        savedStateHandle = SavedStateHandle(),
     )
 
     @Test

@@ -12,7 +12,7 @@ internal class UpdateCachedAccounts @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        block: (List<PartnerAccount>?) -> List<PartnerAccount>?
+        block: (List<PartnerAccount>) -> List<PartnerAccount>
     ) {
         val updatedAccounts = block(repository.getCachedAccounts())
         repository.updateCachedAccounts(updatedAccounts)

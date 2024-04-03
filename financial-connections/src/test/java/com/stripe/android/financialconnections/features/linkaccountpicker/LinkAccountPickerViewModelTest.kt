@@ -160,9 +160,9 @@ class LinkAccountPickerViewModelTest {
         viewModel.onAccountClick(selectedAccount)
         viewModel.onSelectAccountClick()
 
-        with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
+        with(argumentCaptor<(List<PartnerAccount>) -> List<PartnerAccount>>()) {
             verify(updateCachedAccounts).invoke(capture())
-            assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
+            assertThat(firstValue(emptyList())).isEqualTo(listOf(selectedAccount))
         }
         val destination = accounts.data.first().nextPaneOnSelection!!.destination
         navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
@@ -203,9 +203,9 @@ class LinkAccountPickerViewModelTest {
             viewModel.onAccountClick(selectedAccount)
             viewModel.onSelectAccountClick()
 
-            with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
+            with(argumentCaptor<(List<PartnerAccount>) -> List<PartnerAccount>>()) {
                 verify(updateCachedAccounts).invoke(capture())
-                assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
+                assertThat(firstValue(emptyList())).isEqualTo(listOf(selectedAccount))
             }
             verifyNoInteractions(updateLocalManifest)
             verifyNoInteractions(selectNetworkedAccounts)
