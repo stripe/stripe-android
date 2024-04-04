@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.CardBrand
@@ -891,7 +892,11 @@ class PaymentSheetEventTest {
     fun `UpdatePaymentOptionFailed event should return expected toString()`() {
         val event = PaymentSheetEvent.UpdatePaymentOptionFailed(
             selectedBrand = CardBrand.CartesBancaires,
-            error = Exception("No network available!"),
+            error = APIException(
+                StripeError(type = "network_error", code = "error_123"),
+                requestId = "request_123",
+                message = "No network available!"
+            ),
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
@@ -910,6 +915,11 @@ class PaymentSheetEventTest {
                 "is_decoupled" to false,
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
+                "analytics_value" to "apiError",
+                "request_id" to "request_123",
+                "error_type" to "network_error",
+                "error_code" to "error_123",
+                "status_code" to "0"
             )
         )
     }
