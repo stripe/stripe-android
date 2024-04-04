@@ -7,7 +7,7 @@ dependencies {
     implementation libs.compose.material
 
     // Implemented here instead of using plugin which implements with testImplementation
-    implementation("app.cash.paparazzi:paparazzi:${versions.paparazzi}") {
+    api("app.cash.paparazzi:paparazzi:${versions.paparazzi}") {
         exclude group: 'org.hamcrest'
         exclude group: 'org.bouncycastle'
         exclude group: 'jakarta.activation'
