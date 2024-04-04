@@ -357,7 +357,7 @@ internal class DefaultPaymentSheetLoaderTest {
         val result = createPaymentSheetLoader(
             customerRepo = object : FakeCustomerRepository() {
                 override suspend fun getPaymentMethods(
-                    customerConfig: PaymentSheet.CustomerConfiguration,
+                    customerInfo: CustomerRepository.CustomerInfo,
                     types: List<PaymentMethod.Type>,
                     silentlyFail: Boolean
                 ): Result<List<PaymentMethod>> {

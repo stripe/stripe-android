@@ -157,7 +157,7 @@ class CustomerAdapterTest {
         )
         adapter.retrievePaymentMethods()
         verify(customerRepository).getPaymentMethods(
-            customerConfig = any(),
+            customerInfo = any(),
             types = eq(
                 listOf(
                     PaymentMethod.Type.Card,
@@ -206,7 +206,7 @@ class CustomerAdapterTest {
         adapter.retrievePaymentMethods()
 
         verify(customerRepository).getPaymentMethods(
-            customerConfig = any(),
+            customerInfo = any(),
             types = eq(
                 listOf(
                     PaymentMethod.Type.Card,

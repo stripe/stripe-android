@@ -513,8 +513,14 @@ internal abstract class BaseSheetViewModel(
             updateSelection(null)
         }
 
+        // TODO(samer-stripe): Improve this by either throwing an unexpected error or returning a failure result
+        val requiredConfig = requireNotNull(customerConfig)
+
         return customerRepository.detachPaymentMethod(
-            customerConfig!!,
+            CustomerRepository.CustomerInfo(
+                id = requiredConfig.id,
+                ephemeralKeySecret = requiredConfig.ephemeralKeySecret
+            ),
             paymentMethodId
         )
     }
@@ -593,10 +599,14 @@ internal abstract class BaseSheetViewModel(
         paymentMethod: PaymentMethod,
         brand: CardBrand
     ): Result<PaymentMethod> {
-        val customerConfig = config.customer
+        // TODO(samer-stripe): Improve this by returning a failure result and throwing an unexpected result
+        val customerConfig = requireNotNull(config.customer)
 
         return customerRepository.updatePaymentMethod(
-            customerConfig = customerConfig!!,
+            customerInfo = CustomerRepository.CustomerInfo(
+                id = customerConfig.id,
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+            ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(

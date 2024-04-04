@@ -226,7 +226,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val paymentMethodTypes = metadata.supportedSavedPaymentMethodTypes()
 
         val paymentMethods = customerRepository.getPaymentMethods(
-            customerConfig = customerConfig,
+            customerInfo = CustomerRepository.CustomerInfo(
+                id = customerConfig.id,
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+            ),
             types = paymentMethodTypes,
             silentlyFail = metadata.stripeIntent.isLiveMode,
         ).getOrThrow()
@@ -297,8 +300,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val customerEmail = config.defaultBillingDetails?.email ?: config.customer?.let {
             customerRepository.retrieveCustomer(
-                it.id,
-                it.ephemeralKeySecret
+                CustomerRepository.CustomerInfo(
+                    id = it.id,
+                    ephemeralKeySecret = it.ephemeralKeySecret
+                )
             )
         }?.email
 
