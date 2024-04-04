@@ -30,7 +30,7 @@ internal fun Throwable.toEventParams(
             stripeError?.message ?: message,
             extraMessage
         ).joinToString(" "),
-        "code" to (stripeError?.code ?: statusCode.toString())
+        "code" to (stripeError?.code ?: statusCode?.toString())
     )
 
     is StripeException -> mapOf(
@@ -41,7 +41,7 @@ internal fun Throwable.toEventParams(
             (stripeError?.message ?: message)?.take(MAX_LOG_LENGTH),
             extraMessage
         ).joinToString(" "),
-        "code" to (stripeError?.code ?: statusCode.toString())
+        "code" to (stripeError?.code ?: statusCode?.toString())
     )
 
     else -> mapOf(

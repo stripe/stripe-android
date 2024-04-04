@@ -7,7 +7,6 @@ class AppInitializationError(message: String) : StripeException(
     message = message,
     cause = null,
     requestId = null,
-    statusCode = 0,
     stripeError = null
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

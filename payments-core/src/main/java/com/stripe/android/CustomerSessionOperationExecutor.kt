@@ -201,13 +201,13 @@ internal class CustomerSessionOperationExecutor(
 
         when (listener) {
             is CustomerSession.RetrievalWithExceptionListener -> listener.onError(
-                statusCode,
+                statusCode ?: 0,
                 message,
                 stripeError,
                 error,
             )
             is CustomerSession.RetrievalListener -> listener.onError(
-                statusCode,
+                statusCode ?: 0,
                 message,
                 stripeError,
             )

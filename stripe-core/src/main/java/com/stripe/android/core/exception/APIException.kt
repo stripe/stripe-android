@@ -9,7 +9,7 @@ import com.stripe.android.core.StripeError
 class APIException(
     stripeError: StripeError? = null,
     requestId: String? = null,
-    statusCode: Int = 0,
+    statusCode: Int? = null,
     message: String? = stripeError?.message,
     cause: Throwable? = null
 ) : StripeException(

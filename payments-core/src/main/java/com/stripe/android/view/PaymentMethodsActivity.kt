@@ -287,7 +287,7 @@ class PaymentMethodsActivity : AppCompatActivity() {
                             when (it) {
                                 is StripeException -> {
                                     TranslatorManager.getErrorMessageTranslator()
-                                        .translate(it.statusCode, it.message, it.stripeError)
+                                        .translate(it.statusCode ?: 0, it.message, it.stripeError)
                                 }
                                 else -> {
                                     it.message.orEmpty()

@@ -12,7 +12,7 @@ import java.util.Objects
 abstract class StripeException(
     val stripeError: StripeError? = null,
     val requestId: String? = null,
-    val statusCode: Int = 0,
+    val statusCode: Int? = null,
     cause: Throwable? = null,
     message: String? = stripeError?.message
 ) : Exception(message, cause) {
