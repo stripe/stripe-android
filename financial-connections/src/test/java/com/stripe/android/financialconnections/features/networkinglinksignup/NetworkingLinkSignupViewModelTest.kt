@@ -154,7 +154,7 @@ class NetworkingLinkSignupViewModelTest {
             // Simulate the user pressing Save To Link after returning from the OTP screen
             viewModel.onSaveAccount()
 
-            verify(saveAccountToLink, never()).new(any(), any(), any(), any())
+            verify(saveAccountToLink, never()).new(any(), any(), any(), any(), any())
 
             assertThat(awaitItem()).isEqualTo(
                 NavigationIntent.NavigateTo(

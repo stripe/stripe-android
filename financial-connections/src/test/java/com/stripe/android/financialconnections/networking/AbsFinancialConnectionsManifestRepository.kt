@@ -1,6 +1,5 @@
 package com.stripe.android.financialconnections.networking
 
-import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
@@ -9,62 +8,70 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import java.util.Date
 
-internal class FakeFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
-
-    var getSynchronizeSessionResponseProvider: () -> SynchronizeSessionResponse =
-        { ApiKeyFixtures.syncResponse() }
-    var markConsentAcquiredProvider: () -> FinancialConnectionsSessionManifest =
-        { ApiKeyFixtures.sessionManifest() }
-    var postAuthorizationSessionProvider: () -> FinancialConnectionsAuthorizationSession =
-        { ApiKeyFixtures.authorizationSession() }
-    var cancelAuthorizationSessionProvider: () -> FinancialConnectionsAuthorizationSession =
-        { ApiKeyFixtures.authorizationSession() }
-    var postMarkLinkingMoreAccountsProvider: () -> FinancialConnectionsSessionManifest =
-        { ApiKeyFixtures.sessionManifest() }
-    var postAuthSessionEvent: () -> FinancialConnectionsAuthorizationSession =
-        { ApiKeyFixtures.authorizationSession() }
+internal abstract class AbsFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
 
     override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String
-    ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
+    ): SynchronizeSessionResponse {
+        TODO("Not yet implemented")
+    }
 
-    override suspend fun markConsentAcquired(
-        clientSecret: String
-    ): FinancialConnectionsSessionManifest = markConsentAcquiredProvider()
+    override suspend fun synchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String
+    ): SynchronizeSessionResponse {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun postAuthorizationSession(
         clientSecret: String,
         applicationId: String,
         institution: FinancialConnectionsInstitution
-    ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
+    ): FinancialConnectionsAuthorizationSession {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun postAuthorizationSessionEvent(
         clientSecret: String,
         clientTimestamp: Date,
         sessionId: String,
         authSessionEvents: List<AuthSessionEvent>
-    ): FinancialConnectionsAuthorizationSession = postAuthSessionEvent()
+    ): FinancialConnectionsAuthorizationSession {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun completeAuthorizationSession(
         clientSecret: String,
         sessionId: String,
         publicToken: String?
-    ): FinancialConnectionsAuthorizationSession = postAuthorizationSessionProvider()
+    ): FinancialConnectionsAuthorizationSession {
+        TODO("Not yet implemented")
+    }
 
-    override suspend fun postMarkLinkingMoreAccounts(
-        clientSecret: String
-    ): FinancialConnectionsSessionManifest = postMarkLinkingMoreAccountsProvider()
+    override suspend fun postMarkLinkingMoreAccounts(clientSecret: String): FinancialConnectionsSessionManifest {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun cancelAuthorizationSession(
         clientSecret: String,
         sessionId: String
-    ): FinancialConnectionsAuthorizationSession = cancelAuthorizationSessionProvider()
+    ): FinancialConnectionsAuthorizationSession {
+        TODO("Not yet implemented")
+    }
 
     override suspend fun retrieveAuthorizationSession(
         clientSecret: String,
         sessionId: String
     ): FinancialConnectionsAuthorizationSession {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>): Result<Unit> {
         TODO("Not yet implemented")
     }
 
@@ -75,7 +82,7 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: Set<String>,
+        selectedAccounts: Set<String>
     ): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")
     }
@@ -95,16 +102,7 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         TODO("Not yet implemented")
     }
 
-    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>): Result<Unit> {
+    override fun updateLocalManifest(block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest) {
         TODO("Not yet implemented")
     }
-
-    override suspend fun synchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
-
-    override fun updateLocalManifest(
-        block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
-    ) = Unit
 }
