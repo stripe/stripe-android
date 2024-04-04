@@ -102,7 +102,9 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         TODO("Not yet implemented")
     }
 
-    override fun updateLocalManifest(block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest) {
+    override fun updateLocalManifest(
+        block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
+    ) {
         TODO("Not yet implemented")
     }
 }
