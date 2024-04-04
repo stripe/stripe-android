@@ -17,7 +17,7 @@ import kotlin.time.DurationUnit
 internal class DefaultLinkEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
-    private val errorReporter : ErrorReporter,
+    private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val logger: Logger,
     private val durationProvider: DurationProvider,
