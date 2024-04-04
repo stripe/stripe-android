@@ -31,6 +31,39 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         AuthenticationException::class,
         APIException::class
     )
+    suspend fun execute(request: StripeRequest) {
+        runCatching {
+            logger.debug("Executing ${request.method.code} request to ${request.url}")
+            stripeNetworkClient.executeRequest(request)
+        }.fold(
+            onSuccess = { response ->
+                eventEmitter.emitIfPresent(response)
+                when {
+                    /**
+                     * HTTP_ACCEPTED (202) means the processing hasn't been completed, and API
+                     * attaches an error body with it.
+                     *
+                     * Mapping 202s as API errors allow upper layers to customize handling.
+                     */
+                    response.code == HttpURLConnection.HTTP_ACCEPTED -> throw handleApiError(response)
+                    response.isError -> throw handleApiError(response)
+                    else -> Unit
+                }
+            },
+            onFailure = {
+                throw APIConnectionException(
+                    "Failed to execute $request",
+                    cause = it
+                )
+            }
+        )
+    }
+
+    @Throws(
+        InvalidRequestException::class,
+        AuthenticationException::class,
+        APIException::class
+    )
     suspend fun <Response> execute(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>

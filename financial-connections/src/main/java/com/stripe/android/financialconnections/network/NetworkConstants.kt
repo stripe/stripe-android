@@ -6,4 +6,5 @@ internal object NetworkConstants {
     internal const val PARAMS_ID = "id"
     internal const val PARAMS_APPLICATION_ID = "application_id"
     internal const val PARAM_SELECTED_ACCOUNTS: String = "selected_accounts"
+    internal const val PARAM_LINKED_ACCOUNTS: String = "linked_accounts"
 }

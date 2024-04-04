@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
+import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
@@ -221,13 +222,15 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
             val state = stateFlow.value
             val selectedAccounts = getCachedAccounts()
+            val manifest = getManifest()
             val phoneController = state.payload()!!.phoneController
             require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
             saveAccountToLink.new(
                 country = phoneController.getCountryCode(),
                 email = state.validEmail!!,
                 phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
-                selectedAccounts = selectedAccounts.map { it.id }.toSet(),
+                selectedAccounts = selectedAccounts,
+                shouldPollAccountNumbers = manifest.isDataFlow,
             )
         }.execute { copy(saveAccountToLink = it) }
     }
