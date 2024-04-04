@@ -1,7 +1,6 @@
 package com.stripe.android.financialconnections.features.institutionpicker
 
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.LocalOverscrollConfiguration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -30,7 +29,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -122,6 +120,7 @@ private fun InstitutionPickerContent(
             is Uninitialized,
             is Loading,
             is Fail -> FullScreenGenericLoading()
+
             is Success -> LoadedContent(
                 listState = listState,
                 previewText = previewText,
@@ -168,42 +167,37 @@ private fun LoadedContent(
         }
     }
 
-    CompositionLocalProvider(
-        // Disable overscroll as it does not play well with sticky headers.
-        LocalOverscrollConfiguration provides null
+    LazyLayout(
+        lazyListState = listState,
+        bodyPadding = PaddingValues(horizontal = 16.dp),
     ) {
-        LazyLayout(
-            lazyListState = listState,
-            bodyPadding = PaddingValues(horizontal = 16.dp),
-        ) {
-            item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-            stickyHeader(key = "searchRow") {
-                SearchRow(
-                    focusRequester = searchInputFocusRequester,
-                    query = input,
-                    onQueryChanged = {
-                        input = it
-                        onQueryChanged(input)
-                    },
-                )
-            }
-            item { Spacer(modifier = Modifier.height(8.dp)) }
-
-            searchResults(
-                isInputEmpty = input.isBlank(),
-                payload = payload,
-                selectedInstitutionId = selectedInstitutionId,
-                onInstitutionSelected = onInstitutionSelected,
-                institutions = institutions,
-                onManualEntryClick = onManualEntryClick,
-                onSearchMoreClick = {
-                    // Scroll to the top of the list and focus on the search input
-                    coroutineScope.launch { listState.animateScrollToItem(index = 1) }
-                    searchInputFocusRequester.requestFocus()
-                }
+        item { SearchTitle(modifier = Modifier.padding(horizontal = 8.dp)) }
+        item { Spacer(modifier = Modifier.height(24.dp)) }
+        stickyHeader(key = "searchRow") {
+            SearchRow(
+                focusRequester = searchInputFocusRequester,
+                query = input,
+                onQueryChanged = {
+                    input = it
+                    onQueryChanged(input)
+                },
             )
         }
+        item { Spacer(modifier = Modifier.height(8.dp)) }
+
+        searchResults(
+            isInputEmpty = input.isBlank(),
+            payload = payload,
+            selectedInstitutionId = selectedInstitutionId,
+            onInstitutionSelected = onInstitutionSelected,
+            institutions = institutions,
+            onManualEntryClick = onManualEntryClick,
+            onSearchMoreClick = {
+                // Scroll to the top of the list and focus on the search input
+                coroutineScope.launch { listState.animateScrollToItem(index = 1) }
+                searchInputFocusRequester.requestFocus()
+            }
+        )
     }
 }
 
