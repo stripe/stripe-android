@@ -60,7 +60,7 @@ private const val LINK_ARROW_ID = "LinkArrow"
 private const val LINK_EMAIL_TEXT_WEIGHT = 0.5f
 private const val LINK_EMAIL_FONT_SIZE = 15
 private const val LINK_REBRAND_PAY_WITH_FONT_SIZE = 21
-private const val LINK_REBRAND_EMAIL_FONT_SIZE = 19
+private const val LINK_REBRAND_EMAIL_FONT_SIZE = 18
 
 private const val LINK_ICON_ASPECT_RATIO = 33f / 13f
 private const val LINK_REBRAND_ICON_ASPECT_RATIO = 72f / 26f
@@ -258,11 +258,15 @@ private fun LinkIconAndDivider() {
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
             if (LinkUi.useNewBrand) {
-                add(id = LINK_ICON_ID, width = 2.7.em, height = 0.9.em) { LinkIcon() }
+                add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkIcon() }
             } else {
                 add(id = LINK_ICON_ID, width = 2.4.em, height = 1.em) { LinkIcon() }
             }
-            add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.5.em) { LinkDivider() }
+            if (LinkUi.useNewBrand) {
+                add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider() }
+            } else {
+                add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.5.em) { LinkDivider() }
+            }
             addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
         }.build()
     )
