@@ -97,7 +97,7 @@ internal class UnsupportedStripeCardScanProxy(private val errorReporter: ErrorRe
             throw illegalStateException
         } else {
             errorReporter.report(
-                ErrorReporter.ErrorEvent.MISSING_CARDSCAN_DEPENDENCY,
+                ErrorReporter.UnexpectedErrorEvent.MISSING_CARDSCAN_DEPENDENCY,
                 StripeException.create(illegalStateException)
             )
         }
@@ -116,7 +116,7 @@ internal class UnsupportedStripeCardScanProxy(private val errorReporter: ErrorRe
             throw illegalStateException
         } else {
             errorReporter.report(
-                ErrorReporter.ErrorEvent.MISSING_CARDSCAN_DEPENDENCY,
+                ErrorReporter.UnexpectedErrorEvent.MISSING_CARDSCAN_DEPENDENCY,
                 StripeException.create(illegalStateException)
             )
         }

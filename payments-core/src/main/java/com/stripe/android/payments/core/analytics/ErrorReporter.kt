@@ -72,17 +72,27 @@ interface ErrorReporter {
             mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
     }
 
+
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    enum class ErrorEvent(override val eventName: String) : AnalyticsEvent {
+    interface ErrorEvent : AnalyticsEvent
+
+    enum class ExpectedErrorEvent(override val eventName: String) : ErrorEvent {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+
+    }
+
+    enum class UnexpectedErrorEvent(val partialEventName : String) : ErrorEvent {
         MISSING_CARDSCAN_DEPENDENCY(
-            eventName = "unexpected.cardscan.missing_dependency"
+            partialEventName = "cardscan.missing_dependency"
         ),
         MISSING_HOSTED_VOUCHER_URL(
-            eventName = "unexpected.payments.missing_hosted_voucher_url"
-        ),
+            partialEventName = "payments.missing_hosted_voucher_url"
+        );
+
+        override val eventName: String
+            get() = "unexpected.$partialEventName"
     }
 }
 
