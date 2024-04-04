@@ -37,15 +37,7 @@ internal class SaveAccountToLinkTest {
             onPollAccountNumbers = polledAccountIds::addAll,
         )
 
-        val saveAccountToLink = SaveAccountToLink(
-            locale = Locale.getDefault(),
-            configuration = FinancialConnectionsSheet.Configuration(
-                ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-            ),
-            successContentRepository = SuccessContentRepository(SavedStateHandle()),
-            repository = repository,
-        )
+        val saveAccountToLink = makeSaveAccountToLink(repository)
 
         saveAccountToLink.new(
             email = "email@email.com",
@@ -71,15 +63,7 @@ internal class SaveAccountToLinkTest {
             onPollAccountNumbers = polledAccountIds::addAll,
         )
 
-        val saveAccountToLink = SaveAccountToLink(
-            locale = Locale.getDefault(),
-            configuration = FinancialConnectionsSheet.Configuration(
-                ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-            ),
-            successContentRepository = SuccessContentRepository(SavedStateHandle()),
-            repository = repository,
-        )
+        val saveAccountToLink = makeSaveAccountToLink(repository)
 
         saveAccountToLink.new(
             email = "email@email.com",
@@ -108,13 +92,8 @@ internal class SaveAccountToLinkTest {
 
         val successRepository = SuccessContentRepository(SavedStateHandle())
 
-        val saveAccountToLink = SaveAccountToLink(
-            locale = Locale.getDefault(),
-            configuration = FinancialConnectionsSheet.Configuration(
-                ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
-                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
-            ),
-            successContentRepository = successRepository,
+        val saveAccountToLink = makeSaveAccountToLink(
+            successRepository = successRepository,
             repository = repository,
         )
 
@@ -135,6 +114,21 @@ internal class SaveAccountToLinkTest {
                 value = R.plurals.stripe_success_pane_desc_link_error,
                 count = 2,
             )
+        )
+    }
+
+    private fun makeSaveAccountToLink(
+        repository: FinancialConnectionsManifestRepository,
+        successRepository: SuccessContentRepository = SuccessContentRepository(SavedStateHandle()),
+    ): SaveAccountToLink {
+        return SaveAccountToLink(
+            locale = Locale.getDefault(),
+            configuration = FinancialConnectionsSheet.Configuration(
+                ApiKeyFixtures.DEFAULT_FINANCIAL_CONNECTIONS_SESSION_SECRET,
+                ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY
+            ),
+            successContentRepository = successRepository,
+            repository = repository,
         )
     }
 
