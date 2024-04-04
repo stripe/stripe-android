@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetLoader
@@ -17,11 +18,13 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
@@ -559,6 +562,7 @@ class DefaultCustomerSheetLoaderTest {
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            errorReporter = FakeErrorReporter(),
         )
 
         val completable = CompletableDeferred<Unit>()
@@ -595,11 +599,37 @@ class DefaultCustomerSheetLoaderTest {
             ),
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = { false },
+            errorReporter = FakeErrorReporter(),
         )
 
         val result = loader.load(configuration)
 
         assertThat(result.exceptionOrNull()).isInstanceOf(IllegalStateException::class.java)
+    }
+
+    @Test
+    fun `On failed to load, show report error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        val loader = createCustomerSheetLoader(
+            elementsSessionRepository = FakeElementsSessionRepository(
+                stripeIntent = STRIPE_INTENT,
+                error = APIConnectionException("Connection failure!"),
+                linkSettings = null,
+                isCbcEligible = false,
+            ),
+            errorReporter = errorReporter,
+        )
+
+        loader.load(
+            configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
+        )
+
+        assertThat(
+            errorReporter.getLoggedErrors().first()
+        ).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_LOAD_FAILURE.eventName
+        )
     }
 
     private fun createCustomerSheetLoader(
@@ -615,6 +645,7 @@ class DefaultCustomerSheetLoaderTest {
         ),
         customerAdapter: CustomerAdapter = FakeCustomerAdapter(),
         lpmRepository: LpmRepository = this.lpmRepository,
+        errorReporter: ErrorReporter = FakeErrorReporter(),
     ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
             isLiveModeProvider = isLiveModeProvider,
@@ -625,6 +656,7 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             customerAdapterProvider = CompletableDeferred(customerAdapter),
+            errorReporter = errorReporter,
         )
     }
 

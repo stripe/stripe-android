@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet
 
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -9,6 +10,7 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -38,6 +40,7 @@ internal class DefaultCustomerSheetLoader(
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
     private val customerAdapterProvider: Deferred<CustomerAdapter>,
+    private val errorReporter: ErrorReporter,
 ) : CustomerSheetLoader {
 
     @Inject constructor(
@@ -46,6 +49,7 @@ internal class DefaultCustomerSheetLoader(
         elementsSessionRepository: ElementsSessionRepository,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         lpmRepository: LpmRepository,
+        errorReporter: ErrorReporter,
     ) : this(
         isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
@@ -53,6 +57,7 @@ internal class DefaultCustomerSheetLoader(
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
         customerAdapterProvider = CustomerSheetHacks.adapter,
+        errorReporter = errorReporter,
     )
 
     override suspend fun load(configuration: CustomerSheet.Configuration): Result<CustomerSheetState.Full> {
@@ -71,6 +76,11 @@ internal class DefaultCustomerSheetLoader(
                 configuration = configuration,
                 elementsSessionWithMetadata = elementsSessionWithMetadata,
             ).getOrThrow()
+        }.onFailure {
+            errorReporter.report(
+                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_LOAD_FAILURE,
+                stripeException = StripeException.create(it)
+            )
         }
     }
 

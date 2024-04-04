@@ -90,6 +90,9 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        CUSTOMER_SHEET_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.load_failure"
+        ),
         PLACES_FIND_AUTOCOMPLETE_ERROR(
             eventName = "address_element.find_autocomplete.error"
         ),
