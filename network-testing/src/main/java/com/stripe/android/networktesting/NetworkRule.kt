@@ -14,18 +14,21 @@ import java.net.HttpURLConnection
 import java.net.URL
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLSocketFactory
+import kotlin.time.Duration
 
 class NetworkRule private constructor(
     private val hostsToTrack: Set<String>,
+    validationTimeout: Duration?,
 ) : TestRule {
-    private val mockWebServer = TestMockWebServer()
+    private val mockWebServer = TestMockWebServer(validationTimeout)
 
     val baseUrl: HttpUrl
         get() = mockWebServer.baseUrl
 
     constructor(
-        hostsToTrack: List<String> = listOf(ApiRequest.API_HOST)
-    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet())
+        hostsToTrack: List<String> = listOf(ApiRequest.API_HOST),
+        validationTimeout: Duration? = null,
+    ) : this(hostsToTrack.map { it.hostFromUrl() }.toSet(), validationTimeout)
 
     override fun apply(base: Statement, description: Description): Statement {
         return NetworkStatement(
@@ -80,11 +83,10 @@ private class NetworkStatement(
     }
 
     private fun validate() {
-        val numberRemainingInQueue = mockWebServer.dispatcher.numberRemainingInQueue()
-        if (numberRemainingInQueue != 0) {
+        if (mockWebServer.dispatcher.hasResponsesInQueue()) {
             throw IllegalStateException(
                 "${description.testClass}#${description.methodName} - mock responses is not " +
-                    "empty. Remaining: $numberRemainingInQueue.\nRemaining Matchers: " +
+                    "empty. Remaining: ${mockWebServer.dispatcher.numberRemainingInQueue()}.\nRemaining Matchers: " +
                     mockWebServer.dispatcher.remainingMatchersDescription()
             )
         }
