@@ -2437,6 +2437,62 @@ internal class PaymentSheetViewModelTest {
         verify(eventReporter).onCardNumberCompleted()
     }
 
+    @Test
+    fun `on 'removePaymentMethod' with no CustomerConfiguration available, should not attempt detach`() = runTest {
+        val customerRepository = spy(FakeCustomerRepository())
+        val viewModel = createViewModel(
+            customerPaymentMethods = PAYMENT_METHODS,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
+                    customer = null
+                )
+            ),
+        )
+
+        viewModel.removePaymentMethod(PAYMENT_METHODS.first())
+
+        verify(customerRepository, never()).detachPaymentMethod(any(), any())
+    }
+
+    @Test
+    fun `on 'modifyPaymentMethod' with no CustomerConfiguration available, should not attempt update`() = runTest {
+        val customerRepository = spy(FakeCustomerRepository())
+
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            customerPaymentMethods = paymentMethods,
+            customerRepository = customerRepository,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
+                    customer = null
+                )
+            ),
+        )
+
+        viewModel.currentScreen.test {
+            awaitItem()
+
+            viewModel.modifyPaymentMethod(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+            val currentScreen = awaitItem()
+
+            assertThat(currentScreen).isInstanceOf(PaymentSheetScreen.EditPaymentMethod::class.java)
+
+            if (currentScreen is PaymentSheetScreen.EditPaymentMethod) {
+                val interactor = currentScreen.interactor
+
+                interactor.handleViewAction(
+                    EditPaymentMethodViewAction.OnBrandChoiceChanged(
+                        EditPaymentMethodViewState.CardBrandChoice(CardBrand.Visa)
+                    )
+                )
+
+                verify(customerRepository, never()).updatePaymentMethod(any(), any(), any())
+            }
+        }
+    }
+
     private suspend fun testProcessDeathRestorationAfterPaymentSuccess(loadStateBeforePaymentResult: Boolean) {
         val stripeIntent = PaymentIntentFactory.create(status = StripeIntent.Status.Succeeded)
         val savedStateHandle = SavedStateHandle(initialState = mapOf("AwaitingPaymentResult" to true))
