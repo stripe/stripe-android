@@ -2,9 +2,9 @@ package com.stripe.android.uicore.elements
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.utils.PaparazziRule
-import com.stripe.android.uicore.utils.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 

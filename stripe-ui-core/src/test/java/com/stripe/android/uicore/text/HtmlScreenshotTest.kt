@@ -1,8 +1,8 @@
 package com.stripe.android.uicore.text
 
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.utils.PaparazziRule
-import com.stripe.android.uicore.utils.SystemAppearance
+import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test

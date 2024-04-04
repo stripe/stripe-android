@@ -67,6 +67,7 @@ dependencies {
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
+    testImplementation project(':screenshot-testing')
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

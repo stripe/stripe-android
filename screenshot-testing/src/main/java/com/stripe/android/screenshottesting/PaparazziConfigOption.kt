@@ -1,4 +1,4 @@
-package com.stripe.android.uicore.utils
+package com.stripe.android.screenshottesting
 
 import app.cash.paparazzi.DeviceConfig
 import com.android.resources.NightMode
