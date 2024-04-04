@@ -59,7 +59,8 @@ private const val LINK_ARROW_ID = "LinkArrow"
 
 private const val LINK_EMAIL_TEXT_WEIGHT = 0.5f
 private const val LINK_EMAIL_FONT_SIZE = 15
-private const val LINK_REBRAND_FONT_SIZE = 20
+private const val LINK_REBRAND_PAY_WITH_FONT_SIZE = 21
+private const val LINK_REBRAND_EMAIL_FONT_SIZE = 19
 
 private const val LINK_ICON_ASPECT_RATIO = 33f / 13f
 private const val LINK_REBRAND_ICON_ASPECT_RATIO = 72f / 26f
@@ -167,7 +168,7 @@ private fun RowScope.SignedInButtonContent(email: String) {
     Text(
         text = annotatedEmail,
         color = color,
-        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
+        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_EMAIL_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
         maxLines = 1
@@ -176,7 +177,7 @@ private fun RowScope.SignedInButtonContent(email: String) {
         Text(
             text = annotatedArrow,
             color = color,
-            fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
+            fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_EMAIL_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
             maxLines = 1,
             inlineContent = InlineContentTemplateBuilder()
                 .addSpacer(id = LINK_SPACER_ID, width = 0.4.em)
@@ -221,7 +222,7 @@ private fun RowScope.SignedOutButtonContent() {
         }.build(),
         modifier = Modifier.padding(start = 6.dp),
         color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current),
-        fontSize = if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE.sp else 18.sp,
+        fontSize = if (LinkUi.useNewBrand) LINK_REBRAND_PAY_WITH_FONT_SIZE.sp else 18.sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
     )
@@ -252,7 +253,7 @@ private fun LinkIconAndDivider() {
 
     Text(
         text = annotatedLinkAndDivider,
-        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
+        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_EMAIL_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
         inlineContent = InlineContentTemplateBuilder().apply {
