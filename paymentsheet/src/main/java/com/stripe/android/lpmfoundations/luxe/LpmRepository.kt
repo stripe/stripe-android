@@ -30,12 +30,14 @@ internal class LpmRepository(
     ): Result {
         val expectedLpms = stripeIntent.paymentMethodTypes
         var failedToParseServerResponse = false
+        var failedToParseServerErrorMessage: String? = null
 
         val sharedDataSpecs: MutableList<SharedDataSpec> = mutableListOf()
 
         if (!serverLpmSpecs.isNullOrEmpty()) {
             val deserializationResult = LpmSerializer.deserializeList(serverLpmSpecs)
             failedToParseServerResponse = deserializationResult.isFailure
+            failedToParseServerErrorMessage = deserializationResult.exceptionOrNull()?.message
             sharedDataSpecs += deserializationResult.getOrElse { emptyList() }
         }
 
@@ -53,6 +55,7 @@ internal class LpmRepository(
         return Result(
             sharedDataSpecs = sharedDataSpecs,
             failedToParseServerResponse = failedToParseServerResponse,
+            failedToParseServerErrorMessage = failedToParseServerErrorMessage
         )
     }
 
@@ -76,5 +79,6 @@ internal class LpmRepository(
     data class Result(
         val sharedDataSpecs: List<SharedDataSpec>,
         val failedToParseServerResponse: Boolean,
+        val failedToParseServerErrorMessage: String?
     )
 }

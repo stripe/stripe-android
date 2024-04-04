@@ -19,18 +19,14 @@ class RealErrorReporter @Inject constructor(
         stripeException: StripeException?,
         additionalNonPiiParams: Map<String, String>,
     ) {
-        val additionalParams = mapOf(
-            "analytics_value" to stripeException?.analyticsValue(),
-            "status_code" to stripeException?.statusCode?.toString(),
-            "request_id" to stripeException?.requestId,
-            "error_type" to stripeException?.stripeError?.type,
-            "error_code" to stripeException?.stripeError?.code,
-        ).plus(additionalNonPiiParams).filterNotNullValues()
+        val paramsFromStripeException = if (stripeException == null) {
+            emptyMap()
+        } else {
+            ErrorReporter.getAdditionalParamsFromStripeException(stripeException = stripeException)
+        }
+        val additionalParams = paramsFromStripeException + additionalNonPiiParams
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
         )
     }
-
-    private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
-        mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
 }

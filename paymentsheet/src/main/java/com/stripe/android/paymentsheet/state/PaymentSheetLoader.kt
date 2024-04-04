@@ -107,7 +107,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             )
 
             if (sharedDataSpecsResult.failedToParseServerResponse) {
-                eventReporter.onLpmSpecFailure()
+                eventReporter.onLpmSpecFailure(sharedDataSpecsResult.failedToParseServerErrorMessage)
             }
 
             create(

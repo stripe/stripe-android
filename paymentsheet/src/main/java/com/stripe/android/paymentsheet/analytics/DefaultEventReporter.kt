@@ -9,7 +9,6 @@ import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -84,7 +83,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         fireEvent(
             PaymentSheetEvent.LoadFailed(
                 duration = duration,
-                error = error.asPaymentSheetLoadingException.type,
+                error = error,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -95,7 +94,7 @@ internal class DefaultEventReporter @Inject internal constructor(
     override fun onElementsSessionLoadFailed(error: Throwable) {
         fireEvent(
             PaymentSheetEvent.ElementsSessionLoadFailed(
-                error = error.asPaymentSheetLoadingException.type,
+                error = error,
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
@@ -262,12 +261,13 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onLpmSpecFailure() {
+    override fun onLpmSpecFailure(errorMessage: String?) {
         fireEvent(
             PaymentSheetEvent.LpmSerializeFailureEvent(
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,
+                errorMessage = errorMessage
             )
         )
     }

@@ -2,9 +2,11 @@ package com.stripe.android.paymentsheet.analytics
 
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.uicore.StripeThemeDefaults
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -52,7 +54,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
     class LoadFailed(
         duration: Duration?,
-        error: String,
+        error: Throwable,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
@@ -60,20 +62,20 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val eventName: String = "mc_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_DURATION to duration?.asSeconds,
-            FIELD_ERROR_MESSAGE to error,
-        )
+            FIELD_ERROR_MESSAGE to error.asPaymentSheetLoadingException.type,
+        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class ElementsSessionLoadFailed(
-        error: String,
+        error: Throwable,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
     ) : PaymentSheetEvent() {
         override val eventName: String = "mc_elements_session_load_failed"
         override val additionalParams: Map<String, Any?> = mapOf(
-            FIELD_ERROR_MESSAGE to error,
-        )
+            FIELD_ERROR_MESSAGE to error.asPaymentSheetLoadingException.type,
+        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class Init(
@@ -304,7 +306,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         mode: EventReporter.Mode,
         private val result: Result,
         duration: Duration?,
-        private val paymentSelection: PaymentSelection?,
+        paymentSelection: PaymentSelection?,
         currency: String?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
@@ -350,9 +352,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
+        val errorMessage: String?
     ) : PaymentSheetEvent() {
         override val eventName: String = "luxe_serialize_failure"
-        override val additionalParams: Map<String, Any?> = emptyMap()
+        override val additionalParams: Map<String, Any?> = mapOf(FIELD_ERROR_MESSAGE to errorMessage)
     }
 
     class AutofillEvent(
@@ -453,7 +456,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         override val additionalParams: Map<String, Any?> = mapOf(
             FIELD_SELECTED_CARD_BRAND to selectedBrand.code,
             FIELD_ERROR_MESSAGE to error.message,
-        )
+        ).plus(ErrorReporter.getAdditionalParamsFromError(error))
     }
 
     class CannotProperlyReturnFromLinkAndLPMs(
