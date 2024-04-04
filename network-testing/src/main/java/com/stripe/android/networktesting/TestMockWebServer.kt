@@ -10,12 +10,13 @@ import java.security.cert.X509Certificate
 import javax.net.ssl.SSLContext
 import javax.net.ssl.SSLSocketFactory
 import javax.net.ssl.X509TrustManager
+import kotlin.time.Duration
 
-internal class TestMockWebServer {
+internal class TestMockWebServer(validationTimeout: Duration?) {
     private val mockWebServer: MockWebServer = MockWebServer()
     private val localhostCertificate: HeldCertificate = localhostCertificate()
 
-    val dispatcher: NetworkDispatcher = NetworkDispatcher()
+    val dispatcher: NetworkDispatcher = NetworkDispatcher(validationTimeout)
     val baseUrl: HttpUrl
 
     init {

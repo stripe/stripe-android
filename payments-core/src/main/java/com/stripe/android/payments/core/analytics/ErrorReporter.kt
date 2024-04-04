@@ -89,6 +89,9 @@ interface ErrorReporter {
         ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
+        ),
+        LINK_INVALID_SESSION_STATE(
+            partialEventName = "link.signup.failure.invalidSessionState"
         );
 
         override val eventName: String

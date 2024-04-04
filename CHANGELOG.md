@@ -2,6 +2,11 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.40.4 - 2024-04-04
+
+### Financial Connections
+[Fixed][8223](https://github.com/stripe/stripe-android/pull/8223) Fixed a crash that occurred when using Compose 1.6.
+
 ## 20.40.3 - 2024-04-01
 
 ### CustomerSheet

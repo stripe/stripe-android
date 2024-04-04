@@ -24,6 +24,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.util.UUID
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class LinkTest {
@@ -32,8 +33,10 @@ internal class LinkTest {
 
     private val activityScenarioRule = composeTestRule.activityRule
 
+    // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
+    // but it's okay if it takes a bit to happen.
     @get:Rule
-    val networkRule = NetworkRule()
+    val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
