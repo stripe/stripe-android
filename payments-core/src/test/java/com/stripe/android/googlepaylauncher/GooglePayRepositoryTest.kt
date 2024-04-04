@@ -46,7 +46,7 @@ class GooglePayRepositoryTest {
     }
 
     @Test
-    fun `when google pay is ready, 'isReady' should return false`() = runTest {
+    fun `when google pay is not ready, 'isReady' should return false`() = runTest {
         val paymentsClient = mock<PaymentsClient>()
 
         whenever(paymentsClient.isReadyToPay(any())) doReturn Tasks.forResult(false)
