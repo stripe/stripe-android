@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.ErrorMessage
+import com.stripe.android.link.ui.LinkRebrand
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.FontSize
@@ -23,6 +24,7 @@ class LinkFieldsScreenshotTest {
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
         FontSize.entries,
+        LinkRebrand.entries,
         boxModifier = Modifier
             .padding(16.dp)
             .fillMaxWidth(),

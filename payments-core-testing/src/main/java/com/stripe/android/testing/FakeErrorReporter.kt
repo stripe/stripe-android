@@ -9,7 +9,11 @@ class FakeErrorReporter : ErrorReporter {
 
     private val loggedErrors: MutableList<String> = mutableListOf()
 
-    override fun report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
+    override fun report(
+        errorEvent: ErrorReporter.ErrorEvent,
+        stripeException: StripeException?,
+        additionalNonPiiParams: Map<String, String>,
+    ) {
         loggedErrors.add(errorEvent.eventName)
     }
 

@@ -5,7 +5,6 @@ import android.os.Build
 import android.util.Base64
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.link.LinkConfiguration
-import com.stripe.android.link.serialization.PopupPayload.Companion.isSetupForFutureUsage
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent

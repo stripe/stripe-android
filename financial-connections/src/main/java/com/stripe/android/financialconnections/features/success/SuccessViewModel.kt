@@ -42,11 +42,11 @@ internal class SuccessViewModel @Inject constructor(
         suspend {
             val manifest = getManifest()
             val accounts = getCachedAccounts()
-            val successContent: SuccessContentRepository.State = successContentRepository.await()
+            val successContent = successContentRepository.get()
             SuccessState.Payload(
                 skipSuccessPane = manifest.skipSuccessPane ?: false,
                 accountsCount = accounts.size,
-                customSuccessMessage = successContent.customSuccessMessage,
+                customSuccessMessage = successContent?.customSuccessMessage,
                 // We just want to use the business name in the CTA if the feature is enabled in the manifest.
                 businessName = manifest.businessName?.takeIf { manifest.useContinueWithMerchantText() },
             )

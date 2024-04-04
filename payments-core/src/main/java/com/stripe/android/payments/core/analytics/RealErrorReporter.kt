@@ -14,12 +14,18 @@ class RealErrorReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val analyticsRequestFactory: AnalyticsRequestFactory
 ) : ErrorReporter {
-    override fun report(errorEvent: ErrorReporter.ErrorEvent, stripeException: StripeException) {
+    override fun report(
+        errorEvent: ErrorReporter.ErrorEvent,
+        stripeException: StripeException?,
+        additionalNonPiiParams: Map<String, String>,
+    ) {
         val additionalParams = mapOf(
-            "analytics_value" to stripeException.analyticsValue(),
-            "status_code" to stripeException.statusCode.toString(),
-            "request_id" to stripeException.requestId,
-        ).filterNotNullValues()
+            "analytics_value" to stripeException?.analyticsValue(),
+            "status_code" to stripeException?.statusCode?.toString(),
+            "request_id" to stripeException?.requestId,
+            "error_type" to stripeException?.stripeError?.type,
+            "error_code" to stripeException?.stripeError?.code,
+        ).plus(additionalNonPiiParams).filterNotNullValues()
         analyticsRequestExecutor.executeAsync(
             analyticsRequestFactory.createRequest(errorEvent, additionalParams)
         )

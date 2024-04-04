@@ -11,7 +11,6 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -56,7 +55,7 @@ internal class CustomerRepositoryTest {
             )
 
             repository.getPaymentMethods(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -86,7 +85,7 @@ internal class CustomerRepositoryTest {
             )
 
             repository.getPaymentMethods(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -159,7 +158,7 @@ internal class CustomerRepositoryTest {
             }
 
             val result = repository.getPaymentMethods(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -217,7 +216,7 @@ internal class CustomerRepositoryTest {
         }
 
         val result = repository.getPaymentMethods(
-            PaymentSheet.CustomerConfiguration(
+            CustomerRepository.CustomerInfo(
                 "customer_id",
                 "ephemeral_key"
             ),
@@ -238,7 +237,7 @@ internal class CustomerRepositoryTest {
             )
 
             val result = repository.getPaymentMethods(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -259,7 +258,7 @@ internal class CustomerRepositoryTest {
             )
 
             val result = repository.getPaymentMethods(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -287,7 +286,7 @@ internal class CustomerRepositoryTest {
 
             // Requesting 3 payment method types, the first request will fail
             val result = repository.getPaymentMethods(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -317,7 +316,7 @@ internal class CustomerRepositoryTest {
 
             // Requesting 3 payment method types, the first request will fail
             val result = repository.getPaymentMethods(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -341,7 +340,7 @@ internal class CustomerRepositoryTest {
             )
 
             val result = repository.detachPaymentMethod(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -359,7 +358,7 @@ internal class CustomerRepositoryTest {
             )
 
             val result = repository.detachPaymentMethod(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -379,7 +378,7 @@ internal class CustomerRepositoryTest {
             )
 
             val result = repository.attachPaymentMethod(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -398,7 +397,7 @@ internal class CustomerRepositoryTest {
             givenAttachPaymentMethodReturns(error)
 
             val result = repository.attachPaymentMethod(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -415,7 +414,7 @@ internal class CustomerRepositoryTest {
             givenUpdatePaymentMethodReturns(success)
 
             val result = repository.updatePaymentMethod(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),
@@ -433,7 +432,7 @@ internal class CustomerRepositoryTest {
             givenUpdatePaymentMethodReturns(error)
 
             val result = repository.updatePaymentMethod(
-                PaymentSheet.CustomerConfiguration(
+                CustomerRepository.CustomerInfo(
                     "customer_id",
                     "ephemeral_key"
                 ),

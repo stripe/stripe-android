@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.painterResource
@@ -43,6 +44,7 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.LinkTerms
+import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
@@ -51,6 +53,7 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
 import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import kotlinx.coroutines.job
 
@@ -220,14 +223,28 @@ internal fun EmailCollection(
 @Composable
 internal fun LinkLogo() {
     Icon(
-        painter = painterResource(id = R.drawable.stripe_link_logo),
+        painter = painterResource(
+            id = if (LinkUi.useNewBrand) {
+                if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+                    R.drawable.stripe_link_logo_knockout_black
+                } else {
+                    R.drawable.stripe_link_logo_knockout_white
+                }
+            } else {
+                R.drawable.stripe_link_logo
+            }
+        ),
         contentDescription = stringResource(id = R.string.stripe_link),
         modifier = Modifier
-            .padding(end = 12.dp)
+            .padding(end = if (LinkUi.useNewBrand) 16.dp else 12.dp)
             .semantics {
                 testTag = "LinkLogoIcon"
             },
-        tint = MaterialTheme.stripeColors.placeholderText,
+        tint = if (LinkUi.useNewBrand) {
+            Color.Unspecified
+        } else {
+            MaterialTheme.stripeColors.placeholderText
+        },
     )
 }
 

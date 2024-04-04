@@ -65,4 +65,59 @@ class RealErrorReporterTest {
         assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
         assertThat(analyticsRequestParams.get("request_id")).isEqualTo(expectedRequestId)
     }
+
+    @Test
+    fun `RealErrorReporter logs StripeError information correctly`() {
+        val expectedRequestId = "some_request_ID"
+        val expectedErrorType = "some_error_type"
+        val expectedErrorCode = "some_error_code"
+        val exception = CardException(
+            StripeError(type = expectedErrorType, code = expectedErrorCode),
+            requestId = expectedRequestId
+        )
+
+        realErrorReporter.report(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
+
+        val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
+        assertThat(executedAnalyticsRequests.size).isEqualTo(1)
+        val analyticsRequestParams = executedAnalyticsRequests.get(0).params
+        assertThat(analyticsRequestParams.get("error_code")).isEqualTo(expectedErrorCode)
+        assertThat(analyticsRequestParams.get("error_type")).isEqualTo(expectedErrorType)
+        assertThat(analyticsRequestParams.get("request_id")).isEqualTo(expectedRequestId)
+    }
+
+    @Test
+    fun `RealErrorReporter logs additionalNonPiiParams via analyticsRequestExecutor`() {
+        val exception = StripeException.create(IllegalArgumentException("this arg isn't legal"))
+        val expectedAnalyticsValue = exception.analyticsValue()
+        val expectedStatusCode = exception.statusCode.toString()
+
+        realErrorReporter.report(
+            errorEvent = ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
+            stripeException = exception,
+            additionalNonPiiParams = mapOf("foo" to "bar")
+        )
+
+        val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
+        assertThat(executedAnalyticsRequests.size).isEqualTo(1)
+        val analyticsRequestParams = executedAnalyticsRequests.get(0).params
+        assertThat(analyticsRequestParams.get("analytics_value")).isEqualTo(expectedAnalyticsValue)
+        assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
+        assertThat(analyticsRequestParams.get("request_id")).isNull()
+        assertThat(analyticsRequestParams.get("foo")).isEqualTo("bar")
+    }
+
+    @Test
+    fun `RealErrorReporter logs skips exception params when exception is null via analyticsRequestExecutor`() {
+        realErrorReporter.report(
+            errorEvent = ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
+        )
+
+        val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
+        assertThat(executedAnalyticsRequests.size).isEqualTo(1)
+        val analyticsRequestParams = executedAnalyticsRequests.get(0).params
+        assertThat(analyticsRequestParams.get("analytics_value")).isNull()
+        assertThat(analyticsRequestParams.get("status_code")).isNull()
+        assertThat(analyticsRequestParams.get("request_id")).isNull()
+    }
 }
