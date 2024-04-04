@@ -90,6 +90,32 @@ internal class SaveAccountToLinkTest {
             onDisabledNetworking = { disabledNetworking = true },
         )
 
+        val saveAccountToLink = makeSaveAccountToLink(repository = repository)
+
+        assertFails {
+            saveAccountToLink.new(
+                email = "email@email.com",
+                phoneNumber = "+15555555555",
+                selectedAccounts = partnerAccounts,
+                country = "US",
+                shouldPollAccountNumbers = true,
+            )
+        }
+
+        assertThat(disabledNetworking).isTrue()
+    }
+
+    @Test
+    fun `Sets custom success message if polling account numbers fails`() = runTest(testDispatcher) {
+        val partnerAccounts = listOf(
+            partnerAccount().copy(id = "id_1", linkedAccountId = "lid_1"),
+            partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
+        )
+
+        val repository = mockManifestRepository(
+            onPollAccountNumbers = { error("This is failing") },
+        )
+
         val successRepository = SuccessContentRepository(SavedStateHandle())
 
         val saveAccountToLink = makeSaveAccountToLink(
@@ -106,8 +132,6 @@ internal class SaveAccountToLinkTest {
                 shouldPollAccountNumbers = true,
             )
         }
-
-        assertThat(disabledNetworking).isTrue()
 
         assertThat(successRepository.get()?.customSuccessMessage).isEqualTo(
             TextResource.PluralId(

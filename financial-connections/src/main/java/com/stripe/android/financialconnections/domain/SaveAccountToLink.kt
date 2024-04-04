@@ -28,7 +28,7 @@ internal class SaveAccountToLink @Inject constructor(
         country: String,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
-        return withReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
+        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = email,
@@ -46,7 +46,7 @@ internal class SaveAccountToLink @Inject constructor(
         selectedAccounts: List<PartnerAccount>,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
-        return withReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
+        return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
             repository.postSaveAccountsToLink(
                 clientSecret = configuration.financialConnectionsSessionClientSecret,
                 email = null,
@@ -59,7 +59,7 @@ internal class SaveAccountToLink @Inject constructor(
         }
     }
 
-    private suspend fun withReadyAccounts(
+    private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
         partnerAccounts: List<PartnerAccount>,
         action: suspend (Set<String>) -> FinancialConnectionsSessionManifest,
@@ -68,20 +68,19 @@ internal class SaveAccountToLink @Inject constructor(
         val linkedAccountIds = partnerAccounts.mapNotNull { it.linkedAccountId }.toSet()
 
         val pollingResult = if (shouldPollAccountNumbers) {
-            pollAccountNumbers(linkedAccountIds).onFailure {
-                storeFailedToSaveToLinkMessage(selectedAccounts = partnerAccounts.size)
-                disableNetworking()
-            }
+            pollAccountNumbers(linkedAccountIds)
         } else {
             Result.success(Unit)
         }
 
-        return pollingResult.map {
-            runCatching {
-                action(selectedAccountIds)
-            }.updateCustomSuccessMessage(
-                selectedAccounts = selectedAccountIds.size,
-            ).getOrThrow()
+        return pollingResult.onFailure {
+            disableNetworking()
+        }.mapCatching {
+            action(selectedAccountIds)
+        }.onSuccess { manifest ->
+            storeSavedToLinkMessage(manifest, selectedAccountIds.size)
+        }.onFailure {
+            storeFailedToSaveToLinkMessage(selectedAccountIds.size)
         }.getOrThrow()
     }
 
@@ -104,20 +103,6 @@ internal class SaveAccountToLink @Inject constructor(
             disabledReason = "account_numbers_not_available",
         )
     }
-
-    /**
-     * Update the custom success message in the [SuccessContentRepository] if the request was successful.
-     * If the request failed, update the custom success screen message to an error message
-     * (accounts were linked successfully, but not saved to Link).
-     */
-    private fun Result<FinancialConnectionsSessionManifest>.updateCustomSuccessMessage(
-        selectedAccounts: Int
-    ): Result<FinancialConnectionsSessionManifest> =
-        this.onSuccess { manifest ->
-            storeSavedToLinkMessage(manifest, selectedAccounts)
-        }.onFailure {
-            storeFailedToSaveToLinkMessage(selectedAccounts)
-        }
 
     private fun storeSavedToLinkMessage(
         manifest: FinancialConnectionsSessionManifest,
