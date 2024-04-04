@@ -25,7 +25,7 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
         val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
 
-        errorReporter.report(ErrorReporter.ErrorEvent.LINK_INVALID_SESSION_STATE)
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_INVALID_SESSION_STATE)
         fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
     }
 

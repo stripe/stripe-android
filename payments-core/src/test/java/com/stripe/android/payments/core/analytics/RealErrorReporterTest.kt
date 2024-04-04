@@ -39,7 +39,7 @@ class RealErrorReporterTest {
         val expectedAnalyticsValue = exception.analyticsValue()
         val expectedStatusCode = exception.statusCode.toString()
 
-        realErrorReporter.report(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
+        realErrorReporter.report(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
 
         val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
@@ -56,7 +56,7 @@ class RealErrorReporterTest {
         val expectedAnalyticsValue = exception.analyticsValue()
         val expectedStatusCode = exception.statusCode.toString()
 
-        realErrorReporter.report(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
+        realErrorReporter.report(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
 
         val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
@@ -76,7 +76,7 @@ class RealErrorReporterTest {
             requestId = expectedRequestId
         )
 
-        realErrorReporter.report(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
+        realErrorReporter.report(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
 
         val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
@@ -93,7 +93,7 @@ class RealErrorReporterTest {
         val expectedStatusCode = exception.statusCode.toString()
 
         realErrorReporter.report(
-            errorEvent = ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
+            errorEvent = ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
             stripeException = exception,
             additionalNonPiiParams = mapOf("foo" to "bar")
         )
@@ -110,7 +110,7 @@ class RealErrorReporterTest {
     @Test
     fun `RealErrorReporter logs skips exception params when exception is null via analyticsRequestExecutor`() {
         realErrorReporter.report(
-            errorEvent = ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
+            errorEvent = ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
         )
 
         val executedAnalyticsRequests = analyticsRequestExecutor.getExecutedRequests()

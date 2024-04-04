@@ -247,7 +247,7 @@ internal class CustomerRepositoryTest {
 
             assertThat(result.getOrNull()).isEmpty()
             assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
+                .containsExactly(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
@@ -269,7 +269,7 @@ internal class CustomerRepositoryTest {
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("error")
             assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
+                .containsExactly(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
@@ -299,7 +299,7 @@ internal class CustomerRepositoryTest {
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD
             )
             assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
+                .containsExactly(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
@@ -327,7 +327,7 @@ internal class CustomerRepositoryTest {
             assertThat(result.exceptionOrNull()?.message)
                 .isEqualTo("Request Failed")
             assertThat(errorReporter.getLoggedErrors())
-                .containsExactly(ErrorReporter.ErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
+                .containsExactly(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE.eventName)
         }
 
     @Test
