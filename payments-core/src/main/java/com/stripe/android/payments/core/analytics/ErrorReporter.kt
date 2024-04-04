@@ -83,6 +83,9 @@ interface ErrorReporter {
         MISSING_HOSTED_VOUCHER_URL(
             eventName = "unexpected.payments.missing_hosted_voucher_url"
         ),
+        LINK_INVALID_SESSION_STATE(
+            eventName = "unexpected.link.signup.failure.invalidSessionState"
+        )
     }
 }
 
