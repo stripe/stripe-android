@@ -88,8 +88,8 @@ public final class com/stripe/android/core/exception/APIConnectionException$Comp
 
 public final class com/stripe/android/core/exception/APIException : com/stripe/android/core/exception/StripeException {
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;)V
-	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Throwable;)V
+	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/String;Ljava/lang/Throwable;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 }
 
 public final class com/stripe/android/core/exception/AuthenticationException : com/stripe/android/core/exception/StripeException {
@@ -114,11 +114,11 @@ public final class com/stripe/android/core/exception/RateLimitException : com/st
 
 public abstract class com/stripe/android/core/exception/StripeException : java/lang/Exception {
 	public fun <init> ()V
-	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/Throwable;Ljava/lang/String;)V
-	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;ILjava/lang/Throwable;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Throwable;Ljava/lang/String;)V
+	public synthetic fun <init> (Lcom/stripe/android/core/StripeError;Ljava/lang/String;Ljava/lang/Integer;Ljava/lang/Throwable;Ljava/lang/String;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun equals (Ljava/lang/Object;)Z
 	public final fun getRequestId ()Ljava/lang/String;
-	public final fun getStatusCode ()I
+	public final fun getStatusCode ()Ljava/lang/Integer;
 	public final fun getStripeError ()Lcom/stripe/android/core/StripeError;
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
