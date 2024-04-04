@@ -13,7 +13,6 @@ import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
-import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
@@ -37,21 +36,20 @@ internal class CustomerApiRepository @Inject constructor(
 ) : CustomerRepository {
 
     override suspend fun retrieveCustomer(
-        customerId: String,
-        ephemeralKeySecret: String,
+        customerInfo: CustomerRepository.CustomerInfo
     ): Customer? {
         return stripeRepository.retrieveCustomer(
-            customerId,
+            customerInfo.id,
             productUsageTokens,
             ApiRequest.Options(
-                ephemeralKeySecret,
+                customerInfo.ephemeralKeySecret,
                 lazyPaymentConfig.get().stripeAccountId
             )
         ).getOrNull()
     }
 
     override suspend fun getPaymentMethods(
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerInfo: CustomerRepository.CustomerInfo,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
     ): Result<List<PaymentMethod>> = withContext(workContext) {
@@ -65,12 +63,12 @@ internal class CustomerApiRepository @Inject constructor(
             async {
                 stripeRepository.getPaymentMethods(
                     listPaymentMethodsParams = ListPaymentMethodsParams(
-                        customerId = customerConfig.id,
+                        customerId = customerInfo.id,
                         paymentMethodType = paymentMethodType,
                     ),
                     productUsageTokens = productUsageTokens,
                     requestOptions = ApiRequest.Options(
-                        apiKey = customerConfig.ephemeralKeySecret,
+                        apiKey = customerInfo.ephemeralKeySecret,
                         stripeAccount = lazyPaymentConfig.get().stripeAccountId,
                     ),
                 ).onFailure {
@@ -117,14 +115,14 @@ internal class CustomerApiRepository @Inject constructor(
     }
 
     override suspend fun detachPaymentMethod(
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String
     ): Result<PaymentMethod> =
         stripeRepository.detachPaymentMethod(
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
-                apiKey = customerConfig.ephemeralKeySecret,
+                apiKey = customerInfo.ephemeralKeySecret,
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
@@ -132,15 +130,15 @@ internal class CustomerApiRepository @Inject constructor(
         }
 
     override suspend fun attachPaymentMethod(
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String
     ): Result<PaymentMethod> =
         stripeRepository.attachPaymentMethod(
-            customerId = customerConfig.id,
+            customerId = customerInfo.id,
             productUsageTokens = productUsageTokens,
             paymentMethodId = paymentMethodId,
             requestOptions = ApiRequest.Options(
-                apiKey = customerConfig.ephemeralKeySecret,
+                apiKey = customerInfo.ephemeralKeySecret,
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {
@@ -148,7 +146,7 @@ internal class CustomerApiRepository @Inject constructor(
         }
 
     override suspend fun updatePaymentMethod(
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String,
         params: PaymentMethodUpdateParams,
     ): Result<PaymentMethod> =
@@ -156,7 +154,7 @@ internal class CustomerApiRepository @Inject constructor(
             paymentMethodId = paymentMethodId,
             paymentMethodUpdateParams = params,
             options = ApiRequest.Options(
-                apiKey = customerConfig.ephemeralKeySecret,
+                apiKey = customerInfo.ephemeralKeySecret,
                 stripeAccount = lazyPaymentConfig.get().stripeAccountId,
             )
         ).onFailure {

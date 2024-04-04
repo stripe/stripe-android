@@ -65,6 +65,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.Closeable
+import java.lang.IllegalStateException
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -504,6 +505,16 @@ internal abstract class BaseSheetViewModel(
     }
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
+        if (customerConfig == null) {
+            // TODO(samer-stripe): Send 'unexpected_error' here
+            return Result.failure(
+                IllegalStateException(
+                    "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
+                        "provided as part of PaymentSheet.Configuration"
+                )
+            )
+        }
+
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
         val didRemoveSelectedItem = currentSelection == paymentMethodId
 
@@ -514,7 +525,10 @@ internal abstract class BaseSheetViewModel(
         }
 
         return customerRepository.detachPaymentMethod(
-            customerConfig!!,
+            CustomerRepository.CustomerInfo(
+                id = customerConfig.id,
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+            ),
             paymentMethodId
         )
     }
@@ -593,10 +607,21 @@ internal abstract class BaseSheetViewModel(
         paymentMethod: PaymentMethod,
         brand: CardBrand
     ): Result<PaymentMethod> {
-        val customerConfig = config.customer
+        if (customerConfig == null) {
+            // TODO(samer-stripe): Send 'unexpected_error' here
+            return Result.failure(
+                IllegalStateException(
+                    "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
+                        "provided as part of PaymentSheet.Configuration"
+                )
+            )
+        }
 
         return customerRepository.updatePaymentMethod(
-            customerConfig = customerConfig!!,
+            customerInfo = CustomerRepository.CustomerInfo(
+                id = customerConfig.id,
+                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+            ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
                 networks = PaymentMethodUpdateParams.Card.Networks(

@@ -64,7 +64,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
 
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.getPaymentMethods(
-                customerConfig = PaymentSheet.CustomerConfiguration(
+                customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey,
                 ),
@@ -84,7 +84,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().map { customerEphemeralKey ->
             customerRepository.attachPaymentMethod(
-                customerConfig = PaymentSheet.CustomerConfiguration(
+                customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
@@ -103,7 +103,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.detachPaymentMethod(
-                customerConfig = PaymentSheet.CustomerConfiguration(
+                customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
@@ -123,7 +123,7 @@ internal class StripeCustomerAdapter @Inject internal constructor(
     ): CustomerAdapter.Result<PaymentMethod> {
         return getCustomerEphemeralKey().mapCatching { customerEphemeralKey ->
             customerRepository.updatePaymentMethod(
-                customerConfig = PaymentSheet.CustomerConfiguration(
+                customerInfo = CustomerRepository.CustomerInfo(
                     id = customerEphemeralKey.customerId,
                     ephemeralKeySecret = customerEphemeralKey.ephemeralKey
                 ),
