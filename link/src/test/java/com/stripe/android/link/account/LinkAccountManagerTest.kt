@@ -1,10 +1,16 @@
 package com.stripe.android.link.account
 
+import android.app.Application
+import androidx.compose.ui.graphics.vector.DefaultTintBlendMode
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.AuthenticationException
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.analytics.DefaultLinkEventsReporter
 import com.stripe.android.link.analytics.LinkEventsReporter
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.repositories.LinkRepository
@@ -18,6 +24,8 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.RealErrorReporter
+import com.stripe.android.testing.FakeAnalyticsRequestExecutor
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -31,6 +39,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 class LinkAccountManagerTest {
+    // TODO: update test to not use a mock
     private val linkRepository = mock<LinkRepository>()
     private val linkEventsReporter = mock<LinkEventsReporter>()
 

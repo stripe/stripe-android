@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -41,13 +42,17 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     }
 
     override fun onSignupFailure(isInline: Boolean, error: Throwable) {
-        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage)
+        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage).plus(
+            ErrorReporter.getAdditionalParamsFromError(error)
+        )
 
         fireEvent(LinkEvent.SignUpFailure, params)
     }
 
     override fun onAccountLookupFailure(error: Throwable) {
-        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage)
+        val params = mapOf(FIELD_ERROR_MESSAGE to error.safeAnalyticsMessage).plus(
+            ErrorReporter.getAdditionalParamsFromError(error)
+        )
 
         fireEvent(LinkEvent.AccountLookupFailure, params)
     }
