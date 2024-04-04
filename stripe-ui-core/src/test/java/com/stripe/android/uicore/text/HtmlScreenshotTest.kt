@@ -1,5 +1,10 @@
 package com.stripe.android.uicore.text
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -11,6 +16,8 @@ class HtmlScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
+        boxModifier = Modifier.padding(PaddingValues(vertical = 16.dp))
+            .fillMaxWidth()
     )
 
     @Test
