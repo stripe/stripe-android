@@ -23,7 +23,7 @@ import org.junit.runners.model.Statement
 
 class PaparazziRule(
     vararg configOptions: List<PaparazziConfigOption>,
-    private val boxModifier: Modifier = Modifier.defaultBoxModifier(),
+    private val boxModifier: Modifier = Modifier,
 ) : TestRule {
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
@@ -101,11 +101,6 @@ class PaparazziRule(
             },
         )
     }
-}
-
-private fun Modifier.defaultBoxModifier(): Modifier {
-    return padding(PaddingValues(vertical = 16.dp))
-        .fillMaxWidth()
 }
 
 private fun Array<out List<PaparazziConfigOption>>.toTestCases(): List<TestCase> {

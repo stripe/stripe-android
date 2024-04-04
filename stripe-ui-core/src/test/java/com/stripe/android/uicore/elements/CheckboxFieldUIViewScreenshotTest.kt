@@ -1,7 +1,12 @@
 package com.stripe.android.uicore.elements
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.StripeTheme
@@ -27,7 +32,9 @@ class CheckboxFieldUIViewScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.entries
+        SystemAppearance.entries,
+        boxModifier = Modifier.padding(PaddingValues(vertical = 16.dp))
+            .fillMaxWidth()
     )
 
     @Test
