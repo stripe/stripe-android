@@ -19,6 +19,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefini
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.LinkInstantDebitsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
@@ -66,6 +67,7 @@ internal object PaymentMethodRegistry {
         TwintDefinition,
         UpiDefinition,
         UsBankAccountDefinition,
+        LinkInstantDebitsDefinition,
         WeChatPayDefinition,
         ZipDefinition,
     )

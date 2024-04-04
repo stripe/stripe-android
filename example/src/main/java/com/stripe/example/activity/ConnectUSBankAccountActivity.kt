@@ -7,6 +7,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
@@ -43,9 +44,10 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                                     "to check the final state of this payment intent."
                             )
                         confirmPaymentIntent(
-                            ConfirmPaymentIntentParams.create(
+                            ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                                paymentMethodOptions = PaymentMethodOptionsParams(),
                                 clientSecret = requireNotNull(result.response.intent.clientSecret),
-                                paymentMethodType = PaymentMethod.Type.USBankAccount
+                                paymentMethodId = result.response.paymentMethodId!!,
                             )
                         )
                     } else {
@@ -87,6 +89,7 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
         viewBinding.confirmWithPaymentButton.setOnClickListener {
             viewModel.createPaymentIntent(
                 country = "us",
+                email = "carlosmuvi@stripe.com",
                 supportedPaymentMethods = "us_bank_account"
             ).observe(this) { result ->
                 result.onSuccess {
@@ -96,7 +99,7 @@ class ConnectUSBankAccountActivity : StripeIntentActivity() {
                         publishableKey = settings.publishableKey,
                         stripeAccountId = settings.stripeAccountId,
                         clientSecret = it.getString("secret"),
-                        configuration = CollectBankAccountConfiguration.USBankAccount(
+                        configuration = CollectBankAccountConfiguration.InstantDebits(
                             name = viewBinding.name.text?.toString() ?: "",
                             email = viewBinding.email.text?.toString()
                         )

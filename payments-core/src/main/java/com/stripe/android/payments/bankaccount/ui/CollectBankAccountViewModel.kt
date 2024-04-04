@@ -7,10 +7,13 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
@@ -35,6 +38,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     // injected instances
     private val createFinancialConnectionsSession: CreateFinancialConnectionsSession,
     private val attachFinancialConnectionsSession: AttachFinancialConnectionsSession,
+    private val stripeRepository: StripeRepository,
     private val retrieveStripeIntent: RetrieveStripeIntent,
     private val savedStateHandle: SavedStateHandle,
     private val logger: Logger
@@ -135,6 +139,17 @@ internal class CollectBankAccountViewModel @Inject constructor(
             when (result) {
                 FinancialConnectionsSheetInstantDebitsResult.Canceled -> finishWithResult(Cancelled)
                 is FinancialConnectionsSheetInstantDebitsResult.Completed -> {
+                    val newResult = stripeRepository.confirmPaymentIntent(
+                        ConfirmPaymentIntentParams.createWithPaymentMethodId(
+                            result.paymentMethodId,
+                            args.clientSecret!!,
+                        ),
+                        options = ApiRequest.Options(
+                            apiKey = args.publishableKey,
+                            stripeAccount = args.stripeAccountId
+                        )
+                    )
+                    logger.debug("Instant debits completed! ${newResult}")
                     finishWithPaymentMethodId(
                         result.paymentMethodId
                     )

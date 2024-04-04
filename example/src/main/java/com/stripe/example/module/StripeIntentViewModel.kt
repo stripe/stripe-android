@@ -24,6 +24,7 @@ internal class StripeIntentViewModel(
         country: String,
         customerId: String? = null,
         supportedPaymentMethods: String? = null,
+        email: String? = null,
         currency: String? = null,
     ) = makeBackendRequest(
         R.string.creating_payment_intent,
@@ -31,6 +32,11 @@ internal class StripeIntentViewModel(
     ) {
         backendApi.createPaymentIntent(
             mapOf("country" to country)
+                .plus(
+                    email?.let {
+                        mapOf("customer_email" to it)
+                    }.orEmpty()
+                )
                 .plus(
                     customerId?.let {
                         mapOf("customer_id" to it)
