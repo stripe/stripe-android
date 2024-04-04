@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import androidx.core.content.res.ResourcesCompat
+import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
@@ -66,7 +67,11 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             PaymentSelection.Link -> {
                 PaymentOption(
-                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_link,
+                    drawableResourceId = if (LinkUi.useNewBrand) {
+                        R.drawable.stripe_ic_paymentsheet_link_2024
+                    } else {
+                        R.drawable.stripe_ic_paymentsheet_link
+                    },
                     lightThemeIconUrl = null,
                     darkThemeIconUrl = null,
                     label = resources.getString(StripeR.string.stripe_link),
@@ -139,7 +144,11 @@ internal class PaymentOptionFactory @Inject constructor(
         return when (val resourceId = selection.paymentMethod.getSavedPaymentMethodIcon()) {
             R.drawable.stripe_ic_paymentsheet_card_unknown -> {
                 when (selection.walletType) {
-                    PaymentSelection.Saved.WalletType.Link -> R.drawable.stripe_ic_paymentsheet_link
+                    PaymentSelection.Saved.WalletType.Link -> if (LinkUi.useNewBrand) {
+                        R.drawable.stripe_ic_paymentsheet_link_2024
+                    } else {
+                        R.drawable.stripe_ic_paymentsheet_link
+                    }
                     PaymentSelection.Saved.WalletType.GooglePay -> R.drawable.stripe_google_pay_mark
                     else -> resourceId
                 }

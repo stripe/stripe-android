@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -199,7 +200,11 @@ internal sealed class PaymentSelection : Parcelable {
 
             @IgnoredOnParcel
             @DrawableRes
-            val iconResource = R.drawable.stripe_ic_paymentsheet_link
+            val iconResource = if (LinkUi.useNewBrand) {
+                R.drawable.stripe_ic_paymentsheet_link_2024
+            } else {
+                R.drawable.stripe_ic_paymentsheet_link
+            }
 
             @IgnoredOnParcel
             val label = when (paymentDetails) {

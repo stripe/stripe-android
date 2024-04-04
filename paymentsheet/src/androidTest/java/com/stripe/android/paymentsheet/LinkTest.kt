@@ -130,7 +130,7 @@ internal class LinkTest {
                 assertThat(paymentOption?.label).endsWith("4242")
 
                 @Suppress("DEPRECATION")
-                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -331,7 +331,7 @@ internal class LinkTest {
             assertThat(paymentOption?.label).endsWith("4242")
 
             @Suppress("DEPRECATION")
-            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -429,7 +429,7 @@ internal class LinkTest {
                 assertThat(paymentOption?.label).endsWith("4242")
 
                 @Suppress("DEPRECATION")
-                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -550,7 +550,7 @@ internal class LinkTest {
             assertThat(paymentOption?.label).endsWith("1001")
 
             @Suppress("DEPRECATION")
-            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->

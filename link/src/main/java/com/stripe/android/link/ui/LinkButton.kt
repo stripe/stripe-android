@@ -25,7 +25,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -57,8 +59,11 @@ private const val LINK_ARROW_ID = "LinkArrow"
 
 private const val LINK_EMAIL_TEXT_WEIGHT = 0.5f
 private const val LINK_EMAIL_FONT_SIZE = 15
+private const val LINK_REBRAND_PAY_WITH_FONT_SIZE = 21
+private const val LINK_REBRAND_EMAIL_FONT_SIZE = 18
 
 private const val LINK_ICON_ASPECT_RATIO = 33f / 13f
+private const val LINK_REBRAND_ICON_ASPECT_RATIO = 72f / 26f
 private const val LINK_ARROW_ICON_ASPECT_RATIO = 18f / 12f
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -92,8 +97,17 @@ fun LinkButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val alpha = if (enabled) {
+        if (LinkUi.useNewBrand) {
+            1f
+        } else {
+            ContentAlpha.high
+        }
+    } else {
+        ContentAlpha.disabled
+    }
     CompositionLocalProvider(
-        LocalContentAlpha provides if (enabled) ContentAlpha.high else ContentAlpha.disabled
+        LocalContentAlpha provides alpha
     ) {
         DefaultLinkTheme {
             Button(
@@ -154,21 +168,23 @@ private fun RowScope.SignedInButtonContent(email: String) {
     Text(
         text = annotatedEmail,
         color = color,
-        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_EMAIL_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
         overflow = TextOverflow.Ellipsis,
         modifier = Modifier.weight(LINK_EMAIL_TEXT_WEIGHT, fill = false),
         maxLines = 1
     )
-    Text(
-        text = annotatedArrow,
-        color = color,
-        fontSize = LINK_EMAIL_FONT_SIZE.sp,
-        maxLines = 1,
-        inlineContent = InlineContentTemplateBuilder()
-            .addSpacer(id = LINK_SPACER_ID, width = 0.4.em)
-            .add(id = LINK_ARROW_ID, width = 1.2.em, height = 0.8.em) { LinkArrow() }
-            .build()
-    )
+    if (!LinkUi.useNewBrand) {
+        Text(
+            text = annotatedArrow,
+            color = color,
+            fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_EMAIL_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
+            maxLines = 1,
+            inlineContent = InlineContentTemplateBuilder()
+                .addSpacer(id = LINK_SPACER_ID, width = 0.4.em)
+                .add(id = LINK_ARROW_ID, width = 1.2.em, height = 0.8.em) { LinkArrow() }
+                .build()
+        )
+    }
 }
 
 @Suppress("UnusedReceiverParameter")
@@ -181,26 +197,32 @@ private fun RowScope.SignedOutButtonContent() {
             id = LINK_ICON_ID,
             alternateText = "[icon]"
         )
-        appendInlineContent(
-            id = LINK_SPACER_ID,
-            alternateText = "[spacer]"
-        )
-        appendInlineContent(
-            id = LINK_ARROW_ID,
-            alternateText = "[arrow]"
-        )
+        if (!LinkUi.useNewBrand) {
+            appendInlineContent(
+                id = LINK_SPACER_ID,
+                alternateText = "[spacer]"
+            )
+            appendInlineContent(
+                id = LINK_ARROW_ID,
+                alternateText = "[arrow]"
+            )
+        }
     }
 
     Text(
         text = iconizedText,
-        inlineContent = InlineContentTemplateBuilder()
-            .add(id = LINK_ICON_ID, width = 2.2.em, height = 0.93.em) { LinkIcon() }
-            .addSpacer(id = LINK_SPACER_ID, width = 0.2.em)
-            .add(id = LINK_ARROW_ID, width = 1.05.em, height = 0.7.em) { LinkArrow() }
-            .build(),
+        inlineContent = InlineContentTemplateBuilder().apply {
+            if (LinkUi.useNewBrand) {
+                add(id = LINK_ICON_ID, width = 2.6.em, height = 0.9.em) { LinkIcon() }
+            } else {
+                add(id = LINK_ICON_ID, width = 2.2.em, height = 0.93.em) { LinkIcon() }
+                addSpacer(id = LINK_SPACER_ID, width = 0.2.em)
+                add(id = LINK_ARROW_ID, width = 1.05.em, height = 0.7.em) { LinkArrow() }
+            }
+        }.build(),
         modifier = Modifier.padding(start = 6.dp),
         color = MaterialTheme.linkColors.buttonLabel.copy(alpha = LocalContentAlpha.current),
-        fontSize = 18.sp,
+        fontSize = if (LinkUi.useNewBrand) LINK_REBRAND_PAY_WITH_FONT_SIZE.sp else 18.sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1
     )
@@ -231,26 +253,45 @@ private fun LinkIconAndDivider() {
 
     Text(
         text = annotatedLinkAndDivider,
-        fontSize = LINK_EMAIL_FONT_SIZE.sp,
+        fontSize = (if (LinkUi.useNewBrand) LINK_REBRAND_EMAIL_FONT_SIZE else LINK_EMAIL_FONT_SIZE).sp,
         overflow = TextOverflow.Ellipsis,
         maxLines = 1,
-        inlineContent = InlineContentTemplateBuilder()
-            .add(id = LINK_ICON_ID, width = 2.4.em, height = 1.em) { LinkIcon() }
-            .add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.5.em) { LinkDivider() }
-            .addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
-            .build()
+        inlineContent = InlineContentTemplateBuilder().apply {
+            if (LinkUi.useNewBrand) {
+                add(id = LINK_ICON_ID, width = 3.em, height = 1.1.em) { LinkIcon() }
+            } else {
+                add(id = LINK_ICON_ID, width = 2.4.em, height = 1.em) { LinkIcon() }
+            }
+            if (LinkUi.useNewBrand) {
+                add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.3.em) { LinkDivider() }
+            } else {
+                add(id = LINK_DIVIDER_ID, width = 0.1.em, height = 1.5.em) { LinkDivider() }
+            }
+            addSpacer(id = LINK_DIVIDER_SPACER_ID, width = 0.5.em)
+        }.build()
     )
 }
 
 @Composable
 private fun LinkIcon() {
-    Icon(
-        painter = painterResource(R.drawable.stripe_link_logo),
-        contentDescription = stringResource(StripeR.string.stripe_link),
-        modifier = Modifier.aspectRatio(LINK_ICON_ASPECT_RATIO),
-        tint = MaterialTheme.linkColors.buttonLabel
-            .copy(alpha = LocalContentAlpha.current)
-    )
+    if (LinkUi.useNewBrand) {
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_logo_bw),
+            contentDescription = stringResource(StripeR.string.stripe_link),
+            modifier = Modifier
+                .aspectRatio(LINK_REBRAND_ICON_ASPECT_RATIO)
+                .alpha(LocalContentAlpha.current),
+            tint = Color.Unspecified,
+        )
+    } else {
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_logo),
+            contentDescription = stringResource(StripeR.string.stripe_link),
+            modifier = Modifier.aspectRatio(LINK_ICON_ASPECT_RATIO),
+            tint = MaterialTheme.linkColors.buttonLabel
+                .copy(alpha = LocalContentAlpha.current)
+        )
+    }
 }
 
 @Composable
@@ -265,11 +306,13 @@ private fun LinkDivider() {
 
 @Composable
 private fun LinkArrow() {
-    Icon(
-        painter = painterResource(R.drawable.stripe_link_arrow),
-        contentDescription = null,
-        modifier = Modifier.aspectRatio(LINK_ARROW_ICON_ASPECT_RATIO),
-        tint = MaterialTheme.linkColors.buttonLabel
-            .copy(alpha = LocalContentAlpha.current)
-    )
+    if (!LinkUi.useNewBrand) {
+        Icon(
+            painter = painterResource(R.drawable.stripe_link_arrow),
+            contentDescription = null,
+            modifier = Modifier.aspectRatio(LINK_ARROW_ICON_ASPECT_RATIO),
+            tint = MaterialTheme.linkColors.buttonLabel
+                .copy(alpha = LocalContentAlpha.current)
+        )
+    }
 }

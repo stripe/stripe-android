@@ -1,13 +1,14 @@
-package com.stripe.android.link
+package com.stripe.android.link.ui
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.ui.LinkButton
-import com.stripe.android.utils.screenshots.FontSize
-import com.stripe.android.utils.screenshots.PaparazziRule
-import com.stripe.android.utils.screenshots.SystemAppearance
+import com.stripe.android.link.utils.PaparazziRule
+import com.stripe.android.link.utils.screenshots.FontSize
+import com.stripe.android.link.utils.screenshots.SystemAppearance
+import com.stripe.android.model.ElementsSession
+import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 
@@ -16,10 +17,16 @@ internal class LinkButtonScreenshotTest {
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
         FontSize.entries,
+        LinkRebrand.entries,
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
     )
+
+    @After
+    fun resetUseNewBrand() {
+        LinkUi.useNewBrand = ElementsSession.LinkSettings.useRebrandDefault
+    }
 
     @Test
     fun testNewUser() {
