@@ -120,7 +120,7 @@ internal interface FinancialConnectionsManifestRepository {
         sessionId: String
     ): FinancialConnectionsAuthorizationSession
 
-    suspend fun pollAccountNumbers(linkedAccounts: Set<String>): Result<Unit>
+    suspend fun pollAccountNumbers(linkedAccounts: Set<String>)
 
     /**
      * Save the authorized bank accounts to Link.
@@ -412,7 +412,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         }
     }
 
-    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>): Result<Unit> {
+    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
         val accounts = linkedAccounts.mapIndexed { index, account ->
             "${NetworkConstants.PARAM_LINKED_ACCOUNTS}[$index]" to account
         }.toMap()
@@ -423,9 +423,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
             params = accounts,
         )
 
-        return runCatching {
-            requestExecutor.execute(request)
-        }
+        requestExecutor.execute(request)
     }
 
     override suspend fun postSaveAccountsToLink(

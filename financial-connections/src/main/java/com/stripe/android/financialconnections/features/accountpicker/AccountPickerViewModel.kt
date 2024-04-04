@@ -298,7 +298,7 @@ internal class AccountPickerViewModel @Inject constructor(
                 saveAccountToLink.existing(
                     consumerSessionClientSecret = consumerSessionClientSecret,
                     selectedAccounts = accountsList.data,
-                    shouldPollAccountNumbers = true,
+                    shouldPollAccountNumbers = manifest.isDataFlow,
                 )
             }
 

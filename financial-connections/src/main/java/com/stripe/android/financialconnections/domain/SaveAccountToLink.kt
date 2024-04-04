@@ -68,7 +68,7 @@ internal class SaveAccountToLink @Inject constructor(
         val linkedAccountIds = partnerAccounts.mapNotNull { it.linkedAccountId }.toSet()
 
         val pollingResult = if (shouldPollAccountNumbers) {
-            pollAccountNumbers(linkedAccountIds)
+            runCatching { awaitAccountNumbersReady(linkedAccountIds) }
         } else {
             Result.success(Unit)
         }
@@ -84,17 +84,15 @@ internal class SaveAccountToLink @Inject constructor(
         }.getOrThrow()
     }
 
-    private suspend fun pollAccountNumbers(linkedAccountIds: Set<String>): Result<Unit> {
-        return runCatching {
-            retryOnException(
-                options = PollTimingOptions(
-                    initialDelayMs = 1.seconds.inWholeMilliseconds,
-                    maxNumberOfRetries = 20,
-                ),
-                retryCondition = { it.shouldRetry },
-                block = { repository.pollAccountNumbers(linkedAccountIds) },
-            )
-        }
+    private suspend fun awaitAccountNumbersReady(linkedAccountIds: Set<String>) {
+        return retryOnException(
+            options = PollTimingOptions(
+                initialDelayMs = 1.seconds.inWholeMilliseconds,
+                maxNumberOfRetries = 20,
+            ),
+            retryCondition = { it.shouldRetry },
+            block = { repository.pollAccountNumbers(linkedAccountIds) },
+        )
     }
 
     private suspend fun disableNetworking() {

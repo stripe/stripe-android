@@ -71,7 +71,7 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
         TODO("Not yet implemented")
     }
 
-    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>): Result<Unit> {
+    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
         TODO("Not yet implemented")
     }
 

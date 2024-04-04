@@ -174,9 +174,8 @@ internal class SaveAccountToLinkTest {
                 return sessionManifest()
             }
 
-            override suspend fun pollAccountNumbers(linkedAccounts: Set<String>): Result<Unit> {
+            override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
                 onPollAccountNumbers(linkedAccounts)
-                return Result.success(Unit)
             }
 
             override suspend fun disableNetworking(
