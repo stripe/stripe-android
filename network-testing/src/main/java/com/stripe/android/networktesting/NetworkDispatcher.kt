@@ -49,9 +49,10 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         }
 
         var timeWaited = 0.milliseconds
+        val sleepDuration = 100.milliseconds
         while (enqueuedResponses.size != 0 && timeWaited < validationTimeout) {
-            SystemClock.sleep(100)
-            timeWaited = timeWaited.plus(100.milliseconds)
+            SystemClock.sleep(sleepDuration.inWholeMilliseconds)
+            timeWaited = timeWaited.plus(sleepDuration)
         }
         return enqueuedResponses.size != 0
     }
