@@ -321,7 +321,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             mapOf(
                 FIELD_DURATION to duration?.asSeconds,
                 FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + paymentSelection.selectedPaymentMethodType() + errorInfo()
+            ) + buildDeferredIntentConfirmationType() + paymentSelection.selectedPaymentMethodType() + errorMessage()
 
         private fun buildDeferredIntentConfirmationType(): Map<String, String> {
             return deferredIntentConfirmationType?.let {
@@ -329,14 +329,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             }.orEmpty()
         }
 
-        private fun errorInfo(): Map<String, String> {
+        private fun errorMessage(): Map<String, String> {
             return when (result) {
                 is Result.Success -> emptyMap()
-                is Result.Failure -> mapOf(FIELD_ERROR_MESSAGE to result.error.analyticsValue).plus(
-                    ErrorReporter.getAdditionalParamsFromError(
-                        result.error
-                    )
-                )
+                is Result.Failure -> mapOf(FIELD_ERROR_MESSAGE to result.error.analyticsValue)
             }
         }
 
