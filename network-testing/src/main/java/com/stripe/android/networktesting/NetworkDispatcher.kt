@@ -1,5 +1,6 @@
 package com.stripe.android.networktesting
 
+import android.os.SystemClock
 import android.util.Log
 import com.stripe.android.networktesting.RequestMatchers.composite
 import okhttp3.mockwebserver.Dispatcher
@@ -7,8 +8,10 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 import java.util.Queue
 import java.util.concurrent.ConcurrentLinkedQueue
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.milliseconds
 
-internal class NetworkDispatcher : Dispatcher() {
+internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dispatcher() {
     private val enqueuedResponses: Queue<Entry> = ConcurrentLinkedQueue()
 
     fun enqueue(vararg requestMatcher: RequestMatcher, responseFactory: (MockResponse) -> Unit) {
@@ -38,6 +41,19 @@ internal class NetworkDispatcher : Dispatcher() {
 
     fun clear() {
         enqueuedResponses.clear()
+    }
+
+    fun hasResponsesInQueue(): Boolean {
+        if (validationTimeout == null) {
+            return enqueuedResponses.size != 0
+        }
+
+        var timeWaited = 0.milliseconds
+        while (enqueuedResponses.size != 0 && timeWaited < validationTimeout) {
+            SystemClock.sleep(100)
+            timeWaited = timeWaited.plus(100.milliseconds)
+        }
+        return enqueuedResponses.size != 0
     }
 
     fun numberRemainingInQueue(): Int {
