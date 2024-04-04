@@ -17,6 +17,7 @@ import kotlin.time.DurationUnit
 internal class DefaultLinkEventsReporter @Inject constructor(
     private val analyticsRequestExecutor: AnalyticsRequestExecutor,
     private val paymentAnalyticsRequestFactory: PaymentAnalyticsRequestFactory,
+    private val errorReporter : ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val logger: Logger,
     private val durationProvider: DurationProvider,
@@ -24,6 +25,7 @@ internal class DefaultLinkEventsReporter @Inject constructor(
     override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
         val params = mapOf(FIELD_SESSION_STATE to state.analyticsValue)
 
+        errorReporter.report(ErrorReporter.ErrorEvent.LINK_INVALID_SESSION_STATE)
         fireEvent(LinkEvent.SignUpFailureInvalidSessionState, params)
     }
 
