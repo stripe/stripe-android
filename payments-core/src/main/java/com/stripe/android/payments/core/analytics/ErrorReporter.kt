@@ -80,6 +80,12 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        LINK_CREATE_CARD_FAILURE(
+            eventName = "link.create_new_card.create_payment_details_failure"
+        ),
+        LINK_SHARE_CARD_FAILURE(
+            eventName = "link.create_new_card.share_payment_details_failure"
+        )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -92,6 +98,9 @@ interface ErrorReporter {
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
+        ),
+        LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
+            partialEventName = "link.create_new_card.missing_link_account"
         );
 
         override val eventName: String
