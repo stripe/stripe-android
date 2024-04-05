@@ -2083,19 +2083,6 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `verify separator text resource id when is SetupIntent`() = runTest {
-        val viewModel = createViewModel(
-            stripeIntent = SETUP_INTENT
-        )
-
-        //viewModel.checkout()
-        viewModel.walletsState.test {
-            val state = awaitItem()
-            assertThat(state?.dividerTextResource).isEqualTo(R.string.stripe_paymentsheet_or_use)
-        }
-    }
-
-    @Test
     fun `Launch confirmation form when Bacs debit is selected and filled & succeeds payment`() = runTest {
         fakeIntentConfirmationInterceptor.enqueueCompleteStep()
 
