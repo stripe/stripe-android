@@ -57,7 +57,6 @@ internal interface FinancialConnectionsSheetNativeModule {
     fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
 
     @Binds
-    @Singleton
     fun bindsPresentAccountUpdateRequiredSheet(
         impl: RealPresentAccountUpdateRequiredSheet,
     ): PresentAccountUpdateRequiredSheet

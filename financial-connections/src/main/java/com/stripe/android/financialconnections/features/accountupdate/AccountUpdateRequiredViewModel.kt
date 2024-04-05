@@ -142,12 +142,12 @@ internal data class AccountUpdateRequiredState(
         val type: Type,
     ) : Parcelable
 
-    sealed class Type(val pane: Pane) : Parcelable {
+    sealed interface Type : Parcelable {
 
         @Parcelize
-        data class Repair(val authorization: String?) : Type(Pane.BANK_AUTH_REPAIR)
+        data class Repair(val authorization: String?) : Type
 
         @Parcelize
-        data class PartnerAuth(val institution: FinancialConnectionsInstitution?) : Type(Pane.PARTNER_AUTH)
+        data class PartnerAuth(val institution: FinancialConnectionsInstitution?) : Type
     }
 }

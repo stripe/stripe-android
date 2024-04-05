@@ -35,19 +35,17 @@ internal fun AccountUpdateRequiredModal(
 
     val state by viewModel.stateFlow.collectAsState()
 
-    state.payload()?.let { payload ->
-        AccountUpdateRequiredModalContent(
-            payload = payload,
-            onContinue = viewModel::handleContinue,
-            onCancel = viewModel::handleCancel,
-            modifier = modifier,
-        )
-    }
+    AccountUpdateRequiredModalContent(
+        payload = state.payload(),
+        onContinue = viewModel::handleContinue,
+        onCancel = viewModel::handleCancel,
+        modifier = modifier,
+    )
 }
 
 @Composable
 private fun AccountUpdateRequiredModalContent(
-    payload: AccountUpdateRequiredState.Payload,
+    payload: AccountUpdateRequiredState.Payload?,
     onContinue: () -> Unit,
     onCancel: () -> Unit,
     modifier: Modifier = Modifier,
@@ -75,7 +73,7 @@ private fun AccountUpdateRequiredModalContent(
             }
         },
         body = {
-            InstitutionIcon(institutionIcon = payload.iconUrl)
+            InstitutionIcon(institutionIcon = payload?.iconUrl)
 
             Spacer(modifier = Modifier.height(16.dp))
 

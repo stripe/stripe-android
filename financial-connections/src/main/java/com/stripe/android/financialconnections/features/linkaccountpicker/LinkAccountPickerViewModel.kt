@@ -21,7 +21,6 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
-import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.exception.UnclassifiedError
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState
 import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredState.Type.PartnerAuth
@@ -63,7 +62,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     private val handleClickableUrl: HandleClickableUrl,
     private val fetchNetworkedAccounts: FetchNetworkedAccounts,
     private val selectNetworkedAccounts: SelectNetworkedAccounts,
-    private val updateLocalManifest: UpdateLocalManifest,
     private val updateCachedAccounts: UpdateCachedAccounts,
     private val getSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
@@ -193,8 +191,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             val nextPane = accounts.lastOrNull()?.nextPaneOnSelection
             val accountIds = accounts.map { it.id }.toSet()
 
-            eventTracker.track(Click("click.link_accounts", PANE))
-
             eventTracker.track(
                 AccountsSubmitted(
                     accountIds = accountIds,
@@ -202,6 +198,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
                     pane = PANE
                 )
             )
+
+            eventTracker.track(Click("click.link_accounts", PANE))
 
             if (nextPane == SUCCESS) {
                 selectAccounts(
@@ -222,7 +220,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             selectedAccountIds = accountIds,
         )
-        updateLocalManifest { it.copy(activeInstitution = null) }
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
         navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
     }
