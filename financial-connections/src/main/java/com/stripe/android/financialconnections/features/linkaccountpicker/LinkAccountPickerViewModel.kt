@@ -6,7 +6,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsSubmitted
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
@@ -279,6 +278,8 @@ internal class LinkAccountPickerViewModel @Inject constructor(
     }
 
     fun onAccountClick(partnerAccount: PartnerAccount) {
+        logAccountClick(partnerAccount)
+
         val updateRequired = createUpdateRequiredContent(
             partnerAccount = partnerAccount,
             partnerToCoreAuths = stateFlow.value.payload()?.partnerToCoreAuths,
@@ -289,8 +290,6 @@ internal class LinkAccountPickerViewModel @Inject constructor(
             presentUpdateRequiredSheet(updateRequired, referrer = PANE)
             return
         }
-
-        logAccountClick(partnerAccount)
 
         setState {
             val payload = requireNotNull(payload())
@@ -371,9 +370,8 @@ internal data class LinkAccountPickerState(
                     value = selectedAccount?.selectionCta ?: payload.defaultCta,
                 )
             } else {
-                TextResource.PluralId(
-                    value = R.plurals.stripe_account_picker_cta_link,
-                    count = selectedAccountIds.size,
+                TextResource.Text(
+                    value = payload?.defaultCta.orEmpty(),
                 )
             }
         }
