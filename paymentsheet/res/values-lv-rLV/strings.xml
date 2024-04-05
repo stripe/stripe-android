@@ -53,6 +53,10 @@
   <string name="stripe_paymentsheet_or_pay_using">Vai maksāt, izmantojot</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Vai maksāt ar karti</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Vai izmantojiet</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Vai izmantojiet karti</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Maksāt</string>
   <!-- Title shown above a section containing various payment options -->
