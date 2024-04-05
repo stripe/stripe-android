@@ -85,6 +85,12 @@ interface ErrorReporter {
         ),
         LINK_SHARE_CARD_FAILURE(
             eventName = "link.create_new_card.share_payment_details_failure"
+        ),
+        LINK_SIGN_UP_FAILURE(
+            eventName = "link.sign_up.failure"
+        ),
+        LINK_LOG_OUT_FAILURE(
+            eventName = "link.log_out.failure"
         )
     }
 

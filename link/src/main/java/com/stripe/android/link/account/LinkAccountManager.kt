@@ -2,6 +2,7 @@ package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.BuildConfig
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
@@ -104,6 +105,7 @@ internal class LinkAccountManager @Inject constructor(
         }.onSuccess {
             Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
         }.onFailure { error ->
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_LOG_OUT_FAILURE, StripeException.create(error))
             Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
         }
     }
@@ -173,6 +175,8 @@ internal class LinkAccountManager @Inject constructor(
         linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction.consumerAction)
             .map { consumerSession ->
                 setAccount(consumerSession)
+            }.onFailure {
+                errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SIGN_UP_FAILURE, StripeException.create(it))
             }
 
     /**
