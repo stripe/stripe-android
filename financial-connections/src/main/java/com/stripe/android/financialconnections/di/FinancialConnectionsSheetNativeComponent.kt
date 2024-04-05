@@ -6,6 +6,7 @@ import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
+import com.stripe.android.financialconnections.features.accountupdate.AccountUpdateRequiredSubcomponent
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
@@ -61,6 +62,7 @@ internal interface FinancialConnectionsSheetNativeComponent {
     val errorSubcomponent: ErrorSubcomponent.Factory
     val exitSubcomponent: ExitSubcomponent.Factory
     val noticeSheetSubcomponent: NoticeSheetSubcomponent.Factory
+    val accountUpdateRequiredSubcomponent: AccountUpdateRequiredSubcomponent.Factory
     val networkingLinkSignupSubcomponent: NetworkingLinkSignupSubcomponent.Factory
     val networkingLinkLoginWarmupSubcomponent: NetworkingLinkLoginWarmupSubcomponent.Factory
     val networkingLinkVerificationSubcomponent: NetworkingLinkVerificationSubcomponent.Factory

@@ -9,6 +9,8 @@ import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.RealHandleError
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
+import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
+import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
 import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
 import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
 import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
@@ -53,6 +55,11 @@ internal interface FinancialConnectionsSheetNativeModule {
 
     @Binds
     fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
+
+    @Binds
+    fun bindsPresentAccountUpdateRequiredSheet(
+        impl: RealPresentAccountUpdateRequiredSheet,
+    ): PresentAccountUpdateRequiredSheet
 
     @Singleton
     @Binds
