@@ -1636,7 +1636,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Shows the correct divider text if intent only supports card`() = runTest {
+    fun `Shows the correct divider text if PaymentIntent only supports card`() = runTest {
         val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card"))
         val viewModel = createViewModel(
             isGooglePayReady = true,
@@ -1650,7 +1650,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `Shows the correct divider text if intent supports multiple payment method types`() = runTest {
+    fun `Shows the correct divider text if PaymentIntent supports multiple payment method types`() = runTest {
         val intent = PAYMENT_INTENT.copy(paymentMethodTypes = listOf("card", "cashapp"))
         val viewModel = createViewModel(
             isGooglePayReady = true,
@@ -1665,6 +1665,39 @@ internal class PaymentSheetViewModelTest {
         viewModel.walletsState.test {
             val textResource = awaitItem()?.dividerTextResource
             assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_pay_using)
+        }
+    }
+
+    @Test
+    fun `Shows the correct divider text if SetupIntent only supports card and`() = runTest {
+        val intent = SETUP_INTENT.copy(paymentMethodTypes = listOf("card"))
+        val viewModel = createViewModel(
+            isGooglePayReady = true,
+            stripeIntent = intent,
+        )
+
+        viewModel.walletsState.test {
+            val textResource = awaitItem()?.dividerTextResource
+            assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_use_a_card)
+        }
+    }
+
+    @Test
+    fun `Shows the correct divider text if SetupIntent supports multiple payment method types`() = runTest {
+        val intent = SETUP_INTENT.copy(paymentMethodTypes = listOf("card", "cashapp"))
+        val viewModel = createViewModel(
+            isGooglePayReady = true,
+            args = ARGS_CUSTOMER_WITH_GOOGLEPAY.copy(
+                config = ARGS_CUSTOMER_WITH_GOOGLEPAY.config.copy(
+                    allowsDelayedPaymentMethods = true,
+                ),
+            ),
+            stripeIntent = intent,
+        )
+
+        viewModel.walletsState.test {
+            val textResource = awaitItem()?.dividerTextResource
+            assertThat(textResource).isEqualTo(R.string.stripe_paymentsheet_or_use)
         }
     }
 
@@ -2047,6 +2080,19 @@ internal class PaymentSheetViewModelTest {
             transactionId = anyOrNull(),
             label = eq(expectedLabel),
         )
+    }
+
+    @Test
+    fun `verify separator text resource id when is SetupIntent`() = runTest {
+        val viewModel = createViewModel(
+            stripeIntent = SETUP_INTENT
+        )
+
+        //viewModel.checkout()
+        viewModel.walletsState.test {
+            val state = awaitItem()
+            assertThat(state?.dividerTextResource).isEqualTo(R.string.stripe_paymentsheet_or_use)
+        }
     }
 
     @Test

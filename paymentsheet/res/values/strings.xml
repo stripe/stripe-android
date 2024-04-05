@@ -49,10 +49,14 @@
   <string name="stripe_paymentsheet_microdeposit">Stripe will deposit $0.01 to your account in 1-2 business days. Then you’ll get an email with instructions to complete payment to %s.</string>
   <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
   <string name="stripe_paymentsheet_modify_pm">Edit %s</string>
-  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user for a PaymentIntent. -->
   <string name="stripe_paymentsheet_or_pay_using">Or pay using</string>
-  <!-- Title of a section containing a card form that will collect the payment information from the user. -->
+  <!-- Title of a section containing a card form that will collect the payment information from the user for a PaymentIntent. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Or pay with a card</string>
+  <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user for a SetupIntent. -->
+  <string name="stripe_paymentsheet_or_use">Or use</string>
+  <!-- Title of a section containing a card form that will collect the payment information from the user for a SetupIntent. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Or use a card</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Pay</string>
   <!-- Title shown above a section containing various payment options -->
