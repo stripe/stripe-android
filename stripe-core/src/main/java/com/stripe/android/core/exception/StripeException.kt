@@ -51,6 +51,7 @@ abstract class StripeException(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         const val DEFAULT_STATUS_CODE = 0
 
         fun create(throwable: Throwable): StripeException {
