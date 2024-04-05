@@ -8,7 +8,9 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.networking.AbsFinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.networking.AbsFinancialConnectionsManifestRepository
+import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
@@ -33,11 +35,11 @@ internal class SaveAccountToLinkTest {
             partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
         )
 
-        val repository = mockManifestRepository(
+        val accountsRepository = mockAccountsRepository(
             onPollAccountNumbers = polledAccountIds::addAll,
         )
 
-        val saveAccountToLink = makeSaveAccountToLink(repository)
+        val saveAccountToLink = makeSaveAccountToLink(accountsRepository = accountsRepository)
 
         saveAccountToLink.new(
             email = "email@email.com",
@@ -59,11 +61,11 @@ internal class SaveAccountToLinkTest {
             partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
         )
 
-        val repository = mockManifestRepository(
+        val accountsRepository = mockAccountsRepository(
             onPollAccountNumbers = polledAccountIds::addAll,
         )
 
-        val saveAccountToLink = makeSaveAccountToLink(repository)
+        val saveAccountToLink = makeSaveAccountToLink(accountsRepository = accountsRepository)
 
         saveAccountToLink.new(
             email = "email@email.com",
@@ -86,11 +88,17 @@ internal class SaveAccountToLinkTest {
         )
 
         val repository = mockManifestRepository(
-            onPollAccountNumbers = { error("This is failing") },
             onDisabledNetworking = { disabledNetworking = true },
         )
 
-        val saveAccountToLink = makeSaveAccountToLink(repository = repository)
+        val accountsRepository = mockAccountsRepository(
+            onPollAccountNumbers = { error("This is failing") },
+        )
+
+        val saveAccountToLink = makeSaveAccountToLink(
+            repository = repository,
+            accountsRepository = accountsRepository,
+        )
 
         assertFails {
             saveAccountToLink.new(
@@ -112,15 +120,15 @@ internal class SaveAccountToLinkTest {
             partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
         )
 
-        val repository = mockManifestRepository(
+        val accountsRepository = mockAccountsRepository(
             onPollAccountNumbers = { error("This is failing") },
         )
 
         val successRepository = SuccessContentRepository(SavedStateHandle())
 
         val saveAccountToLink = makeSaveAccountToLink(
+            accountsRepository = accountsRepository,
             successRepository = successRepository,
-            repository = repository,
         )
 
         assertFails {
@@ -142,7 +150,8 @@ internal class SaveAccountToLinkTest {
     }
 
     private fun makeSaveAccountToLink(
-        repository: FinancialConnectionsManifestRepository,
+        repository: FinancialConnectionsManifestRepository = mockManifestRepository(),
+        accountsRepository: FinancialConnectionsAccountsRepository = mockAccountsRepository(),
         successRepository: SuccessContentRepository = SuccessContentRepository(SavedStateHandle()),
     ): SaveAccountToLink {
         return SaveAccountToLink(
@@ -153,11 +162,11 @@ internal class SaveAccountToLinkTest {
             ),
             successContentRepository = successRepository,
             repository = repository,
+            accountsRepository = accountsRepository,
         )
     }
 
     private fun mockManifestRepository(
-        onPollAccountNumbers: (Set<String>) -> Unit,
         onDisabledNetworking: () -> Unit = {},
     ): FinancialConnectionsManifestRepository {
         return object : AbsFinancialConnectionsManifestRepository() {
@@ -174,16 +183,23 @@ internal class SaveAccountToLinkTest {
                 return sessionManifest()
             }
 
-            override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
-                onPollAccountNumbers(linkedAccounts)
-            }
-
             override suspend fun disableNetworking(
                 clientSecret: String,
                 disabledReason: String?
             ): FinancialConnectionsSessionManifest {
                 onDisabledNetworking()
                 return sessionManifest()
+            }
+        }
+    }
+
+    private fun mockAccountsRepository(
+        onPollAccountNumbers: (Set<String>) -> Unit = {},
+    ): FinancialConnectionsAccountsRepository {
+        return object : AbsFinancialConnectionsAccountsRepository() {
+
+            override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
+                onPollAccountNumbers(linkedAccounts)
             }
         }
     }

@@ -4,6 +4,7 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
 import com.stripe.android.financialconnections.ui.TextResource
@@ -18,7 +19,8 @@ internal class SaveAccountToLink @Inject constructor(
     private val locale: Locale?,
     private val configuration: FinancialConnectionsSheet.Configuration,
     private val successContentRepository: SuccessContentRepository,
-    private val repository: FinancialConnectionsManifestRepository
+    private val repository: FinancialConnectionsManifestRepository,
+    private val accountsRepository: FinancialConnectionsAccountsRepository,
 ) {
 
     suspend fun new(
@@ -91,7 +93,7 @@ internal class SaveAccountToLink @Inject constructor(
                 maxNumberOfRetries = 20,
             ),
             retryCondition = { it.shouldRetry },
-            block = { repository.pollAccountNumbers(linkedAccountIds) },
+            block = { accountsRepository.pollAccountNumbers(linkedAccountIds) },
         )
     }
 

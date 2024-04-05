@@ -95,10 +95,6 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
         TODO("Not yet implemented")
     }
 
-    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun synchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String
