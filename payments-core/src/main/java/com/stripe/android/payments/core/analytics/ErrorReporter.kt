@@ -59,9 +59,15 @@ interface ErrorReporter {
         }
 
         fun getAdditionalParamsFromStripeException(stripeException: StripeException): Map<String, String> {
+            val statusCode =
+                if (stripeException.statusCode == StripeException.DEFAULT_STATUS_CODE) {
+                    null
+                } else {
+                    stripeException.statusCode
+                }
             return mapOf(
                 "analytics_value" to stripeException.analyticsValue(),
-                "status_code" to stripeException.statusCode.toString(),
+                "status_code" to statusCode?.toString(),
                 "request_id" to stripeException.requestId,
                 "error_type" to stripeException.stripeError?.type,
                 "error_code" to stripeException.stripeError?.code,

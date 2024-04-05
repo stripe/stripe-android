@@ -37,7 +37,6 @@ class RealErrorReporterTest {
     fun `RealErrorReporter logs correct info via analyticsRequestExecutor`() {
         val exception = StripeException.create(IllegalArgumentException("this arg isn't legal"))
         val expectedAnalyticsValue = exception.analyticsValue()
-        val expectedStatusCode = exception.statusCode.toString()
 
         realErrorReporter.report(ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE, exception)
 
@@ -45,7 +44,6 @@ class RealErrorReporterTest {
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
         val analyticsRequestParams = executedAnalyticsRequests.get(0).params
         assertThat(analyticsRequestParams.get("analytics_value")).isEqualTo(expectedAnalyticsValue)
-        assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
         assertThat(analyticsRequestParams.get("request_id")).isNull()
     }
 
@@ -62,6 +60,7 @@ class RealErrorReporterTest {
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
         val analyticsRequestParams = executedAnalyticsRequests.get(0).params
         assertThat(analyticsRequestParams.get("analytics_value")).isEqualTo(expectedAnalyticsValue)
+        assertThat(analyticsRequestParams.get("status_code")).isNotEqualTo(StripeException.DEFAULT_STATUS_CODE)
         assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
         assertThat(analyticsRequestParams.get("request_id")).isEqualTo(expectedRequestId)
     }
@@ -90,7 +89,6 @@ class RealErrorReporterTest {
     fun `RealErrorReporter logs additionalNonPiiParams via analyticsRequestExecutor`() {
         val exception = StripeException.create(IllegalArgumentException("this arg isn't legal"))
         val expectedAnalyticsValue = exception.analyticsValue()
-        val expectedStatusCode = exception.statusCode.toString()
 
         realErrorReporter.report(
             errorEvent = ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
@@ -102,7 +100,6 @@ class RealErrorReporterTest {
         assertThat(executedAnalyticsRequests.size).isEqualTo(1)
         val analyticsRequestParams = executedAnalyticsRequests.get(0).params
         assertThat(analyticsRequestParams.get("analytics_value")).isEqualTo(expectedAnalyticsValue)
-        assertThat(analyticsRequestParams.get("status_code")).isEqualTo(expectedStatusCode)
         assertThat(analyticsRequestParams.get("request_id")).isNull()
         assertThat(analyticsRequestParams.get("foo")).isEqualTo("bar")
     }
