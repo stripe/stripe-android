@@ -5,8 +5,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.link.ui.signup.SignUpState
-import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.uicore.elements.EmailConfig

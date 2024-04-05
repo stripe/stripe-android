@@ -7,9 +7,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.screenshottesting.FontSize
-import com.stripe.android.uicore.R
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.uicore.R
 import org.junit.Rule
 import org.junit.Test
 
