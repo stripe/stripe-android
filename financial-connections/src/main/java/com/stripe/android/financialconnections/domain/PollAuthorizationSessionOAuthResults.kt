@@ -26,7 +26,7 @@ internal class PollAuthorizationSessionOAuthResults @Inject constructor(
         return retryOnException(
             PollTimingOptions(
                 initialDelayMs = 0,
-                maxNumberOfRetries = 300, // Stripe.js has 600 second timeout, 600 / 2 = 300 retries
+                attempts = 300, // Stripe.js has 600 second timeout, 600 / 2 = 300 retries
                 retryInterval = 2.seconds.inWholeMilliseconds
             ),
             retryCondition = { exception -> exception.shouldRetry }

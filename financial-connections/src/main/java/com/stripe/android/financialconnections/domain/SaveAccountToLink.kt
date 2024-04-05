@@ -90,10 +90,10 @@ internal class SaveAccountToLink @Inject constructor(
         return retryOnException(
             options = PollTimingOptions(
                 initialDelayMs = 1.seconds.inWholeMilliseconds,
-                maxNumberOfRetries = 20,
+                attempts = 20,
             ),
             retryCondition = { it.shouldRetry },
-            block = { accountsRepository.pollAccountNumbers(linkedAccountIds) },
+            action = { accountsRepository.pollAccountNumbers(linkedAccountIds) },
         )
     }
 

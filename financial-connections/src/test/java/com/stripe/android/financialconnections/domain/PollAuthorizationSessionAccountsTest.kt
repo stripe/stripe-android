@@ -13,7 +13,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import junit.framework.TestCase.assertEquals
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -25,7 +24,6 @@ import org.mockito.kotlin.whenever
 import java.net.HttpURLConnection
 import kotlin.test.assertIs
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class PollAuthorizationSessionAccountsTest {
 
     private val repository: FinancialConnectionsAccountsRepository = mock()
@@ -81,7 +79,7 @@ internal class PollAuthorizationSessionAccountsTest {
 
         assertIs<AccountLoadError>(exception)
 
-        // Retries 180 times
+        // Attempts 180 times
         verify(repository, times(180)).postAuthorizationSessionAccounts(
             configuration.financialConnectionsSessionClientSecret,
             sync.manifest.activeAuthSession!!.id

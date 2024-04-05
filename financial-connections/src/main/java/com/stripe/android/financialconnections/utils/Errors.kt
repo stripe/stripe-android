@@ -3,47 +3,52 @@ package com.stripe.android.financialconnections.utils
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.StripeException
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.channelFlow
-import kotlinx.coroutines.flow.first
 import java.net.HttpURLConnection
 import kotlin.time.Duration.Companion.seconds
 
 /**
- * Executes and returns the result of the given [block].
+ * Executes and returns the result of the given [action].
  * If the block execution fails, and [retryCondition] is met, the operation is retried.
  * Otherwise the resulting exception will be thrown.
  */
 internal suspend fun <T> retryOnException(
     options: PollTimingOptions,
     retryCondition: suspend (Throwable) -> Boolean,
-    block: suspend () -> T
-): T = channelFlow {
-    var remainingTimes = options.maxNumberOfRetries - 1
-    while (!isClosedForSend) {
-        delay(
-            if (remainingTimes == options.maxNumberOfRetries - 1) {
-                options.initialDelayMs
-            } else {
-                options.retryInterval
-            }
-        )
-        val either = runCatching { block() }
-        either.fold(
+    action: suspend () -> T
+): T {
+    val attempts = options.attempts
+    var attempt = 1
+    var result: T? = null
+
+    while (attempt <= attempts && result == null) {
+        if (attempt == 1) {
+            delay(options.initialDelayMs)
+        } else {
+            delay(options.retryInterval)
+        }
+
+        runCatching {
+            action()
+        }.fold(
             onFailure = { exception ->
-                when {
-                    remainingTimes == 0 -> throw PollingReachedMaxRetriesException(options)
-                    retryCondition(exception).not() -> throw exception
+                if (!retryCondition(exception)) {
+                    throw exception
                 }
             },
-            onSuccess = { send(it) }
+            onSuccess = {
+                result = it
+            }
         )
-        remainingTimes--
+
+        attempt += 1
     }
-}.first()
+
+    return result ?: throw PollingReachedMaxRetriesException(options)
+}
 
 internal data class PollTimingOptions(
     val initialDelayMs: Long = 1.75.seconds.inWholeMilliseconds,
-    val maxNumberOfRetries: Int = 180,
+    val attempts: Int = 180,
     val retryInterval: Long = 0.25.seconds.inWholeMilliseconds
 )
 
@@ -53,7 +58,7 @@ internal data class PollTimingOptions(
 internal class PollingReachedMaxRetriesException(
     pollingOptions: PollTimingOptions
 ) : StripeException(
-    message = "reached max number of retries ${pollingOptions.maxNumberOfRetries}.",
+    message = "reached max number of attempts ${pollingOptions.attempts}.",
     statusCode = HttpURLConnection.HTTP_ACCEPTED
 ) {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
