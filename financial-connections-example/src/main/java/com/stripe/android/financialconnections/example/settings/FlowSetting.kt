@@ -44,5 +44,4 @@ data class FlowSetting(
             updatedSettings
         }
     }
-
 }

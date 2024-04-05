@@ -130,7 +130,8 @@ fun ToggleSetting(
     Row(
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(text = name,
+        Text(
+            text = name,
         )
         Switch(
             modifier = Modifier.padding(0.dp).defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
