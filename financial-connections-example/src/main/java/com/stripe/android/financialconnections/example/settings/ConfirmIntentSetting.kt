@@ -9,8 +9,8 @@ data class ConfirmIntentSetting(
 ) : Saveable<Boolean>, SingleChoiceSetting<Boolean>(
     displayName = "Confirm Intent",
     options = listOf(
-        Option("True", true),
-        Option("False", false),
+        Option("On", true),
+        Option("Off", false),
     ),
     selectedOption = selectedOption
 ) {

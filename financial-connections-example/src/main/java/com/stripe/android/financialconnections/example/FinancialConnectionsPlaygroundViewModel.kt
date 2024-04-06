@@ -262,7 +262,7 @@ internal class FinancialConnectionsPlaygroundViewModel(
                 clientSecret = requireNotNull(response.intent.clientSecret),
                 paymentMethodType = PaymentMethod.Type.USBankAccount
             )
-            stripe(_state.value.publishableKey!!).confirmPaymentIntent(params)
+            stripe().confirmPaymentIntent(params)
             _state.update {
                 it.copy(status = it.status + "Intent Confirmed!")
             }
@@ -273,13 +273,19 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun stripe(publishableKey: String) = Stripe(
-        getApplication(),
-        publishableKey,
-        null,
-        true,
-        emptySet()
-    )
+    private fun stripe() = kotlin.runCatching {
+        Stripe(
+            getApplication(),
+            requireNotNull(_state.value.publishableKey),
+            null,
+            true,
+            emptySet()
+        )
+    }.onFailure {
+        _state.update {
+            it.copy(status = it.status + "Failed to create Stripe instance: $it")
+        }
+    }.getOrThrow()
 
     fun onSettingsChanged(playgroundSettings: PlaygroundSettings) {
         _state.update {
