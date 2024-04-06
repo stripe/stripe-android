@@ -101,7 +101,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val state = viewModel.stateFlow.value
             verify(saveAccountToLink).existing(
                 eq(state.payload()!!.consumerSessionClientSecret),
-                eq(setOf(selectedAccount.id))
+                eq(listOf(selectedAccount)),
+                eq(true),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = consumerSession.clientSecret,
@@ -127,7 +128,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             whenever(getManifest()).thenReturn(sessionManifest())
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
-            whenever(saveAccountToLink.existing(any(), any())).thenThrow(RuntimeException("error"))
+            whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException("error"))
 
             val viewModel = buildViewModel()
 
@@ -141,7 +142,8 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val state = viewModel.stateFlow.value
             verify(saveAccountToLink).existing(
                 eq(state.payload()!!.consumerSessionClientSecret),
-                eq(setOf(selectedAccount.id))
+                eq(listOf(selectedAccount)),
+                eq(true),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = consumerSession.clientSecret,

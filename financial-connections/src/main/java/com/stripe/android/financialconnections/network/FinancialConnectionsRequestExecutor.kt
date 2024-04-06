@@ -31,9 +31,34 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
         AuthenticationException::class,
         APIException::class
     )
+    suspend fun execute(request: StripeRequest) {
+        return executeInternal(request) {
+            // Nothing to decode here
+        }
+    }
+
+    @Throws(
+        InvalidRequestException::class,
+        AuthenticationException::class,
+        APIException::class
+    )
     suspend fun <Response> execute(
         request: StripeRequest,
         responseSerializer: KSerializer<Response>
+    ): Response {
+        return executeInternal(request) { body ->
+            json.decodeFromString(responseSerializer, body)
+        }
+    }
+
+    @Throws(
+        InvalidRequestException::class,
+        AuthenticationException::class,
+        APIException::class
+    )
+    private suspend fun <Response> executeInternal(
+        request: StripeRequest,
+        decodeResponse: (String) -> Response,
     ): Response = runCatching {
         logger.debug("Executing ${request.method.code} request to ${request.url}")
         stripeNetworkClient.executeRequest(request)
@@ -49,10 +74,7 @@ internal class FinancialConnectionsRequestExecutor @Inject constructor(
                  */
                 response.code == HttpURLConnection.HTTP_ACCEPTED -> throw handleApiError(response)
                 response.isError -> throw handleApiError(response)
-                else -> json.decodeFromString(
-                    responseSerializer,
-                    requireNotNull(response.body)
-                )
+                else -> decodeResponse(requireNotNull(response.body))
             }
         },
         onFailure = {
