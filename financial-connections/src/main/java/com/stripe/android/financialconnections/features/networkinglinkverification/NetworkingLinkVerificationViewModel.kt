@@ -40,13 +40,15 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class NetworkingLinkVerificationViewModel @Inject constructor(
-    initialState: NetworkingLinkVerificationState,
+internal class NetworkingLinkVerificationViewModel @AssistedInject constructor(
+    @Assisted initialState: NetworkingLinkVerificationState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
@@ -163,15 +165,19 @@ internal class NetworkingLinkVerificationViewModel @Inject constructor(
             )
     }.execute { copy(confirmVerification = it) }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingLinkVerificationState): NetworkingLinkVerificationViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .networkingLinkVerificationSubcomponent
-                        .create(NetworkingLinkVerificationState())
-                        .viewModel
+                    parentComponent.networkingLinkVerificationViewModelFactory.create(
+                        NetworkingLinkVerificationState()
+                    )
                 }
             }
 

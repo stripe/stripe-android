@@ -29,10 +29,12 @@ import com.stripe.android.financialconnections.repository.SuccessContentReposito
 import com.stripe.android.financialconnections.ui.TextResource.PluralId
 import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
-import javax.inject.Inject
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-internal class AttachPaymentViewModel @Inject constructor(
-    initialState: AttachPaymentState,
+internal class AttachPaymentViewModel @AssistedInject constructor(
+    @Assisted initialState: AttachPaymentState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val successContentRepository: SuccessContentRepository,
     private val pollAttachPaymentAccount: PollAttachPaymentAccount,
@@ -113,15 +115,17 @@ internal class AttachPaymentViewModel @Inject constructor(
     fun onSelectAnotherBank() =
         navigationManager.tryNavigateTo(Reset(referrer = PANE))
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: AttachPaymentState): AttachPaymentViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .attachPaymentSubcomponent
-                        .create(AttachPaymentState())
-                        .viewModel
+                    parentComponent.attachPaymentViewModelFactory.create(AttachPaymentState())
                 }
             }
 
