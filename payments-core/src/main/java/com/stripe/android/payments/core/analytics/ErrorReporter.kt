@@ -80,6 +80,12 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        PLACES_FIND_AUTOCOMPLETE_ERROR(
+            eventName = "address_element.find_autocomplete.error"
+        ),
+        PLACES_FETCH_PLACE_ERROR(
+            eventName = "address_element.fetch_place.error"
+        )
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -92,6 +98,15 @@ interface ErrorReporter {
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
+        ),
+        GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
+            partialEventName = "google_pay.confirm.unexpected_result"
+        ),
+        GOOGLE_PAY_MISSING_INTENT_DATA(
+            partialEventName = "google_pay.on_result.missing_data"
+        ),
+        MISSING_PLACES_DEPENDENCY(
+            partialEventName = "address_element.autocomplete.missing_dependency"
         );
 
         override val eventName: String
