@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.injection
 
 import android.content.Context
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.addresselement.FormControllerSubcomponent
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
@@ -42,6 +43,7 @@ internal class AddressElementViewModelModule {
         PlacesClientProxy.create(
             context,
             it,
+            errorReporter = ErrorReporter.createFallbackInstance(context),
         )
     }
 

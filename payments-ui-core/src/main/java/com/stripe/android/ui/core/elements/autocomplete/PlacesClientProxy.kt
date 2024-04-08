@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Typeface
 import android.text.style.StyleSpan
 import androidx.annotation.RestrictTo
-import androidx.annotation.VisibleForTesting
 import com.google.android.libraries.places.api.Places
 import com.google.android.libraries.places.api.model.AutocompleteSessionToken
 import com.google.android.libraries.places.api.model.TypeFilter
@@ -36,26 +35,10 @@ interface PlacesClientProxy {
         placeId: String
     ): Result<FetchPlaceResponse>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun create(
-            context: Context,
-            googlePlacesApiKey: String,
-            isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
-            clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
-            initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
-        ): PlacesClientProxy {
-            return create(
-                context,
-                googlePlacesApiKey,
-                isPlacesAvailable,
-                clientFactory,
-                initializer,
-                ErrorReporter.createFallbackInstance(context)
-            )
-        }
 
-        @VisibleForTesting
-        internal fun create(
+        fun create(
             context: Context,
             googlePlacesApiKey: String,
             isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
