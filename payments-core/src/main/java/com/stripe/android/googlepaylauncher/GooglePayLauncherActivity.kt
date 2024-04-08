@@ -11,6 +11,7 @@ import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
@@ -34,6 +35,10 @@ import org.json.JSONObject
 internal class GooglePayLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayLauncherViewModel by viewModels {
         GooglePayLauncherViewModel.Factory(args)
+    }
+
+    private val errorReporter: ErrorReporter by lazy {
+        ErrorReporter.createFallbackInstance(context = this, productUsage = setOf())
     }
 
     private lateinit var args: GooglePayLauncherContract.Args
@@ -139,6 +144,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     private fun onGooglePayResult(data: Intent?) {
         val paymentData = data?.let { PaymentData.getFromIntent(it) }
         if (paymentData == null) {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
             viewModel.updateResult(
                 GooglePayLauncher.Result.Failed(
                     IllegalArgumentException("Google Pay data was not available")

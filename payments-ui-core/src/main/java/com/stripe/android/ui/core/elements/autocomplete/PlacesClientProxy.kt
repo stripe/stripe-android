@@ -11,6 +11,8 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
@@ -41,13 +43,15 @@ interface PlacesClientProxy {
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
             initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) }
         ): PlacesClientProxy {
+            val errorReporter = ErrorReporter.createFallbackInstance(context, productUsage = setOf("autocomplete"))
             return if (isPlacesAvailable()) {
                 initializer()
                 DefaultPlacesClientProxy(
-                    clientFactory(context)
+                    clientFactory(context),
+                    errorReporter
                 )
             } else {
-                UnsupportedPlacesClientProxy()
+                UnsupportedPlacesClientProxy(errorReporter)
             }
         }
 
@@ -74,7 +78,8 @@ interface PlacesClientProxy {
 }
 
 internal class DefaultPlacesClientProxy(
-    private val client: PlacesClient
+    private val client: PlacesClient,
+    private val errorReporter: ErrorReporter
 ) : PlacesClientProxy {
     private val token = AutocompleteSessionToken.newInstance()
 
@@ -101,10 +106,14 @@ internal class DefaultPlacesClientProxy(
                             secondaryText = it.getSecondaryText(StyleSpan(Typeface.BOLD)),
                             placeId = it.placeId
                         )
-                    }.take(limit ?: response.autocompletePredictions.size)
+                    }.take(limit)
                 )
             )
         } catch (e: Exception) {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR,
+                StripeException.create(e)
+            )
             Result.failure(
                 Exception("Could not find autocomplete predictions: ${e.message}")
             )
@@ -137,6 +146,7 @@ internal class DefaultPlacesClientProxy(
                 )
             )
         } catch (e: Exception) {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
             Result.failure(
                 Exception("Could not fetch place: ${e.message}")
             )
@@ -144,7 +154,7 @@ internal class DefaultPlacesClientProxy(
     }
 }
 
-internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
+internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
     override suspend fun findAutocompletePredictions(
         query: String?,
         country: String,
@@ -156,6 +166,7 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
         if (BuildConfig.DEBUG) {
             throw exception
         }
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.MISSING_PLACES_DEPENDENCY)
         return Result.failure(exception)
     }
 
@@ -166,6 +177,7 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
         if (BuildConfig.DEBUG) {
             throw exception
         }
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.MISSING_PLACES_DEPENDENCY)
         return Result.failure(exception)
     }
 }
