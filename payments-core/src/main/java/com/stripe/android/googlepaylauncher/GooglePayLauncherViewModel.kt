@@ -225,7 +225,7 @@ internal class GooglePayLauncherViewModel(
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT,
                     StripeException.create(error),
-                    additionalNonPiiParams = mapOf("requestCode" to requestCode.toString()),
+                    additionalNonPiiParams = mapOf("request_code" to requestCode.toString()),
                 )
                 Result.failure(error)
             }
