@@ -106,7 +106,77 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testCardNotSavedOnConnfirmError() = activityScenarioRule.runCustomerSheetTest(
+    fun testSuccessfulCardSaveWithCardBrandChoice() = activityScenarioRule.runCustomerSheetTest(
+        integrationType = integrationType,
+        resultCallback = { result ->
+            assert(result is CustomerSheetResult.Selected)
+        }
+    ) { context ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card")
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "us_bank_account")
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        context.presentCustomerSheet()
+
+        page.fillOutCardDetails()
+        page.changeCardBrandChoice()
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods"),
+            cardDetails(),
+            cardBrandChoice(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/setup_intents/seti_12345"),
+            query("client_secret", "seti_12345_secret_12345"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-get.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/setup_intents/seti_12345/confirm"),
+            confirmParams(),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-confirm.json")
+        }
+
+        page.clickSaveButton()
+        page.clickConfirmButton()
+    }
+
+    @Test
+    fun testCardNotSavedOnConfirmError() = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
         resultCallback = {
             error("Shouldn't call CustomerSheetResultCallback")
@@ -186,6 +256,15 @@ internal class CustomerSheetTest {
             bodyPart("card%5Bcvc%5D", CustomerSheetPage.CVC),
             bodyPart("billing_details%5Baddress%5D%5Bpostal_code%5D", CustomerSheetPage.ZIP_CODE),
             bodyPart("billing_details%5Baddress%5D%5Bcountry%5D", CustomerSheetPage.COUNTRY)
+        )
+    }
+
+    private fun cardBrandChoice(): RequestMatcher {
+        return RequestMatchers.composite(
+            bodyPart(
+                "card%5Bnetworks%5D%5Bpreferred%5D",
+                "cartes_bancaires"
+            )
         )
     }
 
