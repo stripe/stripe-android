@@ -12,6 +12,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
+import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 internal class CustomerSheetPage(
     private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>,
@@ -20,11 +21,18 @@ internal class CustomerSheetPage(
         waitUntil(hasText(text, substring = substring))
     }
 
-    fun fillOutCardDetails() {
-        replaceText("Card number", CARD_NUMBER)
+    fun fillOutCardDetails(
+        cardNumber: String = CARD_NUMBER
+    ) {
+        replaceText("Card number", cardNumber)
         replaceText("MM / YY", "$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
         replaceText("CVC", CVC)
         replaceText("ZIP Code", ZIP_CODE)
+    }
+
+    fun changeCardBrandChoice() {
+        clickDropdownMenu()
+        clickOnCartesBancaires()
     }
 
     fun clickSaveButton() {
@@ -68,6 +76,19 @@ internal class CustomerSheetPage(
         composeTestRule.onNode(hasText(label, substring = isLabelSubstring))
             .performScrollTo()
             .performTextReplacement(text)
+    }
+
+    private fun clickDropdownMenu() {
+        waitForIdle()
+
+        composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
+            .performScrollTo()
+            .performClick()
+    }
+
+    private fun clickOnCartesBancaires() {
+        waitForText("Select card brand (optional)")
+        click(hasText("Cartes Bancaires"))
     }
 
     companion object {
