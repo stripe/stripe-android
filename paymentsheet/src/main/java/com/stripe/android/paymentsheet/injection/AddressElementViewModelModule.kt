@@ -41,7 +41,7 @@ internal class AddressElementViewModelModule {
     ): PlacesClientProxy? = args.config?.googlePlacesApiKey?.let {
         PlacesClientProxy.create(
             context,
-            it
+            it,
         )
     }
 
