@@ -1,0 +1,26 @@
+{
+  "id": "seti_12345",
+  "object": "setup_intent",
+  "automatic_payment_methods": null,
+  "cancellation_reason": null,
+  "client_secret": "seti_12345_secret_12345",
+  "created": 1712345260,
+  "description": null,
+  "last_setup_error": null,
+  "livemode": false,
+  "next_action": null,
+  "payment_method": null,
+  "payment_method_configuration_details": null,
+  "payment_method_options": {
+    "us_bank_account": {
+      "verification_method": "automatic"
+    }
+  },
+  "payment_method_types": [
+    "card",
+    "us_bank_account",
+    "sepa_debit"
+  ],
+  "status": "requires_payment_method",
+  "usage": "off_session"
+}

@@ -297,7 +297,8 @@ internal class AccountPickerViewModel @Inject constructor(
                 // it happens in the AttachPaymentScreen.
                 saveAccountToLink.existing(
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    selectedAccounts = selectedIds,
+                    selectedAccounts = accountsList.data,
+                    shouldPollAccountNumbers = manifest.isDataFlow,
                 )
             }
 

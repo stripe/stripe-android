@@ -59,9 +59,15 @@ interface ErrorReporter {
         }
 
         fun getAdditionalParamsFromStripeException(stripeException: StripeException): Map<String, String> {
+            val statusCode =
+                if (stripeException.statusCode == StripeException.DEFAULT_STATUS_CODE) {
+                    null
+                } else {
+                    stripeException.statusCode
+                }
             return mapOf(
                 "analytics_value" to stripeException.analyticsValue(),
-                "status_code" to stripeException.statusCode.toString(),
+                "status_code" to statusCode?.toString(),
                 "request_id" to stripeException.requestId,
                 "error_type" to stripeException.stripeError?.type,
                 "error_code" to stripeException.stripeError?.code,
@@ -85,6 +91,18 @@ interface ErrorReporter {
         ),
         PLACES_FETCH_PLACE_ERROR(
             eventName = "address_element.fetch_place.error"
+        ),
+        LINK_CREATE_CARD_FAILURE(
+            eventName = "link.create_new_card.create_payment_details_failure"
+        ),
+        LINK_SHARE_CARD_FAILURE(
+            eventName = "link.create_new_card.share_payment_details_failure"
+        ),
+        LINK_SIGN_UP_FAILURE(
+            eventName = "link.sign_up.failure"
+        ),
+        LINK_LOG_OUT_FAILURE(
+            eventName = "link.log_out.failure"
         )
     }
 
@@ -107,6 +125,9 @@ interface ErrorReporter {
         ),
         MISSING_PLACES_DEPENDENCY(
             partialEventName = "address_element.autocomplete.missing_dependency"
+        ),
+        LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
+            partialEventName = "link.create_new_card.missing_link_account"
         );
 
         override val eventName: String

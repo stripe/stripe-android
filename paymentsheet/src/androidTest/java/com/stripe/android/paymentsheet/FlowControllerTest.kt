@@ -13,6 +13,7 @@ import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.SynchronizedTestFlowController
 import com.stripe.android.paymentsheet.utils.assertCompleted
@@ -205,6 +206,7 @@ internal class FlowControllerTest {
         }
 
         initializeActivity(synchronize = true)
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
                 paymentIntentClientSecret = "pi_example_secret_example",
@@ -212,10 +214,13 @@ internal class FlowControllerTest {
                 callback = { success, error ->
                     assertThat(success).isTrue()
                     assertThat(error).isNull()
+                    activityLaunchObserver.prepareForLaunch(it)
                     flowController.presentPaymentOptions()
                 }
             )
         }
+
+        activityLaunchObserver.awaitLaunch()
 
         page.fillOutCardDetails()
         page.clickPrimaryButton()
