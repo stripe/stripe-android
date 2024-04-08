@@ -166,7 +166,7 @@ internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : 
         if (BuildConfig.DEBUG) {
             throw exception
         }
-        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.MISSING_PLACES_DEPENDENCY)
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY)
         return Result.failure(exception)
     }
 
@@ -177,7 +177,7 @@ internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : 
         if (BuildConfig.DEBUG) {
             throw exception
         }
-        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.MISSING_PLACES_DEPENDENCY)
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FETCH_PLACE_WITHOUT_DEPENDENCY)
         return Result.failure(exception)
     }
 }

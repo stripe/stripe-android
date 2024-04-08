@@ -52,7 +52,7 @@ internal class GooglePayLauncherViewModel(
     private val googlePayJsonFactory: GooglePayJsonFactory,
     private val googlePayRepository: GooglePayRepository,
     private val savedStateHandle: SavedStateHandle,
-    private val errorReporter: ErrorReporter
+    private val errorReporter: ErrorReporter,
 ) : ViewModel() {
     /**
      * [hasLaunched] indicates whether Google Pay has already been launched, and must be persisted
@@ -224,7 +224,8 @@ internal class GooglePayLauncherViewModel(
                 val error = IllegalStateException("Unexpected confirmation result.")
                 errorReporter.report(
                     ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT,
-                    StripeException.create(error)
+                    StripeException.create(error),
+                    additionalNonPiiParams = mapOf("requestCode" to requestCode.toString()),
                 )
                 Result.failure(error)
             }

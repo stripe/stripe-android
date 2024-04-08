@@ -123,8 +123,11 @@ interface ErrorReporter {
         GOOGLE_PAY_MISSING_INTENT_DATA(
             partialEventName = "google_pay.on_result.missing_data"
         ),
-        MISSING_PLACES_DEPENDENCY(
-            partialEventName = "address_element.autocomplete.missing_dependency"
+        FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY(
+            partialEventName = "address_element.find_autocomplete.without_dependency"
+        ),
+        FETCH_PLACE_WITHOUT_DEPENDENCY(
+            partialEventName = "address_element.fetch_place.without_dependency",
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
