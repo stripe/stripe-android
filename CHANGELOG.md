@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+### PaymentSheet
+* [CHANGED][8231](https://github.com/stripe/stripe-android/pull/8231) Separator text under Link/Google Pay button from "Or pay using"/"Or pay with a card" to "Or use"/"Or use a card" when using SetupIntent.
 
 ## 20.40.4 - 2024-04-04
 

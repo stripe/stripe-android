@@ -232,6 +232,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isCompleteFlow = true,
             onGooglePayPressed = this::checkoutWithGooglePay,
             onLinkPressed = linkHandler::launchLink,
+            isSetupIntent = paymentMethodMetadata.value?.stripeIntent is SetupIntent
         )
     }
 
