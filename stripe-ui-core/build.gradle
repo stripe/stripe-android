@@ -53,6 +53,7 @@ dependencies {
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
 
+    testImplementation project(':screenshot-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junitKtx
@@ -67,7 +68,6 @@ dependencies {
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
     testImplementation testLibs.turbine
-    testImplementation project(':screenshot-testing')
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"
