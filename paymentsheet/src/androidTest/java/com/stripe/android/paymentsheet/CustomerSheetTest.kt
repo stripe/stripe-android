@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.customersheet.CustomerSheetResult
@@ -41,7 +42,7 @@ internal class CustomerSheetTest {
     fun testSuccessfulCardSave() = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
         resultCallback = { result ->
-            assert(result is CustomerSheetResult.Selected)
+            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
         networkRule.enqueue(
@@ -109,7 +110,7 @@ internal class CustomerSheetTest {
     fun testSuccessfulCardSaveWithCardBrandChoice() = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
         resultCallback = { result ->
-            assert(result is CustomerSheetResult.Selected)
+            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
     ) { context ->
         networkRule.enqueue(
