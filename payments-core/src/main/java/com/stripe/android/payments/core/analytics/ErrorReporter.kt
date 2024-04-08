@@ -41,7 +41,7 @@ interface ErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
-            productUsage: Set<String>,
+            productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .builder()

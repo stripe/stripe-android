@@ -278,10 +278,7 @@ internal class GooglePayLauncherViewModel(
                 logger = logger
             )
 
-            val errorReporter = ErrorReporter.createFallbackInstance(
-                context = application,
-                productUsage = setOf("GooglePay")
-            )
+            val errorReporter = ErrorReporter.createFallbackInstance(context = application)
 
             return GooglePayLauncherViewModel(
                 DefaultPaymentsClientFactory(application).create(googlePayEnvironment),

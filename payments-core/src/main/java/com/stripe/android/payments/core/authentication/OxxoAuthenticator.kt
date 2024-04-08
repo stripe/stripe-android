@@ -27,7 +27,7 @@ internal class OxxoAuthenticator @Inject constructor(
     ) {
         val oxxoDetailsData = authenticatable.nextActionData as NextActionData.DisplayOxxoDetails
         if (oxxoDetailsData.hostedVoucherUrl == null) {
-            ErrorReporter.createFallbackInstance(context, emptySet()).report(
+            ErrorReporter.createFallbackInstance(context).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
                 additionalNonPiiParams = mapOf("lpm" to "oxxo")
             )

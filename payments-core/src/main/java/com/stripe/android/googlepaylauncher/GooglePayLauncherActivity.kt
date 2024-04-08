@@ -38,7 +38,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     }
 
     private val errorReporter: ErrorReporter by lazy {
-        ErrorReporter.createFallbackInstance(context = this, productUsage = setOf())
+        ErrorReporter.createFallbackInstance(context = this)
     }
 
     private lateinit var args: GooglePayLauncherContract.Args

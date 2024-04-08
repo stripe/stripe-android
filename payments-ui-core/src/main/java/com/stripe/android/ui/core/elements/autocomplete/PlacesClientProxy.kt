@@ -43,7 +43,7 @@ interface PlacesClientProxy {
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
             initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) }
         ): PlacesClientProxy {
-            val errorReporter = ErrorReporter.createFallbackInstance(context, productUsage = setOf("autocomplete"))
+            val errorReporter = ErrorReporter.createFallbackInstance(context)
             return if (isPlacesAvailable()) {
                 initializer()
                 DefaultPlacesClientProxy(
