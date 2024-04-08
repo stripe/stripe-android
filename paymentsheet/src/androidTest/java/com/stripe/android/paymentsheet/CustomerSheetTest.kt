@@ -141,14 +141,21 @@ internal class CustomerSheetTest {
 
         context.presentCustomerSheet()
 
-        page.fillOutCardDetails()
+        /*
+         * This card is overridden to use a test card compatible with CbcTestCardDelegate to skip
+         * checking card account ranges network operation which ran only if account ranges aren't
+         * stores in memory.
+         */
+        page.fillOutCardDetails(
+            cardNumber = TEST_CBC_CARD_NUMBER
+        )
         page.changeCardBrandChoice()
 
         networkRule.enqueue(
             host("api.stripe.com"),
             method("POST"),
             path("/v1/payment_methods"),
-            cardDetails(),
+            cardDetails(cardNumber = TEST_CBC_CARD_NUMBER),
             cardBrandChoice(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -248,10 +255,12 @@ internal class CustomerSheetTest {
         context.markTestSucceeded()
     }
 
-    private fun cardDetails(): RequestMatcher {
+    private fun cardDetails(
+        cardNumber: String = CustomerSheetPage.CARD_NUMBER
+    ): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart("type", "card"),
-            bodyPart("card%5Bnumber%5D", CustomerSheetPage.CARD_NUMBER),
+            bodyPart("card%5Bnumber%5D", cardNumber),
             bodyPart("card%5Bexp_month%5D", CustomerSheetPage.EXPIRY_MONTH),
             bodyPart("card%5Bexp_year%5D", CustomerSheetPage.EXPIRY_YEAR),
             bodyPart("card%5Bcvc%5D", CustomerSheetPage.CVC),
@@ -276,5 +285,9 @@ internal class CustomerSheetTest {
             bodyPart("mandate_data%5Bcustomer_acceptance%5D%5Btype%5D", "online"),
             bodyPart("mandate_data%5Bcustomer_acceptance%5D%5Bonline%5D%5Binfer_from_client%5D", "true"),
         )
+    }
+
+    companion object {
+        private const val TEST_CBC_CARD_NUMBER = "4000002500001001"
     }
 }

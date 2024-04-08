@@ -21,8 +21,10 @@ internal class CustomerSheetPage(
         waitUntil(hasText(text, substring = substring))
     }
 
-    fun fillOutCardDetails() {
-        replaceText("Card number", CARD_NUMBER)
+    fun fillOutCardDetails(
+        cardNumber: String = CARD_NUMBER
+    ) {
+        replaceText("Card number", cardNumber)
         replaceText("MM / YY", "$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
         replaceText("CVC", CVC)
         replaceText("ZIP Code", ZIP_CODE)
