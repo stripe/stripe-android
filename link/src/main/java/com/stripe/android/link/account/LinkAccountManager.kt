@@ -175,8 +175,6 @@ internal class LinkAccountManager @Inject constructor(
         linkRepository.consumerSignUp(email, phone, country, name, authSessionCookie, consentAction.consumerAction)
             .map { consumerSession ->
                 setAccount(consumerSession)
-            }.onFailure {
-                errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SIGN_UP_FAILURE, StripeException.create(it))
             }
 
     /**
