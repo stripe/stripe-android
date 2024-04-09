@@ -57,6 +57,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "elements.google_pay_repository.is_ready_request_api_call_failure")
         validateAnalyticsRequest(eventName = "mc_form_shown")
 
         testContext.presentPaymentSheet {
@@ -107,6 +108,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_custom_init_default")
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
+        validateAnalyticsRequest(eventName = "elements.google_pay_repository.is_ready_request_api_call_failure")
         validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
         validateAnalyticsRequest(eventName = "mc_form_shown")
 

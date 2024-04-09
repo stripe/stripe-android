@@ -20,6 +20,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -71,12 +72,18 @@ class GooglePayLauncher internal constructor(
             resultCallback.onResult(it)
         },
         googlePayRepositoryFactory = {
+            val context = activity.application
+
             DefaultGooglePayRepository(
-                context = activity.application,
+                context = context,
                 environment = config.environment,
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                allowCreditCards = config.allowCreditCards
+                allowCreditCards = config.allowCreditCards,
+                errorReporter = ErrorReporter.createFallbackInstance(
+                    context = context,
+                    productUsage = setOf(PRODUCT_USAGE),
+                )
             )
         },
         PaymentAnalyticsRequestFactory(
@@ -112,12 +119,18 @@ class GooglePayLauncher internal constructor(
             resultCallback::onResult,
         ),
         googlePayRepositoryFactory = {
+            val context = fragment.requireActivity().application
+
             DefaultGooglePayRepository(
-                context = fragment.requireActivity().application,
+                context = context,
                 environment = config.environment,
                 billingAddressParameters = config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                allowCreditCards = config.allowCreditCards
+                allowCreditCards = config.allowCreditCards,
+                errorReporter = ErrorReporter.createFallbackInstance(
+                    context = context,
+                    productUsage = setOf(PRODUCT_USAGE)
+                )
             )
         },
         paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
@@ -369,7 +382,11 @@ fun rememberGooglePayLauncher(
                     environment = config.environment,
                     billingAddressParameters = config.billingAddressConfig.convert(),
                     existingPaymentMethodRequired = config.existingPaymentMethodRequired,
-                    allowCreditCards = config.allowCreditCards
+                    allowCreditCards = config.allowCreditCards,
+                    errorReporter = ErrorReporter.createFallbackInstance(
+                        context = context,
+                        productUsage = setOf(GooglePayLauncher.PRODUCT_USAGE)
+                    )
                 )
             },
             PaymentAnalyticsRequestFactory(

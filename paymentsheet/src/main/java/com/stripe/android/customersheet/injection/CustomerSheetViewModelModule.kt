@@ -21,6 +21,8 @@ import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.customersheet.DefaultCustomerSheetLoader
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
@@ -57,6 +59,11 @@ internal interface CustomerSheetViewModelModule {
     fun bindsCustomerSheetLoader(
         impl: DefaultCustomerSheetLoader
     ): CustomerSheetLoader
+
+    @Binds
+    fun bindsErrorReporter(
+        impl: RealErrorReporter
+    ): ErrorReporter
 
     @Binds
     fun bindsStripeIntentRepository(

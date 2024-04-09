@@ -5,6 +5,8 @@ import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
@@ -32,6 +34,7 @@ internal class DefaultGooglePayRepository(
     private val existingPaymentMethodRequired: Boolean,
     private val allowCreditCards: Boolean,
     private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
+    private val errorReporter: ErrorReporter,
     private val logger: Logger = Logger.noop(),
 ) : GooglePayRepository {
 
@@ -40,6 +43,7 @@ internal class DefaultGooglePayRepository(
         context: Context,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
         logger: Logger,
+        errorReporter: ErrorReporter,
     ) : this(
         context.applicationContext,
         googlePayConfig.environment,
@@ -47,6 +51,7 @@ internal class DefaultGooglePayRepository(
         googlePayConfig.existingPaymentMethodRequired,
         googlePayConfig.allowCreditCards,
         DefaultPaymentsClientFactory(context),
+        errorReporter,
         logger
     )
 
@@ -76,7 +81,11 @@ internal class DefaultGooglePayRepository(
                 ).toString()
             )
         }.getOrElse {
-            // TODO (samer-stripe): Add unexpected error event here
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_JSON_REQUEST_PARSING,
+                StripeException.create(it)
+            )
+
             logger.error("Google Pay json parsing failed.", it)
 
             return false
@@ -85,7 +94,11 @@ internal class DefaultGooglePayRepository(
         val isReady = runCatching {
             paymentsClient.isReadyToPay(request).await()
         }.onFailure {
-            // TODO (samer-stripe): Add error event here
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_IS_READY_API_CALL,
+                StripeException.create(it)
+            )
+
             logger.error("Google Pay check failed.", it)
         }.getOrDefault(false)
 

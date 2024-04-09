@@ -86,6 +86,9 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        GOOGLE_PAY_IS_READY_API_CALL(
+            eventName = "elements.google_pay_repository.is_ready_request_api_call_failure"
+        ),
         LINK_CREATE_CARD_FAILURE(
             eventName = "link.create_new_card.create_payment_details_failure"
         ),
@@ -104,6 +107,9 @@ interface ErrorReporter {
         ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
+        ),
+        GOOGLE_PAY_JSON_REQUEST_PARSING(
+            partialEventName = "google_pay_repository.is_ready_request_json_parsing_failure"
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"

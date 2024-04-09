@@ -30,6 +30,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
@@ -261,12 +262,18 @@ internal class GooglePayLauncherViewModel(
                 paymentAnalyticsRequestFactory = analyticsRequestFactory
             )
 
+            val errorReporter = ErrorReporter.createFallbackInstance(
+                context = application,
+                productUsage = productUsageTokens
+            )
+
             val googlePayRepository = DefaultGooglePayRepository(
                 context = application,
                 environment = args.config.environment,
                 billingAddressParameters = args.config.billingAddressConfig.convert(),
                 existingPaymentMethodRequired = args.config.existingPaymentMethodRequired,
                 allowCreditCards = args.config.allowCreditCards,
+                errorReporter = errorReporter,
                 logger = logger
             )
 
