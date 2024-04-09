@@ -55,7 +55,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
             finish()
             ErrorReporter.createFallbackInstance(applicationContext)
                 .report(
-                    errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
                 )
             return
         }

@@ -86,6 +86,9 @@ interface ErrorReporter {
         AUTH_WEB_VIEW_FAILURE(
             eventName = "payments.auth_web_view.failure"
         ),
+        AUTH_WEB_VIEW_NULL_ARGS(
+            eventName = "payments.auth_web_view.null_args"
+        ),
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
@@ -108,9 +111,6 @@ interface ErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class UnexpectedErrorEvent(val partialEventName: String) : ErrorEvent {
-        AUTH_WEB_VIEW_NULL_ARGS(
-            partialEventName = "payments.auth_web_view.null_args"
-        ),
         AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
             partialEventName = "payments.auth_web_view.blank_client_secret"
         ),
