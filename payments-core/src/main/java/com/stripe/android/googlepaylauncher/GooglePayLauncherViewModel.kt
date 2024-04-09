@@ -18,6 +18,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.PaymentController
 import com.stripe.android.StripePaymentController
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayLauncher.BillingAddressConfig.Format
@@ -30,6 +31,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
@@ -49,7 +51,8 @@ internal class GooglePayLauncherViewModel(
     private val paymentController: PaymentController,
     private val googlePayJsonFactory: GooglePayJsonFactory,
     private val googlePayRepository: GooglePayRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val errorReporter: ErrorReporter,
 ) : ViewModel() {
     /**
      * [hasLaunched] indicates whether Google Pay has already been launched, and must be persisted
@@ -218,7 +221,13 @@ internal class GooglePayLauncherViewModel(
                 paymentController.getSetupIntentResult(data)
             }
             else -> {
-                Result.failure(IllegalStateException("Unexpected confirmation result."))
+                val error = IllegalStateException("Unexpected confirmation result.")
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT,
+                    StripeException.create(error),
+                    additionalNonPiiParams = mapOf("request_code" to requestCode.toString()),
+                )
+                Result.failure(error)
             }
         }
 
@@ -270,6 +279,8 @@ internal class GooglePayLauncherViewModel(
                 logger = logger
             )
 
+            val errorReporter = ErrorReporter.createFallbackInstance(context = application)
+
             return GooglePayLauncherViewModel(
                 DefaultPaymentsClientFactory(application).create(googlePayEnvironment),
                 ApiRequest.Options(
@@ -290,7 +301,8 @@ internal class GooglePayLauncherViewModel(
                     isJcbEnabled = args.config.isJcbEnabled
                 ),
                 googlePayRepository,
-                extras.createSavedStateHandle()
+                extras.createSavedStateHandle(),
+                errorReporter
             ) as T
         }
     }

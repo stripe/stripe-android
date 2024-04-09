@@ -41,7 +41,7 @@ interface ErrorReporter {
          */
         fun createFallbackInstance(
             context: Context,
-            productUsage: Set<String>,
+            productUsage: Set<String> = emptySet(),
         ): ErrorReporter {
             return DaggerDefaultErrorReporterComponent
                 .builder()
@@ -86,6 +86,12 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        PLACES_FIND_AUTOCOMPLETE_ERROR(
+            eventName = "address_element.find_autocomplete.error"
+        ),
+        PLACES_FETCH_PLACE_ERROR(
+            eventName = "address_element.fetch_place.error"
+        ),
         LINK_CREATE_CARD_FAILURE(
             eventName = "link.create_new_card.create_payment_details_failure"
         ),
@@ -107,6 +113,18 @@ interface ErrorReporter {
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
+        ),
+        GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
+            partialEventName = "google_pay.confirm.unexpected_result"
+        ),
+        GOOGLE_PAY_MISSING_INTENT_DATA(
+            partialEventName = "google_pay.on_result.missing_data"
+        ),
+        FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY(
+            partialEventName = "address_element.find_autocomplete.without_dependency"
+        ),
+        FETCH_PLACE_WITHOUT_DEPENDENCY(
+            partialEventName = "address_element.fetch_place.without_dependency",
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
