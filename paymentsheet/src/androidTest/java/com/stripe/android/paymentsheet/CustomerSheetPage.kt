@@ -21,8 +21,26 @@ internal class CustomerSheetPage(
         waitUntil(hasText(text, substring = substring))
     }
 
+    fun fillOutFullBillingAddress() {
+        replaceText("Address line 1", ADDRESS_LINE_ONE)
+        replaceText("Address line 2 (optional)", ADDRESS_LINE_TWO)
+        replaceText("City", CITY)
+
+        click(hasText("State"))
+        click(hasText(STATE_NAME))
+    }
+
+    fun fillOutContactInformation() {
+        replaceText("Email", EMAIL)
+        replaceText("Phone number", PHONE_NUMBER)
+    }
+
+    fun fillOutName() {
+        replaceText("Name on card", NAME)
+    }
+
     fun fillOutCardDetails(
-        cardNumber: String = CARD_NUMBER
+        cardNumber: String = CARD_NUMBER,
     ) {
         replaceText("Card number", cardNumber)
         replaceText("MM / YY", "$EXPIRY_MONTH/$${EXPIRY_YEAR.substring(startIndex = 2)}")
@@ -33,6 +51,10 @@ internal class CustomerSheetPage(
     fun changeCardBrandChoice() {
         clickDropdownMenu()
         clickOnCartesBancaires()
+    }
+
+    fun closeKeyboard() {
+        Espresso.closeSoftKeyboard()
     }
 
     fun clickSaveButton() {
@@ -93,9 +115,17 @@ internal class CustomerSheetPage(
 
     companion object {
         const val CARD_NUMBER = "4242424242424242"
+        const val EMAIL = "email@email.com"
+        const val PHONE_NUMBER = "1234567890"
+        const val NAME = "John Doe"
         const val EXPIRY_MONTH = "12"
         const val EXPIRY_YEAR = "2034"
         const val CVC = "123"
+        const val ADDRESS_LINE_ONE = "354 Oyster Point Blvd"
+        const val ADDRESS_LINE_TWO = "Levels 1-5"
+        const val CITY = "South San Francisco"
+        private const val STATE_NAME = "California"
+        const val STATE = "CA"
         const val ZIP_CODE = "12345"
         const val COUNTRY = "US"
     }
