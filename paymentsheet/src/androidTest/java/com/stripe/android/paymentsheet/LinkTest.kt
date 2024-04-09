@@ -5,6 +5,7 @@ import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
@@ -89,16 +90,16 @@ internal class LinkTest {
             /*
              * Make sure card number is included
              */
-            bodyPart("card%5Bnumber%5D", "4242424242424242"),
+            bodyPart(urlEncode("card[number]"), "4242424242424242"),
             /*
              * Make sure card expiration month is included
              */
-            bodyPart("card%5Bexp_month%5D", "12"),
+            bodyPart(urlEncode("card[exp_month]"), "12"),
             /*
              * Ensures we are passing the full expiration year and not the
              * 2-digit shorthand (should send "2034", not "34")
              */
-            bodyPart("card%5Bexp_year%5D", "2034"),
+            bodyPart(urlEncode("card[exp_year]"), "2034"),
             /*
              * Should use the consumer's publishable key when creating payment details
              */
@@ -225,7 +226,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart("payment_method_options%5Bcard%5D%5Bsetup_future_usage%5D", "off_session"),
+                bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -287,20 +288,20 @@ internal class LinkTest {
             /*
              * Ensures card number is included
              */
-            bodyPart("card%5Bnumber%5D", "4000002500001001"),
+            bodyPart(urlEncode("card[number]"), "4000002500001001"),
             /*
              * Ensures card expiration month is included
              */
-            bodyPart("card%5Bexp_month%5D", "12"),
+            bodyPart(urlEncode("card[exp_month]"), "12"),
             /*
              * Ensures we are passing the full expiration year and not the
              * 2-digit shorthand (should send "2034", not "34")
              */
-            bodyPart("card%5Bexp_year%5D", "2034"),
+            bodyPart(urlEncode("card[exp_year]"), "2034"),
             /*
              * Ensures card brand choice is passed properly.
              */
-            bodyPart("card%5Bpreferred_network%5D", "cartes_bancaires"),
+            bodyPart(urlEncode("card[preferred_network]"), "cartes_bancaires"),
             /*
              * Should use the consumer's publishable key when creating payment details
              */
@@ -376,16 +377,16 @@ internal class LinkTest {
             /*
              * Make sure card number is included
              */
-            bodyPart("card%5Bnumber%5D", "4242424242424242"),
+            bodyPart(urlEncode("card[number]"), "4242424242424242"),
             /*
              * Make sure card expiration month is included
              */
-            bodyPart("card%5Bexp_month%5D", "12"),
+            bodyPart(urlEncode("card[exp_month]"), "12"),
             /*
              * Ensures we are passing the full expiration year and not the
              * 2-digit shorthand (should send "2034", not "34")
              */
-            bodyPart("card%5Bexp_year%5D", "2034"),
+            bodyPart(urlEncode("card[exp_year]"), "2034"),
             /*
              * In passthrough mode, this needs to be true
              */
@@ -531,7 +532,7 @@ internal class LinkTest {
             networkRule.enqueue(
                 method("POST"),
                 path("/v1/payment_intents/pi_example/confirm"),
-                bodyPart("payment_method_options%5Bcard%5D%5Bsetup_future_usage%5D", "off_session"),
+                bodyPart(urlEncode("payment_method_options[card][setup_future_usage]"), "off_session"),
             ) { response ->
                 response.testBodyFromFile("payment-intent-confirm.json")
             }
@@ -596,20 +597,20 @@ internal class LinkTest {
             /*
              * Make sure card number is included
              */
-            bodyPart("card%5Bnumber%5D", "4000002500001001"),
+            bodyPart(urlEncode("card[number]"), "4000002500001001"),
             /*
              * Make sure card expiration month is included
              */
-            bodyPart("card%5Bexp_month%5D", "12"),
+            bodyPart(urlEncode("card[exp_month]"), "12"),
             /*
              * Ensures we are passing the full expiration year and not the
              * 2-digit shorthand (should send "2034", not "34")
              */
-            bodyPart("card%5Bexp_year%5D", "2034"),
+            bodyPart(urlEncode("card[exp_year]"), "2034"),
             /*
              * Ensures card brand choice is passed properly.
              */
-            bodyPart("card%5Bpreferred_network%5D", "cartes_bancaires"),
+            bodyPart(urlEncode("card[preferred_network]"), "cartes_bancaires"),
             /*
              * In passthrough mode, this needs to be true
              */
@@ -1072,15 +1073,15 @@ internal class LinkTest {
     private fun linkInformation(): RequestMatcher {
         return composite(
             bodyPart(
-                name = "payment_method_data%5Blink%5D%5Bcard%5D%5Bcvc%5D",
+                name = urlEncode("payment_method_data[link][card][cvc]"),
                 value = "123"
             ),
             bodyPart(
-                name = "payment_method_data%5Blink%5D%5Bpayment_details_id%5D",
+                name = urlEncode("payment_method_data[link][payment_details_id]"),
                 value = "QAAAKJ6"
             ),
             bodyPart(
-                name = "payment_method_data%5Blink%5D%5Bcredentials%5D%5Bconsumer_session_client_secret%5D",
+                name = urlEncode("payment_method_data[link][credentials][consumer_session_client_secret]"),
                 value = "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND"
             ),
         )

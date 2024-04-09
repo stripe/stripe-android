@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -364,7 +365,7 @@ internal class FlowControllerTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    "payment_method_data%5Bpayment_user_agent%5D",
+                    urlEncode("payment_method_data[payment_user_agent]"),
                     Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet.FlowController%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
                 )
             ),
