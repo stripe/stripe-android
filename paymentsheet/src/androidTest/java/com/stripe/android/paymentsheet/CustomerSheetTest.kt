@@ -4,6 +4,8 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.urlEncode
+import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.networktesting.NetworkRule
@@ -80,6 +82,90 @@ internal class CustomerSheetTest {
             method("POST"),
             path("/v1/payment_methods"),
             cardDetails(),
+            billingDetails(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/setup_intents/seti_12345"),
+            query("client_secret", "seti_12345_secret_12345"),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-get.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/setup_intents/seti_12345/confirm"),
+            confirmParams()
+        ) { response ->
+            response.testBodyFromFile("setup-intent-confirm.json")
+        }
+
+        page.clickSaveButton()
+        page.clickConfirmButton()
+    }
+
+    @Test
+    fun testSuccessfulCardSaveWithFullBillingDetailsCollection() = activityScenarioRule.runCustomerSheetTest(
+        configuration = CustomerSheet.Configuration.builder("Merchant, Inc.")
+            .billingDetailsCollectionConfiguration(
+                PaymentSheet.BillingDetailsCollectionConfiguration(
+                    name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                )
+            )
+            .build(),
+        integrationType = integrationType,
+        resultCallback = { result ->
+            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+        }
+    ) { context ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "card")
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+            query("type", "us_bank_account")
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        context.presentCustomerSheet()
+
+        page.fillOutContactInformation()
+        page.fillOutName()
+        page.fillOutCardDetails()
+        page.fillOutFullBillingAddress()
+        page.closeKeyboard()
+
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods"),
+            cardDetails(),
+            fullBillingDetails(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -143,7 +229,7 @@ internal class CustomerSheetTest {
 
         /*
          * This card is overridden to use a test card compatible with CbcTestCardDelegate to skip
-         * checking card account ranges network operation which ran only if account ranges aren't
+         * checking card account ranges network operation which run only if account ranges aren't
          * stores in memory.
          */
         page.fillOutCardDetails(
@@ -225,6 +311,7 @@ internal class CustomerSheetTest {
             method("POST"),
             path("/v1/payment_methods"),
             cardDetails(),
+            billingDetails(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
@@ -255,24 +342,42 @@ internal class CustomerSheetTest {
         context.markTestSucceeded()
     }
 
+    private fun billingDetails(): RequestMatcher {
+        return RequestMatchers.composite(
+            bodyPart(urlEncode("billing_details[address][postal_code]"), CustomerSheetPage.ZIP_CODE),
+            bodyPart(urlEncode("billing_details[address][country]"), CustomerSheetPage.COUNTRY)
+        )
+    }
+
+    private fun fullBillingDetails(): RequestMatcher {
+        return RequestMatchers.composite(
+            bodyPart(urlEncode("billing_details[name]"), urlEncode(CustomerSheetPage.NAME)),
+            bodyPart(urlEncode("billing_details[phone]"), CustomerSheetPage.PHONE_NUMBER),
+            bodyPart(urlEncode("billing_details[email]"), urlEncode(CustomerSheetPage.EMAIL)),
+            bodyPart(urlEncode("billing_details[address][line1]"), urlEncode(CustomerSheetPage.ADDRESS_LINE_ONE)),
+            bodyPart(urlEncode("billing_details[address][line2]"), urlEncode(CustomerSheetPage.ADDRESS_LINE_TWO)),
+            bodyPart(urlEncode("billing_details[address][city]"), urlEncode(CustomerSheetPage.CITY)),
+            bodyPart(urlEncode("billing_details[address][state]"), urlEncode(CustomerSheetPage.STATE)),
+            billingDetails()
+        )
+    }
+
     private fun cardDetails(
         cardNumber: String = CustomerSheetPage.CARD_NUMBER
     ): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart("type", "card"),
-            bodyPart("card%5Bnumber%5D", cardNumber),
-            bodyPart("card%5Bexp_month%5D", CustomerSheetPage.EXPIRY_MONTH),
-            bodyPart("card%5Bexp_year%5D", CustomerSheetPage.EXPIRY_YEAR),
-            bodyPart("card%5Bcvc%5D", CustomerSheetPage.CVC),
-            bodyPart("billing_details%5Baddress%5D%5Bpostal_code%5D", CustomerSheetPage.ZIP_CODE),
-            bodyPart("billing_details%5Baddress%5D%5Bcountry%5D", CustomerSheetPage.COUNTRY)
+            bodyPart(urlEncode("card[number]"), cardNumber),
+            bodyPart(urlEncode("card[exp_month]"), CustomerSheetPage.EXPIRY_MONTH),
+            bodyPart(urlEncode("card[exp_year]"), CustomerSheetPage.EXPIRY_YEAR),
+            bodyPart(urlEncode("card[cvc]"), CustomerSheetPage.CVC),
         )
     }
 
     private fun cardBrandChoice(): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart(
-                "card%5Bnetworks%5D%5Bpreferred%5D",
+                urlEncode("card[networks][preferred]"),
                 "cartes_bancaires"
             )
         )
@@ -282,8 +387,8 @@ internal class CustomerSheetTest {
         return RequestMatchers.composite(
             bodyPart("payment_method", "pm_12345"),
             bodyPart("client_secret", "seti_12345_secret_12345"),
-            bodyPart("mandate_data%5Bcustomer_acceptance%5D%5Btype%5D", "online"),
-            bodyPart("mandate_data%5Bcustomer_acceptance%5D%5Bonline%5D%5Binfer_from_client%5D", "true"),
+            bodyPart(urlEncode("mandate_data[customer_acceptance][type]"), "online"),
+            bodyPart(urlEncode("mandate_data[customer_acceptance][online][infer_from_client]"), "true"),
         )
     }
 
