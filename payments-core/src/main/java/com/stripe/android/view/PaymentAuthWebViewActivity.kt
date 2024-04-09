@@ -127,7 +127,7 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (error != null) {
             ErrorReporter.createFallbackInstance(applicationContext)
                 .report(
-                    errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENTS_AUTH_WEB_VIEW_FAILURE,
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
                     stripeException = StripeException.create(error),
                 )
             viewModel.logError()

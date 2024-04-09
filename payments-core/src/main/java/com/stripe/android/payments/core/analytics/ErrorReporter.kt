@@ -83,6 +83,9 @@ interface ErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExpectedErrorEvent(override val eventName: String) : ErrorEvent {
+        AUTH_WEB_VIEW_FAILURE(
+            eventName = "payments.auth_web_view.failure"
+        ),
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
@@ -100,9 +103,6 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
-        ),
-        PAYMENTS_AUTH_WEB_VIEW_FAILURE(
-            eventName = "payments.auth_web_view.failure"
         ),
     }
 
@@ -140,7 +140,8 @@ interface ErrorReporter {
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
-        );
+        ),
+        ;
 
         override val eventName: String
             get() = "unexpected.$partialEventName"
