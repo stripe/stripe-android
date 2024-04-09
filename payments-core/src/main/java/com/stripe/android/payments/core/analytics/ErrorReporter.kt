@@ -83,6 +83,12 @@ interface ErrorReporter {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class ExpectedErrorEvent(override val eventName: String) : ErrorEvent {
+        AUTH_WEB_VIEW_FAILURE(
+            eventName = "payments.auth_web_view.failure"
+        ),
+        AUTH_WEB_VIEW_NULL_ARGS(
+            eventName = "payments.auth_web_view.null_args"
+        ),
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
@@ -100,16 +106,22 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
-        )
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class UnexpectedErrorEvent(val partialEventName: String) : ErrorEvent {
+        AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
+            partialEventName = "payments.auth_web_view.blank_client_secret"
+        ),
         MISSING_CARDSCAN_DEPENDENCY(
             partialEventName = "cardscan.missing_dependency"
         ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
+        ),
+        MISSING_POLLING_AUTHENTICATOR(
+            partialEventName = "payments.missing_polling_authenticator"
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
@@ -128,7 +140,8 @@ interface ErrorReporter {
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
-        );
+        ),
+        ;
 
         override val eventName: String
             get() = "unexpected.$partialEventName"
