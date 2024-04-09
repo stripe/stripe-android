@@ -1,15 +1,13 @@
-package com.stripe.android.uicore.utils
+package com.stripe.android.screenshottesting
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalInspectionMode
 import app.cash.paparazzi.DeviceConfig
 import app.cash.paparazzi.Paparazzi
 import app.cash.paparazzi.detectEnvironment
@@ -21,14 +19,13 @@ import org.junit.runners.model.Statement
 
 class PaparazziRule(
     vararg configOptions: List<PaparazziConfigOption>,
-    private val boxModifier: Modifier = Modifier.defaultBoxModifier(),
+    private val boxModifier: Modifier = Modifier,
 ) : TestRule {
 
     private val testCases: List<TestCase> = configOptions.toTestCases()
 
     private val defaultDeviceConfig = createPaparazziDeviceConfig()
     private val paparazzi = createPaparazzi(defaultDeviceConfig)
-
     private var description: Description? = null
 
     override fun apply(base: Statement, description: Description): Statement {
@@ -66,13 +63,15 @@ class PaparazziRule(
                 }
 
                 paparazzi.snapshot {
-                    StripeTheme {
-                        Surface(color = MaterialTheme.colors.surface) {
-                            Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = boxModifier,
-                            ) {
-                                content()
+                    CompositionLocalProvider(LocalInspectionMode provides true) {
+                        StripeTheme {
+                            Surface(color = MaterialTheme.colors.surface) {
+                                Box(
+                                    contentAlignment = Alignment.Center,
+                                    modifier = boxModifier,
+                                ) {
+                                    content()
+                                }
                             }
                         }
                     }
@@ -98,11 +97,6 @@ class PaparazziRule(
             },
         )
     }
-}
-
-private fun Modifier.defaultBoxModifier(): Modifier {
-    return padding(PaddingValues(vertical = 16.dp))
-        .fillMaxWidth()
 }
 
 private fun Array<out List<PaparazziConfigOption>>.toTestCases(): List<TestCase> {

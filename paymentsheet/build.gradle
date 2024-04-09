@@ -55,6 +55,7 @@ dependencies {
     testImplementation project(':link')
     testImplementation project(':financial-connections')
     testImplementation project(':payments-core-testing')
+    testImplementation project(':screenshot-testing')
 
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi

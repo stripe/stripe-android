@@ -96,6 +96,7 @@ apiValidation {
             "payments-core-testing",
             "paymentsheet-example",
             "stripecardscan-example",
+            "screenshot-testing",
     ]
     nonPublicMarkers.add("androidx.annotation.RestrictTo")
     nonPublicMarkers.add("dagger.internal.DaggerGenerated")
