@@ -48,27 +48,21 @@ internal class CustomerSheetTest {
         }
     ) { context ->
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+            retrieveElementsSessionRequest(),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "card")
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "us_bank_account")
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -78,29 +72,23 @@ internal class CustomerSheetTest {
         page.fillOutCardDetails()
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods"),
-            cardDetails(),
-            billingDetails(),
+            createPaymentMethodsRequest(),
+            cardDetailsParams(),
+            billingDetailsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/setup_intents/seti_12345"),
-            query("client_secret", "seti_12345_secret_12345"),
+            retrieveSetupIntentRequest(),
+            retrieveSetupIntentParams(),
         ) { response ->
             response.testBodyFromFile("setup-intent-get.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/setup_intents/seti_12345/confirm"),
-            confirmParams()
+            confirmSetupIntentRequest(),
+            confirmSetupIntentParams(),
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
         }
@@ -127,27 +115,21 @@ internal class CustomerSheetTest {
         }
     ) { context ->
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+            retrieveElementsSessionRequest(),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "card")
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "us_bank_account")
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -161,29 +143,23 @@ internal class CustomerSheetTest {
         page.closeKeyboard()
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods"),
-            cardDetails(),
-            fullBillingDetails(),
+            createPaymentMethodsRequest(),
+            cardDetailsParams(),
+            fullBillingDetailsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/setup_intents/seti_12345"),
-            query("client_secret", "seti_12345_secret_12345"),
+            retrieveSetupIntentRequest(),
+            retrieveSetupIntentParams(),
         ) { response ->
             response.testBodyFromFile("setup-intent-get.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/setup_intents/seti_12345/confirm"),
-            confirmParams()
+            confirmSetupIntentRequest(),
+            confirmSetupIntentParams()
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
         }
@@ -200,27 +176,21 @@ internal class CustomerSheetTest {
         }
     ) { context ->
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+            retrieveElementsSessionRequest(),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "card")
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "us_bank_account")
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -238,29 +208,23 @@ internal class CustomerSheetTest {
         page.changeCardBrandChoice()
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods"),
-            cardDetails(cardNumber = TEST_CBC_CARD_NUMBER),
-            cardBrandChoice(),
+            createPaymentMethodsRequest(),
+            cardDetailsParams(cardNumber = TEST_CBC_CARD_NUMBER),
+            cardBrandChoiceParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/setup_intents/seti_12345"),
-            query("client_secret", "seti_12345_secret_12345"),
+            retrieveSetupIntentRequest(),
+            retrieveSetupIntentParams(),
         ) { response ->
             response.testBodyFromFile("setup-intent-get.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/setup_intents/seti_12345/confirm"),
-            confirmParams(),
+            confirmSetupIntentRequest(),
+            confirmSetupIntentParams(),
         ) { response ->
             response.testBodyFromFile("setup-intent-confirm.json")
         }
@@ -277,27 +241,21 @@ internal class CustomerSheetTest {
         }
     ) { context ->
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/elements/sessions"),
+            retrieveElementsSessionRequest(),
         ) { response ->
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "card")
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/payment_methods"),
-            query("type", "us_bank_account")
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-get-success-empty.json")
         }
@@ -307,29 +265,23 @@ internal class CustomerSheetTest {
         page.fillOutCardDetails()
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/payment_methods"),
-            cardDetails(),
-            billingDetails(),
+            createPaymentMethodsRequest(),
+            cardDetailsParams(),
+            billingDetailsParams(),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("GET"),
-            path("/v1/setup_intents/seti_12345"),
-            query("client_secret", "seti_12345_secret_12345"),
+            retrieveSetupIntentRequest(),
+            retrieveSetupIntentParams(),
         ) { response ->
             response.testBodyFromFile("setup-intent-get.json")
         }
 
         networkRule.enqueue(
-            host("api.stripe.com"),
-            method("POST"),
-            path("/v1/setup_intents/seti_12345/confirm"),
-            confirmParams()
+            confirmSetupIntentRequest(),
+            confirmSetupIntentParams()
         ) { response ->
             response.setResponseCode(402)
             response.testBodyFromFile("setup-intent-confirm_incorrect_cvc.json")
@@ -342,14 +294,72 @@ internal class CustomerSheetTest {
         context.markTestSucceeded()
     }
 
-    private fun billingDetails(): RequestMatcher {
+    private fun retrieveElementsSessionRequest(): RequestMatcher {
+        return RequestMatchers.composite(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        )
+    }
+
+    private fun retrievePaymentMethodsRequest(): RequestMatcher {
+        return RequestMatchers.composite(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/payment_methods"),
+        )
+    }
+
+    private fun retrieveSetupIntentRequest(): RequestMatcher {
+        return RequestMatchers.composite(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/setup_intents/seti_12345"),
+        )
+    }
+
+    private fun createPaymentMethodsRequest(): RequestMatcher {
+        return RequestMatchers.composite(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods"),
+        )
+    }
+
+    private fun confirmSetupIntentRequest(): RequestMatcher {
+        return RequestMatchers.composite(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/setup_intents/seti_12345/confirm")
+        )
+    }
+
+    private fun retrieveSetupIntentParams(): RequestMatcher {
+        return RequestMatchers.composite(
+            query("client_secret", "seti_12345_secret_12345"),
+        )
+    }
+
+    private fun cardPaymentMethodsParams(): RequestMatcher {
+        return RequestMatchers.composite(
+            query("type", "card"),
+        )
+    }
+
+    private fun usBankAccountPaymentMethodsParams(): RequestMatcher {
+        return RequestMatchers.composite(
+            query("type", "us_bank_account"),
+        )
+    }
+
+    private fun billingDetailsParams(): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart(urlEncode("billing_details[address][postal_code]"), CustomerSheetPage.ZIP_CODE),
             bodyPart(urlEncode("billing_details[address][country]"), CustomerSheetPage.COUNTRY)
         )
     }
 
-    private fun fullBillingDetails(): RequestMatcher {
+    private fun fullBillingDetailsParams(): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart(urlEncode("billing_details[name]"), urlEncode(CustomerSheetPage.NAME)),
             bodyPart(urlEncode("billing_details[phone]"), CustomerSheetPage.PHONE_NUMBER),
@@ -358,11 +368,11 @@ internal class CustomerSheetTest {
             bodyPart(urlEncode("billing_details[address][line2]"), urlEncode(CustomerSheetPage.ADDRESS_LINE_TWO)),
             bodyPart(urlEncode("billing_details[address][city]"), urlEncode(CustomerSheetPage.CITY)),
             bodyPart(urlEncode("billing_details[address][state]"), urlEncode(CustomerSheetPage.STATE)),
-            billingDetails()
+            billingDetailsParams()
         )
     }
 
-    private fun cardDetails(
+    private fun cardDetailsParams(
         cardNumber: String = CustomerSheetPage.CARD_NUMBER
     ): RequestMatcher {
         return RequestMatchers.composite(
@@ -374,7 +384,7 @@ internal class CustomerSheetTest {
         )
     }
 
-    private fun cardBrandChoice(): RequestMatcher {
+    private fun cardBrandChoiceParams(): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart(
                 urlEncode("card[networks][preferred]"),
@@ -383,7 +393,7 @@ internal class CustomerSheetTest {
         )
     }
 
-    private fun confirmParams(): RequestMatcher {
+    private fun confirmSetupIntentParams(): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart("payment_method", "pm_12345"),
             bodyPart("client_secret", "seti_12345_secret_12345"),
