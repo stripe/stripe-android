@@ -344,20 +344,20 @@ internal class CustomerSheetTest {
 
     private fun billingDetails(): RequestMatcher {
         return RequestMatchers.composite(
-            bodyPart("billing_details%5Baddress%5D%5Bpostal_code%5D", CustomerSheetPage.ZIP_CODE),
-            bodyPart("billing_details%5Baddress%5D%5Bcountry%5D", CustomerSheetPage.COUNTRY)
+            bodyPart(urlEncode("billing_details[address][postal_code]"), CustomerSheetPage.ZIP_CODE),
+            bodyPart(urlEncode("billing_details[address][country]"), CustomerSheetPage.COUNTRY)
         )
     }
 
     private fun fullBillingDetails(): RequestMatcher {
         return RequestMatchers.composite(
-            bodyPart("billing_details%5Bname%5D", urlEncode(CustomerSheetPage.NAME)),
-            bodyPart("billing_details%5Bphone%5D", CustomerSheetPage.PHONE_NUMBER),
-            bodyPart("billing_details%5Bemail%5D", urlEncode(CustomerSheetPage.EMAIL)),
-            bodyPart("billing_details%5Baddress%5D%5Bline1%5D", urlEncode(CustomerSheetPage.ADDRESS_LINE_ONE)),
-            bodyPart("billing_details%5Baddress%5D%5Bline2%5D", urlEncode(CustomerSheetPage.ADDRESS_LINE_TWO)),
-            bodyPart("billing_details%5Baddress%5D%5Bcity%5D", urlEncode(CustomerSheetPage.CITY)),
-            bodyPart("billing_details%5Baddress%5D%5Bstate%5D", urlEncode(CustomerSheetPage.STATE)),
+            bodyPart(urlEncode("billing_details[name]"), urlEncode(CustomerSheetPage.NAME)),
+            bodyPart(urlEncode("billing_details[phone]"), CustomerSheetPage.PHONE_NUMBER),
+            bodyPart(urlEncode("billing_details[email]"), urlEncode(CustomerSheetPage.EMAIL)),
+            bodyPart(urlEncode("billing_details[address][line1]"), urlEncode(CustomerSheetPage.ADDRESS_LINE_ONE)),
+            bodyPart(urlEncode("billing_details[address][line2]"), urlEncode(CustomerSheetPage.ADDRESS_LINE_TWO)),
+            bodyPart(urlEncode("billing_details[address][city]"), urlEncode(CustomerSheetPage.CITY)),
+            bodyPart(urlEncode("billing_details[address][state]"), urlEncode(CustomerSheetPage.STATE)),
             billingDetails()
         )
     }
@@ -367,17 +367,17 @@ internal class CustomerSheetTest {
     ): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart("type", "card"),
-            bodyPart("card%5Bnumber%5D", cardNumber),
-            bodyPart("card%5Bexp_month%5D", CustomerSheetPage.EXPIRY_MONTH),
-            bodyPart("card%5Bexp_year%5D", CustomerSheetPage.EXPIRY_YEAR),
-            bodyPart("card%5Bcvc%5D", CustomerSheetPage.CVC),
+            bodyPart(urlEncode("card[number]"), cardNumber),
+            bodyPart(urlEncode("card[exp_month]"), CustomerSheetPage.EXPIRY_MONTH),
+            bodyPart(urlEncode("card[exp_year]"), CustomerSheetPage.EXPIRY_YEAR),
+            bodyPart(urlEncode("card[cvc]"), CustomerSheetPage.CVC),
         )
     }
 
     private fun cardBrandChoice(): RequestMatcher {
         return RequestMatchers.composite(
             bodyPart(
-                "card%5Bnetworks%5D%5Bpreferred%5D",
+                urlEncode("card[networks][preferred]"),
                 "cartes_bancaires"
             )
         )
@@ -387,8 +387,8 @@ internal class CustomerSheetTest {
         return RequestMatchers.composite(
             bodyPart("payment_method", "pm_12345"),
             bodyPart("client_secret", "seti_12345_secret_12345"),
-            bodyPart("mandate_data%5Bcustomer_acceptance%5D%5Btype%5D", "online"),
-            bodyPart("mandate_data%5Bcustomer_acceptance%5D%5Bonline%5D%5Binfer_from_client%5D", "true"),
+            bodyPart(urlEncode("mandate_data[customer_acceptance][type]"), "online"),
+            bodyPart(urlEncode("mandate_data[customer_acceptance][online][infer_from_client]"), "true"),
         )
     }
 
