@@ -29,7 +29,6 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -622,8 +621,7 @@ class USBankAccountFormViewModelTest {
         )
 
         viewModel.addressElement.countryElement.controller.onRawValueChange("CA")
-        assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.first())
-            .isEqualTo("CA")
+        assertThat(viewModel.phoneController.countryDropdownController.rawFieldValue.value).isEqualTo("CA")
     }
 
     @Test
