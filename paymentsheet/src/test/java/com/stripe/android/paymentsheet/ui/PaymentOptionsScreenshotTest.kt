@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
-import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
@@ -41,29 +40,6 @@ class PaymentOptionsScreenshotTest {
                 onItemRemoved = {},
             )
         }
-    }
-
-    @Test
-    fun testWithLinkRebrandDisabled() {
-        LinkUi.useNewBrand = false
-        paparazziRule.snapshot {
-            PaymentOptions(
-                state = PaymentOptionsState(
-                    items = listOf(
-                        PaymentOptionsItem.AddCard,
-                        PaymentOptionsItem.Link,
-                    ),
-                    selectedIndex = 1,
-                ),
-                isEditing = false,
-                isProcessing = false,
-                onAddCardPressed = {},
-                onItemSelected = {},
-                onModifyItem = {},
-                onItemRemoved = {},
-            )
-        }
-        LinkUi.useNewBrand = true
     }
 
     @Test

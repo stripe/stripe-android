@@ -449,28 +449,4 @@ class ElementsSessionJsonParserTest {
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
         assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
     }
-
-    @Test
-    fun ensureLinkSettingsUseRebrandIsCorrectlyPopulated() {
-        val parser = ElementsSessionJsonParser(
-            ElementsSessionParams.PaymentIntentType(
-                clientSecret = "secret"
-            ),
-            apiKey = "test"
-        )
-
-        fun assertLinkSettingsUseRebrand(expectedValue: Boolean, jsonTransform: JSONObject.() -> Unit) {
-            val json = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
-            val flags = JSONObject()
-            flags.jsonTransform()
-            json
-                .put(ElementsSessionJsonParser.FIELD_FLAGS, flags)
-                .put(ElementsSessionJsonParser.FIELD_LINK_SETTINGS, emptyMap<String, String>())
-            assertThat(parser.parse(json)?.linkSettings?.useRebrand).isEqualTo(expectedValue)
-        }
-
-        assertLinkSettingsUseRebrand(true) { remove(ElementsSessionJsonParser.FIELD_LINK_REBRAND) }
-        assertLinkSettingsUseRebrand(true) { put(ElementsSessionJsonParser.FIELD_LINK_REBRAND, true) }
-        assertLinkSettingsUseRebrand(false) { put(ElementsSessionJsonParser.FIELD_LINK_REBRAND, false) }
-    }
 }

@@ -7,7 +7,6 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
@@ -75,10 +74,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
-            // If Link is enabled, set the `useNewBrand`.
-            LinkUi.useNewBrand = elementsSession.linkSettings?.useRebrand
-                ?: ElementsSession.LinkSettings.useRebrandDefault
-
             val billingDetailsCollectionConfig =
                 paymentSheetConfiguration.billingDetailsCollectionConfiguration
 

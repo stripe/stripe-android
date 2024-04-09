@@ -16,7 +16,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -29,7 +28,6 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionUi
@@ -260,30 +258,13 @@ private fun Link(
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val surfaceColor = MaterialTheme.stripeColors.component
-    val linkLogoColor = remember(surfaceColor) {
-        if (LinkUi.useNewBrand) {
-            null
-        } else {
-            if (surfaceColor.shouldUseDarkDynamicColor()) {
-                Color.Black
-            } else {
-                Color.White
-            }
-        }
-    }
-
     PaymentOptionUi(
         viewWidth = width,
         editState = PaymentOptionEditState.None,
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = if (LinkUi.useNewBrand) {
-            R.drawable.stripe_ic_paymentsheet_link_2024
-        } else {
-            R.drawable.stripe_link_mark
-        },
-        iconTint = linkLogoColor,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+        iconTint = null,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },

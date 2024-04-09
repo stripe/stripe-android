@@ -42,14 +42,7 @@ data class ElementsSession(
         val linkPassthroughModeEnabled: Boolean,
         val linkFlags: Map<String, Boolean>,
         val disableLinkSignup: Boolean,
-        val useRebrand: Boolean = useRebrandDefault,
-    ) : StripeModel {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        companion object {
-            // Should default to true in case we remove the server-side flag someday.
-            const val useRebrandDefault: Boolean = true
-        }
-    }
+    ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
