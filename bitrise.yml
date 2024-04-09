@@ -63,7 +63,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources
+            - content: ./gradlew ktlint detekt lintRelease apiCheck verifyReleaseResources --scan
   test:
     envs:
       - opts:
@@ -77,7 +77,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest
+            - content: ./gradlew testDebugUnitTest verifyPaparazziDebug -x :stripe-test-e2e:testDebugUnitTest --scan
   build-connections-debug:
     envs:
       - BUILD_VARIANT: debug
@@ -205,16 +205,14 @@ workflows:
     before_run:
       - start_emulator
       - prepare_all
-      - restore_gradle_output_data
     after_run:
-      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest -x :financial-connections:assembleAndroidTest -x :financial-connections-example:assembleAndroidTest -x :camera-core:assembleAndroidTest -x :stripecardscan:assembleAndroidTest -x :stripecardscan-example:assembleAndroidTest
+            - content: ./gradlew assembleAndroidTest -x :paymentsheet-example:assembleAndroidTest -x :paymentsheet:assembleAndroidTest -x :example:assembleAndroidTest -x :financial-connections:assembleAndroidTest -x :financial-connections-example:assembleAndroidTest -x :camera-core:assembleAndroidTest -x :stripecardscan:assembleAndroidTest -x :stripecardscan-example:assembleAndroidTest --scan
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -222,23 +220,21 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest
+            - content: ./gradlew connectedAndroidTest -x :paymentsheet-example:connectedAndroidTest -x :paymentsheet:connectedAndroidTest -x :example:connectedAndroidTest -x :financial-connections:connectedAndroidTest -x :financial-connections-example:connectedAndroidTest -x :camera-core:connectedAndroidTest -x :stripecardscan:connectedAndroidTest -x :stripecardscan-example:connectedAndroidTest --scan
   run-paymentsheet-screenshot-tests:
     envs:
       - INCLUDE_SCREENSHOT_ON_FAILURE: true
     before_run:
       - start_screenshot_emulator
       - prepare_all
-      - restore_gradle_output_data
     after_run:
-      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :paymentsheet:assembleAndroidTest
+            - content: ./gradlew :paymentsheet:assembleAndroidTest --scan
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -246,7 +242,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED"
+            - content: ./gradlew paymentsheet-example:executeScreenshotTests -Precord -Pandroid.testInstrumentationRunnerArguments.package=com.stripe.android.screenshot -Dorg.gradle.jvmargs="--add-opens java.base/java.nio=ALL-UNNAMED --add-opens java.base/java.nio.channels=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED" --scan
       - script@1:
           title: Check updated screenshots
           inputs:
@@ -255,16 +251,14 @@ workflows:
     before_run:
       - start_emulator
       - prepare_all
-      - restore_gradle_output_data
     after_run:
-      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :paymentsheet:assembleAndroidTest
+            - content: ./gradlew :paymentsheet:assembleAndroidTest --scan
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -272,21 +266,19 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet:connectedAndroidTest
+            - content: ./gradlew :paymentsheet:connectedAndroidTest --scan
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
       - prepare_all
-      - restore_gradle_output_data
     after_run:
-      - save_gradle_output_data
       - conclude_all
     steps:
       - script@1:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :example:assembleAndroidTest
+            - content: ./gradlew :example:assembleAndroidTest --scan
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -294,7 +286,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :example:connectedAndroidTest
+            - content: ./gradlew :example:connectedAndroidTest --scan
   run-financial-connections-instrumentation-tests:
     before_run:
       - start_emulator
@@ -306,7 +298,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest
+            - content: ./gradlew :financial-connections:assembleAndroidTest :financial-connections-example:assembleAndroidTest --scan
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -314,7 +306,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest
+            - content: ./gradlew :financial-connections:connectedAndroidTest :financial-connections-example:connectedAndroidTest --scan
   run-cardscan-instrumentation-tests:
     before_run:
       - start_emulator
@@ -326,7 +318,7 @@ workflows:
           title: Assemble Instrumentation tests
           timeout: 600
           inputs:
-            - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest
+            - content: ./gradlew :camera-core:assembleAndroidTest :stripecardscan:assembleAndroidTest :stripecardscan-example:assembleAndroidTest --scan
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
@@ -334,7 +326,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest
+            - content: ./gradlew :camera-core:connectedAndroidTest :stripecardscan:connectedAndroidTest :stripecardscan-example:connectedAndroidTest --scan
   run-paymentsheet-end-to-end-tests:
     before_run:
       - prepare_all
@@ -344,7 +336,7 @@ workflows:
       - script@1:
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug
+            - content: ./gradlew :paymentsheet-example:assembleDebugAndroidTest :paymentsheet-example:assembleDebug --scan
       - script@1:
           timeout: 120
           inputs:
@@ -428,7 +420,7 @@ workflows:
       - activate-build-cache-for-gradle:
           inputs:
             - push: 'true'
-            - validation_level: warning
+            - validation_level: off
       - script-runner@0:
           # Maven doesn't like java 17, so running it before.
           run_if: '{{getenv "NEEDS_ROBOLECTRIC" | ne ""}}'
@@ -444,14 +436,6 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
-  save_gradle_output_data:
-    steps:
-      - script@1:
-          inputs:
-            - content: |-
-                /tmp/bin/bitrise-build-cache save-gradle-output-data
-  restore_gradle_output_data:
-    steps:
       - script@1:
           inputs:
             - content: |-
@@ -470,6 +454,10 @@ workflows:
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
+      - script@1:
+          inputs:
+            - content: |-
+                /tmp/bin/bitrise-build-cache save-gradle-output-data
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
