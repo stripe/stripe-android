@@ -8,6 +8,7 @@ import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.utils.AnimationConstants
@@ -62,7 +63,13 @@ internal class PollingAuthenticator : PaymentAuthenticator<StripeIntent>() {
             AnimationConstants.FADE_OUT,
         )
 
-        pollingLauncher?.launch(args, options)
+        val localPollingAuthenticator = pollingLauncher
+        if (localPollingAuthenticator == null) {
+            ErrorReporter.createFallbackInstance(host.application)
+                .report(ErrorReporter.UnexpectedErrorEvent.MISSING_POLLING_AUTHENTICATOR)
+        } else {
+            localPollingAuthenticator.launch(args, options)
+        }
     }
 
     override fun onNewActivityResultCaller(

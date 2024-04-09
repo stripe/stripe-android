@@ -100,16 +100,28 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
-        )
+        ),
+        PAYMENTS_AUTH_WEB_VIEW_FAILURE(
+            eventName = "payments.auth_web_view.failure"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class UnexpectedErrorEvent(val partialEventName: String) : ErrorEvent {
+        AUTH_WEB_VIEW_NULL_ARGS(
+            partialEventName = "payments.auth_web_view.null_args"
+        ),
+        AUTH_WEB_VIEW_BLANK_CLIENT_SECRET(
+            partialEventName = "payments.auth_web_view.blank_client_secret"
+        ),
         MISSING_CARDSCAN_DEPENDENCY(
             partialEventName = "cardscan.missing_dependency"
         ),
         MISSING_HOSTED_VOUCHER_URL(
             partialEventName = "payments.missing_hosted_voucher_url"
+        ),
+        MISSING_POLLING_AUTHENTICATOR(
+            partialEventName = "payments.missing_polling_authenticator"
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
