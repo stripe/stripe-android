@@ -46,9 +46,9 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.utils.combineStateFlows
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
@@ -197,7 +197,7 @@ internal abstract class BaseSheetViewModel(
 
     abstract fun onFatal(throwable: Throwable)
 
-    protected val buttonsEnabled = combineStateFlows(
+    protected val buttonsEnabled = combineAsStateFlow(
         processing,
         editing,
     ) { isProcessing, isEditing ->
