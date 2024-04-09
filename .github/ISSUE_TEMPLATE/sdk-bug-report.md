@@ -31,10 +31,10 @@ For kotlin:
  ./gradlew :dependencies | grep kotlin
 
 For stripe-android: 
- ./gradlew :dependencies | grep com.android.tools.build
+ ./gradlew :dependencies | grep com.stripe:stripe-android
 
 For Android Gradle Plugin:
- ./gradlew :dependencies | grep com.stripe:stripe-android
+ ./gradlew :dependencies | grep com.android.tools.build
 
 For Gradle version:
 ./gradlew -v
