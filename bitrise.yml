@@ -436,10 +436,6 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
-      - script@1:
-          inputs:
-            - content: |-
-                /tmp/bin/bitrise-build-cache restore-gradle-output-data
   conclude_all:
     steps:
       - script-runner@0:
@@ -454,10 +450,6 @@ workflows:
             - deploy_path: /tmp/test_results
             - is_enable_public_page: "false"
           title: Deploy test results artifacts
-      - script@1:
-          inputs:
-            - content: |-
-                /tmp/bin/bitrise-build-cache save-gradle-output-data
 meta:
   bitrise.io:
     stack: linux-docker-android-20.04
