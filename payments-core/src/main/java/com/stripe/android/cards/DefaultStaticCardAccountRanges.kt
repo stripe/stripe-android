@@ -176,6 +176,31 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
+        private val CARTES_BANCAIRES_ACCOUNT_RANGES = setOf(
+            BinRange(
+                low = "2221000000000000",
+                high = "2720000000000000"
+            ),
+            BinRange(
+                low = "4000000000000000",
+                high = "4999999999999999"
+            ),
+            BinRange(
+                low = "5000000000000000",
+                high = "5900000000000000"
+            ),
+            BinRange(
+                low = "6700000000000000",
+                high = "6799999999999999"
+            )
+        ).map {
+            AccountRange(
+                binRange = it,
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.CartesBancaires
+            )
+        }
+
         internal val ACCOUNTS =
             VISA_ACCOUNTS
                 .plus(MASTERCARD_ACCOUNTS)
@@ -186,5 +211,6 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 .plus(UNIONPAY19_ACCOUNTS)
                 .plus(DINERSCLUB16_ACCOUNT_RANGES)
                 .plus(DINERSCLUB14_ACCOUNT_RANGES)
+                .plus(CARTES_BANCAIRES_ACCOUNT_RANGES)
     }
 }
