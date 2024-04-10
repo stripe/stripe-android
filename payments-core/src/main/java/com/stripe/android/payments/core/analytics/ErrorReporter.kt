@@ -14,6 +14,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.utils.filterNotNullValues
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -73,9 +74,6 @@ interface ErrorReporter {
                 "error_code" to stripeException.stripeError?.code,
             ).filterNotNullValues()
         }
-
-        private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
-            mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAnalyticsTest {
@@ -35,6 +36,7 @@ internal class PaymentSheetAnalyticsTest {
     @get:Rule
     val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
+        validationTimeout = 1.seconds, // Analytics requests happen async.
     )
 
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
@@ -81,8 +83,18 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "mc_complete_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()
@@ -138,8 +150,18 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "mc_custom_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()
