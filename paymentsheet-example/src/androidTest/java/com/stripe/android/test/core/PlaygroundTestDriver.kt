@@ -583,6 +583,18 @@ internal class PlaygroundTestDriver(
         selectors.buyButton.click()
     }
 
+    internal fun pressSelection() {
+        composeTestRule.waitForIdle()
+
+        selectors.paymentSelection.click()
+    }
+
+    internal fun scrollToBottom() {
+        composeTestRule.waitForIdle()
+
+        selectors.buyButton.scrollTo()
+    }
+
     internal fun pressEdit() {
         composeTestRule.waitUntil(timeoutMillis = DEFAULT_UI_TIMEOUT.inWholeMilliseconds) {
             composeTestRule
