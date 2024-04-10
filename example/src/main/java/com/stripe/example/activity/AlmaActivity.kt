@@ -47,7 +47,6 @@ class AlmaActivity : StripeIntentActivity() {
             currency = "EUR",
         )
     }
-
 }
 
 @Composable
