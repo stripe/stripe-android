@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import com.google.common.truth.Truth.assertThat
-import com.google.common.truth.TruthJUnit.assume
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.core.utils.urlEncode
@@ -43,11 +42,11 @@ internal class CustomerSheetTest {
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
 
-    @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
-    lateinit var customerSheetTestType: CustomerSheetTestType
-
     @Test
-    fun testSuccessfulCardSave() = activityScenarioRule.runCustomerSheetTest(
+    fun testSuccessfulCardSave(
+        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
+        customerSheetTestType: CustomerSheetTestType,
+    ) = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
@@ -116,7 +115,10 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithFullBillingDetailsCollection() = activityScenarioRule.runCustomerSheetTest(
+    fun testSuccessfulCardSaveWithFullBillingDetailsCollection(
+        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
+        customerSheetTestType: CustomerSheetTestType,
+    ) = activityScenarioRule.runCustomerSheetTest(
         configuration = CustomerSheet.Configuration.builder("Merchant, Inc.")
             .billingDetailsCollectionConfiguration(
                 PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -199,7 +201,10 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice() = activityScenarioRule.runCustomerSheetTest(
+    fun testSuccessfulCardSaveWithCardBrandChoice(
+        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
+        customerSheetTestType: CustomerSheetTestType,
+    ) = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
@@ -276,69 +281,65 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testCardNotAttachedOnError() {
-        assume().that(customerSheetTestType).isNotEqualTo(CustomerSheetTestType.AttachToCustomer)
-
-        activityScenarioRule.runCustomerSheetTest(
-            integrationType = integrationType,
-            customerSheetTestType = customerSheetTestType,
-            resultCallback = {
-                error("Shouldn't call CustomerSheetResultCallback")
-            }
-        ) { context ->
-            networkRule.enqueue(
-                retrieveElementsSessionRequest(),
-            ) { response ->
-                response.testBodyFromFile("elements-sessions-requires_payment_method.json")
-            }
-
-            networkRule.enqueue(
-                retrievePaymentMethodsRequest(),
-                cardPaymentMethodsParams(),
-            ) { response ->
-                response.testBodyFromFile("payment-methods-get-success-empty.json")
-            }
-
-            networkRule.enqueue(
-                retrievePaymentMethodsRequest(),
-                usBankAccountPaymentMethodsParams(),
-            ) { response ->
-                response.testBodyFromFile("payment-methods-get-success-empty.json")
-            }
-
-            context.presentCustomerSheet()
-
-            page.fillOutCardDetails()
-
-            networkRule.enqueue(
-                createPaymentMethodsRequest(),
-                cardDetailsParams(),
-                billingDetailsParams(),
-            ) { response ->
-                response.testBodyFromFile("payment-methods-create.json")
-            }
-
-            networkRule.enqueue(
-                retrieveSetupIntentRequest(),
-                retrieveSetupIntentParams(),
-            ) { response ->
-                response.testBodyFromFile("setup-intent-get.json")
-            }
-
-            networkRule.enqueue(
-                confirmSetupIntentRequest(),
-                confirmSetupIntentParams()
-            ) { response ->
-                response.setResponseCode(402)
-                response.testBodyFromFile("setup-intent-confirm_incorrect_cvc.json")
-            }
-
-            page.clickSaveButton()
-
-            page.waitForText("Your card's security code is incorrect.")
-
-            context.markTestSucceeded()
+    fun testCardNotAttachedOnError() = activityScenarioRule.runCustomerSheetTest(
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
+        resultCallback = {
+            error("Shouldn't call CustomerSheetResultCallback")
         }
+    ) { context ->
+        networkRule.enqueue(
+            retrieveElementsSessionRequest(),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        networkRule.enqueue(
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        context.presentCustomerSheet()
+
+        page.fillOutCardDetails()
+
+        networkRule.enqueue(
+            createPaymentMethodsRequest(),
+            cardDetailsParams(),
+            billingDetailsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-create.json")
+        }
+
+        networkRule.enqueue(
+            retrieveSetupIntentRequest(),
+            retrieveSetupIntentParams(),
+        ) { response ->
+            response.testBodyFromFile("setup-intent-get.json")
+        }
+
+        networkRule.enqueue(
+            confirmSetupIntentRequest(),
+            confirmSetupIntentParams()
+        ) { response ->
+            response.setResponseCode(402)
+            response.testBodyFromFile("setup-intent-confirm_incorrect_cvc.json")
+        }
+
+        page.clickSaveButton()
+
+        page.waitForText("Your card's security code is incorrect.")
+
+        context.markTestSucceeded()
     }
 
     private fun retrieveElementsSessionRequest(): RequestMatcher {
