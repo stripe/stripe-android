@@ -7,6 +7,8 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.view.PaymentAuthWebViewActivity
 
 /**
@@ -31,8 +33,11 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
 
         val args = PaymentBrowserAuthContract.parseArgs(intent)
         if (args == null) {
-            // handle failures
             finish()
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_NULL_ARGS,
+                )
             return
         }
 
@@ -55,6 +60,11 @@ internal class StripeBrowserLauncherActivity : AppCompatActivity() {
             launcher.launch(intent)
             viewModel.hasLaunched = true
         } catch (e: ActivityNotFoundException) {
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND,
+                    stripeException = StripeException.create(e),
+                )
             finishWithFailure(args)
         }
     }

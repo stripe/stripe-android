@@ -3,6 +3,7 @@ package com.stripe.android.payments.core.authentication
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
@@ -44,6 +45,7 @@ class DefaultPaymentAuthenticatorRegistryTest {
             NextActionData.DisplayOxxoDetails::class.java to dispayOxxoDetailsAuthenticator
         ),
         includePaymentSheetAuthenticators = false,
+        applicationContext = ApplicationProvider.getApplicationContext(),
     )
 
     private val allAuthenticators = setOf(
