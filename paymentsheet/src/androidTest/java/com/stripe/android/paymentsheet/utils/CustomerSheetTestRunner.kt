@@ -1,11 +1,14 @@
 package com.stripe.android.paymentsheet.utils
 
+import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetActivity
 import com.stripe.android.customersheet.CustomerSheetResultCallback
@@ -39,6 +42,7 @@ internal class CustomerSheetTestRunnerContext(
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
     integrationType: IntegrationType,
+    customerSheetTestType: CustomerSheetTestType,
     configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
         merchantDisplayName = "Merchant Inc."
     ),
@@ -49,6 +53,7 @@ internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
 
     val factory = CustomerSheetTestFactory(
         integrationType = integrationType,
+        customerSheetTestType = customerSheetTestType,
         configuration = configuration,
         resultCallback = {
             resultCallback.onCustomerSheetResult(it)
@@ -61,6 +66,30 @@ internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
         makeCustomerSheet = factory::make,
         block = block,
     )
+}
+
+@OptIn(ExperimentalCustomerSheetApi::class)
+internal fun createTestAdapter(
+    useSetupIntent: Boolean
+): (context: Context) -> CustomerAdapter {
+    return { context ->
+        CustomerAdapter.create(
+            context = context,
+            customerEphemeralKeyProvider = {
+                CustomerAdapter.Result.success(
+                    CustomerEphemeralKey(
+                        customerId = "cus_1",
+                        ephemeralKey = "ek_test_123"
+                    )
+                )
+            },
+            setupIntentClientSecretProvider = if (useSetupIntent) {
+                { CustomerAdapter.Result.success("seti_12345_secret_12345") }
+            } else {
+                null
+            }
+        )
+    }
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
