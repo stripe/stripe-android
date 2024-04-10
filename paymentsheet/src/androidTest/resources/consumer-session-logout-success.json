@@ -1,0 +1,9 @@
+{
+  "auth_session_client_secret": null,
+  "consumer_session": {
+    "client_secret": "TA3ZTctNDJhYi1iODI3LWY0NTVlZTdkM2Q2MzIIQWJCWlFibkk",
+    "email_address": "test@stripe.com",
+    "redacted_phone_number": "+1********23",
+    "verification_sessions": []
+  }
+}

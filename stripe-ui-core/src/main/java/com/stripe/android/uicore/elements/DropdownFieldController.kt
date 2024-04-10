@@ -5,11 +5,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 /**
  * This class controls the dropdown view and implements the [InputController] interface.
@@ -25,14 +25,14 @@ class DropdownFieldController(
     val disableDropdownWithSingleElement = config.disableDropdownWithSingleElement
     private val _selectedIndex = MutableStateFlow(0)
     val selectedIndex: StateFlow<Int> = _selectedIndex
-    override val label: Flow<Int> = MutableStateFlow(config.label)
-    override val fieldValue = selectedIndex.map { displayItems[it] }
-    override val rawFieldValue = selectedIndex.map { config.rawItems[it] }
+    override val label: StateFlow<Int> = MutableStateFlow(config.label)
+    override val fieldValue = selectedIndex.mapAsStateFlow { displayItems[it] }
+    override val rawFieldValue = selectedIndex.mapAsStateFlow { config.rawItems[it] }
     override val error: Flow<FieldError?> = MutableStateFlow(null)
     override val showOptionalLabel: Boolean = false // not supported yet
-    override val isComplete: Flow<Boolean> = MutableStateFlow(true)
-    override val formFieldValue: Flow<FormFieldEntry> =
-        combine(isComplete, rawFieldValue) { complete, value ->
+    override val isComplete: StateFlow<Boolean> = MutableStateFlow(true)
+    override val formFieldValue: StateFlow<FormFieldEntry> =
+        combineAsStateFlow(isComplete, rawFieldValue) { complete, value ->
             FormFieldEntry(value, complete)
         }
 

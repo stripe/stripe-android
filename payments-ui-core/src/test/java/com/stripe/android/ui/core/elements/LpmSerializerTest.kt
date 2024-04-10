@@ -33,24 +33,6 @@ class LpmSerializerTest {
         assertThat(countrySpec.allowedCountryCodes).isEqualTo(
             setOf("AT", "BE", "DE", "ES", "IT", "NL")
         )
-
-        val nextAction = result.first { it.type == "sofort" }.nextActionSpec
-        assertThat(nextAction?.confirmResponseStatusSpecs).isEqualTo(
-            ConfirmStatusSpecAssociation(
-                requiresAction = ConfirmResponseStatusSpecs.RedirectNextActionSpec(
-                    urlPath = "next_action[redirect_to_url][url]",
-                    returnUrlPath = "next_action[redirect_to_url][return_url]"
-                )
-            )
-        )
-
-        assertThat(nextAction?.postConfirmHandlingPiStatusSpecs).isEqualTo(
-            PostConfirmStatusSpecAssociation(
-                requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec,
-                processing = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
-                succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec
-            )
-        )
     }
 
     @Test
@@ -357,8 +339,7 @@ class LpmSerializerTest {
             """.trimIndent()
 
         val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
-        assertThat(result.async).isFalse()
-        assertThat(result.fields).isEqualTo(listOf(EmptyFormSpec))
+        assertThat(result.fields).isEmpty()
     }
 
     @Test
@@ -371,19 +352,6 @@ class LpmSerializerTest {
     }
 
     companion object {
-
-        val FormUiSpecJsonString = """
-            "type": "new_lpm",
-            "async": true,
-            "fields": [
-              {
-                "type": "billing_address",
-                "allowed_country_codes": [
-                  "AT", "BE"
-                ]
-              }
-            ]
-        """.trimIndent()
 
         val JSON_ALL_FIELDS = """
                 [
@@ -492,53 +460,6 @@ class LpmSerializerTest {
                   }
                ]
         """.trimIndent()
-    }
-
-    @Test
-    fun `Verify serialize redirect url next action and success-finished pi status`() {
-        val serializedString = """
-            [
-              {
-                $FormUiSpecJsonString,
-                "next_action_spec": {
-                    "confirm_response_status_specs": {
-                        "requires_action": {
-                            "type": "redirect_to_url",
-                            "url_path": "next_action[redirect_to_url][url]",
-                            "return_url_path": "next_action[redirect_to_url][return_url]"
-                        }
-                    },
-                    "post_confirm_handling_pi_status_specs": {
-                        "succeeded": {
-                            "type": "finished"
-                        },
-                        "requires_action": {
-                            "type": "canceled"
-                        }
-                    }
-                }
-              }
-            ]
-        """.trimIndent()
-
-        val result = LpmSerializer.deserializeList(serializedString).getOrThrow().first()
-
-        assertThat(result.nextActionSpec?.confirmResponseStatusSpecs).isEqualTo(
-            ConfirmStatusSpecAssociation(
-                requiresAction =
-                ConfirmResponseStatusSpecs.RedirectNextActionSpec(
-                    urlPath = "next_action[redirect_to_url][url]",
-                    returnUrlPath = "next_action[redirect_to_url][return_url]"
-                )
-            )
-        )
-
-        assertThat(result.nextActionSpec?.postConfirmHandlingPiStatusSpecs).isEqualTo(
-            PostConfirmStatusSpecAssociation(
-                succeeded = PostConfirmHandlingPiStatusSpecs.FinishedSpec,
-                requiresAction = PostConfirmHandlingPiStatusSpecs.CanceledSpec
-            )
-        )
     }
 
     @Test

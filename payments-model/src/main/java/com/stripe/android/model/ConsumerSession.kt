@@ -31,7 +31,7 @@ data class ConsumerSession(
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @Serializable
-    data class VerificationSession constructor(
+    data class VerificationSession(
         val type: SessionType,
         val state: SessionState
     ) : StripeModel {

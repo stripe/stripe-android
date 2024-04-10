@@ -1,16 +1,14 @@
 package com.stripe.android.googlepaylauncher
 
 import android.content.Context
-import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.wallet.IsReadyToPayRequest
 import com.google.android.gms.wallet.PaymentsClient
-import com.google.android.gms.wallet.Wallet
 import com.stripe.android.GooglePayJsonFactory
 import com.stripe.android.core.Logger
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -33,31 +31,29 @@ internal class DefaultGooglePayRepository(
     private val billingAddressParameters: GooglePayJsonFactory.BillingAddressParameters,
     private val existingPaymentMethodRequired: Boolean,
     private val allowCreditCards: Boolean,
-    private val logger: Logger = Logger.noop()
+    private val paymentsClientFactory: PaymentsClientFactory = DefaultPaymentsClientFactory(context),
+    private val logger: Logger = Logger.noop(),
 ) : GooglePayRepository {
 
     @Inject
     internal constructor(
         context: Context,
         googlePayConfig: GooglePayPaymentMethodLauncher.Config,
-        logger: Logger
+        logger: Logger,
     ) : this(
         context.applicationContext,
         googlePayConfig.environment,
         googlePayConfig.billingAddressConfig.convert(),
         googlePayConfig.existingPaymentMethodRequired,
         googlePayConfig.allowCreditCards,
+        DefaultPaymentsClientFactory(context),
         logger
     )
 
     private val googlePayJsonFactory = GooglePayJsonFactory(context)
 
     private val paymentsClient: PaymentsClient by lazy {
-        val options = Wallet.WalletOptions.Builder()
-            .setEnvironment(environment.value)
-            .build()
-
-        Wallet.getPaymentsClient(context, options)
+        paymentsClientFactory.create(environment)
     }
 
     /**
@@ -66,32 +62,35 @@ internal class DefaultGooglePayRepository(
      * See [Google Pay API docs](https://developers.google.com/android/reference/com/google/android/gms/wallet/PaymentsClient#isReadyToPay(com.google.android.gms.wallet.IsReadyToPayRequest))
      * for more details.
      */
-    override fun isReady(): Flow<Boolean> {
-        val isReadyState = MutableStateFlow<Boolean?>(null)
+    override fun isReady(): Flow<Boolean> = flow {
+        emit(isReadyAsync())
+    }
 
-        runCatching {
-            val request = IsReadyToPayRequest.fromJson(
+    private suspend fun isReadyAsync(): Boolean {
+        val request = runCatching {
+            IsReadyToPayRequest.fromJson(
                 googlePayJsonFactory.createIsReadyToPayRequest(
                     billingAddressParameters = billingAddressParameters,
                     existingPaymentMethodRequired = existingPaymentMethodRequired,
                     allowCreditCards = allowCreditCards
                 ).toString()
             )
+        }.getOrElse {
+            // TODO (samer-stripe): Add unexpected error event here
+            logger.error("Google Pay json parsing failed.", it)
 
-            paymentsClient.isReadyToPay(request)
-                .addOnCompleteListener { task ->
-                    val isReady = runCatching {
-                        task.getResult(ApiException::class.java) == true
-                    }.onFailure {
-                        logger.error("Google Pay check failed.", it)
-                    }.getOrDefault(false)
-                    logger.info("Google Pay ready? $isReady")
-                    isReadyState.value = isReady
-                }
-        }.onFailure {
-            isReadyState.value = false
+            return false
         }
 
-        return isReadyState.filterNotNull()
+        val isReady = runCatching {
+            paymentsClient.isReadyToPay(request).await()
+        }.onFailure {
+            // TODO (samer-stripe): Add error event here
+            logger.error("Google Pay check failed.", it)
+        }.getOrDefault(false)
+
+        logger.info("Google Pay ready? $isReady")
+
+        return isReady
     }
 }

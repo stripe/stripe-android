@@ -1,11 +1,9 @@
 package com.stripe.android.financialconnections.features.networkingsavetolinkverification
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationError
@@ -14,43 +12,56 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.VerificationSuccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
+import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.Destination.Success
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
+import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
-internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
-    initialState: NetworkingSaveToLinkVerificationState,
+internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constructor(
+    @Assisted initialState: NetworkingSaveToLinkVerificationState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
-    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
     private val startVerification: StartVerification,
+    private val getManifest: GetManifest,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
     private val getCachedAccounts: GetCachedAccounts,
     private val saveAccountToLink: SaveAccountToLink,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<NetworkingSaveToLinkVerificationState>(initialState) {
+) : FinancialConnectionsViewModel<NetworkingSaveToLinkVerificationState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
         suspend {
             val consumerSession = requireNotNull(getCachedConsumerSession())
+            // If we automatically moved to this pane due to prefilled email, we should show the "Not now" button.
+            val showNotNowButton = getManifest().accountholderCustomerEmailAddress != null
             runCatching {
                 startVerification.sms(consumerSession.clientSecret)
             }.onFailure {
@@ -58,8 +69,9 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
             }.getOrThrow()
             eventTracker.track(PaneLoaded(PANE))
             NetworkingSaveToLinkVerificationState.Payload(
+                showNotNowButton = showNotNowButton,
                 email = consumerSession.emailAddress,
-                phoneNumber = consumerSession.redactedPhoneNumber,
+                phoneNumber = consumerSession.getRedactedPhoneNumber(),
                 consumerSessionClientSecret = consumerSession.clientSecret,
                 otpElement = OTPElement(
                     IdentifierSpec.Generic("otp"),
@@ -67,6 +79,14 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 )
             )
         }.execute { copy(payload = it) }
+    }
+
+    override fun updateTopAppBar(state: NetworkingSaveToLinkVerificationState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = true,
+            error = state.payload.error,
+        )
     }
 
     private fun logErrors() {
@@ -89,8 +109,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         onAsync(
             NetworkingSaveToLinkVerificationState::confirmVerification,
             onSuccess = {
-                saveToLinkWithStripeSucceeded.set(true)
-                navigationManager.tryNavigateTo(Success(referrer = PANE))
+                navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
             },
             onFail = { error ->
                 eventTracker.logError(
@@ -100,24 +119,28 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                     pane = PANE
                 )
                 if (error !is OTPError) {
-                    saveToLinkWithStripeSucceeded.set(false)
-                    navigationManager.tryNavigateTo(Success(referrer = PANE))
+                    navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
                 }
             },
         )
     }
 
     private fun onOTPEntered(otp: String) = suspend {
-        val payload = requireNotNull(awaitState().payload())
+        val payload = requireNotNull(stateFlow.value.payload())
 
         runCatching {
             confirmVerification.sms(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
                 verificationCode = otp
             )
+
+            val accounts = getCachedAccounts()
+            val manifest = getManifest()
+
             saveAccountToLink.existing(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
-                selectedAccounts = getCachedAccounts().map { it.id },
+                selectedAccounts = accounts,
+                shouldPollAccountNumbers = manifest.isDataFlow,
             )
         }
             .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }
@@ -131,35 +154,36 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
     }.execute { copy(confirmVerification = it) }
 
     fun onSkipClick() {
-        navigationManager.tryNavigateTo(Success(referrer = PANE))
+        navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
     }
 
-    companion object :
-        MavericksViewModelFactory<NetworkingSaveToLinkVerificationViewModel, NetworkingSaveToLinkVerificationState> {
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingSaveToLinkVerificationState): NetworkingSaveToLinkVerificationViewModel
+    }
+
+    companion object {
 
         internal val PANE = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: NetworkingSaveToLinkVerificationState
-        ): NetworkingSaveToLinkVerificationViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .networkingSaveToLinkVerificationSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent.networkingSaveToLinkVerificationViewModelFactory.create(
+                        NetworkingSaveToLinkVerificationState()
+                    )
+                }
+            }
     }
 }
 
 internal data class NetworkingSaveToLinkVerificationState(
     val payload: Async<Payload> = Uninitialized,
     val confirmVerification: Async<Unit> = Uninitialized
-) : MavericksState {
+) {
 
     data class Payload(
+        val showNotNowButton: Boolean,
         val email: String,
         val phoneNumber: String,
         val otpElement: OTPElement,

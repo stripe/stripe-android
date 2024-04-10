@@ -1,16 +1,14 @@
 package com.stripe.android.financialconnections.features.accountpicker
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
-import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsAutoSelected
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.AccountsSubmitted
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLearnMoreDataAccess
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ClickLinkAccounts
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
@@ -18,12 +16,22 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
+import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
+import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
-import com.stripe.android.financialconnections.features.consent.FinancialConnectionsUrlResolver
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
+import com.stripe.android.financialconnections.features.common.canSaveAccountsToLink
+import com.stripe.android.financialconnections.features.common.isDataFlow
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -31,22 +39,34 @@ import com.stripe.android.financialconnections.navigation.Destination.ManualEntr
 import com.stripe.android.financialconnections.navigation.Destination.Reset
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.ui.TextResource
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.HandleClickableUrl
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.measureTimeMillis
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
+import java.util.Date
 
-@Suppress("LongParameterList", "TooManyFunctions")
-internal class AccountPickerViewModel @Inject constructor(
-    initialState: AccountPickerState,
+internal class AccountPickerViewModel @AssistedInject constructor(
+    @Assisted initialState: AccountPickerState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
+    private val getCachedConsumerSession: GetCachedConsumerSession,
+    private val saveAccountToLink: SaveAccountToLink,
     private val selectAccounts: SelectAccounts,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
+    private val handleClickableUrl: HandleClickableUrl,
     private val logger: Logger,
-    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts
-) : MavericksViewModel<AccountPickerState>(initialState) {
+    private val pollAuthorizationSessionAccounts: PollAuthorizationSessionAccounts,
+    private val presentNoticeSheet: PresentNoticeSheet,
+) : FinancialConnectionsViewModel<AccountPickerState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -54,10 +74,19 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
+    override fun updateTopAppBar(state: AccountPickerState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+            error = state.payload.error,
+        )
+    }
+
     private fun loadAccounts() {
         suspend {
-            val state = awaitState()
+            val state = stateFlow.value
             val sync = getOrFetchSync()
+            val dataAccessNotice = sync.text?.consent?.dataAccessNotice
             val manifest = sync.manifest
             val activeAuthSession = requireNotNull(manifest.activeAuthSession)
             val (partnerAccountList, millis) = measureTimeMillis {
@@ -77,25 +106,21 @@ internal class AccountPickerViewModel @Inject constructor(
             val accounts = partnerAccountList.data.sortedBy { it.allowSelection.not() }
 
             AccountPickerState.Payload(
-                skipAccountSelection = partnerAccountList.skipAccountSelection == true ||
-                    activeAuthSession.skipAccountSelection == true,
+                // note that this uses ?? instead of ||, we do NOT want to skip account selection
+                // if EITHER of these are true, we only want to skip account selection when
+                //  `accountsPayload.skipAccountSelection` is true, OR `accountsPayload.skipAccountSelection` nil
+                // AND `authSession.skipAccountSelection` is true
+                skipAccountSelection = partnerAccountList.skipAccountSelection
+                    ?: activeAuthSession.skipAccountSelection
+                    ?: false,
                 accounts = accounts,
-                selectionMode = if (manifest.singleAccount) SelectionMode.RADIO else SelectionMode.CHECKBOXES,
-                accessibleData = AccessibleDataCalloutModel(
+                selectionMode = if (manifest.singleAccount) SelectionMode.Single else SelectionMode.Multiple,
+                dataAccessNotice = dataAccessNotice,
+                merchantDataAccess = MerchantDataAccessModel(
                     businessName = manifest.businessName,
                     permissions = manifest.permissions,
-                    isNetworking = false,
-                    isStripeDirect = manifest.isStripeDirect ?: false,
-                    dataPolicyUrl = FinancialConnectionsUrlResolver.getDataPolicyUrl(manifest)
+                    isStripeDirect = manifest.isStripeDirect ?: false
                 ),
-                /**
-                 * in the special case that this is single account and the institution would have
-                 * skipped account selection but _didn't_ (because we still saw this), we should
-                 * render specific text that tells the user to "confirm" their account.
-                 */
-                requiresSingleAccountConfirmation = activeAuthSession.institutionSkipAccountSelection == true &&
-                    manifest.singleAccount &&
-                    activeAuthSession.isOAuth,
                 singleAccount = manifest.singleAccount,
                 userSelectedSingleAccountInInstitution = manifest.singleAccount &&
                     activeAuthSession.institutionSkipAccountSelection == true &&
@@ -114,23 +139,40 @@ internal class AccountPickerViewModel @Inject constructor(
                 // If account selection has to be skipped, submit all selectable accounts.
                 payload.skipAccountSelection -> submitAccounts(
                     selectedIds = payload.selectableAccounts.map { it.id }.toSet(),
-                    updateLocalCache = false
+                    updateLocalCache = false,
+                    isSkipAccountSelection = true
                 )
                 // the user saw an OAuth account selection screen and selected
                 // just one to send back in a single-account context. treat these as if
                 // we had done account selection, and submit.
                 payload.userSelectedSingleAccountInInstitution -> submitAccounts(
                     selectedIds = setOf(payload.accounts.first().id),
-                    updateLocalCache = true
+                    updateLocalCache = true,
+                    isSkipAccountSelection = true
                 )
 
-                // Auto-select the first selectable account.
-                payload.selectionMode == SelectionMode.RADIO -> setState {
-                    copy(
-                        selectedIds = setOfNotNull(
-                            payload.selectableAccounts.firstOrNull()?.id
+                // Auto-select the first selectable account and log.
+                payload.selectionMode == SelectionMode.Single -> {
+                    val selectedId = setOfNotNull(payload.selectableAccounts.firstOrNull()?.id)
+                    eventTracker.track(
+                        AccountsAutoSelected(
+                            isSingleAccount = true,
+                            accountIds = selectedId
                         )
                     )
+                    setState { copy(selectedIds = selectedId) }
+                }
+
+                // Auto-select all selectable accounts and log.
+                payload.selectionMode == SelectionMode.Multiple -> {
+                    val selectedIds = payload.selectableAccounts.map { it.id }.toSet()
+                    eventTracker.track(
+                        AccountsAutoSelected(
+                            isSingleAccount = false,
+                            accountIds = selectedIds
+                        )
+                    )
+                    setState { copy(selectedIds = selectedIds) }
                 }
             }
         })
@@ -165,8 +207,8 @@ internal class AccountPickerViewModel @Inject constructor(
         state.payload()?.let { payload ->
             val selectedIds = state.selectedIds
             val newSelectedIds = when (payload.selectionMode) {
-                SelectionMode.RADIO -> setOf(account.id)
-                SelectionMode.CHECKBOXES -> if (selectedIds.contains(account.id)) {
+                SelectionMode.Single -> setOf(account.id)
+                SelectionMode.Multiple -> if (selectedIds.contains(account.id)) {
                     selectedIds - account.id
                 } else {
                     selectedIds + account.id
@@ -219,7 +261,11 @@ internal class AccountPickerViewModel @Inject constructor(
         FinancialConnections.emitEvent(name = Name.ACCOUNTS_SELECTED)
         withState { state ->
             state.payload()?.let {
-                submitAccounts(state.selectedIds, updateLocalCache = true)
+                submitAccounts(
+                    selectedIds = state.selectedIds,
+                    updateLocalCache = true,
+                    isSkipAccountSelection = false
+                )
             } ?: run {
                 logger.error("account clicked without available payload.")
             }
@@ -228,15 +274,36 @@ internal class AccountPickerViewModel @Inject constructor(
 
     private fun submitAccounts(
         selectedIds: Set<String>,
-        updateLocalCache: Boolean
+        updateLocalCache: Boolean,
+        isSkipAccountSelection: Boolean
     ) {
         suspend {
+            eventTracker.track(
+                AccountsSubmitted(
+                    accountIds = selectedIds,
+                    isSkipAccountSelection = isSkipAccountSelection,
+                    pane = PANE
+                )
+            )
             val manifest = getOrFetchSync().manifest
             val accountsList: PartnerAccountsList = selectAccounts(
                 selectedAccountIds = selectedIds,
                 sessionId = requireNotNull(manifest.activeAuthSession).id,
                 updateLocalCache = updateLocalCache
             )
+
+            val consumerSessionClientSecret = getCachedConsumerSession()?.clientSecret
+
+            if (manifest.isDataFlow && manifest.canSaveAccountsToLink && consumerSessionClientSecret != null) {
+                // In the data flow, we save accounts to Link in this screen. In the payment flow,
+                // it happens in the AttachPaymentScreen.
+                saveAccountToLink.existing(
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    selectedAccounts = accountsList.data,
+                    shouldPollAccountNumbers = manifest.isDataFlow,
+                )
+            }
+
             navigationManager.tryNavigateTo(accountsList.nextPane.destination(referrer = PANE))
             accountsList
         }.execute {
@@ -255,46 +322,48 @@ internal class AccountPickerViewModel @Inject constructor(
         loadAccounts()
     }
 
-    fun onSelectAllAccountsClicked() = withState { state ->
-        state.payload()?.let { payload ->
-            val selectedIds = state.selectedIds
-            val newIds = if (state.allAccountsSelected) {
-                // unselect all accounts
-                emptySet()
-            } else {
-                // select all accounts
-                payload.selectableAccounts.map { it.id }.toSet()
-            }
-            setState { copy(selectedIds = newIds) }
-            logAccountSelectionChanges(
-                idsBefore = selectedIds,
-                idsAfter = newIds,
-                isSingleAccount = payload.singleAccount
+    fun onClickableTextClick(uri: String) = viewModelScope.launch {
+        val date = Date()
+        handleClickableUrl(
+            currentPane = PANE,
+            uri = uri,
+            onNetworkUrlClicked = {
+                setState { copy(viewEffect = ViewEffect.OpenUrl(uri, date.time)) }
+            },
+            knownDeeplinkActions = mapOf(
+                DATA.value to {
+                    presentDataAccessBottomSheet()
+                }
             )
-        }
+        )
     }
 
-    fun onLearnMoreAboutDataAccessClick() {
-        viewModelScope.launch {
-            eventTracker.track(ClickLearnMoreDataAccess(Pane.ACCOUNT_PICKER))
-        }
+    private fun presentDataAccessBottomSheet() {
+        val dataAccessNotice = stateFlow.value.payload()?.dataAccessNotice ?: return
+        eventTracker.track(ClickLearnMoreDataAccess(PANE))
+        presentNoticeSheet(
+            content = DataAccess(dataAccessNotice),
+            referrer = PANE,
+        )
     }
 
-    companion object :
-        MavericksViewModelFactory<AccountPickerViewModel, AccountPickerState> {
+    fun onViewEffectLaunched() {
+        setState { copy(viewEffect = null) }
+    }
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: AccountPickerState
-        ): AccountPickerViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .accountPickerBuilder
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: AccountPickerState): AccountPickerViewModel
+    }
+
+    companion object {
+
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent.accountPickerViewModelFactory.create(AccountPickerState())
+                }
+            }
 
         private val PANE = Pane.ACCOUNT_PICKER
     }
@@ -305,7 +374,8 @@ internal data class AccountPickerState(
     val canRetry: Boolean = true,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,
     val selectedIds: Set<String> = emptySet(),
-) : MavericksState {
+    val viewEffect: ViewEffect? = null
+) {
 
     val submitLoading: Boolean
         get() = payload is Loading || selectAccounts is Loading
@@ -313,19 +383,16 @@ internal data class AccountPickerState(
     val submitEnabled: Boolean
         get() = selectedIds.isNotEmpty()
 
-    val allAccountsSelected: Boolean
-        get() = payload()?.selectableAccounts?.count() == selectedIds.count()
-
     data class Payload(
         val skipAccountSelection: Boolean,
         val accounts: List<PartnerAccount>,
+        val dataAccessNotice: DataAccessNotice?,
         val selectionMode: SelectionMode,
-        val accessibleData: AccessibleDataCalloutModel,
+        val merchantDataAccess: MerchantDataAccessModel,
         val singleAccount: Boolean,
         val stripeDirect: Boolean,
         val businessName: String?,
         val userSelectedSingleAccountInInstitution: Boolean,
-        val requiresSingleAccountConfirmation: Boolean
     ) {
 
         val selectableAccounts
@@ -333,18 +400,20 @@ internal data class AccountPickerState(
 
         val shouldSkipPane: Boolean
             get() = skipAccountSelection || userSelectedSingleAccountInInstitution
-
-        val subtitle: TextResource?
-            get() = when {
-                requiresSingleAccountConfirmation -> TextResource.StringId(
-                    R.string.stripe_accountpicker_singleaccount_description
-                )
-
-                else -> null
-            }
     }
 
     enum class SelectionMode {
-        RADIO, CHECKBOXES
+        Single, Multiple
     }
+
+    sealed class ViewEffect {
+        data class OpenUrl(
+            val url: String,
+            val id: Long
+        ) : ViewEffect()
+    }
+}
+
+internal enum class AccountPickerClickableText(val value: String) {
+    DATA("stripe://data-access-notice"),
 }

@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.US_BANK_ACCOUNT
@@ -43,11 +42,18 @@ class SavedPaymentMethodIconTest {
         assertThat(
             CARD_PAYMENT_METHOD.copy(
                 card = CARD_PAYMENT_METHOD.card?.copy(
-                    displayBrand = PaymentMethod.Card.DisplayBrand(
-                        type = CardBrand.CartesBancaires
-                    )
+                    displayBrand = "cartes_bancaires"
                 )
             ).getSavedPaymentMethodIcon()
         ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires)
+    }
+
+    @Test
+    fun `on display brand available for card payment method, a null value defaults back to visa`() {
+        assertThat(
+            CARD_PAYMENT_METHOD.copy(
+                card = CARD_PAYMENT_METHOD.card?.copy()
+            ).getSavedPaymentMethodIcon()
+        ).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
     }
 }

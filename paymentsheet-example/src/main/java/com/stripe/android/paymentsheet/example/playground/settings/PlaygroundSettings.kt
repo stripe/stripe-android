@@ -200,7 +200,10 @@ internal class PlaygroundSettings private constructor(
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
             PrimaryButtonLabelSettingsDefinition,
+            PaymentMethodConfigurationSettingsDefinition,
             PreferredNetworkSettingsDefinition,
+            AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition,
+            PaymentMethodOrderSettingsDefinition,
             IntegrationTypeSettingsDefinition,
         )
 

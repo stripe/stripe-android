@@ -8,7 +8,6 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         PaymentOptionsViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
     ]
 )
 internal class PaymentOptionsViewModelModule {

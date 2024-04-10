@@ -1,22 +1,18 @@
 package com.stripe.android.lpmfoundations.luxe
 
 import androidx.annotation.DrawableRes
-import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.ui.core.elements.SharedDataSpec
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class SupportedPaymentMethod(
+internal data class SupportedPaymentMethod(
     /**
      * This describes the PaymentMethod Type as described
      * https://stripe.com/docs/api/payment_intents/create#create_payment_intent-payment_method_types
      */
     val code: PaymentMethodCode,
-
-    /** This describes if the LPM requires a mandate see [ConfirmPaymentIntentParams.mandateDataParams]. */
-    val requiresMandate: Boolean,
 
     /** This describes the name that appears under the selector. */
     @StringRes val displayNameResource: Int,
@@ -34,28 +30,23 @@ data class SupportedPaymentMethod(
      * on selection.
      */
     val tintIconOnSelection: Boolean,
-
-    /**
-     * This describes the requirements of the LPM including if it is supported with
-     * PaymentIntents w/ or w/out SetupFutureUsage set, SetupIntent, or on-session when attached
-     * to the customer object.
-     */
-    val requirement: PaymentMethodRequirements,
-
-    /**
-     * This describes how the UI should look.
-     */
-    val formSpec: LayoutSpec,
-
-    /**
-     * This forces the UI to render the required fields
-     */
-    val placeholderOverrideList: List<IdentifierSpec> = emptyList()
 ) {
-    /**
-     * Returns true if the payment method supports confirming from a saved
-     * payment method of this type.  See [PaymentMethodRequirements] for
-     * description of the values
-     */
-    fun supportsCustomerSavedPM() = requirement.getConfirmPMFromCustomer(code)
+    constructor(
+        paymentMethodDefinition: PaymentMethodDefinition,
+        sharedDataSpec: SharedDataSpec? = null,
+        @StringRes displayNameResource: Int,
+        @DrawableRes iconResource: Int,
+        tintIconOnSelection: Boolean = false,
+    ) : this(
+        code = paymentMethodDefinition.type.code,
+        displayNameResource = displayNameResource,
+        iconResource = iconResource,
+        lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
+        darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
+        tintIconOnSelection = tintIconOnSelection,
+    )
+
+    internal fun paymentMethodDefinition(): PaymentMethodDefinition {
+        return requireNotNull(PaymentMethodRegistry.definitionsByCode[code])
+    }
 }

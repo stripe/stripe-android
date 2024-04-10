@@ -17,29 +17,21 @@
 package com.stripe.android.paymentsheet.example.utils
 
 import android.graphics.drawable.Animatable
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.view.View
-import androidx.compose.runtime.Composable
 import androidx.compose.runtime.RememberObserver
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.asAndroidColorFilter
-import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.painter.BitmapPainter
-import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.withSave
 import androidx.compose.ui.unit.LayoutDirection
@@ -52,8 +44,6 @@ private val MAIN_HANDLER by lazy(LazyThreadSafetyMode.NONE) {
 /**
  * A [Painter] which draws an Android [Drawable] and supports [Animatable] drawables. Instances
  * should be remembered to be able to start and stop [Animatable] animations.
- *
- * Instances are usually retrieved from [rememberDrawablePainter].
  */
 class DrawablePainter(
     val drawable: Drawable
@@ -137,27 +127,6 @@ class DrawablePainter(
                 drawable.draw(canvas.nativeCanvas)
             }
         }
-    }
-}
-
-/**
- * Remembers [Drawable] wrapped up as a [Painter]. This function attempts to un-wrap the
- * drawable contents and use Compose primitives where possible.
- *
- * If the provided [drawable] is `null`, an empty no-op painter is returned.
- *
- * This function tries to dispatch lifecycle events to [drawable] as much as possible from
- * within Compose.
- */
-@Composable
-fun rememberDrawablePainter(drawable: Drawable?): Painter = remember(drawable) {
-    when (drawable) {
-        null -> EmptyPainter
-        is BitmapDrawable -> BitmapPainter(drawable.bitmap.asImageBitmap())
-        is ColorDrawable -> ColorPainter(Color(drawable.color))
-        // Since the DrawablePainter will be remembered and it implements RememberObserver, it
-        // will receive the necessary events
-        else -> DrawablePainter(drawable.mutate())
     }
 }
 

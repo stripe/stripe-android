@@ -18,6 +18,7 @@ import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runTest
@@ -318,7 +319,7 @@ class LinkAccountManagerTest {
                 Result.success(mock())
             )
 
-            accountManager.createCardPaymentDetails(mock(), "", mock())
+            accountManager.createCardPaymentDetails(mock())
 
             verify(linkRepository)
                 .createCardPaymentDetails(
@@ -447,9 +448,11 @@ class LinkAccountManagerTest {
             shippingValues = null,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             passthroughModeEnabled = passthroughModeEnabled,
+            flags = emptyMap(),
         ),
         linkRepository,
         linkEventsReporter,
+        errorReporter = FakeErrorReporter()
     )
 
     private fun createUserInputWithAction(consentAction: SignUpConsentAction): UserInput.SignUp {

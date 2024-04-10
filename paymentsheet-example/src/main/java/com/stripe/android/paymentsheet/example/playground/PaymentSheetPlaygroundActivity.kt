@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
+import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
@@ -94,6 +95,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
 
             PlaygroundTheme(
                 content = {
+                    playgroundState?.stripeIntentId?.let { stripeIntentId ->
+                        Text(
+                            text = stripeIntentId,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                    }
+
                     SettingsUi(playgroundSettings = localPlaygroundSettings)
 
                     AppearanceButton()
@@ -275,7 +283,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         PaymentMethodSelector(
             isEnabled = flowControllerState != null,
             paymentMethodLabel = flowControllerState.paymentMethodLabel(),
-            paymentMethodIcon = flowControllerState.paymentMethodIcon(),
+            paymentMethodPainter = flowControllerState.paymentMethodPainter(),
             onClick = flowController::presentPaymentOptions
         )
         BuyButton(
@@ -289,9 +297,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         addressLauncher: AddressLauncher,
         playgroundState: PlaygroundState,
     ) {
+        val context = LocalContext.current
         Button(
             onClick = {
-                addressLauncher.present(playgroundState.clientSecret)
+                val configuration = AddressLauncher.Configuration.Builder()
+                    .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
+                    .appearance(AppearanceStore.state)
+                    .build()
+                addressLauncher.present(playgroundState.clientSecret, configuration)
             },
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -317,6 +330,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
+                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
             )
@@ -346,6 +360,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 intentConfiguration = PaymentSheet.IntentConfiguration(
                     mode = playgroundState.checkoutMode.intentConfigurationMode(playgroundState),
                     paymentMethodTypes = playgroundState.paymentMethodTypes,
+                    paymentMethodConfigurationId = playgroundState.paymentMethodConfigurationId
                 ),
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,

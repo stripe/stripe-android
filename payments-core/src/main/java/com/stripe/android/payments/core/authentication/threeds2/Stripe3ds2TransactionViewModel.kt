@@ -13,6 +13,7 @@ import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.Stripe3ds2AuthParams
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2Fingerprint
@@ -30,7 +31,6 @@ import com.stripe.android.stripe3ds2.transaction.InitChallengeRepository
 import com.stripe.android.stripe3ds2.transaction.IntentData
 import com.stripe.android.stripe3ds2.transaction.MessageVersionRegistry
 import com.stripe.android.stripe3ds2.transaction.Transaction
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import javax.inject.Inject

@@ -47,7 +47,6 @@ import kotlinx.serialization.Serializable
  * @param paymentMethodType
  * @param successUrl
  */
-@Suppress("MaxLineLength")
 @Serializable
 @Parcelize
 internal data class FinancialConnectionsSessionManifest(
@@ -138,6 +137,9 @@ internal data class FinancialConnectionsSessionManifest(
 
     @SerialName(value = "experiment_assignments")
     val experimentAssignments: Map<String, String>? = null,
+
+    @SerialName(value = "display_text")
+    val displayText: TextUpdate? = null,
 
     @SerialName(value = "features")
     val features: Map<String, Boolean>? = null,
@@ -243,11 +245,23 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "link_account_picker")
         LINK_ACCOUNT_PICKER("link_account_picker"),
 
+        @SerialName(value = "partner_auth_drawer")
+        PARTNER_AUTH_DRAWER("partner_auth_drawer"),
+
         @SerialName(value = "networking_save_to_link_verification")
         NETWORKING_SAVE_TO_LINK_VERIFICATION("networking_save_to_link_verification"),
 
+        @SerialName(value = "notice")
+        NOTICE("notice"),
+
         @SerialName(value = "reset")
-        RESET("reset");
+        RESET("reset"),
+
+        @SerialName(value = "account_update_required")
+        ACCOUNT_UPDATE_REQUIRED("account_update_required"),
+
+        @SerialName(value = "exit")
+        EXIT("exit");
 
         internal object Serializer :
             EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNEXPECTED_ERROR)
@@ -261,7 +275,6 @@ internal data class FinancialConnectionsSessionManifest(
      * OPAL,PAYMENT_FLOWS,RESERVE_APPEALS,STANDARD_ONBOARDING,STRIPE_CARD,SUPPORT_SITE
      */
     @Serializable(with = Product.Serializer::class)
-    @Suppress("unused")
     enum class Product(val value: String) {
         @SerialName(value = "billpay")
         BILLPAY("billpay"),

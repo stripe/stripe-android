@@ -13,13 +13,17 @@ import com.stripe.android.link.injection.LinkAnalyticsComponent
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Card
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -30,6 +34,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 internal class LinkHandler @Inject constructor(
@@ -40,25 +45,25 @@ internal class LinkHandler @Inject constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
 ) {
     sealed class ProcessingState {
-        object Ready : ProcessingState()
+        data object Ready : ProcessingState()
 
-        object Launched : ProcessingState()
+        data object Launched : ProcessingState()
 
-        object Started : ProcessingState()
+        data object Started : ProcessingState()
 
-        class PaymentDetailsCollected(
+        data class PaymentDetailsCollected(
             val paymentSelection: PaymentSelection?
         ) : ProcessingState()
 
         data class Error(val message: String?) : ProcessingState()
 
-        object Cancelled : ProcessingState()
+        data object Cancelled : ProcessingState()
 
         data class PaymentMethodCollected(val paymentMethod: PaymentMethod) : ProcessingState()
 
-        class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
+        data class CompletedWithPaymentResult(val result: PaymentResult) : ProcessingState()
 
-        object CompleteWithoutLink : ProcessingState()
+        data object CompleteWithoutLink : ProcessingState()
     }
 
     private val _processingState =
@@ -128,6 +133,7 @@ internal class LinkHandler @Inject constructor(
                     completeLinkInlinePayment(
                         configuration,
                         params,
+                        paymentSelection.customerRequestedSave,
                         userInput is UserInput.SignIn && shouldCompleteLinkInlineFlow
                     )
                 }
@@ -149,9 +155,7 @@ internal class LinkHandler @Inject constructor(
                                 )
                             },
                             onFailure = {
-                                _processingState.emit(ProcessingState.Error(it.localizedMessage))
-                                savedStateHandle[SAVE_PROCESSING] = false
-                                _processingState.emit(ProcessingState.Ready)
+                                _processingState.emit(ProcessingState.CompleteWithoutLink)
                             }
                         )
                     } ?: run {
@@ -166,6 +170,7 @@ internal class LinkHandler @Inject constructor(
     private suspend fun completeLinkInlinePayment(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave,
         shouldCompleteLinkInlineFlow: Boolean
     ) {
         if (shouldCompleteLinkInlineFlow) {
@@ -179,16 +184,31 @@ internal class LinkHandler @Inject constructor(
 
             val paymentSelection = when (linkPaymentDetails) {
                 is LinkPaymentDetails.New -> {
-                    PaymentSelection.New.LinkInline(linkPaymentDetails)
+                    PaymentSelection.New.LinkInline(linkPaymentDetails, customerRequestedSave)
                 }
                 is LinkPaymentDetails.Saved -> {
+                    val last4 = when (val paymentDetails = linkPaymentDetails.paymentDetails) {
+                        is ConsumerPaymentDetails.Card -> paymentDetails.last4
+                        is ConsumerPaymentDetails.Passthrough -> paymentDetails.last4
+                        is ConsumerPaymentDetails.BankAccount -> paymentDetails.last4
+                        else -> null
+                    }
+
                     PaymentSelection.Saved(
                         paymentMethod = PaymentMethod.Builder()
                             .setId(linkPaymentDetails.paymentDetails.id)
                             .setCode(paymentMethodCreateParams.typeCode)
+                            .setCard(
+                                PaymentMethod.Card(
+                                    last4 = last4,
+                                    wallet = Wallet.LinkWallet(last4)
+                                )
+                            )
                             .setType(PaymentMethod.Type.Card)
                             .build(),
                         walletType = PaymentSelection.Saved.WalletType.Link,
+                        requiresSaveOnConfirmation = customerRequestedSave ==
+                            PaymentSelection.CustomerRequestedSave.RequestReuse,
                     )
                 }
                 null -> null
@@ -231,6 +251,16 @@ internal class LinkHandler @Inject constructor(
             val paymentResult = result.convertToPaymentResult()
             _processingState.tryEmit(ProcessingState.CompletedWithPaymentResult(paymentResult))
             linkStore.markLinkAsUsed()
+        }
+    }
+
+    @OptIn(DelicateCoroutinesApi::class)
+    fun logOut() {
+        val configuration = linkConfiguration.value ?: return
+
+        GlobalScope.launch {
+            // This usage is intentional. We want the request to be sent without regard for the UI lifecycle.
+            linkConfigurationCoordinator.logOut(configuration = configuration)
         }
     }
 

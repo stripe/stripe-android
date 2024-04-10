@@ -18,7 +18,8 @@ internal class FakeEditPaymentMethodInteractorFactory(
         eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
         removeExecutor: PaymentMethodRemoveOperation,
         updateExecutor: PaymentMethodUpdateOperation,
-        displayName: String
+        displayName: String,
+        canRemove: Boolean,
     ): ModifiableEditPaymentMethodViewInteractor {
         return DefaultEditPaymentMethodViewInteractor(
             initialPaymentMethod = initialPaymentMethod,
@@ -27,7 +28,8 @@ internal class FakeEditPaymentMethodInteractorFactory(
             updateExecutor = updateExecutor,
             displayName = displayName,
             workContext = context,
-            viewStateSharingStarted = SharingStarted.Eagerly
+            viewStateSharingStarted = SharingStarted.Eagerly,
+            canRemove = canRemove,
         )
     }
 }

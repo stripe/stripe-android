@@ -1,38 +1,27 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.paymentsheet.forms.PlaceholderHelper.connectBillingDetailsFields
-import com.stripe.android.paymentsheet.forms.PlaceholderHelper.specsForConfiguration
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.paymentsheet.paymentdatacollection.getInitialValuesMap
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.forms.TransformSpecToElements
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
+import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 
 /**
  * This class stores the visual field layout for the [Form] and then sets up the controller
@@ -43,81 +32,42 @@ import javax.inject.Provider
  * to display the UI fields on screen.  It also informs us of the backing fields to be created.
  */
 internal class FormViewModel @Inject internal constructor(
-    context: Context,
+    val elements: List<FormElement>,
     val formArguments: FormArguments,
-    lpmRepository: LpmRepository,
-    addressRepository: AddressRepository,
     val showCheckboxFlow: Flow<Boolean>
 ) : ViewModel() {
     internal class Factory(
-        val config: FormArguments,
+        val formElements: List<FormElement>,
+        val formArguments: FormArguments,
         val showCheckboxFlow: Flow<Boolean>,
-        private val formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
-            return formViewModelSubComponentBuilderProvider.get()
-                .formArguments(config)
-                .showCheckboxFlow(showCheckboxFlow)
-                .build().viewModel as T
+            return FormViewModel(
+                elements = formElements,
+                formArguments = formArguments,
+                showCheckboxFlow = showCheckboxFlow,
+            ) as T
         }
     }
 
-    val elementsFlow = run {
-        var specs = requireNotNull(
-            lpmRepository.fromCode(formArguments.paymentMethodCode)
-        ).formSpec.items
+    private val saveForFutureUseElement = elements.find { element ->
+        element is SaveForFutureUseElement
+    } as? SaveForFutureUseElement
 
-        // Cards & Bacs debit are a special case and already contain specs based on the configuration.
-        if (formArguments.paymentMethodCode != PaymentMethod.Type.Card.code) {
-            specs = specsForConfiguration(
-                configuration = formArguments.billingDetailsCollectionConfiguration,
-                placeholderOverrideList = formArguments.requiredFields,
-                requiresMandate = formArguments.requiresMandate,
-                specs = specs,
-            )
-        }
+    internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse ?: flowOf(false)
 
-        flowOf(
-            TransformSpecToElements(
-                addressRepository = addressRepository,
-                initialValues = formArguments.getInitialValuesMap(),
-                amount = formArguments.amount,
-                saveForFutureUseInitialValue = formArguments.showCheckboxControlledFields,
-                merchantName = formArguments.merchantName,
-                context = context,
-                shippingValues = formArguments.shippingDetails
-                    ?.toIdentifierMap(formArguments.billingDetails),
-                cbcEligibility = formArguments.cbcEligibility,
-            ).transform(specs)
-        )
-    }
+    private val cardBillingElement = elements.filterIsInstance<SectionElement>()
+        .flatMap { it.fields }
+        .filterIsInstance<CardBillingAddressElement>()
+        .firstOrNull()
 
-    private val saveForFutureUseElement = elementsFlow
-        .map { elementsList ->
-            elementsList.find { element ->
-                element is SaveForFutureUseElement
-            } as? SaveForFutureUseElement
-        }
-
-    internal val saveForFutureUse = saveForFutureUseElement.map {
-        it?.controller?.saveForFutureUse ?: flowOf(false)
-    }.flattenConcat()
-
-    private val cardBillingElement = elementsFlow
-        .map { elementsList ->
-            elementsList
-                .filterIsInstance<SectionElement>()
-                .flatMap { it.fields }
-                .filterIsInstance<CardBillingAddressElement>()
-                .firstOrNull()
-        }
     private var externalHiddenIdentifiers = MutableStateFlow(emptySet<IdentifierSpec>())
 
     init {
         viewModelScope.launch {
-            connectBillingDetailsFields(elementsFlow)
+            connectBillingDetailsFields(elements)
         }
     }
 
@@ -128,14 +78,11 @@ internal class FormViewModel @Inject internal constructor(
 
     internal val hiddenIdentifiers = combine(
         showCheckboxFlow,
-        cardBillingElement.map {
-            it?.hiddenIdentifiers ?: flowOf(emptySet())
-        }.flattenConcat(),
+        cardBillingElement?.hiddenIdentifiers ?: flowOf(emptySet()),
         externalHiddenIdentifiers
     ) { showFutureUse, cardBillingIdentifiers, externalHiddenIdentifiers ->
         val hiddenIdentifiers = externalHiddenIdentifiers.plus(cardBillingIdentifiers)
 
-        val saveForFutureUseElement = saveForFutureUseElement.firstOrNull()
         if (!showFutureUse && saveForFutureUseElement != null) {
             hiddenIdentifiers
                 .plus(saveForFutureUseElement.identifier)
@@ -145,89 +92,83 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
-    private val showingMandate =
-        combine(
-            hiddenIdentifiers,
-            elementsFlow,
-        ) { hiddenIdentifiers, formElements ->
-            formElements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
-                !hiddenIdentifiers.contains(mandate.identifier)
-            } ?: false
-        }
+    private val showingMandate = hiddenIdentifiers.map { hiddenIdentifiers ->
+        elements.filterIsInstance<MandateTextElement>().firstOrNull()?.let { mandate ->
+            !hiddenIdentifiers.contains(mandate.identifier)
+        } ?: false
+    }
 
     // This will convert the save for future use value into a CustomerRequestedSave operation
-    private val userRequestedReuse =
-        combine(
-            elementsFlow.filterNotNull(),
-            showCheckboxFlow
-        ) { elementsList, showCheckbox ->
-            combine(
-                elementsList.map { it.getFormFieldValueFlow() },
-            ) { formFieldValues ->
-                formFieldValues.toList().flatten()
-                    .filter { it.first == IdentifierSpec.SaveForFutureUse }
-                    .map { it.second.value.toBoolean() }
-                    .map { saveForFutureUse ->
-                        if (showCheckbox) {
-                            if (saveForFutureUse) {
-                                PaymentSelection.CustomerRequestedSave.RequestReuse
-                            } else {
-                                PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                            }
+    private val userRequestedReuse = showCheckboxFlow.map { showCheckbox ->
+        currentFieldValues().map { currentFieldValues ->
+            currentFieldValues.filter { it.first == IdentifierSpec.SaveForFutureUse }
+                .map { it.second.value.toBoolean() }
+                .map { saveForFutureUse ->
+                    if (showCheckbox) {
+                        if (saveForFutureUse) {
+                            PaymentSelection.CustomerRequestedSave.RequestReuse
                         } else {
-                            PaymentSelection.CustomerRequestedSave.NoRequest
+                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
                         }
+                    } else {
+                        PaymentSelection.CustomerRequestedSave.NoRequest
                     }
-                    .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
-            }
-        }.flattenConcat()
+                }
+                .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
+        }
+    }.flattenConcat()
 
     val completeFormValues =
         CompleteFormFieldValueFilter(
-            elementsFlow.filterNotNull().map { elementsList ->
-                combine(
-                    elementsList.map {
-                        it.getFormFieldValueFlow()
-                    }
-                ) {
-                    it.toList().flatten().toMap()
-                }
-            }.flattenConcat(),
+            currentFieldValues().map { it.toMap() },
             hiddenIdentifiers,
             showingMandate,
             userRequestedReuse,
             defaultValuesToInclude,
         ).filterFlow()
 
-    @VisibleForTesting
-    val defaultValuesToInclude get(): Map<IdentifierSpec, String> {
-        val defaults = mutableMapOf<IdentifierSpec, String>()
-
-        if (formArguments.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
-            formArguments.billingDetails?.let { billingDetails ->
-                billingDetails.name?.let { defaults[IdentifierSpec.Name] = it }
-                billingDetails.email?.let { defaults[IdentifierSpec.Email] = it }
-                billingDetails.phone?.let { defaults[IdentifierSpec.Phone] = it }
-                billingDetails.address?.line1?.let { defaults[IdentifierSpec.Companion.Line1] = it }
-                billingDetails.address?.line2?.let { defaults[IdentifierSpec.Companion.Line2] = it }
-                billingDetails.address?.city?.let { defaults[IdentifierSpec.Companion.City] = it }
-                billingDetails.address?.state?.let { defaults[IdentifierSpec.Companion.State] = it }
-                billingDetails.address?.postalCode?.let {
-                    defaults[IdentifierSpec.Companion.PostalCode] = it
+    private fun currentFieldValues(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return if (elements.isEmpty()) {
+            flowOf(emptyList())
+        } else {
+            combine(
+                elements.map {
+                    it.getFormFieldValueFlow()
                 }
-                billingDetails.address?.country?.let {
-                    defaults[IdentifierSpec.Companion.Country] = it
-                }
+            ) {
+                it.toList().flatten()
             }
         }
-        return defaults
     }
 
-    private val textFieldControllerIdsFlow = elementsFlow.filterNotNull().map { elementsList ->
-        combine(elementsList.map { it.getTextFieldIdentifiers() }) {
-            it.toList().flatten()
+    @VisibleForTesting
+    val defaultValuesToInclude
+        get(): Map<IdentifierSpec, String> {
+            val defaults = mutableMapOf<IdentifierSpec, String>()
+
+            if (formArguments.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod) {
+                formArguments.billingDetails?.let { billingDetails ->
+                    billingDetails.name?.let { defaults[IdentifierSpec.Name] = it }
+                    billingDetails.email?.let { defaults[IdentifierSpec.Email] = it }
+                    billingDetails.phone?.let { defaults[IdentifierSpec.Phone] = it }
+                    billingDetails.address?.line1?.let { defaults[IdentifierSpec.Companion.Line1] = it }
+                    billingDetails.address?.line2?.let { defaults[IdentifierSpec.Companion.Line2] = it }
+                    billingDetails.address?.city?.let { defaults[IdentifierSpec.Companion.City] = it }
+                    billingDetails.address?.state?.let { defaults[IdentifierSpec.Companion.State] = it }
+                    billingDetails.address?.postalCode?.let {
+                        defaults[IdentifierSpec.Companion.PostalCode] = it
+                    }
+                    billingDetails.address?.country?.let {
+                        defaults[IdentifierSpec.Companion.Country] = it
+                    }
+                }
+            }
+            return defaults
         }
-    }.flattenConcat()
+
+    private val textFieldControllerIdsFlow = combine(elements.map { it.getTextFieldIdentifiers() }) {
+        it.toList().flatten()
+    }
 
     val lastTextFieldIdentifier = combine(
         hiddenIdentifiers,
@@ -239,11 +180,10 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     internal val viewDataFlow = combine(
-        elementsFlow,
         completeFormValues,
         hiddenIdentifiers,
         lastTextFieldIdentifier,
-    ) { elements, completeFormValues, hiddenIdentifiers, lastTextFieldIdentifier ->
+    ) { completeFormValues, hiddenIdentifiers, lastTextFieldIdentifier ->
         ViewData(
             elements = elements,
             completeFormValues = completeFormValues,

@@ -15,9 +15,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.BuildConfig.DEBUG
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.networking.StripeApiRepository
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow

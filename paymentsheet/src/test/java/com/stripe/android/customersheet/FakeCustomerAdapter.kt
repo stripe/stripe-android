@@ -7,6 +7,7 @@ import com.stripe.android.model.PaymentMethodUpdateParams
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class FakeCustomerAdapter(
     override var canCreateSetupIntents: Boolean = true,
+    override val paymentMethodTypes: List<String>? = null,
     var selectedPaymentOption: CustomerAdapter.Result<CustomerAdapter.PaymentOption?> =
         CustomerAdapter.Result.success(null),
     private val paymentMethods: CustomerAdapter.Result<List<PaymentMethod>> =

@@ -1,38 +1,46 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.PersistState
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.features.bankauthrepair.BankAuthRepairViewModel
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 
 internal data class SharedPartnerAuthState(
-    /**
-     * The active auth session id. Used across process kills to prevent re-creating the session
-     * if one is already active.
-     */
-    @PersistState
-    val activeAuthSession: String? = null,
-    val pane: FinancialConnectionsSessionManifest.Pane,
+    val pane: Pane,
     val payload: Async<Payload> = Uninitialized,
     val viewEffect: ViewEffect? = null,
-    val authenticationStatus: Async<String> = Uninitialized,
-) : MavericksState {
+    val authenticationStatus: Async<AuthenticationStatus> = Uninitialized,
+    val inModal: Boolean = false,
+) {
 
-    val dataAccess: DataAccessNotice?
-        get() = payload()?.authSession?.display?.text?.oauthPrepane?.dataAccessNotice
+    constructor(args: PartnerAuthViewModel.Args) : this(
+        pane = args.pane,
+        inModal = args.inModal,
+    )
+
+    constructor(args: BankAuthRepairViewModel.Args) : this(
+        pane = args.pane,
+    )
 
     data class Payload(
         val isStripeDirect: Boolean,
         val institution: FinancialConnectionsInstitution,
-        val authSession: FinancialConnectionsAuthorizationSession
+        val authSession: FinancialConnectionsAuthorizationSession,
     )
+
+    data class AuthenticationStatus(
+        val action: Action,
+    ) {
+        enum class Action {
+            CANCELLING,
+            AUTHENTICATING
+        }
+    }
 
     val canNavigateBack: Boolean
         get() =
@@ -49,10 +57,6 @@ internal data class SharedPartnerAuthState(
 
         data class OpenUrl(
             val url: String,
-            val id: Long
-        ) : ViewEffect
-
-        data class OpenBottomSheet(
             val id: Long
         ) : ViewEffect
     }

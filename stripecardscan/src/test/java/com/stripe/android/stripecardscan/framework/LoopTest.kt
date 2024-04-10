@@ -30,7 +30,7 @@ import kotlin.test.fail
 
 class LoopTest {
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_analyzeData() = runTest {
@@ -75,7 +75,7 @@ class LoopTest {
         assertTrue { dataCount == resultCount.get() }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_analyzeDataNoDuplicates() = runTest {
@@ -135,7 +135,7 @@ class LoopTest {
         }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_noAnalyzersAvailable() = runTest {
@@ -171,7 +171,7 @@ class LoopTest {
         assertTrue { analyzerFailure }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun finiteAnalyzerLoop_analyzeData() = runTest {
@@ -217,7 +217,7 @@ class LoopTest {
         assertTrue(dataProcessed)
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @MediumTest
     @ExperimentalCoroutinesApi
     fun finiteAnalyzerLoop_analyzeDataTimeout() = runTest {
@@ -263,7 +263,7 @@ class LoopTest {
         assertTrue { terminatedEarly }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun finiteAnalyzerLoop_analyzeDataNoData() = runTest {

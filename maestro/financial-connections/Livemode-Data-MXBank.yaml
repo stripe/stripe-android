@@ -28,11 +28,13 @@ tags:
 # LOG IN WITH TEST FINBANK INSTITUTION
 - tapOn: "Authorize"
 ###############################################
-# SELECT ALL ACCOUNTS
-# - Mx bank skips account selection
+# NO ACCOUNT PICKER (skips account selection)
 # CONFIRM AND COMPLETE
-- assertVisible: ".*Success.*"
-- tapOn: "Done"
+- extendedWaitUntil:
+    visible: "Your accounts were connected."
+    timeout: 60000
+- tapOn:
+    id: "done_button"
 - assertVisible: ".*Completed!.*"
 - assertVisible: ".*MX Bank.*"
 - stopRecording

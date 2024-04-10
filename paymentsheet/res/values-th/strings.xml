@@ -26,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">บันทึกที่อยู่</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">ที่อยู่สำหรับจัดส่ง</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">ระบบจะส่งอีเมลถึง %s ภายใน 3 วันทำการเพื่อยืนยันการตั้งค่าขั้นตอนการหักเงินนี้</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">ยืนยันรายละเอียดการหักบัญชีอัตโนมัติ</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">แก้ไขรายละเอียด</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">นอกจากนี้ ระบบจะส่งอีเมลเพื่อแจ้งจำนวนเงินที่จะหักจากบัญชีภายใต้วิธีการนี้ให้คุณทราบล่วงหน้า 2 วันอีกด้วย การชำระเงินจะแสดงเป็น \"%s\" ในรายการเดินบัญชีธนาคารของคุณ</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">การชำระเงินของคุณจะได้รับการคุ้มครองโดย %s</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">เลือกวิธีการชำระเงิน</string>
   <string name="stripe_paymentsheet_close">ปิด</string>
@@ -37,10 +47,16 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">จัดการวิธีการชำระเงินของคุณ</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe จะฝากเงินจำนวน $0.01 ในบัญชีของคุณภายใน 1-2 วันทำการ จากนั้นคุณก็จะได้รับอีเมลแจ้งวิธีชำระเงินแก่ %s ให้เสร็จสิ้น</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">แก้ไข %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">หรือชำระเงินด้วย</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">หรือชำระเงินด้วยบัตร</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">หรือใช้</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">หรือใช้บัตร</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">ชำระเงิน</string>
   <!-- Title shown above a section containing various payment options -->

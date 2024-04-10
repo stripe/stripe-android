@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.addresselement
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
-import com.stripe.android.ui.core.injection.FormControllerSubcomponent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher

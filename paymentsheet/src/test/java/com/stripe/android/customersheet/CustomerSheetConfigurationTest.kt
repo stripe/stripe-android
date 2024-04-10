@@ -81,7 +81,9 @@ class CustomerSheetConfigurationTest {
             "defaultBillingDetails",
             "headerTextForSelectionScreen",
             "preferredNetworks",
-            "build"
+            "build",
+            "allowsRemovalOfLastSavedPaymentMethod",
+            "paymentMethodOrder",
         )
 
         // Programmatically check for any new method on the builder using reflection

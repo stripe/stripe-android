@@ -46,6 +46,7 @@ class LinkActivityContractTest {
             shippingValues = null,
             signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
             passthroughModeEnabled = false,
+            flags = emptyMap(),
         )
 
         val args = LinkActivityContract.Args(

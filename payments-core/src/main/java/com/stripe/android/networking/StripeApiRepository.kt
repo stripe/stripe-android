@@ -22,6 +22,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.PermissionException
 import com.stripe.android.core.exception.RateLimitException
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.exception.safeAnalyticsMessage
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.model.StripeFile
@@ -250,13 +251,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 params = params,
             ),
             jsonParser = PaymentIntentJsonParser(),
-        ) {
+        ) { result ->
             val paymentMethodType =
                 confirmPaymentIntentParams.paymentMethodCreateParams?.typeCode
                     ?: confirmPaymentIntentParams.sourceParams?.type
+
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createPaymentIntentConfirmation(
-                    paymentMethodType
+                    paymentMethodType = paymentMethodType,
+                    errorMessage = result.errorMessage,
                 )
             )
         }
@@ -393,10 +396,11 @@ class StripeApiRepository @JvmOverloads internal constructor(
                 )
             ),
             SetupIntentJsonParser()
-        ) {
+        ) { result ->
             fireAnalyticsRequest(
                 paymentAnalyticsRequestFactory.createSetupIntentConfirmation(
-                    confirmSetupIntentParams.paymentMethodCreateParams?.typeCode
+                    paymentMethodType = confirmSetupIntentParams.paymentMethodCreateParams?.typeCode,
+                    errorMessage = result.errorMessage,
                 )
             )
         }
@@ -1121,6 +1125,26 @@ class StripeApiRepository @JvmOverloads internal constructor(
         ).map { it.id }
     }
 
+    override suspend fun logOut(
+        consumerSessionClientSecret: String,
+        consumerAccountPublishableKey: String?,
+        requestOptions: ApiRequest.Options
+    ): Result<ConsumerSession> {
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createPost(
+                url = logoutConsumerUrl,
+                options = requestOptions,
+                params = mapOf(
+                    "request_surface" to "android_payment_element",
+                    "credentials" to mapOf(
+                        "consumer_session_client_secret" to consumerSessionClientSecret
+                    ),
+                ),
+            ),
+            jsonParser = ConsumerSessionJsonParser(),
+        )
+    }
+
     override suspend fun createFinancialConnectionsSessionForDeferredPayments(
         params: CreateFinancialConnectionsSessionForDeferredPaymentParams,
         requestOptions: ApiRequest.Options
@@ -1530,7 +1554,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
     private suspend fun <ModelType : StripeModel> fetchStripeModelResult(
         apiRequest: ApiRequest,
         jsonParser: ModelJsonParser<ModelType>,
-        onResponse: () -> Unit = {},
+        onResponse: (result: Result<StripeResponse<String>>) -> Unit = {},
     ): Result<ModelType> {
         return runCatching {
             val response = makeApiRequest(apiRequest, onResponse).responseJson()
@@ -1550,14 +1574,14 @@ class StripeApiRepository @JvmOverloads internal constructor(
     )
     internal suspend fun makeApiRequest(
         apiRequest: ApiRequest,
-        onResponse: () -> Unit
+        onResponse: (result: Result<StripeResponse<String>>) -> Unit
     ): StripeResponse<String> {
         val dnsCacheData = disableDnsCache()
 
         val response = runCatching {
             stripeNetworkClient.executeRequest(apiRequest)
         }.also {
-            onResponse()
+            onResponse(it)
         }.getOrElse {
             throw when (it) {
                 is IOException -> APIConnectionException.create(it, apiRequest.baseUrl)
@@ -1711,6 +1735,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
             )
         }
     }
+
+    private val Result<StripeResponse<String>>.errorMessage: String?
+        get() {
+            val response = getOrNull()
+            val resultError = exceptionOrNull()
+
+            return when {
+                resultError != null -> resultError.safeAnalyticsMessage
+                response != null && response.isError -> {
+                    runCatching {
+                        handleApiError(response)
+                    }.let { errorResult ->
+                        errorResult.exceptionOrNull()?.safeAnalyticsMessage
+                    }
+                }
+
+                else -> null
+            }
+        }
 
     private sealed class DnsCacheData {
         data class Success(

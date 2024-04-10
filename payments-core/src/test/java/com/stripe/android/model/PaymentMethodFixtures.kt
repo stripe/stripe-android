@@ -284,9 +284,7 @@ internal object PaymentMethodFixtures {
                 "funding": "credit",
                 "generated_from": null,
                 "last4": "9999",
-                "display_brand": {
-                    "type": "cartes_bancaires"
-                },
+                "display_brand": "cartes_bancaires",
                 "three_d_secure_usage": {
                     "supported": true
                 },

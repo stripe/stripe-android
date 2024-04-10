@@ -5,6 +5,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.compose.rememberNavController
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.uicore.image.NetworkImageDecoder
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -17,14 +18,14 @@ import com.stripe.android.uicore.image.StripeImageLoader
  */
 @Composable
 internal fun FinancialConnectionsPreview(
-    reducedBrandingOverride: Boolean = false,
+    testMode: Boolean = false,
     content: @Composable () -> Unit
 ) {
     val navController = rememberNavController()
     FinancialConnectionsTheme {
         CompositionLocalProvider(
             LocalNavHostController provides navController,
-            LocalReducedBranding provides reducedBrandingOverride,
+            LocalTestMode provides testMode,
             LocalImageLoader provides StripeImageLoader(
                 context = LocalContext.current,
                 logger = Logger.noop(),
@@ -32,7 +33,14 @@ internal fun FinancialConnectionsPreview(
                 networkImageDecoder = NetworkImageDecoder(),
                 diskCache = null
             ),
+            LocalTopAppBarHost provides PreviewTopAppBarHost(),
             content = content
         )
+    }
+}
+
+private class PreviewTopAppBarHost : TopAppBarHost {
+    override fun updateTopAppBarElevation(isElevated: Boolean) {
+        // Nothing to do here
     }
 }

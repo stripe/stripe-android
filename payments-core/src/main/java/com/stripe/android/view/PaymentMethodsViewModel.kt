@@ -3,14 +3,19 @@ package com.stripe.android.view
 import android.app.Application
 import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession
 import com.stripe.android.R
+import com.stripe.android.analytics.PaymentSessionEventReporter
+import com.stripe.android.analytics.PaymentSessionEventReporterFactory
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
-import com.stripe.android.core.exception.APIException
 import com.stripe.android.model.PaymentMethod
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,9 +23,12 @@ import kotlinx.coroutines.launch
 
 internal class PaymentMethodsViewModel(
     application: Application,
+    savedStateHandle: SavedStateHandle,
     private val customerSession: Result<CustomerSession>,
     internal var selectedPaymentMethodId: String? = null,
-    private val startedFromPaymentSession: Boolean
+    private val startedFromPaymentSession: Boolean,
+    private val eventReporter: PaymentSessionEventReporter =
+        PaymentSessionEventReporterFactory.create(application.applicationContext)
 ) : AndroidViewModel(application) {
     private val resources = application.resources
     private val cardDisplayTextFactory = CardDisplayTextFactory(application)
@@ -38,7 +46,9 @@ internal class PaymentMethodsViewModel(
     internal val progressData: MutableStateFlow<Boolean> = MutableStateFlow(false)
 
     init {
-        getPaymentMethods()
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
+        getPaymentMethods(isInitialFetch = true)
     }
 
     internal fun onPaymentMethodAdded(paymentMethod: PaymentMethod) {
@@ -46,7 +56,7 @@ internal class PaymentMethodsViewModel(
             snackbarData.value = it
             snackbarData.value = null
         }
-        getPaymentMethods()
+        getPaymentMethods(isInitialFetch = false)
     }
 
     internal fun onPaymentMethodRemoved(paymentMethod: PaymentMethod) {
@@ -68,8 +78,12 @@ internal class PaymentMethodsViewModel(
         }
     }
 
-    private fun getPaymentMethods() {
+    private fun getPaymentMethods(isInitialFetch: Boolean) {
         paymentMethodsJob?.cancel()
+
+        if (isInitialFetch) {
+            eventReporter.onLoadStarted()
+        }
 
         paymentMethodsJob = viewModelScope.launch {
             progressData.value = true
@@ -79,8 +93,13 @@ internal class PaymentMethodsViewModel(
                     it.getPaymentMethods(
                         paymentMethodType = PaymentMethod.Type.Card,
                         productUsage = productUsage,
-                        listener = object : CustomerSession.PaymentMethodsRetrievalListener {
+                        listener = object : CustomerSession.PaymentMethodsRetrievalWithExceptionListener {
                             override fun onPaymentMethodsRetrieved(paymentMethods: List<PaymentMethod>) {
+                                if (isInitialFetch) {
+                                    eventReporter.onLoadSucceeded(selectedPaymentMethodId)
+                                    eventReporter.onOptionsShown()
+                                }
+
                                 paymentMethodsData.value = Result.success(paymentMethods)
                                 progressData.value = false
                             }
@@ -88,15 +107,14 @@ internal class PaymentMethodsViewModel(
                             override fun onError(
                                 errorCode: Int,
                                 errorMessage: String,
-                                stripeError: StripeError?
+                                stripeError: StripeError?,
+                                throwable: Throwable
                             ) {
-                                paymentMethodsData.value = Result.failure(
-                                    APIException(
-                                        stripeError = stripeError,
-                                        statusCode = errorCode,
-                                        message = errorMessage
-                                    )
-                                )
+                                if (isInitialFetch) {
+                                    eventReporter.onLoadFailed(throwable)
+                                }
+
+                                paymentMethodsData.value = Result.failure(throwable)
                                 progressData.value = false
                             }
                         }
@@ -117,9 +135,10 @@ internal class PaymentMethodsViewModel(
         private val startedFromPaymentSession: Boolean
     ) : ViewModelProvider.Factory {
         @Suppress("UNCHECKED_CAST")
-        override fun <T : ViewModel> create(modelClass: Class<T>): T {
+        override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return PaymentMethodsViewModel(
                 application,
+                extras.createSavedStateHandle(),
                 customerSession,
                 initialPaymentMethodId,
                 startedFromPaymentSession

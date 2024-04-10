@@ -1,53 +1,31 @@
 package com.stripe.android.financialconnections.repository
 
-import com.airbnb.mvrx.MavericksRepository
-import com.airbnb.mvrx.MavericksState
-import com.stripe.android.core.BuildConfig
+import android.os.Parcelable
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository.State
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.parcelize.Parcelize
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /**
  * Repository for storing the core authorization pending repair.
- *
  */
-internal class CoreAuthorizationPendingNetworkingRepairRepository(
-    coroutineScope: CoroutineScope,
+@Singleton
+internal class CoreAuthorizationPendingNetworkingRepairRepository @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val logger: Logger,
-    private val analyticsTracker: FinancialConnectionsAnalyticsTracker
-) : MavericksRepository<State>(
-    initialState = State(),
-    coroutineScope = coroutineScope,
-    performCorrectnessValidations = BuildConfig.DEBUG,
+) : PersistingRepository<State>(
+    savedStateHandle = savedStateHandle,
 ) {
 
-    suspend fun get() = runCatching {
-        awaitState().coreAuthorization
-    }.onFailure {
-        analyticsTracker.logError(
-            "Failed to get core authorization",
-            logger = logger,
-            pane = Pane.UNEXPECTED_ERROR,
-            error = it
-        )
-    }.getOrNull()
-
-    suspend fun set(coreAuthorization: String) = runCatching {
+    fun set(coreAuthorization: String) {
         logger.debug("core authorization set to $coreAuthorization")
-        setState { copy(coreAuthorization = coreAuthorization) }
-    }.onFailure {
-        analyticsTracker.logError(
-            "Failed to set core authorization",
-            logger = logger,
-            pane = Pane.UNEXPECTED_ERROR,
-            error = it
-        )
+        set(State(coreAuthorization))
     }
 
+    @Parcelize
     data class State(
         val coreAuthorization: String? = null
-    ) : MavericksState
+    ) : Parcelable
 }

@@ -29,6 +29,7 @@ internal interface EventReporter {
     fun onLoadSucceeded(
         paymentSelection: PaymentSelection?,
         linkEnabled: Boolean,
+        googlePaySupported: Boolean,
         currency: String?,
     )
 
@@ -66,6 +67,25 @@ internal interface EventReporter {
     )
 
     /**
+     * The form shown in PaymentSheet after a user or system initiated change.
+     */
+    fun onPaymentMethodFormShown(
+        code: PaymentMethodCode,
+    )
+
+    /**
+     * The customer has interacted with the form of an available payment method.
+     */
+    fun onPaymentMethodFormInteraction(
+        code: PaymentMethodCode,
+    )
+
+    /**
+     * The customer has filled in the card number field in the card payment method form.
+     */
+    fun onCardNumberCompleted()
+
+    /**
      * The customer has selected one of their existing payment methods.
      */
     fun onSelectPaymentOption(
@@ -75,7 +95,9 @@ internal interface EventReporter {
     /**
      * The customer has pressed the confirm button.
      */
-    fun onPressConfirmButton()
+    fun onPressConfirmButton(
+        paymentSelection: PaymentSelection?,
+    )
 
     /**
      * Payment or setup have succeeded.
@@ -96,7 +118,7 @@ internal interface EventReporter {
     /**
      * The client was unable to parse the response from LUXE.
      */
-    fun onLpmSpecFailure()
+    fun onLpmSpecFailure(errorMessage: String?)
 
     /**
      * The user has auto-filled a text field.
@@ -146,6 +168,15 @@ internal interface EventReporter {
         selectedBrand: CardBrand,
         error: Throwable,
     )
+
+    /**
+     * The customer cannot properly return from Link payments or other LPM payments using
+     * browser intents.
+     *
+     * @see <a href="https://docs.google.com/document/d/1nEfPEGpO7N7MmfifBW6jR-AJe9pWd_V9lKvKTIVht8c">
+     *     Deep Linking issue for Mobile Android SDK</a>
+     */
+    fun onCannotProperlyReturnFromLinkAndOtherLPMs()
 
     enum class Mode(val code: String) {
         Complete("complete"),

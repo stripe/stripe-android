@@ -39,9 +39,7 @@ internal class PostAuthorizationSession @Inject constructor(
                 institution = institution,
                 applicationId = applicationId
             )
-        } catch (
-            @Suppress("SwallowedException") e: StripeException
-        ) {
+        } catch (e: StripeException) {
             throw e.toDomainException(
                 showManualEntry = sync.showManualEntryInErrors(),
                 institution = institution

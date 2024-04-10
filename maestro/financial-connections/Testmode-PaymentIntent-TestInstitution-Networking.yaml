@@ -33,7 +33,7 @@ tags:
     visible: "Success"
     timeout: 60000
 - tapOn: "Success"
-- tapOn: "Link Account"
+- tapOn: "Connect Account"
 # ENTER PHONE FOR NEW NETWORKED USER
 - waitForAnimationToEnd
 - scrollUntilVisible:
@@ -42,9 +42,9 @@ tags:
 - inputText: "6223115555"
 - tapOn: "Save to Link"
 # CONFIRM AND COMPLETE
-- assertVisible: "Success!"
-- assertVisible: ".*through Link.*"
-- tapOn: "Done"
+- assertVisible: "Your account was connected and saved with Link."
+- tapOn:
+    id: "done_button"
 - assertVisible: ".*Intent Confirmed!.*"
 ###########################################
 # REUSE NEWLY CREATED LINK ACCOUNT
@@ -59,18 +59,26 @@ tags:
 - tapOn:
     id: "consent_cta"
 # LOGIN TO NETWORKING
+- assertVisible:
+    id: "existing_email-button"
+# Ensure the back button is not visible on the Link login bottom sheet
+- assertNotVisible:
+    id: "top-app-bar-back-button"
 - tapOn:
     id: "existing_email-button"
-  # 2FA
-- assertVisible: "●"
+# 2FA
+- assertVisible:
+    id: "OTP-0"
 - inputText: "111111"
 # SELECT NETWORKED ACCOUNT
 - tapOn: "Success"
 - tapOn: "Connect account"
 # STEP UP AUTHENTICATION
-- assertVisible: "●"
+- assertVisible:
+    id: "OTP-0"
 - inputText: "111111"
-- assertVisible: "Success!"
-- tapOn: "Done"
+- assertVisible: "Your account was connected."
+- tapOn:
+    id: "done_button"
 - assertVisible: ".*Intent Confirmed!.*"
 - stopRecording

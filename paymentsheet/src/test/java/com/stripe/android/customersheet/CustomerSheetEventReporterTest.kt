@@ -12,6 +12,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_SETUP_INTENT_CANCELED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_SETUP_INTENT_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_ADD_PAYMENT_METHOD_VIA_SETUP_INTENT_SUCCEEDED
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_CARD_NUMBER_COMPLETED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_EDITABLE_PAYMENT_OPTION
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_PAYMENT_OPTION_BRANDS
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
@@ -273,6 +274,17 @@ class CustomerSheetEventReporterTest {
                 req.params["event"] == CS_UPDATE_PAYMENT_METHOD_FAILED &&
                     req.params["selected_card_brand"] == "cartes_bancaires" &&
                     req.params["error_message"] == "No network available!"
+            }
+        )
+    }
+
+    @Test
+    fun `onCardNumberCompleted() should fire analytics request with expected event value`() {
+        eventReporter.onCardNumberCompleted()
+
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_CARD_NUMBER_COMPLETED
             }
         )
     }

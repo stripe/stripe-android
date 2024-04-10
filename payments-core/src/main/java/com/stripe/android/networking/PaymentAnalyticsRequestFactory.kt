@@ -176,21 +176,25 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
 
     @JvmSynthetic
     internal fun createPaymentIntentConfirmation(
-        paymentMethodType: String? = null
+        paymentMethodType: String? = null,
+        errorMessage: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.PaymentIntentConfirm,
-            sourceType = paymentMethodType
+            sourceType = paymentMethodType,
+            errorMessage = errorMessage,
         )
     }
 
     @JvmSynthetic
     internal fun createSetupIntentConfirmation(
-        paymentMethodType: String?
+        paymentMethodType: String?,
+        errorMessage: String?,
     ): AnalyticsRequest {
         return createRequest(
             PaymentAnalyticsEvent.SetupIntentConfirm,
-            sourceType = paymentMethodType
+            sourceType = paymentMethodType,
+            errorMessage = errorMessage,
         )
     }
 
@@ -200,7 +204,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         productUsageTokens: Set<String> = emptySet(),
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
-        threeDS2UiType: ThreeDS2UiType? = null
+        threeDS2UiType: ThreeDS2UiType? = null,
+        errorMessage: String? = null
     ): AnalyticsRequest {
         return createRequest(
             event,
@@ -208,7 +213,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
                 productUsageTokens = productUsageTokens,
                 sourceType = sourceType,
                 tokenType = tokenType,
-                threeDS2UiType = threeDS2UiType
+                threeDS2UiType = threeDS2UiType,
+                errorMessage = errorMessage,
             )
         )
     }
@@ -217,7 +223,8 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         productUsageTokens: Set<String> = emptySet(),
         @Source.SourceType sourceType: String? = null,
         tokenType: Token.Type? = null,
-        threeDS2UiType: ThreeDS2UiType? = null
+        threeDS2UiType: ThreeDS2UiType? = null,
+        errorMessage: String?,
     ): Map<String, Any> {
         return defaultProductUsageTokens
             .plus(productUsageTokens)
@@ -226,6 +233,7 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
             .plus(sourceType?.let { mapOf(FIELD_SOURCE_TYPE to it) }.orEmpty())
             .plus(createTokenTypeParam(sourceType, tokenType))
             .plus(threeDS2UiType?.let { mapOf(FIELD_3DS2_UI_TYPE to it.toString()) }.orEmpty())
+            .plus(errorMessage?.let { mapOf(FIELD_ERROR_MESSAGE to it) }.orEmpty())
     }
 
     private fun createTokenTypeParam(
@@ -271,5 +279,6 @@ class PaymentAnalyticsRequestFactory @VisibleForTesting internal constructor(
         internal const val FIELD_PRODUCT_USAGE = "product_usage"
         internal const val FIELD_SOURCE_TYPE = "source_type"
         internal const val FIELD_3DS2_UI_TYPE = "3ds2_ui_type"
+        internal const val FIELD_ERROR_MESSAGE = "error_message"
     }
 }

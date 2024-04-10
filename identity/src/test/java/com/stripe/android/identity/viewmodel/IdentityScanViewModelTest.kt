@@ -10,15 +10,14 @@ import com.stripe.android.identity.ml.IDDetectorOutput
 import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.states.IdentityScanState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
-import java.lang.ref.WeakReference
 
 @RunWith(RobolectricTestRunner::class)
 internal class IdentityScanViewModelTest {
@@ -27,14 +26,16 @@ internal class IdentityScanViewModelTest {
     private val mockIdentityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory = mock()
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val viewModel = IdentityScanViewModel(
-        WeakReference(ApplicationProvider.getApplicationContext()),
+    val viewModel = object : IdentityScanViewModel(
+        ApplicationProvider.getApplicationContext(),
         mockFpsTracker,
         mockIdentityRepository,
         mockIdentityAnalyticsRequestFactory,
         mock(),
         mock()
-    )
+    ) {
+        override val scanFeedback = MutableStateFlow(null)
+    }
 
     @Test
     fun testFpsTrackedOnInterimResult() = runBlocking {
@@ -75,7 +76,6 @@ internal class IdentityScanViewModelTest {
 
         assertThat((viewModel.scannerState.value as IdentityScanViewModel.State.Timeout).fromSelfie).isFalse()
         verify(mockIdentityAnalyticsRequestFactory).documentTimeout(eq(resultType))
-        verify(mockIdentityRepository).sendAnalyticsRequest(anyOrNull())
 
         verify(mockFpsTracker).reportAndReset(
             eq(IdentityAnalyticsRequestFactory.TYPE_DOCUMENT)
@@ -98,7 +98,6 @@ internal class IdentityScanViewModelTest {
 
         assertThat((viewModel.scannerState.value as IdentityScanViewModel.State.Timeout).fromSelfie).isTrue()
         verify(mockIdentityAnalyticsRequestFactory).selfieTimeout()
-        verify(mockIdentityRepository).sendAnalyticsRequest(anyOrNull())
 
         verify(mockFpsTracker).reportAndReset(
             eq(IdentityAnalyticsRequestFactory.TYPE_SELFIE)

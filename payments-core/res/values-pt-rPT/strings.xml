@@ -168,6 +168,8 @@
   <string name="stripe_title_payment_method">Método de Pagamento</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">Selecionar método de envio</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">Atualizar cartão</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verifique o seu pagamento</string>
 </resources>

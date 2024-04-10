@@ -62,6 +62,7 @@ class InlineSignupViewModelTest {
                     shippingValues = null,
                     signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
                     passthroughModeEnabled = false,
+                    flags = emptyMap(),
                 ),
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
@@ -430,6 +431,7 @@ class InlineSignupViewModelTest {
             shippingValues = null,
             signupMode = signupMode,
             passthroughModeEnabled = false,
+            flags = emptyMap(),
         ),
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
@@ -462,7 +464,7 @@ class InlineSignupViewModelTest {
         val canada = countryDropdownController.displayItems.indexOfFirst {
             it.contains("Canada")
         }
-        onSelectedCountryIndex(canada)
+        countryDropdownController.onValueChange(canada)
     }
 
     private companion object {

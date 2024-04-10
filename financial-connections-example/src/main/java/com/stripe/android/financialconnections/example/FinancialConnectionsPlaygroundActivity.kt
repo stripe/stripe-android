@@ -5,7 +5,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -38,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.testTagsAsResourceId
@@ -144,10 +144,10 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
             },
             content = {
                 PlaygroundContent(
-                    padding = it,
                     state = state,
                     onSettingsChanged = onSettingsChanged,
-                    onButtonClick = onButtonClick
+                    onButtonClick = onButtonClick,
+                    modifier = Modifier.padding(it),
                 )
             }
         )
@@ -157,56 +157,75 @@ class FinancialConnectionsPlaygroundActivity : AppCompatActivity() {
     @Composable
     @Suppress("LongMethod")
     private fun PlaygroundContent(
-        padding: PaddingValues,
         state: FinancialConnectionsPlaygroundState,
         onSettingsChanged: (PlaygroundSettings) -> Unit,
-        onButtonClick: () -> Unit
+        onButtonClick: () -> Unit,
+        modifier: Modifier = Modifier,
     ) {
-        Column(
-            modifier = Modifier
-                .padding(padding)
-                .padding(16.dp)
+        val focusManager = LocalFocusManager.current
+        LazyColumn(
+            contentPadding = PaddingValues(16.dp),
+            modifier = modifier,
         ) {
-            SettingsUi(
-                playgroundSettings = state.settings,
-                onSettingsChanged = onSettingsChanged
-            )
-            if (state.loading) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth(),
+            item {
+                SettingsUi(
+                    playgroundSettings = state.settings,
+                    onSettingsChanged = onSettingsChanged
                 )
             }
-            Divider(Modifier.padding(vertical = 8.dp))
-            Text(
-                text = "backend: ${state.backendUrl}",
-                color = MaterialTheme.colors.secondaryVariant
-            )
-            Text(
-                text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
-                color = MaterialTheme.colors.secondaryVariant
-            )
-            Button(
-                modifier = Modifier
-                    .semantics { testTagsAsResourceId = true }
-                    .testTag("connect_accounts"),
-                onClick = onButtonClick,
-            ) {
-                Text("Connect Accounts")
+
+            if (state.loading) {
+                item {
+                    LinearProgressIndicator(
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
             }
-            LazyColumn {
-                items(state.status) { item ->
-                    Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
-                        val primary = MaterialTheme.colors.primary
-                        Canvas(
-                            modifier = Modifier
-                                .padding(end = 8.dp, top = 6.dp)
-                                .size(6.dp)
-                        ) {
-                            drawCircle(primary)
-                        }
-                        SelectionContainer {
-                            Text(text = item, fontSize = 12.sp)
-                        }
+
+            item {
+                Divider(Modifier.padding(vertical = 8.dp))
+            }
+
+            item {
+                Text(
+                    text = "backend: ${state.backendUrl}",
+                    color = MaterialTheme.colors.secondaryVariant
+                )
+            }
+
+            item {
+                Text(
+                    text = "env: ${BuildConfig.TEST_ENVIRONMENT}",
+                    color = MaterialTheme.colors.secondaryVariant
+                )
+            }
+
+            item {
+                Button(
+                    modifier = Modifier
+                        .semantics { testTagsAsResourceId = true }
+                        .testTag("connect_accounts"),
+                    onClick = {
+                        focusManager.clearFocus()
+                        onButtonClick()
+                    },
+                ) {
+                    Text("Connect Accounts")
+                }
+            }
+
+            items(state.status) { item ->
+                Row(Modifier.padding(4.dp), verticalAlignment = Alignment.Top) {
+                    val primary = MaterialTheme.colors.primary
+                    Canvas(
+                        modifier = Modifier
+                            .padding(end = 8.dp, top = 6.dp)
+                            .size(6.dp)
+                    ) {
+                        drawCircle(primary)
+                    }
+                    SelectionContainer {
+                        Text(text = item, fontSize = 12.sp)
                     }
                 }
             }

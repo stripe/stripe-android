@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Ajouter un moyen de paiement</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Enregistrer mes informations pour le paiement sécurisé en un clic</string>
+  <string name="stripe_inline_sign_up_header">Enregistrer mes informations pour payer en un clic de façon sécurisée avec Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Déconnexion de Link with Stripe</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Réglez plus rapidement auprès de %s et des milliers d\'autres marchands.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[En rejoignant Link, vous acceptez les <terms>Conditions</terms> et la <privacy>Politique de confidentialité</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[En fournissant votre adresse de courriel, vous acceptez de créer un compte Link et d\'enregistrer vos informations de paiement sur Link, conformément aux <terms>Conditions</terms> et à la <privacy>Politique de confidentialité</privacy> de Link.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[En fournissant votre numéro de téléphone, vous acceptez de créer un compte Link et d\'enregistrer vos informations de paiement sur Link, conformément aux <terms>Conditions</terms> et à la <privacy>Politique de confidentialité</privacy> de Link.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Modifier l\'adresse de courriel</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

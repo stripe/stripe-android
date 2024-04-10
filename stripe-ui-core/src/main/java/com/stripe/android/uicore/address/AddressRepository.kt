@@ -5,11 +5,9 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.uicore.elements.SectionFieldElement
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -26,21 +24,19 @@ class AddressRepository @Inject constructor(
     resources: Resources,
     @IOContext private val workContext: CoroutineContext,
 ) : AddressSchemaRepository(resources) {
-    private val countryFieldMap: Flow<MutableMap<String, List<SectionFieldElement>>>
-    private val initializeCountryFieldMapJob: Job
+    private val countryFieldMap: Deferred<MutableMap<String, List<SectionFieldElement>>>
 
     init {
-        val sharedFlow =
-            MutableSharedFlow<MutableMap<String, List<SectionFieldElement>>>(replay = 1)
-        countryFieldMap = sharedFlow
-        initializeCountryFieldMapJob = CoroutineScope(workContext).launch {
+        val completableDeferred = CompletableDeferred<MutableMap<String, List<SectionFieldElement>>>()
+        countryFieldMap = completableDeferred
+        CoroutineScope(workContext).launch {
             val map = countryAddressSchemaMap.entries.associate { (countryCode, schemaList) ->
                 countryCode to requireNotNull(
                     schemaList
                         .transformToElementList(countryCode)
                 )
             }.toMutableMap()
-            sharedFlow.emit(map)
+            completableDeferred.complete(map)
         }
     }
 
@@ -49,14 +45,14 @@ class AddressRepository @Inject constructor(
         countryCode: String,
         listElements: List<SectionFieldElement>
     ): Unit = withContext(workContext) {
-        countryFieldMap.first()[countryCode] = listElements
+        countryFieldMap.await()[countryCode] = listElements
     }
 
     suspend fun get(
         countryCode: String?
     ): List<SectionFieldElement>? = withContext(workContext) {
         countryCode?.let {
-            countryFieldMap.first()[it]
-        } ?: countryFieldMap.first()[DEFAULT_COUNTRY_CODE]
+            countryFieldMap.await()[it]
+        } ?: countryFieldMap.await()[DEFAULT_COUNTRY_CODE]
     }
 }

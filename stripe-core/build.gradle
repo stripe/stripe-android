@@ -17,6 +17,9 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+    implementation libs.androidx.viewModel
+
+    compileOnly libs.androidx.workManager
 
     ksp libs.daggerCompiler
 
@@ -24,6 +27,7 @@ dependencies {
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.androidx.workManager
     testImplementation testLibs.json
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations

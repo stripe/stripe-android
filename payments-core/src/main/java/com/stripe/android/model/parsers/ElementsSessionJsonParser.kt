@@ -38,6 +38,14 @@ internal class ElementsSessionJsonParser(
         )
         val linkPassthroughModeEnabled = json.optJSONObject(FIELD_LINK_SETTINGS)
             ?.optBoolean(FIELD_LINK_PASSTHROUGH_MODE_ENABLED) ?: false
+        val disableLinkSignup = json.optJSONObject(FIELD_LINK_SETTINGS)
+            ?.optBoolean(FIELD_DISABLE_LINK_SIGNUP) ?: false
+        val linkFlags = json.optJSONObject(FIELD_LINK_SETTINGS)?.let { linkSettingsJson ->
+            parseLinkFlags(linkSettingsJson)
+        } ?: emptyMap()
+        val useLinkRebrand = json.optJSONObject(FIELD_FLAGS)
+            ?.optBoolean(FIELD_LINK_REBRAND, ElementsSession.LinkSettings.useRebrandDefault)
+            ?: ElementsSession.LinkSettings.useRebrandDefault
         val orderedPaymentMethodTypes =
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
@@ -62,6 +70,9 @@ internal class ElementsSessionJsonParser(
                 linkSettings = ElementsSession.LinkSettings(
                     linkFundingSources = jsonArrayToList(linkFundingSources),
                     linkPassthroughModeEnabled = linkPassthroughModeEnabled,
+                    linkFlags = linkFlags,
+                    disableLinkSignup = disableLinkSignup,
+                    useRebrand = useLinkRebrand,
                 ),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
@@ -138,15 +149,32 @@ internal class ElementsSessionJsonParser(
         return cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false)
     }
 
+    private fun parseLinkFlags(json: JSONObject): Map<String, Boolean> {
+        val flags = mutableMapOf<String, Boolean>()
+
+        json.keys().forEach { key ->
+            val value = json.get(key)
+
+            if (value is Boolean) {
+                flags[key] = value
+            }
+        }
+
+        return flags.toMap()
+    }
+
     internal companion object {
         private const val FIELD_OBJECT = "object"
         private const val FIELD_ELEMENTS_SESSION_ID = "session_id"
         private const val FIELD_COUNTRY_CODE = "country_code"
         private const val FIELD_PAYMENT_METHOD_TYPES = "payment_method_types"
         private const val FIELD_ORDERED_PAYMENT_METHOD_TYPES = "ordered_payment_method_types"
-        private const val FIELD_LINK_SETTINGS = "link_settings"
+        const val FIELD_FLAGS = "flags"
+        const val FIELD_LINK_REBRAND = "link_2024_rebrand_m1"
+        const val FIELD_LINK_SETTINGS = "link_settings"
         private const val FIELD_LINK_FUNDING_SOURCES = "link_funding_sources"
         private const val FIELD_LINK_PASSTHROUGH_MODE_ENABLED = "link_passthrough_mode_enabled"
+        private const val FIELD_DISABLE_LINK_SIGNUP = "link_mobile_disable_signup"
         private const val FIELD_MERCHANT_COUNTRY = "merchant_country"
         private const val FIELD_PAYMENT_METHOD_PREFERENCE = "payment_method_preference"
         private const val FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES = "unactivated_payment_method_types"

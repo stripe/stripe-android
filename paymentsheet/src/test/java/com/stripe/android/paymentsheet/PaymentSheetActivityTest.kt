@@ -28,11 +28,10 @@ import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.googlepaylauncher.injection.GooglePayPaymentMethodLauncherFactory
+import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkButtonTestTag
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.update
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
@@ -52,18 +51,16 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.state.LinkState
+import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
-import com.stripe.android.paymentsheet.ui.PrimaryButtonAnimator
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.InjectableActivityScenario
-import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
-import com.stripe.android.utils.formViewModelSubcomponentBuilder
 import com.stripe.android.utils.injectableActivityScenario
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,6 +79,8 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.time.Duration
@@ -548,21 +547,15 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
+            val countDownLatch = CountDownLatch(1)
+
             viewModel.checkoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-            var finishProcessingCalled = false
             viewModel.viewState.value = PaymentSheetViewState.FinishProcessing {
-                finishProcessingCalled = true
+                countDownLatch.countDown()
             }
 
-            idleLooper()
-
-            testDispatcher.scheduler.apply {
-                advanceTimeBy(PrimaryButtonAnimator.HOLD_ANIMATION_ON_SLIDE_IN_COMPLETION)
-                runCurrent()
-            }
-
-            assertThat(finishProcessingCalled).isTrue()
+            countDownLatch.await(5, TimeUnit.SECONDS)
         }
     }
 
@@ -574,16 +567,15 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            val countDownLatch = CountDownLatch(1)
 
-            var finishProcessingCalled = false
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
+
             viewModel.viewState.value = PaymentSheetViewState.FinishProcessing {
-                finishProcessingCalled = true
+                countDownLatch.countDown()
             }
 
-            composeTestRule.waitForIdle()
-
-            assertThat(finishProcessingCalled).isTrue()
+            countDownLatch.await(5, TimeUnit.SECONDS)
         }
     }
 
@@ -593,7 +585,7 @@ internal class PaymentSheetActivityTest {
         val scenario = activityScenario(viewModel)
 
         scenario.launch(intent).onActivity {
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
 
             composeTestRule
                 .onNodeWithTag(GOOGLE_PAY_BUTTON_TEST_TAG)
@@ -601,10 +593,48 @@ internal class PaymentSheetActivityTest {
 
             composeTestRule.waitForIdle()
 
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
             assertThat(viewModel.contentVisible.value).isEqualTo(false)
 
-            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Canceled)
+            viewModel.onGooglePayResult(GooglePayPaymentMethodLauncher.Result.Completed(PAYMENT_METHODS.first()))
+
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
             assertThat(viewModel.contentVisible.value).isEqualTo(true)
+
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
+                WalletsProcessingState.Completed::class.java
+            )
+            assertThat(viewModel.contentVisible.value).isEqualTo(true)
+        }
+    }
+
+    @Test
+    fun `link flow updates the payment sheet before and after`() {
+        val viewModel = createViewModel(isLinkAvailable = true)
+        val scenario = activityScenario(viewModel)
+
+        scenario.launch(intent).onActivity {
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
+
+            composeTestRule
+                .onNodeWithTag(LinkButtonTestTag)
+                .performClick()
+
+            composeTestRule.waitForIdle()
+
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
+
+            viewModel.linkHandler.onLinkActivityResult(LinkActivityResult.Completed(PAYMENT_METHODS.first()))
+
+            assertThat(viewModel.walletsProcessingState.value).isEqualTo(WalletsProcessingState.Processing)
+
+            fakeIntentConfirmationInterceptor.enqueueCompleteStep()
+
+            assertThat(viewModel.walletsProcessingState.value).isInstanceOf(
+                WalletsProcessingState.Completed::class.java
+            )
         }
     }
 
@@ -679,7 +709,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(errorMessage)
                 .assertDoesNotExist()
 
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
@@ -713,7 +743,7 @@ internal class PaymentSheetActivityTest {
                 .onNodeWithText(errorMessage)
                 .assertDoesNotExist()
 
-            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopGooglePay
+            viewModel.checkoutIdentifier = CheckoutIdentifier.SheetTopWallet
             viewModel.viewState.value =
                 PaymentSheetViewState.Reset(BaseSheetViewModel.UserErrorMessage(errorMessage))
 
@@ -933,7 +963,7 @@ internal class PaymentSheetActivityTest {
             composeTestRule.waitForIdle()
         }
 
-        verify(eventReporter).onPressConfirmButton()
+        verify(eventReporter).onPressConfirmButton(any())
     }
 
     private fun activityScenario(
@@ -954,16 +984,6 @@ internal class PaymentSheetActivityTest {
         isLinkAvailable: Boolean = false,
         initialPaymentSelection: PaymentSelection? = paymentMethods.firstOrNull()?.let { PaymentSelection.Saved(it) },
     ): PaymentSheetViewModel = runBlocking {
-        val lpmRepository = LpmRepository(
-            arguments = LpmRepository.LpmRepositoryArguments(resources = context.resources),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            update(
-                stripeIntent = paymentIntent,
-                serverLpmSpecs = null,
-            )
-        }
-
         TestViewModelFactory.create(
             linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
                 onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
@@ -971,11 +991,11 @@ internal class PaymentSheetActivityTest {
             },
         ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentSheetViewModel(
-                ApplicationProvider.getApplicationContext(),
-                PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
-                eventReporter,
-                { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
-                FakePaymentSheetLoader(
+                application = ApplicationProvider.getApplicationContext(),
+                args = PaymentSheetFixtures.ARGS_CUSTOMER_WITH_GOOGLEPAY,
+                eventReporter = eventReporter,
+                lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
+                paymentSheetLoader = FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
                     customerPaymentMethods = paymentMethods,
                     isGooglePayAvailable = isGooglePayAvailable,
@@ -986,22 +1006,17 @@ internal class PaymentSheetActivityTest {
                     delay = loadDelay,
                     paymentSelection = initialPaymentSelection,
                 ),
-                FakeCustomerRepository(paymentMethods),
-                FakePrefsRepository(),
-                lpmRepository,
-                stripePaymentLauncherAssistedFactory,
-                googlePayPaymentMethodLauncherFactory,
-                mock(),
-                Logger.noop(),
-                testDispatcher,
+                customerRepository = FakeCustomerRepository(paymentMethods),
+                prefsRepository = FakePrefsRepository(),
+                paymentLauncherFactory = stripePaymentLauncherAssistedFactory,
+                googlePayPaymentMethodLauncherFactory = googlePayPaymentMethodLauncherFactory,
+                bacsMandateConfirmationLauncherFactory = mock(),
+                logger = Logger.noop(),
+                workContext = testDispatcher,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
-                formViewModelSubComponentBuilderProvider = formViewModelSubcomponentBuilder(
-                    context = ApplicationProvider.getApplicationContext(),
-                    lpmRepository = lpmRepository,
-                ),
                 editInteractorFactory = FakeEditPaymentMethodInteractor.Factory
             )
         }

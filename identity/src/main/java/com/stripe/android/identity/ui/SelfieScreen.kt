@@ -71,6 +71,7 @@ import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.utils.startScanning
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.uicore.text.Html
 import com.stripe.android.uicore.text.dimensionResourceSp
 import kotlinx.coroutines.launch
@@ -90,17 +91,15 @@ private const val FLASH_ANIMATION_TIME = 200
 internal fun SelfieScanScreen(
     navController: NavController,
     identityViewModel: IdentityViewModel,
-    identityScanViewModel: IdentityScanViewModel,
+    selfieScanViewModel: SelfieScanViewModel,
 ) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val cameraManager = remember {
         SelfieCameraManager(context = context) { cause ->
-            identityViewModel.sendAnalyticsRequest(
-                identityViewModel.identityAnalyticsRequestFactory.cameraError(
-                    scanType = IdentityScanState.ScanType.SELFIE,
-                    throwable = IllegalStateException(cause)
-                )
+            identityViewModel.identityAnalyticsRequestFactory.cameraError(
+                scanType = IdentityScanState.ScanType.SELFIE,
+                throwable = IllegalStateException(cause)
             )
         }
     }
@@ -117,14 +116,15 @@ internal fun SelfieScanScreen(
         )
         // run once to initialize
         LaunchedEffect(Unit) {
-            identityScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
+            selfieScanViewModel.initializeScanFlowAndUpdateState(pageAndModelFiles, cameraManager)
         }
 
-        val selfieScannerState by identityScanViewModel.scannerState.collectAsState()
+        val selfieScannerState by selfieScanViewModel.scannerState.collectAsState()
+        val feedback by selfieScanViewModel.scanFeedback.collectAsState()
 
         LiveCaptureLaunchedEffect(
             scannerState = selfieScannerState,
-            identityScanViewModel = identityScanViewModel,
+            identityScanViewModel = selfieScanViewModel,
             identityViewModel = identityViewModel,
             lifecycleOwner = lifecycleOwner,
             verificationPage = pageAndModelFiles.page,
@@ -148,9 +148,10 @@ internal fun SelfieScanScreen(
                     }
                 SelfieCaptureScreen(
                     selfieScannerState = selfieScannerState,
+                    feedback = feedback,
                     successSelfieCapturePage = successSelfieCapturePage,
                     identityViewModel = identityViewModel,
-                    identityScanViewModel = identityScanViewModel,
+                    identityScanViewModel = selfieScanViewModel,
                     navController = navController,
                     lifecycleOwner = lifecycleOwner,
                     cameraManager = cameraManager
@@ -163,6 +164,7 @@ internal fun SelfieScanScreen(
 @Composable
 private fun SelfieCaptureScreen(
     selfieScannerState: IdentityScanViewModel.State,
+    feedback: Int?,
     successSelfieCapturePage: VerificationPageStaticContentSelfieCapturePage,
     identityViewModel: IdentityViewModel,
     identityScanViewModel: IdentityScanViewModel,
@@ -211,33 +213,6 @@ private fun SelfieCaptureScreen(
         label = "flashAnimation"
     )
 
-    val message = when (selfieScannerState) {
-        is IdentityScanViewModel.State.Scanning -> {
-            when (selfieScannerState.scanState) {
-                is IdentityScanState.Finished ->
-                    stringResource(id = R.string.stripe_selfie_capture_complete)
-
-                is IdentityScanState.Found ->
-                    stringResource(id = R.string.stripe_capturing)
-
-                is IdentityScanState.Initial ->
-                    stringResource(id = R.string.stripe_position_selfie)
-
-                is IdentityScanState.Satisfied ->
-                    stringResource(id = R.string.stripe_selfie_capture_complete)
-
-                is IdentityScanState.TimeOut -> ""
-                is IdentityScanState.Unsatisfied -> ""
-                null -> {
-                    stringResource(id = R.string.stripe_position_selfie)
-                }
-            }
-        }
-
-        is IdentityScanViewModel.State.Scanned -> stringResource(id = R.string.stripe_selfie_capture_complete)
-        else -> ""
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -264,7 +239,7 @@ private fun SelfieCaptureScreen(
                 fontWeight = FontWeight.Bold
             )
             Text(
-                text = message,
+                text = feedback?.let { stringResource(id = it) } ?: "",
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)

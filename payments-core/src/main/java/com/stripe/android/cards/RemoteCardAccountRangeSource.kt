@@ -6,8 +6,9 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeRepository
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 internal class RemoteCardAccountRangeSource(
     private val stripeRepository: StripeRepository,
@@ -19,8 +20,7 @@ internal class RemoteCardAccountRangeSource(
 
     private val _loading = MutableStateFlow(false)
 
-    override val loading: Flow<Boolean>
-        get() = _loading
+    override val loading: StateFlow<Boolean> = _loading.asStateFlow()
 
     override suspend fun getAccountRanges(
         cardNumber: CardNumber.Unvalidated

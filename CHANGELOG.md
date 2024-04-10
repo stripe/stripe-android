@@ -1,6 +1,72 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+### PaymentSheet
+* [CHANGED][8231](https://github.com/stripe/stripe-android/pull/8231) Separator text under Link/Google Pay button from "Or pay using"/"Or pay with a card" to "Or use"/"Or use a card" when using SetupIntent.
+
+### Payments
+* [FIXED][8243](https://github.com/stripe/stripe-android/pull/8243) Fixed an issue with R8 when depending directly on `payments-core`.
+
+## 20.40.4 - 2024-04-04
+
+### Financial Connections
+[Fixed][8223](https://github.com/stripe/stripe-android/pull/8223) Fixed a crash that occurred when using Compose 1.6.
+
+## 20.40.3 - 2024-04-01
+
+### CustomerSheet
+* [Added][8176](https://github.com/stripe/stripe-android/pull/8176) Enabled ACH Direct Debit in CustomerSheet
+
+### Financial Connections
+* [CHANGED][8157](https://github.com/stripe/stripe-android/pull/8157) Financial Connections no longer depends on the Mavericks library.
+
+## 20.40.2 - 2024-03-25
+
+### PaymentSheet
+* [Fixed][8147](https://github.com/stripe/stripe-android/pull/8147) Use device locale in Link popup request rather than merchant locale for customer billing country.
+* [Added][8118](https://github.com/stripe/stripe-android/pull/8118) Show `Link` wallet payment methods in saved payment methods screen.
+* [Fixed][8117](https://github.com/stripe/stripe-android/pull/8117) Fix `Link` payment methods not being saved properly in payment method and passthrough mode.
+
+## 20.40.1 - 2024-03-21
+
+### PaymentSheet
+* [Added][8132](https://github.com/stripe/stripe-android/pull/8132) Support for Klarna with SetupIntents and PaymentIntents with `setup_future_usage`.
+* [Fixed][8142](https://github.com/stripe/stripe-android/pull/8142) Fixed an issue with `CustomerSheet` where the form fields were not displayed when adding a payment method.
+
+## 20.40.0 - 2024-03-18
+
+### PaymentSheet
+* [Added][7719](https://github.com/stripe/stripe-android/pull/7719) Added `PaymentOption.iconPainter` to simplify `FlowController` usage in Compose.
+
+### Payments
+* [Added][8028](https://github.com/stripe/stripe-android/pull/8028) Added support for Amazon Pay to API bindings.
+
+### Financial Connections
+* [Changed] Updated the design of the Financial Connections authentication flow.
+
+## 20.39.0 - 2024-03-04
+
+### PaymentSheet
+* [Added] Added support for [Link](https://docs.stripe.com/payments/link/mobile-payment-element-link) in PaymentSheet. Enabling Link in your [payment method settings](https://dashboard.stripe.com/settings/payment_methods) will enable Link in PaymentSheet. To choose different Link availability settings on web and mobile, use a custom [payment method configuration](https://docs.stripe.com/payments/multiple-payment-method-configs).
+* [Changed][7999](https://github.com/stripe/stripe-android/pull/7999) In test mode, PaymentSheet now fails to load when getting saved payment methods fails.
+* [Added][8015](https://github.com/stripe/stripe-android/pull/8015) Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
+* [Added][8011](https://github.com/stripe/stripe-android/pull/8011) Added support for `paymentMethodOrder` in `PaymentSheet` and `CustomerSheet`, which provides client side sorting of payment methods.
+
+## 20.38.0 - 2024-02-26
+
+### PaymentSheet
+* [Added] Added support for [payment method configurations](https://docs.stripe.com/payments/multiple-payment-method-configs) when using the deferred intent integration path.
+
+## 20.37.4 - 2024-02-20
+* [FIXED][7953](https://github.com/stripe/stripe-android/pull/7953) Improved font rendering in `PaymentSheet`, `CustomerSheet`, and `FinancialConnectionsSheet` when used in Compose 1.6 and above.
+
+## 20.37.3 - 2024-02-12
+
+### PaymentSheet
+* [FIXED][7917](https://github.com/stripe/stripe-android/pull/7917) Fixed an issue where `Google Pay` & `Link` were not saved as default payment methods in `FlowController`.
+
+### Identity
+* [FIXED][7903](https://github.com/stripe/stripe-android/pull/7903) Fixed an issue where camera fails to start on some devices.
 
 ## 20.37.2 - 2024-02-05
 

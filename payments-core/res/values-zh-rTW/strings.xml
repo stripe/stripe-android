@@ -113,7 +113,7 @@
   <!-- Text for close button -->
   <string name="stripe_close">關閉</string>
   <!-- Accessibility action for deleting a payment method -->
-  <string name="stripe_delete_payment_method">刪除付款方式</string>
+  <string name="stripe_delete_payment_method">刪除支付方式</string>
   <string name="stripe_delete_payment_method_prompt_title">刪除支付方式</string>
   <!-- Done button title -->
   <string name="stripe_done">完成</string>
@@ -129,7 +129,7 @@
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我們未能驗證您的支付方式。請選擇另一支付方式並重試。</string>
   <!-- Error when 3DS2 authentication timed out. -->
-  <string name="stripe_failure_reason_timed_out">驗證您的付款方式時逾時 -- 請重試</string>
+  <string name="stripe_failure_reason_timed_out">驗證您的支付方式時逾時——請重試</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="stripe_fpx_bank_offline">%s - 線下</string>
   <!-- Error message when a payment method gets declined. -->
@@ -165,9 +165,11 @@
   <!-- Label for Bank Account selection or detail entry form -->
   <string name="stripe_title_bank_account">銀行帳戶</string>
   <!-- Title for Payment Method screen -->
-  <string name="stripe_title_payment_method">付款方式</string>
+  <string name="stripe_title_payment_method">支付方式</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">選擇送貨方式</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">更新卡</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">驗證您的付款</string>
 </resources>

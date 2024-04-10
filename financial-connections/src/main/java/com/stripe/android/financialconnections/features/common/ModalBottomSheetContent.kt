@@ -1,38 +1,31 @@
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.common
 
-import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.stripe.android.financialconnections.model.DataAccessNotice
 import com.stripe.android.financialconnections.model.LegalDetailsNotice
-import com.stripe.android.financialconnections.ui.ImageResource
-import com.stripe.android.financialconnections.ui.LocalImageLoader
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.StringAnnotation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
+import com.stripe.android.financialconnections.ui.sdui.rememberHtml
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
-import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.financialconnections.ui.theme.Layout
 
 @Composable
 internal fun DataAccessBottomSheetContent(
@@ -40,30 +33,53 @@ internal fun DataAccessBottomSheetContent(
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
-    val title = remember(dataDialog.title) {
-        TextResource.Text(fromHtml(dataDialog.title))
-    }
-    val subtitle = remember(dataDialog.subtitle) {
-        dataDialog.subtitle?.let { TextResource.Text(fromHtml(it)) }
-    }
-    val learnMore = remember(dataDialog.learnMore) {
-        TextResource.Text(fromHtml(dataDialog.learnMore))
-    }
-    val connectedAccountNotice = remember(dataDialog.connectedAccountNotice) {
-        dataDialog.connectedAccountNotice?.let { TextResource.Text(fromHtml(it)) }
-    }
+    val title = rememberHtml(dataDialog.title)
+    val subtitle = dataDialog.subtitle?.let { rememberHtml(it) }
+    val disclaimer = dataDialog.disclaimer?.let { rememberHtml(it) }
     val bullets = remember(dataDialog.body.bullets) {
         dataDialog.body.bullets.map { BulletUI.from(it) }
     }
     ModalBottomSheetContent(
-        title = title,
-        subtitle = subtitle,
         onClickableTextClick = onClickableTextClick,
-        bullets = bullets,
-        connectedAccountNotice = connectedAccountNotice,
         cta = dataDialog.cta,
-        learnMore = learnMore,
+        disclaimer = disclaimer,
         onConfirmModalClick = onConfirmModalClick,
+        content = {
+            dataDialog.icon?.default?.let {
+                ShapedIcon(url = it, contentDescription = "Icon")
+                Spacer(modifier = Modifier.size(16.dp))
+            }
+            Title(title = title, onClickableTextClick = onClickableTextClick)
+            // FOR CONNECTED ACCOUNTS: Permissions granted to Stripe by the connected account
+            dataDialog.connectedAccountNotice?.let {
+                Spacer(modifier = Modifier.size(16.dp))
+                Subtitle(
+                    text = rememberHtml(it.subtitle),
+                    onClickableTextClick = onClickableTextClick
+                )
+                Spacer(modifier = Modifier.size(24.dp))
+                it.body.bullets.forEach { bullet ->
+                    ListItem(
+                        bullet = BulletUI.from(bullet),
+                        onClickableTextClick = onClickableTextClick
+                    )
+                    Spacer(modifier = Modifier.size(16.dp))
+                }
+            }
+            // FOR ALL MERCHANTS: Permissions granted to Stripe by the merchant
+            subtitle?.let {
+                Spacer(modifier = Modifier.size(16.dp))
+                Subtitle(it, onClickableTextClick)
+            }
+            Spacer(modifier = Modifier.size(24.dp))
+            bullets.forEach { bullet ->
+                ListItem(
+                    bullet = bullet,
+                    onClickableTextClick = onClickableTextClick
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+            }
+        }
     )
 }
 
@@ -73,253 +89,136 @@ internal fun LegalDetailsBottomSheetContent(
     onClickableTextClick: (String) -> Unit,
     onConfirmModalClick: () -> Unit
 ) {
-    val title = remember(legalDetails.title) {
-        TextResource.Text(fromHtml(legalDetails.title))
-    }
-    val learnMore = remember(legalDetails.learnMore) {
-        TextResource.Text(fromHtml(legalDetails.learnMore))
-    }
-    val bullets = remember(legalDetails.body.bullets) {
-        legalDetails.body.bullets.map { BulletUI.from(it) }
+    val title = rememberHtml(legalDetails.title)
+    val subtitle = legalDetails.subtitle?.let { rememberHtml(it) }
+    val learnMore = legalDetails.disclaimer?.let { rememberHtml(it) }
+    val links = remember(legalDetails.body.links) {
+        legalDetails.body.links.map { TextResource.Text(fromHtml(it.title)) }
     }
     ModalBottomSheetContent(
-        title = title,
-        subtitle = null,
         onClickableTextClick = onClickableTextClick,
-        bullets = bullets,
-        connectedAccountNotice = null,
         cta = legalDetails.cta,
-        learnMore = learnMore,
-        onConfirmModalClick = onConfirmModalClick,
+        disclaimer = learnMore,
+        onConfirmModalClick = onConfirmModalClick
+    ) {
+        legalDetails.icon?.default?.let {
+            ShapedIcon(it, contentDescription = "legal details icon")
+            Spacer(modifier = Modifier.size(16.dp))
+        }
+
+        Title(title = title, onClickableTextClick = onClickableTextClick)
+
+        subtitle?.let {
+            Spacer(modifier = Modifier.size(16.dp))
+            Subtitle(text = it, onClickableTextClick = onClickableTextClick)
+        }
+
+        Spacer(modifier = Modifier.size(24.dp))
+
+        Links(links, onClickableTextClick)
+    }
+}
+
+@Composable
+private fun Links(
+    links: List<TextResource.Text>,
+    onClickableTextClick: (String) -> Unit,
+) {
+    Column {
+        val linkStyle = typography.labelLargeEmphasized.copy(color = colors.textBrand)
+        links.forEachIndexed { index, link ->
+            Divider(color = colors.border)
+            AnnotatedText(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+                text = link,
+                defaultStyle = linkStyle,
+                annotationStyles = mapOf(
+                    StringAnnotation.CLICKABLE to linkStyle.toSpanStyle()
+                ),
+                onClickableTextClick = onClickableTextClick,
+            )
+            if (links.lastIndex == index) {
+                Divider(color = colors.border)
+            }
+        }
+    }
+}
+
+@Composable
+private fun Title(
+    title: TextResource.Text,
+    onClickableTextClick: (String) -> Unit
+) {
+    AnnotatedText(
+        text = title,
+        defaultStyle = typography.headingMedium.copy(
+            color = colors.textDefault
+        ),
+        onClickableTextClick = onClickableTextClick
     )
 }
 
 @Composable
 private fun ModalBottomSheetContent(
-    title: TextResource.Text,
-    subtitle: TextResource.Text?,
     onClickableTextClick: (String) -> Unit,
-    bullets: List<BulletUI>,
-    connectedAccountNotice: TextResource?,
     cta: String,
-    learnMore: TextResource,
+    disclaimer: TextResource?,
     onConfirmModalClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit,
 ) {
-    val scrollState = rememberScrollState()
-    Column {
-        Column(
-            Modifier
-                .weight(1f, fill = false)
-                .verticalScroll(scrollState)
-                .padding(24.dp)
-        ) {
-            AnnotatedText(
-                text = title,
-                defaultStyle = typography.heading.copy(
-                    color = colors.textPrimary
-                ),
-                annotationStyles = emptyMap(),
-                onClickableTextClick = onClickableTextClick
-            )
-            subtitle?.let {
-                Spacer(modifier = Modifier.size(4.dp))
-                AnnotatedText(
-                    text = it,
-                    defaultStyle = typography.body.copy(
-                        color = colors.textPrimary
-                    ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.detail
-                            .toSpanStyle()
-                            .copy(color = colors.textBrand),
-                        StringAnnotation.BOLD to typography.detailEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textPrimary),
-                    ),
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
-            bullets.forEach {
-                Spacer(modifier = Modifier.size(16.dp))
-                BulletItem(
-                    bullet = it,
-                    onClickableTextClick = onClickableTextClick
-                )
-            }
-        }
-        Column(
-            Modifier.padding(
-                bottom = 24.dp,
-                start = 24.dp,
-                end = 24.dp
-            )
-        ) {
-            if (connectedAccountNotice != null) {
-                AnnotatedText(
-                    text = connectedAccountNotice,
-                    onClickableTextClick = onClickableTextClick,
-                    defaultStyle = typography.caption.copy(
-                        color = colors.textSecondary
-                    ),
-                    annotationStyles = mapOf(
-                        StringAnnotation.CLICKABLE to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textBrand),
-                        StringAnnotation.BOLD to typography.captionEmphasized
-                            .toSpanStyle()
-                            .copy(color = colors.textSecondary),
-                    )
-                )
-                Spacer(modifier = Modifier.size(12.dp))
-            }
-            AnnotatedText(
-                text = learnMore,
+    Layout(
+        modifier = modifier,
+        inModal = true,
+        body = { content() },
+        footer = {
+            ModalBottomSheetFooter(
                 onClickableTextClick = onClickableTextClick,
-                defaultStyle = typography.caption.copy(
-                    color = colors.textSecondary
-                ),
-                annotationStyles = mapOf(
-                    StringAnnotation.CLICKABLE to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textBrand),
-                    StringAnnotation.BOLD to typography.captionEmphasized
-                        .toSpanStyle()
-                        .copy(color = colors.textSecondary),
-                )
+                disclaimer = disclaimer,
+                onConfirmModalClick = onConfirmModalClick,
+                cta = cta
             )
-            Spacer(modifier = Modifier.size(16.dp))
-            FinancialConnectionsButton(
-                onClick = { onConfirmModalClick() },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Text(text = cta)
-            }
         }
-    }
+    )
 }
 
 @Composable
-internal fun BulletItem(
-    bullet: BulletUI,
+private fun Subtitle(
+    text: TextResource,
     onClickableTextClick: (String) -> Unit
 ) {
-    Row {
-        BulletIcon(icon = bullet.imageResource)
-        Spacer(modifier = Modifier.size(8.dp))
-        Column {
-            when {
-                // title + content
-                bullet.title != null && bullet.content != null -> {
-                    AnnotatedText(
-                        text = bullet.title,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textPrimary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textPrimary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                    Spacer(modifier = Modifier.size(2.dp))
-                    AnnotatedText(
-                        text = bullet.content,
-                        defaultStyle = typography.detail.copy(
-                            color = colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.detailEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.detailEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textSecondary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                // only title
-                bullet.title != null -> {
-                    AnnotatedText(
-                        text = bullet.title,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textPrimary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textPrimary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-                // only content
-                bullet.content != null -> {
-                    AnnotatedText(
-                        text = bullet.content,
-                        defaultStyle = typography.body.copy(
-                            color = colors.textSecondary
-                        ),
-                        annotationStyles = mapOf(
-                            StringAnnotation.CLICKABLE to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textBrand),
-                            StringAnnotation.BOLD to typography.bodyEmphasized
-                                .toSpanStyle()
-                                .copy(color = colors.textSecondary),
-                        ),
-                        onClickableTextClick = onClickableTextClick
-                    )
-                }
-            }
-        }
-    }
+    AnnotatedText(
+        text = text,
+        defaultStyle = typography.bodyMedium.copy(
+            color = colors.textDefault
+        ),
+        onClickableTextClick = onClickableTextClick
+    )
 }
 
 @Composable
-private fun BulletIcon(icon: ImageResource?) {
-    val modifier = Modifier
-        .size(16.dp)
-        .offset(y = 2.dp)
-    if (icon == null) {
-        val color = colors.textPrimary
-        Canvas(
-            modifier = Modifier
-                .size(16.dp)
-                .padding(6.dp)
-                .offset(y = 2.dp),
-            onDraw = { drawCircle(color = color) }
+private fun ModalBottomSheetFooter(
+    onClickableTextClick: (String) -> Unit,
+    disclaimer: TextResource?,
+    onConfirmModalClick: () -> Unit,
+    cta: String
+) = Column {
+    disclaimer?.let {
+        AnnotatedText(
+            modifier = Modifier.align(Alignment.CenterHorizontally),
+            text = it,
+            onClickableTextClick = onClickableTextClick,
+            defaultStyle = typography.labelSmall.copy(
+                color = colors.textDefault,
+                textAlign = TextAlign.Center
+            ),
         )
-    } else {
-        when (icon) {
-            is ImageResource.Local -> Image(
-                modifier = modifier,
-                painter = painterResource(id = icon.resId),
-                contentDescription = null,
-            )
-
-            is ImageResource.Network -> StripeImage(
-                url = icon.url,
-                errorContent = {
-                    val color = colors.textSecondary
-                    Canvas(
-                        modifier = Modifier
-                            .size(6.dp)
-                            .align(Alignment.Center),
-                        onDraw = { drawCircle(color = color) }
-                    )
-                },
-                imageLoader = LocalImageLoader.current,
-                contentDescription = null,
-                modifier = modifier
-            )
-        }
+    }
+    Spacer(modifier = Modifier.size(16.dp))
+    FinancialConnectionsButton(
+        onClick = { onConfirmModalClick() },
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Text(text = cta)
     }
 }

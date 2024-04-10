@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CountrySettin
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodConfigurationSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 
 @Stable
@@ -24,6 +25,10 @@ internal data class PlaygroundState(
     val countryCode = snapshot[CountrySettingsDefinition]
     val checkoutMode = snapshot[CheckoutModeSettingsDefinition]
     val integrationType = snapshot[IntegrationTypeSettingsDefinition]
+    val paymentMethodConfigurationId: String? = snapshot[PaymentMethodConfigurationSettingsDefinition].ifEmpty { null }
+
+    val stripeIntentId: String
+        get() = clientSecret.substringBefore("_secret_")
 
     fun paymentSheetConfiguration(): PaymentSheet.Configuration {
         return snapshot.paymentSheetConfiguration(this)

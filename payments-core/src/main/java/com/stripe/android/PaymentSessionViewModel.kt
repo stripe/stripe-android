@@ -8,10 +8,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.StripeError
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.utils.requireApplication
 import com.stripe.android.view.PaymentMethodsActivityStarter
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -47,6 +48,8 @@ internal class PaymentSessionViewModel(
     val paymentSessionDataStateFlow: SharedFlow<PaymentSessionData> = _paymentSessionDataStateFlow.asSharedFlow()
 
     init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
         // read from saved state handle
         savedStateHandle.get<PaymentSessionData>(KEY_PAYMENT_SESSION_DATA)?.let {
             this.paymentSessionData = it

@@ -43,7 +43,6 @@ internal data class PartnerAccountsList(
  */
 @Serializable
 @Parcelize
-@Suppress("ConstructorParameterNaming")
 internal data class PartnerAccount(
 
     @SerialName(value = "authorization") @Required val authorization: String,
@@ -91,5 +90,6 @@ internal data class PartnerAccount(
     internal val allowSelection: Boolean
         get() = _allowSelection ?: true
 
-    internal val redactedAccountNumbers: String? get() = displayableAccountNumbers?.let { "••••$it" }
+    internal val redactedAccountNumbers: String
+        get() = "••••${displayableAccountNumbers.orEmpty()}"
 }

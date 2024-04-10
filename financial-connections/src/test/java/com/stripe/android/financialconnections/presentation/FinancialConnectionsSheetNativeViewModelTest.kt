@@ -2,13 +2,13 @@ package com.stripe.android.financialconnections.presentation
 
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.financialConnectionsSessionNoAccounts
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
@@ -38,6 +38,7 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
@@ -50,7 +51,7 @@ import kotlin.test.assertIs
 internal class FinancialConnectionsSheetNativeViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val nativeAuthFlowCoordinator = mock<NativeAuthFlowCoordinator>()
     private val completeFinancialConnectionsSession = mock<CompleteFinancialConnectionsSession>()
@@ -100,9 +101,12 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithAccounts)
 
+        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
+        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
+
         val viewModel = createViewModel()
 
-        viewModel.onCloseConfirm()
+        messagesFlow.emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -121,12 +125,14 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @Test
     fun `onCloseClick - when closing, no accounts, no errors, finish with cancel`() = runTest {
         val sessionWithNoAccounts = financialConnectionsSessionNoAccounts()
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithNoAccounts)
+
+        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
+        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
 
         val viewModel = createViewModel()
 
-        viewModel.onCloseConfirm()
+        messagesFlow.emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -151,12 +157,14 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                 )
             )
         )
-        whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
         whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithNoAccounts)
+
+        val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
+        whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
 
         val viewModel = createViewModel()
 
-        viewModel.onCloseConfirm()
+        messagesFlow.emit(Complete(null))
 
         withState(viewModel) {
             require(it.viewEffect is Finish)
@@ -279,10 +287,11 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
 
     private fun createViewModel(
         initialState: FinancialConnectionsSheetNativeState = FinancialConnectionsSheetNativeState(
-            FinancialConnectionsSheetNativeActivityArgs(
+            args = FinancialConnectionsSheetNativeActivityArgs(
                 configuration = configuration,
                 initialSyncResponse = ApiKeyFixtures.syncResponse(),
-            )
+            ),
+            savedState = null
         )
     ) = FinancialConnectionsSheetNativeViewModel(
         eventTracker = mock(),
@@ -292,8 +301,8 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
         completeFinancialConnectionsSession = completeFinancialConnectionsSession,
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         logger = mock(),
-        getManifest = mock(),
         navigationManager = TestNavigationManager(),
+        savedStateHandle = SavedStateHandle(),
         initialState = initialState
     )
 }

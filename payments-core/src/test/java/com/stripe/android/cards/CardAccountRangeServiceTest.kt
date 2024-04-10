@@ -14,16 +14,17 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.BinRange
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.networking.StripeApiRepository
+import com.stripe.android.uicore.utils.stateFlowOf
 import com.stripe.android.utils.TestUtils
 import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.times
@@ -73,7 +74,10 @@ class CardAccountRangeServiceTest {
         cardNumberString: String,
         expectedRemoteCall: Boolean,
     ) {
-        val mockRemoteCardAccountRangeSource = mock<CardAccountRangeSource>()
+        val mockRemoteCardAccountRangeSource = mock<CardAccountRangeSource> {
+            on { loading } doReturn stateFlowOf(false)
+        }
+
         val serviceMockRemote = CardAccountRangeService(
             createMockRemoteDefaultCardAccountRangeRepository(mockRemoteCardAccountRangeSource),
             testDispatcher,
@@ -156,7 +160,7 @@ class CardAccountRangeServiceTest {
                     return expectedAccountRanges
                 }
 
-                override val loading: Flow<Boolean> = flowOf(false)
+                override val loading: StateFlow<Boolean> = stateFlowOf(false)
             }
         )
 

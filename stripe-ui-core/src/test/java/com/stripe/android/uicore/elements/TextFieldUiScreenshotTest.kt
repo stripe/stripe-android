@@ -3,12 +3,13 @@ package com.stripe.android.uicore.elements
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.uicore.R
-import com.stripe.android.uicore.utils.FontSize
-import com.stripe.android.uicore.utils.PaparazziRule
-import com.stripe.android.uicore.utils.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
@@ -28,7 +29,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "John Doe",
+                value = TextFieldValue("John Doe"),
                 enabled = true,
                 loading = false,
                 placeholder = null,
@@ -44,7 +45,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "John Doe",
+                value = TextFieldValue("John Doe"),
                 enabled = false,
                 loading = false,
                 placeholder = null,
@@ -60,7 +61,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "John Doe",
+                value = TextFieldValue("John Doe"),
                 enabled = true,
                 loading = false,
                 placeholder = null,
@@ -76,7 +77,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "John Doe",
+                value = TextFieldValue("John Doe"),
                 enabled = true,
                 loading = false,
                 placeholder = null,
@@ -92,7 +93,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "John Doe",
+                value = TextFieldValue("John Doe"),
                 enabled = true,
                 loading = false,
                 placeholder = null,
@@ -111,7 +112,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "John Doe",
+                value = TextFieldValue("John Doe"),
                 enabled = true,
                 loading = false,
                 placeholder = null,
@@ -142,7 +143,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Card number",
-                value = "4000 0025 0000 1001",
+                value = TextFieldValue("4000 0025 0000 1001"),
                 enabled = true,
                 loading = false,
                 placeholder = null,
@@ -173,7 +174,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "",
+                value = TextFieldValue(""),
                 enabled = true,
                 loading = false,
                 placeholder = null,
@@ -189,7 +190,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "John Doe",
+                value = TextFieldValue("John Doe"),
                 enabled = false,
                 loading = false,
                 placeholder = null,
@@ -205,7 +206,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "",
+                value = TextFieldValue(""),
                 enabled = true,
                 loading = false,
                 placeholder = "Search for someone...",
@@ -221,7 +222,7 @@ class TextFieldUiScreenshotTest {
         paparazziRule.snapshot {
             TextFieldUi(
                 label = "Search",
-                value = "",
+                value = TextFieldValue(""),
                 enabled = false,
                 loading = false,
                 placeholder = "Search for someone...",

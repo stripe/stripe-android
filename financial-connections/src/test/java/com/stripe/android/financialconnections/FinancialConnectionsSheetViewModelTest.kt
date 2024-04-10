@@ -2,9 +2,8 @@ package com.stripe.android.financialconnections
 
 import android.content.Intent
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -29,11 +28,13 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
+import com.stripe.android.financialconnections.presentation.withState
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TestRule
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -47,7 +48,7 @@ import org.mockito.kotlin.whenever
 class FinancialConnectionsSheetViewModelTest {
 
     @get:Rule
-    val mavericksRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val rule: TestRule = CoroutineTestRule(UnconfinedTestDispatcher())
 
     private val eventReporter = mock<FinancialConnectionsEventReporter>()
     private val configuration = FinancialConnectionsSheet.Configuration(
@@ -65,7 +66,8 @@ class FinancialConnectionsSheetViewModelTest {
     private val synchronizeFinancialConnectionsSession =
         mock<SynchronizeFinancialConnectionsSession>()
     private val defaultInitialState = FinancialConnectionsSheetState(
-        FinancialConnectionsSheetActivityArgs.ForData(configuration)
+        args = FinancialConnectionsSheetActivityArgs.ForData(configuration),
+        savedState = null
     )
 
     @Test
@@ -163,9 +165,7 @@ class FinancialConnectionsSheetViewModelTest {
             withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
-                assertThat(viewEffect.result).isEqualTo(
-                    Completed(linkedAccountId = linkedAccountId)
-                )
+                assertThat(viewEffect.result).isEqualTo(Completed(linkedAccountId = linkedAccountId))
             }
         }
     }
@@ -232,7 +232,6 @@ class FinancialConnectionsSheetViewModelTest {
             // end auth flow
             viewModel.handleOnNewIntent(cancelIntent())
 
-            // Then
             withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 assertThat(it.viewEffect).isEqualTo(FinishWithResult(Canceled))
@@ -401,7 +400,6 @@ class FinancialConnectionsSheetViewModelTest {
             viewModel.handleOnNewIntent(successIntent())
 
             // Then
-            // Then
             withState(viewModel) {
                 assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
                 val viewEffect = it.viewEffect as FinishWithResult
@@ -476,7 +474,7 @@ class FinancialConnectionsSheetViewModelTest {
             val viewModel = createViewModel(defaultInitialState)
 
             // Then
-            withState(viewModel) { assertThat(it.manifest).isEqualTo(syncResponse.manifest) }
+            assertThat(viewModel.stateFlow.value.manifest).isEqualTo(syncResponse.manifest)
         }
     }
 
@@ -517,6 +515,8 @@ class FinancialConnectionsSheetViewModelTest {
             nativeRouter = mock(),
             analyticsTracker = analyticsTracker,
             browserManager = browserManager,
+            savedStateHandle = SavedStateHandle(),
+            nativeAuthFlowCoordinator = mock(),
             logger = Logger.noop()
         )
     }

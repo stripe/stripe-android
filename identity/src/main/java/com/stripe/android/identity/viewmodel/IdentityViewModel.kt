@@ -12,6 +12,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MediatorLiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.Observer
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -24,7 +25,6 @@ import com.stripe.android.camera.framework.image.longerEdge
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.model.StripeFilePurpose
-import com.stripe.android.core.networking.AnalyticsRequestV2
 import com.stripe.android.identity.IdentityVerificationSheetContract
 import com.stripe.android.identity.analytics.AnalyticsState
 import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
@@ -82,6 +82,7 @@ import com.stripe.android.identity.networking.models.VerificationPageStaticConte
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentSelfieCapturePage
 import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.MBDetector
 import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
@@ -371,6 +372,16 @@ internal class IdentityViewModel constructor(
      * LiveData for the cause of ErrorScreen.
      */
     val errorCause = MutableLiveData<Throwable>()
+    private val errorCauseObServer = Observer<Throwable> { value -> logError(value) }
+
+    init {
+        errorCause.observeForever(errorCauseObServer)
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        errorCause.removeObserver(errorCauseObServer)
+    }
 
     /**
      * Upload high_res of an image Uri manually picked from local file storage or taken from camera.
@@ -411,110 +422,210 @@ internal class IdentityViewModel constructor(
         verificationPage: VerificationPage
     ) {
         when (result.result) {
-            is IDDetectorOutput -> {
-                val originalBitmap = result.frame.cameraPreviewImage.image
-                val boundingBox = result.result.boundingBox
-                val scores = result.result.allScores
-
-                val isFront: Boolean
-                val targetScanType: IdentityScanState.ScanType
-
-                when (result.result.category) {
-                    Category.PASSPORT -> {
-                        isFront = true
-                        targetScanType = IdentityScanState.ScanType.DOC_FRONT
-                    }
-
-                    Category.ID_FRONT -> {
-                        isFront = true
-                        targetScanType = IdentityScanState.ScanType.DOC_FRONT
-                    }
-
-                    Category.ID_BACK -> {
-                        isFront = false
-                        targetScanType = IdentityScanState.ScanType.DOC_BACK
-                    }
-
-                    else -> {
-                        Log.e(TAG, "incorrect category: ${result.result.category}")
-                        throw IllegalStateException("incorrect targetScanType: ${result.result.category}")
-                    }
-                }
-                // upload high res
-                processDocumentScanResultAndUpload(
-                    originalBitmap,
-                    boundingBox,
-                    verificationPage.documentCapture,
-                    isHighRes = true,
-                    isFront = isFront,
-                    scores,
-                    targetScanType
+            is IDDetectorOutput.Legacy -> {
+                uploadLegacyIDDetectorOutput(
+                    result.frame.cameraPreviewImage.image,
+                    result.result,
+                    verificationPage
                 )
+            }
 
-                // upload low res
-                processDocumentScanResultAndUpload(
-                    originalBitmap,
-                    boundingBox,
-                    verificationPage.documentCapture,
-                    isHighRes = false,
-                    isFront = isFront,
-                    scores,
-                    targetScanType
+            is IDDetectorOutput.Modern -> {
+                uploadModernIDDetectorOutput(
+                    result.frame.cameraPreviewImage.image,
+                    result.result,
+                    verificationPage
                 )
             }
 
             is FaceDetectorOutput -> {
-                val filteredFrames =
-                    (result.identityState.transitioner as FaceDetectorTransitioner).filteredFrames
-                require(filteredFrames.size == FaceDetectorTransitioner.NUM_FILTERED_FRAMES) {
-                    "FaceDetectorTransitioner incorrectly collected ${filteredFrames.size} frames " +
-                        "instead of ${FaceDetectorTransitioner.NUM_FILTERED_FRAMES} frames"
-                }
-
-                listOf(
-                    (FaceDetectorTransitioner.Selfie.FIRST),
-                    (FaceDetectorTransitioner.Selfie.BEST),
-                    (FaceDetectorTransitioner.Selfie.LAST)
-                ).forEach { selfie ->
-                    listOf(true, false).forEach { isHighRes ->
-                        processSelfieScanResultAndUpload(
-                            originalBitmap = filteredFrames[selfie.index].first.cameraPreviewImage.image,
-                            boundingBox = filteredFrames[selfie.index].second.boundingBox,
-                            selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
-                            isHighRes = isHighRes,
-                            selfie = selfie
-                        )
-                    }
-                }
+                uploadFaceDetectorOutput(
+                    result,
+                    verificationPage
+                )
             }
         }
     }
+
+    private fun uploadLegacyIDDetectorOutput(
+        originalBitmap: Bitmap,
+        legacyOutput: IDDetectorOutput.Legacy,
+        verificationPage: VerificationPage
+    ) {
+        val scores = legacyOutput.allScores
+
+        val isFront: Boolean
+        val targetScanType: IdentityScanState.ScanType
+
+        when (legacyOutput.category) {
+            Category.PASSPORT -> {
+                isFront = true
+                targetScanType = IdentityScanState.ScanType.DOC_FRONT
+            }
+
+            Category.ID_FRONT -> {
+                isFront = true
+                targetScanType = IdentityScanState.ScanType.DOC_FRONT
+            }
+
+            Category.ID_BACK -> {
+                isFront = false
+                targetScanType = IdentityScanState.ScanType.DOC_BACK
+            }
+
+            else -> {
+                Log.e(TAG, "incorrect category: ${legacyOutput.category}")
+                throw IllegalStateException("incorrect targetScanType: ${legacyOutput.category}")
+            }
+        }
+
+        // upload high res
+        processAndUploadBitmap(
+            bitmapToUpload = cropBitmapToUpload(
+                originalBitmap,
+                legacyOutput.boundingBox,
+                verificationPage
+            ),
+            docCapturePage = verificationPage.documentCapture,
+            isHighRes = true,
+            isFront = isFront,
+            scores = scores,
+            targetScanType = targetScanType
+        )
+
+        // upload low res
+        processAndUploadBitmap(
+            bitmapToUpload = originalBitmap,
+            docCapturePage = verificationPage.documentCapture,
+            isHighRes = false,
+            isFront = isFront,
+            scores = scores,
+            targetScanType = targetScanType
+        )
+    }
+
+    private fun uploadModernIDDetectorOutput(
+        originalBitmap: Bitmap,
+        modernOutput: IDDetectorOutput.Modern,
+        verificationPage: VerificationPage
+    ) {
+        val scores = modernOutput.allScores
+        val isFront: Boolean
+        val targetScanType: IdentityScanState.ScanType
+
+        when (modernOutput.category) {
+            Category.PASSPORT -> {
+                isFront = true
+                targetScanType = IdentityScanState.ScanType.DOC_FRONT
+            }
+
+            Category.ID_FRONT -> {
+                isFront = true
+                targetScanType = IdentityScanState.ScanType.DOC_FRONT
+            }
+
+            Category.ID_BACK -> {
+                isFront = false
+                targetScanType = IdentityScanState.ScanType.DOC_BACK
+            }
+
+            else -> {
+                Log.e(TAG, "incorrect category: ${modernOutput.category}")
+                throw IllegalStateException("incorrect targetScanType: ${modernOutput.category}")
+            }
+        }
+
+        val hasMBDetectorOutput = modernOutput.mbOutput is MBDetector.DetectorResult.Captured
+
+        identityAnalyticsRequestFactory.mbCaptureStatus(capturedByMb = hasMBDetectorOutput)
+
+        processAndUploadBitmap(
+            bitmapToUpload =
+            if (hasMBDetectorOutput) {
+                (modernOutput.mbOutput as MBDetector.DetectorResult.Captured).transformed
+            } else {
+                cropBitmapToUpload(
+                    originalBitmap,
+                    modernOutput.boundingBox,
+                    verificationPage
+                )
+            },
+            docCapturePage = verificationPage.documentCapture,
+            isHighRes = true,
+            isFront = isFront,
+            scores = scores,
+            targetScanType = targetScanType
+        )
+
+        processAndUploadBitmap(
+            bitmapToUpload =
+            if (hasMBDetectorOutput) {
+                (modernOutput.mbOutput as MBDetector.DetectorResult.Captured).original
+            } else {
+                originalBitmap
+            },
+            docCapturePage = verificationPage.documentCapture,
+            isHighRes = false,
+            isFront = isFront,
+            scores = scores,
+            targetScanType = targetScanType
+        )
+    }
+
+    private fun uploadFaceDetectorOutput(
+        result: IdentityAggregator.FinalResult,
+        verificationPage: VerificationPage
+    ) {
+        val filteredFrames =
+            (result.identityState.transitioner as FaceDetectorTransitioner).filteredFrames
+        require(filteredFrames.size == FaceDetectorTransitioner.NUM_FILTERED_FRAMES) {
+            "FaceDetectorTransitioner incorrectly collected ${filteredFrames.size} frames " +
+                "instead of ${FaceDetectorTransitioner.NUM_FILTERED_FRAMES} frames"
+        }
+
+        listOf(
+            (FaceDetectorTransitioner.Selfie.FIRST),
+            (FaceDetectorTransitioner.Selfie.BEST),
+            (FaceDetectorTransitioner.Selfie.LAST)
+        ).forEach { selfie ->
+            listOf(true, false).forEach { isHighRes ->
+                processSelfieScanResultAndUpload(
+                    originalBitmap = filteredFrames[selfie.index].first.cameraPreviewImage.image,
+                    boundingBox = filteredFrames[selfie.index].second.boundingBox,
+                    selfieCapturePage = requireNotNull(verificationPage.selfieCapture),
+                    isHighRes = isHighRes,
+                    selfie = selfie
+                )
+            }
+        }
+    }
+
+    private fun cropBitmapToUpload(
+        originalBitmap: Bitmap,
+        boundingBox: BoundingBox,
+        verificationPage: VerificationPage
+    ) =
+        identityIO.cropAndPadBitmap(
+            originalBitmap,
+            boundingBox,
+            originalBitmap.longerEdge() * verificationPage.documentCapture.highResImageCropPadding
+        )
 
     /**
      * Processes document scan result by cropping and padding the bitmap if necessary,
      * then upload the processed file.
      */
     @VisibleForTesting
-    internal fun processDocumentScanResultAndUpload(
-        originalBitmap: Bitmap,
-        boundingBox: BoundingBox,
+    internal fun processAndUploadBitmap(
+        bitmapToUpload: Bitmap,
         docCapturePage: VerificationPageStaticContentDocumentCapturePage,
         isHighRes: Boolean,
         isFront: Boolean,
         scores: List<Float>,
-        targetScanType: IdentityScanState.ScanType
+        targetScanType: IdentityScanState.ScanType,
     ) {
         identityIO.resizeBitmapAndCreateFileToUpload(
-            bitmap =
-            if (isHighRes) {
-                identityIO.cropAndPadBitmap(
-                    originalBitmap,
-                    boundingBox,
-                    originalBitmap.longerEdge() * docCapturePage.highResImageCropPadding
-                )
-            } else {
-                originalBitmap
-            },
+            bitmap = bitmapToUpload,
             verificationId = verificationArgs.verificationSessionId,
             fileName =
             StringBuilder().also { nameBuilder ->
@@ -598,15 +709,13 @@ internal class IdentityViewModel constructor(
                 ) to uploadTime
             }.fold(
                 onSuccess = { fileTimePair ->
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.imageUpload(
-                            value = fileTimePair.second,
-                            compressionQuality = compressionQuality,
-                            scanType = scanType,
-                            id = fileTimePair.first.id,
-                            fileName = fileTimePair.first.filename,
-                            fileSize = imageFile.length() / BYTES_IN_KB
-                        )
+                    identityAnalyticsRequestFactory.imageUpload(
+                        value = fileTimePair.second,
+                        compressionQuality = compressionQuality,
+                        scanType = scanType,
+                        id = fileTimePair.first.id,
+                        fileName = fileTimePair.first.filename,
+                        fileSize = imageFile.length() / BYTES_IN_KB
                     )
 
                     updateAnalyticsState { oldState ->
@@ -631,7 +740,7 @@ internal class IdentityViewModel constructor(
                                 fileTimePair.first,
                                 scores,
                                 uploadMethod
-                            )
+                            ),
                         )
                     }
                 },
@@ -743,15 +852,13 @@ internal class IdentityViewModel constructor(
                 ) to uploadTime
             }.fold(
                 onSuccess = { fileTimePair ->
-                    identityRepository.sendAnalyticsRequest(
-                        identityAnalyticsRequestFactory.imageUpload(
-                            value = fileTimePair.second,
-                            compressionQuality = compressionQuality,
-                            scanType = IdentityScanState.ScanType.SELFIE,
-                            id = fileTimePair.first.id,
-                            fileName = fileTimePair.first.filename,
-                            fileSize = imageFile.length() / BYTES_IN_KB
-                        )
+                    identityAnalyticsRequestFactory.imageUpload(
+                        value = fileTimePair.second,
+                        compressionQuality = compressionQuality,
+                        scanType = IdentityScanState.ScanType.SELFIE,
+                        id = fileTimePair.first.id,
+                        fileName = fileTimePair.first.filename,
+                        fileSize = imageFile.length() / BYTES_IN_KB
                     )
                     _selfieUploadedState.updateStateAndSave { currentState ->
                         currentState.update(
@@ -1203,20 +1310,10 @@ internal class IdentityViewModel constructor(
         }
     }
 
-    fun sendAnalyticsRequest(request: AnalyticsRequestV2) {
-        viewModelScope.launch {
-            identityRepository.sendAnalyticsRequest(
-                request
-            )
-        }
-    }
-
     fun trackScreenPresented(scanType: IdentityScanState.ScanType?, screenName: String) {
-        sendAnalyticsRequest(
-            identityAnalyticsRequestFactory.screenPresented(
-                scanType = scanType,
-                screenName = screenName
-            )
+        identityAnalyticsRequestFactory.screenPresented(
+            scanType = scanType,
+            screenName = screenName
         )
     }
 
@@ -1233,22 +1330,20 @@ internal class IdentityViewModel constructor(
     fun sendSucceededAnalyticsRequestForNative() {
         viewModelScope.launch {
             analyticsState.collectLatest { latestState ->
-                identityRepository.sendAnalyticsRequest(
-                    identityAnalyticsRequestFactory.verificationSucceeded(
-                        isFromFallbackUrl = false,
-                        scanType = latestState.scanType,
-                        requireSelfie = latestState.requireSelfie,
-                        docFrontRetryTimes = latestState.docFrontRetryTimes,
-                        docBackRetryTimes = latestState.docBackRetryTimes,
-                        selfieRetryTimes = latestState.selfieRetryTimes,
-                        docFrontUploadType = latestState.docFrontUploadType,
-                        docBackUploadType = latestState.docBackUploadType,
-                        docFrontModelScore = latestState.docFrontModelScore,
-                        docBackModelScore = latestState.docBackModelScore,
-                        selfieModelScore = latestState.selfieModelScore,
-                        docFrontBlurScore = latestState.docFrontBlurScore,
-                        docBackBlurScore = latestState.docBackBlurScore
-                    )
+                identityAnalyticsRequestFactory.verificationSucceeded(
+                    isFromFallbackUrl = false,
+                    scanType = latestState.scanType,
+                    requireSelfie = latestState.requireSelfie,
+                    docFrontRetryTimes = latestState.docFrontRetryTimes,
+                    docBackRetryTimes = latestState.docBackRetryTimes,
+                    selfieRetryTimes = latestState.selfieRetryTimes,
+                    docFrontUploadType = latestState.docFrontUploadType,
+                    docBackUploadType = latestState.docBackUploadType,
+                    docFrontModelScore = latestState.docFrontModelScore,
+                    docBackModelScore = latestState.docBackModelScore,
+                    selfieModelScore = latestState.selfieModelScore,
+                    docFrontBlurScore = latestState.docFrontBlurScore,
+                    docBackBlurScore = latestState.docBackBlurScore
                 )
             }
         }
@@ -1336,16 +1431,12 @@ internal class IdentityViewModel constructor(
     ) {
         cameraPermissionEnsureable.ensureCameraPermission(
             onCameraReady = {
-                sendAnalyticsRequest(
-                    identityAnalyticsRequestFactory.cameraPermissionGranted()
-                )
+                identityAnalyticsRequestFactory.cameraPermissionGranted()
                 _cameraPermissionGranted.update { true }
                 navController.navigateTo(DocumentScanDestination)
             },
             onUserDeniedCameraPermission = {
-                sendAnalyticsRequest(
-                    identityAnalyticsRequestFactory.cameraPermissionDenied()
-                )
+                identityAnalyticsRequestFactory.cameraPermissionDenied()
                 _cameraPermissionGranted.update { false }
                 navController.navigateTo(CameraPermissionDeniedDestination)
             }
@@ -1710,6 +1801,13 @@ internal class IdentityViewModel constructor(
 
     fun visitedIndividualWelcome() {
         _visitedIndividualWelcomeScreen.updateStateAndSave { true }
+    }
+
+    private fun logError(cause: Throwable) {
+        identityAnalyticsRequestFactory.genericError(
+            cause.message,
+            cause.stackTraceToString()
+        )
     }
 
     private fun <State> MutableStateFlow<State>.updateStateAndSave(function: (State) -> State) {

@@ -9,6 +9,7 @@ import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
 import org.junit.After
@@ -21,10 +22,11 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
 
     private val testParams = TestParameters.create(
         paymentMethodCode = "card",
-    ).copy(
+    ) { settings ->
+        settings[PaymentMethodOrderSettingsDefinition] = "card,klarna,p24,eps"
+    }.copy(
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,
-        snapshotReturningCustomer = true,
     )
 
     private val colors = PaymentSheet.Colors(
@@ -81,7 +83,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Test
     fun testPaymentSheetNewCustomer() {
         testDriver.screenshotRegression(
-            testParams.copy()
+            testParams
         )
     }
 

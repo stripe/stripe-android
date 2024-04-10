@@ -12,7 +12,7 @@ import java.util.Objects
 abstract class StripeException(
     val stripeError: StripeError? = null,
     val requestId: String? = null,
-    val statusCode: Int = 0,
+    val statusCode: Int = DEFAULT_STATUS_CODE,
     cause: Throwable? = null,
     message: String? = stripeError?.message
 ) : Exception(message, cause) {
@@ -50,6 +50,10 @@ abstract class StripeException(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        const val DEFAULT_STATUS_CODE = 0
+
         fun create(throwable: Throwable): StripeException {
             return when (throwable) {
                 is StripeException -> throwable
@@ -59,7 +63,7 @@ abstract class StripeException(
                     message = throwable.message,
                     cause = throwable
                 )
-                else -> APIException(throwable)
+                else -> GenericStripeException(throwable)
             }
         }
     }

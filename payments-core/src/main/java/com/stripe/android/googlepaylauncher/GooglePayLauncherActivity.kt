@@ -13,6 +13,7 @@ import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
@@ -89,7 +90,12 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     private fun onGooglePayResult(taskResult: ApiTaskResult<PaymentData>) {
         when (taskResult.status.statusCode) {
             CommonStatusCodes.SUCCESS -> {
-                onGooglePayResult(taskResult.result!!)
+                val paymentDataJson = JSONObject(taskResult.result!!.toJson())
+                val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
+                val host = AuthActivityStarterHost.create(this)
+                lifecycleScope.launch {
+                    viewModel.confirmStripeIntent(host, params)
+                }
             }
 
             CommonStatusCodes.CANCELED -> {
@@ -113,7 +119,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 viewModel.updateResult(
                     GooglePayLauncher.Result.Failed(
                         RuntimeException(
-                            "Google Pay returned an expected result code."
+                            "Google Pay returned an unexpected result code."
                         )
                     )
                 )
@@ -133,16 +139,6 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 requestCode,
                 data ?: Intent()
             )
-        }
-    }
-
-    private fun onGooglePayResult(paymentData: PaymentData) {
-        val paymentDataJson = JSONObject(paymentData.toJson())
-
-        val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
-        val host = AuthActivityStarterHost.create(this)
-        lifecycleScope.launch {
-            viewModel.confirmStripeIntent(host, params)
         }
     }
 

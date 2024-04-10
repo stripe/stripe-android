@@ -72,6 +72,7 @@ import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.verifyNoMoreInteractions
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.net.UnknownHostException
 import java.util.Calendar
@@ -558,7 +559,7 @@ internal class StripeApiRepositoryTest {
                 create().confirmPaymentIntent(
                     confirmPaymentIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -601,7 +602,7 @@ internal class StripeApiRepositoryTest {
                 create(setOf(productUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -610,6 +611,76 @@ internal class StripeApiRepositoryTest {
                 apiRequest.params?.get(ConfirmStripeIntentParams.PARAM_PAYMENT_METHOD_DATA) as Map<*, *>
             assertThat(paymentMethodDataParams["payment_user_agent"])
                 .isEqualTo("stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage")
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.PaymentIntentConfirm,
+                productUsage = listOf(productUsage),
+            )
+        }
+
+    @Test
+    fun confirmPaymentIntent_sendsErrorMessageAnalytic() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "pi_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    throw IOException()
+                }
+
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmPaymentIntent(
+                    confirmPaymentIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.PaymentIntentConfirm,
+                productUsage = listOf(productUsage),
+                errorMessage = "ioException",
+            )
+        }
+
+    @Test
+    fun confirmPaymentIntent_sendsErrorMessageAnalyticForResponseError() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "pi_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    StripeResponse(
+                        code = 500,
+                        body = "An internal error has occurred"
+                    )
+                }
+
+            val confirmPaymentIntentParams =
+                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmPaymentIntent(
+                    confirmPaymentIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.PaymentIntentConfirm,
+                productUsage = listOf(productUsage),
+                errorMessage = "apiError",
+            )
         }
 
     @Test
@@ -641,7 +712,7 @@ internal class StripeApiRepositoryTest {
                 create(setOf(stripeApiRequestProductUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -685,7 +756,7 @@ internal class StripeApiRepositoryTest {
                 create(setOf(productUsage)).confirmPaymentIntent(
                     confirmPaymentIntentParams,
                     ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-                )
+                ).getOrNull()
             )
 
             verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
@@ -763,6 +834,80 @@ internal class StripeApiRepositoryTest {
                 .isEqualTo(
                     "stripe-android/${StripeSdkVersion.VERSION_NAME};$productUsage"
                 )
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.SetupIntentConfirm,
+                productUsage = listOf(productUsage),
+            )
+        }
+
+    @Test
+    fun confirmSetupIntent_sendsErrorMessageAnalytic() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "seti_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    throw IOException()
+                }
+
+            val confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmSetupIntent(
+                    confirmSetupIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.SetupIntentConfirm,
+                productUsage = listOf(productUsage),
+                errorMessage = "ioException",
+            )
+        }
+
+    @Test
+    fun confirmSetupIntent_sendsErrorMessageAnalyticForResponseError() =
+        runTest {
+            // put a private key here to simulate the backend
+            val clientSecret = "seti_12345_secret_fake"
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenAnswer {
+                    StripeResponse(
+                        code = 500,
+                        body = "An internal error has occurred"
+                    )
+                }
+
+            val confirmSetupIntentParams =
+                ConfirmSetupIntentParams.create(
+                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                    clientSecret
+                )
+
+            val productUsage = "TestProductUsage"
+            requireNotNull(
+                create(setOf(productUsage)).confirmSetupIntent(
+                    confirmSetupIntentParams,
+                    ApiRequest.Options(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+                )
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+
+            verifyAnalyticsRequest(
+                event = PaymentAnalyticsEvent.SetupIntentConfirm,
+                productUsage = listOf(productUsage),
+                errorMessage = "apiError",
+            )
         }
 
     @Test
@@ -825,7 +970,7 @@ internal class StripeApiRepositoryTest {
                 stripeApiRepository.confirmPaymentIntent(
                     confirmPaymentIntentParams,
                     ApiRequest.Options(publishableKey)
-                )
+                ).getOrNull()
             )
         }
 
@@ -1731,6 +1876,60 @@ internal class StripeApiRepositoryTest {
         }
 
     @Test
+    fun `createPaymentDetails() for card with card brand choice sends all parameters`() =
+        runTest {
+            val stripeResponse = StripeResponse(
+                200,
+                ConsumerFixtures.CONSUMER_SINGLE_CARD_PAYMENT_DETAILS_JSON.toString(),
+                emptyMap()
+            )
+            whenever(stripeNetworkClient.executeRequest(any<ApiRequest>()))
+                .thenReturn(stripeResponse)
+
+            val clientSecret = "secret"
+            val email = "email@stripe.com"
+            val paymentDetailsCreateParams = ConsumerPaymentDetailsCreateParams.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD.copy(
+                    card = PaymentMethodCreateParamsFixtures.DEFAULT_CARD.card?.copy(
+                        networks = PaymentMethodCreateParams.Card.Networks(
+                            preferred = "cartes_bancaires"
+                        )
+                    )
+                ).toParamMap(),
+                email
+            )
+            create().createPaymentDetails(
+                clientSecret,
+                paymentDetailsCreateParams,
+                DEFAULT_OPTIONS,
+                false,
+            )
+
+            verify(stripeNetworkClient).executeRequest(apiRequestArgumentCaptor.capture())
+            val params = requireNotNull(apiRequestArgumentCaptor.firstValue.params)
+
+            with(params) {
+                assertEquals(this["request_surface"], "android_payment_element")
+                withNestedParams("credentials") {
+                    assertEquals(this["consumer_session_client_secret"], clientSecret)
+                }
+                assertEquals(this["active"], false)
+                assertEquals(this["type"], "card")
+                assertEquals(this["billing_email_address"], email)
+                withNestedParams("billing_address") {
+                    assertEquals(this["country_code"], "US")
+                    assertEquals(this["postal_code"], "94111")
+                }
+                withNestedParams("card") {
+                    assertEquals(this["number"], "4242424242424242")
+                    assertEquals(this["exp_month"], 1)
+                    assertEquals(this["exp_year"], 2054)
+                    assertEquals(this["preferred_network"], "cartes_bancaires")
+                }
+            }
+        }
+
+    @Test
     fun `sharePaymentDetails() sends all parameters`() =
         runTest {
             val stripeResponse = StripeResponse(
@@ -2228,6 +2427,7 @@ internal class StripeApiRepositoryTest {
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = listOf("card", "link"),
+                    paymentMethodConfigurationId = "pmc_234",
                     onBehalfOf = null,
                 )
             ),
@@ -2254,6 +2454,7 @@ internal class StripeApiRepositoryTest {
             assertEquals("automatic", this["deferred_intent[capture_method]"])
             assertEquals("card", this["deferred_intent[payment_method_types][0]"])
             assertEquals("link", this["deferred_intent[payment_method_types][1]"])
+            assertEquals("pmc_234", this["deferred_intent[payment_method_configuration][id]"])
         }
     }
 
@@ -2335,13 +2536,15 @@ internal class StripeApiRepositoryTest {
 
     private fun verifyAnalyticsRequest(
         event: PaymentAnalyticsEvent,
-        productUsage: List<String>? = null
+        productUsage: List<String>? = null,
+        errorMessage: String? = null
     ) {
         verify(analyticsRequestExecutor)
             .executeAsync(analyticsRequestArgumentCaptor.capture())
 
         val analyticsRequest = analyticsRequestArgumentCaptor.firstValue
         val analyticsParams = analyticsRequest.params
+
         assertEquals(
             event.toString(),
             analyticsParams["event"]
@@ -2350,6 +2553,11 @@ internal class StripeApiRepositoryTest {
         assertEquals(
             productUsage,
             analyticsParams["product_usage"]
+        )
+
+        assertEquals(
+            errorMessage,
+            analyticsParams["error_message"]
         )
     }
 

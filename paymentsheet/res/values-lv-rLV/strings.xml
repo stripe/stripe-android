@@ -26,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">saglabāt adresi</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Piegādes adrese</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Trīs darba dienu laikā uz adresi %s tiks nosūtīts e-pasta ziņojums, lai apstiprinātu šī debitēšanas rīkojuma izveidi.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Apstipriniet tiešā debeta informāciju</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Modificēt informāciju</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Turklāt jūs e-pastā divas dienas iepriekš saņemsiet brīdinājumu par jebkādām debeta darbībām saistībā ar šo pieprasījumu. Bankas konta pārskatos šie maksājumi tiks rādīti ar atzīmi „%s”.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Jūsu maksājumus aizsargā %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Izvēlēties maksājuma veidu</string>
   <string name="stripe_paymentsheet_close">Aizvērt</string>
@@ -37,10 +47,16 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Pārvaldīt savus maksājuma veidus</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe uz jūsu kontu 1-2 darbadienu laikā nosūtīs 0,01 $. Pēc tam saņemsiet e-pastu ar norādījumiem, kā pabeigt maksājumu ar %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Rediģēt %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Vai maksāt, izmantojot</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Vai maksāt ar karti</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Vai izmantojiet</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Vai izmantojiet karti</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Maksāt</string>
   <!-- Title shown above a section containing various payment options -->

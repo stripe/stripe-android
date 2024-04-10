@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Legg til betalingsmetode</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Lagre informasjonen min for sikker 1-klikk-utsjekking</string>
+  <string name="stripe_inline_sign_up_header">Lagre informasjonen din for sikker 1-klikk-utsjekking med Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Logg ut av Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Betal raskere hos %s og tusenvis av andre forhandlere.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Ved å bli med i Link, godtar du <terms>vilkårene</terms> og <privacy>personvernerklæringen</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Ved å oppgi e-postadressen din godtar du å opprette en Link-konto og lagre betalingsinformasjonen din hos Link i henhold til <terms>Links vilkår</terms> og <privacy>personvernerklæring</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Ved å oppgi telefonnummeret ditt godtar du å opprette en Link-konto og lagre betalingsinformasjonen din hos Link i henhold til <terms>Links vilkår</terms> og <privacy>personvernerklæring</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Endre e-post</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->

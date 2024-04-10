@@ -16,10 +16,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
+import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.elements.ParameterDestination
@@ -40,38 +41,28 @@ internal fun AddPaymentMethod(
     sheetViewModel: BaseSheetViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val context = LocalContext.current
-    val linkHandler = sheetViewModel.linkHandler
-    val showCheckboxFlow = remember { MutableStateFlow(false) }
-
-    val processing by sheetViewModel.processing.collectAsState(false)
-    val linkSignupMode by sheetViewModel.linkSignupMode.collectAsState()
-
     var selectedPaymentMethodCode: String by rememberSaveable {
         mutableStateOf(sheetViewModel.initiallySelectedPaymentMethodType)
     }
-
+    val supportedPaymentMethods: List<SupportedPaymentMethod> = sheetViewModel.supportedPaymentMethods
     val selectedItem = remember(selectedPaymentMethodCode) {
-        sheetViewModel.supportedPaymentMethods.first {
-            it.code == selectedPaymentMethodCode
-        }
+        sheetViewModel.supportedPaymentMethodForCode(selectedPaymentMethodCode)
     }
-
     val arguments = remember(selectedItem) {
         sheetViewModel.createFormArguments(selectedItem)
     }
-
-    val linkInlineSignupMode = remember(linkSignupMode, selectedPaymentMethodCode) {
-        linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
-    }
-
+    val showCheckboxFlow = remember { MutableStateFlow(false) }
     LaunchedEffect(arguments) {
         showCheckboxFlow.emit(arguments.showCheckbox)
     }
 
-    val stripeIntent = sheetViewModel.stripeIntent.collectAsState()
     val paymentSelection by sheetViewModel.selection.collectAsState()
-    val linkInlineSelection by linkHandler.linkInlineSelection.collectAsState()
+
+    val linkSignupMode by sheetViewModel.linkSignupMode.collectAsState()
+    val linkInlineSignupMode = remember(linkSignupMode, selectedPaymentMethodCode) {
+        linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
+    }
+    val linkInlineSelection by sheetViewModel.linkHandler.linkInlineSelection.collectAsState()
     var linkSignupState by remember {
         mutableStateOf<InlineSignupViewState?>(null)
     }
@@ -86,11 +77,14 @@ internal fun AddPaymentMethod(
         } else if (isUsingLinkInline) {
             sheetViewModel.updatePrimaryButtonForLinkInline()
         }
+
+        sheetViewModel.clearErrorMessages()
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
         CompositionLocalProvider(
-            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent
+            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent,
+            LocalCardNumberCompletedEventReporter provides sheetViewModel::reportCardNumberCompleted,
         ) {
             val initializationMode = (sheetViewModel as? PaymentSheetViewModel)
                 ?.args
@@ -98,12 +92,19 @@ internal fun AddPaymentMethod(
             val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf
+            val processing by sheetViewModel.processing.collectAsState(false)
+            val context = LocalContext.current
+            val paymentMethodMetadata by sheetViewModel.paymentMethodMetadata.collectAsState()
+            val stripeIntent = paymentMethodMetadata?.stripeIntent
+            val formElements = remember(selectedItem.code) {
+                sheetViewModel.formElementsForCode(selectedItem.code)
+            }
 
             PaymentElement(
-                formViewModelSubComponentBuilderProvider = sheetViewModel.formViewModelSubComponentBuilderProvider,
                 enabled = !processing,
-                supportedPaymentMethods = sheetViewModel.supportedPaymentMethods,
+                supportedPaymentMethods = supportedPaymentMethods,
                 selectedItem = selectedItem,
+                formElements = formElements,
                 linkSignupMode = linkInlineSignupMode,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
                 showCheckboxFlow = showCheckboxFlow,
@@ -120,9 +121,9 @@ internal fun AddPaymentMethod(
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
-                    isPaymentFlow = stripeIntent.value is PaymentIntent,
-                    stripeIntentId = stripeIntent.value?.id,
-                    clientSecret = stripeIntent.value?.clientSecret,
+                    isPaymentFlow = stripeIntent is PaymentIntent,
+                    stripeIntentId = stripeIntent?.id,
+                    clientSecret = stripeIntent?.clientSecret,
                     shippingDetails = sheetViewModel.config.shippingDetails,
                     draftPaymentSelection = sheetViewModel.newPaymentSelection,
                     onMandateTextChanged = sheetViewModel::updateMandateText,
@@ -133,28 +134,26 @@ internal fun AddPaymentMethod(
                     onError = sheetViewModel::onError
                 ),
                 onFormFieldValuesChanged = { formValues ->
-                    val newSelection = formValues?.transformToPaymentSelection(
-                        resources = context.resources,
-                        paymentMethod = selectedItem,
-                    )
-                    sheetViewModel.updateSelection(newSelection)
+                    paymentMethodMetadata?.let { paymentMethodMetadata ->
+                        val newSelection = formValues?.transformToPaymentSelection(
+                            resources = context.resources,
+                            paymentMethod = selectedItem,
+                            paymentMethodMetadata = paymentMethodMetadata,
+                        )
+                        sheetViewModel.updateSelection(newSelection)
+                    }
+                },
+                onInteractionEvent = {
+                    sheetViewModel.reportFieldInteraction(selectedPaymentMethodCode)
                 }
             )
         }
     }
 }
 
-private val BaseSheetViewModel.initiallySelectedPaymentMethodType: PaymentMethodCode
-    get() = when (val selection = newPaymentSelection) {
-        is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
-        is PaymentSelection.New.Card,
-        is PaymentSelection.New.USBankAccount,
-        is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
-        else -> supportedPaymentMethods.first().code
-    }
-
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(
-    paymentMethod: SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod,
+    paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
         fieldValuePairs = fieldValuePairs.filter { entry ->
@@ -163,7 +162,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
             entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
         },
         code = paymentMethod.code,
-        requiresMandate = paymentMethod.requiresMandate,
+        requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethod.code),
     )
 }
 
@@ -191,9 +190,10 @@ internal fun FormFieldValues.transformToExtraParams(
 
 internal fun FormFieldValues.transformToPaymentSelection(
     resources: Resources,
-    paymentMethod: SupportedPaymentMethod
+    paymentMethod: SupportedPaymentMethod,
+    paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentSelection.New {
-    val params = transformToPaymentMethodCreateParams(paymentMethod)
+    val params = transformToPaymentMethodCreateParams(paymentMethod, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     val extras = transformToExtraParams(paymentMethod)
     return if (paymentMethod.code == PaymentMethod.Type.Card.code) {

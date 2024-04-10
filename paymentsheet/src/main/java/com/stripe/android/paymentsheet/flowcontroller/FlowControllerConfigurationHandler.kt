@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -84,7 +83,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        AnalyticsRequestFactory.regenerateSessionId()
+        viewModel.resetSession()
 
         paymentSheetLoader.load(initializationMode, configuration).fold(
             onSuccess = { state ->

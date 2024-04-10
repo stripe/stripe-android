@@ -1,6 +1,7 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -8,6 +9,7 @@ import com.stripe.android.core.StripeError
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.customersheet.CustomerAdapter.PaymentOption.Companion.toPaymentOption
 import com.stripe.android.customersheet.StripeCustomerAdapter.Companion.CACHED_CUSTOMER_MAX_AGE_MILLIS
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodUpdateParams
@@ -17,20 +19,18 @@ import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.utils.FakeCustomerRepository
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.test.assertFailsWith
@@ -41,12 +41,6 @@ class CustomerAdapterTest {
 
     private val application = ApplicationProvider.getApplicationContext<Application>()
     private val testDispatcher = UnconfinedTestDispatcher()
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.customerSheetACHv2,
-        isEnabled = true,
-    )
 
     @Before
     fun setup() {
@@ -152,6 +146,56 @@ class CustomerAdapterTest {
     }
 
     @Test
+    fun `retrievePaymentMethods filters with paymentMethodTypes`() = runTest {
+        val customerRepository = mock<CustomerRepository>()
+
+        whenever(customerRepository.getPaymentMethods(any(), any(), any())).thenReturn(Result.success(emptyList()))
+
+        val adapter = createAdapter(
+            customerRepository = customerRepository,
+            paymentMethodTypes = listOf("card"),
+        )
+        adapter.retrievePaymentMethods()
+        verify(customerRepository).getPaymentMethods(
+            customerInfo = any(),
+            types = eq(
+                listOf(
+                    PaymentMethod.Type.Card,
+                )
+            ),
+            silentlyFail = any(),
+        )
+    }
+
+    @Test
+    fun `retrievePaymentMethods returns failure with invalid paymentMethodTypes`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            ),
+            paymentMethodTypes = listOf("invalid_pm_type"),
+        )
+        val paymentMethods = adapter.retrievePaymentMethods()
+        assertThat(
+            paymentMethods.failureOrNull()?.cause
+        ).hasMessageThat().isEqualTo("Invalid payment method types provided (invalid_pm_type).")
+    }
+
+    @Test
+    fun `retrievePaymentMethods returns failure with unsupported paymentMethodTypes`() = runTest {
+        val adapter = createAdapter(
+            customerRepository = FakeCustomerRepository(
+                paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+            ),
+            paymentMethodTypes = listOf("klarna"),
+        )
+        val paymentMethods = adapter.retrievePaymentMethods()
+        assertThat(
+            paymentMethods.failureOrNull()?.cause
+        ).hasMessageThat().isEqualTo("Unsupported payment method types provided (klarna).")
+    }
+
+    @Test
     fun `retrievePaymentMethods requests US Bank Account payment methods`() = runTest {
         val customerRepository = mock<CustomerRepository>()
 
@@ -162,7 +206,7 @@ class CustomerAdapterTest {
         adapter.retrievePaymentMethods()
 
         verify(customerRepository).getPaymentMethods(
-            customerConfig = any(),
+            customerInfo = any(),
             types = eq(
                 listOf(
                     PaymentMethod.Type.Card,
@@ -713,16 +757,13 @@ class CustomerAdapterTest {
             }
         )
 
-        CustomerSessionViewModel(
-            application = application
-        ).createCustomerSessionComponent(
+        CustomerSheetHacks.initialize(
+            lifecycleOwner = TestLifecycleOwner(),
+            adapter = adapter,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
                 googlePayEnabled = true
             ),
-            customerAdapter = adapter,
-            callback = {},
-            statusBarColor = { null },
         )
 
         val result = adapter.retrieveSelectedPaymentOption()
@@ -745,16 +786,13 @@ class CustomerAdapterTest {
             }
         )
 
-        CustomerSessionViewModel(
-            application = application
-        ).createCustomerSessionComponent(
+        CustomerSheetHacks.initialize(
+            lifecycleOwner = TestLifecycleOwner(),
+            adapter = adapter,
             configuration = CustomerSheet.Configuration(
                 merchantDisplayName = "Example",
-                googlePayEnabled = false
+                googlePayEnabled = false,
             ),
-            customerAdapter = adapter,
-            callback = {},
-            statusBarColor = { null },
         )
 
         val result = adapter.retrieveSelectedPaymentOption()
@@ -781,12 +819,14 @@ class CustomerAdapterTest {
         customerRepository: CustomerRepository = FakeCustomerRepository(),
         prefsRepositoryFactory: (CustomerEphemeralKey) -> PrefsRepository = {
             FakePrefsRepository()
-        }
+        },
+        paymentMethodTypes: List<String>? = null,
     ): StripeCustomerAdapter {
         return StripeCustomerAdapter(
             context = application,
             customerEphemeralKeyProvider = customerEphemeralKeyProvider,
             setupIntentClientSecretProvider = setupIntentClientSecretProvider,
+            paymentMethodTypes = paymentMethodTypes,
             timeProvider = timeProvider,
             customerRepository = customerRepository,
             prefsRepositoryFactory = prefsRepositoryFactory,

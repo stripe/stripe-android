@@ -22,9 +22,15 @@ import com.stripe.android.utils.fadeOut
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
+    private val args: CustomerSheetContract.Args? by lazy {
+        CustomerSheetContract.Args.fromIntent(intent)
+    }
+
     // TODO (jameswoo) Figure out how to create real view model in CustomerSheetActivityTest
     @VisibleForTesting
-    internal var viewModelProvider: ViewModelProvider.Factory = CustomerSheetViewModel.Factory
+    internal var viewModelFactoryProducer: () -> ViewModelProvider.Factory = {
+        CustomerSheetViewModel.Factory(args!!)
+    }
 
     /**
      * TODO (jameswoo) verify that the [viewModels] delegate caches the right dependencies
@@ -34,15 +40,24 @@ internal class CustomerSheetActivity : AppCompatActivity() {
      * [CustomerSessionScope], which would make it out of sync with what the [viewModels]
      * implementation caches.
      */
-    private val viewModel: CustomerSheetViewModel by viewModels {
-        viewModelProvider
-    }
+    private val viewModel: CustomerSheetViewModel by viewModels(
+        factoryProducer = { viewModelFactoryProducer() },
+    )
 
     @OptIn(ExperimentalMaterialApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        if (args == null) {
+            finishWithResult(
+                InternalCustomerSheetResult.Error(
+                    exception = IllegalStateException("No CustomerSheetContract.Args provided"),
+                )
+            )
+            return
+        }
 
         viewModel.registerFromActivity(
             activityResultCaller = this,
@@ -83,7 +98,6 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                         viewState = viewState,
                         viewActionHandler = viewModel::handleViewAction,
                         paymentMethodNameProvider = viewModel::providePaymentMethodName,
-                        formViewModelSubComponentBuilderProvider = viewModel.formViewModelSubcomponentBuilderProvider,
                     )
                 }
             }

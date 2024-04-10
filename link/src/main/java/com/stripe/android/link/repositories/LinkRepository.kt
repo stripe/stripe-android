@@ -50,4 +50,9 @@ internal interface LinkRepository {
         last4: String,
         consumerSessionClientSecret: String,
     ): Result<LinkPaymentDetails>
+
+    suspend fun logOut(
+        consumerSessionClientSecret: String,
+        consumerAccountPublishableKey: String?,
+    ): Result<ConsumerSession>
 }

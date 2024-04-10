@@ -39,6 +39,7 @@ module:network-testing
 com.stripe.android.networktesting
 module:payments-core
 com.stripe.android
+com.stripe.android.analytics
 com.stripe.android.cards
 com.stripe.android.exception
 com.stripe.android.googlepaylauncher
@@ -52,6 +53,7 @@ com.stripe.android.payments
 com.stripe.android.payments.bankaccount
 com.stripe.android.payments.bankaccount.navigation
 com.stripe.android.payments.core
+com.stripe.android.payments.core.analytics
 com.stripe.android.payments.core.authentication
 com.stripe.android.payments.core.injection
 com.stripe.android.payments.financialconnections
@@ -74,13 +76,12 @@ com.stripe.android.ui.core.cbc
 com.stripe.android.ui.core.elements
 com.stripe.android.ui.core.elements.autocomplete
 com.stripe.android.ui.core.elements.autocomplete.model
+com.stripe.android.ui.core.elements.events
 com.stripe.android.ui.core.forms
 com.stripe.android.ui.core.forms.resources.injection
-com.stripe.android.ui.core.injection
 module:paymentsheet
+com.stripe.android
 com.stripe.android.customersheet
-com.stripe.android.lpmfoundations.luxe
-com.stripe.android.lpmfoundations.paymentmethod
 com.stripe.android.paymentsheet
 com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.injection
@@ -110,6 +111,7 @@ com.stripe.android.uicore.forms
 com.stripe.android.uicore.image
 com.stripe.android.uicore.strings
 com.stripe.android.uicore.text
+com.stripe.android.uicore.utils
 module:stripecardscan
 com.stripe.android.stripecardscan.cardimageverification
 com.stripe.android.stripecardscan.cardimageverification.exception

@@ -65,6 +65,30 @@ public final class com/stripe/android/uicore/address/StateSchema$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
+public final class com/stripe/android/uicore/elements/AddressType$Normal$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/AddressType$Normal;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/AddressType$Normal;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/uicore/elements/AddressType$ShippingCondensed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/AddressType$ShippingCondensed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/AddressType$ShippingCondensed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/uicore/elements/AddressType$ShippingExpanded$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/AddressType$ShippingExpanded;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/AddressType$ShippingExpanded;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
 	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
@@ -229,10 +253,6 @@ public final class com/stripe/android/uicore/image/ComposableSingletons$StripeIm
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/uicore/image/DrawablePainterKt {
-	public static final fun rememberDrawablePainter (Landroid/graphics/drawable/Drawable;Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
 }
 
 public final class com/stripe/android/uicore/text/EmbeddableImage$Bitmap : com/stripe/android/uicore/text/EmbeddableImage {

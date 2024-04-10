@@ -4,8 +4,9 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 internal data class EmailSetting(
-    override val selectedOption: String = ""
-) : SingleChoiceSetting<String>(
+    override val selectedOption: String = "",
+    override val key: String = "email",
+) : Saveable<String>, SingleChoiceSetting<String>(
     displayName = "Customer email",
     options = emptyList(),
     selectedOption = selectedOption
@@ -24,4 +25,7 @@ internal data class EmailSetting(
     ): List<Setting<*>> {
         return replace(currentSettings, this.copy(selectedOption = value))
     }
+
+    override fun convertToString(value: String): String = value
+    override fun convertToValue(value: String): String = value
 }

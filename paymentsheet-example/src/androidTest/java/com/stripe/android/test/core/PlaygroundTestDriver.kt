@@ -738,11 +738,15 @@ internal class PlaygroundTestDriver(
                 when (val authAction = testParameters.authorizationAction) {
                     is AuthorizeAction.DisplayQrCode -> {
                         if (checkoutMode != CheckoutMode.SETUP) {
-                            closeQrCodeButton.wait(5000)
+                            closeButton.wait(5000)
                             onView(withText("CLOSE")).perform(click())
                         }
                     }
 
+                    is AuthorizeAction.Authorize3ds2 -> {
+                        closeButton.wait(5000)
+                        UiAutomatorText("COMPLETE", device = device).click()
+                    }
                     is AuthorizeAction.AuthorizePayment -> {}
                     is AuthorizeAction.PollingSucceedsAfterDelay -> {
                         waitForPollingToFinish()
@@ -792,12 +796,8 @@ internal class PlaygroundTestDriver(
             }
         }
 
-        val isDone = testParameters.authorizationAction in setOf(
-            AuthorizeAction.AuthorizePayment,
-            AuthorizeAction.PollingSucceedsAfterDelay,
-            AuthorizeAction.DisplayQrCode,
-            null
-        )
+        val authAction = testParameters.authorizationAction
+        val isDone = authAction == null || authAction.isConsideredDone
 
         if (isDone) {
             waitForPlaygroundActivity()
@@ -806,6 +806,13 @@ internal class PlaygroundTestDriver(
     }
 
     private fun doUSBankAccountAuthorization() {
+        while (currentActivity[0]?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
         }
@@ -869,5 +876,7 @@ internal class PlaygroundTestDriver(
 
     private companion object {
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add"
+        const val FINANCIAL_CONNECTIONS_ACTIVITY =
+            "com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
     }
 }

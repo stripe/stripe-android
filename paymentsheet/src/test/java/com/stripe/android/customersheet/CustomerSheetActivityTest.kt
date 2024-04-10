@@ -8,8 +8,13 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.ApiKeyFixtures
+import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
@@ -20,10 +25,12 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
 import com.stripe.android.utils.injectableActivityScenario
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.verify
 import org.robolectric.annotation.Config
 import java.util.Stack
 
@@ -41,9 +48,20 @@ internal class CustomerSheetActivityTest {
     private val contract = CustomerSheetContract()
     private val intent = contract.createIntent(
         context = context,
-        input = CustomerSheetContract.Args
+        input = CustomerSheetContract.Args(
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true,
+            ),
+            statusBarColor = null,
+        ),
     )
     private val page = CustomerSheetPage(composeTestRule)
+
+    @Before
+    fun before() {
+        PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
+    }
 
     @Test
     fun `Finish with cancel on back press`() {
@@ -195,20 +213,49 @@ internal class CustomerSheetActivityTest {
         }
     }
 
+    @Test
+    fun `When add payment method screen is shown, should display form elements`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        runActivityScenario(
+            viewState = createAddPaymentMethodViewState(),
+            eventReporter = eventReporter,
+        ) {
+            page.waitForText("Card number")
+        }
+    }
+
+    @Test
+    fun `When card number is completed, should execute event`() {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        runActivityScenario(
+            viewState = createAddPaymentMethodViewState(),
+            eventReporter = eventReporter,
+        ) {
+            page.waitForText("Card number")
+            page.inputText("Card number", "4242424242424242")
+
+            verify(eventReporter).onCardNumberCompleted()
+        }
+    }
+
     private fun activityScenario(
         viewState: CustomerSheetViewState,
         savedPaymentSelection: PaymentSelection?,
+        eventReporter: CustomerSheetEventReporter = mock(),
     ): InjectableActivityScenario<CustomerSheetActivity> {
         val viewModel = createViewModel(
             initialBackStack = Stack<CustomerSheetViewState>().apply {
                 push(viewState)
             },
             savedPaymentSelection = savedPaymentSelection,
+            eventReporter = eventReporter
         )
 
         return injectableActivityScenario {
             injectActivity {
-                this.viewModelProvider = viewModelFactoryFor(viewModel)
+                this.viewModelFactoryProducer = { viewModelFactoryFor(viewModel) }
             }
         }
     }
@@ -218,11 +265,13 @@ internal class CustomerSheetActivityTest {
             isLiveMode = false,
         ),
         savedPaymentSelection: PaymentSelection? = null,
+        eventReporter: CustomerSheetEventReporter = mock(),
         testBlock: CustomerSheetTestData.() -> Unit,
     ) {
         activityScenario(
             viewState = viewState,
             savedPaymentSelection = savedPaymentSelection,
+            eventReporter = eventReporter,
         )
             .launchForResult(intent)
             .use { injectableActivityScenario ->
@@ -261,29 +310,37 @@ internal class CustomerSheetActivityTest {
             primaryButtonVisible = primaryButtonVisible,
             primaryButtonLabel = primaryButtonLabel,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            allowsRemovalOfLastSavedPaymentMethod = true,
         )
     }
 
     private fun createAddPaymentMethodViewState(
         paymentMethodCode: PaymentMethodCode = PaymentMethod.Type.Card.code,
         isLiveMode: Boolean = false,
-        formViewData: FormViewModel.ViewData = FormViewModel.ViewData(),
         enabled: Boolean = true,
         isProcessing: Boolean = false,
     ): CustomerSheetViewState.AddPaymentMethod {
+        val card = LpmRepositoryTestHelpers.card
+        val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
+            code = "card",
+            context = context,
+            paymentMethodCreateParams = null,
+            paymentMethodExtraParams = null,
+        )!!
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
-            supportedPaymentMethods = listOf(),
-            formViewData = formViewData,
+            supportedPaymentMethods = listOf(card),
+            formViewData = FormViewModel.ViewData(
+                elements = cardFormElements,
+            ),
             formArguments = FormArguments(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
                 showCheckbox = false,
-                showCheckboxControlledFields = false,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = ""
             ),
             usBankAccountFormArguments = mock(),
-            selectedPaymentMethod = mock(),
+            selectedPaymentMethod = card,
             enabled = enabled,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,

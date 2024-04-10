@@ -62,7 +62,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             override fun onKeyError(
                 operationId: String,
                 errorCode: Int,
-                errorMessage: String
+                errorMessage: String,
+                throwable: Throwable,
             ) {
                 val updateListener = updateListeners.remove(operationId)
                 val retrievalListener = retrievalListeners.remove(operationId)

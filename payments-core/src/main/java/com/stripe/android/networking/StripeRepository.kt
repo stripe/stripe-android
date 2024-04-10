@@ -291,6 +291,13 @@ interface StripeRepository {
         requestOptions: ApiRequest.Options
     ): Result<String>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun logOut(
+        consumerSessionClientSecret: String,
+        consumerAccountPublishableKey: String?,
+        requestOptions: ApiRequest.Options,
+    ): Result<ConsumerSession>
+
     // ACHv2 endpoints
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

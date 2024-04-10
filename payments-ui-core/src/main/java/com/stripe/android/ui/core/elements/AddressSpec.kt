@@ -1,5 +1,6 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.R
@@ -13,6 +14,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -25,6 +27,7 @@ enum class DisplayField {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
+@Parcelize
 data class AddressSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
@@ -50,7 +53,7 @@ data class AddressSpec(
      */
     @Transient
     val hideCountry: Boolean = false,
-) : FormItemSpec() {
+) : FormItemSpec(), Parcelable {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
         addressRepository: AddressRepository,

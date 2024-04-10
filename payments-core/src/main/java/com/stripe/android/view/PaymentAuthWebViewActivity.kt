@@ -20,6 +20,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.databinding.StripePaymentAuthWebViewActivityBinding
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.stripe3ds2.utils.CustomizeUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
@@ -52,6 +53,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (args == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_NULL_ARGS,
+                )
             return
         }
 
@@ -76,6 +81,10 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         if (clientSecret.isBlank()) {
             logger.debug("PaymentAuthWebViewActivity#onCreate() - clientSecret is blank")
             finish()
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.UnexpectedErrorEvent.AUTH_WEB_VIEW_BLANK_CLIENT_SECRET,
+                )
             return
         }
 
@@ -116,6 +125,11 @@ class PaymentAuthWebViewActivity : AppCompatActivity() {
         error: Throwable?
     ) {
         if (error != null) {
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.AUTH_WEB_VIEW_FAILURE,
+                    stripeException = StripeException.create(error),
+                )
             viewModel.logError()
             setResult(
                 Activity.RESULT_OK,

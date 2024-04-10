@@ -8,11 +8,14 @@ import androidx.test.espresso.IdlingResource
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
+import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
+import java.lang.IllegalStateException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -24,9 +27,12 @@ internal class FlowControllerTestRunnerContext(
     fun configureFlowController(
         block: PaymentSheet.FlowController.() -> Unit,
     ) {
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
         scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
             flowController.block()
         }
+        activityLaunchObserver.awaitLaunch()
     }
 }
 
@@ -65,19 +71,32 @@ private fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
 
     scenario.onActivity {
         PaymentConfiguration.init(it, "pk_test_123")
+        LinkStore(it.applicationContext).clear()
     }
 
-    lateinit var flowController: PaymentSheet.FlowController
-    scenario.onActivity { activity ->
-        flowController = SynchronizedTestFlowController(makeFlowController(activity))
-    }
+   var flowController: SynchronizedTestFlowController? = null
 
-    scenario.moveToState(Lifecycle.State.RESUMED)
+   try {
+       scenario.onActivity { activity ->
+           flowController = SynchronizedTestFlowController(makeFlowController(activity))
+       }
 
-    val testContext = FlowControllerTestRunnerContext(scenario, flowController)
-    block(testContext)
+       scenario.moveToState(Lifecycle.State.RESUMED)
 
-    assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+       val testContext = FlowControllerTestRunnerContext(
+           scenario = scenario,
+           flowController = flowController ?: throw IllegalStateException(
+               "FlowController should have been created!"
+           )
+       )
+       block(testContext)
+
+       assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+   } catch (exception: Exception) {
+       flowController?.manuallyRelease()
+
+       throw exception
+   }
 }
 
 internal class SynchronizedTestFlowController(
@@ -92,10 +111,7 @@ internal class SynchronizedTestFlowController(
 
     override fun presentPaymentOptions() {
         flowController.presentPaymentOptions()
-        isIdleNow = true
-        onIdleTransitionCallback?.onTransitionToIdle()
-        IdlingRegistry.getInstance().unregister(this)
-        onIdleTransitionCallback = null
+        manuallyRelease()
     }
 
     override fun getName(): String = FLOW_CONTROLLER_RESOURCE
@@ -106,6 +122,13 @@ internal class SynchronizedTestFlowController(
 
     override fun isIdleNow(): Boolean {
         return isIdleNow
+    }
+
+    fun manuallyRelease() {
+        isIdleNow = true
+        onIdleTransitionCallback?.onTransitionToIdle()
+        IdlingRegistry.getInstance().unregister(this)
+        onIdleTransitionCallback = null
     }
 
     companion object {

@@ -1,23 +1,17 @@
 package com.stripe.android.paymentsheet.forms
 
-import android.app.Application
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
-import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
-import com.stripe.android.lpmfoundations.luxe.PaymentMethodRequirements
-import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
@@ -25,34 +19,28 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
-import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberElement
 import com.stripe.android.uicore.elements.RowElement
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
-import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -66,30 +54,22 @@ internal class FormViewModelTest {
         ApplicationProvider.getApplicationContext(),
         StripeR.style.StripeDefaultTheme
     )
-    val lpmRepository = LpmRepository(LpmRepository.LpmRepositoryArguments(context.resources))
 
-    val showCheckboxFlow = MutableStateFlow(false)
+    private val showCheckboxFlow = MutableStateFlow(false)
 
-    private fun createLpmRepositorySupportedPaymentMethod(
-        paymentMethodType: PaymentMethod.Type,
-        layoutSpec: LayoutSpec
-    ): LpmRepository {
-        val mockLpmRepository = mock<LpmRepository>()
-
-        whenever(mockLpmRepository.fromCode(paymentMethodType.code)).thenReturn(
-            SupportedPaymentMethod(
-                code = paymentMethodType.code,
-                requiresMandate = false,
-                displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
-                iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
-                tintIconOnSelection = true,
-                requirement = PaymentMethodRequirements(emptySet(), emptySet(), true),
-                formSpec = layoutSpec
-            )
+    @Test
+    fun `Verify completeFormValues is not null when no elements exist`() = runTest {
+        val args = COMPOSE_FRAGMENT_ARGS.copy(
+            paymentMethodCode = PaymentMethod.Type.Card.code
         )
-        return mockLpmRepository
+        val formViewModel = createViewModel(
+            arguments = args,
+            formElements = emptyList(),
+        )
+
+        assertThat(
+            formViewModel.completeFormValues.first()
+        ).isNotNull()
     }
 
     @Test
@@ -99,12 +79,9 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    SaveForFutureUseSpec()
-                )
+            listOf(
+                SectionElement.wrap(EmailElement()),
+                SaveForFutureUseElement(true, ""),
             )
         )
 
@@ -148,11 +125,8 @@ internal class FormViewModelTest {
             )
             val formViewModel = createViewModel(
                 args,
-                createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Card,
-                    LayoutSpec.create(
-                        SaveForFutureUseSpec()
-                    )
+                listOf(
+                    SaveForFutureUseElement(true, ""),
                 )
             )
 
@@ -175,11 +149,8 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    CountrySpec()
-                )
+            listOf(
+                CountrySpec().transform(emptyMap())
             )
         )
 
@@ -199,13 +170,10 @@ internal class FormViewModelTest {
             )
             val formViewModel = createViewModel(
                 args,
-                createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.P24,
-                    LayoutSpec.create(
-                        NameSpec(),
-                        EmailSpec(),
-                        CountrySpec()
-                    )
+                listOf(
+                    NameSpec().transform(emptyMap()),
+                    EmailSpec().transform(emptyMap()),
+                    CountrySpec().transform(emptyMap()),
                 )
             )
 
@@ -226,12 +194,9 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LayoutSpec.create(
-                    EmailSpec(),
-                    CountrySpec()
-                )
+            listOf(
+                EmailSpec().transform(emptyMap()),
+                CountrySpec().transform(emptyMap()),
             )
         )
 
@@ -263,13 +228,10 @@ internal class FormViewModelTest {
             )
             val formViewModel = createViewModel(
                 args,
-                createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Card,
-                    LayoutSpec.create(
-                        EmailSpec(),
-                        CountrySpec(),
-                        SaveForFutureUseSpec()
-                    )
+                listOf(
+                    EmailSpec().transform(emptyMap()),
+                    CountrySpec().transform(emptyMap()),
+                    SaveForFutureUseElement(true, ""),
                 )
             )
 
@@ -305,27 +267,23 @@ internal class FormViewModelTest {
             paymentMethodCode = PaymentMethod.Type.P24.code,
             billingDetails = null,
             showCheckbox = true,
-            showCheckboxControlledFields = true
         )
         val formViewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.P24,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    CountrySpec(
-                        allowedCountryCodes = setOf(
-                            "AT",
-                            "BE",
-                            "DE",
-                            "ES",
-                            "IT",
-                            "NL"
-                        )
-                    ),
-                    SaveForFutureUseSpec()
-                )
+            listOf(
+                NameSpec().transform(emptyMap()),
+                EmailSpec().transform(emptyMap()),
+                CountrySpec(
+                    allowedCountryCodes = setOf(
+                        "AT",
+                        "BE",
+                        "DE",
+                        "ES",
+                        "IT",
+                        "NL"
+                    )
+                ).transform(emptyMap()),
+                SaveForFutureUseElement(true, ""),
             )
         )
 
@@ -361,26 +319,22 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
             showCheckbox = false,
-            showCheckboxControlledFields = true,
             billingDetails = null
         )
         val formViewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    IbanSpec(),
-                    AddressSpec(
-                        IdentifierSpec.Generic("address"),
-                        allowedCountryCodes = setOf("US", "JP")
-                    ),
-                    MandateTextSpec(
-                        IdentifierSpec.Generic("mandate"),
-                        R.string.stripe_sepa_mandate
-                    )
-                )
+            listOfNotNull(
+                NameSpec().transform(emptyMap()),
+                EmailSpec().transform(emptyMap()),
+                IbanSpec().transform(emptyMap()),
+                AddressSpec(
+                    IdentifierSpec.Generic("address"),
+                    allowedCountryCodes = setOf("US", "JP")
+                ).transform(emptyMap(), AddressRepository(context.resources, Dispatchers.Unconfined), emptyMap()),
+                MandateTextSpec(
+                    IdentifierSpec.Generic("mandate"),
+                    R.string.stripe_sepa_mandate
+                ).transform(""),
             )
         )
 
@@ -450,21 +404,18 @@ internal class FormViewModelTest {
         )
         val formViewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.SepaDebit,
-                LayoutSpec.create(
-                    NameSpec(),
-                    EmailSpec(),
-                    IbanSpec(),
-                    AddressSpec(
-                        IdentifierSpec.Generic("address"),
-                        allowedCountryCodes = setOf("US", "JP")
-                    ),
-                    MandateTextSpec(
-                        IdentifierSpec.Generic("mandate"),
-                        R.string.stripe_sepa_mandate
-                    )
-                )
+            listOfNotNull(
+                NameSpec().transform(emptyMap()),
+                EmailSpec().transform(emptyMap()),
+                IbanSpec().transform(emptyMap()),
+                AddressSpec(
+                    IdentifierSpec.Generic("address"),
+                    allowedCountryCodes = setOf("US", "JP")
+                ).transform(emptyMap(), AddressRepository(context.resources, Dispatchers.Unconfined), emptyMap()),
+                MandateTextSpec(
+                    IdentifierSpec.Generic("mandate"),
+                    R.string.stripe_sepa_mandate
+                ).transform("")
             )
         )
 
@@ -549,10 +500,7 @@ internal class FormViewModelTest {
 
         val viewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepositoryTestHelpers.card.formSpec,
-            )
+            emptyList(),
         )
 
         assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
@@ -589,10 +537,7 @@ internal class FormViewModelTest {
 
         val viewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepositoryTestHelpers.card.formSpec,
-            )
+            emptyList(),
         )
 
         assertThat(viewModel.defaultValuesToInclude).containsExactlyEntriesIn(
@@ -629,97 +574,10 @@ internal class FormViewModelTest {
 
         val viewModel = createViewModel(
             args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepositoryTestHelpers.card.formSpec,
-            )
+            emptyList(),
         )
 
         assertThat(viewModel.defaultValuesToInclude).isEmpty()
-    }
-
-    @Test
-    fun `Test placeholder specs are transformed correctly`() = runBlocking {
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = false,
-        )
-        val specs = listOf(
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Name),
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Email),
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.Phone),
-            PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddress),
-        )
-
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
-                LayoutSpec(specs),
-            )
-        )
-        val formElement = formViewModel.elementsFlow.first()
-
-        val nameSection = formElement[0] as SectionElement
-        val nameElement = nameSection.fields[0] as SimpleTextElement
-        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
-        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
-
-        val emailSection = formElement[1] as SectionElement
-        val emailElement = emailSection.fields[0] as EmailElement
-        assertThat(emailElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_email)
-        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
-
-        val phoneSection = formElement[2] as SectionElement
-        val phoneElement = phoneSection.fields[0] as PhoneNumberElement
-        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
-        assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
-
-        val addressSection = formElement[3] as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-
-        val identifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element contains country.
-        assertThat(identifiers).contains(IdentifierSpec.Country)
-    }
-
-    @Test
-    fun `Test address without country placeholder produces correct element`() = runBlocking {
-        val billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
-            name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
-            address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            attachDefaultsToPaymentMethod = false,
-        )
-
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-        )
-        val formViewModel = createViewModel(
-            args,
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Bancontact,
-                LayoutSpec(
-                    listOf(
-                        PlaceholderSpec(field = PlaceholderSpec.PlaceholderField.BillingAddressWithoutCountry)
-                    )
-                ),
-            )
-        )
-        val formElement = formViewModel.elementsFlow.first()
-
-        val addressSection = formElement.first() as SectionElement
-        val addressElement = addressSection.fields[0] as AddressElement
-        val identifiers = addressElement.fields.first().map { it.identifier }
-        // Check that the address element doesn't contain country.
-        assertThat(identifiers).doesNotContain(IdentifierSpec.Country)
     }
 
     @Test
@@ -733,28 +591,25 @@ internal class FormViewModelTest {
                 attachDefaultsToPaymentMethod = false,
             )
 
-            val internalBillingDetailsCollectionConfig = BillingDetailsCollectionConfiguration(
-                collectName = true,
-                collectEmail = true,
-                collectPhone = true,
-                address = BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
-            )
-
             val args = COMPOSE_FRAGMENT_ARGS.copy(
                 PaymentMethod.Type.Card.code,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
 
+            val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
+                code = "card",
+                context = context,
+                paymentMethodCreateParams = null,
+                paymentMethodExtraParams = null,
+            )!!
+
             val formViewModel = createViewModel(
                 args,
-                createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Card,
-                    CardDefinition.hardcodedCardSpec(internalBillingDetailsCollectionConfig).formSpec,
-                ),
+                cardFormElements + PhoneSpec().transform(emptyMap()),
             )
 
-            val elements = formViewModel.elementsFlow.first()
+            val elements = formViewModel.elements
             val countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
@@ -797,21 +652,20 @@ internal class FormViewModelTest {
             )
             val formViewModel = createViewModel(
                 args,
-                createLpmRepositorySupportedPaymentMethod(
-                    PaymentMethod.Type.Sofort,
-                    LayoutSpec(
-                        listOf(
-                            NameSpec(),
-                            EmailSpec(),
-                            PhoneSpec(),
-                            CountrySpec(),
-                            AddressSpec(hideCountry = true),
-                        ),
-                    )
+                listOfNotNull(
+                    NameSpec().transform(emptyMap()),
+                    EmailSpec().transform(emptyMap()),
+                    PhoneSpec().transform(emptyMap()),
+                    CountrySpec().transform(emptyMap()),
+                    AddressSpec(hideCountry = true).transform(
+                        initialValues = emptyMap(),
+                        addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
+                        shippingValues = emptyMap(),
+                    ),
                 ),
             )
 
-            val elements = formViewModel.elementsFlow.first()
+            val elements = formViewModel.elements
             val countryElement = elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
@@ -841,10 +695,12 @@ internal class FormViewModelTest {
             COMPOSE_FRAGMENT_ARGS.copy(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
             ),
-            createLpmRepositorySupportedPaymentMethod(
-                PaymentMethod.Type.Card,
-                LpmRepositoryTestHelpers.card.formSpec,
-            ),
+            PaymentMethodMetadataFactory.create().formElementsForCode(
+                code = "card",
+                context = context,
+                paymentMethodCreateParams = null,
+                paymentMethodExtraParams = null,
+            )!!,
         )
 
         formViewModel.viewDataFlow.test {
@@ -871,7 +727,7 @@ internal class FormViewModelTest {
         formViewModel: FormViewModel,
         @StringRes label: Int
     ) =
-        formViewModel.elementsFlow.first()
+        formViewModel.elements
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
             .filterIsInstance<SectionSingleFieldElement>()
@@ -916,7 +772,7 @@ internal class FormViewModelTest {
             formViewModel: FormViewModel,
             @StringRes label: Int
         ): TextFieldController? {
-            val addressElementFields = formViewModel.elementsFlow.first()
+            val addressElementFields = formViewModel.elements
                 .filterIsInstance<SectionElement>()
                 .flatMap { it.fields }
                 .filterIsInstance<AddressElement>()
@@ -937,28 +793,18 @@ internal class FormViewModelTest {
         }
     }
 
-    fun createViewModel(
+    private fun createViewModel(
         arguments: FormArguments,
-        lpmRepository: LpmRepository
+        formElements: List<FormElement>,
     ) = FormViewModel(
-        context = context,
         formArguments = arguments,
-        lpmRepository = lpmRepository,
-        addressRepository = createAddressRepository(),
-        showCheckboxFlow = showCheckboxFlow
+        showCheckboxFlow = showCheckboxFlow,
+        elements = formElements,
     )
 }
 
-internal suspend fun FormViewModel.setSaveForFutureUse(value: Boolean) {
-    elementsFlow
-        .firstOrNull()
-        ?.filterIsInstance<SaveForFutureUseElement>()
-        ?.firstOrNull()?.controller?.onValueChange(value)
-}
-
-private fun createAddressRepository(): AddressRepository {
-    return AddressRepository(
-        resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        workContext = Dispatchers.Unconfined,
-    )
+private fun FormViewModel.setSaveForFutureUse(value: Boolean) {
+    elements
+        .filterIsInstance<SaveForFutureUseElement>()
+        .firstOrNull()?.controller?.onValueChange(value)
 }

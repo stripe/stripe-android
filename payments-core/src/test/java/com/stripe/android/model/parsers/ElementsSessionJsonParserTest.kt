@@ -78,6 +78,60 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun parsePaymentIntent_shouldCreateMapLinkFlags() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test"
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_WITH_LINK_FUNDING_SOURCES_JSON
+        )!!
+
+        assertThat(elementsSession.linkSettings?.linkFlags).containsExactlyEntriesIn(
+            mapOf(
+                "link_authenticated_change_event_enabled" to false,
+                "link_bank_incentives_enabled" to false,
+                "link_bank_onboarding_enabled" to false,
+                "link_email_verification_login_enabled" to false,
+                "link_financial_incentives_experiment_enabled" to false,
+                "link_local_storage_login_enabled" to true,
+                "link_only_for_payment_method_types_enabled" to false,
+                "link_passthrough_mode_enabled" to true,
+            )
+        )
+        assertThat(elementsSession.linkSettings?.linkPassthroughModeEnabled).isTrue()
+    }
+
+    @Test
+    fun parsePaymentIntent_shouldDisableLinkSignUp() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test"
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_JSON
+        )!!
+
+        assertThat(elementsSession.linkSettings?.disableLinkSignup).isTrue()
+    }
+
+    @Test
+    fun parsePaymentIntent_shouldSetDisableLinkSignUpToFalse() {
+        val elementsSession = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test"
+        ).parse(
+            ElementsSessionFixtures.EXPANDED_SETUP_INTENT_WITH_LINK_SIGNUP_DISABLED_FLAG_FALSE_JSON
+        )!!
+
+        assertThat(elementsSession.linkSettings?.disableLinkSignup).isFalse()
+    }
+
+    @Test
     fun parseSetupIntent_shouldCreateObjectLinkFundingSources() {
         val elementsSession = ElementsSessionJsonParser(
             ElementsSessionParams.SetupIntentType(
@@ -255,6 +309,7 @@ class ElementsSessionJsonParserTest {
                         setupFutureUsage = null,
                     ),
                     paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 )
             ),
@@ -295,6 +350,7 @@ class ElementsSessionJsonParserTest {
                         setupFutureUsage = StripeIntent.Usage.OffSession,
                     ),
                     paymentMethodTypes = emptyList(),
+                    paymentMethodConfigurationId = null,
                     onBehalfOf = null,
                 )
             ),
@@ -392,5 +448,29 @@ class ElementsSessionJsonParserTest {
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "enabled") }
         assertIsGooglePayEnabled(true) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "unknown") }
         assertIsGooglePayEnabled(false) { put(ElementsSessionJsonParser.FIELD_GOOGLE_PAY_PREFERENCE, "disabled") }
+    }
+
+    @Test
+    fun ensureLinkSettingsUseRebrandIsCorrectlyPopulated() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret"
+            ),
+            apiKey = "test"
+        )
+
+        fun assertLinkSettingsUseRebrand(expectedValue: Boolean, jsonTransform: JSONObject.() -> Unit) {
+            val json = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+            val flags = JSONObject()
+            flags.jsonTransform()
+            json
+                .put(ElementsSessionJsonParser.FIELD_FLAGS, flags)
+                .put(ElementsSessionJsonParser.FIELD_LINK_SETTINGS, emptyMap<String, String>())
+            assertThat(parser.parse(json)?.linkSettings?.useRebrand).isEqualTo(expectedValue)
+        }
+
+        assertLinkSettingsUseRebrand(true) { remove(ElementsSessionJsonParser.FIELD_LINK_REBRAND) }
+        assertLinkSettingsUseRebrand(true) { put(ElementsSessionJsonParser.FIELD_LINK_REBRAND, true) }
+        assertLinkSettingsUseRebrand(false) { put(ElementsSessionJsonParser.FIELD_LINK_REBRAND, false) }
     }
 }

@@ -638,7 +638,7 @@
             "api_value": "noble_pay"
           },
           {
-            "display_text": "PBac z iPKO (PKO+BP)",
+            "display_text": "Płać z iPKO (PKO BP)",
             "api_value": "pbac_z_ipko"
           },
           {
@@ -879,11 +879,6 @@
     }
   },
   {
-    "type": "card",
-    "async": false,
-    "fields": []
-  },
-  {
     "type": "cashapp",
     "async": false,
     "fields": [],
@@ -891,29 +886,6 @@
       "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp@3x-a89c5d8d0651cae2a511bb49a6be1cfc.png",
       "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-cashapp-981164a833e417d28a8ac2684fda2324.svg"
     }
-  },
-  {
-    "type": "upi",
-    "async": false,
-    "fields": [
-      {
-        "type": "upi"
-      }
-    ]
-  },
-  {
-    "type": "blik",
-    "async": false,
-    "fields": [
-      {
-        "type": "blik"
-      }
-    ]
-  },
-  {
-    "type": "us_bank_account",
-    "async": true,
-    "fields": []
   },
   {
     "type": "grabpay",
@@ -1059,57 +1031,31 @@
     ]
   },
   {
-    "type": "boleto",
+    "type": "twint",
     "async": false,
+    "selector_icon": {
+      "light_theme_png": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-twint@3x-0d33d2bf7c7037878c2a42232362accb.png",
+      "light_theme_svg": "https://js.stripe.com/v3/fingerprinted/img/payment-methods/icon-pm-twint-d86f6ccc22b739319ca4de7c83842de0.svg"
+    },
     "fields": [
-      {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
+    ],
+    "next_action_spec": {
+      "confirm_response_status_specs": {
+        "requires_action": {
+          "type": "redirect_to_url"
         }
       },
-      {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
+      "post_confirm_handling_pi_status_specs": {
+        "succeeded": {
+          "type": "finished"
+        },
+        "processing": {
+          "type": "finished"
+        },
+        "requires_action": {
+          "type": "canceled"
         }
-      },
-      {
-        "type": "boleto_tax_id",
-        "api_path": {
-          "v1": "boleto[tax_id]"
-        }
-      },
-      {
-        "type": "billing_address",
-        "allowed_country_codes": ["BR"]
       }
-    ]
-  },
-  {
-    "type": "konbini",
-    "async": false,
-    "fields": [
-      {
-        "type": "name",
-        "api_path": {
-          "v1": "billing_details[name]"
-        }
-      },
-      {
-        "type": "email",
-        "api_path": {
-          "v1": "billing_details[email]"
-        }
-      },
-      {
-        "type": "konbini_confirmation_number"
-      }
-    ]
-  },
-  {
-    "type": "swish",
-    "async": false,
-    "fields": []
+    }
   }
 ]

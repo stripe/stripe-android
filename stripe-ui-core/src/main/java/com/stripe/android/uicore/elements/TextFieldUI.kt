@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.elements
 
+import android.annotation.SuppressLint
 import android.view.KeyEvent
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
@@ -20,11 +21,11 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -37,8 +38,8 @@ import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.autofill.AutofillNode
 import androidx.compose.ui.focus.FocusDirection
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
@@ -47,26 +48,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
-import androidx.compose.ui.layout.boundsInWindow
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalAutofill
-import androidx.compose.ui.platform.LocalAutofillTree
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.editableText
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.stripe.android.core.Logger
 import com.stripe.android.uicore.BuildConfig
 import com.stripe.android.uicore.LocalInstrumentationTest
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.stripeColors
+import com.stripe.android.uicore.text.autofill
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -127,8 +126,8 @@ fun TextFieldSection(
  * attribute of [textFieldController] is also taken into account to decide if the UI should be
  * enabled.
  */
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
+@Suppress("LongMethod")
 fun TextField(
     textFieldController: TextFieldController,
     enabled: Boolean,
@@ -140,14 +139,14 @@ fun TextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
     val focusManager = LocalFocusManager.current
-    val value by textFieldController.fieldValue.collectAsState("")
-    val trailingIcon by textFieldController.trailingIcon.collectAsState(null)
-    val shouldShowError by textFieldController.visibleError.collectAsState(false)
-    val loading by textFieldController.loading.collectAsState(false)
-    val contentDescription by textFieldController.contentDescription.collectAsState("")
-    val placeHolder by textFieldController.placeHolder.collectAsState(null)
+    val value by textFieldController.fieldValue.collectAsState()
+    val trailingIcon by textFieldController.trailingIcon.collectAsState()
+    val shouldShowError by textFieldController.visibleError.collectAsState()
+    val loading by textFieldController.loading.collectAsState()
+    val contentDescription by textFieldController.contentDescription.collectAsState()
+    val placeHolder by textFieldController.placeHolder.collectAsState()
 
-    var hasFocus by rememberSaveable { mutableStateOf(false) }
+    val hasFocus = rememberSaveable { mutableStateOf(false) }
 
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
@@ -156,39 +155,33 @@ fun TextField(
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing
-        if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus) {
+        if (fieldState == TextFieldStateConstants.Valid.Full && hasFocus.value) {
             focusManager.moveFocus(nextFocusDirection)
         }
     }
 
     val autofillReporter = LocalAutofillEventReporter.current
 
-    val autofillNode = remember {
-        AutofillNode(
-            autofillTypes = listOfNotNull(textFieldController.autofillType),
-            onFill = {
-                textFieldController.autofillType?.let { type ->
-                    autofillReporter(type.name)
-                }
-                textFieldController.onValueChange(it)
-            }
-        )
-    }
-    val autofill = LocalAutofill.current
-    val autofillTree = LocalAutofillTree.current
-
-    LaunchedEffect(autofillNode) {
-        autofillTree += autofillNode
+    var selection by remember {
+        mutableStateOf<TextRange?>(null)
     }
 
     TextFieldUi(
-        value = value,
+        value = TextFieldValue(
+            text = value,
+            selection = selection ?: TextRange(value.length),
+        ),
         loading = loading,
         onValueChange = { newValue ->
-            val acceptInput = fieldState.canAcceptInput(value, newValue)
+            val newTextValue = newValue.text
+            val acceptInput = fieldState.canAcceptInput(value, newTextValue)
+
+            if (newTextValue == value || acceptInput) {
+                selection = newValue.selection
+            }
 
             if (acceptInput) {
-                val newTextState = textFieldController.onValueChange(newValue)
+                val newTextState = textFieldController.onValueChange(newTextValue)
 
                 if (newTextState != null) {
                     onTextStateChanged(newTextState)
@@ -197,38 +190,22 @@ fun TextField(
         },
         onDropdownItemClicked = textFieldController::onDropdownItemClicked,
         modifier = modifier
-            .onPreviewKeyEvent { event ->
-                if (event.type == KeyEventType.KeyDown &&
-                    event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
-                    value.isEmpty()
-                ) {
-                    focusManager.moveFocus(previousFocusDirection)
-                    true
-                } else {
-                    false
-                }
-            }
-            .onGloballyPositioned {
-                autofillNode.boundingBox = it.boundsInWindow()
-            }
-            .onFocusChanged {
-                if (hasFocus != it.isFocused) {
-                    textFieldController.onFocusChange(it.isFocused)
-                }
-                hasFocus = it.isFocused
-
-                if (autofill != null && autofillNode.boundingBox != null) {
-                    if (it.isFocused) {
-                        autofill.requestAutofillForNode(autofillNode)
-                    } else {
-                        autofill.cancelAutofillForNode(autofillNode)
-                    }
-                }
-            }
+            .onPreviewKeyEvent(
+                value = value,
+                focusManager = focusManager,
+                direction = previousFocusDirection
+            )
+            .onAutofill(
+                textFieldController = textFieldController,
+                autofillReporter = autofillReporter,
+            )
+            .onFocusChanged(
+                textFieldController = textFieldController,
+                hasFocus = hasFocus,
+            )
             .focusRequester(focusRequester)
             .semantics {
                 this.contentDescription = contentDescription
-                this.editableText = AnnotatedString("")
             },
         enabled = enabled && textFieldController.enabled,
         label = label?.let {
@@ -257,7 +234,7 @@ fun TextField(
 
 @Composable
 internal fun TextFieldUi(
-    value: String,
+    value: TextFieldValue,
     enabled: Boolean,
     loading: Boolean,
     label: String?,
@@ -269,12 +246,12 @@ internal fun TextFieldUi(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     keyboardActions: KeyboardActions = KeyboardActions(),
-    onValueChange: (value: String) -> Unit = {},
+    onValueChange: (value: TextFieldValue) -> Unit = {},
     onDropdownItemClicked: (item: TextFieldIcon.Dropdown.Item) -> Unit = {}
 ) {
     val colors = TextFieldColors(shouldShowError)
 
-    TextField(
+    CompatTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = modifier.fillMaxWidth(),
@@ -303,6 +280,7 @@ internal fun TextFieldUi(
                         is TextFieldIcon.Trailing -> {
                             TrailingIcon(it, loading)
                         }
+
                         is TextFieldIcon.MultiTrailing -> {
                             Row(modifier = Modifier.padding(10.dp)) {
                                 it.staticIcons.forEach {
@@ -311,6 +289,7 @@ internal fun TextFieldUi(
                                 AnimatedIcons(icons = it.animatedIcons, loading = loading)
                             }
                         }
+
                         is TextFieldIcon.Dropdown -> {
                             TrailingDropdown(
                                 icon = it,
@@ -475,6 +454,52 @@ private fun TrailingDropdown(
             }
         )
     }
+}
+
+private fun Modifier.onPreviewKeyEvent(
+    value: String,
+    focusManager: FocusManager,
+    direction: FocusDirection,
+): Modifier = onPreviewKeyEvent { event ->
+    if (event.type == KeyEventType.KeyDown &&
+        event.nativeKeyEvent.keyCode == KeyEvent.KEYCODE_DEL &&
+        value.isEmpty()
+    ) {
+        focusManager.moveFocus(direction)
+        true
+    } else {
+        false
+    }
+}
+
+/*
+ * Using 'composed' is no longer recommended
+ * https://developer.android.com/jetpack/compose/custom-modifiers#create_a_custom_modifier_using_a_composable_modifier_factory
+ */
+@SuppressLint("ComposableModifierFactory")
+@OptIn(ExperimentalComposeUiApi::class)
+@Composable
+private fun Modifier.onAutofill(
+    textFieldController: TextFieldController,
+    autofillReporter: (String) -> Unit
+): Modifier = autofill(
+    types = listOfNotNull(textFieldController.autofillType),
+    onFill = {
+        textFieldController.autofillType?.let { type ->
+            autofillReporter(type.name)
+        }
+        textFieldController.onValueChange(it)
+    }
+)
+
+private fun Modifier.onFocusChanged(
+    textFieldController: TextFieldController,
+    hasFocus: MutableState<Boolean>
+): Modifier = onFocusChanged {
+    if (hasFocus.value != it.isFocused) {
+        textFieldController.onFocusChange(it.isFocused)
+    }
+    hasFocus.value = it.isFocused
 }
 
 private fun Modifier.conditionallyClickable(onClick: (() -> Unit)?): Modifier {

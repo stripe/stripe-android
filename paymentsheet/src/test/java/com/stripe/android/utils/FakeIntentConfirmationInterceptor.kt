@@ -57,7 +57,7 @@ internal class FakeIntentConfirmationInterceptor : IntentConfirmationInterceptor
         initializationMode: PaymentSheet.InitializationMode,
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
-        customerRequestedSave: Boolean,
+        requiresSaveOnConfirmation: Boolean,
     ): IntentConfirmationInterceptor.NextStep {
         return channel.receive()
     }

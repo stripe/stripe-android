@@ -23,15 +23,14 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class NoPaymentMethodTypesAvailable(
-        private val requested: String,
-        private val supported: String,
+        private val requested: String
     ) : PaymentSheetLoadingException() {
 
         override val type: String = "noPaymentMethodTypesAvailable"
 
         override val message: String
             get() = "None of the requested payment methods ($requested) " +
-                "match the supported payment types ($supported)."
+                "are supported."
     }
 
     data class PaymentIntentInTerminalState(

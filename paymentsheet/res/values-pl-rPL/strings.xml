@@ -26,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Zapisz adres</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Adres dostawy</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Na adres %s w ciągu trzech dni roboczych zostanie wysłana wiadomość e-mail w celu potwierdzenia konfiguracji tej instrukcji zapłaty.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Potwierdź szczegóły polecenia zapłaty</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Modyfikuj szczegóły</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Dodatkowo otrzymasz dwa powiadomienia e-mail o każdej kwocie, która będzie pobierana na podstawie tej instrukcji. Płatności będą widoczne na wyciągu bankowym jako „%s”.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Twoje płatności są chronione przez %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Wybierz metodę płatności</string>
   <string name="stripe_paymentsheet_close">Zamknij</string>
@@ -37,10 +47,16 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Zarządzaj metodami płatności</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe wpłaci 0,01 USD na Twoje konto w ciągu 1-2 dni roboczych. Następnie otrzymasz wiadomość e-mail z instrukcjami dotyczącymi zakończenia płatności na rzecz %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Edytuj %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Lub zapłać, korzystając z</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Lub zapłać kartą</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Lub użyj</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Lub użyj karty</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Zapłać</string>
   <!-- Title shown above a section containing various payment options -->

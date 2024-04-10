@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.junit4.AndroidComposeTestRule
 import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
@@ -32,6 +33,65 @@ internal class PaymentSheetPage(
         }
     }
 
+    fun fillOutLink() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Save your info for secure 1-click checkout with Link")
+        clickViewWithText("Save your info for secure 1-click checkout with Link")
+    }
+
+    fun clickOnSaveForFutureUsage(merchantName: String) {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Save for future $merchantName payments", true)
+        clickViewWithText("Save for future $merchantName payments")
+    }
+
+    fun clickOnLinkCheckbox() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Save your info for secure 1-click checkout with Link")
+        clickViewWithText("Save your info for secure 1-click checkout with Link")
+    }
+
+    fun fillOutLinkEmail(optionalLabel: Boolean = false) {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        val label = if (optionalLabel) "Email (optional)" else "Email"
+
+        waitForText(label)
+        replaceText(label, "email@email.com")
+    }
+
+    fun selectPhoneNumberCountry(country: String) {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Phone number")
+        composeTestRule.onNode(hasTestTag("DropDown:tiny")).performClick()
+        composeTestRule.onNode(hasText(country, substring = true)).performClick()
+    }
+
+    fun fillOutLinkPhone(phoneNumber: String = "+12113526421") {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Phone number", true)
+        replaceText("Phone number", phoneNumber, true)
+    }
+
+    fun fillOutLinkName() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        waitForText("Full name")
+        replaceText("Full name", "John Doe")
+    }
+
     fun fillOutCardDetailsWithCardBrandChoice(fillOutZipCode: Boolean = true) {
         Espresso.onIdle()
         composeTestRule.waitForIdle()
@@ -52,6 +112,12 @@ internal class PaymentSheetPage(
     }
 
     fun clickPrimaryButton() {
+        composeTestRule.waitUntil(5_000) {
+            composeTestRule
+                .onAllNodes(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG).and(isEnabled()))
+                .fetchSemanticsNodes().isNotEmpty()
+        }
+
         composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG))
             .performScrollTo()
             .performClick()
@@ -89,8 +155,8 @@ internal class PaymentSheetPage(
             .performClick()
     }
 
-    fun replaceText(label: String, text: String) {
-        composeTestRule.onNode(hasText(label))
+    fun replaceText(label: String, text: String, isLabelSubstring: Boolean = false) {
+        composeTestRule.onNode(hasText(label, substring = isLabelSubstring))
             .performScrollTo()
             .performTextReplacement(text)
     }

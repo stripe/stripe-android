@@ -1,5 +1,6 @@
 package com.stripe.android.utils
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -42,13 +43,20 @@ internal class FakePaymentSheetLoader(
             Result.success(
                 PaymentSheetState.Full(
                     config = paymentSheetConfiguration,
-                    stripeIntent = stripeIntent,
                     customerPaymentMethods = customerPaymentMethods,
                     isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
                     paymentSelection = paymentSelection,
                     isEligibleForCardBrandChoice = false,
                     validationError = validationError,
+                    paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                        stripeIntent = stripeIntent,
+                        billingDetailsCollectionConfiguration = paymentSheetConfiguration
+                            .billingDetailsCollectionConfiguration,
+                        allowsDelayedPaymentMethods = paymentSheetConfiguration.allowsDelayedPaymentMethods,
+                        allowsPaymentMethodsRequiringShippingAddress = paymentSheetConfiguration
+                            .allowsPaymentMethodsRequiringShippingAddress,
+                    ),
                 )
             )
         }

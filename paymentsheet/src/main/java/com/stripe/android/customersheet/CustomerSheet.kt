@@ -1,22 +1,26 @@
 package com.stripe.android.customersheet
 
 import android.app.Application
+import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.customersheet.injection.CustomerSheetComponent
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+import com.stripe.android.common.configuration.ConfigurationDefaults
+import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.AnimationConstants
+import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.parcelize.Parcelize
 import javax.inject.Inject
 
 /**
@@ -32,6 +36,8 @@ class CustomerSheet @Inject internal constructor(
     activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val callback: CustomerSheetResultCallback,
+    private val configuration: Configuration,
+    private val statusBarColor: () -> Int?,
 ) {
 
     private val customerSheetActivityLauncher =
@@ -57,7 +63,10 @@ class CustomerSheet @Inject internal constructor(
      * are delivered through the callback passed in [CustomerSheet.create].
      */
     fun present() {
-        val args = CustomerSheetContract.Args
+        val args = CustomerSheetContract.Args(
+            configuration = configuration,
+            statusBarColor = statusBarColor(),
+        )
 
         val options = ActivityOptionsCompat.makeCustomAnimation(
             application.applicationContext,
@@ -75,7 +84,7 @@ class CustomerSheet @Inject internal constructor(
      * of the box and clearing manually is not required.
      */
     fun resetCustomer() {
-        CustomerSessionViewModel.clear()
+        CustomerSheetHacks.clear()
     }
 
     /**
@@ -83,7 +92,8 @@ class CustomerSheet @Inject internal constructor(
      * a persisted payment option selection.
      */
     suspend fun retrievePaymentOptionSelection(): CustomerSheetResult = coroutineScope {
-        val adapter = CustomerSessionViewModel.component.customerAdapter
+        val adapter = CustomerSheetHacks.adapter.await()
+
         val selectedPaymentOptionDeferred = async {
             adapter.retrieveSelectedPaymentOption()
         }
@@ -121,21 +131,23 @@ class CustomerSheet @Inject internal constructor(
      * Configuration for [CustomerSheet]
      */
     @ExperimentalCustomerSheetApi
+    @Parcelize
+    @Poko
     class Configuration internal constructor(
         /**
          * Describes the appearance of [CustomerSheet].
          */
-        val appearance: PaymentSheet.Appearance = PaymentSheet.Appearance(),
+        val appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance,
 
         /**
          * Whether [CustomerSheet] displays Google Pay as a payment option.
          */
-        val googlePayEnabled: Boolean = false,
+        val googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled,
 
         /**
          * The text to display at the top of the presented bottom sheet.
          */
-        val headerTextForSelectionScreen: String? = null,
+        val headerTextForSelectionScreen: String? = ConfigurationDefaults.headerTextForSelectionScreen,
 
         /**
          * [CustomerSheet] pre-populates fields with the values provided. If
@@ -143,7 +155,7 @@ class CustomerSheet @Inject internal constructor(
          * is true, these values will be attached to the payment method even if they are not
          * collected by the [CustomerSheet] UI.
          */
-        val defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails(),
+        val defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails,
 
         /**
          * Describes how billing details should be collected. All values default to
@@ -153,7 +165,7 @@ class CustomerSheet @Inject internal constructor(
          * you must provide an appropriate value as part of [defaultBillingDetails].
          */
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
-            PaymentSheet.BillingDetailsCollectionConfiguration(),
+            ConfigurationDefaults.billingDetailsCollectionConfiguration,
 
         /**
          * Your customer-facing business name. The default value is the name of your app.
@@ -167,38 +179,49 @@ class CustomerSheet @Inject internal constructor(
          * The first preferred network that matches an available network will be used. If no preferred network is
          * applicable, Stripe will select the network.
          */
-        val preferredNetworks: List<CardBrand> = emptyList(),
-    ) {
+        val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
+
+        internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
+            ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+
+        internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+    ) : Parcelable {
 
         // Hide no-argument constructor init
         internal constructor(merchantDisplayName: String) : this(
-            appearance = PaymentSheet.Appearance(),
-            googlePayEnabled = false,
-            headerTextForSelectionScreen = null,
-            defaultBillingDetails = PaymentSheet.BillingDetails(),
-            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            appearance = ConfigurationDefaults.appearance,
+            googlePayEnabled = ConfigurationDefaults.googlePayEnabled,
+            headerTextForSelectionScreen = ConfigurationDefaults.headerTextForSelectionScreen,
+            defaultBillingDetails = ConfigurationDefaults.billingDetails,
+            billingDetailsCollectionConfiguration = ConfigurationDefaults.billingDetailsCollectionConfiguration,
             merchantDisplayName = merchantDisplayName,
+            allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
         )
 
         fun newBuilder(): Builder {
+            @OptIn(ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
             return Builder(merchantDisplayName)
                 .appearance(appearance)
                 .googlePayEnabled(googlePayEnabled)
                 .headerTextForSelectionScreen(headerTextForSelectionScreen)
                 .defaultBillingDetails(defaultBillingDetails)
                 .billingDetailsCollectionConfiguration(billingDetailsCollectionConfiguration)
+                .allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod)
+                .paymentMethodOrder(paymentMethodOrder)
         }
 
         @ExperimentalCustomerSheetApi
         class Builder internal constructor(private val merchantDisplayName: String) {
-            private var appearance: PaymentSheet.Appearance = PaymentSheet.Appearance()
-            private var googlePayEnabled: Boolean = false
-            private var headerTextForSelectionScreen: String? = null
-            private var defaultBillingDetails: PaymentSheet.BillingDetails = PaymentSheet.BillingDetails()
-            private var billingDetailsCollectionConfiguration:
-                PaymentSheet.BillingDetailsCollectionConfiguration =
-                    PaymentSheet.BillingDetailsCollectionConfiguration()
-            private var preferredNetworks: List<CardBrand> = emptyList()
+            private var appearance: PaymentSheet.Appearance = ConfigurationDefaults.appearance
+            private var googlePayEnabled: Boolean = ConfigurationDefaults.googlePayEnabled
+            private var headerTextForSelectionScreen: String? = ConfigurationDefaults.headerTextForSelectionScreen
+            private var defaultBillingDetails: PaymentSheet.BillingDetails = ConfigurationDefaults.billingDetails
+            private var billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+                ConfigurationDefaults.billingDetailsCollectionConfiguration
+            private var preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks
+            private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
+                ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
+            private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
 
             fun appearance(appearance: PaymentSheet.Appearance) = apply {
                 this.appearance = appearance
@@ -228,6 +251,26 @@ class CustomerSheet @Inject internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
+            @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
+            fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
+                this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
+            }
+
+            /**
+             * By default, CustomerSheet will use a dynamic ordering that optimizes payment method display for the
+             * customer. You can override the default order in which payment methods are displayed in PaymentSheet with
+             * a list of payment method types.
+             *
+             * See https://stripe.com/docs/api/payment_methods/object#payment_method_object-type for the list of valid
+             *  types.
+             * - Example: listOf("card")
+             * - Note: If you omit payment methods from this list, they’ll be automatically ordered by Stripe after the
+             *  ones you provide. Invalid payment methods are ignored.
+             */
+            fun paymentMethodOrder(paymentMethodOrder: List<String>): Builder = apply {
+                this.paymentMethodOrder = paymentMethodOrder
+            }
+
             fun build() = Configuration(
                 appearance = appearance,
                 googlePayEnabled = googlePayEnabled,
@@ -236,6 +279,8 @@ class CustomerSheet @Inject internal constructor(
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 merchantDisplayName = merchantDisplayName,
                 preferredNetworks = preferredNetworks,
+                allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+                paymentMethodOrder = paymentMethodOrder,
             )
         }
 
@@ -267,8 +312,8 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                application = activity.application,
                 lifecycleOwner = activity,
-                viewModelStoreOwner = activity,
                 activityResultRegistryOwner = activity,
                 statusBarColor = { activity.window.statusBarColor },
                 configuration = configuration,
@@ -293,8 +338,8 @@ class CustomerSheet @Inject internal constructor(
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
             return getInstance(
+                application = fragment.requireActivity().application,
                 lifecycleOwner = fragment,
-                viewModelStoreOwner = fragment,
                 activityResultRegistryOwner = (fragment.host as? ActivityResultRegistryOwner)
                     ?: fragment.requireActivity(),
                 statusBarColor = { fragment.activity?.window?.statusBarColor },
@@ -305,31 +350,32 @@ class CustomerSheet @Inject internal constructor(
         }
 
         internal fun getInstance(
+            application: Application,
             lifecycleOwner: LifecycleOwner,
-            viewModelStoreOwner: ViewModelStoreOwner,
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             statusBarColor: () -> Int?,
             configuration: Configuration,
             customerAdapter: CustomerAdapter,
             callback: CustomerSheetResultCallback,
         ): CustomerSheet {
-            val customerSessionViewModel =
-                ViewModelProvider(viewModelStoreOwner)[CustomerSessionViewModel::class.java]
-
-            val customerSessionComponent = customerSessionViewModel.createCustomerSessionComponent(
+            CustomerSheetHacks.initialize(
+                lifecycleOwner = lifecycleOwner,
+                adapter = customerAdapter,
                 configuration = configuration,
-                customerAdapter = customerAdapter,
-                callback = callback,
-                statusBarColor = statusBarColor,
             )
 
-            val customerSheetComponent: CustomerSheetComponent =
-                customerSessionComponent.customerSheetComponentBuilder
-                    .lifecycleOwner(lifecycleOwner)
-                    .activityResultRegistryOwner(activityResultRegistryOwner)
-                    .build()
-
-            return customerSheetComponent.customerSheet
+            return CustomerSheet(
+                application = application,
+                lifecycleOwner = lifecycleOwner,
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                paymentOptionFactory = PaymentOptionFactory(
+                    resources = application.resources,
+                    imageLoader = StripeImageLoader(application),
+                ),
+                callback = callback,
+                statusBarColor = statusBarColor,
+                configuration = configuration,
+            )
         }
 
         internal fun PaymentSelection?.toPaymentOptionSelection(

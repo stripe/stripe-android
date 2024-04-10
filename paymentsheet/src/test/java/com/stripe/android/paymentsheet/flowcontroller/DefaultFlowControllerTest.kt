@@ -23,6 +23,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -35,6 +36,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.model.wallets.Wallet
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -409,7 +411,6 @@ internal class DefaultFlowControllerTest {
 
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = emptyList(),
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
                 isGooglePayReady = false,
@@ -417,6 +418,7 @@ internal class DefaultFlowControllerTest {
                 linkState = null,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(allowsDelayedPaymentMethods = false),
             ),
             statusBarColor = STATUS_BAR_COLOR,
             enableLogging = ENABLE_LOGGING,
@@ -585,13 +587,13 @@ internal class DefaultFlowControllerTest {
             NEW_CARD_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
         )
 
@@ -624,13 +626,13 @@ internal class DefaultFlowControllerTest {
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
         )
 
@@ -666,13 +668,13 @@ internal class DefaultFlowControllerTest {
             paymentSelection,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
                 customerPaymentMethods = PAYMENT_METHODS,
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
                 isEligibleForCardBrandChoice = false,
                 validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(),
             )
         )
 
@@ -719,7 +721,8 @@ internal class DefaultFlowControllerTest {
                 PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                 mock(),
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            )
+            ),
+            PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
         flowController.onPaymentOptionResult(
@@ -758,7 +761,8 @@ internal class DefaultFlowControllerTest {
                 PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                 mock(),
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            )
+            ),
+            PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
         flowController.onPaymentOptionResult(
@@ -808,7 +812,8 @@ internal class DefaultFlowControllerTest {
                 PaymentDetailsFixtures.CONSUMER_SINGLE_PAYMENT_DETAILS.paymentDetails.first(),
                 mock(),
                 PaymentMethodCreateParamsFixtures.DEFAULT_CARD
-            )
+            ),
+            PaymentSelection.CustomerRequestedSave.NoRequest,
         )
 
         flowController.onPaymentOptionResult(
@@ -1663,6 +1668,70 @@ internal class DefaultFlowControllerTest {
                 )
             ) { _, _ -> }
         }
+    }
+
+    @Test
+    fun `On google pay intent result, should save payment selection as google_pay`() = runTest {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!
+        val flowController = createFlowController()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = "pi_12345"
+        ) { _, _ -> }
+
+        flowController.onGooglePayResult(
+            GooglePayPaymentMethodLauncher.Result.Completed(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                        wallet = Wallet.GooglePayWallet(
+                            dynamicLast4 = "1234"
+                        )
+                    )
+                )
+            )
+        )
+        flowController.onInternalPaymentResult(InternalPaymentResult.Completed(paymentIntent))
+
+        assertThat(
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = true,
+                isLinkAvailable = true
+            )
+        ).isEqualTo(
+            SavedSelection.GooglePay
+        )
+    }
+
+    @Test
+    fun `On link intent result, should save payment selection as link`() = runTest {
+        val paymentIntent = PaymentIntentFixtures.PI_WITH_PAYMENT_METHOD!!
+        val flowController = createFlowController()
+
+        flowController.configureWithPaymentIntent(
+            paymentIntentClientSecret = "pi_12345"
+        ) { _, _ -> }
+
+        flowController.onLinkActivityResult(
+            LinkActivityResult.Completed(
+                paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(
+                    card = PaymentMethodFixtures.CARD_PAYMENT_METHOD.card?.copy(
+                        wallet = Wallet.LinkWallet(
+                            dynamicLast4 = "1234"
+                        )
+                    )
+                )
+            )
+        )
+        flowController.onInternalPaymentResult(InternalPaymentResult.Completed(paymentIntent))
+
+        assertThat(
+            prefsRepository.getSavedSelection(
+                isGooglePayAvailable = true,
+                isLinkAvailable = true
+            )
+        ).isEqualTo(
+            SavedSelection.Link
+        )
     }
 
     @Test

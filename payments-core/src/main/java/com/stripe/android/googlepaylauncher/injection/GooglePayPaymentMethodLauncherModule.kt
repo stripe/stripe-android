@@ -1,6 +1,7 @@
 package com.stripe.android.googlepaylauncher.injection
 
 import com.stripe.android.googlepaylauncher.DefaultGooglePayRepository
+import com.stripe.android.googlepaylauncher.DefaultPaymentsClientFactory
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.googlepaylauncher.PaymentsClientFactory
@@ -19,6 +20,12 @@ internal abstract class GooglePayPaymentMethodLauncherModule {
     abstract fun bindsGooglePayRepository(
         defaultGooglePayRepository: DefaultGooglePayRepository
     ): GooglePayRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindsPaymentsClientFactory(
+        defaultPaymentsClientFactory: DefaultPaymentsClientFactory
+    ): PaymentsClientFactory
 
     companion object {
         @Provides

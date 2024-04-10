@@ -1,0 +1,34 @@
+# Disabled until Test Institution is fixed on Edge merchants.
+# https://jira.corp.stripe.com/browse/RUN_BANKCON_AUX-1237
+appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - testmode-data
+---
+- startRecording: ${'/tmp/test_results/web-testmode-data-testoauthinstitution-' + new Date().getTime()}
+- clearState
+- openLink: stripeconnectionsexample://playground?flow=Data&financial_connections_override_native=web&merchant=testmode
+- tapOn:
+    id: "connect_accounts"
+- extendedWaitUntil:
+    notVisible:
+      id: "connect_accounts"
+    timeout: 60000
+######## Bypass Chrome on-boarding screen #######
+- runFlow:
+    file: ../common/subflow-skip-chrome-welcome.yaml
+################################################
+# Common: web AuthFlow - connect institution
+- tapOn: "Agree and continue"
+# SELECT OAUTH INSTITUTION
+- tapOn: ".*Ownership Accounts.*"
+# SELECT ALL ACCOUNTS
+- extendedWaitUntil:
+    visible: "Connect accounts"
+    timeout: 60000
+- tapOn: "Connect accounts" # select all accounts
+# CONFIRM AND COMPLETE
+- tapOn: "Done"
+- assertVisible: ".*Completed!.*"
+- assertVisible: ".*StripeBank.*"
+- stopRecording

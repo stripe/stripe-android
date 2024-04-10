@@ -25,8 +25,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 4 interest-free payments of $50.00 with <img/> " +
-                "<a href=\"https://static.afterpay.com/modal/en_US.html\">" +
-                "<b>ⓘ</b></a>"
+                "<b>ⓘ</b>"
         )
     }
 
@@ -41,8 +40,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 3 interest-free payments of €66.66 with <img/> " +
-                "<a href=\"https://static.afterpay.com/modal/en_US.html\">" +
-                "<b>ⓘ</b></a>"
+                "<b>ⓘ</b>"
         )
     }
 
@@ -58,8 +56,7 @@ class AfterpayClearpayHeaderElementTest {
             element.getLabel(ApplicationProvider.getApplicationContext<Application>().resources)
         ).isEqualTo(
             "Pay in 4 interest-free payments of US$50.00 with <img/> " +
-                "<a href=\"https://static.afterpay.com/modal/en_CA.html\">" +
-                "<b>ⓘ</b></a>"
+                "<b>ⓘ</b>"
         )
     }
 

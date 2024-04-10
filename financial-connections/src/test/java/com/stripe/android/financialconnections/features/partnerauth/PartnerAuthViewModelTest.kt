@@ -1,8 +1,5 @@
 package com.stripe.android.financialconnections.features.partnerauth
 
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.test.MavericksTestRule
-import com.airbnb.mvrx.withState
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIException
@@ -10,12 +7,13 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.authorizationSessi
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
 import com.stripe.android.financialconnections.domain.PostAuthSessionEvent
 import com.stripe.android.financialconnections.domain.PostAuthorizationSession
@@ -24,28 +22,26 @@ import com.stripe.android.financialconnections.exception.InstitutionUnplannedDow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.verifyBlocking
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("MaxLineLength")
+@ExperimentalCoroutinesApi
 internal class PartnerAuthViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule(testDispatcher = UnconfinedTestDispatcher())
+    val testRule = CoroutineTestRule()
 
     private val applicationId = "com.sample.applicationid"
     private val getSync = mock<GetOrFetchSync>()
@@ -58,9 +54,11 @@ internal class PartnerAuthViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val createAuthorizationSession = mock<PostAuthorizationSession>()
     private val logger = mock<Logger>()
+    private val handleError = TestHandleError()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     @Test
-    fun `init - when creating auth session returns unplanned downtime, error is logged`() =
+    fun `init - when creating auth session returns unplanned downtime, error is logged and displayed`() =
         runTest {
             val unplannedDowntimeError = InstitutionUnplannedDowntimeError(
                 institution = institution(),
@@ -74,18 +72,14 @@ internal class PartnerAuthViewModelTest {
                 throw unplannedDowntimeError
             }
 
-            val viewModel = createViewModel()
+            createViewModel()
 
-            withState(viewModel) {
-                verifyBlocking(eventTracker) {
-                    logError(
-                        extraMessage = "Error fetching payload / posting AuthSession",
-                        error = unplannedDowntimeError,
-                        logger = logger,
-                        pane = Pane.PARTNER_AUTH
-                    )
-                }
-            }
+            handleError.assertError(
+                extraMessage = "Error fetching payload / posting AuthSession",
+                error = unplannedDowntimeError,
+                pane = Pane.PARTNER_AUTH,
+                displayErrorScreen = true
+            )
         }
 
     @Test
@@ -200,6 +194,7 @@ internal class PartnerAuthViewModelTest {
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
+            // An auth session was created on the previous pane, before launching Partner Auth.
             val manifest = sessionManifest().copy(
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution,
@@ -222,8 +217,8 @@ internal class PartnerAuthViewModelTest {
             // stays in partner auth pane
             assertThat(navigationManager.emittedIntents).isEmpty()
 
-            // creates two sessions (initial and retry)
-            verify(createAuthorizationSession, times(2)).invoke(
+            // creates an additional session (cancel triggers a retry)
+            verify(createAuthorizationSession).invoke(
                 eq(activeInstitution),
                 eq(syncResponse)
             )
@@ -240,6 +235,7 @@ internal class PartnerAuthViewModelTest {
         runTest {
             val activeAuthSession = authorizationSession().copy(url = null)
             val activeInstitution = institution()
+            // An auth session was created on the previous pane, before launching Partner Auth.
             val manifest = sessionManifest().copy(
                 activeAuthSession = activeAuthSession.copy(_isOAuth = true),
                 activeInstitution = activeInstitution
@@ -259,8 +255,8 @@ internal class PartnerAuthViewModelTest {
             // stays in partner auth pane
             assertThat(navigationManager.emittedIntents).isEmpty()
 
-            // creates two sessions (initial and retry)
-            verify(createAuthorizationSession, times(2)).invoke(
+            // creates an additional session (cancel triggers a retry)
+            verify(createAuthorizationSession).invoke(
                 eq(activeInstitution),
                 eq(syncResponse)
             )
@@ -273,13 +269,7 @@ internal class PartnerAuthViewModelTest {
         }
 
     private fun createViewModel(
-        initialState: SharedPartnerAuthState = SharedPartnerAuthState(
-            activeAuthSession = null,
-            pane = Pane.PARTNER_AUTH,
-            payload = Uninitialized,
-            viewEffect = null,
-            authenticationStatus = Uninitialized
-        )
+        initialState: SharedPartnerAuthState = SharedPartnerAuthState(Pane.PARTNER_AUTH)
     ): PartnerAuthViewModel {
         return PartnerAuthViewModel(
             navigationManager = TestNavigationManager(),
@@ -295,7 +285,10 @@ internal class PartnerAuthViewModelTest {
             initialState = initialState,
             browserManager = mock(),
             uriUtils = UriUtils(Logger.noop(), mock()),
-            applicationId = applicationId
+            handleError = handleError,
+            applicationId = applicationId,
+            nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+            presentNoticeSheet = mock(),
         )
     }
 }

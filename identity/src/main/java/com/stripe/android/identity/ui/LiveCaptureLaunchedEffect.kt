@@ -50,14 +50,14 @@ internal fun LiveCaptureLaunchedEffect(
                         identityViewModel.updateAnalyticsState { oldState ->
                             oldState.copy(
                                 docFrontModelScore = detectorOutput.resultScore,
-                                docFrontBlurScore = detectorOutput.blurScore
+                                docFrontBlurScore = detectorOutput.blurScore()
                             )
                         }
                     } else if (scanResult.identityState.type.isBack()) {
                         identityViewModel.updateAnalyticsState { oldState ->
                             oldState.copy(
                                 docBackModelScore = detectorOutput.resultScore,
-                                docBackBlurScore = detectorOutput.blurScore
+                                docBackBlurScore = detectorOutput.blurScore()
                             )
                         }
                     }

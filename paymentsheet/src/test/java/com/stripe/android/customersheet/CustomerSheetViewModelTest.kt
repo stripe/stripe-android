@@ -43,12 +43,15 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction.OnUpdatePr
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.testing.CoroutineTestRule
-import com.stripe.android.testing.FeatureFlagTestRule
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.elements.CardBillingAddressElement
+import com.stripe.android.ui.core.elements.CardDetailsSectionElement
+import com.stripe.android.ui.core.elements.SaveForFutureUseElement
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import com.stripe.android.utils.FeatureFlags
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -69,12 +72,6 @@ import com.stripe.android.ui.core.R as UiCoreR
 class CustomerSheetViewModelTest {
 
     private val testDispatcher = UnconfinedTestDispatcher(TestCoroutineScheduler())
-
-    @get:Rule
-    val featureFlagTestRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.customerSheetACHv2,
-        isEnabled = false,
-    )
 
     @get:Rule
     val coroutineTestRule = CoroutineTestRule(testDispatcher)
@@ -442,7 +439,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod`() = runTest(testDispatcher) {
+    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher
         )
@@ -451,8 +448,41 @@ class CustomerSheetViewModelTest {
             assertThat(awaitItem())
                 .isInstanceOf(SelectPaymentMethod::class.java)
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
+
+            val formElements = item.asAddState().formViewData.elements
+
+            assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
+            assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
+            assertThat(formElements[1].asSectionElement().fields[0])
+                .isInstanceOf(CardBillingAddressElement::class.java)
+            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
+        }
+    }
+
+    @Test
+    fun `When CustomerViewAction#OnAddCardPressed & ACHv2 disabled, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher
+        )
+
+        viewModel.viewState.test {
             assertThat(awaitItem())
-                .isInstanceOf(AddPaymentMethod::class.java)
+                .isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            val item = awaitItem()
+            assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
+
+            val formElements = item.asAddState().formViewData.elements
+
+            assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
+            assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
+            assertThat(formElements[1].asSectionElement().fields[0])
+                .isInstanceOf(CardBillingAddressElement::class.java)
+            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
         }
     }
 
@@ -1664,8 +1694,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `Payment method form changes on user selection`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             initialBackStack = listOf(
@@ -1692,8 +1720,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `Payment method user selection saved after returning to add screen`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             initialBackStack = listOf(
@@ -1733,8 +1759,6 @@ class CustomerSheetViewModelTest {
 
     @Test
     fun `When the payment method form is us bank account, the primary button label is continue`() = runTest(testDispatcher) {
-        featureFlagTestRule.setEnabled(true)
-
         val viewModel = createViewModel(
             workContext = testDispatcher,
             initialBackStack = listOf(
@@ -2805,6 +2829,40 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `Modifying a payment method does not show remove`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+        val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState.copy(
+                    savedPaymentMethods = paymentMethods,
+                )
+            ),
+            customerPaymentMethods = paymentMethods,
+        )
+
+        viewModel.viewState.test {
+            assertThat(awaitItem()).isInstanceOf(SelectPaymentMethod::class.java)
+            viewModel.handleViewAction(CustomerSheetViewAction.OnModifyItem(paymentMethods.single()))
+
+            val editViewState = awaitViewState<CustomerSheetViewState.EditPaymentMethod>()
+            editViewState.editPaymentMethodInteractor.handleViewAction(
+                OnBrandChoiceChanged(
+                    EditPaymentMethodViewState.CardBrandChoice(brand = CardBrand.Visa)
+                )
+            )
+
+            verify(eventReporter).onHidePaymentOptionBrands(
+                source = CustomerSheetEventReporter.CardBrandChoiceEventSource.Edit,
+                selectedBrand = CardBrand.Visa
+            )
+        }
+    }
+
+    @Test
     fun `Removing the current and original payment selection results in the selection being null`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
@@ -2833,6 +2891,20 @@ class CustomerSheetViewModelTest {
         }
     }
 
+    @Test
+    fun `When card number input is completed, should report event`() = runTest(testDispatcher) {
+        val eventReporter = mock<CustomerSheetEventReporter>()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(CustomerSheetViewAction.OnCardNumberInputCompleted)
+
+        verify(eventReporter).onCardNumberCompleted()
+    }
+
     private fun mockUSBankAccountResult(
         isVerified: Boolean
     ): CollectBankAccountResultInternal.Completed {
@@ -2851,6 +2923,14 @@ class CustomerSheetViewModelTest {
         return CollectBankAccountResultInternal.Completed(
             response = bankAccountResponse,
         )
+    }
+
+    private fun CustomerSheetViewState.asAddState(): AddPaymentMethod {
+        return this as AddPaymentMethod
+    }
+
+    private fun FormElement.asSectionElement(): SectionElement {
+        return this as SectionElement
     }
 
     @Suppress("UNCHECKED_CAST")

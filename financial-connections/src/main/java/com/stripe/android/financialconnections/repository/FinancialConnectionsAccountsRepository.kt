@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.model.PaymentAccountParams
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
+import com.stripe.android.financialconnections.network.NetworkConstants
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CLIENT_SECRET
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_CONSUMER_CLIENT_SECRET
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_ID
@@ -56,11 +57,13 @@ internal interface FinancialConnectionsAccountsRepository {
         updateLocalCache: Boolean
     ): PartnerAccountsList
 
-    suspend fun postShareNetworkedAccount(
+    suspend fun postShareNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-        selectedAccountId: String
+        selectedAccountIds: Set<String>,
     ): InstitutionResponse
+
+    suspend fun pollAccountNumbers(linkedAccounts: Set<String>)
 
     companion object {
         operator fun invoke(
@@ -140,10 +143,10 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
-    override suspend fun postShareNetworkedAccount(
+    override suspend fun postShareNetworkedAccounts(
         clientSecret: String,
         consumerSessionClientSecret: String,
-        selectedAccountId: String
+        selectedAccountIds: Set<String>
     ): InstitutionResponse {
         val request = apiRequestFactory.createPost(
             url = shareNetworkedAccountsUrl,
@@ -151,8 +154,9 @@ private class FinancialConnectionsAccountsRepositoryImpl(
             params = mapOf(
                 PARAMS_CLIENT_SECRET to clientSecret,
                 PARAMS_CONSUMER_CLIENT_SECRET to consumerSessionClientSecret,
-                "$PARAM_SELECTED_ACCOUNTS[0]" to selectedAccountId,
-            )
+            ) + selectedAccountIds.mapIndexed { index, selectedAccountId ->
+                "$PARAM_SELECTED_ACCOUNTS[$index]" to selectedAccountId
+            },
         )
         return requestExecutor.execute(
             request,
@@ -207,6 +211,20 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         }
     }
 
+    override suspend fun pollAccountNumbers(linkedAccounts: Set<String>) {
+        val accounts = linkedAccounts.mapIndexed { index, account ->
+            "${NetworkConstants.PARAM_LINKED_ACCOUNTS}[$index]" to account
+        }.toMap()
+
+        val request = apiRequestFactory.createGet(
+            url = pollAccountsNumbersUrl,
+            options = apiOptions,
+            params = accounts,
+        )
+
+        requestExecutor.execute(request)
+    }
+
     private fun updateCachedAccounts(
         source: String,
         accounts: List<PartnerAccount>
@@ -230,5 +248,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 
         internal const val authorizationSessionSelectedAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/selected_accounts"
+
+        internal const val pollAccountsNumbersUrl: String =
+            "${ApiRequest.API_HOST}/v1/link_account_sessions/poll_account_numbers"
     }
 }

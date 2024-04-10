@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.host
@@ -27,11 +27,10 @@ internal class PaymentSheetTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
-    @get:Rule
-    val networkRule = NetworkRule()
+    private val activityScenarioRule = composeTestRule.activityRule
 
     @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
+    val networkRule = NetworkRule()
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -254,7 +253,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    "payment_method_data%5Bpayment_user_agent%5D",
+                    urlEncode("payment_method_data[payment_user_agent]"),
                     Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
                 )
             ),
@@ -384,7 +383,7 @@ internal class PaymentSheetTest {
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
             bodyPart(
-                "payment_method_data%5Bcard%5D%5Bnetworks%5D%5Bpreferred%5D",
+                urlEncode("payment_method_data[card][networks][preferred]"),
                 "cartes_bancaires"
             ),
         ) { response ->

@@ -3,29 +3,23 @@ package com.stripe.android.financialconnections.di
 import android.app.Application
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
-import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.version.StripeSdkVersion
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerSubcomponent
-import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentSubcomponent
-import com.stripe.android.financialconnections.features.consent.ConsentSubcomponent
-import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerSubcomponent
-import com.stripe.android.financialconnections.features.manualentry.ManualEntrySubcomponent
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthSubcomponent
-import com.stripe.android.financialconnections.features.reset.ResetSubcomponent
-import com.stripe.android.financialconnections.features.success.SuccessSubcomponent
+import com.stripe.android.financialconnections.domain.HandleError
+import com.stripe.android.financialconnections.domain.RealHandleError
+import com.stripe.android.financialconnections.features.accountupdate.PresentAccountUpdateRequiredSheet
+import com.stripe.android.financialconnections.features.accountupdate.RealPresentAccountUpdateRequiredSheet
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
+import com.stripe.android.financialconnections.features.notice.RealPresentNoticeSheet
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
-import com.stripe.android.financialconnections.repository.CoreAuthorizationPendingNetworkingRepairRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsConsumerSessionRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsInstitutionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
 import com.stripe.android.financialconnections.repository.api.FinancialConnectionsConsumersApiService
 import com.stripe.android.repository.ConsumersApiService
 import com.stripe.android.repository.ConsumersApiServiceImpl
@@ -33,32 +27,31 @@ import com.stripe.android.uicore.image.StripeImageLoader
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.SupervisorJob
 import java.util.Locale
 import javax.inject.Named
 import javax.inject.Singleton
-import kotlin.coroutines.CoroutineContext
 
-@Module(
-    subcomponents = [
-        ConsentSubcomponent::class,
-        ManualEntrySubcomponent::class,
-        InstitutionPickerSubcomponent::class,
-        PartnerAuthSubcomponent::class,
-        SuccessSubcomponent::class,
-        AccountPickerSubcomponent::class,
-        AttachPaymentSubcomponent::class,
-        ResetSubcomponent::class
-    ]
-)
+@Module
 internal interface FinancialConnectionsSheetNativeModule {
+
+    @Binds
+    fun bindsPresentNoticeSheet(impl: RealPresentNoticeSheet): PresentNoticeSheet
+
+    @Binds
+    fun bindsPresentAccountUpdateRequiredSheet(
+        impl: RealPresentAccountUpdateRequiredSheet,
+    ): PresentAccountUpdateRequiredSheet
 
     @Singleton
     @Binds
-    fun providesNavigationManager(
+    fun bindsNavigationManager(
         impl: NavigationManagerImpl
     ): NavigationManager
+
+    @Binds
+    fun bindsHandleError(
+        impl: RealHandleError
+    ): HandleError
 
     companion object {
         @Provides
@@ -140,26 +133,6 @@ internal interface FinancialConnectionsSheetNativeModule {
             requestExecutor = requestExecutor,
             apiOptions = apiOptions,
             apiRequestFactory = apiRequestFactory
-        )
-
-        @Singleton
-        @Provides
-        fun providesSaveToLinkWithStripeSucceededRepository(
-            @IOContext workContext: CoroutineContext
-        ) = SaveToLinkWithStripeSucceededRepository(
-            CoroutineScope(SupervisorJob() + workContext)
-        )
-
-        @Singleton
-        @Provides
-        fun providesPartnerToCoreAuthsRepository(
-            logger: Logger,
-            @IOContext workContext: CoroutineContext,
-            analyticsTracker: FinancialConnectionsAnalyticsTracker
-        ) = CoreAuthorizationPendingNetworkingRepairRepository(
-            coroutineScope = CoroutineScope(SupervisorJob() + workContext),
-            logger = logger,
-            analyticsTracker = analyticsTracker
         )
 
         @Provides

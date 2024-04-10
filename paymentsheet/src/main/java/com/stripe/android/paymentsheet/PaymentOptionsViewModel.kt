@@ -8,15 +8,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.injection.DaggerPaymentOptionsViewModelFactoryComponent
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.GooglePayButtonType
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
@@ -24,24 +25,24 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPay
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.GooglePayState
+import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
-import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
 @JvmSuppressWildcards
@@ -53,11 +54,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     @IOContext workContext: CoroutineContext,
     application: Application,
     logger: Logger,
-    lpmRepository: LpmRepository,
     savedStateHandle: SavedStateHandle,
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
-    formViewModelSubComponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder>,
     editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : BaseSheetViewModel(
     application = application,
@@ -67,12 +66,10 @@ internal class PaymentOptionsViewModel @Inject constructor(
     customerRepository = customerRepository,
     workContext = workContext,
     logger = logger,
-    lpmRepository = lpmRepository,
     savedStateHandle = savedStateHandle,
     linkHandler = linkHandler,
     linkConfigurationCoordinator = linkConfigurationCoordinator,
     headerTextFactory = HeaderTextFactory(isCompleteFlow = false),
-    formViewModelSubComponentBuilderProvider = formViewModelSubComponentBuilderProvider,
     editInteractorFactory = editInteractorFactory
 ) {
 
@@ -82,7 +79,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         isProcessingPayment = args.state.stripeIntent is PaymentIntent,
         currentScreenFlow = currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = amount,
+        amountFlow = paymentMethodMetadata.map { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         onClick = {
@@ -97,6 +94,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     private val _error = MutableStateFlow<String?>(null)
     override val error: StateFlow<String?> = _error
 
+    override val walletsProcessingState: StateFlow<WalletsProcessingState?> = MutableStateFlow(null).asStateFlow()
+
     override val walletsState: StateFlow<WalletsState?> = combine(
         linkHandler.isLinkEnabled,
         linkEmailFlow,
@@ -108,7 +107,6 @@ internal class PaymentOptionsViewModel @Inject constructor(
             isLinkAvailable = isLinkAvailable,
             linkEmail = linkEmail,
             googlePayState = GooglePayState.NotAvailable,
-            googlePayButtonState = null,
             buttonsEnabled = buttonsEnabled,
             paymentMethodTypes = paymentMethodTypes,
             googlePayLauncherConfig = null,
@@ -122,6 +120,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 updateSelection(PaymentSelection.Link)
                 onUserSelection()
             },
+            isSetupIntent = paymentMethodMetadata.value?.stripeIntent is SetupIntent
         )
     }.stateIn(
         scope = viewModelScope,
@@ -141,6 +140,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
     )
 
     init {
+        SessionSavedStateHandler.attachTo(this, savedStateHandle)
+
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (args.state.isGooglePayReady) {
             GooglePayState.Available
         } else {
@@ -155,26 +156,22 @@ internal class PaymentOptionsViewModel @Inject constructor(
             }
         }
 
+        // This is bad, but I don't think there's a better option
+        PaymentSheet.FlowController.linkHandler = linkHandler
+
         linkHandler.linkInlineSelection.value = args.state.paymentSelection as? PaymentSelection.New.LinkInline
         linkHandler.setupLink(linkState)
 
-        // After recovering from don't keep activities the stripe intent will be saved,
-        // calling setStripeIntent would require the repository be initialized, which
+        // After recovering from don't keep activities the paymentMethodMetadata will be saved,
+        // calling setPaymentMethodMetadata would require the repository be initialized, which
         // would not be the case.
-        if (stripeIntent.value == null) {
-            setStripeIntent(args.state.stripeIntent)
+        if (paymentMethodMetadata.value == null) {
+            setPaymentMethodMetadata(args.state.paymentMethodMetadata)
         }
         savedStateHandle[SAVE_PAYMENT_METHODS] = args.state.customerPaymentMethods
         savedStateHandle[SAVE_PROCESSING] = false
 
         updateSelection(args.state.paymentSelection)
-
-        cbcEligibility = when (args.state.isEligibleForCardBrandChoice) {
-            true -> CardBrandChoiceEligibility.Eligible(
-                preferredNetworks = args.state.config.preferredNetworks
-            )
-            false -> CardBrandChoiceEligibility.Ineligible
-        }
 
         transitionToFirstScreen()
     }

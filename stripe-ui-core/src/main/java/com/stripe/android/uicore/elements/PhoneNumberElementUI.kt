@@ -22,7 +22,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.AutofillType
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -37,6 +39,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
+import com.stripe.android.uicore.text.autofill
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import com.stripe.android.core.R as CoreR
@@ -96,7 +99,7 @@ fun PhoneNumberCollectionSection(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 @Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -139,6 +142,10 @@ fun PhoneNumberElementUI(
             .fillMaxWidth()
             .bringIntoViewRequester(bringIntoViewRequester)
             .focusRequester(focusRequester)
+            .autofill(
+                types = listOf(AutofillType.PhoneNumberNational),
+                onFill = controller::onValueChange,
+            )
             .onFocusEvent {
                 if (it.isFocused) {
                     coroutineScope.launch { bringIntoViewRequester.bringIntoView() }

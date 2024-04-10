@@ -27,8 +27,10 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.RevolutPayDef
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SepaDebitDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SofortDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.SwishDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.TwintDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UpiDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.UsBankAccountDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.WeChatPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ZipDefinition
 
 internal object PaymentMethodRegistry {
@@ -61,8 +63,10 @@ internal object PaymentMethodRegistry {
         SepaDebitDefinition,
         SofortDefinition,
         SwishDefinition,
+        TwintDefinition,
         UpiDefinition,
         UsBankAccountDefinition,
+        WeChatPayDefinition,
         ZipDefinition,
     )
 

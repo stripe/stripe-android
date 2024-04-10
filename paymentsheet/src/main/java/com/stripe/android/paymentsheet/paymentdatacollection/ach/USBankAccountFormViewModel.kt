@@ -11,6 +11,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.model.Address
@@ -30,7 +31,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseSpec
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailConfig
@@ -40,7 +40,6 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.TextFieldController
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -197,10 +196,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val defaultSaveForFutureUse: Boolean =
         args.savedPaymentMethod?.input?.saveForFutureUse ?: false
 
-    val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseSpec().transform(
+    val saveForFutureUseElement: SaveForFutureUseElement = SaveForFutureUseElement(
         initialValue = defaultSaveForFutureUse,
         merchantName = args.formArgs.merchantName
-    ) as SaveForFutureUseElement
+    )
 
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
         .stateIn(

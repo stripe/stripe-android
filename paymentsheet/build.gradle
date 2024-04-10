@@ -4,6 +4,7 @@ apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
 apply plugin: 'app.cash.paparazzi'
+apply plugin: 'dev.drewhamilton.poko'
 
 dependencies {
     implementation project(":link")
@@ -54,6 +55,7 @@ dependencies {
     testImplementation project(':link')
     testImplementation project(':financial-connections')
     testImplementation project(':payments-core-testing')
+    testImplementation project(':screenshot-testing')
 
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi

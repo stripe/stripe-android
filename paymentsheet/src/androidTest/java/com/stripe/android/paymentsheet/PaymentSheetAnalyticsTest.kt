@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -29,15 +28,14 @@ internal class PaymentSheetAnalyticsTest {
     @get:Rule
     val composeTestRule = createAndroidComposeRule<MainActivity>()
 
+    private val activityScenarioRule = composeTestRule.activityRule
+
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
     val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
     )
-
-    @get:Rule
-    val activityScenarioRule = ActivityScenarioRule(MainActivity::class.java)
 
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
@@ -59,6 +57,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_complete_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
 
         testContext.presentPaymentSheet {
             presentWithPaymentIntent(
@@ -68,6 +67,8 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.fillOutCardDetails()
 
@@ -107,6 +108,7 @@ internal class PaymentSheetAnalyticsTest {
         validateAnalyticsRequest(eventName = "mc_load_started")
         validateAnalyticsRequest(eventName = "mc_load_succeeded")
         validateAnalyticsRequest(eventName = "mc_custom_sheet_newpm_show")
+        validateAnalyticsRequest(eventName = "mc_form_shown")
 
         testContext.configureFlowController {
             configureWithPaymentIntent(
@@ -122,6 +124,8 @@ internal class PaymentSheetAnalyticsTest {
 
         validateAnalyticsRequest(eventName = "stripe_android.card_metadata_pk_available")
         validateAnalyticsRequest(eventName = "mc_custom_paymentoption_newpm_select")
+        validateAnalyticsRequest(eventName = "mc_form_interacted")
+        validateAnalyticsRequest(eventName = "mc_card_number_completed")
 
         page.fillOutCardDetails()
 

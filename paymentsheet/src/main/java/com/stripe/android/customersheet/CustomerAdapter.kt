@@ -31,6 +31,13 @@ interface CustomerAdapter {
     val canCreateSetupIntents: Boolean
 
     /**
+     * A list of payment method types to display to the customer.
+     * Valid values include: "card", "us_bank_account"
+     * If null or empty, the SDK will dynamically determine the payment methods using your Stripe Dashboard settings.
+     */
+    val paymentMethodTypes: List<String>?
+
+    /**
      * Retrieves a list of payment methods attached to a customer
      * @return a list of [PaymentMethod]s.
      */
@@ -100,17 +107,24 @@ interface CustomerAdapter {
          * @param setupIntentClientSecretProvider, a callback to retrieve the [SetupIntent] client
          * secret. The client secret is used in this adapter to attach a payment method with a
          * [SetupIntent].
+         * @param paymentMethodTypes, A list of payment method types to display to the customer.
+         *  Valid values include: "card", "us_bank_account"
+         *  If null or empty, the SDK will dynamically determine the payment methods using your Stripe Dashboard
+         *  settings.
          */
         @JvmStatic
+        @JvmOverloads
         fun create(
             context: Context,
             customerEphemeralKeyProvider: CustomerEphemeralKeyProvider,
             setupIntentClientSecretProvider: SetupIntentClientSecretProvider?,
+            paymentMethodTypes: List<String>? = null
         ): CustomerAdapter {
             val component = DaggerStripeCustomerAdapterComponent.builder()
                 .context(context.applicationContext)
                 .customerEphemeralKeyProvider(customerEphemeralKeyProvider)
                 .setupIntentClientSecretProvider(setupIntentClientSecretProvider)
+                .paymentMethodTypes(paymentMethodTypes)
                 .build()
             return component.stripeCustomerAdapter
         }

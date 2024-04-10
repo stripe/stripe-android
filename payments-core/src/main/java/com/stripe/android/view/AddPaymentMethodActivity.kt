@@ -69,6 +69,24 @@ class AddPaymentMethodActivity : StripeActivity() {
         )
     }
 
+    private val cardInputListener = object : CardInputListener {
+        override fun onFocusChange(focusField: CardInputListener.FocusField) {
+            // No-op
+        }
+        override fun onCardComplete() {
+            viewModel.onCardNumberCompleted()
+        }
+        override fun onExpirationComplete() {
+            // No-op
+        }
+        override fun onCvcComplete() {
+            // No-op
+        }
+        override fun onPostalCodeComplete() {
+            // No-op
+        }
+    }
+
     private val titleStringRes: Int
         @StringRes
         get() {
@@ -95,6 +113,7 @@ class AddPaymentMethodActivity : StripeActivity() {
         if (argsAreInvalid { args }) {
             return
         }
+        viewModel.onFormShown()
         configureView(args)
         setResult(
             Activity.RESULT_OK,
@@ -109,6 +128,12 @@ class AddPaymentMethodActivity : StripeActivity() {
     override fun onResume() {
         super.onResume()
         addPaymentMethodView.requestFocus()
+    }
+
+    override fun onUserInteraction() {
+        super.onUserInteraction()
+
+        viewModel.onFormInteracted()
     }
 
     private fun configureView(args: AddPaymentMethodActivityStarter.Args) {
@@ -140,7 +165,9 @@ class AddPaymentMethodActivity : StripeActivity() {
                 AddPaymentMethodCardView(
                     context = this,
                     billingAddressFields = args.billingAddressFields
-                )
+                ).also { view ->
+                    view.setCardInputListener(cardInputListener)
+                }
             }
             PaymentMethod.Type.Fpx -> {
                 AddPaymentMethodFpxView.create(this)
@@ -178,6 +205,7 @@ class AddPaymentMethodActivity : StripeActivity() {
     }
 
     public override fun onActionSave() {
+        viewModel.onSaveClicked()
         createPaymentMethod(viewModel, addPaymentMethodView.createParams)
     }
 

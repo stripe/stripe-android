@@ -13,7 +13,9 @@ import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.extensions.jsonBody
 import com.github.kittinunf.fuel.core.requests.suspendable
 import com.github.kittinunf.result.Result
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
 import com.stripe.android.customersheet.CustomerSheet
@@ -26,8 +28,6 @@ import com.stripe.android.paymentsheet.example.samples.networking.ExampleCreateS
 import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetRequest
 import com.stripe.android.paymentsheet.example.samples.networking.PlaygroundCustomerSheetResponse
 import com.stripe.android.paymentsheet.example.samples.networking.awaitModel
-import com.stripe.android.utils.FeatureFlags.customerSheetACHv2
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -39,7 +39,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
-@OptIn(ExperimentalCustomerSheetApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
 class CustomerSheetPlaygroundViewModel(
     application: Application,
 ) : AndroidViewModel(application) {
@@ -71,22 +71,7 @@ class CustomerSheetPlaygroundViewModel(
     val configuration: StateFlow<CustomerSheet.Configuration> = configurationState.map {
         initialConfiguration
             .newBuilder()
-            .defaultBillingDetails(
-                if (it.useDefaultBillingAddress) {
-                    PaymentSheet.BillingDetails(
-                        name = "Jenny Rosen",
-                        email = "jenny@example.com",
-                        address = PaymentSheet.Address(
-                            city = "Seattle",
-                            country = "US",
-                            line1 = "123 Main St.",
-                            postalCode = "99999",
-                        )
-                    )
-                } else {
-                    PaymentSheet.BillingDetails()
-                }
-            )
+            .defaultBillingDetails(defaultBillingDetails(it.useDefaultBillingAddress))
             .billingDetailsCollectionConfiguration(
                 configuration = PaymentSheet.BillingDetailsCollectionConfiguration(
                     name = it.billingCollectionConfiguration.name,
@@ -97,6 +82,7 @@ class CustomerSheetPlaygroundViewModel(
                 )
             )
             .googlePayEnabled(it.isGooglePayEnabled)
+            .allowsRemovalOfLastSavedPaymentMethod(it.allowsRemovalOfLastSavedPaymentMethod)
             .build()
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), initialConfiguration)
 
@@ -149,6 +135,23 @@ class CustomerSheetPlaygroundViewModel(
     init {
         viewModelScope.launch(Dispatchers.IO) {
             fetchClientSecret()
+        }
+    }
+
+    internal fun defaultBillingDetails(useDefaultBillingAddress: Boolean): PaymentSheet.BillingDetails {
+        return if (useDefaultBillingAddress) {
+            PaymentSheet.BillingDetails(
+                name = "Jenny Rosen",
+                email = "jenny@example.com",
+                address = PaymentSheet.Address(
+                    city = "Seattle",
+                    country = "US",
+                    line1 = "123 Main St.",
+                    postalCode = "99999",
+                )
+            )
+        } else {
+            PaymentSheet.BillingDetails()
         }
     }
 
@@ -226,12 +229,12 @@ class CustomerSheetPlaygroundViewModel(
                 toggleSetupIntentEnabled()
             is CustomerSheetPlaygroundViewAction.ToggleExistingCustomer ->
                 toggleExistingCustomer()
-            is CustomerSheetPlaygroundViewAction.ToggleAchEnabled ->
-                toggleAchEnabled()
             is CustomerSheetPlaygroundViewAction.ToggleUseDefaultBillingAddress ->
                 toggleUseDefaultBillingAddress()
             is CustomerSheetPlaygroundViewAction.ToggleAttachDefaultBillingAddress ->
                 toggleAttachDefaultBillingAddress()
+            is CustomerSheetPlaygroundViewAction.ToggleAllowsRemovalOfLastSavedPaymentMethod ->
+                toggleAllowsRemovalOfLastSavedPaymentMethod()
             is CustomerSheetPlaygroundViewAction.UpdateBillingAddressCollection ->
                 updateBillingAddressCollection(viewAction.value)
             is CustomerSheetPlaygroundViewAction.UpdateBillingEmailCollection ->
@@ -309,15 +312,6 @@ class CustomerSheetPlaygroundViewModel(
         }
     }
 
-    private fun toggleAchEnabled() {
-        updateConfiguration {
-            customerSheetACHv2.setEnabled(!it.achEnabled)
-            it.copy(
-                achEnabled = !it.achEnabled,
-            )
-        }
-    }
-
     private fun toggleUseDefaultBillingAddress() {
         updateConfiguration {
             it.copy(
@@ -330,6 +324,14 @@ class CustomerSheetPlaygroundViewModel(
         updateConfiguration {
             it.copy(
                 attachDefaultBillingAddress = !it.attachDefaultBillingAddress
+            )
+        }
+    }
+
+    private fun toggleAllowsRemovalOfLastSavedPaymentMethod() {
+        updateConfiguration {
+            it.copy(
+                allowsRemovalOfLastSavedPaymentMethod = !it.allowsRemovalOfLastSavedPaymentMethod
             )
         }
     }

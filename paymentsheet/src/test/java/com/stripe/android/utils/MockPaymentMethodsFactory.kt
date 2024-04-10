@@ -1,9 +1,7 @@
 package com.stripe.android.utils
 
-import com.stripe.android.lpmfoundations.luxe.PaymentMethodRequirements
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.LayoutSpec
 
 internal object MockPaymentMethodsFactory {
 
@@ -41,18 +39,11 @@ internal object MockPaymentMethodsFactory {
     ): SupportedPaymentMethod {
         return SupportedPaymentMethod(
             code = code,
-            requiresMandate = false,
             displayNameResource = displayNameResource,
             iconResource = iconResource,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
             tintIconOnSelection = tintIconOnSelection,
-            requirement = PaymentMethodRequirements(
-                piRequirements = emptySet(),
-                siRequirements = emptySet(),
-                confirmPMFromCustomer = true
-            ),
-            formSpec = LayoutSpec(items = emptyList())
         )
     }
 }

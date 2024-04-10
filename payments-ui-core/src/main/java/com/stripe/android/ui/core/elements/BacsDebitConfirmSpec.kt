@@ -5,11 +5,15 @@ import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.CheckboxFieldController
 import com.stripe.android.uicore.elements.CheckboxFieldElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
+@Parcelize
 class BacsDebitConfirmSpec : FormItemSpec() {
+    @IgnoredOnParcel
     override val apiPath: IdentifierSpec = IdentifierSpec.BacsDebitConfirmed
 
     fun transform(

@@ -3,8 +3,8 @@ package com.stripe.android.financialconnections.analytics
 import android.content.Context
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.StripeException
+import com.stripe.android.core.networking.AnalyticsRequestV2Executor
 import com.stripe.android.core.networking.AnalyticsRequestV2Factory
-import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.financialconnections.FinancialConnections
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
@@ -12,17 +12,20 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsRes
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.Locale
 
 /**
  * Event tracker for Financial Connections.
  */
 internal interface FinancialConnectionsAnalyticsTracker {
-
-    suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit>
+    fun track(event: FinancialConnectionsAnalyticsEvent)
 }
 
-internal suspend fun FinancialConnectionsAnalyticsTracker.logError(
+internal fun FinancialConnectionsAnalyticsTracker.logError(
     extraMessage: String,
     error: Throwable,
     logger: Logger,
@@ -78,12 +81,11 @@ private fun emitPublicClientErrorEventIfNeeded(error: Throwable) {
 }
 
 internal class FinancialConnectionsAnalyticsTrackerImpl(
-    private val stripeNetworkClient: StripeNetworkClient,
     private val getManifest: GetManifest,
     private val configuration: FinancialConnectionsSheet.Configuration,
-    private val logger: Logger,
     private val locale: Locale,
     context: Context,
+    private val requestExecutor: AnalyticsRequestV2Executor,
 ) : FinancialConnectionsAnalyticsTracker {
 
     private val requestFactory = AnalyticsRequestV2Factory(
@@ -92,21 +94,15 @@ internal class FinancialConnectionsAnalyticsTrackerImpl(
         origin = ORIGIN
     )
 
-    override suspend fun track(event: FinancialConnectionsAnalyticsEvent): Result<Unit> {
-        return runCatching {
-            val eventParams: Map<out String, Any?> = event.params ?: emptyMap()
-            val commonParams = commonParams()
+    @OptIn(DelicateCoroutinesApi::class)
+    override fun track(event: FinancialConnectionsAnalyticsEvent) {
+        GlobalScope.launch(Dispatchers.IO) {
             val request = requestFactory.createRequest(
                 eventName = event.eventName,
-                additionalParams = eventParams + commonParams,
-                includeSDKParams = true
+                additionalParams = event.params.orEmpty() + commonParams(),
+                includeSDKParams = true,
             )
-            stripeNetworkClient.executeRequest(
-                request
-            )
-            logger.debug("EVENT: ${request.eventName}: ${request.params}")
-        }.onFailure {
-            logger.error("Exception while making analytics request", it)
+            requestExecutor.enqueue(request)
         }
     }
 

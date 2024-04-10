@@ -6,9 +6,11 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -22,9 +24,12 @@ internal class PaymentSheetTestRunnerContext(
     fun presentPaymentSheet(
         block: PaymentSheet.() -> Unit,
     ) {
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentSheetActivity::class.java)
         scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
             paymentSheet.block()
         }
+        activityLaunchObserver.awaitLaunch()
     }
 
     /**
@@ -69,6 +74,7 @@ private fun ActivityScenarioRule<MainActivity>.runPaymentSheetTestInternal(
     scenario.moveToState(Lifecycle.State.CREATED)
     scenario.onActivity {
         PaymentConfiguration.init(it, "pk_test_123")
+        LinkStore(it.applicationContext).clear()
     }
 
     lateinit var paymentSheet: PaymentSheet

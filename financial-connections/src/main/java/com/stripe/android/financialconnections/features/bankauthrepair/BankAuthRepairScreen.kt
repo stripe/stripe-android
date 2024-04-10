@@ -1,29 +1,25 @@
-@file:OptIn(ExperimentalMaterialApi::class)
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.bankauthrepair
 
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
+import androidx.compose.runtime.collectAsState
 import com.stripe.android.financialconnections.features.common.SharedPartnerAuth
 import com.stripe.android.financialconnections.features.partnerauth.SharedPartnerAuthState
+import com.stripe.android.financialconnections.presentation.paneViewModel
 
 @Composable
 internal fun BankAuthRepairScreen() {
     // step view model
-    val viewModel: BankAuthRepairViewModel = mavericksViewModel()
-    val state: State<SharedPartnerAuthState> = viewModel.collectAsState()
+    val viewModel: BankAuthRepairViewModel = paneViewModel { BankAuthRepairViewModel.factory(it) }
+    val state: State<SharedPartnerAuthState> = viewModel.stateFlow.collectAsState()
 
     SharedPartnerAuth(
         state = state.value,
         onContinueClick = { /*TODO*/ },
-        onSelectAnotherBank = { /*TODO*/ },
+        onCancelClick = { /*TODO*/ },
         onClickableTextClick = { /*TODO*/ },
-        onEnterDetailsManually = { /*TODO*/ },
         onWebAuthFlowFinished = { /*TODO*/ },
-        onViewEffectLaunched = { /*TODO*/ }
+        onViewEffectLaunched = { /*TODO*/ },
+        inModal = false
     )
 }

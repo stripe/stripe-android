@@ -16,10 +16,9 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.FakeCustomerAdapter
 import com.stripe.android.customersheet.FakeStripeRepository
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
-import com.stripe.android.lpmfoundations.luxe.LpmRepository
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.update
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
@@ -31,7 +30,6 @@ import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -40,17 +38,12 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
-import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.DummyActivityResultCaller
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.test.StandardTestDispatcher
-import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
-import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
 
@@ -85,6 +78,7 @@ internal object CustomerSheetTestHelper {
         primaryButtonVisible = false,
         primaryButtonLabel = null,
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        allowsRemovalOfLastSavedPaymentMethod = true,
     )
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
@@ -98,7 +92,6 @@ internal object CustomerSheetTestHelper {
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             showCheckbox = false,
-            showCheckboxControlledFields = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             merchantName = ""
         ),
@@ -121,56 +114,8 @@ internal object CustomerSheetTestHelper {
         cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
-    internal fun mockedFormViewModel(
-        configuration: CustomerSheet.Configuration,
-        lpmRepository: LpmRepository,
-    ): Provider<FormViewModelSubcomponent.Builder> {
-        val formViewModel = FormViewModel(
-            context = application,
-            formArguments = FormArguments(
-                PaymentMethod.Type.Card.code,
-                showCheckbox = false,
-                showCheckboxControlledFields = false,
-                initialPaymentMethodCreateParams = null,
-                merchantName = configuration.merchantDisplayName,
-                billingDetails = configuration.defaultBillingDetails,
-                billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
-                cbcEligibility = CardBrandChoiceEligibility.Ineligible
-            ),
-            lpmRepository = lpmRepository,
-            addressRepository = AddressRepository(
-                resources = ApplicationProvider.getApplicationContext<Application>().resources,
-                workContext = Dispatchers.Unconfined,
-            ),
-            showCheckboxFlow = mock()
-        )
-        val mockFormBuilder = mock<FormViewModelSubcomponent.Builder>()
-        val mockFormSubcomponent = mock<FormViewModelSubcomponent>()
-        val mockFormSubComponentBuilderProvider =
-            mock<Provider<FormViewModelSubcomponent.Builder>>()
-        whenever(mockFormBuilder.build()).thenReturn(mockFormSubcomponent)
-        whenever(mockFormBuilder.formArguments(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormBuilder.showCheckboxFlow(any())).thenReturn(mockFormBuilder)
-        whenever(mockFormSubcomponent.viewModel).thenReturn(formViewModel)
-        whenever(mockFormSubComponentBuilderProvider.get()).thenReturn(mockFormBuilder)
-
-        return mockFormSubComponentBuilderProvider
-    }
-
     internal fun createViewModel(
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { true },
-        lpmRepository: LpmRepository = LpmRepository(
-            LpmRepository.LpmRepositoryArguments(
-                resources = application.resources,
-            )
-        ).apply {
-            update(
-                PaymentIntentFactory.create(
-                    paymentMethodTypes = PaymentMethod.Type.entries.map { it.code },
-                ),
-                null
-            )
-        },
         isLiveMode: Boolean = false,
         workContext: CoroutineContext = EmptyCoroutineContext,
         initialBackStack: List<CustomerSheetViewState> = listOf(
@@ -194,8 +139,6 @@ internal object CustomerSheetTestHelper {
             merchantDisplayName = "Example",
             googlePayEnabled = isGooglePayAvailable
         ),
-        formViewModelSubcomponentBuilderProvider: Provider<FormViewModelSubcomponent.Builder> =
-            mockedFormViewModel(configuration, lpmRepository),
         eventReporter: CustomerSheetEventReporter = mock(),
         intentConfirmationInterceptor: IntentConfirmationInterceptor = FakeIntentConfirmationInterceptor().apply {
             enqueueCompleteStep(true)
@@ -218,11 +161,9 @@ internal object CustomerSheetTestHelper {
             workContext = workContext,
             originalPaymentSelection = savedPaymentSelection,
             paymentConfigurationProvider = { paymentConfiguration },
-            formViewModelSubcomponentBuilderProvider = formViewModelSubcomponentBuilderProvider,
+            customerAdapterProvider = CompletableDeferred(customerAdapter),
             resources = application.resources,
             stripeRepository = stripeRepository,
-            customerAdapter = customerAdapter,
-            lpmRepository = lpmRepository,
             configuration = configuration,
             isLiveModeProvider = { isLiveMode },
             logger = Logger.noop(),
@@ -238,13 +179,15 @@ internal object CustomerSheetTestHelper {
                     return mock()
                 }
             },
-            statusBarColor = { null },
+            statusBarColor = null,
             eventReporter = eventReporter,
             customerSheetLoader = customerSheetLoader,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             editInteractorFactory = editInteractorFactory,
         ).apply {
             registerFromActivity(DummyActivityResultCaller(), TestLifecycleOwner())
+
+            paymentMethodMetadata = PaymentMethodMetadataFactory.create()
         }
     }
 
@@ -257,7 +200,8 @@ internal object CustomerSheetTestHelper {
                 eventHandler: (EditPaymentMethodViewInteractor.Event) -> Unit,
                 removeExecutor: PaymentMethodRemoveOperation,
                 updateExecutor: PaymentMethodUpdateOperation,
-                displayName: String
+                displayName: String,
+                canRemove: Boolean,
             ): ModifiableEditPaymentMethodViewInteractor {
                 return DefaultEditPaymentMethodViewInteractor(
                     initialPaymentMethod = initialPaymentMethod,
@@ -265,7 +209,8 @@ internal object CustomerSheetTestHelper {
                     removeExecutor = removeExecutor,
                     updateExecutor = updateExecutor,
                     eventHandler = eventHandler,
-                    workContext = workContext
+                    workContext = workContext,
+                    canRemove = canRemove,
                 )
             }
         }

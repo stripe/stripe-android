@@ -4,7 +4,6 @@ import android.content.Context
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.paymentsheet.analytics.EventReporter
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.injection.PaymentOptionsViewModelSubcomponent
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -17,7 +16,6 @@ import javax.inject.Singleton
 @Module(
     subcomponents = [
         PaymentOptionsViewModelSubcomponent::class,
-        FormViewModelSubcomponent::class
     ]
 )
 internal object FlowControllerModule {

@@ -2,6 +2,8 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Paga in <num_installments/> rate senza interessi di <installment_price/> con <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Confermando il tuo pagamento con AmazonPay, consenti a %s di addebitare i pagamenti futuri sul tuo account AmazonPay in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Indietro</string>
   <!-- Label for Bacs account number field -->
@@ -49,6 +51,8 @@
   <string name="stripe_invalid_upi_id">ID UPI non valido</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Acquista ora o paga dopo con Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Continuando su Klarna, consenti a %1$s di addebitare i pagamenti futuri sul tuo account Klarna in base a quanto previsto dai suoi termini e condizioni e da quelli di Klarna. Puoi modificare questa impostazione in qualsiasi momento nell\'app Klarna o contattando %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Paga dopo con Klarna.</string>
   <!-- Caption for Phone field on address form -->
@@ -76,7 +80,7 @@
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Addebito SEPA</string>
   <!-- PayPal mandate text -->
-  <string name="stripe_paypal_mandate">Confermando il tuo pagamento con PayPal, consenti a %s di addebitare i pagamenti futuri sul tuo account PayPal in base a quanto previsto dai relativi termini e condizioni.</string>
+  <string name="stripe_paypal_mandate">Confermando il tuo pagamento con PayPal, consenti a %s di addebitare i pagamenti futuri sul tuo conto PayPal in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Revolut mandate text -->
   <string name="stripe_revolut_mandate">Confermando il tuo pagamento con RevolutPay, consenti a %s di addebitare i pagamenti futuri sul tuo account RevolutPay in base a quanto previsto dai relativi termini e condizioni.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->

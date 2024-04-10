@@ -9,6 +9,11 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OTPController(val otpLength: Int = 6) : Controller {
+
+    // SMS autofill delivers us one character at a time. We store them here until
+    // we have received all.
+    private var autofillAccumulator = ""
+
     internal val keyboardType = KeyboardType.NumberPassword
 
     internal val fieldValues: List<MutableStateFlow<String>> = (0 until otpLength).map {
@@ -49,6 +54,15 @@ class OTPController(val otpLength: Int = 6) : Controller {
         }
 
         return inputLength
+    }
+
+    fun onAutofillDigit(digit: String) {
+        autofillAccumulator += digit
+
+        if (autofillAccumulator.length == otpLength) {
+            onValueChanged(0, autofillAccumulator)
+            autofillAccumulator = ""
+        }
     }
 
     fun reset() {

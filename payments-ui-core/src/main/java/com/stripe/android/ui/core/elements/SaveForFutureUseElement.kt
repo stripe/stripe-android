@@ -13,10 +13,15 @@ import kotlinx.coroutines.flow.map
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SaveForFutureUseElement(
-    override val identifier: IdentifierSpec,
-    override val controller: SaveForFutureUseController,
+    val initialValue: Boolean,
     val merchantName: String?
 ) : FormElement {
+    override val controller: SaveForFutureUseController = SaveForFutureUseController(
+        initialValue
+    )
+
+    override val identifier: IdentifierSpec = IdentifierSpec.SaveForFutureUse
+
     override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.formFieldValue.map {
             listOf(

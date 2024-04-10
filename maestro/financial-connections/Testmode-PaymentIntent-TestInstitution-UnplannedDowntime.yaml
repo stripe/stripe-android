@@ -1,0 +1,28 @@
+appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - edge
+  - testmode-payments
+---
+- startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-networking-' + new Date().getTime()}
+- clearState
+- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=testmode&permissions=payment_method
+- tapOn:
+    id: "connect_accounts"
+# Wait until the consent button is visible
+- extendedWaitUntil:
+    visible:
+      id: "consent_cta"
+    timeout: 30000
+- tapOn:
+    id: "consent_cta"
+# Select Down institution
+- tapOn: "Down Bank (unscheduled)"
+# Selecting another bank resets the flow
+- tapOn: "Select another bank"
+# Assert flow correctly returns to institution picker
+- tapOn: "Down Bank (unscheduled)"
+# Close flow from error page
+- tapOn: "Close icon"
+- assertVisible: "Failed! Request-id: .*"
+- stopRecording

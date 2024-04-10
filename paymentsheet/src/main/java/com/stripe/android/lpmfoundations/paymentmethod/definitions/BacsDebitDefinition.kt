@@ -1,17 +1,18 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
-import com.stripe.android.lpmfoundations.luxe.BacsDebitRequirement
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.BacsDebitBankAccountSpec
 import com.stripe.android.ui.core.elements.BacsDebitConfirmSpec
-import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.PlaceholderSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal object BacsDebitDefinition : PaymentMethodDefinition {
@@ -19,15 +20,32 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+    override fun requirementsToBeUsedAsNewPaymentMethod(
+        hasIntentToSetup: Boolean
+    ): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.MerchantSupportsDelayedPaymentMethods,
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
-    override fun supportedPaymentMethod(
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = true
+
+    override fun uiDefinitionFactory(): UiDefinitionFactory = BacsDebitUiDefinitionFactory
+}
+
+private object BacsDebitUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataSpec {
+    override fun createSupportedPaymentMethod(sharedDataSpec: SharedDataSpec) = SupportedPaymentMethod(
+        paymentMethodDefinition = BacsDebitDefinition,
+        sharedDataSpec = sharedDataSpec,
+        displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
+        tintIconOnSelection = true,
+    )
+
+    override fun createFormElements(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec
-    ): SupportedPaymentMethod {
+        sharedDataSpec: SharedDataSpec,
+        transformSpecToElements: TransformSpecToElements
+    ): List<FormElement> {
         val localFields = listOfNotNull(
             PlaceholderSpec(
                 apiPath = IdentifierSpec.Name,
@@ -49,16 +67,8 @@ internal object BacsDebitDefinition : PaymentMethodDefinition {
             BacsDebitConfirmSpec()
         )
 
-        return SupportedPaymentMethod(
-            code = "bacs_debit",
-            requiresMandate = true,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_bacs_debit,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = true,
-            requirement = BacsDebitRequirement,
-            formSpec = LayoutSpec(items = sharedDataSpec.fields + localFields),
+        return transformSpecToElements.transform(
+            specs = sharedDataSpec.fields + localFields,
             placeholderOverrideList = listOf(
                 IdentifierSpec.Name,
                 IdentifierSpec.Email,

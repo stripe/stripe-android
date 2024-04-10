@@ -11,7 +11,7 @@ internal class UriUtils @Inject constructor(
     private val logger: Logger,
     private val tracker: FinancialConnectionsAnalyticsTracker,
 ) {
-    suspend fun compareSchemeAuthorityAndPath(
+    fun compareSchemeAuthorityAndPath(
         uriString1: String,
         uriString2: String
     ): Boolean {
@@ -28,7 +28,7 @@ internal class UriUtils @Inject constructor(
      *
      * stripe-auth://link-accounts/authentication_return?code=failure
      */
-    suspend fun getQueryParameter(uri: String, key: String): String? = kotlin.runCatching {
+    fun getQueryParameter(uri: String, key: String): String? = kotlin.runCatching {
         uri.toUriOrNull()?.getQueryParameter(key)
     }.onFailure { error ->
         tracker.logError(
@@ -66,7 +66,7 @@ internal class UriUtils @Inject constructor(
         )
     }.getOrNull()
 
-    private suspend fun String.toUriOrNull(): Uri? = kotlin.runCatching {
+    private fun String.toUriOrNull(): Uri? = kotlin.runCatching {
         return Uri.parse(this)
     }.onFailure { error ->
         tracker.logError(

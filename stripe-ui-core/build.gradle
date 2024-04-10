@@ -34,6 +34,7 @@ android {
 
 dependencies {
     implementation project(":stripe-core")
+    implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.coreKtx
     implementation libs.compose.foundation
@@ -52,9 +53,12 @@ dependencies {
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
 
+    testImplementation project(':screenshot-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines

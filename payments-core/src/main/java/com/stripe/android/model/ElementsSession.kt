@@ -22,6 +22,12 @@ data class ElementsSession(
     val linkPassthroughModeEnabled: Boolean
         get() = linkSettings?.linkPassthroughModeEnabled ?: false
 
+    val linkFlags: Map<String, Boolean>
+        get() = linkSettings?.linkFlags ?: emptyMap()
+
+    val disableLinkSignup: Boolean
+        get() = linkSettings?.disableLinkSignup ?: false
+
     val isLinkEnabled: Boolean
         get() {
             val allowsLink = Link.code in stripeIntent.paymentMethodTypes
@@ -34,7 +40,16 @@ data class ElementsSession(
     data class LinkSettings(
         val linkFundingSources: List<String>,
         val linkPassthroughModeEnabled: Boolean,
-    ) : StripeModel
+        val linkFlags: Map<String, Boolean>,
+        val disableLinkSignup: Boolean,
+        val useRebrand: Boolean = useRebrandDefault,
+    ) : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            // Should default to true in case we remove the server-side flag someday.
+            const val useRebrandDefault: Boolean = true
+        }
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {

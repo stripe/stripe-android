@@ -1,38 +1,45 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.lpmfoundations.luxe.FormElementsBuilder
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.lpmfoundations.luxe.UpiRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.elements.LayoutSpec
-import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.ui.core.elements.UpiElement
+import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.elements.SectionElement
 
 internal object UpiDefinition : PaymentMethodDefinition {
     override val type: PaymentMethod.Type = PaymentMethod.Type.Upi
 
     override val supportedAsSavedPaymentMethod: Boolean = false
 
-    override fun addRequirement(hasIntentToSetup: Boolean): Set<AddPaymentMethodRequirement> = setOf(
+    override fun requirementsToBeUsedAsNewPaymentMethod(
+        hasIntentToSetup: Boolean
+    ): Set<AddPaymentMethodRequirement> = setOf(
         AddPaymentMethodRequirement.UnsupportedForSetup,
     )
 
-    override fun supportedPaymentMethod(
+    override fun requiresMandate(metadata: PaymentMethodMetadata): Boolean = false
+
+    override fun uiDefinitionFactory(): UiDefinitionFactory = UpiUiDefinitionFactory
+}
+
+private object UpiUiDefinitionFactory : UiDefinitionFactory.Simple {
+    override fun createSupportedPaymentMethod() = SupportedPaymentMethod(
+        paymentMethodDefinition = UpiDefinition,
+        displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
+        iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
+    )
+
+    override fun createFormElements(
         metadata: PaymentMethodMetadata,
-        sharedDataSpec: SharedDataSpec
-    ): SupportedPaymentMethod {
-        return SupportedPaymentMethod(
-            code = "upi",
-            requiresMandate = false,
-            displayNameResource = R.string.stripe_paymentsheet_payment_method_upi,
-            iconResource = R.drawable.stripe_ic_paymentsheet_pm_upi,
-            lightThemeIconUrl = sharedDataSpec.selectorIcon?.lightThemePng,
-            darkThemeIconUrl = sharedDataSpec.selectorIcon?.darkThemePng,
-            tintIconOnSelection = false,
-            requirement = UpiRequirement,
-            formSpec = LayoutSpec(sharedDataSpec.fields)
-        )
+        arguments: UiDefinitionFactory.Arguments
+    ): List<FormElement> {
+        val section = SectionElement.wrap(UpiElement(), label = R.string.stripe_paymentsheet_buy_using_upi_id)
+        return FormElementsBuilder(arguments).element(section).build()
     }
 }
