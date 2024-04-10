@@ -8,6 +8,8 @@ import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.PaymentOptionSelection
+import com.stripe.android.model.CardBrand
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatcher
 import com.stripe.android.networktesting.RequestMatchers
@@ -88,6 +90,51 @@ internal class CustomerSheetTest {
         networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
+        page.clickConfirmButton()
+    }
+
+    @Test
+    fun testSavedCardReturnedInResultCallback() = activityScenarioRule.runCustomerSheetTest(
+        integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
+        resultCallback = { result ->
+            assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
+
+            val selected = result as CustomerSheetResult.Selected
+
+            assertThat(selected.selection).isInstanceOf(PaymentOptionSelection.PaymentMethod::class.java)
+
+            val paymentMethodSelection = selected.selection as PaymentOptionSelection.PaymentMethod
+
+            val card = paymentMethodSelection.paymentMethod.card
+
+            assertThat(card?.last4).isEqualTo("4242")
+            assertThat(card?.brand).isEqualTo(CardBrand.Visa)
+        }
+    ) { context ->
+        networkRule.enqueue(
+            retrieveElementsSessionRequest(),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method.json")
+        }
+
+        networkRule.enqueue(
+            retrievePaymentMethodsRequest(),
+            cardPaymentMethodsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success.json")
+        }
+
+        networkRule.enqueue(
+            retrievePaymentMethodsRequest(),
+            usBankAccountPaymentMethodsParams(),
+        ) { response ->
+            response.testBodyFromFile("payment-methods-get-success-empty.json")
+        }
+
+        context.presentCustomerSheet()
+
+        page.clickSavedPaymentMethod(endsWith = "4242")
         page.clickConfirmButton()
     }
 
