@@ -17,6 +17,8 @@ import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
+import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
@@ -41,8 +43,12 @@ internal class CustomerSheetTest {
     lateinit var integrationType: IntegrationType
 
     @Test
-    fun testSuccessfulCardSave() = activityScenarioRule.runCustomerSheetTest(
+    fun testSuccessfulCardSave(
+        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
+        customerSheetTestType: CustomerSheetTestType,
+    ) = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
+        customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
@@ -79,26 +85,17 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        networkRule.enqueue(
-            retrieveSetupIntentRequest(),
-            retrieveSetupIntentParams(),
-        ) { response ->
-            response.testBodyFromFile("setup-intent-get.json")
-        }
-
-        networkRule.enqueue(
-            confirmSetupIntentRequest(),
-            confirmSetupIntentParams(),
-        ) { response ->
-            response.testBodyFromFile("setup-intent-confirm.json")
-        }
+        networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
         page.clickConfirmButton()
     }
 
     @Test
-    fun testSuccessfulCardSaveWithFullBillingDetailsCollection() = activityScenarioRule.runCustomerSheetTest(
+    fun testSuccessfulCardSaveWithFullBillingDetailsCollection(
+        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
+        customerSheetTestType: CustomerSheetTestType,
+    ) = activityScenarioRule.runCustomerSheetTest(
         configuration = CustomerSheet.Configuration.builder("Merchant, Inc.")
             .billingDetailsCollectionConfiguration(
                 PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -110,6 +107,7 @@ internal class CustomerSheetTest {
             )
             .build(),
         integrationType = integrationType,
+        customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
@@ -150,27 +148,19 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        networkRule.enqueue(
-            retrieveSetupIntentRequest(),
-            retrieveSetupIntentParams(),
-        ) { response ->
-            response.testBodyFromFile("setup-intent-get.json")
-        }
-
-        networkRule.enqueue(
-            confirmSetupIntentRequest(),
-            confirmSetupIntentParams()
-        ) { response ->
-            response.testBodyFromFile("setup-intent-confirm.json")
-        }
+        networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
         page.clickConfirmButton()
     }
 
     @Test
-    fun testSuccessfulCardSaveWithCardBrandChoice() = activityScenarioRule.runCustomerSheetTest(
+    fun testSuccessfulCardSaveWithCardBrandChoice(
+        @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
+        customerSheetTestType: CustomerSheetTestType,
+    ) = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
+        customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
             assertThat(result).isInstanceOf(CustomerSheetResult.Selected::class.java)
         }
@@ -215,27 +205,16 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        networkRule.enqueue(
-            retrieveSetupIntentRequest(),
-            retrieveSetupIntentParams(),
-        ) { response ->
-            response.testBodyFromFile("setup-intent-get.json")
-        }
-
-        networkRule.enqueue(
-            confirmSetupIntentRequest(),
-            confirmSetupIntentParams(),
-        ) { response ->
-            response.testBodyFromFile("setup-intent-confirm.json")
-        }
+        networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
         page.clickConfirmButton()
     }
 
     @Test
-    fun testCardNotSavedOnConfirmError() = activityScenarioRule.runCustomerSheetTest(
+    fun testCardNotAttachedOnError() = activityScenarioRule.runCustomerSheetTest(
         integrationType = integrationType,
+        customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
         resultCallback = {
             error("Shouldn't call CustomerSheetResultCallback")
         }
@@ -294,6 +273,33 @@ internal class CustomerSheetTest {
         context.markTestSucceeded()
     }
 
+    private fun NetworkRule.enqueueAttachRequests(customerSheetTestType: CustomerSheetTestType) {
+        when (customerSheetTestType) {
+            CustomerSheetTestType.AttachToCustomer -> {
+                enqueue(
+                    attachPaymentMethodRequest(),
+                ) { response ->
+                    response.testBodyFromFile("payment-methods-create.json")
+                }
+            }
+            CustomerSheetTestType.AttachToSetupIntent -> {
+                enqueue(
+                    retrieveSetupIntentRequest(),
+                    retrieveSetupIntentParams(),
+                ) { response ->
+                    response.testBodyFromFile("setup-intent-get.json")
+                }
+
+                enqueue(
+                    confirmSetupIntentRequest(),
+                    confirmSetupIntentParams()
+                ) { response ->
+                    response.testBodyFromFile("setup-intent-confirm.json")
+                }
+            }
+        }
+    }
+
     private fun retrieveElementsSessionRequest(): RequestMatcher {
         return RequestMatchers.composite(
             host("api.stripe.com"),
@@ -307,6 +313,14 @@ internal class CustomerSheetTest {
             host("api.stripe.com"),
             method("GET"),
             path("/v1/payment_methods"),
+        )
+    }
+
+    private fun attachPaymentMethodRequest(): RequestMatcher {
+        return RequestMatchers.composite(
+            host("api.stripe.com"),
+            method("POST"),
+            path("/v1/payment_methods/pm_12345/attach"),
         )
     }
 

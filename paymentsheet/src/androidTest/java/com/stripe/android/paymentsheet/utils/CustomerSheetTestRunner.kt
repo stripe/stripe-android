@@ -39,6 +39,7 @@ internal class CustomerSheetTestRunnerContext(
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
     integrationType: IntegrationType,
+    customerSheetTestType: CustomerSheetTestType,
     configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
         merchantDisplayName = "Merchant Inc."
     ),
@@ -49,6 +50,7 @@ internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
 
     val factory = CustomerSheetTestFactory(
         integrationType = integrationType,
+        customerSheetTestType = customerSheetTestType,
         configuration = configuration,
         resultCallback = {
             resultCallback.onCustomerSheetResult(it)

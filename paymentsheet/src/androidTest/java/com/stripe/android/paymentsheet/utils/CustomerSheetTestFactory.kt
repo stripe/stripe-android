@@ -12,6 +12,7 @@ import com.stripe.android.customersheet.rememberCustomerSheet
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetTestFactory(
     private val integrationType: IntegrationType,
+    private val customerSheetTestType: CustomerSheetTestType,
     private val configuration: CustomerSheet.Configuration,
     private val resultCallback: CustomerSheetResultCallback,
 ) {
@@ -29,7 +30,7 @@ internal class CustomerSheetTestFactory(
         return CustomerSheet.create(
             activity = activity,
             configuration = configuration,
-            customerAdapter = createCustomerAdapter(activity),
+            customerAdapter = createCustomerAdapter(customerSheetTestType, activity),
             callback = resultCallback,
         )
     }
@@ -42,7 +43,7 @@ internal class CustomerSheetTestFactory(
         activity.setContent {
             customerSheet = rememberCustomerSheet(
                 configuration = configuration,
-                customerAdapter = createCustomerAdapter(activity),
+                customerAdapter = createCustomerAdapter(customerSheetTestType, activity),
                 callback = resultCallback,
             )
         }
@@ -51,6 +52,7 @@ internal class CustomerSheetTestFactory(
     }
 
     private fun createCustomerAdapter(
+        customerSheetTestType: CustomerSheetTestType,
         activity: ComponentActivity
     ): CustomerAdapter {
         return CustomerAdapter.create(
@@ -63,8 +65,11 @@ internal class CustomerSheetTestFactory(
                     )
                 )
             },
-            setupIntentClientSecretProvider = {
-                CustomerAdapter.Result.success("seti_12345_secret_12345")
+            setupIntentClientSecretProvider = when (customerSheetTestType) {
+                CustomerSheetTestType.AttachToCustomer -> null
+                CustomerSheetTestType.AttachToSetupIntent -> {
+                    { CustomerAdapter.Result.success("seti_12345_secret_12345") }
+                }
             }
         )
     }
