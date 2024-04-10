@@ -107,6 +107,15 @@ interface ErrorReporter {
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
         ),
+        PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS(
+            eventName = "payments.paymentlauncherconfirmation.null_args"
+        ),
+        BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND(
+            eventName = "payments.browserlauncher.activity_not_found"
+        ),
+        BROWSER_LAUNCHER_NULL_ARGS(
+            eventName = "payments.browserlauncher.null_args"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -140,6 +149,9 @@ interface ErrorReporter {
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
+        ),
+        PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
+            partialEventName = "paymentsheet.authenticators.not_found"
         ),
         ;
 
