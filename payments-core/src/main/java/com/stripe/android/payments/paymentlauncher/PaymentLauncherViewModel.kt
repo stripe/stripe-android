@@ -114,17 +114,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
             savedStateHandle[KEY_HAS_STARTED] = true
             savedStateHandle[KEY_CONFIRM_ACTION_REQUESTED] = true
 
-            val analyticsParams: Map<String, String> = mapOf(
-                "payment_method_type" to confirmStripeIntentParams.createParams()?.code,
-                "intent_id" to confirmStripeIntentParams.clientSecret.toStripeId(),
-            ).filterNotNullValues()
-            analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(
-                    event = PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
-                    additionalParams = analyticsParams,
-                )
-            )
-
+            val analyticsParams = logConfirmStarted(confirmStripeIntentParams)
             logReturnUrl(confirmStripeIntentParams.returnUrl)
             val returnUrl =
                 if (isInstantApp) {
@@ -170,6 +160,20 @@ internal class PaymentLauncherViewModel @Inject constructor(
         }
     }
 
+    private fun logConfirmStarted(confirmStripeIntentParams: ConfirmStripeIntentParams): Map<String, String> {
+        val analyticsParams: Map<String, String> = mapOf(
+            "payment_method_type" to confirmStripeIntentParams.createParams()?.code,
+            "intent_id" to confirmStripeIntentParams.clientSecret.toStripeId(),
+        ).filterNotNullValues()
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.PaymentLauncherConfirmStarted,
+                additionalParams = analyticsParams,
+            )
+        )
+        return analyticsParams
+    }
+
     private suspend fun confirmIntent(
         confirmStripeIntentParams: ConfirmStripeIntentParams,
         returnUrl: String?
@@ -205,15 +209,7 @@ internal class PaymentLauncherViewModel @Inject constructor(
             savedStateHandle[KEY_HAS_STARTED] = true
             savedStateHandle[KEY_CONFIRM_ACTION_REQUESTED] = false
 
-            val analyticsParams = mapOf(
-                "intent_id" to clientSecret.toStripeId(),
-            )
-            analyticsRequestExecutor.executeAsync(
-                paymentAnalyticsRequestFactory.createRequest(
-                    event = PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
-                    additionalParams = analyticsParams,
-                )
-            )
+            val analyticsParams = logHandleNextActionStarted(clientSecret)
 
             stripeApiRepository.retrieveStripeIntent(
                 clientSecret = clientSecret,
@@ -238,6 +234,19 @@ internal class PaymentLauncherViewModel @Inject constructor(
                 }
             )
         }
+    }
+
+    private fun logHandleNextActionStarted(clientSecret: String): Map<String, String> {
+        val analyticsParams = mapOf(
+            "intent_id" to clientSecret.toStripeId(),
+        )
+        analyticsRequestExecutor.executeAsync(
+            paymentAnalyticsRequestFactory.createRequest(
+                event = PaymentAnalyticsEvent.PaymentLauncherNextActionStarted,
+                additionalParams = analyticsParams,
+            )
+        )
+        return analyticsParams
     }
 
     @VisibleForTesting
