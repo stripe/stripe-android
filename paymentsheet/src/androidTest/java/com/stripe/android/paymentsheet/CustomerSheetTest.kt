@@ -85,30 +85,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        when (customerSheetTestType) {
-            CustomerSheetTestType.AttachToCustomer -> {
-                networkRule.enqueue(
-                    attachPaymentMethodRequest(),
-                ) { response ->
-                    response.testBodyFromFile("payment-methods-create.json")
-                }
-            }
-            CustomerSheetTestType.AttachToSetupIntent -> {
-                networkRule.enqueue(
-                    retrieveSetupIntentRequest(),
-                    retrieveSetupIntentParams(),
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-get.json")
-                }
-
-                networkRule.enqueue(
-                    confirmSetupIntentRequest(),
-                    confirmSetupIntentParams()
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-confirm.json")
-                }
-            }
-        }
+        networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
         page.clickConfirmButton()
@@ -171,30 +148,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        when (customerSheetTestType) {
-            CustomerSheetTestType.AttachToCustomer -> {
-                networkRule.enqueue(
-                    attachPaymentMethodRequest(),
-                ) { response ->
-                    response.testBodyFromFile("payment-methods-create.json")
-                }
-            }
-            CustomerSheetTestType.AttachToSetupIntent -> {
-                networkRule.enqueue(
-                    retrieveSetupIntentRequest(),
-                    retrieveSetupIntentParams(),
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-get.json")
-                }
-
-                networkRule.enqueue(
-                    confirmSetupIntentRequest(),
-                    confirmSetupIntentParams()
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-confirm.json")
-                }
-            }
-        }
+        networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
         page.clickConfirmButton()
@@ -251,30 +205,7 @@ internal class CustomerSheetTest {
             response.testBodyFromFile("payment-methods-create.json")
         }
 
-        when (customerSheetTestType) {
-            CustomerSheetTestType.AttachToCustomer -> {
-                networkRule.enqueue(
-                    attachPaymentMethodRequest(),
-                ) { response ->
-                    response.testBodyFromFile("payment-methods-create.json")
-                }
-            }
-            CustomerSheetTestType.AttachToSetupIntent -> {
-                networkRule.enqueue(
-                    retrieveSetupIntentRequest(),
-                    retrieveSetupIntentParams(),
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-get.json")
-                }
-
-                networkRule.enqueue(
-                    confirmSetupIntentRequest(),
-                    confirmSetupIntentParams()
-                ) { response ->
-                    response.testBodyFromFile("setup-intent-confirm.json")
-                }
-            }
-        }
+        networkRule.enqueueAttachRequests(customerSheetTestType)
 
         page.clickSaveButton()
         page.clickConfirmButton()
@@ -340,6 +271,33 @@ internal class CustomerSheetTest {
         page.waitForText("Your card's security code is incorrect.")
 
         context.markTestSucceeded()
+    }
+
+    private fun NetworkRule.enqueueAttachRequests(customerSheetTestType: CustomerSheetTestType) {
+        when (customerSheetTestType) {
+            CustomerSheetTestType.AttachToCustomer -> {
+                enqueue(
+                    attachPaymentMethodRequest(),
+                ) { response ->
+                    response.testBodyFromFile("payment-methods-create.json")
+                }
+            }
+            CustomerSheetTestType.AttachToSetupIntent -> {
+                enqueue(
+                    retrieveSetupIntentRequest(),
+                    retrieveSetupIntentParams(),
+                ) { response ->
+                    response.testBodyFromFile("setup-intent-get.json")
+                }
+
+                enqueue(
+                    confirmSetupIntentRequest(),
+                    confirmSetupIntentParams()
+                ) { response ->
+                    response.testBodyFromFile("setup-intent-confirm.json")
+                }
+            }
+        }
     }
 
     private fun retrieveElementsSessionRequest(): RequestMatcher {
