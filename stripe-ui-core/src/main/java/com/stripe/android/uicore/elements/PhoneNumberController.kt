@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
@@ -19,7 +20,7 @@ import kotlinx.coroutines.flow.map
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class PhoneNumberController(
+class PhoneNumberController @VisibleForTesting constructor(
     val initialPhoneNumber: String = "",
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
@@ -130,6 +131,7 @@ class PhoneNumberController(
         fun createPhoneNumberController(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null,
+            overrideCountryCodes: Set<String> = emptySet(),
             showOptionalLabel: Boolean = false,
             acceptAnyInput: Boolean = false
         ): PhoneNumberController {
@@ -156,14 +158,16 @@ class PhoneNumberController(
                     initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
                     showOptionalLabel = showOptionalLabel,
-                    acceptAnyInput = acceptAnyInput
+                    acceptAnyInput = acceptAnyInput,
+                    overrideCountryCodes = overrideCountryCodes,
                 )
             } else {
                 PhoneNumberController(
                     initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode,
                     showOptionalLabel = showOptionalLabel,
-                    acceptAnyInput = acceptAnyInput
+                    acceptAnyInput = acceptAnyInput,
+                    overrideCountryCodes = overrideCountryCodes,
                 )
             }
         }

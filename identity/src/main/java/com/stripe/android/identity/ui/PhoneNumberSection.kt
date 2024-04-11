@@ -20,7 +20,7 @@ internal fun PhoneNumberSection(
     onPhoneCollected: (Resource<PhoneParam>) -> Unit
 ) {
     val phoneNumberController = remember {
-        PhoneNumberController(
+        PhoneNumberController.createPhoneNumberController(
             overrideCountryCodes = phoneNumberCountries.map { it.code.value }.toSet()
         )
     }
