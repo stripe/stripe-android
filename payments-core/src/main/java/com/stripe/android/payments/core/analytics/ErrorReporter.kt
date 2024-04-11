@@ -91,13 +91,13 @@ interface ErrorReporter {
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
         CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
-            eventName = "elements.customer_sheet.load_failure"
+            eventName = "elements.customer_sheet.elements_session.load_failure"
         ),
         CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE(
-            eventName = "elements.customer_sheet.load_failure"
+            eventName = "elements.customer_sheet.payment_methods.load_failure"
         ),
         CUSTOMER_SHEET_ADAPTER_NOT_FOUND(
-            eventName = "elements.customer_sheet.load_failure"
+            eventName = "elements.customer_sheet.customer_adapter.not_found"
         ),
         PLACES_FIND_AUTOCOMPLETE_ERROR(
             eventName = "address_element.find_autocomplete.error"
