@@ -17,13 +17,15 @@ import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarSta
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.repository.NoticeSheetContentRepository
 import com.stripe.android.financialconnections.ui.HandleClickableUrl
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import kotlinx.parcelize.Parcelize
 import java.util.Date
-import javax.inject.Inject
 
-internal class NoticeSheetViewModel @Inject constructor(
-    initialState: NoticeSheetState,
+internal class NoticeSheetViewModel @AssistedInject constructor(
+    @Assisted initialState: NoticeSheetState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val navigationManager: NavigationManager,
     private val noticeSheetContentRepository: NoticeSheetContentRepository,
@@ -85,6 +87,11 @@ internal class NoticeSheetViewModel @Inject constructor(
         super.onCleared()
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NoticeSheetState): NoticeSheetViewModel
+    }
+
     companion object {
 
         fun factory(
@@ -93,10 +100,7 @@ internal class NoticeSheetViewModel @Inject constructor(
         ): ViewModelProvider.Factory {
             return viewModelFactory {
                 initializer {
-                    parentComponent
-                        .noticeSheetSubcomponent
-                        .create(NoticeSheetState(arguments))
-                        .viewModel
+                    parentComponent.noticeSheetViewModelFactory.create(NoticeSheetState(arguments))
                 }
             }
         }

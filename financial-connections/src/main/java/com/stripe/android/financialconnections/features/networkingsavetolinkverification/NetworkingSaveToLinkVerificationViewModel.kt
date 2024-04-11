@@ -22,6 +22,7 @@ import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
+import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
@@ -32,14 +33,16 @@ import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
-internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
-    initialState: NetworkingSaveToLinkVerificationState,
+internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constructor(
+    @Assisted initialState: NetworkingSaveToLinkVerificationState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
@@ -130,9 +133,14 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
                 verificationCode = otp
             )
+
+            val accounts = getCachedAccounts()
+            val manifest = getManifest()
+
             saveAccountToLink.existing(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,
-                selectedAccounts = getCachedAccounts().map { it.id }.toSet(),
+                selectedAccounts = accounts,
+                shouldPollAccountNumbers = manifest.isDataFlow,
             )
         }
             .onSuccess { eventTracker.track(VerificationSuccess(PANE)) }
@@ -149,6 +157,11 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingSaveToLinkVerificationState): NetworkingSaveToLinkVerificationViewModel
+    }
+
     companion object {
 
         internal val PANE = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
@@ -156,10 +169,9 @@ internal class NetworkingSaveToLinkVerificationViewModel @Inject constructor(
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .networkingSaveToLinkVerificationSubcomponent
-                        .create(NetworkingSaveToLinkVerificationState())
-                        .viewModel
+                    parentComponent.networkingSaveToLinkVerificationViewModelFactory.create(
+                        NetworkingSaveToLinkVerificationState()
+                    )
                 }
             }
     }

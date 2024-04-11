@@ -27,7 +27,7 @@ internal class BoletoAuthenticator @Inject constructor(
     ) {
         val detailsData = authenticatable.nextActionData as NextActionData.DisplayBoletoDetails
         if (detailsData.hostedVoucherUrl == null) {
-            ErrorReporter.createFallbackInstance(context, emptySet()).report(
+            ErrorReporter.createFallbackInstance(context).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
                 additionalNonPiiParams = mapOf("lpm" to "boleto")
             )

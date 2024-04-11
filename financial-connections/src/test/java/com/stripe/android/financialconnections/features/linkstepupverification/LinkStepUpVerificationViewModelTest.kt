@@ -15,8 +15,6 @@ import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVeri
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
-import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
-import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -48,8 +46,6 @@ class LinkStepUpVerificationViewModelTest {
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
     private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val markLinkVerified = mock<MarkLinkStepUpVerified>()
-    private val updateLocalManifest = mock<UpdateLocalManifest>()
-    private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
@@ -63,8 +59,6 @@ class LinkStepUpVerificationViewModelTest {
         markLinkStepUpVerified = markLinkVerified,
         getCachedAccounts = getCachedAccounts,
         selectNetworkedAccounts = selectNetworkedAccounts,
-        updateCachedAccounts = updateCachedAccounts,
-        updateLocalManifest = updateLocalManifest,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         logger = Logger.noop(),
         initialState = state,

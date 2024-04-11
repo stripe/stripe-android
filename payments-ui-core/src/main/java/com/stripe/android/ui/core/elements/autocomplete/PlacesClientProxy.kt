@@ -11,6 +11,8 @@ import com.google.android.libraries.places.api.net.FetchPlaceRequest
 import com.google.android.libraries.places.api.net.FindAutocompletePredictionsRequest
 import com.google.android.libraries.places.api.net.PlacesClient
 import com.stripe.android.BuildConfig
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.ui.core.elements.autocomplete.model.AddressComponent
 import com.stripe.android.ui.core.elements.autocomplete.model.AutocompletePrediction
 import com.stripe.android.ui.core.elements.autocomplete.model.FetchPlaceResponse
@@ -33,21 +35,25 @@ interface PlacesClientProxy {
         placeId: String
     ): Result<FetchPlaceResponse>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
+
         fun create(
             context: Context,
             googlePlacesApiKey: String,
             isPlacesAvailable: IsPlacesAvailable = DefaultIsPlacesAvailable(),
             clientFactory: (Context) -> PlacesClient = { Places.createClient(context) },
-            initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) }
+            initializer: () -> Unit = { Places.initialize(context, googlePlacesApiKey) },
+            errorReporter: ErrorReporter
         ): PlacesClientProxy {
             return if (isPlacesAvailable()) {
                 initializer()
                 DefaultPlacesClientProxy(
-                    clientFactory(context)
+                    clientFactory(context),
+                    errorReporter
                 )
             } else {
-                UnsupportedPlacesClientProxy()
+                UnsupportedPlacesClientProxy(errorReporter)
             }
         }
 
@@ -74,7 +80,8 @@ interface PlacesClientProxy {
 }
 
 internal class DefaultPlacesClientProxy(
-    private val client: PlacesClient
+    private val client: PlacesClient,
+    private val errorReporter: ErrorReporter
 ) : PlacesClientProxy {
     private val token = AutocompleteSessionToken.newInstance()
 
@@ -101,10 +108,14 @@ internal class DefaultPlacesClientProxy(
                             secondaryText = it.getSecondaryText(StyleSpan(Typeface.BOLD)),
                             placeId = it.placeId
                         )
-                    }.take(limit ?: response.autocompletePredictions.size)
+                    }.take(limit)
                 )
             )
         } catch (e: Exception) {
+            errorReporter.report(
+                ErrorReporter.ExpectedErrorEvent.PLACES_FIND_AUTOCOMPLETE_ERROR,
+                StripeException.create(e)
+            )
             Result.failure(
                 Exception("Could not find autocomplete predictions: ${e.message}")
             )
@@ -137,6 +148,7 @@ internal class DefaultPlacesClientProxy(
                 )
             )
         } catch (e: Exception) {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.PLACES_FETCH_PLACE_ERROR, StripeException.create(e))
             Result.failure(
                 Exception("Could not fetch place: ${e.message}")
             )
@@ -144,7 +156,7 @@ internal class DefaultPlacesClientProxy(
     }
 }
 
-internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
+internal class UnsupportedPlacesClientProxy(val errorReporter: ErrorReporter) : PlacesClientProxy {
     override suspend fun findAutocompletePredictions(
         query: String?,
         country: String,
@@ -156,6 +168,7 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
         if (BuildConfig.DEBUG) {
             throw exception
         }
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FIND_AUTOCOMPLETE_PREDICTIONS_WITHOUT_DEPENDENCY)
         return Result.failure(exception)
     }
 
@@ -166,6 +179,7 @@ internal class UnsupportedPlacesClientProxy : PlacesClientProxy {
         if (BuildConfig.DEBUG) {
             throw exception
         }
+        errorReporter.report(ErrorReporter.UnexpectedErrorEvent.FETCH_PLACE_WITHOUT_DEPENDENCY)
         return Result.failure(exception)
     }
 }

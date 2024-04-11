@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -153,6 +154,7 @@ internal fun SelectPaymentMethod(
                         viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
                     },
                     modifier = Modifier
+                        .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
                         .padding(top = 20.dp)
                         .padding(horizontal = horizontalPadding),
                 )
@@ -263,6 +265,7 @@ internal fun AddPaymentMethod(
                 viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
             },
             modifier = Modifier
+                .testTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
                 .padding(top = 10.dp)
                 .padding(horizontal = horizontalPadding),
         )
@@ -300,6 +303,9 @@ private fun EditPaymentMethod(
         )
     }
 }
+
+internal const val CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG = "CustomerSheetConfirmButton"
+internal const val CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG = "CustomerSheetSaveButton"
 
 private class DefaultCardNumberCompletedEventReporter(
     private val viewActionHandler: (CustomerSheetViewAction) -> Unit

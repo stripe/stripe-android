@@ -2,6 +2,7 @@ package com.stripe.android.link.account
 
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.link.BuildConfig
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkPaymentDetails
@@ -15,7 +16,7 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -28,7 +29,8 @@ import javax.inject.Inject
 internal class LinkAccountManager @Inject constructor(
     private val config: LinkConfiguration,
     private val linkRepository: LinkRepository,
-    private val linkEventsReporter: LinkEventsReporter
+    private val linkEventsReporter: LinkEventsReporter,
+    private val errorReporter: ErrorReporter,
 ) {
     private val _linkAccount = MutableStateFlow<LinkAccount?>(null)
     val linkAccount: StateFlow<LinkAccount?> = _linkAccount
@@ -103,6 +105,7 @@ internal class LinkAccountManager @Inject constructor(
         }.onSuccess {
             Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
         }.onFailure { error ->
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_LOG_OUT_FAILURE, StripeException.create(error))
             Logger.getInstance(BuildConfig.DEBUG).warning("Failed to log out of Link: $error")
         }
     }
@@ -182,47 +185,37 @@ internal class LinkAccountManager @Inject constructor(
      */
     suspend fun createCardPaymentDetails(
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails> =
-        linkAccount.value?.let { account ->
-            createCardPaymentDetails(
-                paymentMethodCreateParams,
-                account.email,
-                config.stripeIntent
-            ).mapCatching {
-                if (config.passthroughModeEnabled) {
-                    linkRepository.shareCardPaymentDetails(
-                        id = it.paymentDetails.id,
-                        last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
-                        consumerSessionClientSecret = account.clientSecret,
-                        paymentMethodCreateParams = paymentMethodCreateParams,
-                    ).getOrThrow()
-                } else {
-                    it
+    ): Result<LinkPaymentDetails> {
+        val linkAccountValue = linkAccount.value
+        return if (linkAccountValue != null) {
+            linkAccountValue.let { account ->
+                linkRepository.createCardPaymentDetails(
+                    paymentMethodCreateParams = paymentMethodCreateParams,
+                    userEmail = account.email,
+                    stripeIntent = config.stripeIntent,
+                    consumerSessionClientSecret = account.clientSecret,
+                    consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
+                    active = config.passthroughModeEnabled,
+                ).mapCatching {
+                    if (config.passthroughModeEnabled) {
+                        linkRepository.shareCardPaymentDetails(
+                            id = it.paymentDetails.id,
+                            last4 = paymentMethodCreateParams.cardLast4().orEmpty(),
+                            consumerSessionClientSecret = account.clientSecret,
+                            paymentMethodCreateParams = paymentMethodCreateParams,
+                        ).getOrThrow()
+                    } else {
+                        it
+                    }
                 }
             }
-        } ?: Result.failure(
-            IllegalStateException("A non-null Link account is needed to create payment details")
-        )
-
-    /**
-     * Create a new Card payment method attached to the consumer account.
-     */
-    suspend fun createCardPaymentDetails(
-        paymentMethodCreateParams: PaymentMethodCreateParams,
-        userEmail: String,
-        stripeIntent: StripeIntent
-    ): Result<LinkPaymentDetails.New> = linkAccount.value?.let { account ->
-        linkRepository.createCardPaymentDetails(
-            paymentMethodCreateParams = paymentMethodCreateParams,
-            userEmail = userEmail,
-            stripeIntent = stripeIntent,
-            consumerSessionClientSecret = account.clientSecret,
-            consumerPublishableKey = if (config.passthroughModeEnabled) null else consumerPublishableKey,
-            active = config.passthroughModeEnabled,
-        )
-    } ?: Result.failure(
-        IllegalStateException("User not signed in")
-    )
+        } else {
+            errorReporter.report(ErrorReporter.UnexpectedErrorEvent.LINK_ATTACH_CARD_WITH_NULL_ACCOUNT)
+            Result.failure(
+                IllegalStateException("A non-null Link account is needed to create payment details")
+            )
+        }
+    }
 
     private fun setAccount(consumerSession: ConsumerSession): LinkAccount {
         maybeUpdateConsumerPublishableKey(consumerSession)

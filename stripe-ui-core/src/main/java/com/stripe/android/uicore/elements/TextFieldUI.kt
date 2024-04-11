@@ -139,12 +139,12 @@ fun TextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
     val focusManager = LocalFocusManager.current
-    val value by textFieldController.fieldValue.collectAsState("")
-    val trailingIcon by textFieldController.trailingIcon.collectAsState(null)
-    val shouldShowError by textFieldController.visibleError.collectAsState(false)
-    val loading by textFieldController.loading.collectAsState(false)
-    val contentDescription by textFieldController.contentDescription.collectAsState("")
-    val placeHolder by textFieldController.placeHolder.collectAsState(null)
+    val value by textFieldController.fieldValue.collectAsState()
+    val trailingIcon by textFieldController.trailingIcon.collectAsState()
+    val shouldShowError by textFieldController.visibleError.collectAsState()
+    val loading by textFieldController.loading.collectAsState()
+    val contentDescription by textFieldController.contentDescription.collectAsState()
+    val placeHolder by textFieldController.placeHolder.collectAsState()
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
 

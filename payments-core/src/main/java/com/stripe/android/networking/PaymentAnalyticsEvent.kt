@@ -42,6 +42,12 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     SetupIntentRetrieveOrdered("setup_intent_retrieval_ordered"),
     SetupIntentCancelSource("setup_intent_cancel_source"),
 
+    // Payment Launcher
+    PaymentLauncherConfirmStarted("paymenthandler.confirm.started"),
+    PaymentLauncherConfirmFinished("paymenthandler.confirm.finished"),
+    PaymentLauncherNextActionStarted("paymenthandler.handle_next_action.started"),
+    PaymentLauncherNextActionFinished("paymenthandler.handle_next_action.finished"),
+
     // File
     FileCreate("create_file"),
 

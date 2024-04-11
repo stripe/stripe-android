@@ -182,12 +182,11 @@ class AutocompleteViewModelTest {
     @Test
     fun `when user presses clear text field is cleared`() = runTest {
         val viewModel = createViewModel()
-        val trailingIcon = viewModel.textFieldController.trailingIcon.stateIn(viewModel.viewModelScope)
+        val trailingIcon = viewModel.textFieldController.trailingIcon
 
         (trailingIcon.value as? TextFieldIcon.Trailing)?.onClick?.invoke()
 
-        assertThat(viewModel.textFieldController.rawFieldValue.stateIn(viewModel.viewModelScope).value)
-            .isEqualTo("")
+        assertThat(viewModel.textFieldController.rawFieldValue.value).isEqualTo("")
     }
 
     @Test

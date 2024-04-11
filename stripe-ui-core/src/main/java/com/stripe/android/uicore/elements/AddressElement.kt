@@ -64,7 +64,6 @@ open class AddressElement constructor(
     private val currentValuesMap = mutableMapOf<IdentifierSpec, String?>()
 
     private val otherFields = countryElement.controller.rawFieldValue
-        .distinctUntilChanged()
         .map { countryCode ->
             countryCode?.let {
                 phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)

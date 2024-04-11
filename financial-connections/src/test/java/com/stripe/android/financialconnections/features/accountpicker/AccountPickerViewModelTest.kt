@@ -232,6 +232,7 @@ internal class AccountPickerViewModelTest {
         verify(saveAccountToLink, never()).existing(
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
+            shouldPollAccountNumbers = any(),
         )
 
         navigationManager.assertNavigatedTo(
@@ -264,6 +265,7 @@ internal class AccountPickerViewModelTest {
         verify(saveAccountToLink, never()).existing(
             consumerSessionClientSecret = any(),
             selectedAccounts = any(),
+            shouldPollAccountNumbers = any(),
         )
 
         navigationManager.assertNavigatedTo(
@@ -298,7 +300,8 @@ internal class AccountPickerViewModelTest {
 
         verify(saveAccountToLink).existing(
             consumerSessionClientSecret = consumerSession.clientSecret,
-            selectedAccounts = setOf("id_1", "id2"),
+            selectedAccounts = accounts.data,
+            shouldPollAccountNumbers = true,
         )
 
         navigationManager.assertNavigatedTo(

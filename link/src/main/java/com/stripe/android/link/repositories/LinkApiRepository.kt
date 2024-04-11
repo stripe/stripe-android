@@ -1,5 +1,6 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
@@ -15,6 +16,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -32,7 +34,8 @@ internal class LinkApiRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val consumersApiService: ConsumersApiService,
     @IOContext private val workContext: CoroutineContext,
-    private val locale: Locale?
+    private val locale: Locale?,
+    private val errorReporter: ErrorReporter,
 ) : LinkRepository {
 
     override suspend fun lookupConsumer(
@@ -102,6 +105,8 @@ internal class LinkApiRepository @Inject constructor(
                 paymentMethodCreateParams = createParams,
                 originalParams = paymentMethodCreateParams,
             )
+        }.onFailure {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE, StripeException.create(it))
         }
     }
 
@@ -115,7 +120,9 @@ internal class LinkApiRepository @Inject constructor(
             consumerSessionClientSecret = consumerSessionClientSecret,
             id = id,
             requestOptions = buildRequestOptions(),
-        ).mapCatching { passthroughModePaymentMethodId ->
+        ).onFailure {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
+        }.map { passthroughModePaymentMethodId ->
             LinkPaymentDetails.Saved(
                 paymentDetails = ConsumerPaymentDetails.Passthrough(
                     id = passthroughModePaymentMethodId,

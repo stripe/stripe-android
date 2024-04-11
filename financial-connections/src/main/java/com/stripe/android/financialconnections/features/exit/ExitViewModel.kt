@@ -21,11 +21,13 @@ import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.TextResource
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class ExitViewModel @Inject constructor(
-    initialState: ExitState,
+internal class ExitViewModel @AssistedInject constructor(
+    @Assisted initialState: ExitState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val getManifest: GetManifest,
     private val coordinator: NativeAuthFlowCoordinator,
@@ -91,14 +93,16 @@ internal class ExitViewModel @Inject constructor(
         )
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ExitState): ExitViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent, arguments: Bundle?) = viewModelFactory {
             initializer {
-                parentComponent
-                    .exitSubcomponent
-                    .create(ExitState(arguments))
-                    .viewModel
+                parentComponent.exitViewModelFactory.create(ExitState(arguments))
             }
         }
 

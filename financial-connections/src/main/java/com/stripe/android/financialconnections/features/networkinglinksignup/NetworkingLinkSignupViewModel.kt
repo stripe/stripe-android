@@ -21,6 +21,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
+import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
@@ -42,6 +43,9 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
@@ -49,11 +53,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
-import javax.inject.Inject
 import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
-internal class NetworkingLinkSignupViewModel @Inject constructor(
-    initialState: NetworkingLinkSignupState,
+internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
+    @Assisted initialState: NetworkingLinkSignupState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
@@ -221,13 +224,15 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
             val state = stateFlow.value
             val selectedAccounts = getCachedAccounts()
+            val manifest = getManifest()
             val phoneController = state.payload()!!.phoneController
             require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
             saveAccountToLink.new(
                 country = phoneController.getCountryCode(),
                 email = state.validEmail!!,
                 phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
-                selectedAccounts = selectedAccounts.map { it.id }.toSet(),
+                selectedAccounts = selectedAccounts,
+                shouldPollAccountNumbers = manifest.isDataFlow,
             )
         }.execute { copy(saveAccountToLink = it) }
     }
@@ -277,15 +282,17 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingLinkSignupState): NetworkingLinkSignupViewModel
+    }
+
     companion object {
 
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .networkingLinkSignupSubcomponent
-                        .create(NetworkingLinkSignupState())
-                        .viewModel
+                    parentComponent.networkingLinkSignupViewModelFactory.create(NetworkingLinkSignupState())
                 }
             }
 

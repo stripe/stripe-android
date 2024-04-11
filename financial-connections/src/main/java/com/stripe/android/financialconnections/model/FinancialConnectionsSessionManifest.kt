@@ -257,6 +257,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "reset")
         RESET("reset"),
 
+        @SerialName(value = "account_update_required")
+        ACCOUNT_UPDATE_REQUIRED("account_update_required"),
+
         @SerialName(value = "exit")
         EXIT("exit");
 

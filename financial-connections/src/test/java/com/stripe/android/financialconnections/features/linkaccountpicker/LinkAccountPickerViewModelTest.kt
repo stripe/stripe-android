@@ -14,7 +14,6 @@ import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
-import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -49,7 +48,6 @@ class LinkAccountPickerViewModelTest {
     private val navigationManager = TestNavigationManager()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
-    private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
     private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -65,13 +63,12 @@ class LinkAccountPickerViewModelTest {
         getCachedConsumerSession = getCachedConsumerSession,
         fetchNetworkedAccounts = fetchNetworkedAccounts,
         selectNetworkedAccounts = selectNetworkedAccounts,
-        updateLocalManifest = updateLocalManifest,
         updateCachedAccounts = updateCachedAccounts,
         initialState = state,
         handleClickableUrl = mock(),
-        coreAuthorizationPendingNetworkingRepair = mock(),
         nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
         presentNoticeSheet = mock(),
+        presentUpdateRequiredSheet = mock(),
     )
 
     @Test
@@ -158,7 +155,7 @@ class LinkAccountPickerViewModelTest {
         val viewModel = buildViewModel(LinkAccountPickerState())
 
         viewModel.onAccountClick(selectedAccount)
-        viewModel.onSelectAccountClick()
+        viewModel.onSelectAccountsClick()
 
         with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
             verify(updateCachedAccounts).invoke(capture())
@@ -201,13 +198,12 @@ class LinkAccountPickerViewModelTest {
             val viewModel = buildViewModel(LinkAccountPickerState())
 
             viewModel.onAccountClick(selectedAccount)
-            viewModel.onSelectAccountClick()
+            viewModel.onSelectAccountsClick()
 
             with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
                 verify(updateCachedAccounts).invoke(capture())
                 assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
             }
-            verifyNoInteractions(updateLocalManifest)
             verifyNoInteractions(selectNetworkedAccounts)
             navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }

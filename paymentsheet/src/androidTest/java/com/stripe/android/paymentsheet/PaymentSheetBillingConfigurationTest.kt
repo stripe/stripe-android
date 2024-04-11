@@ -5,6 +5,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
@@ -82,11 +83,11 @@ internal class PaymentSheetBillingConfigurationTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            bodyPart("payment_method_data%5Bbilling_details%5D%5Bname%5D", "Jane+Doe"),
-            bodyPart("payment_method_data%5Bbilling_details%5D%5Bemail%5D", "mail%40mail.com"),
-            bodyPart("payment_method_data%5Bbilling_details%5D%5Bphone%5D", "%2B13105551234"),
-            bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bcountry%5D", "US"),
-            bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bpostal_code%5D", "94111"),
+            bodyPart(urlEncode("payment_method_data[billing_details][name]"), urlEncode("Jane Doe")),
+            bodyPart(urlEncode("payment_method_data[billing_details][email]"), urlEncode("mail@mail.com")),
+            bodyPart(urlEncode("payment_method_data[billing_details][phone]"), urlEncode("+13105551234")),
+            bodyPart(urlEncode("payment_method_data[billing_details][address][country]"), "US"),
+            bodyPart(urlEncode("payment_method_data[billing_details][address][postal_code]"), "94111"),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }
@@ -154,11 +155,11 @@ internal class PaymentSheetBillingConfigurationTest {
         networkRule.enqueue(
             method("POST"),
             path("/v1/payment_intents/pi_example/confirm"),
-            not(bodyPart("payment_method_data%5Bbilling_details%5D%5Bname%5D", "Jenny Rosen")),
-            not(bodyPart("payment_method_data%5Bbilling_details%5D%5Bemail%5D", "foo%40bar.com")),
-            not(bodyPart("payment_method_data%5Bbilling_details%5D%5Bphone%5D", "%2B13105551234")),
-            not(bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bcountry%5D", "US")),
-            not(bodyPart("payment_method_data%5Bbilling_details%5D%5Baddress%5D%5Bpostal_code%5D", "94111")),
+            not(bodyPart(urlEncode("payment_method_data[billing_details][name]"), urlEncode("Jenny Rosen"))),
+            not(bodyPart(urlEncode("payment_method_data[billing_details][email]"), urlEncode("foo@bar.com"))),
+            not(bodyPart(urlEncode("payment_method_data[billing_details][phone]"), urlEncode("+13105551234"))),
+            not(bodyPart(urlEncode("payment_method_data[billing_details][address][country]"), "US")),
+            not(bodyPart(urlEncode("payment_method_data[billing_details][address][postal_code]"), "94111")),
         ) { response ->
             response.testBodyFromFile("payment-intent-confirm.json")
         }

@@ -11,11 +11,13 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.error
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.parcelize.Parcelize
-import javax.inject.Inject
 
-internal class BankAuthRepairViewModel @Inject constructor(
-    initialState: SharedPartnerAuthState,
+internal class BankAuthRepairViewModel @AssistedInject constructor(
+    @Assisted initialState: SharedPartnerAuthState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
 ) : FinancialConnectionsViewModel<SharedPartnerAuthState>(initialState, nativeAuthFlowCoordinator) {
 
@@ -30,14 +32,16 @@ internal class BankAuthRepairViewModel @Inject constructor(
     @Parcelize
     data class Args(val pane: Pane) : Parcelable
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: SharedPartnerAuthState): BankAuthRepairViewModel
+    }
+
     internal companion object {
         fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .bankAuthRepairSubcomponent
-                        .create(SharedPartnerAuthState(Args(PANE)))
-                        .viewModel
+                    parentComponent.bankAuthRepairViewModelFactory.create(SharedPartnerAuthState(Args(PANE)))
                 }
             }
 

@@ -37,9 +37,9 @@ internal class MBDetector private constructor(settings: MBSettings) {
         DOCUMENT_FRAMING_CAMERA_ORIENTATION_UNSUITABLE(R.string.stripe_rotate_document),
         DOCUMENT_TOO_CLOSE_TO_FRAME_EDGE(R.string.stripe_move_farther),
         LIGHTING_TOO_DARK(R.string.stripe_increase_lighting),
-        LIGHTING_TOO_BRIGHT(R.string.stripe_decrease_lighting),
+        LIGHTING_TOO_BRIGHT(R.string.stripe_decrease_lighting_2),
         BLUR_DETECTED(R.string.stripe_reduce_blur),
-        GLARE_DETECTED(R.string.stripe_reduce_glare),
+        GLARE_DETECTED(R.string.stripe_reduce_glare_2),
         OCCLUDED_BY_HAND(R.string.stripe_keep_fully_visible),
         WRONG_SIDE(R.string.stripe_position_id_back),
         UNKNOWN(null)

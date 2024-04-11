@@ -53,6 +53,10 @@
   <string name="stripe_paymentsheet_or_pay_using">または別の方法で支払う</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">または、カードで支払う</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">または次を使用:</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">またはカードを使用</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">支払う: </string>
   <!-- Title shown above a section containing various payment options -->

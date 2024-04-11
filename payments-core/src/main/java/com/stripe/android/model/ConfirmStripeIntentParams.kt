@@ -27,3 +27,14 @@ sealed interface ConfirmStripeIntentParams : StripeParamsModel, Parcelable {
         internal const val PARAM_MANDATE_DATA = "mandate_data"
     }
 }
+
+internal fun ConfirmStripeIntentParams.createParams(): PaymentMethodCreateParams? {
+    return when (this) {
+        is ConfirmPaymentIntentParams -> {
+            paymentMethodCreateParams
+        }
+        is ConfirmSetupIntentParams -> {
+            paymentMethodCreateParams
+        }
+    }
+}

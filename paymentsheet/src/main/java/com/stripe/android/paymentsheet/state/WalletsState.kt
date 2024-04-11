@@ -42,6 +42,7 @@ internal data class WalletsState(
             isCompleteFlow: Boolean,
             onGooglePayPressed: () -> Unit,
             onLinkPressed: () -> Unit,
+            isSetupIntent: Boolean
         ): WalletsState? {
             if (!screen.showsWalletsHeader(isCompleteFlow)) {
                 return null
@@ -73,10 +74,14 @@ internal data class WalletsState(
                     link = link,
                     googlePay = googlePay,
                     buttonsEnabled = buttonsEnabled,
-                    dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code) {
+                    dividerTextResource = if (paymentMethodTypes.singleOrNull() == Card.code && !isSetupIntent) {
                         R.string.stripe_paymentsheet_or_pay_with_card
-                    } else {
+                    } else if (paymentMethodTypes.singleOrNull() == null && !isSetupIntent) {
                         R.string.stripe_paymentsheet_or_pay_using
+                    } else if (paymentMethodTypes.singleOrNull() == Card.code && isSetupIntent) {
+                        R.string.stripe_paymentsheet_or_use_a_card
+                    } else {
+                        R.string.stripe_paymentsheet_or_use
                     },
                     onGooglePayPressed = onGooglePayPressed,
                     onLinkPressed = onLinkPressed,

@@ -27,7 +27,7 @@ internal class KonbiniAuthenticator @Inject constructor(
     ) {
         val detailsData = authenticatable.nextActionData as NextActionData.DisplayKonbiniDetails
         if (detailsData.hostedVoucherUrl == null) {
-            ErrorReporter.createFallbackInstance(context, emptySet()).report(
+            ErrorReporter.createFallbackInstance(context).report(
                 ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
                 additionalNonPiiParams = mapOf("lpm" to "konbini")
             )

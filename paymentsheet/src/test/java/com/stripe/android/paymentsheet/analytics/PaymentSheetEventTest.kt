@@ -919,7 +919,6 @@ class PaymentSheetEventTest {
                 "request_id" to "request_123",
                 "error_type" to "network_error",
                 "error_code" to "error_123",
-                "status_code" to "0"
             )
         )
     }

@@ -1,6 +1,6 @@
 package com.stripe.android.financialconnections.features.linkstepupverification
 
-import androidx.lifecycle.ViewModelProvider.Factory
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -21,8 +21,6 @@ import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVeri
 import com.stripe.android.financialconnections.domain.MarkLinkStepUpVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
-import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
-import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationState.Payload
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -41,13 +39,15 @@ import com.stripe.android.model.VerificationType
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.OTPController
 import com.stripe.android.uicore.elements.OTPElement
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import getRedactedPhoneNumber
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import javax.inject.Inject
 
-internal class LinkStepUpVerificationViewModel @Inject constructor(
-    initialState: LinkStepUpVerificationState,
+internal class LinkStepUpVerificationViewModel @AssistedInject constructor(
+    @Assisted initialState: LinkStepUpVerificationState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getManifest: GetManifest,
@@ -55,9 +55,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
     private val confirmVerification: ConfirmVerification,
     private val selectNetworkedAccounts: SelectNetworkedAccounts,
     private val getCachedAccounts: GetCachedAccounts,
-    private val updateLocalManifest: UpdateLocalManifest,
     private val markLinkStepUpVerified: MarkLinkStepUpVerified,
-    private val updateCachedAccounts: UpdateCachedAccounts,
     private val navigationManager: NavigationManager,
     private val logger: Logger
 ) : FinancialConnectionsViewModel<LinkStepUpVerificationState>(initialState, nativeAuthFlowCoordinator) {
@@ -154,7 +152,7 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
         )
 
         // Get accounts selected in networked accounts picker.
-        val selectedAccount = getCachedAccounts().first()
+        val selectedAccounts = getCachedAccounts()
 
         // Mark session as verified.
         runCatching { markLinkStepUpVerified() }
@@ -170,15 +168,11 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             .getOrThrow()
 
         // Mark networked account as selected.
-        val activeInstitution = selectNetworkedAccounts(
+        selectNetworkedAccounts(
             consumerSessionClientSecret = payload.consumerSessionClientSecret,
-            selectedAccountIds = setOf(selectedAccount.id),
+            selectedAccountIds = selectedAccounts.map { it.id }.toSet(),
         )
 
-        // Updates manifest active institution after account networked.
-        updateLocalManifest { it.copy(activeInstitution = activeInstitution.data.firstOrNull()) }
-        // Updates cached accounts with the one selected.
-        updateCachedAccounts { listOf(selectedAccount) }
         navigationManager.tryNavigateTo(Destination.Success(referrer = PANE))
     }.execute { copy(confirmVerification = it) }
 
@@ -216,15 +210,17 @@ internal class LinkStepUpVerificationViewModel @Inject constructor(
             )
         }
 
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: LinkStepUpVerificationState): LinkStepUpVerificationViewModel
+    }
+
     companion object {
 
-        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): Factory =
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
             viewModelFactory {
                 initializer {
-                    parentComponent
-                        .linkStepUpVerificationSubcomponent
-                        .create(LinkStepUpVerificationState())
-                        .viewModel
+                    parentComponent.linkStepUpVerificationViewModelFactory.create(LinkStepUpVerificationState())
                 }
             }
 
