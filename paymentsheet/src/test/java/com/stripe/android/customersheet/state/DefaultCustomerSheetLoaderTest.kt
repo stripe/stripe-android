@@ -28,6 +28,7 @@ import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
@@ -41,6 +42,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.milliseconds
 
+@Suppress("LargeClass")
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(RobolectricTestRunner::class)
 class DefaultCustomerSheetLoaderTest {
@@ -608,7 +610,7 @@ class DefaultCustomerSheetLoaderTest {
     }
 
     @Test
-    fun `On failed to load, show report error`() = runTest {
+    fun `On failed to load elements session, show report error`() = runTest {
         val errorReporter = FakeErrorReporter()
 
         val loader = createCustomerSheetLoader(
@@ -628,7 +630,53 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(
             errorReporter.getLoggedErrors().first()
         ).isEqualTo(
-            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_LOAD_FAILURE.eventName
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE.eventName
+        )
+    }
+
+    @Test
+    fun `On failed to load payment methods, show report error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        val loader = createCustomerSheetLoader(
+            customerAdapter = FakeCustomerAdapter(
+                paymentMethods = CustomerAdapter.Result.failure(
+                    cause = APIConnectionException("Connection failure!"),
+                    displayMessage = null
+                )
+            ),
+            errorReporter = errorReporter,
+        )
+
+        loader.load(
+            configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
+        )
+
+        assertThat(
+            errorReporter.getLoggedErrors().first()
+        ).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE.eventName
+        )
+    }
+
+    @Test
+    fun `On timeout while waiting for 'CustomerAdapter' instance, show report error`() = runTest {
+        val errorReporter = FakeErrorReporter()
+
+        val loader = createCustomerSheetLoader(
+            customerAdapterProvider = CompletableDeferred(),
+            errorReporter = errorReporter,
+        )
+
+        // Timeouts are skipped in test coroutine contexts so the timeout failure is immediately returned
+        loader.load(
+            configuration = CustomerSheet.Configuration(merchantDisplayName = "Merchant, Inc.")
+        )
+
+        assertThat(
+            errorReporter.getLoggedErrors().first()
+        ).isEqualTo(
+            ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND.eventName
         )
     }
 
@@ -647,6 +695,33 @@ class DefaultCustomerSheetLoaderTest {
         lpmRepository: LpmRepository = this.lpmRepository,
         errorReporter: ErrorReporter = FakeErrorReporter(),
     ): CustomerSheetLoader {
+        return createCustomerSheetLoader(
+            customerAdapterProvider = CompletableDeferred(customerAdapter),
+            isGooglePayReady = isGooglePayReady,
+            isLiveModeProvider = isLiveModeProvider,
+            isCbcEligible = isCbcEligible,
+            isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
+            elementsSessionRepository = elementsSessionRepository,
+            lpmRepository = lpmRepository,
+            errorReporter = errorReporter,
+        )
+    }
+
+    private fun createCustomerSheetLoader(
+        customerAdapterProvider: Deferred<CustomerAdapter>,
+        isGooglePayReady: Boolean = true,
+        isLiveModeProvider: () -> Boolean = { false },
+        isCbcEligible: Boolean = false,
+        isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = IsFinancialConnectionsAvailable { false },
+        elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
+            stripeIntent = STRIPE_INTENT,
+            error = null,
+            linkSettings = null,
+            isCbcEligible = isCbcEligible,
+        ),
+        lpmRepository: LpmRepository = this.lpmRepository,
+        errorReporter: ErrorReporter = FakeErrorReporter(),
+    ): CustomerSheetLoader {
         return DefaultCustomerSheetLoader(
             isLiveModeProvider = isLiveModeProvider,
             googlePayRepositoryFactory = {
@@ -655,7 +730,7 @@ class DefaultCustomerSheetLoaderTest {
             elementsSessionRepository = elementsSessionRepository,
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
-            customerAdapterProvider = CompletableDeferred(customerAdapter),
+            customerAdapterProvider = customerAdapterProvider,
             errorReporter = errorReporter,
         )
     }

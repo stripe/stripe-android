@@ -90,7 +90,13 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
-        CUSTOMER_SHEET_LOAD_FAILURE(
+        CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.load_failure"
+        ),
+        CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.load_failure"
+        ),
+        CUSTOMER_SHEET_ADAPTER_NOT_FOUND(
             eventName = "elements.customer_sheet.load_failure"
         ),
         PLACES_FIND_AUTOCOMPLETE_ERROR(

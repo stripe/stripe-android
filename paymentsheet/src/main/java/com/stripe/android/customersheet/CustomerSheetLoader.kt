@@ -68,19 +68,33 @@ internal class DefaultCustomerSheetLoader(
                     "Couldn't find an instance of CustomerAdapter. " +
                         "Are you instantiating CustomerSheet unconditionally in your app?"
                 },
-            ).getOrThrow()
+            ).onFailure {
+                errorReporter.report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ADAPTER_NOT_FOUND,
+                    stripeException = StripeException.create(it)
+                )
+            }.getOrThrow()
 
-            val elementsSessionWithMetadata = retrieveElementsSession(configuration, customerAdapter).getOrThrow()
+            val elementsSessionWithMetadata = retrieveElementsSession(
+                configuration = configuration,
+                customerAdapter = customerAdapter
+            ).onFailure {
+                errorReporter.report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE,
+                    stripeException = StripeException.create(it)
+                )
+            }.getOrThrow()
+
             loadPaymentMethods(
                 customerAdapter = customerAdapter,
                 configuration = configuration,
                 elementsSessionWithMetadata = elementsSessionWithMetadata,
-            ).getOrThrow()
-        }.onFailure {
-            errorReporter.report(
-                errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_LOAD_FAILURE,
-                stripeException = StripeException.create(it)
-            )
+            ).onFailure {
+                errorReporter.report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE,
+                    stripeException = StripeException.create(it)
+                )
+            }.getOrThrow()
         }
     }
 
