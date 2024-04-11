@@ -176,23 +176,16 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        private val CARTES_BANCAIRES_ACCOUNT_RANGES = setOf(
+        @VisibleForTesting
+        val CARTES_BANCAIRES_ACCOUNT_RANGES = setOf(
             BinRange(
-                low = "2221000000000000",
-                high = "2720000000000000"
+                low = "4000002500001001",
+                high = "4000002500001001"
             ),
             BinRange(
-                low = "4000000000000000",
-                high = "4999999999999999"
+                low = "5555552500001001",
+                high = "5555552500001001"
             ),
-            BinRange(
-                low = "5000000000000000",
-                high = "5900000000000000"
-            ),
-            BinRange(
-                low = "6700000000000000",
-                high = "6799999999999999"
-            )
         ).map {
             AccountRange(
                 binRange = it,
