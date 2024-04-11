@@ -43,17 +43,6 @@ class CardAccountRangeService(
             return
         }
 
-        val testAccountRanges = if (isCbcEligible()) {
-            CbcTestCardDelegate.onCardNumberChanged(cardNumber)
-        } else {
-            emptyList()
-        }
-
-        if (testAccountRanges.isNotEmpty()) {
-            updateAccountRangesResult(testAccountRanges)
-            return
-        }
-
         val staticAccountRanges = staticCardAccountRanges.filter(cardNumber)
 
         if (isCbcEligible) {
