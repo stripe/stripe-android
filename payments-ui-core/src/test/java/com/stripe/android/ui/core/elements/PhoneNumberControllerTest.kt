@@ -16,7 +16,7 @@ internal class PhoneNumberControllerTest {
 
     @Test
     fun `when new country is selected then phoneNumberFormatter is updated`() = runTest {
-        val phoneNumberController = PhoneNumberController(
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             initiallySelectedCountryCode = "US",
             overrideCountryCodes = setOf("US", "BR"),
         )
@@ -58,7 +58,7 @@ internal class PhoneNumberControllerTest {
 
     @Test
     fun `incomplete input is marked correctly if field is not optional`() = runTest {
-        val phoneNumberController = PhoneNumberController()
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController()
 
         phoneNumberController.isComplete.test {
             assertThat(awaitItem()).isFalse()
@@ -73,7 +73,7 @@ internal class PhoneNumberControllerTest {
 
     @Test
     fun `any input is marked complete if field is optional`() = runTest {
-        val phoneNumberController = PhoneNumberController(
+        val phoneNumberController = PhoneNumberController.createPhoneNumberController(
             showOptionalLabel = true,
             acceptAnyInput = true,
         )
