@@ -131,6 +131,7 @@ class PhoneNumberController(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null,
             showOptionalLabel: Boolean = false,
+            acceptAnyInput: Boolean = false
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
 
@@ -155,12 +156,14 @@ class PhoneNumberController(
                     initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
                     showOptionalLabel = showOptionalLabel,
+                    acceptAnyInput = acceptAnyInput
                 )
             } else {
                 PhoneNumberController(
                     initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode,
                     showOptionalLabel = showOptionalLabel,
+                    acceptAnyInput = acceptAnyInput
                 )
             }
         }

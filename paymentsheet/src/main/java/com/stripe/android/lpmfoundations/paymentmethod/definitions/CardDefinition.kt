@@ -150,7 +150,10 @@ private fun contactInformationElement(
         ).takeIf { collectEmail },
         PhoneNumberElement(
             identifier = IdentifierSpec.Phone,
-            controller = PhoneNumberController(initialValues[IdentifierSpec.Phone] ?: "")
+            controller = PhoneNumberController.createPhoneNumberController(
+                initialValue = initialValues[IdentifierSpec.Phone] ?: "",
+                initiallySelectedCountryCode = initialValues[IdentifierSpec.Country]
+            )
         ).takeIf { collectPhone },
     )
 

@@ -54,8 +54,9 @@ open class AddressElement constructor(
 
     private val phoneNumberElement = PhoneNumberElement(
         IdentifierSpec.Phone,
-        PhoneNumberController(
-            initialPhoneNumber = rawValuesMap[IdentifierSpec.Phone] ?: "",
+        PhoneNumberController.createPhoneNumberController(
+            initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
+            initiallySelectedCountryCode = rawValuesMap[IdentifierSpec.Country],
             showOptionalLabel = addressType.phoneNumberState == PhoneNumberState.OPTIONAL,
             acceptAnyInput = true,
         )
