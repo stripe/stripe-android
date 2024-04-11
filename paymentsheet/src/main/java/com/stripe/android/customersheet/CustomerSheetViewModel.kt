@@ -795,7 +795,7 @@ internal class CustomerSheetViewModel(
                         handleViewAction(CustomerSheetViewAction.OnCollectBankAccountResult(it))
                     },
                     onConfirmUSBankAccount = {
-                        handleViewAction(CustomerSheetViewAction.OnConfirmUSBankAccount(it))
+//                        handleViewAction(CustomerSheetViewAction.OnConfirmUSBankAccount(it))
                     },
                     onUpdatePrimaryButtonUIState = {
                         handleViewAction(CustomerSheetViewAction.OnUpdateCustomButtonUIState(it))

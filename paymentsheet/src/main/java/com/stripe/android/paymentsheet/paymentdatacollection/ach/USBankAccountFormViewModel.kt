@@ -188,8 +188,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         flowOf(null)
     }
 
-    private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)
-    val result: Flow<PaymentSelection.New.USBankAccount?> = _result
+    private val _result = MutableSharedFlow<PaymentSelection?>(replay = 1)
+    val result: Flow<PaymentSelection?> = _result
     private val _collectBankAccountResult = MutableSharedFlow<CollectBankAccountResultInternal?>(replay = 1)
     val collectBankAccountResult: Flow<CollectBankAccountResultInternal?> = _collectBankAccountResult
 
@@ -284,7 +284,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                                 livemode = false,
                                 supportedPaymentMethodTypes = emptyList()
                             ),
-                            financialConnectionsSessionId = "1234",
+                            financialConnectionsSessionId = result.response.paymentMethodId!!,
                             intentId = result.response.intent?.id,
                             primaryButtonText = buildPrimaryButtonText(),
                             mandateText = buildMandateText(),
@@ -340,11 +340,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 collectBankAccount(args.clientSecret)
             }
             is USBankAccountFormScreenState.MandateCollection ->
-                updatePaymentSelection(
-                    linkAccountId = screenState.financialConnectionsSessionId,
+                updateID(
+                    paymentMethodId = screenState.financialConnectionsSessionId,
                     bankName = screenState.paymentAccount.institutionName,
                     last4 = screenState.paymentAccount.last4
                 )
+//                updatePaymentSelection(
+//                    linkAccountId = screenState.financialConnectionsSessionId,
+//                    bankName = screenState.paymentAccount.institutionName,
+//                    last4 = screenState.paymentAccount.last4
+//                )
             is USBankAccountFormScreenState.VerifyWithMicrodeposits ->
                 updatePaymentSelection(
                     linkAccountId = screenState.financialConnectionsSessionId,
@@ -361,6 +366,28 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 }
             }
         }
+    }
+
+    private fun updateID(paymentMethodId: String, bankName: String, last4: String?) {
+        if (bankName == null || last4 == null) return
+
+        val paymentSelection = PaymentSelection.Saved(
+            paymentMethod = PaymentMethod(
+                id = paymentMethodId,
+                type = PaymentMethod.Type.Link,
+                code = PaymentMethod.Type.Link.code,
+                created = null,
+                liveMode = false,
+                billingDetails = PaymentMethod.BillingDetails(
+                    name = name.value,
+                    email = email.value,
+                    phone = phone.value,
+                    address = address.value,
+                ),
+            )
+        )
+        _result.tryEmit(paymentSelection)
+        shouldReset = true
     }
 
     fun reset(@StringRes error: Int? = null) {
