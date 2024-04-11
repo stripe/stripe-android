@@ -7,6 +7,7 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
+import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
@@ -252,6 +253,22 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             }.copy(
                 authorizationAction = null,
             ),
+            customOperations = {
+                testDriver.pressSelection()
+                testDriver.scrollToBottom()
+            }
+        )
+    }
+
+    @Test
+    fun testDefaultBillingAndPhoneDetails() {
+        testDriver.screenshotRegression(
+            testParameters = TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CollectPhoneSettingsDefinition] = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+            },
             customOperations = {
                 testDriver.pressSelection()
                 testDriver.scrollToBottom()
