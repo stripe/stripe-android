@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
@@ -52,7 +53,8 @@ open class AddressElement constructor(
         onNavigation = (addressType as? AddressType.ShippingCondensed)?.onNavigation
     )
 
-    private val phoneNumberElement = PhoneNumberElement(
+    @VisibleForTesting
+    val phoneNumberElement = PhoneNumberElement(
         IdentifierSpec.Phone,
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
