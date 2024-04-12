@@ -88,4 +88,8 @@ internal class CollectBankAccountForInstantDebitsLauncher(
     override fun unregister() {
         hostActivityLauncher.unregister()
     }
+
+    companion object {
+
+    }
 }

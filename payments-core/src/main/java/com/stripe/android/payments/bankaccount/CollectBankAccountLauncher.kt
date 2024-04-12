@@ -96,7 +96,7 @@ interface CollectBankAccountLauncher {
             )
         }
 
-        //TODO make this expose [CollectBankAccountResult] once the make the intent field nullable (breaking change)
+        // TODO make this expose [CollectBankAccountResult] once the make the intent field nullable (breaking change)
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
