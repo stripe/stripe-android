@@ -9,12 +9,12 @@ import org.mockito.kotlin.verify
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class StripeCollectBankAccountLauncherTest {
+class CollectBankAccountForACHLauncherTest {
 
     private val mockHostActivityLauncher =
         mock<ActivityResultLauncher<CollectBankAccountContract.Args>>()
 
-    private val launcher = StripeCollectBankAccountLauncher(mockHostActivityLauncher)
+    private val launcher = CollectBankAccountForACHLauncher(mockHostActivityLauncher)
 
     @Test
     fun `presentWithPaymentIntent - launches CollectBankAccountActivity with correct arguments`() {

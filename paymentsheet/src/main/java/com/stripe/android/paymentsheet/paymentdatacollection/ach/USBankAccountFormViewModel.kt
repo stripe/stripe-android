@@ -271,15 +271,15 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _collectBankAccountResult.tryEmit(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
+                val usBankAccountData = requireNotNull(result.response.usBankAccountData)
                 when (
-                    val paymentAccount =
-                        result.response.financialConnectionsSession.paymentAccount
+                    val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount
                 ) {
                     is BankAccount -> {
                         _currentScreenState.update {
                             USBankAccountFormScreenState.VerifyWithMicrodeposits(
                                 paymentAccount = paymentAccount,
-                                financialConnectionsSessionId = result.response.financialConnectionsSession.id,
+                                financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                                 intentId = result.response.intent?.id,
                                 primaryButtonText = buildPrimaryButtonText(),
                                 mandateText = buildMandateText(),
@@ -291,7 +291,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             USBankAccountFormScreenState.MandateCollection(
                                 paymentAccount = paymentAccount,
                                 financialConnectionsSessionId =
-                                result.response.financialConnectionsSession.id,
+                                usBankAccountData.financialConnectionsSession.id,
                                 intentId = result.response.intent?.id,
                                 primaryButtonText = buildPrimaryButtonText(),
                                 mandateText = buildMandateText(),

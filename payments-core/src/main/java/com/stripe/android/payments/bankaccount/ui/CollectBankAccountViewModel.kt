@@ -10,13 +10,13 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
-import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal.USBankAccountData
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Cancelled
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Completed
@@ -55,59 +55,59 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 
     private suspend fun createFinancialConnectionsSession() {
-        when (val configuration = args.configuration) {
-            is CollectBankAccountConfiguration.USBankAccount -> when (args) {
-                is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
-                    createFinancialConnectionsSession.forDeferredPayments(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
-                        elementsSessionId = args.elementsSessionId,
-                        customerId = args.customerId,
-                        onBehalfOf = args.onBehalfOf,
-                        amount = args.amount,
-                        currency = args.currency
-                    )
-                is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
-                    createFinancialConnectionsSession.forDeferredPayments(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
-                        elementsSessionId = args.elementsSessionId,
-                        customerId = args.customerId,
-                        onBehalfOf = args.onBehalfOf,
-                        amount = null,
-                        currency = null
-                    )
-                is CollectBankAccountContract.Args.ForPaymentIntent ->
-                    createFinancialConnectionsSession.forPaymentIntent(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
-                        clientSecret = args.clientSecret,
-                        customerName = configuration.name,
-                        customerEmail = configuration.email
-                    )
-                is CollectBankAccountContract.Args.ForSetupIntent ->
-                    createFinancialConnectionsSession.forSetupIntent(
-                        publishableKey = args.publishableKey,
-                        stripeAccountId = args.stripeAccountId,
-                        clientSecret = args.clientSecret,
-                        customerName = configuration.name,
-                        customerEmail = configuration.email
-                    )
-            }
-                .mapCatching { requireNotNull(it.clientSecret) }
-                .onSuccess { financialConnectionsSessionSecret: String ->
-                    logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
-                    hasLaunched = true
-                    _viewEffect.emit(
-                        OpenConnectionsFlow(
-                            financialConnectionsSessionSecret = financialConnectionsSessionSecret,
-                            publishableKey = args.publishableKey,
-                            stripeAccountId = args.stripeAccountId
-                        )
-                    )
-                }
-                .onFailure { finishWithError(it) }
+        // TODO if args.configuration == instant debits, then start instant debits flow
+        when (args) {
+            is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
+                createFinancialConnectionsSession.forDeferredPayments(
+                    publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
+                    elementsSessionId = args.elementsSessionId,
+                    customerId = args.customerId,
+                    onBehalfOf = args.onBehalfOf,
+                    amount = args.amount,
+                    currency = args.currency
+                )
+
+            is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
+                createFinancialConnectionsSession.forDeferredPayments(
+                    publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
+                    elementsSessionId = args.elementsSessionId,
+                    customerId = args.customerId,
+                    onBehalfOf = args.onBehalfOf,
+                    amount = null,
+                    currency = null
+                )
+
+            is CollectBankAccountContract.Args.ForPaymentIntent ->
+                createFinancialConnectionsSession.forPaymentIntent(
+                    publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
+                    clientSecret = args.clientSecret,
+                    configuration = args.configuration
+                )
+
+            is CollectBankAccountContract.Args.ForSetupIntent ->
+                createFinancialConnectionsSession.forSetupIntent(
+                    publishableKey = args.publishableKey,
+                    stripeAccountId = args.stripeAccountId,
+                    clientSecret = args.clientSecret,
+                    configuration = args.configuration
+                )
         }
+            .mapCatching { requireNotNull(it.clientSecret) }
+            .onSuccess { financialConnectionsSessionSecret: String ->
+                logger.debug("Bank account session created! $financialConnectionsSessionSecret.")
+                hasLaunched = true
+                _viewEffect.emit(
+                    OpenConnectionsFlow(
+                        financialConnectionsSessionSecret = financialConnectionsSessionSecret,
+                        publishableKey = args.publishableKey,
+                        stripeAccountId = args.stripeAccountId
+                    )
+                )
+            }
+            .onFailure { finishWithError(it) }
     }
 
     fun onConnectionsResult(result: FinancialConnectionsSheetResult) {
@@ -122,7 +122,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     if (args.attachToIntent) {
                         attachFinancialConnectionsSessionToIntent(result.financialConnectionsSession)
                     } else {
-                        finishWithFinancialConnectionsSession(result.financialConnectionsSession)
+                        finishWithUsBankAccountResult(result.financialConnectionsSession)
                     }
             }
         }
@@ -132,7 +132,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithResult(result))
     }
 
-    private fun finishWithFinancialConnectionsSession(
+    private fun finishWithUsBankAccountResult(
         financialConnectionsSession: FinancialConnectionsSession
     ) {
         viewModelScope.launch {
@@ -149,8 +149,11 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     finishWithResult(
                         Completed(
                             CollectBankAccountResponseInternal(
-                                intent,
-                                financialConnectionsSession = financialConnectionsSession
+                                intent = intent,
+                                usBankAccountData = USBankAccountData(
+                                    financialConnectionsSession
+                                ),
+                                instantDebitsData = null,
                             )
                         )
                     )
@@ -161,8 +164,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private fun attachFinancialConnectionsSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
         viewModelScope.launch {
             when (args) {
-                is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
-                    error("Attach requires client secret")
+                is CollectBankAccountContract.Args.ForDeferredPaymentIntent,
                 is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
                     error("Attach requires client secret")
                 is CollectBankAccountContract.Args.ForPaymentIntent ->
@@ -180,11 +182,12 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         linkedAccountSessionId = financialConnectionsSession.id
                     )
             }
-                .mapCatching {
+                .mapCatching { stripeIntent ->
                     Completed(
                         CollectBankAccountResponseInternal(
-                            it,
-                            financialConnectionsSession
+                            stripeIntent,
+                            usBankAccountData = USBankAccountData(financialConnectionsSession),
+                            instantDebitsData = null
                         )
                     )
                 }

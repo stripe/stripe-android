@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.VerificationMethodParam
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import javax.inject.Inject
 
 internal class CreateFinancialConnectionsSession @Inject constructor(
@@ -20,9 +21,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
     suspend fun forPaymentIntent(
         publishableKey: String,
         clientSecret: String,
-        customerName: String,
-        customerEmail: String?,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        configuration: CollectBankAccountConfiguration,
     ): Result<FinancialConnectionsSession> {
         val paymentIntentClientSecretResult = runCatching {
             PaymentIntent.ClientSecret(clientSecret)
@@ -31,11 +31,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         return paymentIntentClientSecretResult.mapCatching { paymentIntentClientSecret ->
             stripeRepository.createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = paymentIntentClientSecret.paymentIntentId,
-                params = CreateFinancialConnectionsSessionParams(
-                    clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmailAddress = customerEmail
-                ),
+                params = configuration.toCreateSessionParams(clientSecret),
                 requestOptions = ApiRequest.Options(
                     publishableKey,
                     stripeAccountId
@@ -50,9 +46,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
     suspend fun forSetupIntent(
         publishableKey: String,
         clientSecret: String,
-        customerName: String,
-        customerEmail: String?,
-        stripeAccountId: String?
+        stripeAccountId: String?,
+        configuration: CollectBankAccountConfiguration,
     ): Result<FinancialConnectionsSession> {
         val setupIntentClientSecretResult = runCatching {
             SetupIntent.ClientSecret(clientSecret)
@@ -61,11 +56,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         return setupIntentClientSecretResult.mapCatching { setupIntentClientSecret ->
             stripeRepository.createSetupIntentFinancialConnectionsSession(
                 setupIntentId = setupIntentClientSecret.setupIntentId,
-                params = CreateFinancialConnectionsSessionParams(
-                    clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmailAddress = customerEmail
-                ),
+                params = configuration.toCreateSessionParams(clientSecret),
                 requestOptions = ApiRequest.Options(
                     publishableKey,
                     stripeAccountId
@@ -106,5 +97,21 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 stripeAccountId
             )
         )
+    }
+
+    private fun CollectBankAccountConfiguration.toCreateSessionParams(
+        clientSecret: String
+    ): CreateFinancialConnectionsSessionParams = when (this) {
+        is CollectBankAccountConfiguration.USBankAccount -> {
+            CreateFinancialConnectionsSessionParams(
+                clientSecret = clientSecret,
+                customerName = name,
+                customerEmailAddress = email
+            )
+        }
+
+        is CollectBankAccountConfiguration.InstantDebits -> {
+            TODO("Instant Debits not supported yet. This will create a FCSession for ID.")
+        }
     }
 }

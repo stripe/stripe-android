@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
-import com.stripe.android.payments.bankaccount.navigation.toExposedResult
+import com.stripe.android.payments.bankaccount.navigation.toUSBankAccountResult
 import kotlinx.parcelize.Parcelize
 
 /**
@@ -72,9 +72,9 @@ interface CollectBankAccountLauncher {
             activity: ComponentActivity,
             callback: (CollectBankAccountResult) -> Unit
         ): CollectBankAccountLauncher {
-            return StripeCollectBankAccountLauncher(
+            return CollectBankAccountForACHLauncher(
                 activity.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it.toExposedResult())
+                    callback(it.toUSBankAccountResult())
                 }
             )
         }
@@ -89,55 +89,20 @@ interface CollectBankAccountLauncher {
             fragment: Fragment,
             callback: (CollectBankAccountResult) -> Unit
         ): CollectBankAccountLauncher {
-            return StripeCollectBankAccountLauncher(
+            return CollectBankAccountForACHLauncher(
                 fragment.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it.toExposedResult())
+                    callback(it.toUSBankAccountResult())
                 }
             )
         }
 
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [ComponentActivity].
-         *
-         * This API registers an [ActivityResultLauncher] into the [ComponentActivity],  it needs
-         * to be called before the [ComponentActivity] is created.
-         */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun createInternal(
-            activity: ComponentActivity,
-            callback: (CollectBankAccountResultInternal) -> Unit
-        ): CollectBankAccountLauncher {
-            return StripeCollectBankAccountLauncher(
-                activity.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it)
-                }
-            )
-        }
-
-        /**
-         * Create a [CollectBankAccountLauncher] instance with [Fragment].
-         *
-         * This API registers an [ActivityResultLauncher] into the [Fragment],  it needs
-         * to be called before the [Fragment] is created.
-         */
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun createInternal(
-            fragment: Fragment,
-            callback: (CollectBankAccountResultInternal) -> Unit
-        ): CollectBankAccountLauncher {
-            return StripeCollectBankAccountLauncher(
-                fragment.registerForActivityResult(CollectBankAccountContract()) {
-                    callback(it)
-                }
-            )
-        }
-
+        //TODO make this expose [CollectBankAccountResult] once the make the intent field nullable (breaking change)
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
             callback: (CollectBankAccountResultInternal) -> Unit,
         ): CollectBankAccountLauncher {
-            return StripeCollectBankAccountLauncher(
+            return CollectBankAccountForACHLauncher(
                 activityResultRegistryOwner.activityResultRegistry.register(
                     LAUNCHER_KEY,
                     CollectBankAccountContract(),
@@ -148,97 +113,16 @@ interface CollectBankAccountLauncher {
     }
 }
 
-internal class StripeCollectBankAccountLauncher constructor(
-    private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
-) : CollectBankAccountLauncher {
-
-    override fun presentWithPaymentIntent(
-        publishableKey: String,
-        stripeAccountId: String?,
-        clientSecret: String,
-        configuration: CollectBankAccountConfiguration
-    ) {
-        hostActivityLauncher.launch(
-            CollectBankAccountContract.Args.ForPaymentIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                clientSecret = clientSecret,
-                configuration = configuration,
-                attachToIntent = true
-            )
-        )
-    }
-
-    override fun presentWithSetupIntent(
-        publishableKey: String,
-        stripeAccountId: String?,
-        clientSecret: String,
-        configuration: CollectBankAccountConfiguration
-    ) {
-        hostActivityLauncher.launch(
-            CollectBankAccountContract.Args.ForSetupIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                clientSecret = clientSecret,
-                configuration = configuration,
-                attachToIntent = true
-            )
-        )
-    }
-
-    override fun presentWithDeferredPayment(
-        publishableKey: String,
-        stripeAccountId: String?,
-        configuration: CollectBankAccountConfiguration,
-        elementsSessionId: String,
-        customerId: String?,
-        onBehalfOf: String?,
-        amount: Int?,
-        currency: String?
-    ) {
-        hostActivityLauncher.launch(
-            CollectBankAccountContract.Args.ForDeferredPaymentIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                elementsSessionId = elementsSessionId,
-                configuration = configuration,
-                customerId = customerId,
-                onBehalfOf = onBehalfOf,
-                amount = amount,
-                currency = currency,
-            )
-        )
-    }
-
-    override fun presentWithDeferredSetup(
-        publishableKey: String,
-        stripeAccountId: String?,
-        configuration: CollectBankAccountConfiguration,
-        elementsSessionId: String,
-        customerId: String?,
-        onBehalfOf: String?,
-    ) {
-        hostActivityLauncher.launch(
-            CollectBankAccountContract.Args.ForDeferredSetupIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                elementsSessionId = elementsSessionId,
-                configuration = configuration,
-                customerId = customerId,
-                onBehalfOf = onBehalfOf,
-            )
-        )
-    }
-
-    override fun unregister() {
-        hostActivityLauncher.unregister()
-    }
-}
-
-sealed class CollectBankAccountConfiguration : Parcelable {
+sealed interface CollectBankAccountConfiguration : Parcelable {
     @Parcelize
     data class USBankAccount(
         val name: String,
         val email: String?
-    ) : Parcelable, CollectBankAccountConfiguration()
+    ) : Parcelable, CollectBankAccountConfiguration
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    data class InstantDebits(
+        val email: String?
+    ) : Parcelable, CollectBankAccountConfiguration
 }
