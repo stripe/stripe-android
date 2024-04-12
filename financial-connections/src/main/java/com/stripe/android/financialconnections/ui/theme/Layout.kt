@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.stripe.android.financialconnections.features.common.LoadingPillContainer
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.components.DragHandle
@@ -53,6 +54,8 @@ internal fun Layout(
     modifier: Modifier = Modifier,
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
+    loading: Boolean = false,
+    showPillOnSlowLoad: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     scrollState: ScrollState = rememberScrollState(),
@@ -63,6 +66,8 @@ internal fun Layout(
         canScrollForward = scrollState.canScrollForward,
         canScrollBackward = scrollState.canScrollBackward,
         inModal = inModal,
+        loading = loading,
+        showPillOnSlowLoad = showPillOnSlowLoad,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
         footer = footer,
@@ -97,6 +102,8 @@ internal fun LazyLayout(
     modifier: Modifier = Modifier,
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
+    loading: Boolean = false,
+    showPillOnSlowLoad: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     lazyListState: LazyListState = rememberLazyListState(),
@@ -107,6 +114,8 @@ internal fun LazyLayout(
         canScrollForward = lazyListState.canScrollForward,
         canScrollBackward = lazyListState.canScrollBackward,
         inModal = inModal,
+        loading = loading,
+        showPillOnSlowLoad = showPillOnSlowLoad,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
         footer = footer,
@@ -124,6 +133,8 @@ internal fun LazyLayout(
 private fun LayoutScaffold(
     canScrollForward: Boolean,
     canScrollBackward: Boolean,
+    loading: Boolean,
+    showPillOnSlowLoad: Boolean,
     inModal: Boolean,
     showFooterShadowWhenScrollable: Boolean,
     modifier: Modifier = Modifier,
@@ -162,17 +173,28 @@ private fun LayoutScaffold(
             // Body content
             body()
         }
-        // Footer content (bottom aligned)
-        footer?.let {
-            Box(
-                modifier = Modifier.padding(
-                    top = 16.dp,
-                    bottom = 24.dp,
-                    start = 24.dp,
-                    end = 24.dp,
-                ),
-                content = { it() }
-            )
+
+        Box(contentAlignment = Alignment.BottomCenter) {
+            // Footer content (bottom aligned)
+            footer?.let {
+                Box(
+                    modifier = Modifier.padding(
+                        top = 16.dp,
+                        bottom = 24.dp,
+                        start = 24.dp,
+                        end = 24.dp,
+                    ),
+                    content = { it() }
+                )
+            }
+
+            if (showPillOnSlowLoad) {
+                // Loading pill if things take too long
+                LoadingPillContainer(
+                    canShowPill = loading,
+                    modifier = Modifier.padding(bottom = 24.dp),
+                )
+            }
         }
     }
 }
