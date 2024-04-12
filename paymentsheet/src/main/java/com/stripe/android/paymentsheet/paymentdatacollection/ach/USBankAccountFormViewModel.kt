@@ -558,6 +558,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     data class Args(
+        val instantDebits: Boolean,
         val formArgs: FormArguments,
         val showCheckbox: Boolean,
         val isCompleteFlow: Boolean,

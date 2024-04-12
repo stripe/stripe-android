@@ -67,6 +67,7 @@ class USBankAccountFormViewModelTest {
         onBehalfOf = "on_behalf_of_id",
         savedPaymentMethod = null,
         shippingDetails = null,
+        instantDebits = false,
     )
 
     private val collectBankAccountLauncher = mock<CollectBankAccountLauncher>()

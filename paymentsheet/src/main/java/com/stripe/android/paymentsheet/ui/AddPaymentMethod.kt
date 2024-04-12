@@ -103,6 +103,10 @@ internal fun AddPaymentMethod(
                 )
             } ?: false
 
+            val instantDebits = remember(supportedPaymentMethods) {
+                supportedPaymentMethods.find { it.code == PaymentMethod.Type.Link.code } != null
+            }
+
             PaymentElement(
                 enabled = !processing,
                 supportedPaymentMethods = supportedPaymentMethods,
@@ -122,6 +126,7 @@ internal fun AddPaymentMethod(
                 formArguments = arguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
                     showCheckbox = isSaveForFutureUseValueChangeable,
+                    instantDebits = instantDebits,
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
                     isPaymentFlow = stripeIntent is PaymentIntent,

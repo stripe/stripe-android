@@ -59,6 +59,7 @@ internal fun USBankAccountForm(
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
             USBankAccountFormViewModel.Args(
+                instantDebits = usBankAccountFormArgs.instantDebits,
                 formArgs = formArgs,
                 showCheckbox = usBankAccountFormArgs.showCheckbox,
                 isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
@@ -84,6 +85,7 @@ internal fun USBankAccountForm(
         when (val screenState = currentScreenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     formArgs = formArgs,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     isProcessing = screenState.isProcessing,
@@ -99,6 +101,7 @@ internal fun USBankAccountForm(
                 MandateCollectionScreen(
                     formArgs = formArgs,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
@@ -116,6 +119,7 @@ internal fun USBankAccountForm(
                 VerifyWithMicrodepositsScreen(
                     formArgs = formArgs,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
@@ -133,6 +137,7 @@ internal fun USBankAccountForm(
                 SavedAccountScreen(
                     formArgs = formArgs,
                     showCheckbox = usBankAccountFormArgs.showCheckbox,
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
@@ -153,6 +158,7 @@ internal fun USBankAccountForm(
 @Composable
 internal fun BillingDetailsCollectionScreen(
     formArgs: FormArguments,
+    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     nameController: TextFieldController,
@@ -164,6 +170,7 @@ internal fun BillingDetailsCollectionScreen(
 ) {
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
+            instantDebits = instantDebits,
             formArgs = formArgs,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
@@ -181,6 +188,7 @@ internal fun BillingDetailsCollectionScreen(
 internal fun MandateCollectionScreen(
     formArgs: FormArguments,
     showCheckbox: Boolean,
+    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.MandateCollection,
@@ -196,6 +204,7 @@ internal fun MandateCollectionScreen(
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
             formArgs = formArgs,
+            instantDebits = instantDebits,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
             nameController = nameController,
@@ -220,6 +229,7 @@ internal fun MandateCollectionScreen(
 internal fun VerifyWithMicrodepositsScreen(
     formArgs: FormArguments,
     showCheckbox: Boolean,
+    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits,
@@ -235,6 +245,7 @@ internal fun VerifyWithMicrodepositsScreen(
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
             formArgs = formArgs,
+            instantDebits = instantDebits,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
             nameController = nameController,
@@ -259,6 +270,7 @@ internal fun VerifyWithMicrodepositsScreen(
 internal fun SavedAccountScreen(
     formArgs: FormArguments,
     showCheckbox: Boolean,
+    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.SavedAccount,
@@ -274,6 +286,7 @@ internal fun SavedAccountScreen(
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
             formArgs = formArgs,
+            instantDebits = instantDebits,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
             nameController = nameController,
@@ -296,6 +309,7 @@ internal fun SavedAccountScreen(
 
 @Composable
 internal fun BillingDetailsForm(
+    instantDebits: Boolean,
     formArgs: FormArguments,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
@@ -315,7 +329,15 @@ internal fun BillingDetailsForm(
             },
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
         )
-        if (formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never) {
+
+        val showName = if (instantDebits) {
+            // Only show if we're being forced to
+            formArgs.billingDetailsCollectionConfiguration.name == CollectionMode.Always
+        } else {
+            formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
+        }
+
+        if (showName) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
