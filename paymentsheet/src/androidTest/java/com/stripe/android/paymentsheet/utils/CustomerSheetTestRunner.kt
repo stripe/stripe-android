@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal class CustomerSheetTestRunnerContext(
-    private val scenario: ActivityScenario<MainActivity>,
+    internal val scenario: ActivityScenario<MainActivity>,
     private val customerSheet: CustomerSheet,
     private val countDownLatch: CountDownLatch,
 ) {

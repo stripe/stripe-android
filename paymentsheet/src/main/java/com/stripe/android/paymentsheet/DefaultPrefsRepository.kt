@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.model.toSavedSelection
 import kotlinx.coroutines.withContext
+import org.jetbrains.annotations.VisibleForTesting
 import kotlin.coroutines.CoroutineContext
 
 internal class DefaultPrefsRepository(
@@ -77,7 +78,8 @@ internal class DefaultPrefsRepository(
         return customerId?.let { "customer[$it]" } ?: "guest"
     }
 
-    private companion object {
-        private const val PREF_FILE = "DefaultPrefsRepository"
+    internal companion object {
+        @VisibleForTesting
+        internal const val PREF_FILE = "DefaultPrefsRepository"
     }
 }
