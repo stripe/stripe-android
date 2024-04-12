@@ -1,7 +1,11 @@
 package com.stripe.android.payments.bankaccount
 
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.ActivityResultRegistryOwner
+import androidx.annotation.RestrictTo
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
+import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
 
 internal class CollectBankAccountForInstantDebitsLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
@@ -90,6 +94,23 @@ internal class CollectBankAccountForInstantDebitsLauncher(
     }
 
     companion object {
+
+        private const val LAUNCHER_KEY = "CollectBankAccountForInstantDebitsLauncher"
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun create(
+            activityResultRegistryOwner: ActivityResultRegistryOwner,
+            callback: (CollectBankAccountForInstantDebitsResult) -> Unit,
+        ): CollectBankAccountLauncher {
+            return CollectBankAccountForInstantDebitsLauncher(
+                activityResultRegistryOwner.activityResultRegistry.register(
+                    LAUNCHER_KEY,
+                    CollectBankAccountContract()
+                ) {
+                    callback(it.toInstantDebitsResult())
+                }
+            )
+        }
 
     }
 }
