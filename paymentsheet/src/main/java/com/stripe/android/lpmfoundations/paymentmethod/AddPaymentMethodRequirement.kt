@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Link
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 
 internal enum class AddPaymentMethodRequirement {
     /** A special case that indicates the payment method is always unsupported by PaymentSheet. */
@@ -48,11 +50,23 @@ internal enum class AddPaymentMethodRequirement {
     /** Requires a valid us bank verification method. */
     ValidUsBankVerificationMethod {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
-            val pmo = metadata.stripeIntent.getPaymentMethodOptions()[PaymentMethod.Type.USBankAccount.code]
+            val pmo = metadata.stripeIntent.getPaymentMethodOptions()[USBankAccount.code]
             val verificationMethod = (pmo as? Map<*, *>)?.get("verification_method") as? String
             val supportsVerificationMethod = verificationMethod in setOf("instant", "automatic")
             val isDeferred = metadata.stripeIntent.clientSecret == null
             return supportsVerificationMethod || isDeferred
+        }
+    },
+
+    /** Requires that Instant Debits are possible for this transaction. */
+    InstantDebits {
+        override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
+            val paymentMethodTypes = metadata.stripeIntent.paymentMethodTypes
+            val validTypes = Link.code in paymentMethodTypes && USBankAccount.code !in paymentMethodTypes
+            val supportsBankAccounts = "bank_account" in metadata.stripeIntent.linkFundingSources
+            val isDeferred = metadata.stripeIntent.clientSecret == null
+            val isEnabled = FeatureFlags.instantDebits.isEnabled
+            return validTypes && supportsBankAccounts && !isDeferred && isEnabled
         }
     };
 

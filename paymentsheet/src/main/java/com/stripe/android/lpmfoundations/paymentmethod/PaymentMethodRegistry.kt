@@ -17,6 +17,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.FpxDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GiroPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.GrabPayDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.IdealDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebitsDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
@@ -53,6 +54,7 @@ internal object PaymentMethodRegistry {
         GiroPayDefinition,
         GrabPayDefinition,
         IdealDefinition,
+        InstantDebitsDefinition,
         KlarnaDefinition,
         KonbiniDefinition,
         MobilePayDefinition,
