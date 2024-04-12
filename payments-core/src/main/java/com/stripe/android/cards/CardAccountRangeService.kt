@@ -8,6 +8,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 private const val MIN_CARD_NUMBER_LENGTH = 8
@@ -75,7 +76,9 @@ class CardAccountRangeService(
                     null
                 }
 
-                updateAccountRangesResult(accountRanges.orEmpty())
+                withContext(uiContext) {
+                    updateAccountRangesResult(accountRanges.orEmpty())
+                }
             }
         }
     }

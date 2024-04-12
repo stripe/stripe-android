@@ -60,6 +60,7 @@ class CardDetailsControllerTest {
             ),
             cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
         )
+        idleLooper()
 
         cardController.numberElement.controller.cardBrandFlow.test {
             assertThat(awaitItem()).isEqualTo(CardBrand.CartesBancaires)
