@@ -76,9 +76,7 @@ class CardAccountRangeService(
                     null
                 }
 
-                withContext(uiContext) {
-                    updateAccountRangesResult(accountRanges.orEmpty())
-                }
+                updateAccountRangesResult(accountRanges.orEmpty())
             }
         }
     }
