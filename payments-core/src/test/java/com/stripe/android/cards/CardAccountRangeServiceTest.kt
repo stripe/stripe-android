@@ -63,9 +63,9 @@ class CardAccountRangeServiceTest {
     @Test
     fun `test the card metadata service is always called if CBC eligible`() = runTest {
         ACCOUNTS.forEach {
-                testIfRemoteCalled(isCbcEligible = true, it.binRange.low, expectedRemoteCall = true)
-                testIfRemoteCalled(isCbcEligible = true, it.binRange.high, expectedRemoteCall = true)
-            }
+            testIfRemoteCalled(isCbcEligible = true, it.binRange.low, expectedRemoteCall = true)
+            testIfRemoteCalled(isCbcEligible = true, it.binRange.high, expectedRemoteCall = true)
+        }
     }
 
     @SuppressWarnings("EmptyFunctionBlock")
