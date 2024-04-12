@@ -55,18 +55,7 @@ internal class CollectBankAccountForInstantDebitsLauncher(
         amount: Int?,
         currency: String?
     ) {
-        hostActivityLauncher.launch(
-            CollectBankAccountContract.Args.ForDeferredPaymentIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                elementsSessionId = elementsSessionId,
-                configuration = configuration,
-                customerId = customerId,
-                onBehalfOf = onBehalfOf,
-                amount = amount,
-                currency = currency,
-            )
-        )
+        TODO("Instant Debits does not support deferred payments yet")
     }
 
     override fun presentWithDeferredSetup(
@@ -77,16 +66,7 @@ internal class CollectBankAccountForInstantDebitsLauncher(
         customerId: String?,
         onBehalfOf: String?,
     ) {
-        hostActivityLauncher.launch(
-            CollectBankAccountContract.Args.ForDeferredSetupIntent(
-                publishableKey = publishableKey,
-                stripeAccountId = stripeAccountId,
-                elementsSessionId = elementsSessionId,
-                configuration = configuration,
-                customerId = customerId,
-                onBehalfOf = onBehalfOf,
-            )
-        )
+        TODO("Instant Debits does not support deferred payments yet")
     }
 
     override fun unregister() {
