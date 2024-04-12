@@ -11,6 +11,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -205,6 +206,7 @@ class CardDetailsElementTest {
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
         cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
 
+        idleLooper()
         cardDetailsElement.getFormFieldValueFlow().test {
             assertThat(awaitItem()).containsExactlyElementsIn(
                 listOf(
@@ -245,6 +247,7 @@ class CardDetailsElementTest {
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
         cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
 
+        idleLooper()
         cardDetailsElement.getFormFieldValueFlow().test {
             assertThat(awaitItem()).containsExactlyElementsIn(
                 listOf(
