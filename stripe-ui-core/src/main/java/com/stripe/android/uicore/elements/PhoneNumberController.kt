@@ -20,7 +20,7 @@ import kotlinx.coroutines.flow.map
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class PhoneNumberController @VisibleForTesting constructor(
+class PhoneNumberController private constructor(
     val initialPhoneNumber: String = "",
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
