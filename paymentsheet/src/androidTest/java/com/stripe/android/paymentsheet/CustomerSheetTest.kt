@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.utils.CustomerSheetTestType
 import com.stripe.android.paymentsheet.utils.CustomerSheetTestTypeProvider
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
+import com.stripe.android.paymentsheet.utils.PrefsTestStore
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import org.junit.Rule
 import org.junit.Test
@@ -112,6 +113,10 @@ internal class CustomerSheetTest {
             assertThat(card?.brand).isEqualTo(CardBrand.Visa)
         }
     ) { context ->
+        context.scenario.onActivity {
+            PrefsTestStore(it).clear()
+        }
+
         networkRule.enqueue(
             retrieveElementsSessionRequest(),
         ) { response ->

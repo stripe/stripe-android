@@ -84,7 +84,7 @@ internal fun PaymentOptions(
                     onModifyItem = onModifyItem,
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
-                        .testTag(item.key)
+                        .testTag(item.viewType.name)
                         .animateItemPlacement(),
                 )
             }
