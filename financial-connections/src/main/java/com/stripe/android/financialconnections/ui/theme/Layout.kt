@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.stripe.android.financialconnections.features.common.LoadingPill
+import com.stripe.android.financialconnections.features.common.LoadingPillContainer
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.ui.LocalTopAppBarHost
 import com.stripe.android.financialconnections.ui.components.DragHandle
@@ -55,6 +55,7 @@ internal fun Layout(
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     loading: Boolean = false,
+    showPillOnSlowLoad: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     scrollState: ScrollState = rememberScrollState(),
@@ -66,6 +67,7 @@ internal fun Layout(
         canScrollBackward = scrollState.canScrollBackward,
         inModal = inModal,
         loading = loading,
+        showPillOnSlowLoad = showPillOnSlowLoad,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
         footer = footer,
@@ -101,6 +103,7 @@ internal fun LazyLayout(
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
     inModal: Boolean = false,
     loading: Boolean = false,
+    showPillOnSlowLoad: Boolean = false,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     lazyListState: LazyListState = rememberLazyListState(),
@@ -112,6 +115,7 @@ internal fun LazyLayout(
         canScrollBackward = lazyListState.canScrollBackward,
         inModal = inModal,
         loading = loading,
+        showPillOnSlowLoad = showPillOnSlowLoad,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
         footer = footer,
@@ -130,6 +134,7 @@ private fun LayoutScaffold(
     canScrollForward: Boolean,
     canScrollBackward: Boolean,
     loading: Boolean,
+    showPillOnSlowLoad: Boolean,
     inModal: Boolean,
     showFooterShadowWhenScrollable: Boolean,
     modifier: Modifier = Modifier,
@@ -183,11 +188,13 @@ private fun LayoutScaffold(
                 )
             }
 
-            // Loading pill if things take too long
-            LoadingPill(
-                canShowPill = loading,
-                modifier = Modifier.padding(bottom = 24.dp),
-            )
+            if (showPillOnSlowLoad) {
+                // Loading pill if things take too long
+                LoadingPillContainer(
+                    canShowPill = loading,
+                    modifier = Modifier.padding(bottom = 24.dp),
+                )
+            }
         }
     }
 }

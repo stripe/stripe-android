@@ -64,7 +64,6 @@ private const val SHIMMER_GRADIENT_ALPHA = 0.4f
 
 private const val LOADING_SPINNER_ROTATION_MS = 1_000
 private const val ShowLoadingPillDelayMillis = 5_000L
-private const val HideLoadingPillDelayMillis = 400L
 private const val SlideDurationMillis = 600
 
 @Composable
@@ -161,10 +160,9 @@ internal fun LoadingSpinner(
 }
 
 @Composable
-internal fun LoadingPill(
+internal fun LoadingPillContainer(
     canShowPill: Boolean,
     modifier: Modifier = Modifier,
-    showPillImmediately: Boolean = false,
 ) {
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
@@ -176,21 +174,19 @@ internal fun LoadingPill(
         }
     }
 
-    var showLoadingPill by rememberSaveable {
-        mutableStateOf(inspectionMode && showPillImmediately)
+    var showingPill by rememberSaveable {
+        mutableStateOf(inspectionMode && canShowPill)
     }
 
     LaunchedEffect(canShowPill) {
         if (canShowPill) {
             delay(ShowLoadingPillDelayMillis)
-        } else {
-            delay(HideLoadingPillDelayMillis)
         }
-        showLoadingPill = canShowPill
+        showingPill = canShowPill
     }
 
     AnimatedVisibility(
-        visible = showLoadingPill,
+        visible = showingPill,
         enter = slideInVertically(
             animationSpec = tween(
                 durationMillis = SlideDurationMillis,
@@ -339,9 +335,8 @@ internal fun LoadingShimmerWithPillPreview() {
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
-                    LoadingPill(
+                    LoadingPillContainer(
                         canShowPill = true,
-                        showPillImmediately = true,
                     )
                 }
             }
