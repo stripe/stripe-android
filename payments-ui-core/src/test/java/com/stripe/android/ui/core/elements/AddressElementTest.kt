@@ -248,24 +248,20 @@ class AddressElementTest {
 
     @Test
     fun `country code in initial phone number is displayed correctly`() = runTest {
-        val addressElement = AddressElement(
-            IdentifierSpec.Generic("address"),
-            addressRepository = addressRepository,
-            rawValuesMap = mapOf(IdentifierSpec.Phone to "+18008675309", IdentifierSpec.Country to "US"),
-            countryDropdownFieldController = countryDropdownFieldController,
-            addressType = AddressType.ShippingCondensed(
-                googleApiKey = null,
-                autocompleteCountries = setOf(),
-                phoneNumberState = PhoneNumberState.OPTIONAL
-            ) { throw AssertionError("Not Expected") },
-            sameAsShippingElement = null,
-            shippingValuesMap = null,
+        val countryCode = "US"
+        val phoneNumberCountryCode = "+1"
+        val phoneNumberWithoutCountryCode = "8008675309"
+        val addressElement = createAddressElement(
+            initialValues = mapOf(
+                IdentifierSpec.Phone to phoneNumberCountryCode + phoneNumberWithoutCountryCode,
+                IdentifierSpec.Country to countryCode
+            )
         )
 
         val phoneNumberController = addressElement.phoneNumberElement.controller
 
-        assertThat(phoneNumberController.initialPhoneNumber).isEqualTo("8008675309")
-        assertThat(phoneNumberController.getCountryCode()).isEqualTo("US")
+        assertThat(phoneNumberController.initialPhoneNumber).isEqualTo(phoneNumberWithoutCountryCode)
+        assertThat(phoneNumberController.getCountryCode()).isEqualTo(countryCode)
     }
 
     @Test
@@ -540,7 +536,24 @@ class AddressElementTest {
 
         assertThat(country()).isEqualTo("US")
     }
+
+    private fun createAddressElement(initialValues : Map<IdentifierSpec, String>) : AddressElement {
+        return AddressElement(
+            IdentifierSpec.Generic("address"),
+            addressRepository = addressRepository,
+            rawValuesMap = initialValues,
+            countryDropdownFieldController = countryDropdownFieldController,
+            addressType = AddressType.ShippingCondensed(
+                googleApiKey = null,
+                autocompleteCountries = setOf(),
+                phoneNumberState = PhoneNumberState.OPTIONAL
+            ) { throw AssertionError("Not Expected") },
+            sameAsShippingElement = null,
+            shippingValuesMap = null,
+        )
+    }
 }
+
 
 private suspend fun AddressElement.trailingIconFor(
     identifierSpec: IdentifierSpec
