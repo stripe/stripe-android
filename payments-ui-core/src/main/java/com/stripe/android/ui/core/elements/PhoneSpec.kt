@@ -20,7 +20,6 @@ data class PhoneSpec(
             this.apiPath,
             PhoneNumberController.createPhoneNumberController(
                 initialValue = initialValues[IdentifierSpec.Phone] ?: "",
-                initiallySelectedCountryCode = initialValues[IdentifierSpec.Country]
             )
         )
     )

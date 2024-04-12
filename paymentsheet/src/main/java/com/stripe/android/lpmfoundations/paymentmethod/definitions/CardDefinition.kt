@@ -152,7 +152,6 @@ private fun contactInformationElement(
             identifier = IdentifierSpec.Phone,
             controller = PhoneNumberController.createPhoneNumberController(
                 initialValue = initialValues[IdentifierSpec.Phone] ?: "",
-                initiallySelectedCountryCode = initialValues[IdentifierSpec.Country]
             )
         ).takeIf { collectPhone },
     )

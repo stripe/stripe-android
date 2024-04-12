@@ -265,6 +265,25 @@ class AddressElementTest {
     }
 
     @Test
+    fun `country code in initial phone number is displayed correctly when country and country code differ`() = runTest {
+        val countryCode = "US"
+        val phoneNumberCountryCode = "+44"
+        val phoneNumberWithoutCountryCode = "8008675309"
+        val addressElement = createAddressElement(
+            initialValues = mapOf(
+                IdentifierSpec.Phone to phoneNumberCountryCode + phoneNumberWithoutCountryCode,
+                IdentifierSpec.Country to countryCode
+            )
+        )
+
+        val phoneNumberController = addressElement.phoneNumberElement.controller
+
+        assertThat(phoneNumberController.initialPhoneNumber).isEqualTo(phoneNumberWithoutCountryCode)
+        assertThat(phoneNumberController.getCountryCode()).isEqualTo("UK")
+    }
+
+
+    @Test
     fun `expanded shipping address element should have name and phone number fields when required`() = runTest {
         val addressElement = AddressElement(
             IdentifierSpec.Generic("address"),

@@ -58,7 +58,6 @@ open class AddressElement constructor(
         IdentifierSpec.Phone,
         PhoneNumberController.createPhoneNumberController(
             initialValue = rawValuesMap[IdentifierSpec.Phone] ?: "",
-            initiallySelectedCountryCode = rawValuesMap[IdentifierSpec.Country],
             showOptionalLabel = addressType.phoneNumberState == PhoneNumberState.OPTIONAL,
             acceptAnyInput = true,
         )
