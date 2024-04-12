@@ -286,6 +286,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             )
                         }
                     }
+
                     is FinancialConnectionsAccount -> {
                         _currentScreenState.update {
                             USBankAccountFormScreenState.MandateCollection(
@@ -298,14 +299,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                             )
                         }
                     }
+
                     null -> {
                         reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
                     }
                 }
             }
+
             is CollectBankAccountResultInternal.Failed -> {
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
             }
+
             is CollectBankAccountResultInternal.Cancelled -> {
                 reset()
             }
@@ -320,18 +324,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 }
                 collectBankAccount(args.clientSecret)
             }
+
             is USBankAccountFormScreenState.MandateCollection ->
                 updatePaymentSelection(
                     linkAccountId = screenState.financialConnectionsSessionId,
                     bankName = screenState.paymentAccount.institutionName,
                     last4 = screenState.paymentAccount.last4
                 )
+
             is USBankAccountFormScreenState.VerifyWithMicrodeposits ->
                 updatePaymentSelection(
                     linkAccountId = screenState.financialConnectionsSessionId,
                     bankName = screenState.paymentAccount.bankName,
                     last4 = screenState.paymentAccount.last4
                 )
+
             is USBankAccountFormScreenState.SavedAccount -> {
                 screenState.financialConnectionsSessionId?.let { linkAccountId ->
                     updatePaymentSelection(
@@ -517,6 +524,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 }
             }
+
             else -> application.getString(
                 StripeUiCoreR.string.stripe_continue_button_label
             )

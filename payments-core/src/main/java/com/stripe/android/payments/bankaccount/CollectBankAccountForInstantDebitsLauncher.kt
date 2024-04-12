@@ -7,7 +7,8 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.toInstantDebitsResult
 
-internal class CollectBankAccountForInstantDebitsLauncher(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class CollectBankAccountForInstantDebitsLauncher(
     private val hostActivityLauncher: ActivityResultLauncher<CollectBankAccountContract.Args>
 ) : CollectBankAccountLauncher {
 
