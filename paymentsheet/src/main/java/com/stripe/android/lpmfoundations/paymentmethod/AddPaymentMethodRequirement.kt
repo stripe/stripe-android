@@ -2,7 +2,6 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 
 internal enum class AddPaymentMethodRequirement {
@@ -62,11 +61,11 @@ internal enum class AddPaymentMethodRequirement {
     InstantDebits {
         override fun isMetBy(metadata: PaymentMethodMetadata): Boolean {
             val paymentMethodTypes = metadata.stripeIntent.paymentMethodTypes
-            val validTypes = Link.code in paymentMethodTypes && USBankAccount.code !in paymentMethodTypes
+            val noUsBankAccount = USBankAccount.code !in paymentMethodTypes
             val supportsBankAccounts = "bank_account" in metadata.stripeIntent.linkFundingSources
             val isDeferred = metadata.stripeIntent.clientSecret == null
             val isEnabled = FeatureFlags.instantDebits.isEnabled
-            return validTypes && supportsBankAccounts && !isDeferred && isEnabled
+            return noUsBankAccount && supportsBankAccounts && !isDeferred && isEnabled
         }
     };
 

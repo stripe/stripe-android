@@ -193,7 +193,7 @@ internal class AddPaymentMethodRequirementTest {
 
     @Test
     fun testInstantDebitsReturnsFalseIfDeferredIntent() {
-        instantDebitsFeatureRule.setEnabled(false)
+        instantDebitsFeatureRule.setEnabled(true)
 
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent().copy(
@@ -206,7 +206,7 @@ internal class AddPaymentMethodRequirementTest {
 
     @Test
     fun testInstantDebitsReturnsFalseIfShowingUsBankAccount() {
-        instantDebitsFeatureRule.setEnabled(false)
+        instantDebitsFeatureRule.setEnabled(true)
 
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent().copy(
@@ -219,7 +219,7 @@ internal class AddPaymentMethodRequirementTest {
 
     @Test
     fun testInstantDebitsReturnsFalseIfOnlyCardFundingSource() {
-        instantDebitsFeatureRule.setEnabled(false)
+        instantDebitsFeatureRule.setEnabled(true)
 
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = createValidInstantDebitsPaymentIntent().copy(
