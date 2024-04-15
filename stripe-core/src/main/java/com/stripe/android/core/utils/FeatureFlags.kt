@@ -13,7 +13,7 @@ class FeatureFlag {
 
     val isEnabled: Boolean
         get() = if (BuildConfig.DEBUG) {
-            overrideInTest ?: true
+            overrideInTest ?: false
         } else {
             false
         }
