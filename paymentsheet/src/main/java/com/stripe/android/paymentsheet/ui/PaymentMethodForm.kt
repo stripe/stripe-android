@@ -21,7 +21,6 @@ internal fun PaymentMethodForm(
     args: FormArguments,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
-    showCheckboxFlow: Flow<Boolean>,
     formElements: List<FormElement>,
     modifier: Modifier = Modifier,
 ) {
@@ -30,7 +29,6 @@ internal fun PaymentMethodForm(
         factory = FormViewModel.Factory(
             formElements = formElements,
             formArguments = args,
-            showCheckboxFlow = showCheckboxFlow,
         )
     )
 

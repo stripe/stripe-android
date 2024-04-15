@@ -34,7 +34,6 @@ import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.ui.core.elements.events.CardNumberCompletedEventReporter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.strings.resolve
-import kotlinx.coroutines.flow.flowOf
 import com.stripe.android.R as PaymentsCoreR
 
 @Composable
@@ -222,7 +221,6 @@ internal fun AddPaymentMethod(
                     formElements = viewState.formViewData.elements,
                     linkSignupMode = null,
                     linkConfigurationCoordinator = null,
-                    showCheckboxFlow = flowOf(false),
                     onItemSelectedListener = {
                         viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                     },

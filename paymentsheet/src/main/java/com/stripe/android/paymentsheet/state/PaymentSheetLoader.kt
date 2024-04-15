@@ -10,9 +10,8 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.getSetupFutureUsageFieldConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -314,17 +313,16 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config.merchantDisplayName
 
-        val setupFutureUsageFieldConfiguration = requireNotNull(
-            CardDefinition.getSetupFutureUsageFieldConfiguration(
-                metadata = metadata,
-                customerConfiguration = config.customer,
-            )
+        val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
+            code = PaymentMethod.Type.Card.code,
+            metadata = metadata,
+            customerConfiguration = config.customer,
         )
         val hasUsedLink = linkStore.hasUsedLink()
 
         val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
             null
-        } else if (setupFutureUsageFieldConfiguration.isSaveForFutureUseValueChangeable) {
+        } else if (isSaveForFutureUseValueChangeable) {
             LinkSignupMode.AlongsideSaveForFutureUse
         } else {
             LinkSignupMode.InsteadOfSaveForFutureUse

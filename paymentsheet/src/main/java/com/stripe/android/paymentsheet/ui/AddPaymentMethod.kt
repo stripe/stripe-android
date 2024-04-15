@@ -34,7 +34,6 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.elements.ParameterDestination
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AddPaymentMethod(
@@ -50,10 +49,6 @@ internal fun AddPaymentMethod(
     }
     val arguments = remember(selectedItem) {
         sheetViewModel.createFormArguments(selectedItem)
-    }
-    val showCheckboxFlow = remember { MutableStateFlow(false) }
-    LaunchedEffect(arguments) {
-        showCheckboxFlow.emit(arguments.showCheckbox)
     }
 
     val paymentSelection by sheetViewModel.selection.collectAsState()
@@ -107,7 +102,6 @@ internal fun AddPaymentMethod(
                 formElements = formElements,
                 linkSignupMode = linkInlineSignupMode,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
-                showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
                         selectedPaymentMethodCode = selectedLpm.code

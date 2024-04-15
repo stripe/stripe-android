@@ -35,7 +35,6 @@ import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
@@ -55,8 +54,6 @@ internal class FormViewModelTest {
         StripeR.style.StripeDefaultTheme
     )
 
-    private val showCheckboxFlow = MutableStateFlow(false)
-
     @Test
     fun `Verify completeFormValues is not null when no elements exist`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
@@ -75,17 +72,16 @@ internal class FormViewModelTest {
     @Test
     fun `Verify setting save for future use value is updated in flowable`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            showCheckbox = true,
         )
         val formViewModel = createViewModel(
-            args,
-            listOf(
+            arguments = args,
+            formElements = listOf(
                 SectionElement.wrap(EmailElement()),
                 SaveForFutureUseElement(true, ""),
-            )
+            ),
         )
-
-        showCheckboxFlow.emit(true)
 
         // Set all the card fields, billing is set in the args
         val emailController =
@@ -121,22 +117,17 @@ internal class FormViewModelTest {
     fun `Verify setting save for future use visibility removes it from completed values`() =
         runTest {
             val args = COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = PaymentMethod.Type.Card.code
+                paymentMethodCode = PaymentMethod.Type.Card.code,
+                showCheckbox = false,
             )
             val formViewModel = createViewModel(
-                args,
-                listOf(
+                arguments = args,
+                formElements = listOf(
                     SaveForFutureUseElement(true, ""),
-                )
+                ),
             )
 
             formViewModel.hiddenIdentifiers.test {
-                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
-
-                showCheckboxFlow.tryEmit(true)
-                assertThat(awaitItem()).isEmpty()
-
-                showCheckboxFlow.tryEmit(false)
                 assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
             }
         }
@@ -798,7 +789,6 @@ internal class FormViewModelTest {
         formElements: List<FormElement>,
     ) = FormViewModel(
         formArguments = arguments,
-        showCheckboxFlow = showCheckboxFlow,
         elements = formElements,
     )
 }
