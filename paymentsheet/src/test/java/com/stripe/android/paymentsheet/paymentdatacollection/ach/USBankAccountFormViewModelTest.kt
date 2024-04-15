@@ -355,7 +355,7 @@ class USBankAccountFormViewModelTest {
                     billingDetails = PaymentSheet.BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
-                        phone = CUSTOMER_PHONE,
+                        phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
                         address = CUSTOMER_ADDRESS,
                     ),
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -368,6 +368,7 @@ class USBankAccountFormViewModelTest {
 
         assertThat(viewModel.name.value).isEqualTo(CUSTOMER_NAME)
         assertThat(viewModel.email.value).isEqualTo(CUSTOMER_EMAIL)
+        assertThat(viewModel.phoneController.getCountryCode()).isEqualTo(CUSTOMER_COUNTRY)
         assertThat(viewModel.phone.value).isEqualTo(CUSTOMER_PHONE)
         assertThat(viewModel.address.value).isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
     }
@@ -484,7 +485,7 @@ class USBankAccountFormViewModelTest {
                         billingDetails = PaymentSheet.BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
-                            phone = CUSTOMER_PHONE,
+                            phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
                         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -504,6 +505,7 @@ class USBankAccountFormViewModelTest {
                 .isEqualTo(CUSTOMER_EMAIL)
             assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value)
                 .isEqualTo(CUSTOMER_PHONE)
+            assertThat(viewModel.phoneController.getCountryCode()).isEqualTo(CUSTOMER_COUNTRY)
             assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value)
                 .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
@@ -1069,7 +1071,9 @@ class USBankAccountFormViewModelTest {
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
-        const val CUSTOMER_PHONE = "+13105551234"
+        const val CUSTOMER_COUNTRY = "US"
+        const val CUSTOMER_PHONE_COUNTRY_CODE = "+1"
+        const val CUSTOMER_PHONE = "3105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(
             line1 = "123 Main Street",
             line2 = "Apt 456",

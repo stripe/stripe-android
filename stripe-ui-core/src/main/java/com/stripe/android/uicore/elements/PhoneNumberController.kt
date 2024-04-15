@@ -19,7 +19,7 @@ import kotlinx.coroutines.flow.map
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
-class PhoneNumberController(
+class PhoneNumberController private constructor(
     val initialPhoneNumber: String = "",
     initiallySelectedCountryCode: String? = null,
     overrideCountryCodes: Set<String> = emptySet(),
@@ -130,7 +130,9 @@ class PhoneNumberController(
         fun createPhoneNumberController(
             initialValue: String = "",
             initiallySelectedCountryCode: String? = null,
+            overrideCountryCodes: Set<String> = emptySet(),
             showOptionalLabel: Boolean = false,
+            acceptAnyInput: Boolean = false
         ): PhoneNumberController {
             val hasCountryPrefix = initialValue.startsWith("+")
 
@@ -155,12 +157,16 @@ class PhoneNumberController(
                     initialPhoneNumber = e164Number.removePrefix(prefix),
                     initiallySelectedCountryCode = formatter.countryCode,
                     showOptionalLabel = showOptionalLabel,
+                    acceptAnyInput = acceptAnyInput,
+                    overrideCountryCodes = overrideCountryCodes,
                 )
             } else {
                 PhoneNumberController(
                     initialPhoneNumber = initialValue,
                     initiallySelectedCountryCode = initiallySelectedCountryCode,
                     showOptionalLabel = showOptionalLabel,
+                    acceptAnyInput = acceptAnyInput,
+                    overrideCountryCodes = overrideCountryCodes,
                 )
             }
         }

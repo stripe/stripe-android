@@ -125,9 +125,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         null
     }
 
-    val phoneController = PhoneNumberController(
+    val phoneController = PhoneNumberController.createPhoneNumberController(
         initiallySelectedCountryCode = defaultPhoneCountry,
-        initialPhoneNumber = defaultPhone ?: "",
+        initialValue = defaultPhone ?: "",
     )
 
     val phone: StateFlow<String?> = phoneController.formFieldValue.map { formFieldEntry ->
