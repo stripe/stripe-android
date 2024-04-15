@@ -3,7 +3,6 @@ package com.stripe.android.lpmfoundations.luxe
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodRegistry
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -45,8 +44,4 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
         tintIconOnSelection = tintIconOnSelection,
     )
-
-    internal fun paymentMethodDefinition(): PaymentMethodDefinition {
-        return requireNotNull(PaymentMethodRegistry.definitionsByCode[code])
-    }
 }

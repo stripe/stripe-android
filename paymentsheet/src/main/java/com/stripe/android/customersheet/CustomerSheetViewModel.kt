@@ -781,6 +781,7 @@ internal class CustomerSheetViewModel(
                 ),
                 formArguments = formArguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
+                    showCheckbox = false,
                     onBehalfOf = null,
                     isCompleteFlow = false,
                     isPaymentFlow = false,

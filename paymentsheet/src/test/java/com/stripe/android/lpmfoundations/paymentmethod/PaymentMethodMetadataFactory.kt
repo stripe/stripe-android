@@ -22,6 +22,7 @@ internal object PaymentMethodMetadataFactory {
         paymentMethodOrder: List<String> = emptyList(),
         shippingDetails: AddressDetails? = null,
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+        hasCustomerConfiguration: Boolean = false,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
@@ -35,6 +36,7 @@ internal object PaymentMethodMetadataFactory {
             merchantName = PaymentSheetFixtures.MERCHANT_DISPLAY_NAME,
             defaultBillingDetails = PaymentSheet.BillingDetails(),
             shippingDetails = shippingDetails,
+            hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
         )
     }

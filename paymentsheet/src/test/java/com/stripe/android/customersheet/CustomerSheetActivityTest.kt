@@ -335,7 +335,6 @@ internal class CustomerSheetActivityTest {
             ),
             formArguments = FormArguments(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
-                showCheckbox = false,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = ""
             ),

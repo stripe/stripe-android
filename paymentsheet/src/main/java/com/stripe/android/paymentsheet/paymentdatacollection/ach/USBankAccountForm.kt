@@ -60,6 +60,7 @@ internal fun USBankAccountForm(
         factory = USBankAccountFormViewModel.Factory {
             USBankAccountFormViewModel.Args(
                 formArgs = formArgs,
+                showCheckbox = usBankAccountFormArgs.showCheckbox,
                 isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
                 isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                 stripeIntentId = usBankAccountFormArgs.stripeIntentId,
@@ -97,6 +98,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.MandateCollection -> {
                 MandateCollectionScreen(
                     formArgs = formArgs,
+                    showCheckbox = usBankAccountFormArgs.showCheckbox,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
@@ -113,6 +115,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                 VerifyWithMicrodepositsScreen(
                     formArgs = formArgs,
+                    showCheckbox = usBankAccountFormArgs.showCheckbox,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
@@ -129,6 +132,7 @@ internal fun USBankAccountForm(
             is USBankAccountFormScreenState.SavedAccount -> {
                 SavedAccountScreen(
                     formArgs = formArgs,
+                    showCheckbox = usBankAccountFormArgs.showCheckbox,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     screenState = screenState,
@@ -176,6 +180,7 @@ internal fun BillingDetailsCollectionScreen(
 @Composable
 internal fun MandateCollectionScreen(
     formArgs: FormArguments,
+    showCheckbox: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.MandateCollection,
@@ -201,7 +206,7 @@ internal fun MandateCollectionScreen(
             sameAsShippingElement = sameAsShippingElement,
         )
         AccountDetailsForm(
-            formArgs = formArgs,
+            showCheckbox = showCheckbox,
             isProcessing = isProcessing,
             bankName = screenState.paymentAccount.institutionName,
             last4 = screenState.paymentAccount.last4,
@@ -214,6 +219,7 @@ internal fun MandateCollectionScreen(
 @Composable
 internal fun VerifyWithMicrodepositsScreen(
     formArgs: FormArguments,
+    showCheckbox: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits,
@@ -239,7 +245,7 @@ internal fun VerifyWithMicrodepositsScreen(
             sameAsShippingElement = sameAsShippingElement,
         )
         AccountDetailsForm(
-            formArgs = formArgs,
+            showCheckbox = showCheckbox,
             isProcessing = isProcessing,
             bankName = screenState.paymentAccount.bankName,
             last4 = screenState.paymentAccount.last4,
@@ -252,6 +258,7 @@ internal fun VerifyWithMicrodepositsScreen(
 @Composable
 internal fun SavedAccountScreen(
     formArgs: FormArguments,
+    showCheckbox: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     screenState: USBankAccountFormScreenState.SavedAccount,
@@ -277,7 +284,7 @@ internal fun SavedAccountScreen(
             sameAsShippingElement = sameAsShippingElement,
         )
         AccountDetailsForm(
-            formArgs = formArgs,
+            showCheckbox = showCheckbox,
             isProcessing = isProcessing,
             bankName = screenState.bankName,
             last4 = screenState.last4,
@@ -439,7 +446,7 @@ private fun AddressSection(
 
 @Composable
 private fun AccountDetailsForm(
-    formArgs: FormArguments,
+    showCheckbox: Boolean,
     isProcessing: Boolean,
     bankName: String?,
     last4: String?,
@@ -495,7 +502,7 @@ private fun AccountDetailsForm(
                 )
             }
         }
-        if (formArgs.showCheckbox) {
+        if (showCheckbox) {
             SaveForFutureUseElementUI(
                 enabled = true,
                 element = saveForFutureUseElement,

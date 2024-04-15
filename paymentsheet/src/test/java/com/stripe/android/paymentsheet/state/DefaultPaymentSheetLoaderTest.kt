@@ -121,9 +121,25 @@ internal class DefaultPaymentSheetLoaderTest {
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
                     sharedDataSpecs = emptyList(),
+                    hasCustomerConfiguration = true,
                 ),
             )
         )
+    }
+
+    @Test
+    fun `load without customer should return expected result`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            PaymentSheetFixtures.CONFIG_MINIMUM
+        ).getOrThrow()
+        assertThat(result.paymentMethodMetadata.hasCustomerConfiguration).isFalse()
     }
 
     @Test

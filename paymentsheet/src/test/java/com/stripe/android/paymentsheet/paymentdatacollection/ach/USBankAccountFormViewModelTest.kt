@@ -51,7 +51,6 @@ class USBankAccountFormViewModelTest {
     private val defaultArgs = USBankAccountFormViewModel.Args(
         formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-            showCheckbox = false,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
             billingDetails = PaymentSheet.BillingDetails(
@@ -60,6 +59,7 @@ class USBankAccountFormViewModelTest {
             ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         ),
+        showCheckbox = false,
         isCompleteFlow = true,
         isPaymentFlow = true,
         stripeIntentId = "id_12345",
@@ -201,7 +201,8 @@ class USBankAccountFormViewModelTest {
     fun `when payment options, verified bank account, then result has correct paymentMethodOptionsParams`() = runTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
-                formArgs = defaultArgs.formArgs.copy(showCheckbox = true)
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
             )
         )
         val bankAccount = mockVerifiedBankAccount()
@@ -628,9 +629,8 @@ class USBankAccountFormViewModelTest {
     fun `Doesn't save for future use by default`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
-                formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
-                ),
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
             ),
         )
         assertThat(viewModel.saveForFutureUse.value).isFalse()
@@ -640,9 +640,8 @@ class USBankAccountFormViewModelTest {
     fun `Produces correct lastTextFieldIdentifier for default config`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
-                formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
-                ),
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
             ),
         )
 
@@ -664,9 +663,9 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                 ),
+                showCheckbox = true,
             ),
         )
 
@@ -689,13 +688,13 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
                 ),
+                showCheckbox = true,
             ),
         )
 
@@ -717,13 +716,13 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
                 ),
+                showCheckbox = true,
             ),
         )
 
@@ -745,13 +744,13 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
                 ),
+                showCheckbox = true,
             ),
         )
 

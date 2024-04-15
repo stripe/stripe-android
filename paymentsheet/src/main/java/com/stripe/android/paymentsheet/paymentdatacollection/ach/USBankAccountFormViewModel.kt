@@ -469,7 +469,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         linkAccountId: String,
     ): PaymentSelection.New.USBankAccount {
         val customerRequestedSave = customerRequestedSave(
-            showCheckbox = args.formArgs.showCheckbox,
+            showCheckbox = args.showCheckbox,
             saveForFutureUse = saveForFutureUse.value
         )
         return PaymentSelection.New.USBankAccount(
@@ -551,6 +551,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     data class Args(
         val formArgs: FormArguments,
+        val showCheckbox: Boolean,
         val isCompleteFlow: Boolean,
         val isPaymentFlow: Boolean,
         val stripeIntentId: String?,

@@ -33,7 +33,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.image.StripeImageLoader
-import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
 @Composable
@@ -44,7 +43,6 @@ internal fun PaymentElement(
     formElements: List<FormElement>,
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-    showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
@@ -81,7 +79,6 @@ internal fun PaymentElement(
             enabled = enabled,
             selectedItem = selectedItem,
             formElements = formElements,
-            showCheckboxFlow = showCheckboxFlow,
             formArguments = formArguments,
             usBankAccountFormArguments = usBankAccountFormArguments,
             horizontalPadding = horizontalPadding,
@@ -104,7 +101,6 @@ private fun FormElement(
     enabled: Boolean,
     selectedItem: SupportedPaymentMethod,
     formElements: List<FormElement>,
-    showCheckboxFlow: Flow<Boolean>,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
     horizontalPadding: Dp,
@@ -146,7 +142,6 @@ private fun FormElement(
                 args = formArguments,
                 enabled = enabled,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
-                showCheckboxFlow = showCheckboxFlow,
                 formElements = formElements,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )

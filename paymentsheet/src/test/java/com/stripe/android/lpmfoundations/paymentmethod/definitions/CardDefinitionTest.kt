@@ -21,18 +21,16 @@ class CardDefinitionTest {
                 )
             )
         )
-        assertThat(formElements).hasSize(2)
+        assertThat(formElements).hasSize(1)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
-        assertThat(formElements[1].identifier.v1).isEqualTo("save_for_future_use")
     }
 
     @Test
     fun `createFormElements returns default set of fields`() {
         val formElements = CardDefinition.formElements(PaymentMethodMetadataFactory.create())
-        assertThat(formElements).hasSize(3)
+        assertThat(formElements).hasSize(2)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
-        assertThat(formElements[2].identifier.v1).isEqualTo("save_for_future_use")
     }
 
     @Test
@@ -47,11 +45,10 @@ class CardDefinitionTest {
                 )
             )
         )
-        assertThat(formElements).hasSize(4)
+        assertThat(formElements).hasSize(3)
         assertThat(formElements[0].identifier.v1).isEqualTo("billing_details[email]_section")
         assertThat(formElements[1].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[2].identifier.v1).isEqualTo("credit_billing_section")
-        assertThat(formElements[3].identifier.v1).isEqualTo("save_for_future_use")
 
         val contactElement = formElements[0] as SectionElement
         assertThat(contactElement.fields).hasSize(2)
@@ -66,14 +63,28 @@ class CardDefinitionTest {
                 shippingDetails = AddressDetails(isCheckboxSelected = true)
             )
         )
-        assertThat(formElements).hasSize(3)
+        assertThat(formElements).hasSize(2)
         assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
         assertThat(formElements[1].identifier.v1).isEqualTo("credit_billing_section")
-        assertThat(formElements[2].identifier.v1).isEqualTo("save_for_future_use")
 
         val billingDetailsElement = formElements[1] as SectionElement
         assertThat(billingDetailsElement.fields).hasSize(2)
         assertThat(billingDetailsElement.fields[0].identifier.v1).isEqualTo("credit_billing")
         assertThat(billingDetailsElement.fields[1].identifier.v1).isEqualTo("same_as_shipping")
+    }
+
+    @Test
+    fun `createFormElements returns save_for_future_use`() {
+        val formElements = CardDefinition.formElements(
+            PaymentMethodMetadataFactory.create(
+                billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                    address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Never
+                ),
+                hasCustomerConfiguration = true,
+            )
+        )
+        assertThat(formElements).hasSize(2)
+        assertThat(formElements[0].identifier.v1).isEqualTo("card_details")
+        assertThat(formElements[1].identifier.v1).isEqualTo("save_for_future_use")
     }
 }

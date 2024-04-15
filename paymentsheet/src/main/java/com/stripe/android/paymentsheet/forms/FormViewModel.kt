@@ -17,7 +17,6 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flattenConcat
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -34,12 +33,10 @@ import javax.inject.Inject
 internal class FormViewModel @Inject internal constructor(
     val elements: List<FormElement>,
     val formArguments: FormArguments,
-    val showCheckboxFlow: Flow<Boolean>
 ) : ViewModel() {
     internal class Factory(
         val formElements: List<FormElement>,
         val formArguments: FormArguments,
-        val showCheckboxFlow: Flow<Boolean>,
     ) : ViewModelProvider.Factory {
 
         @Suppress("UNCHECKED_CAST")
@@ -47,7 +44,6 @@ internal class FormViewModel @Inject internal constructor(
             return FormViewModel(
                 elements = formElements,
                 formArguments = formArguments,
-                showCheckboxFlow = showCheckboxFlow,
             ) as T
         }
     }
@@ -77,18 +73,10 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     internal val hiddenIdentifiers = combine(
-        showCheckboxFlow,
         cardBillingElement?.hiddenIdentifiers ?: flowOf(emptySet()),
         externalHiddenIdentifiers
-    ) { showFutureUse, cardBillingIdentifiers, externalHiddenIdentifiers ->
-        val hiddenIdentifiers = externalHiddenIdentifiers.plus(cardBillingIdentifiers)
-
-        if (!showFutureUse && saveForFutureUseElement != null) {
-            hiddenIdentifiers
-                .plus(saveForFutureUseElement.identifier)
-        } else {
-            hiddenIdentifiers
-        }
+    ) { cardBillingIdentifiers, externalHiddenIdentifiers ->
+        externalHiddenIdentifiers.plus(cardBillingIdentifiers)
     }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
@@ -99,24 +87,18 @@ internal class FormViewModel @Inject internal constructor(
     }
 
     // This will convert the save for future use value into a CustomerRequestedSave operation
-    private val userRequestedReuse = showCheckboxFlow.map { showCheckbox ->
-        currentFieldValues().map { currentFieldValues ->
-            currentFieldValues.filter { it.first == IdentifierSpec.SaveForFutureUse }
-                .map { it.second.value.toBoolean() }
-                .map { saveForFutureUse ->
-                    if (showCheckbox) {
-                        if (saveForFutureUse) {
-                            PaymentSelection.CustomerRequestedSave.RequestReuse
-                        } else {
-                            PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                        }
-                    } else {
-                        PaymentSelection.CustomerRequestedSave.NoRequest
-                    }
+    private val userRequestedReuse = currentFieldValues().map { currentFieldValues ->
+        currentFieldValues.filter { it.first == IdentifierSpec.SaveForFutureUse }
+            .map { it.second.value.toBoolean() }
+            .map { saveForFutureUse ->
+                if (saveForFutureUse) {
+                    PaymentSelection.CustomerRequestedSave.RequestReuse
+                } else {
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 }
-                .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
-        }
-    }.flattenConcat()
+            }
+            .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest
+    }
 
     val completeFormValues =
         CompleteFormFieldValueFilter(

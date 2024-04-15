@@ -1412,7 +1412,6 @@ internal class PaymentSheetViewModelTest {
                     value = 1099,
                     currencyCode = "usd",
                 ),
-                showCheckbox = false,
                 billingDetails = PaymentSheet.BillingDetails(),
             )
         )

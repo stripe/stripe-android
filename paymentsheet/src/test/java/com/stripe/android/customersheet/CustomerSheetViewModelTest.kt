@@ -46,7 +46,6 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -439,7 +438,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
+    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shown`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher
         )
@@ -458,31 +457,6 @@ class CustomerSheetViewModelTest {
             assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
             assertThat(formElements[1].asSectionElement().fields[0])
                 .isInstanceOf(CardBillingAddressElement::class.java)
-            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
-        }
-    }
-
-    @Test
-    fun `When CustomerViewAction#OnAddCardPressed & ACHv2 disabled, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem())
-                .isInstanceOf(SelectPaymentMethod::class.java)
-            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
-
-            val item = awaitItem()
-            assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
-
-            val formElements = item.asAddState().formViewData.elements
-
-            assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
-            assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
-            assertThat(formElements[1].asSectionElement().fields[0])
-                .isInstanceOf(CardBillingAddressElement::class.java)
-            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
         }
     }
 
