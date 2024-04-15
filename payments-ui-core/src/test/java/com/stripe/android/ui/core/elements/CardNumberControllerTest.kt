@@ -215,14 +215,14 @@ internal class CardNumberControllerTest {
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
-                                id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
-                                icon = CardBrand.Visa.icon
-                            ),
-                            TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = resolvableString("Cartes Bancaires"),
                                 icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
                             ),
                         ),
                         hide = false
@@ -255,14 +255,14 @@ internal class CardNumberControllerTest {
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
-                                id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
-                                icon = CardBrand.Visa.icon
-                            ),
-                            TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = resolvableString("Cartes Bancaires"),
                                 icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
                             ),
                         ),
                         hide = false
@@ -302,14 +302,14 @@ internal class CardNumberControllerTest {
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
-                                id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
-                                icon = CardBrand.Visa.icon
-                            ),
-                            TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = resolvableString("Cartes Bancaires"),
                                 icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
                             ),
                         ),
                         hide = false
@@ -351,14 +351,14 @@ internal class CardNumberControllerTest {
                         ),
                         items = listOf(
                             TextFieldIcon.Dropdown.Item(
-                                id = CardBrand.Visa.code,
-                                label = resolvableString("Visa"),
-                                icon = CardBrand.Visa.icon
-                            ),
-                            TextFieldIcon.Dropdown.Item(
                                 id = CardBrand.CartesBancaires.code,
                                 label = resolvableString("Cartes Bancaires"),
                                 icon = CardBrand.CartesBancaires.icon
+                            ),
+                            TextFieldIcon.Dropdown.Item(
+                                id = CardBrand.Visa.code,
+                                label = resolvableString("Visa"),
+                                icon = CardBrand.Visa.icon
                             ),
                         ),
                         hide = false

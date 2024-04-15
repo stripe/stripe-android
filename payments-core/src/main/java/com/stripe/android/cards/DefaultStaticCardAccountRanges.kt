@@ -176,7 +176,8 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
-        private val CARTES_BANCAIRES_ACCOUNT_RANGES = setOf(
+        @VisibleForTesting
+        val CARTES_BANCAIRES_ACCOUNT_RANGES = setOf(
             // The following two BIN ranges are Cartes Bancaires test cards from the Stripe docs:
             // https://docs.stripe.com/testing?testing-method=card-numbers#cards
             BinRange(
