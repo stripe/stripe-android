@@ -208,7 +208,7 @@ internal class LinkAccountManager @Inject constructor(
                     } else {
                         it
                     }
-                }.onFailure {
+                }.onSuccess {
                     errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
             }
