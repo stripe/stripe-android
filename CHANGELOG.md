@@ -6,6 +6,7 @@
 
 ### Payments
 * [FIXED][8243](https://github.com/stripe/stripe-android/pull/8243) Fixed an issue with R8 when depending directly on `payments-core`.
+* [ADDED][8257](https://github.com/stripe/stripe-android/pull/8257) Added support for Alma to API bindings.
 
 ## 20.40.4 - 2024-04-04
 

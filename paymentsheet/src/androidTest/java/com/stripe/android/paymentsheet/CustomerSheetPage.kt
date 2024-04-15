@@ -12,6 +12,7 @@ import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 internal class CustomerSheetPage(
@@ -63,6 +64,14 @@ internal class CustomerSheetPage(
 
     fun clickConfirmButton() {
         clickPrimaryButton(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
+    }
+
+    fun clickSavedPaymentMethod(endsWith: String) {
+        val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+            .and(hasText(endsWith, substring = true))
+
+        waitUntil(savedPaymentMethodMatcher)
+        click(savedPaymentMethodMatcher)
     }
 
     private fun clickPrimaryButton(tag: String) {
