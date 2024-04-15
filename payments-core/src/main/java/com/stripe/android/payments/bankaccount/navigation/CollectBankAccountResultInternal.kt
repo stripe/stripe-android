@@ -19,13 +19,13 @@ sealed class CollectBankAccountResultInternal : Parcelable {
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Completed(
+    data class Completed(
         val response: CollectBankAccountResponseInternal
     ) : CollectBankAccountResultInternal()
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    class Failed(
+    data class Failed(
         val error: Throwable
     ) : CollectBankAccountResultInternal()
 

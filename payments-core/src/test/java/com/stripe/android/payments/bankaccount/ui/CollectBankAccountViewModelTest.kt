@@ -353,7 +353,8 @@ class CollectBankAccountViewModelTest {
             )
 
             // Then
-            assertThat(expectMostRecentItem()).isEqualTo(
+            val result = expectMostRecentItem()
+            assertThat(result).isEqualTo(
                 FinishWithResult(
                     CollectBankAccountResultInternal.Failed(expectedException)
                 )
