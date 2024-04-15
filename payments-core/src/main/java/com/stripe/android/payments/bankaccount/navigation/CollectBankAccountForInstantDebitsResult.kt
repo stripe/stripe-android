@@ -9,7 +9,7 @@ import kotlinx.parcelize.Parcelize
  * The result of an attempt to collect a bank account
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class CollectBankAccountForInstantDebitsResult : Parcelable {
+sealed interface CollectBankAccountForInstantDebitsResult : Parcelable {
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -18,20 +18,19 @@ sealed class CollectBankAccountForInstantDebitsResult : Parcelable {
         val paymentMethodId: String,
         val last4: String?,
         val bankName: String?
-    ) : CollectBankAccountForInstantDebitsResult()
+    ) : CollectBankAccountForInstantDebitsResult
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(
         val error: Throwable
-    ) : CollectBankAccountForInstantDebitsResult()
+    ) : CollectBankAccountForInstantDebitsResult
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Cancelled : CollectBankAccountForInstantDebitsResult()
+    data object Cancelled : CollectBankAccountForInstantDebitsResult
 }
 
-@Suppress("unused")
 internal fun CollectBankAccountResultInternal.toInstantDebitsResult(): CollectBankAccountForInstantDebitsResult {
     return when (this) {
         is CollectBankAccountResultInternal.Cancelled -> {
@@ -40,7 +39,7 @@ internal fun CollectBankAccountResultInternal.toInstantDebitsResult(): CollectBa
 
         is CollectBankAccountResultInternal.Completed -> {
             when {
-                response.intent !is StripeIntent -> {
+                response.intent == null -> {
                     CollectBankAccountForInstantDebitsResult.Failed(
                         IllegalArgumentException("StripeIntent not set for this session")
                     )

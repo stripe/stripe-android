@@ -96,7 +96,10 @@ interface CollectBankAccountLauncher {
             )
         }
 
-        // TODO make this expose [CollectBankAccountResult] once the make the intent field nullable (breaking change)
+        // TODO: [BANKCON-10079]
+        // callback should return CollectBankAccountResult, instead of the internal result.
+        // However, CollectBankAccountResult currently does not support nullable intents, a requirement
+        // for deferred payment flows. Updating that implies a breaking change.
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun create(
             activityResultRegistryOwner: ActivityResultRegistryOwner,
