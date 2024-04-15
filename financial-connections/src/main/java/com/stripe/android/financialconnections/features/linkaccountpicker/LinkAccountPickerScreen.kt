@@ -154,6 +154,8 @@ private fun LinkAccountPickerLoaded(
     LazyLayout(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         lazyListState = scrollState,
+        loading = payload is Loading,
+        showPillOnSlowLoad = true,
         body = {
             payload()?.let {
                 loadedContent(

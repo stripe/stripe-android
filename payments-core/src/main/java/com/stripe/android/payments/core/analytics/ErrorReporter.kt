@@ -14,6 +14,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.utils.filterNotNullValues
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -73,9 +74,6 @@ interface ErrorReporter {
                 "error_code" to stripeException.stripeError?.code,
             ).filterNotNullValues()
         }
-
-        private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
-            mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -92,6 +90,15 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.elements_session.load_failure"
+        ),
+        CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.payment_methods.load_failure"
+        ),
+        CUSTOMER_SHEET_ADAPTER_NOT_FOUND(
+            eventName = "elements.customer_sheet.customer_adapter.not_found"
+        ),
         PLACES_FIND_AUTOCOMPLETE_ERROR(
             eventName = "address_element.find_autocomplete.error"
         ),
@@ -106,6 +113,15 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
+        ),
+        PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS(
+            eventName = "payments.paymentlauncherconfirmation.null_args"
+        ),
+        BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND(
+            eventName = "payments.browserlauncher.activity_not_found"
+        ),
+        BROWSER_LAUNCHER_NULL_ARGS(
+            eventName = "payments.browserlauncher.null_args"
         ),
     }
 
@@ -140,6 +156,9 @@ interface ErrorReporter {
         ),
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
+        ),
+        PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
+            partialEventName = "paymentsheet.authenticators.not_found"
         ),
         ;
 

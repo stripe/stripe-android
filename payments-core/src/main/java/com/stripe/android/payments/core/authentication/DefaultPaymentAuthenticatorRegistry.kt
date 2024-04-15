@@ -8,11 +8,13 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.PaymentRelayContract
 import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.auth.PaymentBrowserAuthContract
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.model.StripeModel
 import com.stripe.android.model.Source
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.PaymentFlowResult
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.DaggerAuthenticationComponent
 import com.stripe.android.payments.core.injection.INCLUDE_PAYMENT_SHEET_AUTHENTICATORS
 import com.stripe.android.payments.core.injection.IntentAuthenticatorMap
@@ -34,10 +36,11 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
     private val sourceAuthenticator: SourceAuthenticator,
     @IntentAuthenticatorMap private val paymentAuthenticators: Map<AuthenticatorKey, Authenticator>,
     @Named(INCLUDE_PAYMENT_SHEET_AUTHENTICATORS) private val includePaymentSheetAuthenticators: Boolean,
+    applicationContext: Context,
 ) : PaymentAuthenticatorRegistry {
 
     private val paymentSheetAuthenticators: Map<AuthenticatorKey, Authenticator> by lazy {
-        paymentSheetAuthenticators(includePaymentSheetAuthenticators)
+        paymentSheetAuthenticators(includePaymentSheetAuthenticators, applicationContext)
     }
 
     @VisibleForTesting
@@ -145,7 +148,8 @@ internal class DefaultPaymentAuthenticatorRegistry @Inject internal constructor(
 }
 
 private fun paymentSheetAuthenticators(
-    includePaymentSheetAuthenticators: Boolean
+    includePaymentSheetAuthenticators: Boolean,
+    applicationContext: Context
 ): Map<AuthenticatorKey, Authenticator> {
     return try {
         if (includePaymentSheetAuthenticators) {
@@ -158,6 +162,11 @@ private fun paymentSheetAuthenticators(
             emptyMap()
         }
     } catch (e: Exception) {
+        ErrorReporter.createFallbackInstance(applicationContext)
+            .report(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND,
+                stripeException = StripeException.create(e),
+            )
         emptyMap()
     }
 }
