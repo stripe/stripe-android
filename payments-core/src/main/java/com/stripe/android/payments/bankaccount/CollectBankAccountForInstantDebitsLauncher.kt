@@ -56,7 +56,7 @@ class CollectBankAccountForInstantDebitsLauncher(
         amount: Int?,
         currency: String?
     ) {
-        TODO("Instant Debits does not support deferred payments yet")
+        TODO("Instant Debits do not support deferred payments yet")
     }
 
     override fun presentWithDeferredSetup(
@@ -67,7 +67,7 @@ class CollectBankAccountForInstantDebitsLauncher(
         customerId: String?,
         onBehalfOf: String?,
     ) {
-        TODO("Instant Debits does not support deferred payments yet")
+        TODO("Instant Debits do not support deferred payments yet")
     }
 
     override fun unregister() {

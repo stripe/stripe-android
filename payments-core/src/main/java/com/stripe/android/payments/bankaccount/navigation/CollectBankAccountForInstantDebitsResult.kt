@@ -12,6 +12,7 @@ import kotlinx.parcelize.Parcelize
 sealed class CollectBankAccountForInstantDebitsResult : Parcelable {
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
         val intent: StripeIntent,
         val paymentMethodId: String,
@@ -20,11 +21,13 @@ sealed class CollectBankAccountForInstantDebitsResult : Parcelable {
     ) : CollectBankAccountForInstantDebitsResult()
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(
         val error: Throwable
     ) : CollectBankAccountForInstantDebitsResult()
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data object Cancelled : CollectBankAccountForInstantDebitsResult()
 }
 
