@@ -28,7 +28,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     private val testParams = TestParameters.create(
         paymentMethodCode = "card",
     ) { settings ->
-        settings[PaymentMethodOrderSettingsDefinition] = "card,klarna,p24,eps"
+        settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna,p24,eps"
     }.copy(
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,
