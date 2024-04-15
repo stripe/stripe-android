@@ -102,6 +102,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 merchantName = paymentSheetConfiguration.merchantDisplayName,
                 defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
                 shippingDetails = paymentSheetConfiguration.shippingDetails,
+                hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 
@@ -316,7 +317,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
             code = PaymentMethod.Type.Card.code,
             metadata = metadata,
-            customerConfiguration = config.customer,
         )
         val hasUsedLink = linkStore.hasUsedLink()
 

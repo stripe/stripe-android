@@ -6,7 +6,6 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.PaymentSheet
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
@@ -20,7 +19,6 @@ class SaveForFutureUseHelperKtTest {
             metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             ),
-            customerConfiguration = null,
         )
         assertThat(isSaveForFutureUseValueChangeable).isFalse()
     }
@@ -34,7 +32,6 @@ class SaveForFutureUseHelperKtTest {
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
             ),
-            customerConfiguration = null,
         )
         assertThat(isSaveForFutureUseValueChangeable).isFalse()
     }
@@ -47,8 +44,8 @@ class SaveForFutureUseHelperKtTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     setupFutureUsage = StripeIntent.Usage.OnSession,
                 ),
+                hasCustomerConfiguration = true,
             ),
-            customerConfiguration = PaymentSheet.CustomerConfiguration("123", "123"),
         )
         assertThat(isSaveForFutureUseValueChangeable).isFalse()
     }
@@ -61,8 +58,8 @@ class SaveForFutureUseHelperKtTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                     setupFutureUsage = null,
                 ),
+                hasCustomerConfiguration = true,
             ),
-            customerConfiguration = PaymentSheet.CustomerConfiguration("123", "123"),
         )
         assertThat(isSaveForFutureUseValueChangeable).isTrue()
     }

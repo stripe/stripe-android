@@ -73,7 +73,6 @@ internal class FormViewModelTest {
     fun `Verify setting save for future use value is updated in flowable`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            showCheckbox = true,
         )
         val formViewModel = createViewModel(
             arguments = args,
@@ -112,25 +111,6 @@ internal class FormViewModelTest {
             receiver.cancel()
         }
     }
-
-    @Test
-    fun `Verify setting save for future use visibility removes it from completed values`() =
-        runTest {
-            val args = COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = PaymentMethod.Type.Card.code,
-                showCheckbox = false,
-            )
-            val formViewModel = createViewModel(
-                arguments = args,
-                formElements = listOf(
-                    SaveForFutureUseElement(true, ""),
-                ),
-            )
-
-            formViewModel.hiddenIdentifiers.test {
-                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
-            }
-        }
 
     @Test
     fun `Verify if there are no text fields, there is no last text field id`() = runTest {
@@ -257,7 +237,6 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.P24.code,
             billingDetails = null,
-            showCheckbox = true,
         )
         val formViewModel = createViewModel(
             args,
@@ -309,7 +288,6 @@ internal class FormViewModelTest {
     fun `Verify params are set when element address fields are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
-            showCheckbox = false,
             billingDetails = null
         )
         val formViewModel = createViewModel(

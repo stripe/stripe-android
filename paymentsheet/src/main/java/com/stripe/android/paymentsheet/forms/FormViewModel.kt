@@ -76,14 +76,7 @@ internal class FormViewModel @Inject internal constructor(
         cardBillingElement?.hiddenIdentifiers ?: flowOf(emptySet()),
         externalHiddenIdentifiers
     ) { cardBillingIdentifiers, externalHiddenIdentifiers ->
-        val hiddenIdentifiers = externalHiddenIdentifiers.plus(cardBillingIdentifiers)
-
-        if (!formArguments.showCheckbox && saveForFutureUseElement != null) {
-            hiddenIdentifiers
-                .plus(saveForFutureUseElement.identifier)
-        } else {
-            hiddenIdentifiers
-        }
+        externalHiddenIdentifiers.plus(cardBillingIdentifiers)
     }
 
     // Mandate is showing if it is an element of the form and it isn't hidden
@@ -98,14 +91,10 @@ internal class FormViewModel @Inject internal constructor(
         currentFieldValues.filter { it.first == IdentifierSpec.SaveForFutureUse }
             .map { it.second.value.toBoolean() }
             .map { saveForFutureUse ->
-                if (formArguments.showCheckbox) {
-                    if (saveForFutureUse) {
-                        PaymentSelection.CustomerRequestedSave.RequestReuse
-                    } else {
-                        PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                    }
+                if (saveForFutureUse) {
+                    PaymentSelection.CustomerRequestedSave.RequestReuse
                 } else {
-                    PaymentSelection.CustomerRequestedSave.NoRequest
+                    PaymentSelection.CustomerRequestedSave.RequestNoReuse
                 }
             }
             .firstOrNull() ?: PaymentSelection.CustomerRequestedSave.NoRequest

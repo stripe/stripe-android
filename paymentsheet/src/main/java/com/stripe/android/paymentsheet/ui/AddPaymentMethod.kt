@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -95,6 +96,13 @@ internal fun AddPaymentMethod(
                 sheetViewModel.formElementsForCode(selectedItem.code)
             }
 
+            val isSaveForFutureUseValueChangeable = paymentMethodMetadata?.let {
+                isSaveForFutureUseValueChangeable(
+                    code = arguments.paymentMethodCode,
+                    metadata = it,
+                )
+            } ?: false
+
             PaymentElement(
                 enabled = !processing,
                 supportedPaymentMethods = supportedPaymentMethods,
@@ -113,6 +121,7 @@ internal fun AddPaymentMethod(
                 },
                 formArguments = arguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
+                    showCheckbox = isSaveForFutureUseValueChangeable,
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
                     isPaymentFlow = stripeIntent is PaymentIntent,

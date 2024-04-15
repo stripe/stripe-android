@@ -34,7 +34,7 @@
     <ID>LongMethod:USBankAccountEmitters.kt$@Composable internal fun USBankAccountEmitters( viewModel: USBankAccountFormViewModel, usBankAccountFormArgs: USBankAccountFormArguments, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun BillingDetailsForm( formArgs: FormArguments, isProcessing: Boolean, isPaymentFlow: Boolean, nameController: TextFieldController, emailController: TextFieldController, phoneController: PhoneNumberController, addressController: AddressController, lastTextFieldIdentifier: IdentifierSpec?, sameAsShippingElement: SameAsShippingElement?, )</ID>
     <ID>LongMethod:USBankAccountForm.kt$@Composable internal fun USBankAccountForm( formArgs: FormArguments, usBankAccountFormArgs: USBankAccountFormArguments, modifier: Modifier = Modifier, )</ID>
-    <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( formArgs: FormArguments, isProcessing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
+    <ID>LongMethod:USBankAccountForm.kt$@Composable private fun AccountDetailsForm( showCheckbox: Boolean, isProcessing: Boolean, bankName: String?, last4: String?, saveForFutureUseElement: SaveForFutureUseElement, onRemoveAccount: () -> Unit, )</ID>
     <ID>LongMethod:USBankAccountFormViewModelTest.kt$USBankAccountFormViewModelTest$@Test fun `Restores screen state when re-opening screen`()</ID>
     <ID>MagicNumber:AutocompleteScreen.kt$0.07f</ID>
     <ID>MagicNumber:BaseSheetActivity.kt$BaseSheetActivity$30</ID>
@@ -56,10 +56,8 @@
     <ID>MaxLineLength:DefaultFlowControllerTest.kt$DefaultFlowControllerTest$fun</ID>
     <ID>MaxLineLength:DefaultPaymentSheetLoaderTest.kt$DefaultPaymentSheetLoaderTest$fun</ID>
     <ID>MaxLineLength:FlowControllerConfigurationHandlerTest.kt$FlowControllerConfigurationHandlerTest$.</ID>
-    <ID>MaxLineLength:FormArgumentsFactoryTest.kt$FormArgumentsFactoryTest$fun</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$delegate ?: throw IllegalStateException("Cannot move to state $newState since the activity hasn't been launched.")</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$val d = delegate ?: throw IllegalStateException("Cannot run onActivity since the activity hasn't been launched.")</ID>
-    <ID>MaxLineLength:PaymentMethodDefinitionTest.kt$PaymentMethodDefinitionTest$fun</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Address$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.BillingDetails$*</ID>
     <ID>MaxLineLength:PaymentSheet.kt$PaymentSheet.Configuration$*</ID>

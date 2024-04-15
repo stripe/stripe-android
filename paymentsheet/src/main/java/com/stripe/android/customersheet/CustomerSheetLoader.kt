@@ -136,6 +136,7 @@ internal class DefaultCustomerSheetLoader(
                 merchantName = configuration.merchantDisplayName,
                 defaultBillingDetails = configuration.defaultBillingDetails,
                 shippingDetails = null,
+                hasCustomerConfiguration = true,
                 sharedDataSpecs = sharedDataSpecs,
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )

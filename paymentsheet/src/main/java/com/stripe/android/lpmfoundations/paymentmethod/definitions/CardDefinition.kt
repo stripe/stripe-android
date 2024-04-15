@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -83,7 +84,14 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     )
                 )
             }
-            add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
+            if (
+                isSaveForFutureUseValueChangeable(
+                    code = PaymentMethod.Type.Card.code,
+                    metadata = metadata,
+                )
+            ) {
+                add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
+            }
         }
     }
 }

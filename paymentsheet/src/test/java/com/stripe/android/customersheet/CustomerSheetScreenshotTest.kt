@@ -37,6 +37,7 @@ internal class CustomerSheetScreenshotTest {
     )
 
     private val usBankAccountFormArguments = USBankAccountFormArguments(
+        showCheckbox = false,
         onBehalfOf = null,
         isCompleteFlow = false,
         isPaymentFlow = false,
@@ -76,7 +77,6 @@ internal class CustomerSheetScreenshotTest {
         ),
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            showCheckbox = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             merchantName = ""
         ),

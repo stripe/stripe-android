@@ -52,6 +52,7 @@ internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 
     internal val usBankAccountFormArguments = USBankAccountFormArguments(
+        showCheckbox = false,
         onBehalfOf = null,
         isCompleteFlow = false,
         isPaymentFlow = false,
@@ -91,7 +92,6 @@ internal object CustomerSheetTestHelper {
         ),
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            showCheckbox = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             merchantName = ""
         ),

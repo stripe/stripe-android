@@ -173,7 +173,6 @@ internal object PaymentSheetFixtures {
     internal val COMPOSE_FRAGMENT_ARGS
         get() = FormArguments(
             PaymentMethod.Type.Bancontact.code,
-            showCheckbox = true,
             merchantName = "Merchant, Inc.",
             billingDetails = PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(

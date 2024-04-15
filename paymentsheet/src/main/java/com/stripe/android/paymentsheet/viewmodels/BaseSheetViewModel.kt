@@ -65,7 +65,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.Closeable
-import java.lang.IllegalStateException
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -708,7 +707,6 @@ internal abstract class BaseSheetViewModel(
         return FormArgumentsFactory.create(
             paymentMethod = selectedItem,
             metadata = metadata,
-            customerConfig = config.customer,
         )
     }
 

@@ -40,6 +40,7 @@ internal data class PaymentMethodMetadata(
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
+    val hasCustomerConfiguration: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     @IgnoredOnParcel

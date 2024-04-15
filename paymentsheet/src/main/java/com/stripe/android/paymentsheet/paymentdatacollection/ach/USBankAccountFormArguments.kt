@@ -29,6 +29,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
  */
 internal class USBankAccountFormArguments(
     val onBehalfOf: String?,
+    val showCheckbox: Boolean,
     val isCompleteFlow: Boolean,
     val isPaymentFlow: Boolean,
     val stripeIntentId: String?,
