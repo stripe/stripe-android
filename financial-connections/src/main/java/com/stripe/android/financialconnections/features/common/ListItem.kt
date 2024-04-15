@@ -29,12 +29,13 @@ import com.stripe.android.uicore.image.StripeImage
 @Composable
 internal fun ListItem(
     bullet: BulletUI,
+    modifier: Modifier = Modifier,
     onClickableTextClick: (String) -> Unit,
 ) {
     val firstText = bullet.title ?: bullet.content ?: TextResource.Text("")
     val secondText = remember(firstText) { bullet.content?.takeIf { bullet.title != null } }
     val titleStyle = if (secondText != null) typography.bodyMediumEmphasized else typography.bodyMedium
-    Row {
+    Row(modifier) {
         ListItemIcon(icon = bullet.imageResource)
         Spacer(modifier = Modifier.size(16.dp))
         Column {

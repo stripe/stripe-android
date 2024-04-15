@@ -21,6 +21,7 @@ internal data class FinancialConnectionsTypography(
     val headingMedium: TextStyle,
     val bodyMediumEmphasized: TextStyle,
     val bodyMedium: TextStyle,
+    val bodyXSmall: TextStyle,
     val bodySmall: TextStyle,
     val labelLargeEmphasized: TextStyle,
     val labelLarge: TextStyle,

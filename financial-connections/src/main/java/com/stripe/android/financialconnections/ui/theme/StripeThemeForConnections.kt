@@ -19,6 +19,7 @@ internal fun StripeThemeForConnections(
             materialColors = stripeDefaultColors.materialColors.copy(
                 primary = colors.iconBrand,
                 error = colors.textCritical,
+                background = colors.background,
             )
         ),
         shapes = StripeThemeDefaults.shapes.copy(

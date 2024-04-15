@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
@@ -59,9 +60,18 @@ internal fun Layout(
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     scrollState: ScrollState = rememberScrollState(),
+    enableScroll: Boolean = true,
     footer: (@Composable () -> Unit)? = null,
     body: @Composable ColumnScope.() -> Unit,
 ) {
+    val scrollModifier = remember(enableScroll) {
+        if (enableScroll) {
+            Modifier.verticalScroll(scrollState)
+        } else {
+            Modifier
+        }
+    }
+
     LayoutScaffold(
         canScrollForward = scrollState.canScrollForward,
         canScrollBackward = scrollState.canScrollBackward,
@@ -73,9 +83,7 @@ internal fun Layout(
         footer = footer,
     ) {
         Column(
-            modifier = Modifier
-                .verticalScroll(scrollState)
-                .animateContentSize(),
+            modifier = scrollModifier.animateContentSize(),
             verticalArrangement = verticalArrangement,
         ) {
             // Nested columns to achieve proper content padding

@@ -110,6 +110,12 @@ private val Typography = FinancialConnectionsTypography(
         fontWeight = FontWeight.W400,
         lineHeightStyle = lineHeightStyle
     ).toCompat(),
+    bodyXSmall = TextStyle(
+        fontSize = 12.sp,
+        lineHeight = 16.sp,
+        fontWeight = FontWeight.W400,
+        lineHeightStyle = lineHeightStyle
+    ).toCompat(),
     bodySmall = TextStyle(
         fontSize = 14.sp,
         lineHeight = 20.sp,

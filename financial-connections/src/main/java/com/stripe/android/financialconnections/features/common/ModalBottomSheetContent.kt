@@ -120,7 +120,7 @@ internal fun LegalDetailsBottomSheetContent(
 }
 
 @Composable
-private fun Links(
+internal fun Links(
     links: List<TextResource.Text>,
     onClickableTextClick: (String) -> Unit,
 ) {
@@ -145,7 +145,7 @@ private fun Links(
 }
 
 @Composable
-private fun Title(
+internal fun Title(
     title: TextResource.Text,
     onClickableTextClick: (String) -> Unit
 ) {
@@ -183,7 +183,7 @@ private fun ModalBottomSheetContent(
 }
 
 @Composable
-private fun Subtitle(
+internal fun Subtitle(
     text: TextResource,
     onClickableTextClick: (String) -> Unit
 ) {

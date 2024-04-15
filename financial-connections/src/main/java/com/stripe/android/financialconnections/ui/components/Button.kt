@@ -114,6 +114,7 @@ internal fun FinancialConnectionsButton(
                 ) {
                     Box(contentAlignment = Alignment.Center) {
                         Row(
+                            verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .alpha(1f - loadingIndicatorAlpha)
                                 .padding(size.paddingValues())

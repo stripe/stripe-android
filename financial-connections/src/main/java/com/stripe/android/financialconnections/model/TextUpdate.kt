@@ -1,6 +1,8 @@
 package com.stripe.android.financialconnections.model
 
 import android.os.Parcelable
+import com.stripe.android.financialconnections.features.consent.ContentAlignment
+import com.stripe.android.financialconnections.features.consent.ContentSize
 import com.stripe.android.financialconnections.model.serializer.EntrySerializer
 import com.stripe.android.financialconnections.model.serializer.MarkdownToHtmlSerializer
 import kotlinx.parcelize.Parcelize
@@ -110,7 +112,9 @@ internal sealed class Entry : Parcelable {
     @Parcelize
     internal data class Text(
         @Serializable(with = MarkdownToHtmlSerializer::class)
-        val content: String
+        @SerialName("text") val content: String,
+        @SerialName("alignment") val alignment: ContentAlignment = ContentAlignment.Center,
+        @SerialName("size") val size: ContentSize = ContentSize.Small,
     ) : Entry(), Parcelable
 
     @Serializable
@@ -278,3 +282,12 @@ internal data class AddNewAccount(
     @SerialName("body") val body: String,
     @SerialName("icon") val icon: Image? = null,
 ) : Parcelable
+
+internal enum class Alignment {
+
+    @SerialName("center")
+    Center,
+
+    @SerialName("left")
+    Left,
+}
