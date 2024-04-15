@@ -279,9 +279,8 @@ class AddressElementTest {
         val phoneNumberController = addressElement.phoneNumberElement.controller
 
         assertThat(phoneNumberController.initialPhoneNumber).isEqualTo(phoneNumberWithoutCountryCode)
-        assertThat(phoneNumberController.getCountryCode()).isEqualTo("UK")
+        assertThat(phoneNumberController.getCountryCode()).isEqualTo("GB")
     }
-
 
     @Test
     fun `expanded shipping address element should have name and phone number fields when required`() = runTest {
@@ -556,7 +555,7 @@ class AddressElementTest {
         assertThat(country()).isEqualTo("US")
     }
 
-    private fun createAddressElement(initialValues : Map<IdentifierSpec, String>) : AddressElement {
+    private fun createAddressElement(initialValues: Map<IdentifierSpec, String>): AddressElement {
         return AddressElement(
             IdentifierSpec.Generic("address"),
             addressRepository = addressRepository,
@@ -572,7 +571,6 @@ class AddressElementTest {
         )
     }
 }
-
 
 private suspend fun AddressElement.trailingIconFor(
     identifierSpec: IdentifierSpec
