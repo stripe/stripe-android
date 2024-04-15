@@ -87,6 +87,8 @@ com.stripe.android.paymentsheet.addresselement
 com.stripe.android.paymentsheet.injection
 com.stripe.android.paymentsheet.model
 com.stripe.android.paymentsheet.ui
+module:screenshot-testing
+com.stripe.android.screenshottesting
 module:stripe-core
 com.stripe.android.core
 com.stripe.android.core.browser
