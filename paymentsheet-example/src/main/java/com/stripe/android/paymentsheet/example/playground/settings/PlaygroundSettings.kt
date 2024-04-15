@@ -187,6 +187,7 @@ internal class PlaygroundSettings private constructor(
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
+            EnableInstantDebitsSettingsDefinition,
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
