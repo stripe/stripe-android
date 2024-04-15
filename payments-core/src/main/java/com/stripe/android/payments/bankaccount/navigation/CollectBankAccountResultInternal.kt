@@ -43,11 +43,13 @@ data class CollectBankAccountResponseInternal(
 ) : StripeModel {
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class USBankAccountData(
         val financialConnectionsSession: FinancialConnectionsSession
     ) : StripeModel
 
     @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class InstantDebitsData(
         val paymentMethodId: String,
         val last4: String,

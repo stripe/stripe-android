@@ -74,6 +74,7 @@ class CollectBankAccountForInstantDebitsLauncher(
         hostActivityLauncher.unregister()
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         private const val LAUNCHER_KEY = "CollectBankAccountForInstantDebitsLauncher"
@@ -92,6 +93,5 @@ class CollectBankAccountForInstantDebitsLauncher(
                 }
             )
         }
-
     }
 }

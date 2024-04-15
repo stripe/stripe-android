@@ -1,12 +1,14 @@
 package com.stripe.android.payments.bankaccount.navigation
 
 import android.os.Parcelable
+import androidx.annotation.RestrictTo
 import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
 /**
  * The result of an attempt to collect a bank account
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class CollectBankAccountForInstantDebitsResult : Parcelable {
 
     @Parcelize
