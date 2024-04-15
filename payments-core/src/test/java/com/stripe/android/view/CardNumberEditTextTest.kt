@@ -561,11 +561,6 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun addMasterCardBin_callsBrandListener() {
-        verifyCardBrandBin(CardBrand.MasterCard, CardNumberFixtures.MASTERCARD_BIN)
-    }
-
-    @Test
     fun addJcbBin_callsBrandListener() {
         verifyCardBrandBin(CardBrand.JCB, CardNumberFixtures.JCB_BIN)
     }
@@ -759,11 +754,10 @@ internal class CardNumberEditTextTest {
     }
 
     @Test
-    fun `when first digit matches a single account, show a card brand`() {
-        // matches Visa
-        updateCardNumberAndIdle("4")
+    fun `when first two digits match a single account, show a card brand`() {
+        updateCardNumberAndIdle("37")
         assertThat(lastBrandChangeCallbackInvocation)
-            .isEqualTo(CardBrand.Visa)
+            .isEqualTo(CardBrand.AmericanExpress)
         assertThat(cardNumberEditText.isCardNumberValid)
             .isFalse()
         assertThat(cardNumberEditText.shouldShowError)

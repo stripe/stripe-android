@@ -176,6 +176,26 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
             )
         }
 
+        @VisibleForTesting
+        val CARTES_BANCAIRES_ACCOUNT_RANGES = setOf(
+            // The following two BIN ranges are Cartes Bancaires test cards from the Stripe docs:
+            // https://docs.stripe.com/testing?testing-method=card-numbers#cards
+            BinRange(
+                low = "4000002500001001",
+                high = "4000002500001001"
+            ),
+            BinRange(
+                low = "5555552500001001",
+                high = "5555552500001001"
+            ),
+        ).map {
+            AccountRange(
+                binRange = it,
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.CartesBancaires
+            )
+        }
+
         internal val ACCOUNTS =
             VISA_ACCOUNTS
                 .plus(MASTERCARD_ACCOUNTS)
@@ -186,5 +206,6 @@ class DefaultStaticCardAccountRanges : StaticCardAccountRanges {
                 .plus(UNIONPAY19_ACCOUNTS)
                 .plus(DINERSCLUB16_ACCOUNT_RANGES)
                 .plus(DINERSCLUB14_ACCOUNT_RANGES)
+                .plus(CARTES_BANCAIRES_ACCOUNT_RANGES)
     }
 }
