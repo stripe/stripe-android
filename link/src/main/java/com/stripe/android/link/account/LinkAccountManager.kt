@@ -103,6 +103,7 @@ internal class LinkAccountManager @Inject constructor(
                 consumerAccountPublishableKey = consumerPublishableKey,
             ).getOrThrow()
         }.onSuccess {
+            errorReporter.report(ErrorReporter.SuccessEvent.LINK_LOG_OUT_SUCCESS)
             Logger.getInstance(BuildConfig.DEBUG).debug("Logged out of Link successfully")
         }.onFailure { error ->
             errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_LOG_OUT_FAILURE, StripeException.create(error))
@@ -207,6 +208,8 @@ internal class LinkAccountManager @Inject constructor(
                     } else {
                         it
                     }
+                }.onFailure {
+                    errorReporter.report(ErrorReporter.SuccessEvent.LINK_CREATE_CARD_SUCCESS)
                 }
             }
         } else {

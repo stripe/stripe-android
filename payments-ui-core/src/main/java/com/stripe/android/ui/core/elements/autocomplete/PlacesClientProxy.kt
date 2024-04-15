@@ -100,6 +100,7 @@ internal class DefaultPlacesClientProxy(
                     .setTypeFilter(TypeFilter.ADDRESS)
                     .build()
             ).await()
+            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FIND_AUTOCOMPLETE_SUCCESS)
             Result.success(
                 FindAutocompletePredictionsResponse(
                     autocompletePredictions = response.autocompletePredictions.map {
@@ -134,6 +135,7 @@ internal class DefaultPlacesClientProxy(
                     )
                 )
             ).await()
+            errorReporter.report(ErrorReporter.SuccessEvent.PLACES_FETCH_PLACE_SUCCESS)
             Result.success(
                 FetchPlaceResponse(
                     Place(
