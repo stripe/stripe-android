@@ -102,8 +102,8 @@ internal fun InputAddressScreen(
             val titleText = viewModel.args.config?.title ?: stringResource(
                 R.string.stripe_paymentsheet_address_element_shipping_address
             )
-            val formEnabled by viewModel.formEnabled.collectAsState(initial = true)
-            val checkboxChecked by viewModel.checkboxChecked.collectAsState(false)
+            val formEnabled by viewModel.formEnabled.collectAsState()
+            val checkboxChecked by viewModel.checkboxChecked.collectAsState()
 
             InputAddressScreen(
                 primaryButtonEnabled = completeValues != null,

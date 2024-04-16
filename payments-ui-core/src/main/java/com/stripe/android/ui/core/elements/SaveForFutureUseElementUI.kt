@@ -18,8 +18,8 @@ fun SaveForFutureUseElementUI(
     modifier: Modifier = Modifier,
 ) {
     val controller = element.controller
-    val checked by controller.saveForFutureUse.collectAsState(true)
-    val label by controller.label.collectAsState(null)
+    val checked by controller.saveForFutureUse.collectAsState()
+    val label by controller.label.collectAsState()
     val resources = LocalContext.current.resources
 
     CheckboxElementUI(

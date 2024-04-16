@@ -13,13 +13,13 @@ const val SAME_AS_SHIPPING_CHECKBOX_TEST_TAG = "SAME_AS_SHIPPING_CHECKBOX_TEST_T
 fun SameAsShippingElementUI(
     controller: SameAsShippingController
 ) {
-    val checked by controller.value.collectAsState(false)
-    val label by controller.label.collectAsState(null)
+    val checked by controller.value.collectAsState()
+    val label by controller.label.collectAsState()
 
     CheckboxElementUI(
         automationTestTag = SAME_AS_SHIPPING_CHECKBOX_TEST_TAG,
         isChecked = checked,
-        label = label?.let { stringResource(it) },
+        label = stringResource(label),
         isEnabled = true,
         onValueChange = {
             controller.onValueChange(!checked)

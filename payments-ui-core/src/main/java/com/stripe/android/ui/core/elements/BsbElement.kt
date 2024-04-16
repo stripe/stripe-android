@@ -7,9 +7,9 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.view.BecsDebitBanks
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BsbElement(
@@ -27,7 +27,7 @@ class BsbElement(
         SimpleTextFieldController(BsbConfig(banks), initialValue = initialValue)
     )
 
-    val bankName = textElement.controller.fieldValue.map { textFieldValue ->
+    val bankName = textElement.controller.fieldValue.mapAsStateFlow { textFieldValue ->
         banks
             .filter { textFieldValue.startsWith(it.prefix) }
             .map { it.name }

@@ -14,6 +14,8 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
@@ -72,8 +74,8 @@ internal class FormViewModel @Inject internal constructor(
         externalHiddenIdentifiers.value = identifierSpecs
     }
 
-    internal val hiddenIdentifiers = combine(
-        cardBillingElement?.hiddenIdentifiers ?: flowOf(emptySet()),
+    internal val hiddenIdentifiers = combineAsStateFlow(
+        cardBillingElement?.hiddenIdentifiers ?: stateFlowOf(emptySet()),
         externalHiddenIdentifiers
     ) { cardBillingIdentifiers, externalHiddenIdentifiers ->
         externalHiddenIdentifiers.plus(cardBillingIdentifiers)

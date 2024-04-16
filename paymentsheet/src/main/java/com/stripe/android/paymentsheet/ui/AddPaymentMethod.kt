@@ -88,7 +88,7 @@ internal fun AddPaymentMethod(
             val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf
-            val processing by sheetViewModel.processing.collectAsState(false)
+            val processing by sheetViewModel.processing.collectAsState()
             val context = LocalContext.current
             val paymentMethodMetadata by sheetViewModel.paymentMethodMetadata.collectAsState()
             val stripeIntent = paymentMethodMetadata?.stripeIntent

@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -96,9 +95,9 @@ class PhoneNumberController private constructor(
         }
     }
 
-    val placeholder = phoneNumberFormatter.map { it.placeholder }
+    val placeholder = phoneNumberFormatter.mapAsStateFlow { it.placeholder }
 
-    val visualTransformation = phoneNumberFormatter.map { it.visualTransformation }
+    val visualTransformation = phoneNumberFormatter.mapAsStateFlow { it.visualTransformation }
 
     fun getCountryCode() = phoneNumberFormatter.value.countryCode
 
