@@ -7,8 +7,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.common.api.CommonStatusCodes
-import com.google.android.gms.tasks.CancellationTokenSource
-import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
@@ -16,9 +14,6 @@ import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentData
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.suspendCancellableCoroutine
-import java.util.concurrent.Executor
-import kotlin.coroutines.resume
 
 /**
  * [GooglePayPaymentMethodLauncherActivity] is used to return the result of a Google Pay operation.
@@ -73,7 +68,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
                 runCatching {
-                    viewModel.createLoadPaymentDataTask().awaitTask()
+                    viewModel.loadPaymentData()
                 }.fold(
                     onSuccess = {
                         googlePayLauncher.launch(it)
@@ -166,22 +161,4 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     }
 }
 
-suspend fun <T> Task<T>.awaitTask(cancellationTokenSource: CancellationTokenSource? = null): Task<T> {
-    return if (isComplete) this else suspendCancellableCoroutine { cont ->
-        // Run the callback directly to avoid unnecessarily scheduling on the main thread.
-        addOnCompleteListener(DirectExecutor, cont::resume)
 
-        cancellationTokenSource?.let { cancellationSource ->
-            cont.invokeOnCancellation { cancellationSource.cancel() }
-        }
-    }
-}
-
-/**
- * An [Executor] that just directly executes the [Runnable].
- */
-private object DirectExecutor : Executor {
-    override fun execute(r: Runnable) {
-        r.run()
-    }
-}

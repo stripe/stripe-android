@@ -160,7 +160,7 @@ internal class GooglePayLauncherViewModel(
         }
     }
 
-    suspend fun createLoadPaymentDataTask(): Result<Task<PaymentData>> {
+    suspend fun loadPaymentData(): Result<Task<PaymentData>> {
         return runCatching {
             check(isReadyToPay()) { "Google Pay is unavailable." }
         }.mapResult {
@@ -168,7 +168,7 @@ internal class GooglePayLauncherViewModel(
         }.mapCatching { json ->
             PaymentDataRequest.fromJson(json)
         }.map { request ->
-            paymentsClient.loadPaymentData(request)
+            paymentsClient.loadPaymentData(request).awaitTask()
         }
     }
 

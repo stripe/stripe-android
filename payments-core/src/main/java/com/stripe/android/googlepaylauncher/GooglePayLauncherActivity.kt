@@ -13,7 +13,6 @@ import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
@@ -67,7 +66,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
-                viewModel.createLoadPaymentDataTask().fold(
+                viewModel.loadPaymentData().fold(
                     onSuccess = {
                         googlePayLauncher.launch(it)
                         viewModel.hasLaunched = true
