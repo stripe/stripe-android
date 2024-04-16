@@ -53,6 +53,7 @@ internal object CustomerSheetTestHelper {
 
     internal val usBankAccountFormArguments = USBankAccountFormArguments(
         showCheckbox = false,
+        instantDebits = false,
         onBehalfOf = null,
         isCompleteFlow = false,
         isPaymentFlow = false,
