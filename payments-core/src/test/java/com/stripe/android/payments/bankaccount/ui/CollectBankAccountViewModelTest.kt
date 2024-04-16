@@ -156,7 +156,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration(attachToIntent = false))
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -181,7 +181,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration(attachToIntent = false))
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -228,7 +228,7 @@ class CollectBankAccountViewModelTest {
             // When
             val viewModel = buildViewModel(viewEffect, paymentIntentConfiguration())
 
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -258,7 +258,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -288,7 +288,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, deferredPaymentIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -318,7 +318,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, deferredSetupIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 
@@ -348,7 +348,7 @@ class CollectBankAccountViewModelTest {
 
             // When
             val viewModel = buildViewModel(viewEffect, setupIntentConfiguration())
-            viewModel.onConnectionsResult(
+            viewModel.onConnectionsForACHResult(
                 FinancialConnectionsSheetResult.Completed(paymentsFinancialConnectionsSession)
             )
 

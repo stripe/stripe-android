@@ -6,21 +6,30 @@ import androidx.annotation.RestrictTo
 sealed interface CreateFinancialConnectionsSessionParams {
     fun toMap(): Map<String, Any>
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class InstantDebits(
         val clientSecret: String,
         val customerEmailAddress: String?
     ) : CreateFinancialConnectionsSessionParams {
+
         override fun toMap(): Map<String, Any> {
+            val paymentMethod = PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Link,
+                billingDetails = PaymentMethod.BillingDetails(
+                    email = customerEmailAddress,
+                ),
+            )
             return mapOf(
                 PARAM_CLIENT_SECRET to clientSecret,
-                "hosted_surface" to "payment_element",
-                "product" to "instant_debits",
-                "attach_required" to true,
-                "payment_method_data[type]" to "link"
+                PARAM_HOSTED_SURFACE to "payment_element",
+                PARAM_PRODUCT to "instant_debits",
+                PARAM_ATTACH_REQUIRED to true,
+                PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap()
             )
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class USBankAccount(
         val clientSecret: String,
         val customerName: String,
@@ -42,6 +51,9 @@ sealed interface CreateFinancialConnectionsSessionParams {
 
     private companion object {
         const val PARAM_CLIENT_SECRET = "client_secret"
+        const val PARAM_HOSTED_SURFACE = "hosted_surface"
+        const val PARAM_ATTACH_REQUIRED = "attach_required"
+        const val PARAM_PRODUCT = "product"
         const val PARAM_PAYMENT_METHOD_DATA = "payment_method_data"
     }
 }
