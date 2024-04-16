@@ -271,41 +271,45 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         _collectBankAccountResult.tryEmit(result)
         when (result) {
             is CollectBankAccountResultInternal.Completed -> {
+                val usBankAccountData = requireNotNull(result.response.usBankAccountData)
                 when (
-                    val paymentAccount =
-                        result.response.financialConnectionsSession.paymentAccount
+                    val paymentAccount = usBankAccountData.financialConnectionsSession.paymentAccount
                 ) {
                     is BankAccount -> {
                         _currentScreenState.update {
                             USBankAccountFormScreenState.VerifyWithMicrodeposits(
                                 paymentAccount = paymentAccount,
-                                financialConnectionsSessionId = result.response.financialConnectionsSession.id,
+                                financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
                                 intentId = result.response.intent?.id,
                                 primaryButtonText = buildPrimaryButtonText(),
                                 mandateText = buildMandateText(),
                             )
                         }
                     }
+
                     is FinancialConnectionsAccount -> {
                         _currentScreenState.update {
                             USBankAccountFormScreenState.MandateCollection(
                                 paymentAccount = paymentAccount,
                                 financialConnectionsSessionId =
-                                result.response.financialConnectionsSession.id,
+                                usBankAccountData.financialConnectionsSession.id,
                                 intentId = result.response.intent?.id,
                                 primaryButtonText = buildPrimaryButtonText(),
                                 mandateText = buildMandateText(),
                             )
                         }
                     }
+
                     null -> {
                         reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
                     }
                 }
             }
+
             is CollectBankAccountResultInternal.Failed -> {
                 reset(R.string.stripe_paymentsheet_ach_something_went_wrong)
             }
+
             is CollectBankAccountResultInternal.Cancelled -> {
                 reset()
             }
@@ -320,18 +324,21 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 }
                 collectBankAccount(args.clientSecret)
             }
+
             is USBankAccountFormScreenState.MandateCollection ->
                 updatePaymentSelection(
                     linkAccountId = screenState.financialConnectionsSessionId,
                     bankName = screenState.paymentAccount.institutionName,
                     last4 = screenState.paymentAccount.last4
                 )
+
             is USBankAccountFormScreenState.VerifyWithMicrodeposits ->
                 updatePaymentSelection(
                     linkAccountId = screenState.financialConnectionsSessionId,
                     bankName = screenState.paymentAccount.bankName,
                     last4 = screenState.paymentAccount.last4
                 )
+
             is USBankAccountFormScreenState.SavedAccount -> {
                 screenState.financialConnectionsSessionId?.let { linkAccountId ->
                     updatePaymentSelection(
@@ -517,6 +524,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     )
                 }
             }
+
             else -> application.getString(
                 StripeUiCoreR.string.stripe_continue_button_label
             )

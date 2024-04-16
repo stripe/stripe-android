@@ -142,28 +142,3 @@ class CollectBankAccountContract :
             "com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.extra_result"
     }
 }
-
-internal fun CollectBankAccountResultInternal.toExposedResult(): CollectBankAccountResult {
-    return when (this) {
-        is CollectBankAccountResultInternal.Cancelled -> {
-            CollectBankAccountResult.Cancelled
-        }
-        is CollectBankAccountResultInternal.Completed -> {
-            if (response.intent == null) {
-                CollectBankAccountResult.Failed(
-                    IllegalArgumentException("StripeIntent not set for this session")
-                )
-            } else {
-                CollectBankAccountResult.Completed(
-                    response = CollectBankAccountResponse(
-                        intent = response.intent,
-                        financialConnectionsSession = response.financialConnectionsSession
-                    )
-                )
-            }
-        }
-        is CollectBankAccountResultInternal.Failed -> {
-            CollectBankAccountResult.Failed(error)
-        }
-    }
-}

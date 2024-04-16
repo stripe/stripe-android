@@ -8,6 +8,7 @@ import com.stripe.android.model.CreateFinancialConnectionsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.VerificationMethodParam
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.any
@@ -42,8 +43,10 @@ class CreateFinancialConnectionsSessionTest {
                 createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmail = null,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = customerName,
+                        email = null
+                    ),
                     stripeAccountId = null
                 )
 
@@ -76,8 +79,10 @@ class CreateFinancialConnectionsSessionTest {
                 createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmail = null,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = customerName,
+                        email = null
+                    ),
                     stripeAccountId = null
                 )
 
@@ -108,8 +113,10 @@ class CreateFinancialConnectionsSessionTest {
                 createFinancialConnectionsSession.forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmail = null,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = customerName,
+                        email = null
+                    ),
                     stripeAccountId = null
                 )
 
@@ -132,8 +139,10 @@ class CreateFinancialConnectionsSessionTest {
                 createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmail = null,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = customerName,
+                        email = null
+                    ),
                     stripeAccountId = stripeAccountId
                 )
 
@@ -168,8 +177,10 @@ class CreateFinancialConnectionsSessionTest {
                 createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmail = null,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = customerName,
+                        email = null
+                    ),
                     stripeAccountId = null
                 )
 
@@ -200,8 +211,10 @@ class CreateFinancialConnectionsSessionTest {
                 createFinancialConnectionsSession.forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = customerName,
-                    customerEmail = null,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = customerName,
+                        email = null
+                    ),
                     stripeAccountId = null
                 )
 

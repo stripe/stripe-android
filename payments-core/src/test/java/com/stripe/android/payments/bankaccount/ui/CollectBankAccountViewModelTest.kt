@@ -17,6 +17,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountCont
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForPaymentIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract.Args.ForSetupIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal.USBankAccountData
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
@@ -237,7 +238,8 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             paymentIntent,
-                            paymentsFinancialConnectionsSession
+                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            instantDebitsData = null
                         )
                     )
                 )
@@ -266,7 +268,8 @@ class CollectBankAccountViewModelTest {
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
                             setupIntent,
-                            paymentsFinancialConnectionsSession
+                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            instantDebitsData = null
                         )
                     )
                 )
@@ -294,8 +297,9 @@ class CollectBankAccountViewModelTest {
                 FinishWithResult(
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
-                            intent = null,
-                            financialConnectionsSession = paymentsFinancialConnectionsSession
+                            null,
+                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            instantDebitsData = null
                         )
                     )
                 )
@@ -323,8 +327,9 @@ class CollectBankAccountViewModelTest {
                 FinishWithResult(
                     CollectBankAccountResultInternal.Completed(
                         CollectBankAccountResponseInternal(
-                            intent = null,
-                            financialConnectionsSession = paymentsFinancialConnectionsSession
+                            null,
+                            usBankAccountData = USBankAccountData(paymentsFinancialConnectionsSession),
+                            instantDebitsData = null
                         )
                     )
                 )
@@ -348,7 +353,8 @@ class CollectBankAccountViewModelTest {
             )
 
             // Then
-            assertThat(expectMostRecentItem()).isEqualTo(
+            val result = expectMostRecentItem()
+            assertThat(result).isEqualTo(
                 FinishWithResult(
                     CollectBankAccountResultInternal.Failed(expectedException)
                 )
@@ -364,9 +370,11 @@ class CollectBankAccountViewModelTest {
                 forPaymentIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = name,
-                    customerEmail = email,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = name,
+                        email = email
+                    ),
                 )
             }.doReturn(result)
         }
@@ -410,9 +418,11 @@ class CollectBankAccountViewModelTest {
                 forSetupIntent(
                     publishableKey = publishableKey,
                     clientSecret = clientSecret,
-                    customerName = name,
-                    customerEmail = email,
-                    stripeAccountId = stripeAccountId
+                    stripeAccountId = stripeAccountId,
+                    configuration = CollectBankAccountConfiguration.USBankAccount(
+                        name = name,
+                        email = email
+                    )
                 )
             }.doReturn(result)
         }

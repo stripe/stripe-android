@@ -65,7 +65,9 @@ internal sealed class CustomerSheetViewState(
             paymentMethodCode == PaymentMethod.Type.USBankAccount.code &&
             isFinancialConnectionsAvailable() &&
             bankAccountResult is CollectBankAccountResultInternal.Completed &&
-            bankAccountResult.response.financialConnectionsSession.paymentAccount is FinancialConnectionsAccount
+            bankAccountResult.response.usBankAccountData
+                ?.financialConnectionsSession
+                ?.paymentAccount is FinancialConnectionsAccount
     }
 
     data class Loading(

@@ -1037,7 +1037,10 @@ class USBankAccountFormViewModelTest {
         return CollectBankAccountResultInternal.Completed(
             CollectBankAccountResponseInternal(
                 intent = paymentIntent,
-                financialConnectionsSession = financialConnectionsSession
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
             )
         )
     }
@@ -1061,7 +1064,10 @@ class USBankAccountFormViewModelTest {
         return CollectBankAccountResultInternal.Completed(
             CollectBankAccountResponseInternal(
                 intent = paymentIntent,
-                financialConnectionsSession = financialConnectionsSession
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
             )
         )
     }
