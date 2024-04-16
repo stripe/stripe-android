@@ -77,6 +77,8 @@ internal class CustomerApiRepository @Inject constructor(
                         ErrorReporter.ExpectedErrorEvent.GET_SAVED_PAYMENT_METHODS_FAILURE,
                         StripeException.create(it)
                     )
+                }.onSuccess {
+                    errorReporter.report(ErrorReporter.SuccessEvent.GET_SAVED_PAYMENT_METHODS_SUCCESS)
                 }
             }
         }

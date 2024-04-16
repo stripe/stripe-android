@@ -165,6 +165,30 @@ interface ErrorReporter {
         override val eventName: String
             get() = "unexpected.$partialEventName"
     }
+
+    /**
+     * Success events that correspond to an [ExpectedErrorEvent].
+     *
+     * This exists so that we can compute failure rates for [ExpectedErrorEvent]s to enable adding meaningful alerts.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class SuccessEvent(override val eventName: String) : ErrorEvent {
+        GET_SAVED_PAYMENT_METHODS_SUCCESS(
+            eventName = "elements.customer_repository.get_saved_payment_methods_success"
+        ),
+        PLACES_FIND_AUTOCOMPLETE_SUCCESS(
+            eventName = "address_element.find_autocomplete.success"
+        ),
+        PLACES_FETCH_PLACE_SUCCESS(
+            eventName = "address_element.fetch_place.success"
+        ),
+        LINK_CREATE_CARD_SUCCESS(
+            eventName = "link.create_new_card.success"
+        ),
+        LINK_LOG_OUT_SUCCESS(
+            eventName = "link.log_out.success"
+        ),
+    }
 }
 
 @Component(modules = [DefaultErrorReporterModule::class])
