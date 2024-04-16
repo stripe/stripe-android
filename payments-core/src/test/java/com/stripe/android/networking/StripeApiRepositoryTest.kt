@@ -2120,7 +2120,6 @@ internal class StripeApiRepositoryTest {
 
         val clientSecret = "pi_1234_secret_5678"
         val id = "pi_1234"
-        val customerName = "John Doe"
         val customerEmailAddress = "johndoe@gmail.com"
         create().createPaymentIntentFinancialConnectionsSession(
             paymentIntentId = id,
@@ -2141,10 +2140,13 @@ internal class StripeApiRepositoryTest {
         )
         with(params) {
             assertEquals(clientSecret, this["client_secret"])
+            assertEquals("instant_debits", this["product"])
+            assertEquals("payment_element", this["hosted_surface"])
+            assertEquals(true, this["attach_required"])
             withNestedParams("payment_method_data") {
-                assertEquals("us_bank_account", this["type"])
+                assertEquals("link", this["type"])
                 withNestedParams("billing_details") {
-                    assertEquals(customerName, this["name"])
+                    assertEquals(customerEmailAddress, this["email"])
                 }
             }
         }
@@ -2207,7 +2209,6 @@ internal class StripeApiRepositoryTest {
 
         val clientSecret = "seti_1234_secret_5678"
         val id = "seti_1234"
-        val customerName = "John Doe"
         val customerEmailAddress = "johndoe@gmail.com"
         create().createSetupIntentFinancialConnectionsSession(
             setupIntentId = id,
@@ -2230,10 +2231,13 @@ internal class StripeApiRepositoryTest {
 
         with(params) {
             assertEquals(clientSecret, this["client_secret"])
+            assertEquals("instant_debits", this["product"])
+            assertEquals("payment_element", this["hosted_surface"])
+            assertEquals(true, this["attach_required"])
             withNestedParams("payment_method_data") {
-                assertEquals("us_bank_account", this["type"])
+                assertEquals("link", this["type"])
                 withNestedParams("billing_details") {
-                    assertEquals(customerName, this["name"])
+                    assertEquals(customerEmailAddress, this["email"])
                 }
             }
         }
