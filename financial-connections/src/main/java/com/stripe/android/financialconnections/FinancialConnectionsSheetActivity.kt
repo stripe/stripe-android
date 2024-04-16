@@ -14,8 +14,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
@@ -54,28 +57,40 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (getArgs(intent) == null) {
+        val arguments = getArgs(intent)
+
+        if (arguments == null) {
             finish()
-        } else {
-            observeViewEffects()
-            browserManager = BrowserManager(application)
-            if (savedInstanceState != null) viewModel.onActivityRecreated()
+            return
         }
+
+        observeViewEffects()
+        browserManager = BrowserManager(application)
+        if (savedInstanceState != null) viewModel.onActivityRecreated()
 
         onBackPressedDispatcher.addCallback {
             finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
         }
-        setContent { Loading() }
+        setContent { Loading(arguments.isInstantDebits) }
     }
 
     @Composable
-    private fun Loading() {
+    private fun Loading(isInstantDebits: Boolean) {
         FinancialConnectionsTheme {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                LoadingSpinner(Modifier.size(52.dp))
+                val colors = FinancialConnectionsTheme.colors
+
+                val spinnerColor = remember(isInstantDebits) {
+                    if (isInstantDebits) Color.Link else colors.borderBrand
+                }
+
+                LoadingSpinner(
+                    modifier = Modifier.size(52.dp),
+                    gradient = Brush.sweepGradient(listOf(Color.White, spinnerColor)),
+                )
             }
         }
     }
@@ -165,3 +180,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
         }
     }
 }
+
+// TODO
+private val Color.Companion.Link: Color
+    get() = Color(android.graphics.Color.parseColor("#00D66F"))

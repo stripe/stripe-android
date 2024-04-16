@@ -103,7 +103,7 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         clientSecret: String
     ): CreateFinancialConnectionsSessionParams = when (this) {
         is CollectBankAccountConfiguration.USBankAccount -> {
-            CreateFinancialConnectionsSessionParams(
+            CreateFinancialConnectionsSessionParams.USBankAccount(
                 clientSecret = clientSecret,
                 customerName = name,
                 customerEmailAddress = email
@@ -111,7 +111,10 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
         }
 
         is CollectBankAccountConfiguration.InstantDebits -> {
-            TODO("Instant Debits not supported yet. This will create a FCSession for ID.")
+            CreateFinancialConnectionsSessionParams.InstantDebits(
+                clientSecret = clientSecret,
+                customerEmailAddress = email,
+            )
         }
     }
 }

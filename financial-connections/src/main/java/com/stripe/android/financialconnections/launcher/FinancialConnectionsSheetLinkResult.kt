@@ -16,7 +16,7 @@ sealed class FinancialConnectionsSheetLinkResult : Parcelable {
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
-        val linkedAccountId: String
+        val paymentMethodId: String,
     ) : FinancialConnectionsSheetLinkResult()
 
     /**

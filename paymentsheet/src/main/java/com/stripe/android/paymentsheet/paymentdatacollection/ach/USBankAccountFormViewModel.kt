@@ -19,7 +19,9 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountForInstantDebitsResult
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -259,10 +261,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         set(value) = savedStateHandle.set(SHOULD_RESET_KEY, value)
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
-        collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            activityResultRegistryOwner = activityResultRegistryOwner,
-            callback = ::handleCollectBankAccountResult,
-        )
+        collectBankAccountLauncher = if (args.instantDebits) {
+            CollectBankAccountForInstantDebitsLauncher.create(
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                callback = ::handleInstantDebitsResult,
+            )
+        } else {
+            CollectBankAccountLauncher.create(
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                callback = ::handleCollectBankAccountResult,
+            )
+        }
     }
 
     @VisibleForTesting
@@ -314,6 +323,13 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 reset()
             }
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    @VisibleForTesting
+    fun handleInstantDebitsResult(result: CollectBankAccountForInstantDebitsResult) {
+        // TODO: Eventually do real work here…
+        reset()
     }
 
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
@@ -398,25 +414,30 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         if (hasLaunched) return
         hasLaunched = true
         if (clientSecret != null) {
+            val config = if (args.instantDebits) {
+                CollectBankAccountConfiguration.InstantDebits(
+                    email = email.value,
+                )
+            } else {
+                CollectBankAccountConfiguration.USBankAccount(
+                    name = name.value,
+                    email = email.value,
+                )
+            }
+
             if (args.isPaymentFlow) {
                 collectBankAccountLauncher?.presentWithPaymentIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                     clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
+                    configuration = config,
                 )
             } else {
                 collectBankAccountLauncher?.presentWithSetupIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                     clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
+                    configuration = config,
                 )
             }
         } else {

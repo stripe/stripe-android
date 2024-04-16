@@ -1,7 +1,9 @@
 package com.stripe.android.financialconnections
 
+import FinancialConnectionsSheetForLinkLauncher
 import android.os.Parcelable
 import androidx.activity.ComponentActivity
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForTokenLauncher
@@ -57,6 +59,17 @@ class FinancialConnectionsSheet internal constructor(
         ): FinancialConnectionsSheet {
             return FinancialConnectionsSheet(
                 FinancialConnectionsSheetForDataLauncher(activity, callback)
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @JvmStatic
+        fun createForLink(
+            activity: ComponentActivity,
+            callback: FinancialConnectionsSheetResultForLinkCallback,
+        ): FinancialConnectionsSheet {
+            return FinancialConnectionsSheet(
+                FinancialConnectionsSheetForLinkLauncher(activity, callback)
             )
         }
 

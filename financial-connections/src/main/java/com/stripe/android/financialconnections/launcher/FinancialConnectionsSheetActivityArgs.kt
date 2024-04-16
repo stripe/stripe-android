@@ -49,4 +49,7 @@ sealed class FinancialConnectionsSheetActivityArgs constructor(
     }
 
     internal fun isValid(): Boolean = kotlin.runCatching { validate() }.isSuccess
+
+    internal val isInstantDebits: Boolean
+        get() = this is ForLink
 }

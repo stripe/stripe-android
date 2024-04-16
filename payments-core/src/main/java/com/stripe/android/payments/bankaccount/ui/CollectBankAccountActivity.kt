@@ -6,9 +6,13 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
+import com.stripe.android.payments.financialconnections.DefaultFinancialConnectionsPaymentsProxy
 import com.stripe.android.payments.financialconnections.FinancialConnectionsPaymentsProxy
 
 /**
@@ -30,7 +34,11 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initConnectionsPaymentsProxy()
+
+        starterArgs?.let {
+            initConnectionsPaymentsProxy(it)
+        }
+
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect { viewEffect ->
                 when (viewEffect) {
@@ -41,11 +49,29 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         }
     }
 
-    private fun initConnectionsPaymentsProxy() {
-        financialConnectionsPaymentsProxy = FinancialConnectionsPaymentsProxy.create(
-            activity = this,
-            onComplete = viewModel::onConnectionsResult
-        )
+    private fun initConnectionsPaymentsProxy(args: CollectBankAccountContract.Args) {
+        financialConnectionsPaymentsProxy = when (args.configuration) {
+            is InstantDebits -> {
+                FinancialConnectionsPaymentsProxy.create(
+                    activity = this,
+                    onComplete = viewModel::onConnectionsResult,
+                    provider = {
+                        DefaultFinancialConnectionsPaymentsProxy(
+                            FinancialConnectionsSheet.createForLink(
+                                activity = this,
+                                callback = { /* TODO Coming soon… */ },
+                            )
+                        )
+                    },
+                )
+            }
+            is USBankAccount -> {
+                FinancialConnectionsPaymentsProxy.create(
+                    activity = this,
+                    onComplete = viewModel::onConnectionsResult
+                )
+            }
+        }
     }
 
     private fun OpenConnectionsFlow.launch() {

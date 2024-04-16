@@ -47,6 +47,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Product.INSTANT_DEBITS
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
@@ -125,7 +126,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logNoBrowserAvailableAndFinish()
             return
         }
-        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(sync.manifest)
+
+        val nativeAuthFlowEnabled = when (sync.manifest.product) {
+            // Instant debits does not support native auth flow yet.
+            INSTANT_DEBITS -> false
+            else -> nativeRouter.nativeAuthFlowEnabled(sync.manifest)
+        }
+
         viewModelScope.launch { nativeRouter.logExposure(sync.manifest) }
         if (sync.manifest.hostedAuthUrl == null) {
             finishWithResult(
