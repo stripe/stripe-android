@@ -2911,8 +2911,6 @@ class CustomerSheetViewModelTest {
         val paymentAccount = mock<PaymentAccount>()
         val financialConnectionsAccount = mock<FinancialConnectionsAccount>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
-        val bankAccountResponse = mock<CollectBankAccountResponseInternal>()
-        whenever(bankAccountResponse.financialConnectionsSession).thenReturn(financialConnectionsSession)
         whenever(financialConnectionsSession.paymentAccount).thenReturn(
             if (isVerified) {
                 financialConnectionsAccount
@@ -2921,7 +2919,13 @@ class CustomerSheetViewModelTest {
             }
         )
         return CollectBankAccountResultInternal.Completed(
-            response = bankAccountResponse,
+            response = CollectBankAccountResponseInternal(
+                intent = null,
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
+            ),
         )
     }
 
