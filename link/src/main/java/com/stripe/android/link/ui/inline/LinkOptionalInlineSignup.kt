@@ -44,7 +44,6 @@ import com.stripe.android.link.R
 import com.stripe.android.link.theme.DefaultLinkTheme
 import com.stripe.android.link.ui.ErrorMessage
 import com.stripe.android.link.ui.LinkTerms
-import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.link.ui.signup.SignUpState
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.uicore.elements.EmailConfig
@@ -224,27 +223,19 @@ internal fun EmailCollection(
 internal fun LinkLogo() {
     Icon(
         painter = painterResource(
-            id = if (LinkUi.useNewBrand) {
-                if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
-                    R.drawable.stripe_link_logo_knockout_black
-                } else {
-                    R.drawable.stripe_link_logo_knockout_white
-                }
+            id = if (MaterialTheme.stripeColors.component.shouldUseDarkDynamicColor()) {
+                R.drawable.stripe_link_logo_knockout_black
             } else {
-                R.drawable.stripe_link_logo
+                R.drawable.stripe_link_logo_knockout_white
             }
         ),
         contentDescription = stringResource(id = R.string.stripe_link),
         modifier = Modifier
-            .padding(end = if (LinkUi.useNewBrand) 16.dp else 12.dp)
+            .padding(end = 16.dp)
             .semantics {
                 testTag = "LinkLogoIcon"
             },
-        tint = if (LinkUi.useNewBrand) {
-            Color.Unspecified
-        } else {
-            MaterialTheme.stripeColors.placeholderText
-        },
+        tint = Color.Unspecified,
     )
 }
 

@@ -4,11 +4,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.model.ElementsSession
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
-import org.junit.After
 import org.junit.Rule
 import org.junit.Test
 
@@ -17,16 +15,10 @@ internal class LinkButtonScreenshotTest {
     val paparazziRule = PaparazziRule(
         SystemAppearance.entries,
         FontSize.entries,
-        LinkRebrand.entries,
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
     )
-
-    @After
-    fun resetUseNewBrand() {
-        LinkUi.useNewBrand = ElementsSession.LinkSettings.useRebrandDefault
-    }
 
     @Test
     fun testNewUser() {
