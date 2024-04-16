@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
@@ -30,7 +31,7 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initConnectionsPaymentsProxy()
+        initConnectionsPaymentsProxy(requireNotNull(starterArgs).configuration)
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect { viewEffect ->
                 when (viewEffect) {
@@ -41,11 +42,18 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
         }
     }
 
-    private fun initConnectionsPaymentsProxy() {
-        financialConnectionsPaymentsProxy = FinancialConnectionsPaymentsProxy.create(
-            activity = this,
-            onComplete = viewModel::onConnectionsResult
-        )
+    private fun initConnectionsPaymentsProxy(configuration: CollectBankAccountConfiguration) {
+        financialConnectionsPaymentsProxy = when (configuration) {
+            is CollectBankAccountConfiguration.InstantDebits -> FinancialConnectionsPaymentsProxy.createForInstantDebits(
+                activity = this,
+                onComplete = viewModel::onConnectionsForInstantDebitsResult
+            )
+
+            is CollectBankAccountConfiguration.USBankAccount -> FinancialConnectionsPaymentsProxy.createForACH(
+                activity = this,
+                onComplete = viewModel::onConnectionsForACHResult
+            )
+        }
     }
 
     private fun OpenConnectionsFlow.launch() {

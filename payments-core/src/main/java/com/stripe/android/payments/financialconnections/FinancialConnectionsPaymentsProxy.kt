@@ -1,10 +1,11 @@
 package com.stripe.android.payments.financialconnections
 
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.stripe.android.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
 
 /**
  * Proxy to access financial connections code safely in payments.
@@ -18,13 +19,14 @@ internal interface FinancialConnectionsPaymentsProxy {
     )
 
     companion object {
-        fun create(
-            fragment: Fragment,
+
+        fun createForInstantDebits(
+            activity: AppCompatActivity,
             onComplete: (FinancialConnectionsSheetResult) -> Unit,
             provider: () -> FinancialConnectionsPaymentsProxy = {
-                DefaultFinancialConnectionsPaymentsProxy(
-                    FinancialConnectionsSheet.create(
-                        fragment,
+                FinancialConnectionsLauncherProxy(
+                    FinancialConnectionsSheetForDataLauncher(
+                        activity,
                         onComplete
                     )
                 )
@@ -32,18 +34,18 @@ internal interface FinancialConnectionsPaymentsProxy {
             isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
             return if (isFinancialConnectionsAvailable()) {
-                provider()
+                TODO("Instant Debits not implemented yet.")
             } else {
                 UnsupportedFinancialConnectionsPaymentsProxy()
             }
         }
 
-        fun create(
+        fun createForACH(
             activity: AppCompatActivity,
             onComplete: (FinancialConnectionsSheetResult) -> Unit,
             provider: () -> FinancialConnectionsPaymentsProxy = {
-                DefaultFinancialConnectionsPaymentsProxy(
-                    FinancialConnectionsSheet.create(
+                FinancialConnectionsLauncherProxy(
+                    FinancialConnectionsSheetForDataLauncher(
                         activity,
                         onComplete
                     )
@@ -60,15 +62,15 @@ internal interface FinancialConnectionsPaymentsProxy {
     }
 }
 
-internal class DefaultFinancialConnectionsPaymentsProxy(
-    private val financialConnectionsSheet: FinancialConnectionsSheet
+internal class FinancialConnectionsLauncherProxy<T: FinancialConnectionsSheetLauncher>(
+    private val launcher: T
 ) : FinancialConnectionsPaymentsProxy {
     override fun present(
         financialConnectionsSessionClientSecret: String,
         publishableKey: String,
         stripeAccountId: String?
     ) {
-        financialConnectionsSheet.present(
+        launcher.present(
             FinancialConnectionsSheet.Configuration(
                 financialConnectionsSessionClientSecret,
                 publishableKey,
