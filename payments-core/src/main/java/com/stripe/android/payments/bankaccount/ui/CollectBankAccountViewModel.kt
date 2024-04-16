@@ -110,7 +110,6 @@ internal class CollectBankAccountViewModel @Inject constructor(
             .onFailure { finishWithError(it) }
     }
 
-
     fun onConnectionsForACHResult(result: FinancialConnectionsSheetResult) {
         hasLaunched = false
         viewModelScope.launch {
@@ -129,6 +128,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onConnectionsForInstantDebitsResult(result: FinancialConnectionsSheetResult) {
         TODO("Instant Debits not implemented yet.")
     }

@@ -9,7 +9,7 @@ sealed interface CreateFinancialConnectionsSessionParams {
     data class InstantDebits(
         val clientSecret: String,
         val customerEmailAddress: String?
-    ): CreateFinancialConnectionsSessionParams {
+    ) : CreateFinancialConnectionsSessionParams {
         override fun toMap(): Map<String, Any> {
             return mapOf(
                 PARAM_CLIENT_SECRET to clientSecret,
@@ -25,7 +25,7 @@ sealed interface CreateFinancialConnectionsSessionParams {
         val clientSecret: String,
         val customerName: String,
         val customerEmailAddress: String?
-    ): CreateFinancialConnectionsSessionParams {
+    ) : CreateFinancialConnectionsSessionParams {
         override fun toMap(): Map<String, Any> {
             val paymentMethod = PaymentMethodCreateParams.createUSBankAccount(
                 billingDetails = PaymentMethod.BillingDetails(

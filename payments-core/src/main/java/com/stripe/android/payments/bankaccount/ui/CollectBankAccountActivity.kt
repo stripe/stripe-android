@@ -7,6 +7,8 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
@@ -44,12 +46,12 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     private fun initConnectionsPaymentsProxy(configuration: CollectBankAccountConfiguration) {
         financialConnectionsPaymentsProxy = when (configuration) {
-            is CollectBankAccountConfiguration.InstantDebits -> FinancialConnectionsPaymentsProxy.createForInstantDebits(
+            is InstantDebits -> FinancialConnectionsPaymentsProxy.createForInstantDebits(
                 activity = this,
                 onComplete = viewModel::onConnectionsForInstantDebitsResult
             )
 
-            is CollectBankAccountConfiguration.USBankAccount -> FinancialConnectionsPaymentsProxy.createForACH(
+            is USBankAccount -> FinancialConnectionsPaymentsProxy.createForACH(
                 activity = this,
                 onComplete = viewModel::onConnectionsForACHResult
             )

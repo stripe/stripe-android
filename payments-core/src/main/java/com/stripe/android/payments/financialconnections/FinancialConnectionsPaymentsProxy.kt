@@ -62,7 +62,7 @@ internal interface FinancialConnectionsPaymentsProxy {
     }
 }
 
-internal class FinancialConnectionsLauncherProxy<T: FinancialConnectionsSheetLauncher>(
+internal class FinancialConnectionsLauncherProxy<T : FinancialConnectionsSheetLauncher>(
     private val launcher: T
 ) : FinancialConnectionsPaymentsProxy {
     override fun present(

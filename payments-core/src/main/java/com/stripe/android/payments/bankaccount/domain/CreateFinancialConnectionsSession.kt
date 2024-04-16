@@ -116,7 +116,6 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                     clientSecret = clientSecret,
                     customerEmailAddress = email
                 )
-
             }
         }
     }
