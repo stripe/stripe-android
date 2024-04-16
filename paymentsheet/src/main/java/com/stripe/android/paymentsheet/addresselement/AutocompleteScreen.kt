@@ -73,8 +73,8 @@ internal fun AutocompleteScreen(
 @Composable
 internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
     val predictions by viewModel.predictions.collectAsState()
-    val loading by viewModel.loading.collectAsState(initial = false)
-    val query = viewModel.textFieldController.fieldValue.collectAsState(initial = "")
+    val loading by viewModel.loading.collectAsState()
+    val query = viewModel.textFieldController.fieldValue.collectAsState()
     val attributionDrawable =
         PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
     val focusRequester = remember { FocusRequester() }

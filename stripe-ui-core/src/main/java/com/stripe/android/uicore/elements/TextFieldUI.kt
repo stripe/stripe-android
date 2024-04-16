@@ -151,7 +151,7 @@ fun TextField(
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
-    val label by textFieldController.label.collectAsState(null)
+    val label by textFieldController.label.collectAsState()
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing

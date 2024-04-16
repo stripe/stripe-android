@@ -10,8 +10,8 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingElement
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * This is a special type of AddressElement that
@@ -44,8 +44,8 @@ class CardBillingAddressElement(
 ) {
     // Save for future use puts this in the controller rather than element
     // card and achv2 uses save for future use
-    val hiddenIdentifiers: Flow<Set<IdentifierSpec>> =
-        countryDropdownFieldController.rawFieldValue.map { countryCode ->
+    val hiddenIdentifiers: StateFlow<Set<IdentifierSpec>> =
+        countryDropdownFieldController.rawFieldValue.mapAsStateFlow { countryCode ->
             when (collectionMode) {
                 BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
                     FieldType.entries

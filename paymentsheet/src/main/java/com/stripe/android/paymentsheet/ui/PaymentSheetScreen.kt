@@ -131,7 +131,7 @@ internal fun PaymentSheetScreenContent(
     type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
-    val headerText by viewModel.headerText.collectAsState(null)
+    val headerText by viewModel.headerText.collectAsState()
     val walletsState by viewModel.walletsState.collectAsState()
     val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
     val error by viewModel.error.collectAsState()

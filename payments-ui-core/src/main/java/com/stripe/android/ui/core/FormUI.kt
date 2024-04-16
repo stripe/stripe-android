@@ -33,19 +33,20 @@ import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun FormUI(
     hiddenIdentifiersFlow: Flow<Set<IdentifierSpec>>,
-    enabledFlow: Flow<Boolean>,
-    elementsFlow: Flow<List<FormElement>>,
+    enabledFlow: StateFlow<Boolean>,
+    elementsFlow: StateFlow<List<FormElement>>,
     lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
     modifier: Modifier = Modifier
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptySet())
-    val enabled by enabledFlow.collectAsState(true)
-    val elements by elementsFlow.collectAsState(emptyList())
+    val enabled by enabledFlow.collectAsState()
+    val elements by elementsFlow.collectAsState()
     val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState(null)
 
     FormUI(

@@ -51,7 +51,6 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -128,8 +127,8 @@ internal abstract class BaseSheetViewModel(
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
 
-    internal val headerText: Flow<Int?> by lazy {
-        combine(
+    internal val headerText: StateFlow<Int?> by lazy {
+        combineAsStateFlow(
             currentScreen,
             walletsState,
             supportedPaymentMethodsFlow,

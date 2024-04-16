@@ -22,7 +22,7 @@ fun BsbElementUI(
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
     val error by element.textElement.controller.error.collectAsState(null)
-    val bankName by element.bankName.collectAsState(null)
+    val bankName by element.bankName.collectAsState()
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
             stringResource(
