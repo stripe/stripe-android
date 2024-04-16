@@ -138,7 +138,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                 FinancialConnectionsSheetInstantDebitsResult.Canceled -> finishWithResult(Cancelled)
                 is FinancialConnectionsSheetInstantDebitsResult.Completed -> {
                     finishWithPaymentMethodId(
-                        result.paymentMethodId
+                        result.paymentMethodId,
+                        result.bankName,
+                        result.last4
                     )
                 }
 
@@ -151,7 +153,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithResult(result))
     }
 
-    private fun finishWithPaymentMethodId(paymentMethodId: String) {
+    private fun finishWithPaymentMethodId(paymentMethodId: String, bankName: String, last4: String) {
         viewModelScope.launch {
             val clientSecret = args.clientSecret
             val retrieveIntentResult = if (clientSecret == null) {
@@ -168,7 +170,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                             CollectBankAccountResponseInternal(
                                 intent = intent,
                                 financialConnectionsSession = null,
-                                paymentMethodId = paymentMethodId
+                                paymentMethodId = paymentMethodId,
+                                last4 = last4,
+                                bankName = bankName
                             )
                         )
                     )
@@ -195,7 +199,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                             CollectBankAccountResponseInternal(
                                 intent = intent,
                                 financialConnectionsSession = financialConnectionsSession,
-                                paymentMethodId = null
+                                paymentMethodId = null,
+                                last4 = null,
+                                bankName = null
                             )
                         )
                     )
@@ -233,7 +239,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         CollectBankAccountResponseInternal(
                             intent = it,
                             financialConnectionsSession = financialConnectionsSession,
-                            paymentMethodId = null
+                            paymentMethodId = null,
+                            last4 = null,
+                            bankName = null
                         )
                     )
                 }

@@ -277,8 +277,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     _currentScreenState.update {
                         USBankAccountFormScreenState.MandateCollection(
                             paymentAccount = FinancialConnectionsAccount(
-                                last4 = "****",
-                                institutionName = "Random Bank",
+                                last4 = result.response.last4,
+                                institutionName = result.response.bankName!!,
                                 created = 123456,
                                 id = "random_id",
                                 livemode = false,

@@ -20,7 +20,7 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
     @Parcelize
     data class Completed(
         // Instant Debits: just return payment method id
-        val paymentMethodId: String? = null,
+        val instantDebits: InstantDebits? = null,
         // Link sessions: just return linkedAccountId.
         val linkedAccountId: String? = null,
         // non-Link sessions: return full LinkedAccountSession
@@ -28,6 +28,13 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
         // Bank account Token sessions: session + token.
         val token: Token? = null
     ) : FinancialConnectionsSheetActivityResult()
+
+    @Parcelize
+    data class InstantDebits(
+        val paymentMethodId: String,
+        val last4: String,
+        val bankName: String
+    ): Parcelable
 
     /**
      * The customer canceled the connections session attempt.

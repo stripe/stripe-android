@@ -58,5 +58,7 @@ sealed class CollectBankAccountResultInternal : Parcelable {
 data class CollectBankAccountResponseInternal(
     val intent: StripeIntent?,
     val financialConnectionsSession: FinancialConnectionsSession?,
-    val paymentMethodId: String?
+    val paymentMethodId: String?,
+    val last4: String?,
+    val bankName: String?
 ) : StripeModel

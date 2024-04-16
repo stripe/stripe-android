@@ -437,7 +437,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             withState {
                 finishWithResult(
                     state = it,
-                    result = Completed(paymentMethodId = paymentMethodId)
+                    result = Completed(
+                        instantDebits = FinancialConnectionsSheetActivityResult.InstantDebits(
+                            paymentMethodId = paymentMethodId,
+                            last4 = requireNotNull(url.getQueryParameter("last4")),
+                            bankName = requireNotNull(url.getQueryParameter("bank_name"))
+                        )
+                    )
                 )
             }
         }.onFailure { error ->

@@ -38,12 +38,16 @@ class FinancialConnectionsSheetForInstantDebitsContract :
                 error
             )
 
-            is FinancialConnectionsSheetActivityResult.Completed -> when (paymentMethodId) {
+            is FinancialConnectionsSheetActivityResult.Completed -> when (instantDebits) {
                 null -> FinancialConnectionsSheetInstantDebitsResult.Failed(
                     IllegalArgumentException("linkedAccountId not set for this session")
                 )
 
-                else -> FinancialConnectionsSheetInstantDebitsResult.Completed(paymentMethodId)
+                else -> FinancialConnectionsSheetInstantDebitsResult.Completed(
+                    paymentMethodId = instantDebits.paymentMethodId,
+                    last4 = instantDebits.last4,
+                    bankName = instantDebits.bankName
+                )
             }
         }
 }

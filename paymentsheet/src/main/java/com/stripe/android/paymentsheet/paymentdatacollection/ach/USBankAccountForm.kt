@@ -308,7 +308,7 @@ internal fun BillingDetailsForm(
             },
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
         )
-        if (formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never) {
+        if (false) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

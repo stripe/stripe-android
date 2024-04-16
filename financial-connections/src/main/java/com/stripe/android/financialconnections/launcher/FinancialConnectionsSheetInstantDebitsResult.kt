@@ -16,7 +16,9 @@ sealed class FinancialConnectionsSheetInstantDebitsResult : Parcelable {
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
-        val paymentMethodId: String
+        val paymentMethodId: String,
+        val last4: String,
+        val bankName: String
     ) : FinancialConnectionsSheetInstantDebitsResult()
 
     /**
