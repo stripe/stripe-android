@@ -163,7 +163,7 @@ interface ErrorReporter {
         ;
 
         override val eventName: String
-            get() = "unexpected.$partialEventName"
+            get() = "unexpected_error.$partialEventName"
     }
 
     /**
