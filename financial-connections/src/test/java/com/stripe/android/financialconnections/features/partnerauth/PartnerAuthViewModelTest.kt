@@ -87,28 +87,28 @@ internal class PartnerAuthViewModelTest {
 
     @Test
     fun `init - when existing auth session available, payload succeeds pane loaded emits`() = runTest {
-            val activeAuthSession = authorizationSession()
-            val activeInstitution = institution()
-            val manifest = sessionManifest().copy(
-                activeInstitution = activeInstitution,
-                activeAuthSession = activeAuthSession
+        val activeAuthSession = authorizationSession()
+        val activeInstitution = institution()
+        val manifest = sessionManifest().copy(
+            activeInstitution = activeInstitution,
+            activeAuthSession = activeAuthSession
+        )
+        whenever(getSync()).thenReturn(syncResponse(manifest))
+
+        val viewModel = createViewModel(SharedPartnerAuthState(Pane.PARTNER_AUTH_DRAWER))
+
+        eventTracker.assertContainsEvent(
+            "linked_accounts.pane.loaded",
+            mapOf(
+                "pane" to Pane.PARTNER_AUTH.value,
             )
-            whenever(getSync()).thenReturn(syncResponse(manifest))
+        )
 
-            val viewModel = createViewModel(SharedPartnerAuthState(Pane.PARTNER_AUTH_DRAWER))
-
-            eventTracker.assertContainsEvent(
-                "linked_accounts.pane.loaded",
-                mapOf(
-                    "pane" to Pane.PARTNER_AUTH.value,
-                )
-            )
-
-            withState(viewModel) {
-                assertThat(it.payload).isInstanceOf(Async.Success::class.java)
-                assertEquals(requireNotNull(it.payload()).authSession, activeAuthSession)
-            }
+        withState(viewModel) {
+            assertThat(it.payload).isInstanceOf(Async.Success::class.java)
+            assertEquals(requireNotNull(it.payload()).authSession, activeAuthSession)
         }
+    }
 
     @Test
     fun `onWebAuthFlowFinished - when webStatus Success, polls accounts and authorizes with token`() =
