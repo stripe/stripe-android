@@ -5,7 +5,9 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
@@ -14,6 +16,7 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResu
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.payments.financialconnections.FinancialConnectionsPaymentsProxy
+import kotlinx.coroutines.launch
 
 /**
  * No-UI activity that will handle collect bank account logic.
@@ -39,11 +42,13 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
             FinishWithResult(failure).launch()
         } else {
             initConnectionsPaymentsProxy(requireNotNull(starterArgs).configuration)
-            lifecycleScope.launchWhenStarted {
-                viewModel.viewEffect.collect { viewEffect ->
-                    when (viewEffect) {
-                        is OpenConnectionsFlow -> viewEffect.launch()
-                        is FinishWithResult -> viewEffect.launch()
+            lifecycleScope.launch {
+                repeatOnLifecycle(STARTED) {
+                    viewModel.viewEffect.collect { viewEffect ->
+                        when (viewEffect) {
+                            is OpenConnectionsFlow -> viewEffect.launch()
+                            is FinishWithResult -> viewEffect.launch()
+                        }
                     }
                 }
             }
