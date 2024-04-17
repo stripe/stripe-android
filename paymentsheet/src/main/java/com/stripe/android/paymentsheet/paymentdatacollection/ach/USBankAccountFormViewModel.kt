@@ -290,9 +290,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     is FinancialConnectionsAccount -> {
                         _currentScreenState.update {
                             USBankAccountFormScreenState.MandateCollection(
-                                paymentAccount = paymentAccount,
-                                financialConnectionsSessionId =
-                                usBankAccountData.financialConnectionsSession.id,
+                                financialConnectionsSessionId = usBankAccountData.financialConnectionsSession.id,
+                                bankName = paymentAccount.institutionName,
+                                last4 = paymentAccount.last4,
                                 intentId = result.response.intent?.id,
                                 primaryButtonText = buildPrimaryButtonText(),
                                 mandateText = buildMandateText(),
@@ -328,8 +328,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             is USBankAccountFormScreenState.MandateCollection ->
                 updatePaymentSelection(
                     linkAccountId = screenState.financialConnectionsSessionId,
-                    bankName = screenState.paymentAccount.institutionName,
-                    last4 = screenState.paymentAccount.last4
+                    bankName = screenState.bankName,
+                    last4 = screenState.last4,
                 )
 
             is USBankAccountFormScreenState.VerifyWithMicrodeposits ->

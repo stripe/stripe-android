@@ -217,8 +217,8 @@ internal fun MandateCollectionScreen(
         AccountDetailsForm(
             showCheckbox = showCheckbox,
             isProcessing = isProcessing,
-            bankName = screenState.paymentAccount.institutionName,
-            last4 = screenState.paymentAccount.last4,
+            bankName = screenState.bankName,
+            last4 = screenState.last4,
             saveForFutureUseElement = saveForFutureUseElement,
             onRemoveAccount = onRemoveAccount,
         )

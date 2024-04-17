@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import com.stripe.android.financialconnections.model.BankAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import kotlinx.parcelize.Parcelize
 
 internal sealed class USBankAccountFormScreenState(
@@ -26,7 +25,8 @@ internal sealed class USBankAccountFormScreenState(
 
     @Parcelize
     data class MandateCollection(
-        val paymentAccount: FinancialConnectionsAccount,
+        val bankName: String,
+        val last4: String?,
         val financialConnectionsSessionId: String,
         val intentId: String?,
         override val primaryButtonText: String,
