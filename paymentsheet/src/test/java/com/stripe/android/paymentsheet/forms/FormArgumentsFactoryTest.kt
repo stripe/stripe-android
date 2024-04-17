@@ -7,10 +7,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class FormArgumentsFactoryTest {
     @Test
     fun `Create correct FormArguments with custom billing details collection`() {

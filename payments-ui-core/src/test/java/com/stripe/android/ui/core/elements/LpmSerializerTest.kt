@@ -1,7 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ui.core.R
 import org.junit.Test
@@ -18,12 +16,8 @@ class LpmSerializerTest {
      */
     @Test
     fun `Verify sofort country spec parsed correctly`() {
-        val serializedString = ApplicationProvider
-            .getApplicationContext<Application>()
-            .resources
-            .assets
-            .open("lpms.json")
-            .bufferedReader().use { it.readText() }
+        val inputStream = SharedDataSpecParcelerTest::class.java.classLoader!!.getResourceAsStream("lpms.json")
+        val serializedString = inputStream.bufferedReader().use { it.readText() }
 
         val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
 
@@ -37,12 +31,8 @@ class LpmSerializerTest {
 
     @Test
     fun `Verify a DropdownSpec in lpms_json parses correctly`() {
-        val serializedString = ApplicationProvider
-            .getApplicationContext<Application>()
-            .resources
-            .assets
-            .open("lpms.json")
-            .bufferedReader().use { it.readText() }
+        val inputStream = SharedDataSpecParcelerTest::class.java.classLoader!!.getResourceAsStream("lpms.json")
+        val serializedString = inputStream.bufferedReader().use { it.readText() }
 
         val result = LpmSerializer.deserializeList(serializedString).getOrThrow()
 

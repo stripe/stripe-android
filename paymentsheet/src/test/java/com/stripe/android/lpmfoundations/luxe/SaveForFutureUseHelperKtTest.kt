@@ -6,11 +6,8 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
 class SaveForFutureUseHelperKtTest {
     @Test
     fun `isSaveForFutureUseValueChangeable returns false for SetupIntents`() {

@@ -1,6 +1,5 @@
 package com.stripe.android.lpmfoundations.luxe
 
-import android.content.res.Resources
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -16,14 +15,7 @@ import javax.inject.Inject
  * repository is not a singleton.  Additionally every time you create a new
  * form view model a new repository is created and thus needs to be initialized.
  */
-internal class LpmRepository(
-    private val arguments: LpmRepositoryArguments,
-) {
-    @Inject
-    constructor(resources: Resources) : this(
-        arguments = LpmRepositoryArguments(resources),
-    )
-
+internal class LpmRepository @Inject constructor() {
     fun getSharedDataSpecs(
         stripeIntent: StripeIntent,
         serverLpmSpecs: String?,
@@ -60,7 +52,8 @@ internal class LpmRepository(
     }
 
     private fun readFromDisk(): List<SharedDataSpec> {
-        return parseLpms(arguments.resources.assets?.open("lpms.json"))
+        val inputStream = LpmRepository::class.java.classLoader!!.getResourceAsStream("lpms.json")
+        return parseLpms(inputStream)
     }
 
     private fun parseLpms(inputStream: InputStream?): List<SharedDataSpec> {
@@ -71,10 +64,6 @@ internal class LpmRepository(
 
     private fun getJsonStringFromInputStream(inputStream: InputStream?) =
         inputStream?.bufferedReader().use { it?.readText() }
-
-    data class LpmRepositoryArguments(
-        val resources: Resources,
-    )
 
     data class Result(
         val sharedDataSpecs: List<SharedDataSpec>,
