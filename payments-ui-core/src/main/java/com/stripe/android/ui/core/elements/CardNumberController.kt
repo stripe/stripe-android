@@ -1,6 +1,5 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -13,7 +12,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.cards.CardAccountRangeService
 import com.stripe.android.cards.CardNumber
-import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.cards.DefaultStaticCardAccountRanges
 import com.stripe.android.cards.StaticCardAccountRanges
 import com.stripe.android.core.strings.resolvableString
@@ -79,12 +77,12 @@ internal class DefaultCardNumberController(
 ) : CardNumberController() {
     constructor(
         cardTextFieldConfig: CardNumberConfig,
-        context: Context,
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         initialValue: String?,
         cardBrandChoiceConfig: CardBrandChoiceConfig,
     ) : this(
         cardTextFieldConfig,
-        DefaultCardAccountRangeRepositoryFactory(context).create(),
+        cardAccountRangeRepositoryFactory.create(),
         Dispatchers.Main,
         Dispatchers.IO,
         initialValue = initialValue,

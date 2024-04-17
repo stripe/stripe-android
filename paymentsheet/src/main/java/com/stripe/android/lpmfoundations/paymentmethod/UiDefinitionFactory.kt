@@ -1,6 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import android.content.Context
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -19,7 +19,7 @@ internal sealed interface UiDefinitionFactory {
         val amount: Amount?,
         val saveForFutureUseInitialValue: Boolean,
         val merchantName: String,
-        val context: Context,
+        val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val cbcEligibility: CardBrandChoiceEligibility,
         val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
         val requiresMandate: Boolean,

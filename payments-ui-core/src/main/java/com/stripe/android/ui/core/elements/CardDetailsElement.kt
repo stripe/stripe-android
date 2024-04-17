@@ -1,6 +1,6 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -19,12 +19,12 @@ import kotlinx.coroutines.flow.map
  */
 internal class CardDetailsElement(
     identifier: IdentifierSpec,
-    context: Context,
+    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     private val cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
     val controller: CardDetailsController = CardDetailsController(
-        context,
+        cardAccountRangeRepositoryFactory,
         initialValues,
         collectName,
         cbcEligibility,
