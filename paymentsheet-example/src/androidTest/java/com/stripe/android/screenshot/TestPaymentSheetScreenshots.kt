@@ -244,13 +244,12 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Test
     fun testPaymentSheetMandate() {
         testDriver.screenshotRegression(
-            testParameters = TestParameters.create(
-                paymentMethodCode = "sepa_debit",
-            ) { settings ->
+            testParameters = testParams.copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.FR
                 settings[DelayedPaymentMethodsSettingsDefinition] = true
                 settings[GooglePaySettingsDefinition] = false
             }.copy(
+                paymentMethodCode = "sepa_debit",
                 authorizationAction = null,
             ),
             customOperations = {
@@ -263,9 +262,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     @Test
     fun testDefaultBillingAndPhoneDetails() {
         testDriver.screenshotRegression(
-            testParameters = TestParameters.create(
-                paymentMethodCode = "card",
-            ) { settings ->
+            testParameters = testParams.copyPlaygroundSettings { settings ->
                 settings[CountrySettingsDefinition] = Country.US
                 settings[CollectPhoneSettingsDefinition] = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
             },
