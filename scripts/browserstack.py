@@ -254,6 +254,15 @@ def confirm(message):
         answer = input(message + " [Y/N]? ").lower()
     return answer == "y"
 
+def run_tests(appUrl, testUrl, is_nightly):
+   buildId = executeTests(appUrl, testUrl, is_nightly)
+   exitStatus = 1
+   if(buildId != None):
+       exitStatus = waitForBuildComplete(buildId)
+   else:
+       deleteTestSuite(testUrl.replace("bs://", ""))
+   return exitStatus
+ 
 if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description='Interact with browserstack.')
@@ -309,12 +318,14 @@ if __name__ == "__main__":
            print("-----------------")
            testUrl = uploadEspressoApk(args.espresso)
            print("-----------------")
-           buildId = executeTests(appUrl, testUrl, args.is_nightly)
-           exitStatus = 1
-           if(buildId != None):
-               exitStatus = waitForBuildComplete(buildId)
+           exitStatus = run_tests(appUrl, testUrl, args.is_nightly)
+           if(exitStatus == 1):
+              print("Rerunning test suite")
+              os.environ["BROWSERSTACK_RERUN"]="true"
+              exitStatus = run_tests(appUrl, testUrl, args.is_nightly)
+              del os.environ["BROWSERSTACK_RERUN"]
            else:
-               deleteTestSuite(testUrl.replace("bs://", ""))
+              print("Passed on the first run!")
            sys.exit(exitStatus)
     else:
        parser.print_help()
