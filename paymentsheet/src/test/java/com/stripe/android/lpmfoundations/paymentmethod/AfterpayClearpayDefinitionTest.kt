@@ -5,12 +5,9 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.testing.LocaleTestRule
 import com.stripe.android.ui.core.R
 import org.junit.Rule
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import java.util.Locale
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
 internal class AfterpayClearpayDefinitionTest {
     @get:Rule
     val localeRule = LocaleTestRule()

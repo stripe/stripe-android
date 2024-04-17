@@ -1,10 +1,8 @@
 package com.stripe.android.ui.core.elements
 
-import android.app.Application
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import kotlinx.parcelize.Parcelize
@@ -15,8 +13,8 @@ import org.junit.runner.RunWith
 class SharedDataSpecParcelerTest {
     @Test
     fun `parceled specs result in the same specs`() {
-        val resources = ApplicationProvider.getApplicationContext<Application>().resources
-        val specsString = resources.assets!!.open("lpms.json").bufferedReader().use { it.readText() }
+        val inputStream = SharedDataSpecParcelerTest::class.java.classLoader!!.getResourceAsStream("lpms.json")
+        val specsString = inputStream.bufferedReader().use { it.readText() }
         val originalSpecs = LpmSerializer.deserializeList(specsString).getOrThrow()
         assertThat(originalSpecs).isNotEmpty()
 

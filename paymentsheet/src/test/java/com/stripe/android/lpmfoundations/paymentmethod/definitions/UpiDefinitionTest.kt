@@ -7,10 +7,7 @@ import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.uicore.elements.SectionElement
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
 class UpiDefinitionTest {
     private val upiMetadata = PaymentMethodMetadataFactory.create(
         stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(

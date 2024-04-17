@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.state
 
-import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -37,7 +35,6 @@ import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
@@ -47,22 +44,16 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
 internal class DefaultPaymentSheetLoaderTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
 
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val lpmRepository = LpmRepository(
-        arguments = LpmRepository.LpmRepositoryArguments(
-            resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        ),
-    )
+    private val lpmRepository = LpmRepository()
 
     private val prefsRepository = FakePrefsRepository()
 
