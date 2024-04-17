@@ -1,7 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -41,11 +39,9 @@ internal object PaymentMethodMetadataFactory {
         )
     }
 
-    private fun createSharedDataSpecs(): List<SharedDataSpec> = runCatching {
-        val resources = ApplicationProvider.getApplicationContext<Context>().resources
-        val specsString = resources.assets!!.open("lpms.json").bufferedReader().use { it.readText() }
-        LpmSerializer.deserializeList(specsString).getOrThrow()
-    }.getOrElse {
-        emptyList()
+    private fun createSharedDataSpecs(): List<SharedDataSpec> {
+        val inputStream = PaymentMethodMetadataFactory::class.java.classLoader!!.getResourceAsStream("lpms.json")
+        val specsString = inputStream.bufferedReader().use { it.readText() }
+        return LpmSerializer.deserializeList(specsString).getOrThrow()
     }
 }

@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.luxe
 
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -96,6 +98,7 @@ class FormElementsBuilderTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
     ): UiDefinitionFactory.Arguments {
+        val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
             addressRepository = mock(),
             initialValues = emptyMap(),
@@ -103,7 +106,7 @@ class FormElementsBuilderTest {
             amount = null,
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
-            context = ApplicationProvider.getApplicationContext(),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = false,

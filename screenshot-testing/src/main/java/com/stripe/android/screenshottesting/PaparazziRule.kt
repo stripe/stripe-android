@@ -100,6 +100,10 @@ class PaparazziRule(
 }
 
 private fun Array<out List<PaparazziConfigOption>>.toTestCases(): List<TestCase> {
+    if (isEmpty()) {
+        // Use all defaults, but still run the test.
+        return listOf(TestCase(emptyList()))
+    }
     return createPermutations(this).map { TestCase(it) }
 }
 

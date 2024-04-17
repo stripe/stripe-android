@@ -90,6 +90,13 @@ private class NetworkStatement(
                     mockWebServer.dispatcher.remainingMatchersDescription()
             )
         }
+        val extraRequests = mockWebServer.dispatcher.extraRequestDescriptions()
+        if (extraRequests.isNotEmpty()) {
+            throw IllegalStateException(
+                "${description.testClass}#${description.methodName} - made extra requests.\n" +
+                    "Extra Requests: $extraRequests"
+            )
+        }
     }
 
     private fun tearDown() {

@@ -4,6 +4,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -24,7 +25,10 @@ class CardDetailsControllerTest {
 
     @Test
     fun `Verify the first field in error is returned in error flow`() = runTest {
-        val cardController = CardDetailsController(context, emptyMap())
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = emptyMap(),
+        )
 
         cardController.error.test {
             assertThat(awaitItem()).isNull()
@@ -53,8 +57,8 @@ class CardDetailsControllerTest {
     @Test
     fun `When eligible for card brand choice and preferred card brand is passed, initial value should have been set`() = runTest {
         val cardController = CardDetailsController(
-            context,
-            mapOf(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4000002500001001",
                 IdentifierSpec.PreferredCardBrand to CardBrand.CartesBancaires.code
             ),

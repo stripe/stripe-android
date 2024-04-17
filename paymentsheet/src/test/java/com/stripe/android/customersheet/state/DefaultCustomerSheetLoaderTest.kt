@@ -1,8 +1,6 @@
 package com.stripe.android.customersheet.state
 
-import android.app.Application
 import androidx.lifecycle.testing.TestLifecycleOwner
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.customersheet.CustomerAdapter
@@ -35,22 +33,15 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LargeClass")
 @OptIn(ExperimentalCustomerSheetApi::class)
-@RunWith(RobolectricTestRunner::class)
 class DefaultCustomerSheetLoaderTest {
-    private val lpmRepository = LpmRepository(
-        arguments = LpmRepository.LpmRepositoryArguments(
-            resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        ),
-    )
+    private val lpmRepository = LpmRepository()
 
     private val readyGooglePayRepository = mock<GooglePayRepository>()
     private val unreadyGooglePayRepository = mock<GooglePayRepository>()

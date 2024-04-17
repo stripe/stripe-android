@@ -1,7 +1,5 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import android.content.Context
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.PaymentIntentFixtures
@@ -29,8 +27,6 @@ import com.stripe.android.uicore.R as UiCoreR
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentMethodMetadataTest {
-    private val context: Context = ApplicationProvider.getApplicationContext()
-
     @Test
     fun `hasIntentToSetup returns true for setup_intent`() {
         val metadata = PaymentMethodMetadataFactory.create(
@@ -388,7 +384,10 @@ internal class PaymentMethodMetadataTest {
                 attachDefaultsToPaymentMethod = false,
             )
         )
-        val formElement = metadata.formElementsForCode("bancontact", context, null, null)!!
+        val formElement = metadata.formElementsForCode(
+            code = "bancontact",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
 
         val nameSection = formElement[0] as SectionElement
         val nameElement = nameSection.fields[0] as SimpleTextElement
@@ -427,7 +426,10 @@ internal class PaymentMethodMetadataTest {
                 attachDefaultsToPaymentMethod = false,
             )
         )
-        val formElement = metadata.formElementsForCode("klarna", context, null, null)!!
+        val formElement = metadata.formElementsForCode(
+            code = "klarna",
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
 
         val countrySection = formElement[4] as SectionElement
         val countryElement = countrySection.fields[0] as CountryElement

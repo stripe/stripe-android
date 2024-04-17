@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Context
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
@@ -41,7 +42,7 @@ internal object FormControllerModule {
             },
             saveForFutureUseInitialValue = false,
             merchantName = merchantName,
-            context = context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context.applicationContext),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             requiresMandate = false,
