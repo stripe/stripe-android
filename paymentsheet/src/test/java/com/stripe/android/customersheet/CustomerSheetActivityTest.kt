@@ -15,6 +15,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
@@ -323,9 +324,7 @@ internal class CustomerSheetActivityTest {
         val card = LpmRepositoryTestHelpers.card
         val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
             code = "card",
-            context = context,
-            paymentMethodCreateParams = null,
-            paymentMethodExtraParams = null,
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create()
         )!!
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,

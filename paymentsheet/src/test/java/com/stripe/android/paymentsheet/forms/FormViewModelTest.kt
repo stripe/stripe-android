@@ -7,6 +7,7 @@ import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
@@ -568,9 +569,7 @@ internal class FormViewModelTest {
 
             val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
                 code = "card",
-                context = context,
-                paymentMethodCreateParams = null,
-                paymentMethodExtraParams = null,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
             )!!
 
             val formViewModel = createViewModel(
@@ -666,9 +665,7 @@ internal class FormViewModelTest {
             ),
             PaymentMethodMetadataFactory.create().formElementsForCode(
                 code = "card",
-                context = context,
-                paymentMethodCreateParams = null,
-                paymentMethodExtraParams = null,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
             )!!,
         )
 

@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -12,6 +13,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -47,6 +49,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -84,6 +87,9 @@ internal abstract class BaseSheetViewModel(
     private val headerTextFactory: HeaderTextFactory,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
+
+    private val addressRepository = AddressRepository(application.resources, workContext)
+    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
     internal val customerConfig = config.customer
     internal val merchantName = config.merchantDisplayName
@@ -693,9 +699,12 @@ internal abstract class BaseSheetViewModel(
 
         return paymentMethodMetadata.value?.formElementsForCode(
             code = code,
-            context = getApplication(),
-            paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
-            paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                addressRepository = addressRepository,
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
+                paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+            ),
         ) ?: emptyList()
     }
 
