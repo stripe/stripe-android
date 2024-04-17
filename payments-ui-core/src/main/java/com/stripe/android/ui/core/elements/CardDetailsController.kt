@@ -1,10 +1,10 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.stripe.android.cards.CardAccountRangeRepository
 import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -23,7 +23,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.UUID
 
 internal class CardDetailsController(
-    context: Context,
+    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -50,7 +50,7 @@ internal class CardDetailsController(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
             CardNumberConfig(),
-            context,
+            cardAccountRangeRepositoryFactory,
             initialValues[IdentifierSpec.CardNumber],
             when (cbcEligibility) {
                 is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(

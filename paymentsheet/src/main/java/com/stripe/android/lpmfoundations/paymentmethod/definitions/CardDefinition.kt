@@ -64,7 +64,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
             add(
                 CardDetailsSectionElement(
-                    context = arguments.context,
+                    cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
                     initialValues = arguments.initialValues,
                     identifier = IdentifierSpec.Generic("card_details"),
                     collectName = billingDetailsCollectionConfiguration.collectsName,

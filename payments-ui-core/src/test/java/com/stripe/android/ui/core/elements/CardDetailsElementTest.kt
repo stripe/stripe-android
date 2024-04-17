@@ -4,6 +4,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.stripecardscan.R
@@ -44,10 +45,13 @@ class CardDetailsElementTest {
 
     @Test
     fun `test form field values returned and expiration date parsing`() = runTest {
-        val cardController = CardDetailsController(context, emptyMap())
+        val cardController = CardDetailsController(
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
+            initialValues = emptyMap(),
+        )
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
-            context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             controller = cardController
         )
@@ -74,7 +78,7 @@ class CardDetailsElementTest {
     fun `test view only form field values returned and expiration date parsing`() = runTest {
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
-            context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = mapOf(
                 IdentifierSpec.CardNumber to "4242424242424242",
                 IdentifierSpec.CardBrand to CardBrand.Visa.code
@@ -101,13 +105,13 @@ class CardDetailsElementTest {
     @Test
     fun `test form field values returned when collecting name`() = runTest {
         val cardController = CardDetailsController(
-            context = context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
         )
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
-            context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -138,7 +142,7 @@ class CardDetailsElementTest {
     fun `test form field values returned when eligible for card brand choice`() = runTest(testDispatcher) {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList())
         val cardController = CardDetailsController(
-            context = context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility
@@ -146,7 +150,7 @@ class CardDetailsElementTest {
 
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
-            context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -178,7 +182,7 @@ class CardDetailsElementTest {
     fun `test form field values returned when eligible for card brand choice and brand is changed`() = runTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf())
         val cardController = CardDetailsController(
-            context = context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility
@@ -186,7 +190,7 @@ class CardDetailsElementTest {
 
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
-            context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,
@@ -226,7 +230,7 @@ class CardDetailsElementTest {
     fun `test form field values returned when eligible for cbc & preferred network is passed`() = runTest {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(listOf(CardBrand.CartesBancaires))
         val cardController = CardDetailsController(
-            context = context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
             cbcEligibility = cbcEligibility
@@ -234,7 +238,7 @@ class CardDetailsElementTest {
 
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
-            context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
             controller = cardController,

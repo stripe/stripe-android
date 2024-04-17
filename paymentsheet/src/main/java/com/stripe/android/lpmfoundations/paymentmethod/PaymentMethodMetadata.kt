@@ -2,6 +2,9 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.content.Context
 import android.os.Parcelable
+import androidx.annotation.VisibleForTesting
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
@@ -48,6 +51,10 @@ internal data class PaymentMethodMetadata(
 
     @IgnoredOnParcel
     private val addressRepositoryReference = AtomicReference<AddressRepository?>()
+
+    @IgnoredOnParcel
+    @Volatile
+    private var testOverrideCardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory? = null
 
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -165,7 +172,8 @@ internal data class PaymentMethodMetadata(
             ),
             shippingValues = shippingDetails?.toIdentifierMap(defaultBillingDetails),
             saveForFutureUseInitialValue = false,
-            context = context.applicationContext,
+            cardAccountRangeRepositoryFactory = testOverrideCardAccountRangeRepositoryFactory
+                ?: DefaultCardAccountRangeRepositoryFactory(context.applicationContext),
             addressRepository = requireNotNull(addressRepository),
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = requiresMandate,
@@ -191,5 +199,17 @@ internal data class PaymentMethodMetadata(
                 paymentMethodExtraParams = paymentMethodExtraParams,
             ),
         )
+    }
+
+    @VisibleForTesting
+    fun setTestAddressRepository(addressRepository: AddressRepository) {
+        addressRepositoryReference.set(addressRepository)
+    }
+
+    @VisibleForTesting
+    fun setTestCardAccountRangeRepositoryFactory(
+        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
+    ) {
+        this.testOverrideCardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
     }
 }
