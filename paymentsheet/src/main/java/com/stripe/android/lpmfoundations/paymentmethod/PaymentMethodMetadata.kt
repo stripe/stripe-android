@@ -1,31 +1,19 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
-import android.content.Context
 import android.os.Parcelable
-import androidx.annotation.VisibleForTesting
-import com.stripe.android.cards.CardAccountRangeRepository
-import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
-import com.stripe.android.lpmfoundations.luxe.InitialValuesFactory
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.model.PaymentMethodCreateParams
-import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
-import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
-import kotlinx.coroutines.Dispatchers
-import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
-import java.util.concurrent.atomic.AtomicReference
 
 /**
  * The metadata we need to determine what payment methods are supported, as well as being able to display them.
@@ -46,16 +34,6 @@ internal data class PaymentMethodMetadata(
     val hasCustomerConfiguration: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
-    @IgnoredOnParcel
-    private val addressRepositoryLock: Any = Any()
-
-    @IgnoredOnParcel
-    private val addressRepositoryReference = AtomicReference<AddressRepository?>()
-
-    @IgnoredOnParcel
-    @Volatile
-    private var testOverrideCardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory? = null
-
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
             is PaymentIntent -> stripeIntent.setupFutureUsage != null
@@ -144,47 +122,9 @@ internal data class PaymentMethodMetadata(
         return null
     }
 
-    private fun uiDefinitionFactoryArguments(
-        context: Context,
-        requiresMandate: Boolean,
-        paymentMethodCreateParams: PaymentMethodCreateParams? = null,
-        paymentMethodExtraParams: PaymentMethodExtraParams? = null,
-    ): UiDefinitionFactory.Arguments {
-        var addressRepository = addressRepositoryReference.get()
-        if (addressRepository == null) {
-            synchronized(addressRepositoryLock) {
-                addressRepository = addressRepositoryReference.get()
-                if (addressRepository == null) {
-                    addressRepository = AddressRepository(context.resources, Dispatchers.IO)
-                    addressRepositoryReference.set(addressRepository)
-                }
-            }
-        }
-
-        return UiDefinitionFactory.Arguments(
-            amount = amount(),
-            merchantName = merchantName,
-            cbcEligibility = cbcEligibility,
-            initialValues = InitialValuesFactory.create(
-                defaultBillingDetails = defaultBillingDetails,
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                paymentMethodExtraParams = paymentMethodExtraParams,
-            ),
-            shippingValues = shippingDetails?.toIdentifierMap(defaultBillingDetails),
-            saveForFutureUseInitialValue = false,
-            cardAccountRangeRepositoryFactory = testOverrideCardAccountRangeRepositoryFactory
-                ?: DefaultCardAccountRangeRepositoryFactory(context.applicationContext),
-            addressRepository = requireNotNull(addressRepository),
-            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
-            requiresMandate = requiresMandate,
-        )
-    }
-
     fun formElementsForCode(
         code: String,
-        context: Context,
-        paymentMethodCreateParams: PaymentMethodCreateParams?,
-        paymentMethodExtraParams: PaymentMethodExtraParams?,
+        uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
     ): List<FormElement>? {
         val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
@@ -192,24 +132,10 @@ internal data class PaymentMethodMetadata(
             metadata = this,
             definition = definition,
             sharedDataSpecs = sharedDataSpecs,
-            arguments = uiDefinitionFactoryArguments(
-                context = context,
-                requiresMandate = definition.requiresMandate(this),
-                paymentMethodCreateParams = paymentMethodCreateParams,
-                paymentMethodExtraParams = paymentMethodExtraParams,
+            arguments = uiDefinitionFactoryArgumentsFactory.create(
+                metadata = this,
+                definition = definition,
             ),
         )
-    }
-
-    @VisibleForTesting
-    fun setTestAddressRepository(addressRepository: AddressRepository) {
-        addressRepositoryReference.set(addressRepository)
-    }
-
-    @VisibleForTesting
-    fun setTestCardAccountRangeRepositoryFactory(
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory
-    ) {
-        this.testOverrideCardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory
     }
 }

@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IS_LIVE_MODE
@@ -24,6 +25,7 @@ import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.customersheet.util.isUnverifiedUSBankAccount
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.ConfirmStripeIntentParams
@@ -57,6 +59,7 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -133,6 +136,9 @@ internal class CustomerSheetViewModel(
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         editInteractorFactory = editInteractorFactory,
     )
+
+    private val addressRepository = AddressRepository(application.resources, workContext)
+    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
     private val backStack = MutableStateFlow(initialBackStack)
     val viewState: StateFlow<CustomerSheetViewState> = backStack.mapAsStateFlow { it.last() }
@@ -767,9 +773,10 @@ internal class CustomerSheetViewModel(
         val stripeIntent = paymentMethodMetadata?.stripeIntent
         val formElements = paymentMethodMetadata?.formElementsForCode(
             code = selectedPaymentMethod.code,
-            context = application,
-            paymentMethodCreateParams = null,
-            paymentMethodExtraParams = null,
+            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                addressRepository = addressRepository,
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+            )
         ) ?: emptyList()
 
         transition(
