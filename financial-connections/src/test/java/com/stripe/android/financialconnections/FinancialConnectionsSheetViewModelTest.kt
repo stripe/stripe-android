@@ -20,7 +20,7 @@ import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnec
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
@@ -29,6 +29,7 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.presentation.withState
+import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -144,40 +145,13 @@ class FinancialConnectionsSheetViewModelTest {
     }
 
     @Test
-    fun `handleOnNewIntent - on Link flows with valid account, id param is extracted`() {
-        runTest {
-            // Given
-            val linkedAccountId = "1234"
-            whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
-            val viewModel = createViewModel(
-                defaultInitialState.copy(initialArgs = ForLink(configuration))
-            )
-
-            // When
-            viewModel.handleOnNewIntent(
-                successIntent(
-                    "stripe-auth://link-accounts/success?linked_account=$linkedAccountId"
-                )
-            )
-
-            // Then
-            withState(viewModel) {
-                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
-                val viewEffect = it.viewEffect as FinishWithResult
-                assertThat(viewEffect.result).isEqualTo(Completed(linkedAccountId = linkedAccountId))
-            }
-        }
-    }
-
-    @Test
     fun `handleOnNewIntent - on Link flows with invalid account, error is thrown`() {
         runTest {
             // Given
             whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             val viewModel = createViewModel(
-                defaultInitialState.copy(initialArgs = ForLink(configuration))
+                defaultInitialState.copy(initialArgs = ForInstantDebits(configuration))
             )
 
             // When
@@ -517,6 +491,7 @@ class FinancialConnectionsSheetViewModelTest {
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
+            uriUtils = UriUtils(Logger.noop(), mock()),
             logger = Logger.noop()
         )
     }

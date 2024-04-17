@@ -8,23 +8,23 @@ import kotlinx.parcelize.Parcelize
  * The result of an attempt to complete a connections session
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class FinancialConnectionsSheetLinkResult : Parcelable {
+sealed class FinancialConnectionsSheetInstantDebitsResult : Parcelable {
     /**
      * The customer completed the connections session.
-     * @param linkedAccountId The linked account id result of the AuthFlow.
+     * @param paymentMethodId
      */
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
-        val linkedAccountId: String
-    ) : FinancialConnectionsSheetLinkResult()
+        val paymentMethodId: String
+    ) : FinancialConnectionsSheetInstantDebitsResult()
 
     /**
      * The customer canceled the connections session attempt.
      */
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Canceled : FinancialConnectionsSheetLinkResult()
+    data object Canceled : FinancialConnectionsSheetInstantDebitsResult()
 
     /**
      * The connections session attempt failed.
@@ -34,5 +34,5 @@ sealed class FinancialConnectionsSheetLinkResult : Parcelable {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Failed(
         val error: Throwable
-    ) : FinancialConnectionsSheetLinkResult()
+    ) : FinancialConnectionsSheetInstantDebitsResult()
 }

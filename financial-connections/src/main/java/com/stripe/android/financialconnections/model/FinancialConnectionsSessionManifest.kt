@@ -306,6 +306,9 @@ internal data class FinancialConnectionsSessionManifest(
         @SerialName(value = "external_api")
         EXTERNAL_API("external_api"),
 
+        @SerialName(value = "instant_debits")
+        INSTANT_DEBITS("instant_debits"),
+
         @SerialName(value = "issuing")
         ISSUING("issuing"),
 

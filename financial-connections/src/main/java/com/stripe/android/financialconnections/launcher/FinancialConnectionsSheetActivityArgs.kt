@@ -13,7 +13,7 @@ import java.security.InvalidParameterException
  */
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class FinancialConnectionsSheetActivityArgs constructor(
+sealed class FinancialConnectionsSheetActivityArgs(
     open val configuration: FinancialConnectionsSheet.Configuration
 ) : Parcelable {
 
@@ -31,7 +31,7 @@ sealed class FinancialConnectionsSheetActivityArgs constructor(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class ForLink(
+    data class ForInstantDebits(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 

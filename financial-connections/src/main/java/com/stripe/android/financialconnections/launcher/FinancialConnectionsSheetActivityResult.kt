@@ -19,8 +19,8 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
      */
     @Parcelize
     data class Completed(
-        // Link sessions: just return linkedAccountId.
-        val linkedAccountId: String? = null,
+        // Instant Debits: just return payment method id
+        val paymentMethodId: String? = null,
         // non-Link sessions: return full LinkedAccountSession
         val financialConnectionsSession: FinancialConnectionsSession? = null,
         // Bank account Token sessions: session + token.
