@@ -47,7 +47,6 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Product
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
@@ -129,9 +128,10 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             return
         }
         val manifest = sync.manifest
-        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest)
-        viewModelScope.launch { nativeRouter.logExposure(manifest) }
-        val hostedAuthUrl = buildHostedAuthUrl(manifest)
+        val isInstantDebits = stateFlow.value.isInstantDebits
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest, isInstantDebits)
+        viewModelScope.launch { nativeRouter.logExposure(manifest, isInstantDebits) }
+        val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
         if (hostedAuthUrl == null) {
             finishWithResult(
                 state = stateFlow.value,
@@ -161,19 +161,21 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun buildHostedAuthUrl(
-        manifest: FinancialConnectionsSessionManifest
-    ): String? = when (manifest.product) {
+        hostedAuthUrl: String?,
+        isInstantDebits: Boolean
+    ): String? = when (isInstantDebits) {
         /**
          * For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
          * takes place on the web side of the flow and the payment method ID is returned to the app.
          */
-        Product.INSTANT_DEBITS -> manifest.hostedAuthUrl?.let { hostedAuthUrl ->
+        true -> hostedAuthUrl?.let {
             uriUtils.addQueryParameterToUri(
-                uri = hostedAuthUrl,
+                it,
                 queryParam = "return_payment_method" to "true"
             )
         }
-        else -> manifest.hostedAuthUrl
+
+        false -> hostedAuthUrl
     }
 
     private fun logNoBrowserAvailableAndFinish() {

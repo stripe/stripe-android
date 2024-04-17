@@ -17,19 +17,22 @@ internal class NativeAuthFlowRouter @Inject constructor(
     private val debugConfiguration: DebugConfiguration
 ) {
 
-    private val FinancialConnectionsSessionManifest.isInstantDebits
-        get() = product == FinancialConnectionsSessionManifest.Product.INSTANT_DEBITS
-
-    fun nativeAuthFlowEnabled(manifest: FinancialConnectionsSessionManifest): Boolean {
+    fun nativeAuthFlowEnabled(
+        manifest: FinancialConnectionsSessionManifest,
+        isInstantDebits: Boolean
+    ): Boolean {
         debugConfiguration.overriddenNative?.let { return it }
         val killSwitchEnabled = nativeKillSwitchActive(manifest)
         val nativeExperimentEnabled = manifest
             .experimentAssignment(Experiment.CONNECTIONS_MOBILE_NATIVE) == EXPERIMENT_VALUE_NATIVE_TREATMENT
-        return manifest.isInstantDebits.not() && killSwitchEnabled.not() && nativeExperimentEnabled
+        return isInstantDebits.not() && killSwitchEnabled.not() && nativeExperimentEnabled
     }
 
-    suspend fun logExposure(manifest: FinancialConnectionsSessionManifest) {
-        if (manifest.isInstantDebits || debugConfiguration.overriddenNative != null) {
+    suspend fun logExposure(
+        manifest: FinancialConnectionsSessionManifest,
+        isInstantDebits: Boolean,
+    ) {
+        if (isInstantDebits || debugConfiguration.overriddenNative != null) {
             return
         }
         if (nativeKillSwitchActive(manifest).not()) {

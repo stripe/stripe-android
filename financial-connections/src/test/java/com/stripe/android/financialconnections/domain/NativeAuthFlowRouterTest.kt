@@ -5,7 +5,6 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Exposure
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.debug.DebugConfiguration
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -13,7 +12,6 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
 
-@OptIn(ExperimentalCoroutinesApi::class)
 internal class NativeAuthFlowRouterTest {
 
     private val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
@@ -35,9 +33,22 @@ internal class NativeAuthFlowRouterTest {
             ),
             features = mapOf()
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = false)
 
         assertThat(nativeAuthFlowEnabled).isTrue()
+    }
+
+    @Test
+    fun `nativeAuthFlowEnabled - false if experiment is treatment but instant debits`() {
+        val syncResponse = syncWithAssignments(
+            assignments = mapOf(
+                "connections_mobile_native" to "treatment"
+            ),
+            features = mapOf()
+        )
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = true)
+
+        assertThat(nativeAuthFlowEnabled).isFalse()
     }
 
     @Test
@@ -50,7 +61,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to true
             )
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = false)
 
         assertThat(nativeAuthFlowEnabled).isFalse()
     }
@@ -65,7 +76,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to false
             )
         )
-        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest)
+        val nativeAuthFlowEnabled = router.nativeAuthFlowEnabled(syncResponse.manifest, isInstantDebits = false)
 
         assertThat(nativeAuthFlowEnabled).isFalse()
     }
@@ -80,7 +91,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to false
             )
         )
-        router.logExposure(syncResponse.manifest)
+        router.logExposure(syncResponse.manifest, isInstantDebits = false)
 
         verify(eventTracker).track(
             Exposure(
@@ -89,6 +100,21 @@ internal class NativeAuthFlowRouterTest {
                 accountHolderId = "token"
             )
         )
+    }
+
+    @Test
+    fun `logExposure - does not log if instant debits and experiment present`() = runTest {
+        val syncResponse = syncWithAssignments(
+            assignments = mapOf(
+                "connections_mobile_native" to "random"
+            ),
+            features = mapOf(
+                "bank_connections_mobile_native_version_killswitch" to false
+            )
+        )
+        router.logExposure(syncResponse.manifest, isInstantDebits = true)
+
+        verifyNoInteractions(eventTracker)
     }
 
     @Test
@@ -101,7 +127,7 @@ internal class NativeAuthFlowRouterTest {
                 "bank_connections_mobile_native_version_killswitch" to true
             )
         )
-        router.logExposure(syncResponse.manifest)
+        router.logExposure(syncResponse.manifest, isInstantDebits = false)
 
         verifyNoInteractions(eventTracker)
     }
