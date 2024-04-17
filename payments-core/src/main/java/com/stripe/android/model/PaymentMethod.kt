@@ -169,6 +169,7 @@ constructor(
         private val hasDelayedSettlement: Boolean,
         internal val shouldRefreshIfIntentRequiresAction: Boolean,
     ) : Parcelable {
+        // TODO: should external pms actually be included here as a type?
         Link(
             "link",
             isReusable = false,
