@@ -40,7 +40,7 @@ class FinancialConnectionsSheetForInstantDebitsContract :
         is FinancialConnectionsSheetActivityResult.Canceled -> Canceled
         is FinancialConnectionsSheetActivityResult.Failed -> Failed(error)
         is FinancialConnectionsSheetActivityResult.Completed -> when (instantDebits) {
-            null -> Failed(IllegalArgumentException("payment method id is missing"))
+            null -> Failed(IllegalArgumentException("Instant debits result is missing"))
             else -> Completed(
                 paymentMethodId = instantDebits.paymentMethodId,
                 last4 = instantDebits.last4,

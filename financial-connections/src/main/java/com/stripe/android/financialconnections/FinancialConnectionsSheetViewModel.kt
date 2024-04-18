@@ -439,27 +439,27 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     }
 
     private fun onSuccessFromInstantDebits(url: Uri) {
-        kotlin.runCatching {
-            requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID))
-        }.onSuccess { paymentMethodId ->
-            withState {
-                finishWithResult(
-                    state = it,
-                    result = Completed(
-                        instantDebits = InstantDebitsResult(
-                            paymentMethodId = paymentMethodId,
-                            last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
-                            bankName = url.getQueryParameter(QUERY_BANK_NAME)
-                        ),
-                        financialConnectionsSession = null,
-                        token = null
+        runCatching { requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID)) }
+            .onSuccess { paymentMethodId ->
+                withState {
+                    finishWithResult(
+                        state = it,
+                        result = Completed(
+                            instantDebits = InstantDebitsResult(
+                                paymentMethodId = paymentMethodId,
+                                last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
+                                bankName = url.getQueryParameter(QUERY_BANK_NAME)
+                            ),
+                            financialConnectionsSession = null,
+                            token = null
+                        )
                     )
-                )
+                }
             }
-        }.onFailure { error ->
-            logger.error("Could not retrieve linked account from success url", error)
-            finishWithResult(stateFlow.value, Failed(error))
-        }
+            .onFailure { error ->
+                logger.error("Could not retrieve payment method parameters from success url", error)
+                finishWithResult(stateFlow.value, Failed(error))
+            }
     }
 
     private fun onFlowCancelled(state: FinancialConnectionsSheetState) {
