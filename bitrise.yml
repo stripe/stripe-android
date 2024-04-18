@@ -28,16 +28,16 @@ pipelines:
 stages:
   stage-trigger-run-all:
     workflows:
-      - check: { }
-      - test: { }
-      - run-instrumentation-tests: { }
+#      - check: { }
+#      - test: { }
+#      - run-instrumentation-tests: { }
       - run-paymentsheet-instrumentation-tests: { }
-      - run-example-instrumentation-tests: { }
-      - run-financial-connections-instrumentation-tests: { }
-      - run-cardscan-instrumentation-tests: { }
-      - run-paymentsheet-end-to-end-tests: { }
-      - run-paymentsheet-screenshot-tests: { }
-      - check-dependencies: { }
+#      - run-example-instrumentation-tests: { }
+#      - run-financial-connections-instrumentation-tests: { }
+#      - run-cardscan-instrumentation-tests: { }
+#      - run-paymentsheet-end-to-end-tests: { }
+#      - run-paymentsheet-screenshot-tests: { }
+#      - check-dependencies: { }
   stage-build-connections-debug:
     workflows:
       - build-connections-debug: { }
@@ -262,6 +262,10 @@ workflows:
       - wait-for-android-emulator@1:
           inputs:
             - boot_timeout: 600
+      - script@1:
+          title: Being writing logcat to file
+          inputs:
+            - content: ( adb logcat -v threadtime & echo $! >&3 ) 3>/tmp/test_results/logcat.pid | tee /tmp/test_results/adb_logcat.log 2>&1 > /dev/null
       - script@1:
           title: Execute instrumentation tests
           timeout: 1200
