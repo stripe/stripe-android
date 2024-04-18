@@ -11,6 +11,7 @@ import com.stripe.android.customersheet.CustomerSheetActivity
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.MainActivity
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -37,6 +38,7 @@ internal class CustomerSheetTestRunnerContext(
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
+    networkRule: NetworkRule,
     integrationType: IntegrationType,
     customerSheetTestType: CustomerSheetTestType,
     configuration: CustomerSheet.Configuration = CustomerSheet.Configuration(
@@ -58,6 +60,7 @@ internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
     )
 
     runCustomerSheetTest(
+        networkRule = networkRule,
         countDownLatch = countDownLatch,
         makeCustomerSheet = factory::make,
         block = block,
@@ -66,6 +69,7 @@ internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 private fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
+    networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makeCustomerSheet: (ComponentActivity) -> CustomerSheet,
     block: (CustomerSheetTestRunnerContext) -> Unit,
@@ -94,5 +98,7 @@ private fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
     )
     block(testContext)
 
-    assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+    networkRule.validate()
+    assertThat(didCompleteSuccessfully).isTrue()
 }

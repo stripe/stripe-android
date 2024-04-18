@@ -46,7 +46,22 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         extraRequests.clear()
     }
 
-    fun hasResponsesInQueue(): Boolean {
+    fun validate() {
+        if (hasResponsesInQueue()) {
+            throw IllegalStateException(
+                "Mock responses is not empty. Remaining: ${numberRemainingInQueue()}.\nRemaining Matchers: " +
+                    remainingMatchersDescription()
+            )
+        }
+        val extraRequests = extraRequestDescriptions()
+        if (extraRequests.isNotEmpty()) {
+            throw IllegalStateException(
+                "Extra Requests: $extraRequests"
+            )
+        }
+    }
+
+    private fun hasResponsesInQueue(): Boolean {
         if (validationTimeout == null) {
             return enqueuedResponses.size != 0
         }
@@ -60,15 +75,15 @@ internal class NetworkDispatcher(private val validationTimeout: Duration?) : Dis
         return enqueuedResponses.size != 0
     }
 
-    fun numberRemainingInQueue(): Int {
+    private fun numberRemainingInQueue(): Int {
         return enqueuedResponses.size
     }
 
-    fun remainingMatchersDescription(): String {
+    private fun remainingMatchersDescription(): String {
         return enqueuedResponses.joinToString { it.requestMatcher.toString() }
     }
 
-    fun extraRequestDescriptions(): String {
+    private fun extraRequestDescriptions(): String {
         return extraRequests.joinToString { it.requestUrl.toString() }
     }
 

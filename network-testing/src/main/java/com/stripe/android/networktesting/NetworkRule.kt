@@ -33,7 +33,6 @@ class NetworkRule private constructor(
     override fun apply(base: Statement, description: Description): Statement {
         return NetworkStatement(
             base,
-            description,
             mockWebServer,
             hostsToTrack,
         )
@@ -60,11 +59,14 @@ class NetworkRule private constructor(
             responseFactory(request, response)
         }
     }
+
+    fun validate() {
+        mockWebServer.dispatcher.validate()
+    }
 }
 
 private class NetworkStatement(
     private val baseStatement: Statement,
-    private val description: Description,
     private val mockWebServer: TestMockWebServer,
     private val hostsToTrack: Set<String>,
 ) : Statement() {
@@ -72,7 +74,7 @@ private class NetworkStatement(
         try {
             setup()
             baseStatement.evaluate()
-            validate()
+            mockWebServer.dispatcher.validate()
         } finally {
             tearDown()
         }
@@ -80,23 +82,6 @@ private class NetworkStatement(
 
     private fun setup() {
         ConnectionFactory.Default.connectionOpener = NetworkRuleConnectionOpener()
-    }
-
-    private fun validate() {
-        if (mockWebServer.dispatcher.hasResponsesInQueue()) {
-            throw IllegalStateException(
-                "${description.testClass}#${description.methodName} - mock responses is not " +
-                    "empty. Remaining: ${mockWebServer.dispatcher.numberRemainingInQueue()}.\nRemaining Matchers: " +
-                    mockWebServer.dispatcher.remainingMatchersDescription()
-            )
-        }
-        val extraRequests = mockWebServer.dispatcher.extraRequestDescriptions()
-        if (extraRequests.isNotEmpty()) {
-            throw IllegalStateException(
-                "${description.testClass}#${description.methodName} - made extra requests.\n" +
-                    "Extra Requests: $extraRequests"
-            )
-        }
     }
 
     private fun tearDown() {

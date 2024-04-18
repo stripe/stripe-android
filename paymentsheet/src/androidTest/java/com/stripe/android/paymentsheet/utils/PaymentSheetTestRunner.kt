@@ -7,6 +7,7 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -43,6 +44,7 @@ internal class PaymentSheetTestRunnerContext(
 }
 
 internal fun ActivityScenarioRule<MainActivity>.runPaymentSheetTest(
+    networkRule: NetworkRule,
     integrationType: IntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     resultCallback: PaymentSheetResultCallback,
@@ -60,6 +62,7 @@ internal fun ActivityScenarioRule<MainActivity>.runPaymentSheetTest(
     )
 
     runPaymentSheetTestInternal(
+        networkRule = networkRule,
         countDownLatch = countDownLatch,
         makePaymentSheet = factory::make,
         block = block,
@@ -67,6 +70,7 @@ internal fun ActivityScenarioRule<MainActivity>.runPaymentSheetTest(
 }
 
 private fun ActivityScenarioRule<MainActivity>.runPaymentSheetTestInternal(
+    networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makePaymentSheet: (ComponentActivity) -> PaymentSheet,
     block: (PaymentSheetTestRunnerContext) -> Unit,
@@ -87,5 +91,7 @@ private fun ActivityScenarioRule<MainActivity>.runPaymentSheetTestInternal(
     val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
     block(testContext)
 
-    assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+    val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+    networkRule.validate()
+    assertThat(didCompleteSuccessfully).isTrue()
 }

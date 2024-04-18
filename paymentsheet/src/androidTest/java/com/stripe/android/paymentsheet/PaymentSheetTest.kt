@@ -39,6 +39,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulCardPayment() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -71,6 +72,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSocketErrorCardPayment() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
@@ -105,6 +107,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testInsufficientFundsCardPayment() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
@@ -140,6 +143,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulDelayedSuccessPayment() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -178,6 +182,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testFailureWhenSetupRequestsFail() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
@@ -205,6 +210,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testDeferredIntentCardPayment() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
         resultCallback = ::assertCompleted,
@@ -266,6 +272,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testDeferredIntentFailedCardPayment() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Failure(
@@ -316,6 +323,7 @@ internal class PaymentSheetTest {
     @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
@@ -359,6 +367,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPaymentIntentWithCardBrandChoiceSuccess() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -395,6 +404,7 @@ internal class PaymentSheetTest {
 
     @Test
     fun testPaymentIntentReturnsFailureWhenAlreadySucceeded() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->

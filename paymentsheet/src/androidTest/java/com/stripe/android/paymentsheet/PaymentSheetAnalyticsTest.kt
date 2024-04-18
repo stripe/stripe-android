@@ -44,6 +44,7 @@ internal class PaymentSheetAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPayment() = activityScenarioRule.runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -102,6 +103,7 @@ internal class PaymentSheetAnalyticsTest {
 
     @Test
     fun testSuccessfulCardPaymentInFlowController() = activityScenarioRule.runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
