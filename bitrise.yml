@@ -263,7 +263,7 @@ workflows:
           inputs:
             - boot_timeout: 600
       - script@1:
-          title: Being writing logcat to file
+          title: Begin writing logcat to file
           inputs:
             - content: ( adb logcat -v threadtime & echo $! >&3 ) 3>/tmp/test_results/logcat.pid | tee /tmp/test_results/adb_logcat.log 2>&1 > /dev/null
       - script@1:
@@ -271,6 +271,10 @@ workflows:
           timeout: 1200
           inputs:
             - content: ./gradlew :paymentsheet:connectedAndroidTest
+      - script@1:
+          title: Kill logcat
+          inputs:
+            - content: kill -9 $(cat /tmp/test_results/logcat.pid) | true
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
@@ -438,6 +442,9 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
+      - script@1:
+          inputs:
+            - content: mkdir -p /tmp/test_results
   conclude_all:
     steps:
       - script-runner@0:
