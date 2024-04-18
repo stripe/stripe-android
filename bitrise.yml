@@ -266,20 +266,7 @@ workflows:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content:  |-
-                #!/usr/bin/env bash
-                # fail if any commands fails
-                # set -e
-                # debug log
-                set -x
-                
-                ( adb logcat -v threadtime & echo $! >&3 ) 3>/tmp/test_results/logcat.pid | tee /tmp/test_results/adb_logcat.log 2>&1 > /dev/null
-                ./gradlew :paymentsheet:connectedAndroidTest
-                gradleExitStatus=${PIPESTATUS[0]}
-                kill -9 $(cat /tmp/test_results/logcat.pid) | true
-                if [[ ${gradleExitStatus} -gt 0 ]]; then
-                  exit 1
-                fi
+            - content: ./gradlew :paymentsheet:connectedAndroidTest
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
@@ -447,9 +434,6 @@ workflows:
       - script@1:
           inputs:
             - content: echo "STRIPE_EXAMPLE_BACKEND_URL=$STRIPE_EXAMPLE_BACKEND_URL" >> ~/.gradle/gradle.properties; echo "STRIPE_EXAMPLE_PUBLISHABLE_KEY=$STRIPE_EXAMPLE_PUBLISHABLE_KEY" >> ~/.gradle/gradle.properties
-      - script@1:
-          inputs:
-            - content: mkdir -p /tmp/test_results
   conclude_all:
     steps:
       - script-runner@0:
