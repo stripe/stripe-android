@@ -5,21 +5,26 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
-import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.CountryAddressSchema
+import com.stripe.android.uicore.address.FieldSchema
+import com.stripe.android.uicore.address.FieldType
+import com.stripe.android.uicore.address.NameType
+import com.stripe.android.uicore.address.transformToElementList
 import com.stripe.android.uicore.elements.AddressController
+import com.stripe.android.uicore.elements.CountryConfig
+import com.stripe.android.uicore.elements.CountryElement
+import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
-import com.stripe.android.uicore.elements.SameAsShippingController
-import com.stripe.android.uicore.elements.SameAsShippingElement
-import com.stripe.android.uicore.elements.SectionSingleFieldElement
-import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Rule
 import org.junit.Test
 
@@ -27,61 +32,168 @@ internal class BillingDetailsCollectionScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
         SystemAppearance.entries,
-        listOf(FontSize.DefaultFont),
-        listOf(PaymentSheetAppearance.DefaultAppearance),
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
     )
 
-    private val formArguments = FormArguments(
-        paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-        merchantName = "Test Merchant",
-        amount = null,
-        billingDetails = null,
-        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-    )
-
-    private val nameController = NameConfig.createController(null)
-    private val emailController = EmailConfig.createController(null)
-    private val phoneController = PhoneNumberController.createPhoneNumberController()
-    private val addressController = AddressController(MutableStateFlow(listOf<SectionSingleFieldElement>()))
-    private val sameAsShippingElement = SameAsShippingElement(
-        identifier = IdentifierSpec.SameAsShipping,
-        controller = SameAsShippingController(false),
-    )
-
     @Test
-    fun testPaymentFlow() {
+    fun testEmpty() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = formArguments,
+                formArgs = createFormArguments(),
                 isProcessing = false,
                 isPaymentFlow = true,
-                nameController = nameController,
-                emailController = emailController,
-                phoneController = phoneController,
-                addressController = addressController,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
                 lastTextFieldIdentifier = null,
-                sameAsShippingElement = sameAsShippingElement
+                sameAsShippingElement = null
             )
         }
     }
 
     @Test
-    fun testSetupFlow() {
+    fun testFilled() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = formArguments,
+                formArgs = createFormArguments(),
                 isProcessing = false,
-                isPaymentFlow = false,
-                nameController = nameController,
-                emailController = emailController,
-                phoneController = phoneController,
-                addressController = addressController,
+                isPaymentFlow = true,
+                nameController = createNameController("John Doe"),
+                emailController = createEmailController("email@email.com"),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
                 lastTextFieldIdentifier = null,
-                sameAsShippingElement = sameAsShippingElement
+                sameAsShippingElement = null
             )
         }
+    }
+
+    @Test
+    fun testEmptyWithBillingAddress() {
+        paparazzi.snapshot {
+            BillingDetailsCollectionScreen(
+                formArgs = createFormArguments(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                    ),
+                ),
+                isProcessing = false,
+                isPaymentFlow = true,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                lastTextFieldIdentifier = null,
+                sameAsShippingElement = null
+            )
+        }
+    }
+
+    @Test
+    fun testFilledWithBillingAddress() {
+        paparazzi.snapshot {
+            BillingDetailsCollectionScreen(
+                formArgs = createFormArguments(),
+                isProcessing = false,
+                isPaymentFlow = true,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(fillAddress = true),
+                lastTextFieldIdentifier = null,
+                sameAsShippingElement = null
+            )
+        }
+    }
+
+    private fun createFormArguments(
+        billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
+            PaymentSheet.BillingDetailsCollectionConfiguration(),
+    ): FormArguments {
+        return FormArguments(
+            paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+            merchantName = "Test Merchant",
+            amount = null,
+            billingDetails = null,
+            billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        )
+    }
+
+    private fun createNameController(initialValue: String? = null): TextFieldController {
+        return NameConfig.createController(initialValue)
+    }
+
+    private fun createEmailController(initialValue: String? = null): TextFieldController {
+        return EmailConfig.createController(initialValue)
+    }
+
+    private fun createPhoneNumberController(initialValue: String = ""): PhoneNumberController {
+        return PhoneNumberController.createPhoneNumberController(initialValue)
+    }
+
+    private fun createAddressController(
+        fillAddress: Boolean = false,
+    ): AddressController {
+        val elements = listOf(
+            CountryAddressSchema(
+                type = FieldType.AddressLine1,
+                required = true,
+            ),
+            CountryAddressSchema(
+                type = FieldType.AddressLine2,
+                required = false,
+            ),
+            CountryAddressSchema(
+                type = FieldType.Locality,
+                required = true,
+                schema = FieldSchema(nameType = NameType.City),
+            ),
+            CountryAddressSchema(
+                type = FieldType.PostalCode,
+                required = true,
+                schema = FieldSchema(
+                    isNumeric = true,
+                    nameType = NameType.Zip,
+                ),
+            ),
+            CountryAddressSchema(
+                type = FieldType.AdministrativeArea,
+                required = true,
+                schema = FieldSchema(nameType = NameType.State),
+            )
+        ).transformToElementList(countryCode = "US")
+
+        if (fillAddress) {
+            elements.forEach { element ->
+                val value = when (element.identifier) {
+                    FieldType.AddressLine1.identifierSpec -> "354 Oyster Point Blvd"
+                    FieldType.AddressLine2.identifierSpec -> "Levels 1-5"
+                    FieldType.Locality.identifierSpec -> "South San Francisco"
+                    FieldType.AdministrativeArea.identifierSpec -> "CA"
+                    FieldType.PostalCode.identifierSpec -> "94080"
+                    else -> ""
+                }
+
+                element.setRawValue(mapOf(element.identifier to value))
+            }
+        }
+
+        return AddressController(
+            stateFlowOf(
+                listOf(
+                    CountryElement(
+                        identifier = IdentifierSpec.BillingAddress,
+                        controller = DropdownFieldController(
+                            config = CountryConfig(setOf("US", "CA")),
+                            initialValue = "US"
+                        )
+                    ),
+                ).plus(elements)
+            )
+        )
     }
 }
