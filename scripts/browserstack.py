@@ -186,7 +186,7 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
     shards = testShards(isNightly, testClasses)
-    running_all_tests = len(testClasses) == len(get_all_test_class_names())
+    runningAllTests = len(testClasses) == len(get_all_test_class_names())
     devices = []
     if isNightly:
         devices = [
@@ -212,7 +212,7 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
             "numberOfShards": len(shards),
             "mapping": shards,
          },
-         "class": None if running_all_tests else testClasses
+         "class": None if runningAllTests else testClasses
       }, auth=(user, authKey))
     jsonResponse = response.json()
 
