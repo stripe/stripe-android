@@ -388,7 +388,7 @@ if __name__ == "__main__":
                   testClassesToRun = getFailedTestsForBuild(testResults["buildId"])
                   os.environ["BROWSERSTACK_RERUN"]="true"
 
-           del os.environ["BROWSERSTACK_RERUN"]
+           os.environ["BROWSERSTACK_RERUN"]="false"
            sys.exit(exitStatus)
     else:
        parser.print_help()
