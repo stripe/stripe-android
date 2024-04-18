@@ -267,13 +267,6 @@ internal data class FinancialConnectionsSessionManifest(
             EnumIgnoreUnknownSerializer<Pane>(entries.toTypedArray(), UNEXPECTED_ERROR)
     }
 
-    /**
-     *
-     *
-     * Values: BILLPAY,CANARY,CAPITAL,CAPITAL_HOSTED,DASHBOARD,DIRECT_ONBOARDING,DIRECT_SETTINGS,
-     * EMERALD,EXPRESS_ONBOARDING,EXTERNAL_API,ISSUING,LCPM,LINK_WITH_NETWORKING,
-     * OPAL,PAYMENT_FLOWS,RESERVE_APPEALS,STANDARD_ONBOARDING,STRIPE_CARD,SUPPORT_SITE
-     */
     @Serializable(with = Product.Serializer::class)
     enum class Product(val value: String) {
         @SerialName(value = "billpay")

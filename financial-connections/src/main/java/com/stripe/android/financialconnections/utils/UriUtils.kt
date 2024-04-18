@@ -23,15 +23,6 @@ internal class UriUtils @Inject constructor(
             uri1.path.equals(uri2.path)
     }
 
-    fun addQueryParameterToUri(
-        uri: String,
-        queryParam: Pair<String, String>
-    ): String? {
-        val uriBuilder = uri.toUriOrNull()?.buildUpon()
-        uriBuilder?.appendQueryParameter(queryParam.first, queryParam.second)
-        return uriBuilder?.build()?.toString()
-    }
-
     /**
      * Extracts a query parameter from an URI.
      *

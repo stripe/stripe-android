@@ -168,13 +168,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
          * For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
          * takes place on the web side of the flow and the payment method ID is returned to the app.
          */
-        true -> hostedAuthUrl?.let {
-            uriUtils.addQueryParameterToUri(
-                it,
-                queryParam = "return_payment_method" to "true"
-            )
-        }
-
+        true -> hostedAuthUrl?.let { "$it?return_payment_method=true" }
         false -> hostedAuthUrl
     }
 
