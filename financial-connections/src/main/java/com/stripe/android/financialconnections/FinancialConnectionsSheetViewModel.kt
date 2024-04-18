@@ -51,7 +51,6 @@ import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import com.stripe.android.financialconnections.utils.UriUtils
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -66,7 +65,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
-    private val uriUtils: UriUtils,
     private val browserManager: BrowserManager,
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
@@ -168,7 +166,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
          * For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
          * takes place on the web side of the flow and the payment method ID is returned to the app.
          */
-        true -> hostedAuthUrl?.let { "$it?return_payment_method=true" }
+        true -> hostedAuthUrl?.let { "$it&return_payment_method=true" }
         false -> hostedAuthUrl
     }
 

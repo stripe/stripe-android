@@ -30,7 +30,6 @@ import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession.StatusDetails
 import com.stripe.android.financialconnections.presentation.withState
-import com.stripe.android.financialconnections.utils.UriUtils
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -148,7 +147,7 @@ class FinancialConnectionsSheetViewModelTest {
             withState(viewModel) {
                 val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
                 assertThat(viewEffect.url).isEqualTo(
-                    "${syncResponse.manifest.hostedAuthUrl}?return_payment_method=true"
+                    "${syncResponse.manifest.hostedAuthUrl}&return_payment_method=true"
                 )
             }
         }
@@ -536,7 +535,6 @@ class FinancialConnectionsSheetViewModelTest {
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),
             nativeAuthFlowCoordinator = mock(),
-            uriUtils = UriUtils(Logger.noop(), mock()),
             logger = Logger.noop()
         )
     }
