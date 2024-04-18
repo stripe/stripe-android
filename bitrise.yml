@@ -263,18 +263,23 @@ workflows:
           inputs:
             - boot_timeout: 600
       - script@1:
-          title: Begin writing logcat to file
-          inputs:
-            - content: ( adb logcat -v threadtime & echo $! >&3 ) 3>/tmp/test_results/logcat.pid | tee /tmp/test_results/adb_logcat.log 2>&1 > /dev/null
-      - script@1:
           title: Execute instrumentation tests
           timeout: 1200
           inputs:
-            - content: ./gradlew :paymentsheet:connectedAndroidTest
-      - script@1:
-          title: Kill logcat
-          inputs:
-            - content: kill -9 $(cat /tmp/test_results/logcat.pid) | true
+            - content:  |-
+                #!/usr/bin/env bash
+                # fail if any commands fails
+                # set -e
+                # debug log
+                set -x
+                
+                ( adb logcat -v threadtime & echo $! >&3 ) 3>/tmp/test_results/logcat.pid | tee /tmp/test_results/adb_logcat.log 2>&1 > /dev/null
+                ./gradlew :paymentsheet:connectedAndroidTest
+                gradleExitStatus=${PIPESTATUS[0]}
+                kill -9 $(cat /tmp/test_results/logcat.pid) | true
+                if [[ ${gradleExitStatus} -gt 0 ]]; then
+                  exit 1
+                fi
   run-example-instrumentation-tests:
     before_run:
       - start_emulator
