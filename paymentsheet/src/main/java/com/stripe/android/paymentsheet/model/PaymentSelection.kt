@@ -217,7 +217,7 @@ internal sealed class PaymentSelection : Parcelable {
         @Parcelize
         data class GenericPaymentMethod(
             val labelResource: String,
-            @DrawableRes val iconResource: Int,
+            @DrawableRes val iconResource: Int?,
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,

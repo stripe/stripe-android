@@ -74,8 +74,9 @@ internal object DeferredIntentValidator {
     private fun mapToDeferredIntentParams(
         intentConfiguration: PaymentSheet.IntentConfiguration,
     ): DeferredIntentParams {
+        // TODO: understand what I need to do validation here
         val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration)
-        val params = initializationMode.toElementsSessionParams()
+        val params = initializationMode.toElementsSessionParams(externalPaymentMethods = emptyList())
         return (params as ElementsSessionParams.DeferredIntentType).deferredIntentParams
     }
 }

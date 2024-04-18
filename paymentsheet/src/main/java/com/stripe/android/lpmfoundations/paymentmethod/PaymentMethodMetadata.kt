@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import android.content.Context
 import android.os.Parcelable
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -11,6 +13,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.parcelize.Parcelize
@@ -33,6 +36,7 @@ internal data class PaymentMethodMetadata(
     val sharedDataSpecs: List<SharedDataSpec>,
     val hasCustomerConfiguration: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
+    val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {
         return when (stripeIntent) {
@@ -84,9 +88,10 @@ internal data class PaymentMethodMetadata(
     }
 
     fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
+        // TODO: audit and update other parts of this class
         return supportedPaymentMethodDefinitions().mapNotNull { definition ->
             definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
-        }
+        }.plus(externalPaymentMethodSpecs.map { it.toSupportedPaymentMethod() })
     }
 
     private fun orderedPaymentMethodTypes(): List<String> {
@@ -138,4 +143,23 @@ internal data class PaymentMethodMetadata(
             ),
         )
     }
+}
+
+// TODO: obviously do elsewhere, or increase vis of something needed for this
+private class LabelResolvableString(val string : String) : ResolvableString {
+    override fun resolve(context: Context): String {
+        return string
+    }
+}
+
+private fun ExternalPaymentMethodSpec.toSupportedPaymentMethod() : SupportedPaymentMethod {
+    // TODO: return null if incorrect info? and then filter not nulls?
+    return SupportedPaymentMethod(
+        code = this.type,
+        displayNameResource = LabelResolvableString(this.localizedLabel ?: this.type),
+        iconResource = 0,
+        lightThemeIconUrl = this.lightImageUrl,
+        darkThemeIconUrl = this.darkImageUrl,
+        tintIconOnSelection = false
+    )
 }

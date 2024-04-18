@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -64,6 +65,9 @@ internal class PlaygroundSettings private constructor(
             settings.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(value, builder, playgroundState, configurationData)
             }
+            Log.d("xkcd", "setting external_venmo as EPM")
+            // TODO: create a playground field that takes in EPMs similar to the paymentMethodOrder one
+            builder.externalPaymentMethods(listOf("external_venmo"))
             return builder.build()
         }
 

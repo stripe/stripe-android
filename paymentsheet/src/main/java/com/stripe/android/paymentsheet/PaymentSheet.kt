@@ -32,6 +32,7 @@ import kotlinx.parcelize.Parcelize
 class PaymentSheet internal constructor(
     private val paymentSheetLauncher: PaymentSheetLauncher
 ) {
+    // TODO: all these constructors would need to be updated
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
@@ -438,6 +439,8 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
+        val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
+
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
@@ -588,6 +591,7 @@ class PaymentSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            private var externalPaymentMethods : List<String> = ConfigurationDefaults.externalPaymentMethods
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -642,6 +646,12 @@ class PaymentSheet internal constructor(
                 this.preferredNetworks = preferredNetworks
             }
 
+            fun externalPaymentMethods(
+                externalPaymentMethods: List<String>
+            ) = apply {
+                this.externalPaymentMethods = externalPaymentMethods
+            }
+
             @ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
             fun allowsRemovalOfLastSavedPaymentMethod(allowsRemovalOfLastSavedPaymentMethod: Boolean) = apply {
                 this.allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod
@@ -677,6 +687,7 @@ class PaymentSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
+                externalPaymentMethods = externalPaymentMethods
             )
         }
 

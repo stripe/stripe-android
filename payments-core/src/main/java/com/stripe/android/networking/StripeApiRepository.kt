@@ -2,6 +2,7 @@ package com.stripe.android.networking
 
 import android.content.Context
 import android.net.http.HttpResponseCache
+import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
@@ -1490,12 +1491,15 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
         val requestParams = buildMap {
             this["type"] = params.type
+            this["external_payment_methods"] = params.externalPaymentMethods
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
         }
+
+        Log.e("xkcd", "external payment methods in req: ${requestParams.get("external_payment_methods")}")
 
         return fetchStripeModelResult(
             apiRequest = apiRequestFactory.createGet(

@@ -12,6 +12,7 @@ private val LinkSupportedFundingSources = setOf("card", "bank_account")
 data class ElementsSession(
     val linkSettings: LinkSettings?,
     val paymentMethodSpecs: String?,
+    val externalPaymentMethodSpecs: String?,
     val stripeIntent: StripeIntent,
     val merchantCountry: String?,
     val isEligibleForCardBrandChoice: Boolean,
@@ -58,6 +59,7 @@ data class ElementsSession(
                 isEligibleForCardBrandChoice = false,
                 isGooglePayEnabled = true,
                 sessionsError = sessionsError,
+                externalPaymentMethodSpecs = null
             )
         }
     }

@@ -61,8 +61,10 @@ fun rememberPaymentSheet(
 fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodCreator: ExternalPaymentMethodCreator? = null,
 ): PaymentSheet {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
+    UpdateExternalPaymentMethodCreator(externalPaymentMethodCreator = externalPaymentMethodCreator)
     return rememberPaymentSheet(paymentResultCallback)
 }
 
@@ -72,5 +74,17 @@ private fun UpdateIntentConfirmationInterceptor(
 ) {
     LaunchedEffect(createIntentCallback) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+}
+
+@Composable
+private fun UpdateExternalPaymentMethodCreator(
+    externalPaymentMethodCreator: ExternalPaymentMethodCreator? = null,
+) {
+    if (externalPaymentMethodCreator == null) {
+        return
+    }
+    LaunchedEffect(externalPaymentMethodCreator) {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodCreator = externalPaymentMethodCreator
     }
 }

@@ -1,11 +1,15 @@
 package com.stripe.android.lpmfoundations.luxe
 
+import android.content.Context
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import com.stripe.android.core.strings.IdentifierResolvableString
+import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
+// TODO: can probably change this type to make it so that either the icon URL is present or the iconResource is present always
 internal data class SupportedPaymentMethod(
     /**
      * This describes the PaymentMethod Type as described
@@ -14,10 +18,11 @@ internal data class SupportedPaymentMethod(
     val code: PaymentMethodCode,
 
     /** This describes the name that appears under the selector. */
-    @StringRes val displayNameResource: Int,
+    val displayNameResource: ResolvableString,
 
+    // TODO: make this nullable
     /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
-    @DrawableRes val iconResource: Int,
+    @DrawableRes val iconResource: Int?,
 
     /** An optional light theme icon url if it's supported. */
     val lightThemeIconUrl: String?,
@@ -38,10 +43,26 @@ internal data class SupportedPaymentMethod(
         tintIconOnSelection: Boolean = false,
     ) : this(
         code = paymentMethodDefinition.type.code,
-        displayNameResource = displayNameResource,
+        displayNameResource = IdentifierResolvableString(displayNameResource, args = emptyList(), transformations = emptyList()),
         iconResource = iconResource,
         lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
+        tintIconOnSelection = tintIconOnSelection,
+    )
+
+    constructor(
+        code: PaymentMethodCode,
+        @StringRes displayNameResource: Int,
+        @DrawableRes iconResource: Int,
+        tintIconOnSelection: Boolean = false,
+        lightThemeIconUrl: String?,
+        darkThemeIconUrl: String?
+    ) : this(
+        code = code,
+        displayNameResource = IdentifierResolvableString(displayNameResource, args = emptyList(), transformations = emptyList()),
+        iconResource = iconResource,
+        lightThemeIconUrl = lightThemeIconUrl,
+        darkThemeIconUrl = darkThemeIconUrl,
         tintIconOnSelection = tintIconOnSelection,
     )
 }

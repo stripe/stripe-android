@@ -89,7 +89,7 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                 }
 
                 val paymentSheet = rememberPaymentSheet(
-                    paymentResultCallback = viewModel::handlePaymentResult
+                    paymentResultCallback = viewModel::handlePaymentResult,
                 )
 
                 LaunchedEffect(customerAdapter) {

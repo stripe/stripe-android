@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -38,6 +39,7 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
+import java.lang.IllegalStateException
 
 private object Spacing {
     val cardLeadingInnerPadding = 12.dp
@@ -101,7 +103,7 @@ internal fun PaymentMethodsUI(
                     iconRes = item.iconResource,
                     iconUrl = iconUrl,
                     imageLoader = imageLoader,
-                    title = stringResource(item.displayNameResource),
+                    title = item.displayNameResource.resolve(LocalContext.current),
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     tintOnSelected = item.tintIconOnSelection,
@@ -171,7 +173,7 @@ private fun computeItemWidthWhenExceedingMaxWidth(
 @Composable
 internal fun PaymentMethodUI(
     minViewWidth: Dp,
-    iconRes: Int,
+    iconRes: Int?,
     iconUrl: String?,
     imageLoader: StripeImageLoader,
     title: String,
@@ -240,7 +242,7 @@ internal fun PaymentMethodUI(
 
 @Composable
 private fun PaymentMethodIconUi(
-    iconRes: Int,
+    iconRes: Int?,
     iconUrl: String?,
     imageLoader: StripeImageLoader,
     tintOnSelected: Boolean,
@@ -261,11 +263,15 @@ private fun PaymentMethodIconUi(
             contentDescription = null,
             contentScale = ContentScale.Fit,
         )
-    } else {
+    } else if (iconRes != null) {
         Image(
             painter = painterResource(iconRes),
             contentDescription = null,
             colorFilter = colorFilter,
         )
+    } else {
+        // TODO: have a placeholder image?
+        // TODO: error analytic?
+        throw IllegalStateException("we require either an icon res or an icon url!!")
     }
 }

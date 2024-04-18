@@ -114,7 +114,7 @@ internal class DefaultCustomerSheetLoader(
                 paymentMethodTypes = paymentMethodTypes,
             )
         )
-        return elementsSessionRepository.get(initializationMode).map { elementsSession ->
+        return elementsSessionRepository.get(initializationMode, externalPaymentMethods = emptyList()).map { elementsSession ->
             val billingDetailsCollectionConfig = configuration.billingDetailsCollectionConfiguration
             val sharedDataSpecs = lpmRepository.getSharedDataSpecs(
                 stripeIntent = elementsSession.stripeIntent,
@@ -138,7 +138,8 @@ internal class DefaultCustomerSheetLoader(
                 shippingDetails = null,
                 hasCustomerConfiguration = true,
                 sharedDataSpecs = sharedDataSpecs,
-                financialConnectionsAvailable = isFinancialConnectionsAvailable()
+                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
+                externalPaymentMethodSpecs = emptyList()
             )
 
             ElementsSessionWithMetadata(elementsSession = elementsSession, metadata = metadata)

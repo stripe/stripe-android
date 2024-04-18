@@ -222,10 +222,8 @@ internal abstract class BaseSheetViewModel(
 
     private fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
-            paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
-        }?.displayNameResource?.let {
-            getApplication<Application>().getString(it)
-        }.orEmpty()
+                paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
+            }?.displayNameResource?.resolve(getApplication()).orEmpty()
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()

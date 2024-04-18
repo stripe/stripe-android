@@ -220,10 +220,8 @@ internal class CustomerSheetViewModel(
 
     fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
-            paymentMethodMetadata?.supportedPaymentMethodForCode(code)
-        }?.displayNameResource?.let {
-            resources.getString(it)
-        }.orEmpty()
+                paymentMethodMetadata?.supportedPaymentMethodForCode(code)
+            }?.displayNameResource?.resolve(application).orEmpty()
     }
 
     fun registerFromActivity(
@@ -455,9 +453,9 @@ internal class CustomerSheetViewModel(
                     ),
                     primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
                     draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
-                        resources = resources,
                         paymentMethod = it.selectedPaymentMethod,
-                        paymentMethodMetadata = paymentMethodMetadata
+                        paymentMethodMetadata = paymentMethodMetadata,
+                        context = application
                     )
                 )
             }
@@ -591,7 +589,7 @@ internal class CustomerSheetViewModel(
                             }
                         }
                     },
-                    displayName = providePaymentMethodName(paymentMethod.type?.code),
+                    displayName = providePaymentMethodName(paymentMethod.type?.code, ),
                     removeExecutor = { pm ->
                         removePaymentMethod(pm).onSuccess {
                             onBackPressed()

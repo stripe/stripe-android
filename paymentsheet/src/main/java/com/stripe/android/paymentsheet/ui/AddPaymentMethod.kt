@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import android.content.Context
 import android.content.res.Resources
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -144,9 +145,9 @@ internal fun AddPaymentMethod(
                 onFormFieldValuesChanged = { formValues ->
                     paymentMethodMetadata?.let { paymentMethodMetadata ->
                         val newSelection = formValues?.transformToPaymentSelection(
-                            resources = context.resources,
                             paymentMethod = selectedItem,
                             paymentMethodMetadata = paymentMethodMetadata,
+                            context = context
                         )
                         sheetViewModel.updateSelection(newSelection)
                     }
@@ -197,9 +198,9 @@ internal fun FormFieldValues.transformToExtraParams(
 }
 
 internal fun FormFieldValues.transformToPaymentSelection(
-    resources: Resources,
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
+    context: Context
 ): PaymentSelection.New {
     val params = transformToPaymentMethodCreateParams(paymentMethod, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
@@ -215,7 +216,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
         )
     } else {
         PaymentSelection.New.GenericPaymentMethod(
-            labelResource = resources.getString(paymentMethod.displayNameResource),
+            labelResource = paymentMethod.displayNameResource.resolve(context),
             iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,

@@ -106,7 +106,7 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
-                    drawableResourceId = selection.iconResource,
+                    drawableResourceId = selection.iconResource!!, // TODO: error analytic? or placeholder
                     lightThemeIconUrl = selection.lightThemeIconUrl,
                     darkThemeIconUrl = selection.darkThemeIconUrl,
                     label = selection.labelResource,

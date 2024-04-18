@@ -4,7 +4,7 @@ import android.content.Context
 import androidx.annotation.StringRes
 import com.stripe.android.core.strings.transformations.TransformOperation
 
-internal data class IdentifierResolvableString(
+data class IdentifierResolvableString(
     @StringRes private val id: Int,
     private val args: List<Any?>,
     private val transformations: List<TransformOperation>

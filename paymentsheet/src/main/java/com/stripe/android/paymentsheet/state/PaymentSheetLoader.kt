@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.state
 
+import android.util.Log
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
@@ -26,6 +27,7 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodsSerializer
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -71,6 +73,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
+            externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
@@ -86,6 +89,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             )
+            // TODO: handle errors, log client error about difference between configuration and parsed epms
+            val externalPaymentMethodSpecs =
+                ExternalPaymentMethodsSerializer.deserializeList(elementsSession.externalPaymentMethodSpecs ?: "")
+                    .getOrDefault(
+                        emptyList()
+                    )
+            Log.i("xkcd", "deseralized EPM specs, found ${externalPaymentMethodSpecs.size}")
+            // TODO: use externalPaymentMethodSpecs in PaymentMethodMetadata
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
@@ -99,6 +110,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 shippingDetails = paymentSheetConfiguration.shippingDetails,
                 hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs
             )
 
             if (sharedDataSpecsResult.failedToParseServerResponse) {
@@ -241,8 +253,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
+        externalPaymentMethods: List<String>
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode)
+        return elementsSessionRepository.get(initializationMode, externalPaymentMethods = externalPaymentMethods)
     }
 
     private suspend fun loadLinkState(

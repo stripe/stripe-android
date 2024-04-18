@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -75,9 +76,11 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
+            Log.d("xkcd", "setting the external payment method creator for payment sheet")
             val paymentSheet = rememberPaymentSheet(
                 paymentResultCallback = viewModel::onPaymentSheetResult,
-                createIntentCallback = viewModel::createIntentCallback
+                createIntentCallback = viewModel::createIntentCallback,
+                externalPaymentMethodCreator = viewModel.externalPaymentMethodCreator
             )
             val flowController = rememberPaymentSheetFlowController(
                 paymentOptionCallback = viewModel::onPaymentOptionSelected,
