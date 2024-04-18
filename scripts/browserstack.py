@@ -127,7 +127,7 @@ def uploadEspressoApk(espressoApkFile):
         print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
-def testShards(isNightly):
+def get_all_test_class_names():
     testClassNames = [
         # Hard coded tests.
         "com.stripe.android.TestAuthorization",
@@ -135,7 +135,7 @@ def testShards(isNightly):
         "com.stripe.android.TestCustomers",
         "com.stripe.android.addresselement.AddressElementTest",
     ]
-
+    
     # Add LPM tests to testClassNames.
     lpmFileNames = os.listdir('paymentsheet-example/src/androidTest/java/com/stripe/android/lpm')
     for fileName in lpmFileNames:
@@ -144,6 +144,9 @@ def testShards(isNightly):
         className = fileName[:-3]
         testClassNames.append(f"com.stripe.android.lpm.{className}")
 
+    return testClassNames
+
+def testShards(isNightly, testClassNames):
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
     numberOfShards = 8.0 if isNightly else 10.0
     testClassesPerShard = math.ceil(len(testClassNames) / numberOfShards)
@@ -175,14 +178,15 @@ def testShards(isNightly):
     return shards
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
-def executeTests(appUrl, testUrl, isNightly):
+def executeTests(appUrl, testUrl, isNightly, testClasses):
     print("RUNNING the tests (appUrl: {app}, testUrl: {test})..."
         .format(app=appUrl, test=testUrl),
          end=''
     )
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
-    shards = testShards(isNightly)
+    shards = testShards(isNightly, testClasses)
+    running_all_tests = len(testClasses) == len(get_all_test_class_names())
     devices = []
     if isNightly:
         devices = [
@@ -207,7 +211,8 @@ def executeTests(appUrl, testUrl, isNightly):
          "shards": {
             "numberOfShards": len(shards),
             "mapping": shards,
-         }
+         },
+         "class": None if running_all_tests else testClasses
       }, auth=(user, authKey))
     jsonResponse = response.json()
 
@@ -226,15 +231,19 @@ def executeTests(appUrl, testUrl, isNightly):
         return None
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
+def get_build_status(buildId):
+       url="https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
+       return requests.get(url, auth=(user, authKey))
+
+
 def waitForBuildComplete(buildId):
        print("WAITING for build id: {buildId}...".format(buildId=buildId), end='')
-       url="https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
        responseStatus="running"
 
        while(responseStatus == "running"):
            time.sleep(10)
            print(".", end='')
-           response = requests.get(url, auth=(user, authKey))
+           response = get_build_status(buildId)
            responseStatus = response.json()["status"]
        print("DONE.\nRESULT is: " + responseStatus)
        if(responseStatus == "passed"):
@@ -254,15 +263,60 @@ def confirm(message):
         answer = input(message + " [Y/N]? ").lower()
     return answer == "y"
 
-def run_tests(appUrl, testUrl, is_nightly):
-   buildId = executeTests(appUrl, testUrl, is_nightly)
+def run_tests(appUrl, testUrl, isNightly, testClasses):
+   print("RUNNING " + str({len(testClasses)}) + " test cases")
+   buildId = executeTests(appUrl, testUrl, isNightly, testClasses)
    exitStatus = 1
    if(buildId != None):
        exitStatus = waitForBuildComplete(buildId)
    else:
        deleteTestSuite(testUrl.replace("bs://", ""))
-   return exitStatus
- 
+   return {"exitStatus": exitStatus, "buildId" : buildId}
+
+# https://www.browserstack.com/docs/app-automate/api-reference/espresso/sessions#get-session-details
+def get_failed_test_classes_for_session(buildId, sessionId):
+    failedTestClasses = []
+    url="https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId + "/sessions/" + sessionId
+    details = requests.get(url, auth=(user, authKey)).json()
+    sessionFailed = details["status"] == "failed"
+
+    if (not sessionFailed):
+        return []
+
+    for classData in details["testcases"]["data"]:
+        testCaseStatuses = [testCase["status"] for testCase in classData["testcases"]]
+        if ("failed" in testCaseStatuses):
+            failedTestClasses.append(classData["class"])
+    return failedTestClasses
+
+def class_names_to_fully_qualified_class_names(failedTestClassNames):
+    fullyQualifiedTestClassNames = get_all_test_class_names()
+    failedFullyQualifiedTestClassNames = []
+    for fullyQualifiedTestClassName in fullyQualifiedTestClassNames:
+        testClassName = fullyQualifiedTestClassName.split(".")[-1]
+        if (testClassName in failedTestClassNames):
+            failedFullyQualifiedTestClassNames.append(fullyQualifiedTestClassName)
+    return failedFullyQualifiedTestClassNames
+
+def get_session_ids_for_build(buildId):
+    sessionIds = []
+    buildStatus = get_build_status(buildId)
+    devices = buildStatus.json()["devices"]
+    for device in devices:
+        sessions_on_device = device["sessions"]
+        for session in sessions_on_device:
+            sessionIds.append(session["id"])
+    return sessionIds
+
+def get_failed_tests_for_build(buildId):
+    sessionIds = get_session_ids_for_build(buildId)
+    failedClasses = []
+    for sessionId in sessionIds:
+        failedClassesInSession = get_failed_test_classes_for_session(buildId, sessionId)
+        for failedClass in failedClassesInSession:
+            failedClasses.append(failedClass)
+    return class_names_to_fully_qualified_class_names(failedClasses)
+
 if __name__ == "__main__":
     # Parse arguments
     parser = argparse.ArgumentParser(description='Interact with browserstack.')
@@ -276,7 +330,8 @@ if __name__ == "__main__":
     parser.add_argument("-l", "--list", help="List apps and test apps", action="store_true")
 
     parser.add_argument("-d", "--delete", help="Delete a test suite id.  Pass in the test suite id (no bs://)")
-    parser.add_argument("-f", "--force", help="Force delete with no prompt", action="store_true")
+    parser.add_argument("-f", "--force", help="Force delete with no prompt", action="store_true") 
+    parser.add_argument("-n", "--num-retries", help="Retry failed tests")
 
     args = parser.parse_args()
     print("\n")
@@ -318,14 +373,22 @@ if __name__ == "__main__":
            print("-----------------")
            testUrl = uploadEspressoApk(args.espresso)
            print("-----------------")
-           exitStatus = run_tests(appUrl, testUrl, args.is_nightly)
-           if(exitStatus == 1):
-              print("Rerunning test suite")
-              os.environ["BROWSERSTACK_RERUN"]="true"
-              exitStatus = run_tests(appUrl, testUrl, args.is_nightly)
-              del os.environ["BROWSERSTACK_RERUN"]
-           else:
-              print("Passed on the first run!")
+           numRetries = int(args.num_retries) if args.num_retries is not None else 0
+
+           exitStatus = 1
+           testClassesToRun = get_all_test_class_names()
+           while (numRetries >= 0):
+              testResults = run_tests(appUrl, testUrl, args.is_nightly, testClassesToRun)
+              print("-----------------")
+              exitStatus = testResults["exitStatus"]
+              if (exitStatus == 0):
+                  break 
+              else:
+                  numRetries -= 1
+                  testClassesToRun = get_failed_tests_for_build(testResults["buildId"])
+                  os.environ["BROWSERSTACK_RERUN"]="true"
+
+           del os.environ["BROWSERSTACK_RERUN"]
            sys.exit(exitStatus)
     else:
        parser.print_help()
