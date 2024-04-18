@@ -494,7 +494,7 @@ internal abstract class BaseSheetViewModel(
     fun removePaymentMethod(paymentMethod: PaymentMethod) {
         val paymentMethodId = paymentMethod.id ?: return
 
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             removeDeletedPaymentMethodFromState(paymentMethodId)
             removePaymentMethodInternal(paymentMethodId)
         }
@@ -597,7 +597,7 @@ internal abstract class BaseSheetViewModel(
         val result = removePaymentMethodInternal(paymentMethodId)
 
         if (result.isSuccess) {
-            viewModelScope.launch {
+            viewModelScope.launch(workContext) {
                 onUserBack()
                 delay(PaymentMethodRemovalDelayMillis)
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
@@ -677,7 +677,7 @@ internal abstract class BaseSheetViewModel(
     abstract val shouldCompleteLinkFlowInline: Boolean
 
     private fun payWithLinkInline(userInput: UserInput?) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             linkHandler.payWithLinkInline(
                 userInput = userInput,
                 paymentSelection = selection.value,

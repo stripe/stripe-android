@@ -45,6 +45,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -70,7 +71,8 @@ internal class PaymentOptionsViewModelTest {
     private val customerRepository = mock<CustomerRepository>()
 
     @Before
-    fun before() {
+    @After
+    fun resetMainDispatcher() {
         Dispatchers.resetMain()
     }
 
@@ -180,6 +182,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(cards[1])
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
@@ -197,6 +200,7 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(selection)
 
         viewModel.removePaymentMethod(selection.paymentMethod)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.selection.value).isNull()
     }
@@ -211,6 +215,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(paymentMethod)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value).isEmpty()
         assertThat(viewModel.primaryButtonUiState.value).isNull()
@@ -462,6 +467,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.paymentOptionResult.test {
             // Simulate user removing the selected payment method
             viewModel.removePaymentMethod(selection.paymentMethod)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             viewModel.onUserCancel()
 

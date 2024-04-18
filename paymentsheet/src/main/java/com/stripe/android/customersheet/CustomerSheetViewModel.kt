@@ -158,7 +158,7 @@ internal class CustomerSheetViewModel(
         configuration.appearance.parseAppearance()
 
         if (viewState.value is CustomerSheetViewState.Loading) {
-            viewModelScope.launch {
+            viewModelScope.launch(workContext) {
                 loadCustomerSheetState()
             }
         }
@@ -465,7 +465,7 @@ internal class CustomerSheetViewModel(
     }
 
     private fun onItemRemoved(paymentMethod: PaymentMethod) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             val result = removePaymentMethod(paymentMethod)
 
             result.fold(
@@ -615,7 +615,7 @@ internal class CustomerSheetViewModel(
     }
 
     private fun removePaymentMethodFromState(paymentMethod: PaymentMethod) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             delay(PaymentMethodRemovalDelayMillis)
 
             val newSavedPaymentMethods = viewState.value.savedPaymentMethods - paymentMethod
@@ -725,7 +725,7 @@ internal class CustomerSheetViewModel(
     private fun createAndAttach(
         paymentMethodCreateParams: PaymentMethodCreateParams,
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             createPaymentMethod(paymentMethodCreateParams)
                 .onSuccess { paymentMethod ->
                     if (paymentMethod.isUnverifiedUSBankAccount()) {
@@ -908,7 +908,7 @@ internal class CustomerSheetViewModel(
     }
 
     private fun attachPaymentMethodToCustomer(paymentMethod: PaymentMethod) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             if (awaitCustomerAdapter().canCreateSetupIntents) {
                 attachWithSetupIntent(paymentMethod = paymentMethod)
             } else {
@@ -1098,7 +1098,7 @@ internal class CustomerSheetViewModel(
     }
 
     private fun selectSavedPaymentMethod(savedPaymentSelection: PaymentSelection.Saved?) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             awaitCustomerAdapter().setSelectedPaymentOption(
                 savedPaymentSelection?.toPaymentOption()
             ).onSuccess {
@@ -1118,7 +1118,7 @@ internal class CustomerSheetViewModel(
     }
 
     private fun selectGooglePay() {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             awaitCustomerAdapter().setSelectedPaymentOption(CustomerAdapter.PaymentOption.GooglePay)
                 .onSuccess {
                     confirmPaymentSelection(

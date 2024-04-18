@@ -273,7 +273,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isDeferred = isDeferred,
         )
 
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             loadPaymentSheetState()
         }
     }
@@ -590,7 +590,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
 
             val nextStep = intentConfirmationInterceptor.intercept(
@@ -622,7 +622,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
             processPayment(stripeIntent, paymentResult)
         }

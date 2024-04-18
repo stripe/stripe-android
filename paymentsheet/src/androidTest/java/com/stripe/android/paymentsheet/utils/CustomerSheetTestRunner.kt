@@ -12,7 +12,6 @@ import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.paymentsheet.MainActivity
-import java.lang.IllegalStateException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
