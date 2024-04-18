@@ -264,7 +264,7 @@ def confirm(message):
     return answer == "y"
 
 def run_tests(appUrl, testUrl, isNightly, testClasses):
-   print("RUNNING " + str({len(testClasses)}) + " test cases")
+   print("RUNNING " + str(len(testClasses)) + " test cases")
    buildId = executeTests(appUrl, testUrl, isNightly, testClasses)
    exitStatus = 1
    if(buildId != None):
