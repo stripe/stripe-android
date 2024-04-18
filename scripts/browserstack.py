@@ -127,7 +127,7 @@ def uploadEspressoApk(espressoApkFile):
         print("DONE\nRESULT: " + str(response.status_code) + "\n" + str(response.json()))
         return None
 
-def get_all_test_class_names():
+def getAllTestClassNames():
     testClassNames = [
         # Hard coded tests.
         "com.stripe.android.TestAuthorization",
@@ -186,7 +186,7 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
     # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
     shards = testShards(isNightly, testClasses)
-    runningAllTests = len(testClasses) == len(get_all_test_class_names())
+    runningAllTests = len(testClasses) == len(getAllTestClassNames())
     devices = []
     if isNightly:
         devices = [
@@ -263,7 +263,7 @@ def confirm(message):
         answer = input(message + " [Y/N]? ").lower()
     return answer == "y"
 
-def run_tests(appUrl, testUrl, isNightly, testClasses):
+def runTests(appUrl, testUrl, isNightly, testClasses):
    print("RUNNING " + str(len(testClasses)) + " test cases")
    buildId = executeTests(appUrl, testUrl, isNightly, testClasses)
    exitStatus = 1
@@ -274,7 +274,7 @@ def run_tests(appUrl, testUrl, isNightly, testClasses):
    return {"exitStatus": exitStatus, "buildId" : buildId}
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/sessions#get-session-details
-def get_failed_test_classes_for_session(buildId, sessionId):
+def getFailedTestClassesForSession(buildId, sessionId):
     failedTestClasses = []
     url="https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId + "/sessions/" + sessionId
     details = requests.get(url, auth=(user, authKey)).json()
@@ -289,8 +289,8 @@ def get_failed_test_classes_for_session(buildId, sessionId):
             failedTestClasses.append(classData["class"])
     return failedTestClasses
 
-def class_names_to_fully_qualified_class_names(failedTestClassNames):
-    fullyQualifiedTestClassNames = get_all_test_class_names()
+def classNamesToFullyQualifiedClassNames(failedTestClassNames):
+    fullyQualifiedTestClassNames = getAllTestClassNames()
     failedFullyQualifiedTestClassNames = []
     for fullyQualifiedTestClassName in fullyQualifiedTestClassNames:
         testClassName = fullyQualifiedTestClassName.split(".")[-1]
@@ -298,7 +298,7 @@ def class_names_to_fully_qualified_class_names(failedTestClassNames):
             failedFullyQualifiedTestClassNames.append(fullyQualifiedTestClassName)
     return failedFullyQualifiedTestClassNames
 
-def get_session_ids_for_build(buildId):
+def getSessionIdsForBuild(buildId):
     sessionIds = []
     buildStatus = get_build_status(buildId)
     devices = buildStatus.json()["devices"]
@@ -308,14 +308,14 @@ def get_session_ids_for_build(buildId):
             sessionIds.append(session["id"])
     return sessionIds
 
-def get_failed_tests_for_build(buildId):
-    sessionIds = get_session_ids_for_build(buildId)
+def getFailedTestsForBuild(buildId):
+    sessionIds = getSessionIdsForBuild(buildId)
     failedClasses = []
     for sessionId in sessionIds:
-        failedClassesInSession = get_failed_test_classes_for_session(buildId, sessionId)
+        failedClassesInSession = getFailedTestClassesForSession(buildId, sessionId)
         for failedClass in failedClassesInSession:
             failedClasses.append(failedClass)
-    return class_names_to_fully_qualified_class_names(failedClasses)
+    return classNamesToFullyQualifiedClassNames(failedClasses)
 
 if __name__ == "__main__":
     # Parse arguments
@@ -376,16 +376,16 @@ if __name__ == "__main__":
            numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
            exitStatus = 1
-           testClassesToRun = get_all_test_class_names()
+           testClassesToRun = getAllTestClassNames()
            while (numRetries >= 0):
-              testResults = run_tests(appUrl, testUrl, args.is_nightly, testClassesToRun)
+              testResults = runTests(appUrl, testUrl, args.is_nightly, testClassesToRun)
               print("-----------------")
               exitStatus = testResults["exitStatus"]
               if (exitStatus == 0):
                   break 
               else:
                   numRetries -= 1
-                  testClassesToRun = get_failed_tests_for_build(testResults["buildId"])
+                  testClassesToRun = getFailedTestsForBuild(testResults["buildId"])
                   os.environ["BROWSERSTACK_RERUN"]="true"
 
            del os.environ["BROWSERSTACK_RERUN"]
