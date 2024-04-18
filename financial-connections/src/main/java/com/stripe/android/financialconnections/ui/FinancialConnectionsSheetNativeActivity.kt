@@ -14,14 +14,12 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.Lifecycle
@@ -72,6 +70,8 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         factoryProducer = { FinancialConnectionsSheetNativeViewModel.Factory }
     )
 
+    private var visibilityObserver: ActivityVisibilityObserver? = null
+
     @Inject
     lateinit var logger: Logger
 
@@ -83,21 +83,39 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         if (getArgs(intent) == null) {
             finish()
-        } else {
-            viewModel.activityRetainedComponent.inject(this)
-            onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
-            observeViewEffects()
-            setContent {
-                FinancialConnectionsTheme {
-                    val state by viewModel.stateFlow.collectAsState()
-                    NavHost(
-                        initialPane = state.initialPane,
-                        testMode = state.testMode,
-                    )
-                }
+            return
+        }
+
+        viewModel.activityRetainedComponent.inject(this)
+
+        observeBackPress()
+        observeBackgroundEvents()
+        observeViewEffects()
+
+        setContent {
+            FinancialConnectionsTheme {
+                val state by viewModel.stateFlow.collectAsState()
+                NavHost(
+                    initialPane = state.initialPane,
+                    testMode = state.testMode,
+                )
             }
+        }
+    }
+
+    private fun observeBackPress() {
+        onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
+    }
+
+    private fun observeBackgroundEvents() {
+        visibilityObserver = ActivityVisibilityObserver(
+            onBackgrounded = viewModel::onBackgrounded,
+            onForegrounded = viewModel::onForegrounded,
+        ).also {
+            lifecycle.addObserver(it)
         }
     }
 
@@ -145,7 +163,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         val navController = rememberNavController(bottomSheetNavigator)
         val keyboardController = rememberKeyboardController()
 
-        PaneBackgroundEffects(navController)
         NavigationEffects(viewModel.navigationFlow, navController, keyboardController)
 
         CompositionLocalProvider(
@@ -201,26 +218,6 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         }
     }
 
-    @Composable
-    private fun PaneBackgroundEffects(
-        navController: NavHostController
-    ) {
-        val lifecycleOwner = LocalLifecycleOwner.current
-        DisposableEffect(lifecycleOwner) {
-            val lifecycle = lifecycleOwner.lifecycle
-            val observer = ActivityVisibilityObserver(
-                onBackgrounded = {
-                    viewModel.onBackgrounded(navController.currentDestination, true)
-                },
-                onForegrounded = {
-                    viewModel.onBackgrounded(navController.currentDestination, false)
-                }
-            )
-            lifecycle.addObserver(observer)
-            onDispose { lifecycle.removeObserver(observer) }
-        }
-    }
-
     /**
      * Handles new intents in the form of the redirect from the custom tab hosted auth flow
      */
@@ -232,6 +229,13 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         viewModel.onResume()
+    }
+
+    override fun onDestroy() {
+        visibilityObserver?.let {
+            lifecycle.removeObserver(it)
+        }
+        super.onDestroy()
     }
 
     @Composable
