@@ -259,10 +259,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         set(value) = savedStateHandle.set(SHOULD_RESET_KEY, value)
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
-        collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            activityResultRegistryOwner = activityResultRegistryOwner,
-            callback = ::handleCollectBankAccountResult,
-        )
+        collectBankAccountLauncher = if (args.instantDebits) {
+            CollectBankAccountLauncher.createForInstantDebits(
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                callback = ::handleCollectBankAccountResult,
+            )
+        } else {
+            CollectBankAccountLauncher.create(
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                callback = ::handleCollectBankAccountResult,
+            )
+        }
     }
 
     @VisibleForTesting
@@ -397,26 +404,32 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun collectBankAccount(clientSecret: String?) {
         if (hasLaunched) return
         hasLaunched = true
+
         if (clientSecret != null) {
+            val configuration = if (args.instantDebits) {
+                CollectBankAccountConfiguration.InstantDebits(
+                    email = email.value,
+                )
+            } else {
+                CollectBankAccountConfiguration.USBankAccount(
+                    name = name.value,
+                    email = email.value,
+                )
+            }
+
             if (args.isPaymentFlow) {
                 collectBankAccountLauncher?.presentWithPaymentIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                     clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
+                    configuration = configuration,
                 )
             } else {
                 collectBankAccountLauncher?.presentWithSetupIntent(
                     publishableKey = lazyPaymentConfig.get().publishableKey,
                     stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                     clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
+                    configuration = configuration,
                 )
             }
         } else {
