@@ -384,13 +384,8 @@ class USBankAccountFormViewModelTest {
             USBankAccountFormScreenState.MandateCollection(
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
-                paymentAccount = FinancialConnectionsAccount(
-                    created = 0,
-                    id = "fc_id",
-                    institutionName = "Stripe Bank",
-                    livemode = false,
-                    supportedPaymentMethodTypes = emptyList(),
-                ),
+                bankName = "Stripe Bank",
+                last4 = null,
                 primaryButtonText = "Continue",
                 mandateText = null,
             ),

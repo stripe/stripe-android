@@ -18,7 +18,8 @@ import com.stripe.android.model.SetupIntent
 sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams> {
 
     abstract fun create(
-        paymentMethod: PaymentMethod,
+        paymentMethodId: String,
+        paymentMethodType: PaymentMethod.Type?,
         requiresSaveOnConfirmation: Boolean = false,
     ): T
 
@@ -26,6 +27,17 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         createParams: PaymentMethodCreateParams,
         optionsParams: PaymentMethodOptionsParams? = null,
     ): T
+
+    fun create(
+        paymentMethod: PaymentMethod,
+        requiresSaveOnConfirmation: Boolean = false,
+    ): T {
+        return create(
+            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodType = paymentMethod.type,
+            requiresSaveOnConfirmation = requiresSaveOnConfirmation,
+        )
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
@@ -52,11 +64,15 @@ internal class ConfirmPaymentIntentParamsFactory(
     private val shipping: ConfirmPaymentIntentParams.Shipping?
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
 
-    override fun create(paymentMethod: PaymentMethod, requiresSaveOnConfirmation: Boolean): ConfirmPaymentIntentParams {
+    override fun create(
+        paymentMethodId: String,
+        paymentMethodType: PaymentMethod.Type?,
+        requiresSaveOnConfirmation: Boolean,
+    ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
-            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            paymentMethodOptions = when (paymentMethod.type) {
+            paymentMethodOptions = when (paymentMethodType) {
                 PaymentMethod.Type.Card -> {
                     PaymentMethodOptionsParams.Card(
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
@@ -74,7 +90,7 @@ internal class ConfirmPaymentIntentParamsFactory(
                 }
             },
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                .takeIf { paymentMethod.type?.requiresMandate == true },
+                .takeIf { paymentMethodType?.requiresMandate == true },
             shipping = shipping
         )
     }
@@ -95,11 +111,16 @@ internal class ConfirmPaymentIntentParamsFactory(
 internal class ConfirmSetupIntentParamsFactory(
     private val clientSecret: String,
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
-    override fun create(paymentMethod: PaymentMethod, requiresSaveOnConfirmation: Boolean): ConfirmSetupIntentParams {
+
+    override fun create(
+        paymentMethodId: String,
+        paymentMethodType: PaymentMethod.Type?,
+        requiresSaveOnConfirmation: Boolean,
+    ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
-            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            mandateData = paymentMethod.type?.requiresMandate?.let {
+            mandateData = paymentMethodType?.requiresMandate?.let {
                 MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
             }
         )
