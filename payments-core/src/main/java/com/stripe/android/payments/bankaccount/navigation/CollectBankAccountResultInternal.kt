@@ -52,7 +52,7 @@ data class CollectBankAccountResponseInternal(
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class InstantDebitsData(
         val paymentMethodId: String,
-        val last4: String,
-        val bankName: String
+        val last4: String?,
+        val bankName: String?
     ) : StripeModel
 }

@@ -5,7 +5,10 @@ import com.stripe.android.BuildConfig
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForDataLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetForInstantDebitsLauncher
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetLauncher
+import kotlin.reflect.KFunction1
 
 /**
  * Proxy to access financial connections code safely in payments.
@@ -22,10 +25,10 @@ internal interface FinancialConnectionsPaymentsProxy {
 
         fun createForInstantDebits(
             activity: AppCompatActivity,
-            onComplete: (FinancialConnectionsSheetResult) -> Unit,
+            onComplete: KFunction1<FinancialConnectionsSheetInstantDebitsResult, Unit>,
             provider: () -> FinancialConnectionsPaymentsProxy = {
                 FinancialConnectionsLauncherProxy(
-                    FinancialConnectionsSheetForDataLauncher(
+                    FinancialConnectionsSheetForInstantDebitsLauncher(
                         activity,
                         onComplete
                     )
@@ -34,7 +37,7 @@ internal interface FinancialConnectionsPaymentsProxy {
             isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable = DefaultIsFinancialConnectionsAvailable
         ): FinancialConnectionsPaymentsProxy {
             return if (isFinancialConnectionsAvailable()) {
-                TODO("Instant Debits not implemented yet.")
+                provider()
             } else {
                 UnsupportedFinancialConnectionsPaymentsProxy()
             }
