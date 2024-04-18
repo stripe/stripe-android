@@ -16,11 +16,12 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsEve
 import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
+import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
@@ -61,12 +62,13 @@ class FinancialConnectionsSheetViewModelTest {
     private val fetchFinancialConnectionsSession = mock<FetchFinancialConnectionsSession>()
     private val browserManager = mock<BrowserManager>()
     private val analyticsTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val nativeRouter = mock<NativeAuthFlowRouter>()
     private val fetchFinancialConnectionsSessionForToken =
         mock<FetchFinancialConnectionsSessionForToken>()
     private val synchronizeFinancialConnectionsSession =
         mock<SynchronizeFinancialConnectionsSession>()
     private val defaultInitialState = FinancialConnectionsSheetState(
-        args = FinancialConnectionsSheetActivityArgs.ForData(configuration),
+        args = ForData(configuration),
         savedState = null
     )
 
@@ -127,47 +129,63 @@ class FinancialConnectionsSheetViewModelTest {
     }
 
     @Test
-    fun `handleOnNewIntent - wrong intent should fire analytics event and set fail result`() {
+    fun `init - when instant debits flow, hosted auth url with payment_method create query param is launched`() =
         runTest {
             // Given
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
-            val viewModel = createViewModel(defaultInitialState)
+            whenever(nativeRouter.nativeAuthFlowEnabled(any(), any())).thenReturn(false)
 
             // When
-            viewModel.handleOnNewIntent(Intent("error_url"))
-
-            // Then
-            verify(eventReporter)
-                .onResult(eq(configuration), any<Failed>())
-        }
-    }
-
-    @Test
-    fun `handleOnNewIntent - on Link flows with valid account, id param is extracted`() {
-        runTest {
-            // Given
-            val linkedAccountId = "1234"
-            whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
-            whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
             val viewModel = createViewModel(
-                defaultInitialState.copy(initialArgs = ForLink(configuration))
-            )
-
-            // When
-            viewModel.handleOnNewIntent(
-                successIntent(
-                    "stripe-auth://link-accounts/success?linked_account=$linkedAccountId"
+                defaultInitialState.copy(
+                    initialArgs = ForInstantDebits(configuration)
                 )
             )
 
             // Then
             withState(viewModel) {
-                assertThat(it.webAuthFlowStatus).isEqualTo(AuthFlowStatus.NONE)
-                val viewEffect = it.viewEffect as FinishWithResult
-                assertThat(viewEffect.result).isEqualTo(Completed(linkedAccountId = linkedAccountId))
+                val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+                assertThat(viewEffect.url).isEqualTo(
+                    "${syncResponse.manifest.hostedAuthUrl}&return_payment_method=true"
+                )
             }
         }
+
+    @Test
+    fun `init - when data flow and non-native, hosted auth url without query params is launched`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
+        whenever(nativeRouter.nativeAuthFlowEnabled(any(), any())).thenReturn(false)
+
+        // When
+        val viewModel = createViewModel(
+            defaultInitialState.copy(
+                initialArgs = ForData(configuration)
+            )
+        )
+
+        // Then
+        withState(viewModel) {
+            val viewEffect = it.viewEffect as OpenAuthFlowWithUrl
+            assertThat(viewEffect.url).isEqualTo("${syncResponse.manifest.hostedAuthUrl}")
+        }
+    }
+
+    @Test
+    fun `handleOnNewIntent - wrong intent should fire analytics event and set fail result`() = runTest {
+        // Given
+        whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
+        whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
+        val viewModel = createViewModel(defaultInitialState)
+
+        // When
+        viewModel.handleOnNewIntent(Intent("error_url"))
+
+        // Then
+        verify(eventReporter)
+            .onResult(eq(configuration), any<Failed>())
     }
 
     @Test
@@ -177,7 +195,7 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(synchronizeFinancialConnectionsSession()).thenReturn(syncResponse)
             whenever(browserManager.canOpenHttpsUrl()).thenReturn(true)
             val viewModel = createViewModel(
-                defaultInitialState.copy(initialArgs = ForLink(configuration))
+                defaultInitialState.copy(initialArgs = ForInstantDebits(configuration))
             )
 
             // When
@@ -512,7 +530,7 @@ class FinancialConnectionsSheetViewModelTest {
             fetchFinancialConnectionsSession = fetchFinancialConnectionsSession,
             fetchFinancialConnectionsSessionForToken = fetchFinancialConnectionsSessionForToken,
             eventReporter = eventReporter,
-            nativeRouter = mock(),
+            nativeRouter = nativeRouter,
             analyticsTracker = analyticsTracker,
             browserManager = browserManager,
             savedStateHandle = SavedStateHandle(),

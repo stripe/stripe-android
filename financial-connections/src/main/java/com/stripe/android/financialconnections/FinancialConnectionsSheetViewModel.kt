@@ -38,7 +38,7 @@ import com.stripe.android.financialconnections.exception.CustomManualEntryRequir
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
@@ -125,9 +125,12 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             logNoBrowserAvailableAndFinish()
             return
         }
-        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(sync.manifest)
-        viewModelScope.launch { nativeRouter.logExposure(sync.manifest) }
-        if (sync.manifest.hostedAuthUrl == null) {
+        val manifest = sync.manifest
+        val isInstantDebits = stateFlow.value.isInstantDebits
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest, isInstantDebits)
+        viewModelScope.launch { nativeRouter.logExposure(manifest, isInstantDebits) }
+        val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
+        if (hostedAuthUrl == null) {
             finishWithResult(
                 state = stateFlow.value,
                 result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
@@ -137,7 +140,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             if (nativeAuthFlowEnabled) {
                 setState {
                     copy(
-                        manifest = sync.manifest,
+                        manifest = manifest,
                         webAuthFlowStatus = AuthFlowStatus.NONE,
                         viewEffect = OpenNativeAuthFlow(initialArgs.configuration, sync)
                     )
@@ -146,13 +149,25 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 FinancialConnections.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
                 setState {
                     copy(
-                        manifest = sync.manifest,
+                        manifest = manifest,
                         webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY,
-                        viewEffect = OpenAuthFlowWithUrl(sync.manifest.hostedAuthUrl)
+                        viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
                     )
                 }
             }
         }
+    }
+
+    private fun buildHostedAuthUrl(
+        hostedAuthUrl: String?,
+        isInstantDebits: Boolean
+    ): String? = when (isInstantDebits) {
+        /**
+         * For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
+         * takes place on the web side of the flow and the payment method ID is returned to the app.
+         */
+        true -> hostedAuthUrl?.let { "$it&return_payment_method=true" }
+        false -> hostedAuthUrl
     }
 
     private fun logNoBrowserAvailableAndFinish() {
@@ -417,9 +432,14 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             when (state.initialArgs) {
                 is ForData -> fetchFinancialConnectionsSession(state)
                 is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-                is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+                is ForInstantDebits -> onSuccessFromInstantDebits(receivedUrl)
             }
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    private fun onSuccessFromInstantDebits(url: Uri) {
+        TODO("Instant Debits flow not yet implemented")
     }
 
     private fun onFlowCancelled(state: FinancialConnectionsSheetState) {
@@ -429,24 +449,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
-    }
-
-    /**
-     * Link flows do not need to fetch the FC session, since the linked account id is
-     * appended to the web success url.
-     */
-    private fun onSuccessFromLinkFlow(url: Uri) {
-        kotlin.runCatching {
-            requireNotNull(url.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
-        }.onSuccess { linkedAccountId ->
-            finishWithResult(
-                state = stateFlow.value,
-                result = Completed(linkedAccountId = linkedAccountId)
-            )
-        }.onFailure { error ->
-            logger.error("Could not retrieve linked account from success url", error)
-            finishWithResult(stateFlow.value, Failed(error))
-        }
     }
 
     private fun String.toUriOrNull(): Uri? {
@@ -501,7 +503,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
 
         internal const val MAX_ACCOUNTS = 100
-        internal const val QUERY_PARAM_LINKED_ACCOUNT = "linked_account"
     }
 
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
