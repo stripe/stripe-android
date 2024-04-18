@@ -16,6 +16,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -37,6 +38,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -70,7 +72,7 @@ class USBankAccountFormViewModelTest {
         instantDebits = false,
     )
 
-    private val collectBankAccountLauncher = mock<CollectBankAccountLauncher>()
+    private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
     private val savedStateHandle = SavedStateHandle()
 
     @BeforeTest
@@ -123,7 +125,7 @@ class USBankAccountFormViewModelTest {
     fun `collect bank account is callable with initial screen state`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+            viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             val currentScreenState =
                 viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
 
@@ -137,7 +139,7 @@ class USBankAccountFormViewModelTest {
                 currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
             )
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
@@ -226,7 +228,7 @@ class USBankAccountFormViewModelTest {
     fun `when reset, primary button launches bank account collection`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+            viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.reset()
 
             val currentScreenState =
@@ -236,13 +238,13 @@ class USBankAccountFormViewModelTest {
                 currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
             )
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
     fun `when reset, save for future usage should be false`() = runTest {
         val viewModel = createViewModel()
-        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         viewModel.saveForFutureUseElement.controller.onValueChange(false)
 
@@ -766,7 +768,7 @@ class USBankAccountFormViewModelTest {
             )
         )
 
-        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         val currentScreenState =
             viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
@@ -781,7 +783,7 @@ class USBankAccountFormViewModelTest {
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
         )
 
-        verify(collectBankAccountLauncher).presentWithDeferredPayment(
+        verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
             publishableKey = any(),
             stripeAccountId = any(),
             configuration = any(),
@@ -802,7 +804,7 @@ class USBankAccountFormViewModelTest {
             )
         )
 
-        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         val currentScreenState =
             viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
@@ -817,7 +819,7 @@ class USBankAccountFormViewModelTest {
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
         )
 
-        verify(collectBankAccountLauncher).presentWithDeferredSetup(
+        verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
             publishableKey = any(),
             stripeAccountId = any(),
             configuration = any(),
@@ -998,6 +1000,56 @@ class USBankAccountFormViewModelTest {
                 saveForFutureUse = false
             )
         ).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
+    }
+
+    @Test
+    fun `Uses CollectBankAccountLauncher for ACH when not in Instant Debits flow`() {
+        val viewModel = createViewModel().apply {
+            this.collectBankAccountLauncher = mockCollectBankAccountLauncher
+        }
+
+        viewModel.nameController.onValueChange("Some Name")
+        viewModel.emailController.onValueChange("email@email.com")
+
+        val currentState = viewModel.currentScreenState.value
+        viewModel.handlePrimaryButtonClick(currentState)
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.USBankAccount(
+                    name = "Some Name",
+                    email = "email@email.com",
+                )
+            ),
+        )
+    }
+
+    @Test
+    fun `Uses CollectBankAccountLauncher for Instant Debits when in Instant Debits flow`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(instantDebits = true),
+        ).apply {
+            this.collectBankAccountLauncher = mockCollectBankAccountLauncher
+        }
+
+        viewModel.emailController.onValueChange("email@email.com")
+
+        val currentState = viewModel.currentScreenState.value
+        viewModel.handlePrimaryButtonClick(currentState)
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.InstantDebits(
+                    email = "email@email.com",
+                )
+            ),
+        )
     }
 
     private fun createViewModel(
