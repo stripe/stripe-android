@@ -44,6 +44,7 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.launcher.InstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -437,9 +438,28 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
     private fun onSuccessFromInstantDebits(url: Uri) {
-        TODO("Instant Debits flow not yet implemented")
+        runCatching { requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID)) }
+            .onSuccess { paymentMethodId ->
+                withState {
+                    finishWithResult(
+                        state = it,
+                        result = Completed(
+                            instantDebits = InstantDebitsResult(
+                                paymentMethodId = paymentMethodId,
+                                last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
+                                bankName = url.getQueryParameter(QUERY_BANK_NAME)
+                            ),
+                            financialConnectionsSession = null,
+                            token = null
+                        )
+                    )
+                }
+            }
+            .onFailure { error ->
+                logger.error("Could not retrieve payment method parameters from success url", error)
+                finishWithResult(stateFlow.value, Failed(error))
+            }
     }
 
     private fun onFlowCancelled(state: FinancialConnectionsSheetState) {
@@ -503,6 +523,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
 
         internal const val MAX_ACCOUNTS = 100
+        internal const val QUERY_PARAM_PAYMENT_METHOD_ID = "payment_method_id"
+        internal const val QUERY_PARAM_LAST4 = "last4"
+        internal const val QUERY_BANK_NAME = "bank_name"
     }
 
     override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {

@@ -39,10 +39,13 @@ class FinancialConnectionsSheetForInstantDebitsContract :
         FinancialConnectionsSheetInstantDebitsResult = when (this) {
         is FinancialConnectionsSheetActivityResult.Canceled -> Canceled
         is FinancialConnectionsSheetActivityResult.Failed -> Failed(error)
-        is FinancialConnectionsSheetActivityResult.Completed -> when (paymentMethodId) {
-            null -> Failed(IllegalArgumentException("linkedAccountId not set for this session"))
-
-            else -> Completed(paymentMethodId)
+        is FinancialConnectionsSheetActivityResult.Completed -> when (instantDebits) {
+            null -> Failed(IllegalArgumentException("Instant debits result is missing"))
+            else -> Completed(
+                paymentMethodId = instantDebits.paymentMethodId,
+                last4 = instantDebits.last4,
+                bankName = instantDebits.bankName
+            )
         }
     }
 }

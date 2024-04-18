@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.core.Logger
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
@@ -16,6 +17,7 @@ import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnections
 import com.stripe.android.payments.bankaccount.domain.RetrieveStripeIntent
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal.InstantDebitsData
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal.USBankAccountData
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Cancelled
@@ -55,7 +57,6 @@ internal class CollectBankAccountViewModel @Inject constructor(
     }
 
     private suspend fun createFinancialConnectionsSession() {
-        // TODO if args.configuration == instant debits, then start instant debits flow
         when (args) {
             is CollectBankAccountContract.Args.ForDeferredPaymentIntent ->
                 createFinancialConnectionsSession.forDeferredPayments(
@@ -114,11 +115,9 @@ internal class CollectBankAccountViewModel @Inject constructor(
         hasLaunched = false
         viewModelScope.launch {
             when (result) {
-                is FinancialConnectionsSheetResult.Canceled ->
-                    finishWithResult(Cancelled)
+                is FinancialConnectionsSheetResult.Canceled -> finishWithResult(Cancelled)
 
-                is FinancialConnectionsSheetResult.Failed ->
-                    finishWithError(result.error)
+                is FinancialConnectionsSheetResult.Failed -> finishWithError(result.error)
 
                 is FinancialConnectionsSheetResult.Completed -> when {
                     args.attachToIntent -> attachSessionToIntent(result.financialConnectionsSession)
@@ -128,9 +127,29 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun onConnectionsForInstantDebitsResult(result: FinancialConnectionsSheetResult) {
-        TODO("Instant Debits not implemented yet.")
+    fun onConnectionsForInstantDebitsResult(result: FinancialConnectionsSheetInstantDebitsResult) {
+        hasLaunched = false
+        viewModelScope.launch {
+            when (result) {
+                is FinancialConnectionsSheetInstantDebitsResult.Canceled -> finishWithResult(Cancelled)
+
+                is FinancialConnectionsSheetInstantDebitsResult.Failed -> finishWithError(result.error)
+
+                is FinancialConnectionsSheetInstantDebitsResult.Completed -> finishWithResult(
+                    Completed(
+                        CollectBankAccountResponseInternal(
+                            intent = null,
+                            usBankAccountData = null,
+                            instantDebitsData = InstantDebitsData(
+                                result.paymentMethodId,
+                                result.last4,
+                                result.bankName
+                            ),
+                        )
+                    )
+                )
+            }
+        }
     }
 
     private suspend fun finishWithResult(result: CollectBankAccountResultInternal) {

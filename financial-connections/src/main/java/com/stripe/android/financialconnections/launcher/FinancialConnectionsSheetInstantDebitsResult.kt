@@ -11,12 +11,16 @@ import kotlinx.parcelize.Parcelize
 sealed class FinancialConnectionsSheetInstantDebitsResult : Parcelable {
     /**
      * The customer completed the connections session.
-     * @param paymentMethodId
+     * @param paymentMethodId The payment method id, that can be used to confirm the payment.
+     * @param last4 The last 4 digits of the bank account.
+     * @param bankName The name of the bank.
      */
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     data class Completed(
-        val paymentMethodId: String
+        val paymentMethodId: String,
+        val last4: String?,
+        val bankName: String?
     ) : FinancialConnectionsSheetInstantDebitsResult()
 
     /**

@@ -19,8 +19,8 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
      */
     @Parcelize
     data class Completed(
-        // Instant Debits: just return payment method id
-        val paymentMethodId: String? = null,
+        // Instant Debits sessions: return payment method id and bank details.
+        val instantDebits: InstantDebitsResult? = null,
         // non-Link sessions: return full LinkedAccountSession
         val financialConnectionsSession: FinancialConnectionsSession? = null,
         // Bank account Token sessions: session + token.
@@ -51,3 +51,10 @@ internal sealed class FinancialConnectionsSheetActivityResult : Parcelable {
             "com.stripe.android.financialconnections.ConnectionsSheetContract.extra_result"
     }
 }
+
+@Parcelize
+internal data class InstantDebitsResult(
+    val paymentMethodId: String,
+    val last4: String?,
+    val bankName: String?
+) : Parcelable
