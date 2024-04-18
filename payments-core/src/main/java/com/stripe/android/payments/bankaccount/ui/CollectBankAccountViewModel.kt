@@ -110,29 +110,34 @@ internal class CollectBankAccountViewModel @Inject constructor(
             .onFailure { finishWithError(it) }
     }
 
-    fun onConnectionsResult(result: FinancialConnectionsSheetResult) {
+    fun onConnectionsForACHResult(result: FinancialConnectionsSheetResult) {
         hasLaunched = false
         viewModelScope.launch {
             when (result) {
                 is FinancialConnectionsSheetResult.Canceled ->
                     finishWithResult(Cancelled)
+
                 is FinancialConnectionsSheetResult.Failed ->
                     finishWithError(result.error)
-                is FinancialConnectionsSheetResult.Completed ->
-                    if (args.attachToIntent) {
-                        attachFinancialConnectionsSessionToIntent(result.financialConnectionsSession)
-                    } else {
-                        finishWithUsBankAccountResult(result.financialConnectionsSession)
-                    }
+
+                is FinancialConnectionsSheetResult.Completed -> when {
+                    args.attachToIntent -> attachSessionToIntent(result.financialConnectionsSession)
+                    else -> finishWithSession(result.financialConnectionsSession)
+                }
             }
         }
+    }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onConnectionsForInstantDebitsResult(result: FinancialConnectionsSheetResult) {
+        TODO("Instant Debits not implemented yet.")
     }
 
     private suspend fun finishWithResult(result: CollectBankAccountResultInternal) {
         _viewEffect.emit(CollectBankAccountViewEffect.FinishWithResult(result))
     }
 
-    private fun finishWithUsBankAccountResult(
+    private fun finishWithSession(
         financialConnectionsSession: FinancialConnectionsSession
     ) {
         viewModelScope.launch {
@@ -161,12 +166,13 @@ internal class CollectBankAccountViewModel @Inject constructor(
         }
     }
 
-    private fun attachFinancialConnectionsSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
+    private fun attachSessionToIntent(financialConnectionsSession: FinancialConnectionsSession) {
         viewModelScope.launch {
             when (args) {
                 is CollectBankAccountContract.Args.ForDeferredPaymentIntent,
                 is CollectBankAccountContract.Args.ForDeferredSetupIntent ->
                     error("Attach requires client secret")
+
                 is CollectBankAccountContract.Args.ForPaymentIntent ->
                     attachFinancialConnectionsSession.forPaymentIntent(
                         publishableKey = args.publishableKey,
@@ -174,6 +180,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                         clientSecret = args.clientSecret,
                         linkedAccountSessionId = financialConnectionsSession.id
                     )
+
                 is CollectBankAccountContract.Args.ForSetupIntent ->
                     attachFinancialConnectionsSession.forSetupIntent(
                         publishableKey = args.publishableKey,
@@ -192,7 +199,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
                     )
                 }
                 .onSuccess { result: Completed ->
-                    logger.debug("Bank account session attached to  intent!!")
+                    logger.debug("Bank account session attached to intent!!")
                     finishWithResult(result)
                 }
                 .onFailure { finishWithError(it) }

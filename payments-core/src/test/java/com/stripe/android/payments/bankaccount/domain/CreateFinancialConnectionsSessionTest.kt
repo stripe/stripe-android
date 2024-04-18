@@ -53,7 +53,7 @@ class CreateFinancialConnectionsSessionTest {
             // Then
             verify(stripeRepository).createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = "pi_1234",
-                params = CreateFinancialConnectionsSessionParams(
+                params = CreateFinancialConnectionsSessionParams.USBankAccount(
                     clientSecret,
                     customerName,
                     null
@@ -89,7 +89,7 @@ class CreateFinancialConnectionsSessionTest {
             // Then
             verify(stripeRepository).createPaymentIntentFinancialConnectionsSession(
                 paymentIntentId = "pi_1234",
-                params = CreateFinancialConnectionsSessionParams(
+                params = CreateFinancialConnectionsSessionParams.USBankAccount(
                     clientSecret = clientSecret,
                     customerName = customerName,
                     customerEmailAddress = null
@@ -149,7 +149,7 @@ class CreateFinancialConnectionsSessionTest {
             // Then
             verify(stripeRepository).createSetupIntentFinancialConnectionsSession(
                 setupIntentId = "seti_1234",
-                params = CreateFinancialConnectionsSessionParams(
+                params = CreateFinancialConnectionsSessionParams.USBankAccount(
                     clientSecret,
                     customerName,
                     null
@@ -187,7 +187,7 @@ class CreateFinancialConnectionsSessionTest {
             // Then
             verify(stripeRepository).createSetupIntentFinancialConnectionsSession(
                 setupIntentId = "seti_1234",
-                params = CreateFinancialConnectionsSessionParams(
+                params = CreateFinancialConnectionsSessionParams.USBankAccount(
                     clientSecret,
                     customerName,
                     null
