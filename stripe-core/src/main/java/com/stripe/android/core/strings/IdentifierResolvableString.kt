@@ -5,11 +5,10 @@ import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.core.strings.transformations.TransformOperation
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class IdentifierResolvableString(
+internal data class IdentifierResolvableString(
     @StringRes private val id: Int,
-    private val args: List<Any?> = emptyList(),
-    private val transformations: List<TransformOperation> = emptyList()
+    private val args: List<Any?>,
+    private val transformations: List<TransformOperation>
 ) : ResolvableString {
     @Suppress("SpreadOperator")
     override fun resolve(context: Context): String {

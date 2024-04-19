@@ -26,7 +26,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -37,6 +36,7 @@ import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 private object Spacing {
@@ -101,7 +101,7 @@ internal fun PaymentMethodsUI(
                     iconRes = item.iconResource,
                     iconUrl = iconUrl,
                     imageLoader = imageLoader,
-                    title = item.displayName.resolve(LocalContext.current),
+                    title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     tintOnSelected = item.tintIconOnSelection,

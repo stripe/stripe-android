@@ -2,8 +2,8 @@ package com.stripe.android.lpmfoundations.luxe
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import com.stripe.android.core.strings.IdentifierResolvableString
 import com.stripe.android.core.strings.ResolvableString
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.ui.core.elements.SharedDataSpec
@@ -40,7 +40,7 @@ internal data class SupportedPaymentMethod(
         tintIconOnSelection: Boolean = false,
     ) : this(
         code = paymentMethodDefinition.type.code,
-        displayName = IdentifierResolvableString(id = displayNameResource),
+        displayName = resolvableString(id = displayNameResource),
         iconResource = iconResource,
         lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
@@ -56,7 +56,7 @@ internal data class SupportedPaymentMethod(
         darkThemeIconUrl: String?,
     ) : this(
         code = code,
-        displayName = IdentifierResolvableString(id = displayNameResource),
+        displayName = resolvableString(id = displayNameResource),
         iconResource = iconResource,
         lightThemeIconUrl = lightThemeIconUrl,
         darkThemeIconUrl = darkThemeIconUrl,
