@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
@@ -16,6 +17,7 @@ import androidx.compose.material.ExposedDropdownMenuDefaults
 import androidx.compose.material.LocalMinimumInteractiveComponentEnforcement
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
+import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -84,26 +86,59 @@ private fun <T> SingleSelectSetting(
     value: T,
     onOptionChanged: (T) -> Unit,
 ) {
-    if (options.isEmpty() && value is String) {
-        @Suppress("UNCHECKED_CAST")
-        TextSetting(
-            name = name,
-            value = value as String,
-            onOptionChanged = onOptionChanged as (String) -> Unit,
+    when {
+        value is Boolean -> {
+            ToggleSetting(
+                name = name,
+                value = value,
+                onOptionChanged = onOptionChanged as (Boolean) -> Unit,
+            )
+        }
+        options.isEmpty() && value is String -> {
+            @Suppress("UNCHECKED_CAST")
+            TextSetting(
+                name = name,
+                value = value as String,
+                onOptionChanged = onOptionChanged as (String) -> Unit,
+            )
+        }
+        options.size < MAX_RADIO_BUTTON_OPTIONS -> {
+            RadioButtonSetting(
+                name = name,
+                options = options,
+                value = value,
+                onOptionChanged = onOptionChanged,
+            )
+        }
+        else -> {
+            DropdownSetting(
+                name = name,
+                options = options,
+                value = value,
+                onOptionChanged = onOptionChanged,
+            )
+        }
+    }
+}
+
+@Composable
+fun ToggleSetting(
+    name: String,
+    value: Boolean,
+    onOptionChanged: (Boolean) -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text = name,
         )
-    } else if (options.size < MAX_RADIO_BUTTON_OPTIONS) {
-        RadioButtonSetting(
-            name = name,
-            options = options,
-            value = value,
-            onOptionChanged = onOptionChanged,
-        )
-    } else {
-        DropdownSetting(
-            name = name,
-            options = options,
-            value = value,
-            onOptionChanged = onOptionChanged,
+        Switch(
+            modifier = Modifier.padding(0.dp).defaultMinSize(minWidth = 1.dp, minHeight = 1.dp),
+            checked = value,
+            onCheckedChange = {
+                onOptionChanged(it)
+            },
         )
     }
 }
