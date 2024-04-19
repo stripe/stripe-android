@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -259,10 +260,19 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         set(value) = savedStateHandle.set(SHOULD_RESET_KEY, value)
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
-        collectBankAccountLauncher = CollectBankAccountLauncher.create(
-            activityResultRegistryOwner = activityResultRegistryOwner,
-            callback = ::handleCollectBankAccountResult,
-        )
+        collectBankAccountLauncher = if (args.instantDebits) {
+            CollectBankAccountForInstantDebitsLauncher.create(
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                callback = {
+                    // TODO(tillh-stripe) Coming soon…
+                },
+            )
+        } else {
+            CollectBankAccountLauncher.create(
+                activityResultRegistryOwner = activityResultRegistryOwner,
+                callback = ::handleCollectBankAccountResult,
+            )
+        }
     }
 
     @VisibleForTesting
@@ -397,59 +407,72 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private fun collectBankAccount(clientSecret: String?) {
         if (hasLaunched) return
         hasLaunched = true
+
         if (clientSecret != null) {
-            if (args.isPaymentFlow) {
-                collectBankAccountLauncher?.presentWithPaymentIntent(
-                    publishableKey = lazyPaymentConfig.get().publishableKey,
-                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                    clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
-                )
-            } else {
-                collectBankAccountLauncher?.presentWithSetupIntent(
-                    publishableKey = lazyPaymentConfig.get().publishableKey,
-                    stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                    clientSecret = clientSecret,
-                    configuration = CollectBankAccountConfiguration.USBankAccount(
-                        name.value,
-                        email.value
-                    )
-                )
-            }
+            collectBankAccountForIntent(clientSecret)
         } else {
-            // Decoupled Flow
-            args.stripeIntentId?.let { elementsSessionId ->
-                if (args.isPaymentFlow) {
-                    collectBankAccountLauncher?.presentWithDeferredPayment(
-                        publishableKey = lazyPaymentConfig.get().publishableKey,
-                        stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                        configuration = CollectBankAccountConfiguration.USBankAccount(
-                            name.value,
-                            email.value
-                        ),
-                        elementsSessionId = elementsSessionId,
-                        customerId = null,
-                        onBehalfOf = args.onBehalfOf,
-                        amount = args.formArgs.amount?.value?.toInt(),
-                        currency = args.formArgs.amount?.currencyCode
-                    )
-                } else {
-                    collectBankAccountLauncher?.presentWithDeferredSetup(
-                        publishableKey = lazyPaymentConfig.get().publishableKey,
-                        stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
-                        configuration = CollectBankAccountConfiguration.USBankAccount(
-                            name.value,
-                            email.value
-                        ),
-                        elementsSessionId = elementsSessionId,
-                        customerId = null,
-                        onBehalfOf = args.onBehalfOf,
-                    )
-                }
-            }
+            collectBankAccountForDeferredIntent()
+        }
+    }
+
+    private fun collectBankAccountForIntent(clientSecret: String) {
+        val configuration = if (args.instantDebits) {
+            CollectBankAccountConfiguration.InstantDebits(
+                email = email.value,
+            )
+        } else {
+            CollectBankAccountConfiguration.USBankAccount(
+                name = name.value,
+                email = email.value,
+            )
+        }
+
+        if (args.isPaymentFlow) {
+            collectBankAccountLauncher?.presentWithPaymentIntent(
+                publishableKey = lazyPaymentConfig.get().publishableKey,
+                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                clientSecret = clientSecret,
+                configuration = configuration,
+            )
+        } else {
+            collectBankAccountLauncher?.presentWithSetupIntent(
+                publishableKey = lazyPaymentConfig.get().publishableKey,
+                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                clientSecret = clientSecret,
+                configuration = configuration,
+            )
+        }
+    }
+
+    private fun collectBankAccountForDeferredIntent() {
+        val elementsSessionId = args.stripeIntentId ?: return
+
+        if (args.isPaymentFlow) {
+            collectBankAccountLauncher?.presentWithDeferredPayment(
+                publishableKey = lazyPaymentConfig.get().publishableKey,
+                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                configuration = CollectBankAccountConfiguration.USBankAccount(
+                    name.value,
+                    email.value
+                ),
+                elementsSessionId = elementsSessionId,
+                customerId = null,
+                onBehalfOf = args.onBehalfOf,
+                amount = args.formArgs.amount?.value?.toInt(),
+                currency = args.formArgs.amount?.currencyCode
+            )
+        } else {
+            collectBankAccountLauncher?.presentWithDeferredSetup(
+                publishableKey = lazyPaymentConfig.get().publishableKey,
+                stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
+                configuration = CollectBankAccountConfiguration.USBankAccount(
+                    name.value,
+                    email.value
+                ),
+                elementsSessionId = elementsSessionId,
+                customerId = null,
+                onBehalfOf = args.onBehalfOf,
+            )
         }
     }
 
