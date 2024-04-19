@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerSheet
@@ -37,7 +36,7 @@ internal class CustomerSheetTestRunnerContext(
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
+internal fun runCustomerSheetTest(
     networkRule: NetworkRule,
     integrationType: IntegrationType,
     customerSheetTestType: CustomerSheetTestType,
@@ -68,37 +67,39 @@ internal fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
 }
 
 @OptIn(ExperimentalCustomerSheetApi::class)
-private fun ActivityScenarioRule<MainActivity>.runCustomerSheetTest(
+private fun runCustomerSheetTest(
     networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makeCustomerSheet: (ComponentActivity) -> CustomerSheet,
     block: (CustomerSheetTestRunnerContext) -> Unit,
 ) {
-    scenario.moveToState(Lifecycle.State.CREATED)
+    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        scenario.moveToState(Lifecycle.State.CREATED)
 
-    scenario.onActivity {
-        PaymentConfiguration.init(it, "pk_test_123")
-        LinkStore(it.applicationContext).clear()
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            LinkStore(it.applicationContext).clear()
+        }
+
+        var customerSheet: CustomerSheet? = null
+
+        scenario.onActivity { activity ->
+            customerSheet = makeCustomerSheet(activity)
+        }
+
+        scenario.moveToState(Lifecycle.State.RESUMED)
+
+        val testContext = CustomerSheetTestRunnerContext(
+            scenario = scenario,
+            customerSheet = customerSheet ?: throw IllegalStateException(
+                "CustomerSheet should have been created!"
+            ),
+            countDownLatch = countDownLatch,
+        )
+        block(testContext)
+
+        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+        networkRule.validate()
+        assertThat(didCompleteSuccessfully).isTrue()
     }
-
-    var customerSheet: CustomerSheet? = null
-
-    scenario.onActivity { activity ->
-        customerSheet = makeCustomerSheet(activity)
-    }
-
-    scenario.moveToState(Lifecycle.State.RESUMED)
-
-    val testContext = CustomerSheetTestRunnerContext(
-        scenario = scenario,
-        customerSheet = customerSheet ?: throw IllegalStateException(
-            "CustomerSheet should have been created!"
-        ),
-        countDownLatch = countDownLatch,
-    )
-    block(testContext)
-
-    val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
-    networkRule.validate()
-    assertThat(didCompleteSuccessfully).isTrue()
 }

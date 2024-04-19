@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -21,29 +21,32 @@ import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAnalyticsTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
-
-    private val activityScenarioRule = composeTestRule.activityRule
-
-    private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-
-    @get:Rule
-    val networkRule = NetworkRule(
+    private val retryRule = RetryRule(5)
+    private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 1.seconds, // Analytics requests happen async.
     )
+    private val composeTestRule = createEmptyComposeRule()
+
+    @get:Rule
+    val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(networkRule)
+        .around(composeTestRule)
+        .around(retryRule)
+
+    private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
 
     @Test
-    fun testSuccessfulCardPayment() = activityScenarioRule.runPaymentSheetTest(
+    fun testSuccessfulCardPayment() = runPaymentSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
@@ -102,7 +105,7 @@ internal class PaymentSheetAnalyticsTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentInFlowController() = activityScenarioRule.runFlowControllerTest(
+    fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->

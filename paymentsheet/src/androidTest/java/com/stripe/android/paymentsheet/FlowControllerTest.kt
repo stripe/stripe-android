@@ -1,7 +1,8 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.lifecycle.Lifecycle
+import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -16,30 +17,34 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.IntegrationType
-import com.stripe.android.paymentsheet.utils.SynchronizedTestFlowController
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
+    private val retryRule = RetryRule(5)
+    private val networkRule = NetworkRule()
+    private val composeTestRule = createEmptyComposeRule()
+
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(networkRule)
+        .around(composeTestRule)
+        .around(retryRule)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-
-    @get:Rule
-    val networkRule = NetworkRule()
 
     @Test
     fun testSuccessfulCardPayment(
         @TestParameter integrationType: IntegrationType,
-    ) = composeTestRule.activityRule.runFlowControllerTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
@@ -81,7 +86,7 @@ internal class FlowControllerTest {
     @Test
     fun testFailedElementsSessionCall(
         @TestParameter integrationType: IntegrationType,
-    ) = composeTestRule.activityRule.runFlowControllerTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
@@ -131,7 +136,7 @@ internal class FlowControllerTest {
     fun testFailedConfirmCall(
         @TestParameter integrationType: IntegrationType,
     ) {
-        composeTestRule.activityRule.runFlowControllerTest(
+        runFlowControllerTest(
             networkRule = networkRule,
             integrationType = integrationType,
             paymentOptionCallback = { paymentOption ->
@@ -181,10 +186,10 @@ internal class FlowControllerTest {
         }
 
         val paymentOptionCallbackCountDownLatch = CountDownLatch(1)
-        val scenario = composeTestRule.activityRule.scenario
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
         lateinit var flowController: PaymentSheet.FlowController
 
-        fun initializeActivity(synchronize: Boolean) {
+        fun initializeActivity() {
             scenario.moveToState(Lifecycle.State.CREATED)
             scenario.onActivity {
                 PaymentConfiguration.init(it, "pk_test_123")
@@ -200,16 +205,12 @@ internal class FlowControllerTest {
                     },
                 )
 
-                flowController = if (synchronize) {
-                    SynchronizedTestFlowController(unsynchronizedController)
-                } else {
-                    unsynchronizedController
-                }
+                flowController = unsynchronizedController
             }
             scenario.moveToState(Lifecycle.State.RESUMED)
         }
 
-        initializeActivity(synchronize = true)
+        initializeActivity()
         val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
         scenario.onActivity {
             flowController.configureWithPaymentIntent(
@@ -232,7 +233,7 @@ internal class FlowControllerTest {
         assertThat(paymentOptionCallbackCountDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
 
         scenario.recreate()
-        initializeActivity(synchronize = false)
+        initializeActivity()
 
         val configureCallbackCountDownLatch = CountDownLatch(1)
         scenario.onActivity {
@@ -253,7 +254,7 @@ internal class FlowControllerTest {
 
     @Test
     fun testCallsElementsSessionsForSeparateConfiguredClientSecrets() {
-        val scenario = composeTestRule.activityRule.scenario
+        val scenario = ActivityScenario.launch(MainActivity::class.java)
         lateinit var flowController: PaymentSheet.FlowController
 
         scenario.moveToState(Lifecycle.State.CREATED)
@@ -311,7 +312,7 @@ internal class FlowControllerTest {
     @Test
     fun testDeferredIntentCardPayment(
         @TestParameter integrationType: IntegrationType,
-    ) = composeTestRule.activityRule.runFlowControllerTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
@@ -383,7 +384,7 @@ internal class FlowControllerTest {
     @Test
     fun testDeferredIntentFailedCardPayment(
         @TestParameter integrationType: IntegrationType,
-    ) = composeTestRule.activityRule.runFlowControllerTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ ->
@@ -445,7 +446,7 @@ internal class FlowControllerTest {
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess(
         @TestParameter integrationType: IntegrationType,
-    ) = composeTestRule.activityRule.runFlowControllerTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ ->
@@ -499,7 +500,7 @@ internal class FlowControllerTest {
     @Test
     fun testDeferredIntentCardPaymentWithInvalidStripeIntent(
         @TestParameter integrationType: IntegrationType,
-    ) = composeTestRule.activityRule.runFlowControllerTest(
+    ) = runFlowControllerTest(
         networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
