@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -27,18 +27,21 @@ import com.stripe.android.paymentsheet.utils.PrefsTestStore
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(TestParameterInjector::class)
 internal class CustomerSheetTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    private val retryRule = RetryRule(5)
+    private val networkRule = NetworkRule()
+    private val composeTestRule = createEmptyComposeRule()
 
-    private val activityScenarioRule = composeTestRule.activityRule
-
     @get:Rule
-    val networkRule = NetworkRule()
+    val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(networkRule)
+        .around(composeTestRule)
+        .around(retryRule)
 
     private val page: CustomerSheetPage = CustomerSheetPage(composeTestRule)
 
@@ -49,7 +52,7 @@ internal class CustomerSheetTest {
     fun testSuccessfulCardSave(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
-    ) = activityScenarioRule.runCustomerSheetTest(
+    ) = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
@@ -96,7 +99,7 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testSavedCardReturnedInResultCallback() = activityScenarioRule.runCustomerSheetTest(
+    fun testSavedCardReturnedInResultCallback() = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
@@ -149,7 +152,7 @@ internal class CustomerSheetTest {
     fun testSuccessfulCardSaveWithFullBillingDetailsCollection(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
-    ) = activityScenarioRule.runCustomerSheetTest(
+    ) = runCustomerSheetTest(
         networkRule = networkRule,
         configuration = CustomerSheet.Configuration.builder("Merchant, Inc.")
             .billingDetailsCollectionConfiguration(
@@ -213,7 +216,7 @@ internal class CustomerSheetTest {
     fun testSuccessfulCardSaveWithCardBrandChoice(
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
-    ) = activityScenarioRule.runCustomerSheetTest(
+    ) = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
@@ -268,7 +271,7 @@ internal class CustomerSheetTest {
     }
 
     @Test
-    fun testCardNotAttachedOnError() = activityScenarioRule.runCustomerSheetTest(
+    fun testCardNotAttachedOnError() = runCustomerSheetTest(
         networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
