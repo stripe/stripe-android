@@ -16,7 +16,6 @@ import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResult
-import com.stripe.android.paymentsheet.VenmoPaymentMethodCreator
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState.Companion.asPlaygroundState
@@ -48,7 +47,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val status = MutableStateFlow<StatusMessage?>(null)
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
-    val externalPaymentMethodCreator = VenmoPaymentMethodCreator()
+    val externalPaymentMethodCreator = VenmoActivity.VenmoPaymentMethodCreator()
 
     init {
         viewModelScope.launch(Dispatchers.IO) {

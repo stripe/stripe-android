@@ -14,7 +14,8 @@ class ExternalPaymentMethodContract : ActivityResultContract<ExternalPaymentMeth
         // TODO: rather than require not null here, by default return a result code of failed
         return requireNotNull(
                 ExternalPaymentMethodInterceptor.externalPaymentMethodCreator?.createIntent(
-                    input
+                    context,
+                    input,
                 )
             )
     }
@@ -23,7 +24,8 @@ class ExternalPaymentMethodContract : ActivityResultContract<ExternalPaymentMeth
         return when (resultCode) {
             1 -> PaymentResult.Completed
             -1 -> PaymentResult.Canceled // TODO: idk
-            else -> PaymentResult.Failed(throwable = IllegalStateException("xkcd oops"))
+                // TODO: make this failure message part of the API
+            else -> PaymentResult.Failed(throwable = IllegalStateException("external payment failed"))
         }
     }
 }
