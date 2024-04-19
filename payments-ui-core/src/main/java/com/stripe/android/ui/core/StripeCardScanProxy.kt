@@ -101,6 +101,7 @@ internal class UnsupportedStripeCardScanProxy(private val errorReporter: ErrorRe
                 StripeException.create(illegalStateException)
             )
         }
+        // TODO: add an error here for if the dependency is missing?
     }
 
     override fun attachCardScanFragment(
@@ -120,5 +121,6 @@ internal class UnsupportedStripeCardScanProxy(private val errorReporter: ErrorRe
                 StripeException.create(illegalStateException)
             )
         }
+        // TODO: add an error here for if the dependency is missing?
     }
 }
