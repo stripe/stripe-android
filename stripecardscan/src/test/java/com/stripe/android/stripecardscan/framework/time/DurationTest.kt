@@ -10,7 +10,6 @@ import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.camera.framework.time.min
 import com.stripe.android.camera.framework.time.minutes
 import com.stripe.android.camera.framework.time.months
-import com.stripe.android.camera.framework.time.nanoseconds
 import com.stripe.android.camera.framework.time.seconds
 import com.stripe.android.camera.framework.time.weeks
 import com.stripe.android.camera.framework.time.years
@@ -38,7 +37,6 @@ class DurationTest {
         val randomFloat = Random.nextFloat() * 20 - 10
         val randomDouble = Random.nextDouble() * 20 - 10
 
-        assertEquals(randomInt, randomInt.nanoseconds.inNanoseconds.toInt())
         assertEquals(randomInt, randomInt.microseconds.inMicroseconds.roundToInt())
         assertEquals(randomInt, randomInt.milliseconds.inMilliseconds.roundToInt())
         assertEquals(randomInt, randomInt.seconds.inSeconds.roundToInt())
@@ -49,7 +47,6 @@ class DurationTest {
         assertEquals(randomInt, randomInt.months.inMonths.roundToInt())
         assertEquals(randomInt, randomInt.years.inYears.roundToInt())
 
-        assertEquals(randomLong, randomLong.nanoseconds.inNanoseconds)
         assertEquals(randomLong, randomLong.microseconds.inMicroseconds.roundToLong())
         assertEquals(randomLong, randomLong.milliseconds.inMilliseconds.roundToLong())
         assertEquals(randomLong, randomLong.seconds.inSeconds.roundToLong())
@@ -61,16 +58,6 @@ class DurationTest {
         assertEquals(randomLong, randomLong.years.inYears.roundToLong())
 
         // These have to be truncated since the limiting factor for accuracy is nanoseconds.
-        assertEquals(
-            randomFloat.roundToLong(),
-            randomFloat.nanoseconds.inNanoseconds,
-            randomFloat.toString()
-        )
-        assertEquals(
-            randomFloat.truncate(3),
-            randomFloat.microseconds.inMicroseconds.toFloat(),
-            randomFloat.toString()
-        )
         assertEquals(
             randomFloat.truncate(6),
             randomFloat.milliseconds.inMilliseconds.toFloat(),
@@ -89,11 +76,6 @@ class DurationTest {
         assertEquals(randomFloat, randomFloat.years.inYears.toFloat(), randomFloat.toString())
 
         // These have to be truncated since the limiting factor for accuracy is nanoseconds.
-        assertEquals(
-            randomDouble.roundToLong(),
-            randomDouble.nanoseconds.inNanoseconds,
-            randomDouble.toString()
-        )
         assertEquals(
             randomDouble.truncate(3),
             randomDouble.microseconds.inMicroseconds,

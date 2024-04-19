@@ -208,8 +208,6 @@ val Float.hours get(): Duration = this.toDouble().hours
 val Float.minutes get(): Duration = this.toDouble().minutes
 val Float.seconds get(): Duration = this.toDouble().seconds
 val Float.milliseconds get(): Duration = this.toDouble().milliseconds
-val Float.microseconds get(): Duration = this.toDouble().microseconds
-val Float.nanoseconds get(): Duration = this.roundToLong().nanoseconds
 
 val Double.years get(): Duration = DurationNanoseconds.fromYears(this)
 val Double.months get(): Duration = DurationNanoseconds.fromMonths(this)
@@ -220,7 +218,6 @@ val Double.minutes get(): Duration = DurationNanoseconds.fromMinutes(this)
 val Double.seconds get(): Duration = DurationNanoseconds.fromSeconds(this)
 val Double.milliseconds get(): Duration = DurationNanoseconds.fromMilliseconds(this)
 val Double.microseconds get(): Duration = DurationNanoseconds.fromMicroseconds(this)
-val Double.nanoseconds get(): Duration = this.roundToLong().nanoseconds
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun min(duration1: Duration, duration2: Duration): Duration =
