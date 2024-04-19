@@ -24,7 +24,7 @@ sealed class InternalPaymentResult : Parcelable {
     @JvmSynthetic
     internal fun toBundle() = bundleOf(EXTRA to this)
 
-    internal companion object {
+    companion object {
         private const val EXTRA = "extra_args"
 
         @JvmSynthetic

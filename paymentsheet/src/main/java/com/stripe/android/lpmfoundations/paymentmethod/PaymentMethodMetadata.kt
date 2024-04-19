@@ -83,6 +83,12 @@ internal data class PaymentMethodMetadata(
     fun supportedPaymentMethodForCode(
         code: String,
     ): SupportedPaymentMethod? {
+        // TODO: obvi do this in a better way
+        if (code.startsWith("external_")) {
+            // TODO: this doesn't show address when you click on it, will need to fix that bc some payment configs
+            // collect billing address
+            return externalPaymentMethodSpecs.map { it.type to it.toSupportedPaymentMethod() }.toMap().get(code)
+        }
         val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
         return definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
     }
@@ -156,7 +162,7 @@ private fun ExternalPaymentMethodSpec.toSupportedPaymentMethod() : SupportedPaym
     // TODO: return null if incorrect info? and then filter not nulls?
     return SupportedPaymentMethod(
         code = this.type,
-        displayNameResource = LabelResolvableString(this.localizedLabel ?: this.type),
+        displayNameResource = LabelResolvableString(this.label),
         iconResource = 0,
         lightThemeIconUrl = this.lightImageUrl,
         darkThemeIconUrl = this.darkImageUrl,

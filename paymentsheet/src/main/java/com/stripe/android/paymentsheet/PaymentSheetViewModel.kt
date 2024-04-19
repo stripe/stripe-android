@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.app.Application
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.registerForActivityResult
 import androidx.annotation.IntegerRes
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -256,6 +257,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     )
 
     private var paymentLauncher: StripePaymentLauncher? = null
+
+    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
@@ -561,6 +564,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             ::onBacsMandateResult
         )
 
+        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
+            ExternalPaymentMethodContract(),
+            ::onPaymentResult
+        )
+
+
         bacsMandateConfirmationLauncher = bacsMandateConfirmationLauncherFactory.create(
             bacsActivityResultLauncher
         )
@@ -616,6 +625,15 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
                     processPayment(stripeIntent, PaymentResult.Completed)
+                }
+                is IntentConfirmationInterceptor.NextStep.HandleExternalPaymentMethod -> {
+                    externalPaymentMethodLauncher?.launch(
+                            ExternalPaymentMethodInput(
+                                name = nextStep.paymentMethodCode,
+                                billingDetails = nextStep.billingDetails
+                            )
+                    )
+                    Result.success(Unit)
                 }
             }
         }

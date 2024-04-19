@@ -225,6 +225,11 @@ internal sealed class PaymentSelection : Parcelable {
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
             override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New()
+
+        fun isExternalPaymentMethod() : Boolean {
+            // TODO: do this in a better way?
+            return this.paymentMethodCreateParams.typeCode.startsWith("external_")
+        }
     }
 }
 

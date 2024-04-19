@@ -19,7 +19,7 @@ data class ExternalPaymentMethodSpec(
     val darkImageUrl: String? = null,
 
     // TODO: this name might be wrong
-    @SerialName("localized_label")
-    val localizedLabel: String? = null,
+    @SerialName("label")
+    val label: String
 ) : Parcelable
 

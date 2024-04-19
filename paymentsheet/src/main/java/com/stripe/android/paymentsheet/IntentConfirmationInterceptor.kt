@@ -56,6 +56,15 @@ internal interface IntentConfirmationInterceptor {
                     DeferredIntentConfirmationType.Server
                 }
         }
+
+        data class HandleExternalPaymentMethod(
+            val paymentMethodCode: String,
+            val billingDetails: PaymentSheet.BillingDetails
+        ) : NextStep {
+            override val deferredIntentConfirmationType: DeferredIntentConfirmationType?
+                get() = null
+        }
+
     }
 
     suspend fun intercept(

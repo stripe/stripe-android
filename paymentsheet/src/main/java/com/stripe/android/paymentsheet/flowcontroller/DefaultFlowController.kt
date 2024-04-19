@@ -378,6 +378,9 @@ internal class DefaultFlowController @Inject internal constructor(
                 is IntentConfirmationInterceptor.NextStep.Complete -> {
                     onPaymentResult(PaymentResult.Completed)
                 }
+                is IntentConfirmationInterceptor.NextStep.HandleExternalPaymentMethod -> {
+                    Result.success(Unit)
+                }
             }
         }
     }

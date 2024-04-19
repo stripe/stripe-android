@@ -1006,6 +1006,9 @@ internal class CustomerSheetViewModel(
                 )
                 Result.success(Unit)
             }
+            is IntentConfirmationInterceptor.NextStep.HandleExternalPaymentMethod -> {
+                Result.success(Unit)
+            }
         }
     }
 
