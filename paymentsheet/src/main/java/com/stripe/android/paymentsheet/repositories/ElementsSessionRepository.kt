@@ -107,20 +107,20 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 }
 
 internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
-    externalPaymentMethods: List<String>?
+    externalPaymentMethods: List<String>?,
 ): ElementsSessionParams {
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
-                externalPaymentMethods = externalPaymentMethods
+                externalPaymentMethods = externalPaymentMethods,
             )
         }
 
         is PaymentSheet.InitializationMode.SetupIntent -> {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = clientSecret,
-                externalPaymentMethods = externalPaymentMethods
+                externalPaymentMethods = externalPaymentMethods,
             )
         }
 
@@ -132,7 +132,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
                     onBehalfOf = intentConfiguration.onBehalfOf,
                     paymentMethodConfigurationId = intentConfiguration.paymentMethodConfigurationId,
                 ),
-                externalPaymentMethods = externalPaymentMethods
+                externalPaymentMethods = externalPaymentMethods,
             )
         }
     }
