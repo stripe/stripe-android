@@ -23,6 +23,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        externalPaymentMethods: List<String>?,
     ): Result<ElementsSession>
 }
 
@@ -45,8 +46,9 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        val params = initializationMode.toElementsSessionParams()
+        val params = initializationMode.toElementsSessionParams(externalPaymentMethods = externalPaymentMethods)
 
         val elementsSession = stripeRepository.retrieveElementsSession(
             params = params,
@@ -104,14 +106,24 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
     }
 }
 
-internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsSessionParams {
+internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
+    externalPaymentMethods: List<String>?
+): ElementsSessionParams {
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
-            ElementsSessionParams.PaymentIntentType(clientSecret = clientSecret)
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = clientSecret,
+                externalPaymentMethods = externalPaymentMethods
+            )
         }
+
         is PaymentSheet.InitializationMode.SetupIntent -> {
-            ElementsSessionParams.SetupIntentType(clientSecret = clientSecret)
+            ElementsSessionParams.SetupIntentType(
+                clientSecret = clientSecret,
+                externalPaymentMethods = externalPaymentMethods
+            )
         }
+
         is PaymentSheet.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
                 deferredIntentParams = DeferredIntentParams(
@@ -120,6 +132,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): Elements
                     onBehalfOf = intentConfiguration.onBehalfOf,
                     paymentMethodConfigurationId = intentConfiguration.paymentMethodConfigurationId,
                 ),
+                externalPaymentMethods = externalPaymentMethods
             )
         }
     }

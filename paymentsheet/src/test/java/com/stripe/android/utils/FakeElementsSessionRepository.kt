@@ -18,6 +18,7 @@ internal class FakeElementsSessionRepository(
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
         lastGetParam = initializationMode
         return if (error != null) {

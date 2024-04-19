@@ -48,6 +48,7 @@ internal class ElementsSessionRepositoryTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret",
                 ),
+                externalPaymentMethods = null,
             ).getOrThrow()
         }
 
@@ -74,6 +75,7 @@ internal class ElementsSessionRepositoryTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
+                    externalPaymentMethods = null,
                 ).getOrThrow()
             }
 
@@ -97,6 +99,7 @@ internal class ElementsSessionRepositoryTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
+                    externalPaymentMethods = null,
                 ).getOrThrow()
             }
 
@@ -126,6 +129,7 @@ internal class ElementsSessionRepositoryTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
             ),
+            externalPaymentMethods = null,
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -160,6 +164,7 @@ internal class ElementsSessionRepositoryTest {
                     )
                 )
             ),
+            externalPaymentMethods = null,
         )
 
         assertThat(session.getOrNull()).isNull()
