@@ -535,11 +535,17 @@ internal class CustomerSheetViewModel(
                     originalPaymentSelection = null
                 }
 
+                val updatedStateCanUpdate = canEdit(
+                    viewState.allowsRemovalOfLastSavedPaymentMethod,
+                    newSavedPaymentMethods,
+                    viewState.cbcEligibility
+                )
                 viewState.copy(
                     savedPaymentMethods = newSavedPaymentMethods,
                     paymentSelection = viewState.paymentSelection.takeUnless {
                         didRemoveCurrentSelection
                     } ?: originalPaymentSelection,
+                    isEditing = viewState.isEditing && updatedStateCanUpdate
                 )
             }
         }

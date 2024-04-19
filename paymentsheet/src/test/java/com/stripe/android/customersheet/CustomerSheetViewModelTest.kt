@@ -467,20 +467,50 @@ class CustomerSheetViewModelTest {
         )
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(viewState.isEditing)
-                .isFalse()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
-            assertThat(viewState.isEditing)
-                .isTrue()
+            assertThat(viewState.isEditing).isTrue()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
-            assertThat(viewState.isEditing)
-                .isTrue()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isFalse()
+        }
+    }
+
+    @Test
+    fun `When CustomerSheetViewAction#OnItemRemoved with allowsRemovalOfLastSavedPaymentMethod=false, view state isEditing should be updated`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true,
+                allowsRemovalOfLastSavedPaymentMethod = false,
+            ),
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD, CARD_PAYMENT_METHOD.copy(id = "pm_543")),
+        )
+        viewModel.viewState.test {
+            var viewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+            viewState = awaitViewState()
+            assertThat(viewState.isEditing).isTrue()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
+
+            viewState = awaitViewState()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isFalse()
         }
     }
 
