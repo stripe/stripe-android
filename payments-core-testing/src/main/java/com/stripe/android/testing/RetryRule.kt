@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet
+package com.stripe.android.testing
 
 import android.util.Log
 import org.junit.AssumptionViolatedException
@@ -6,7 +6,7 @@ import org.junit.rules.TestRule
 import org.junit.runner.Description
 import org.junit.runners.model.Statement
 
-internal class RetryRule(private val attempts: Int) : TestRule {
+class RetryRule(private val attempts: Int) : TestRule {
     override fun apply(base: Statement, description: Description): Statement {
         val logTag = description.className
         return object : Statement() {
@@ -14,16 +14,15 @@ internal class RetryRule(private val attempts: Int) : TestRule {
             override fun evaluate() {
                 for (attempt in 1..attempts) {
                     val isLast = attempts == attempt
-                    val error = runCatching { base.evaluate() }.exceptionOrNull()
-
-                    if (error != null) {
+                    runCatching {
+                        base.evaluate()
+                    }.onSuccess {
+                        return
+                    }.onFailure { error ->
                         if (isLast || error is AssumptionViolatedException) {
                             throw error
                         }
                         Log.d(logTag, "Failed attempt $attempt out of $attempts with error")
-                    } else {
-                        // The test succeeded
-                        return
                     }
                 }
             }

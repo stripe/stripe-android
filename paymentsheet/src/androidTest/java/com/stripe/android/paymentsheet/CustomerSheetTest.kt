@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.PrefsTestStore
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
