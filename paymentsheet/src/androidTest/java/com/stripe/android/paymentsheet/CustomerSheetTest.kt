@@ -50,6 +50,7 @@ internal class CustomerSheetTest {
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
     ) = activityScenarioRule.runCustomerSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
@@ -96,6 +97,7 @@ internal class CustomerSheetTest {
 
     @Test
     fun testSavedCardReturnedInResultCallback() = activityScenarioRule.runCustomerSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
         resultCallback = { result ->
@@ -148,6 +150,7 @@ internal class CustomerSheetTest {
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
     ) = activityScenarioRule.runCustomerSheetTest(
+        networkRule = networkRule,
         configuration = CustomerSheet.Configuration.builder("Merchant, Inc.")
             .billingDetailsCollectionConfiguration(
                 PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -211,6 +214,7 @@ internal class CustomerSheetTest {
         @TestParameter(valuesProvider = CustomerSheetTestTypeProvider::class)
         customerSheetTestType: CustomerSheetTestType,
     ) = activityScenarioRule.runCustomerSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = customerSheetTestType,
         resultCallback = { result ->
@@ -265,6 +269,7 @@ internal class CustomerSheetTest {
 
     @Test
     fun testCardNotAttachedOnError() = activityScenarioRule.runCustomerSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         customerSheetTestType = CustomerSheetTestType.AttachToSetupIntent,
         resultCallback = {

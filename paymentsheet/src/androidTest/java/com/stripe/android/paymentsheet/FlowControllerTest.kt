@@ -40,6 +40,7 @@ internal class FlowControllerTest {
     fun testSuccessfulCardPayment(
         @TestParameter integrationType: IntegrationType,
     ) = composeTestRule.activityRule.runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -81,6 +82,7 @@ internal class FlowControllerTest {
     fun testFailedElementsSessionCall(
         @TestParameter integrationType: IntegrationType,
     ) = composeTestRule.activityRule.runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -130,6 +132,7 @@ internal class FlowControllerTest {
         @TestParameter integrationType: IntegrationType,
     ) {
         composeTestRule.activityRule.runFlowControllerTest(
+            networkRule = networkRule,
             integrationType = integrationType,
             paymentOptionCallback = { paymentOption ->
                 assertThat(paymentOption?.label).endsWith("4242")
@@ -309,6 +312,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPayment(
         @TestParameter integrationType: IntegrationType,
     ) = composeTestRule.activityRule.runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
         paymentOptionCallback = { paymentOption ->
@@ -380,6 +384,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentFailedCardPayment(
         @TestParameter integrationType: IntegrationType,
     ) = composeTestRule.activityRule.runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Failure(
@@ -441,6 +446,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPaymentWithForcedSuccess(
         @TestParameter integrationType: IntegrationType,
     ) = composeTestRule.activityRule.runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
@@ -494,6 +500,7 @@ internal class FlowControllerTest {
     fun testDeferredIntentCardPaymentWithInvalidStripeIntent(
         @TestParameter integrationType: IntegrationType,
     ) = composeTestRule.activityRule.runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
         paymentOptionCallback = { paymentOption ->

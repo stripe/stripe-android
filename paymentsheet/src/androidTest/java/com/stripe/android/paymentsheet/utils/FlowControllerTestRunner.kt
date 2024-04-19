@@ -9,13 +9,13 @@ import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
-import java.lang.IllegalStateException
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -37,6 +37,7 @@ internal class FlowControllerTestRunnerContext(
 }
 
 internal fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
+    networkRule: NetworkRule,
     integrationType: IntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,
@@ -56,6 +57,7 @@ internal fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
     )
 
     runFlowControllerTest(
+        networkRule = networkRule,
         countDownLatch = countDownLatch,
         makeFlowController = factory::make,
         block = block,
@@ -63,6 +65,7 @@ internal fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
 }
 
 private fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
+    networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makeFlowController: (ComponentActivity) -> PaymentSheet.FlowController,
     block: (FlowControllerTestRunnerContext) -> Unit,
@@ -91,7 +94,9 @@ private fun ActivityScenarioRule<MainActivity>.runFlowControllerTest(
        )
        block(testContext)
 
-       assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
+       val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+       networkRule.validate()
+       assertThat(didCompleteSuccessfully).isTrue()
    } catch (exception: Exception) {
        flowController?.manuallyRelease()
 
