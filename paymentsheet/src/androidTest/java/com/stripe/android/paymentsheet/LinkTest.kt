@@ -22,6 +22,7 @@ import com.stripe.android.paymentsheet.utils.LinkIntegrationType
 import com.stripe.android.paymentsheet.utils.LinkIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runLinkTest
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain

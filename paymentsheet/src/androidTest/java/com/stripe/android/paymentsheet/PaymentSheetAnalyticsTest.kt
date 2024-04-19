@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
