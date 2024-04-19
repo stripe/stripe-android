@@ -19,6 +19,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -260,9 +261,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     fun register(activityResultRegistryOwner: ActivityResultRegistryOwner) {
         collectBankAccountLauncher = if (args.instantDebits) {
-            CollectBankAccountLauncher.createForInstantDebits(
+            CollectBankAccountForInstantDebitsLauncher.create(
                 activityResultRegistryOwner = activityResultRegistryOwner,
-                callback = ::handleCollectBankAccountResult,
+                callback = {
+                    // TODO(tillh-stripe) Coming soon…
+                },
             )
         } else {
             CollectBankAccountLauncher.create(

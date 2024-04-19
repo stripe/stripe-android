@@ -112,20 +112,6 @@ interface CollectBankAccountLauncher {
                 )
             )
         }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun createForInstantDebits(
-            activityResultRegistryOwner: ActivityResultRegistryOwner,
-            callback: (CollectBankAccountResultInternal) -> Unit,
-        ): CollectBankAccountLauncher {
-            return CollectBankAccountForInstantDebitsLauncher(
-                activityResultRegistryOwner.activityResultRegistry.register(
-                    LAUNCHER_KEY,
-                    CollectBankAccountContract(),
-                    callback,
-                )
-            )
-        }
     }
 }
 
