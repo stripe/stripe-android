@@ -1,7 +1,6 @@
 package com.stripe.android.core.strings
 
 import android.content.Context
-import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.core.strings.transformations.TransformOperation
 
