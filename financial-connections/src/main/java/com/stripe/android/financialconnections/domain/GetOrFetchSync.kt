@@ -17,10 +17,44 @@ internal class GetOrFetchSync @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
 ) {
 
-    suspend operator fun invoke(): SynchronizeSessionResponse {
-        return repository.getOrFetchSynchronizeFinancialConnectionsSession(
+    suspend operator fun invoke(
+        fetchCondition: FetchCondition = FetchCondition.IfMissing
+    ): SynchronizeSessionResponse {
+        return repository.getOrSynchronizeFinancialConnectionsSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
-            applicationId = applicationId
+            applicationId = applicationId,
+            fetchCondition = fetchCondition::check,
         )
+    }
+
+    sealed interface FetchCondition {
+        fun check(response: SynchronizeSessionResponse): Boolean
+
+        /**
+         * Session won't be fetched if it's already cached.
+         */
+        data object IfMissing : FetchCondition {
+            override fun check(response: SynchronizeSessionResponse): Boolean {
+                return false
+            }
+        }
+
+        /**
+         * Session will always be fetched, even if a cached version exists.
+         */
+        data object Always : FetchCondition {
+            override fun check(response: SynchronizeSessionResponse): Boolean {
+                return true
+            }
+        }
+
+        /**
+         * Session will be fetched only if there's no active auth session on the cached manifest.
+         */
+        data object MissingActiveAuthSession : FetchCondition {
+            override fun check(response: SynchronizeSessionResponse): Boolean {
+                return response.manifest.activeAuthSession == null
+            }
+        }
     }
 }

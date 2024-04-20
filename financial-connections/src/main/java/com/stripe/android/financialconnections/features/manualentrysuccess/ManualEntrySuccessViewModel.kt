@@ -8,7 +8,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.success.SuccessState
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
@@ -27,7 +27,7 @@ import kotlinx.coroutines.launch
 
 internal class ManualEntrySuccessViewModel @AssistedInject constructor(
     @Assisted initialState: ManualEntrySuccessState,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
@@ -35,7 +35,7 @@ internal class ManualEntrySuccessViewModel @AssistedInject constructor(
 
     init {
         suspend {
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             SuccessState.Payload(
                 businessName = manifest.businessName,
                 customSuccessMessage = successContentRepository.get()?.customSuccessMessage,

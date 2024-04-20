@@ -17,7 +17,7 @@ import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -47,7 +47,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val getCachedConsumerSession: GetCachedConsumerSession,
     private val startVerification: StartVerification,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val confirmVerification: ConfirmVerification,
     private val markLinkVerified: MarkLinkVerified,
     private val getCachedAccounts: GetCachedAccounts,
@@ -61,7 +61,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
         suspend {
             val consumerSession = requireNotNull(getCachedConsumerSession())
             // If we automatically moved to this pane due to prefilled email, we should show the "Not now" button.
-            val showNotNowButton = getManifest().accountholderCustomerEmailAddress != null
+            val showNotNowButton = getOrFetchSync().manifest.accountholderCustomerEmailAddress != null
             runCatching {
                 startVerification.sms(consumerSession.clientSecret)
             }.onFailure {
@@ -135,7 +135,7 @@ internal class NetworkingSaveToLinkVerificationViewModel @AssistedInject constru
             )
 
             val accounts = getCachedAccounts()
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
 
             saveAccountToLink.existing(
                 consumerSessionClientSecret = payload.consumerSessionClientSecret,

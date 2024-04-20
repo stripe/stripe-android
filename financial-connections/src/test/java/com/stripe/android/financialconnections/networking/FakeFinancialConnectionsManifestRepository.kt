@@ -24,9 +24,10 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
     var postAuthSessionEvent: () -> FinancialConnectionsAuthorizationSession =
         { ApiKeyFixtures.authorizationSession() }
 
-    override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
+    override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
-        applicationId: String
+        applicationId: String,
+        fetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
 
     override suspend fun markConsentAcquired(
@@ -94,11 +95,6 @@ internal class FakeFinancialConnectionsManifestRepository : FinancialConnections
     override suspend fun postMarkLinkStepUpVerified(clientSecret: String): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")
     }
-
-    override suspend fun synchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse = getSynchronizeSessionResponseProvider()
 
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest

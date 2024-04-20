@@ -4,25 +4,10 @@ import com.stripe.android.financialconnections.analytics.AuthSessionEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import java.util.Date
 
 internal abstract class AbsFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
-
-    override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun synchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse {
-        TODO("Not yet implemented")
-    }
 
     override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")

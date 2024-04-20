@@ -32,6 +32,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -47,7 +48,7 @@ internal class PartnerAuthViewModelTest {
     val testRule = CoroutineTestRule()
 
     private val applicationId = "com.sample.applicationid"
-    private val getSync = mock<GetOrFetchSync>()
+    private val getOrFetchSync = mock<GetOrFetchSync>()
     private val postAuthSessionEvent = mock<PostAuthSessionEvent>()
     private val retrieveAuthorizationSession = mock<RetrieveAuthorizationSession>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
@@ -68,7 +69,7 @@ internal class PartnerAuthViewModelTest {
                 showManualEntry = false,
                 stripeException = APIException()
             )
-            whenever(getSync()).thenReturn(
+            whenever(getOrFetchSync(anyOrNull())).thenReturn(
                 syncResponse(sessionManifest().copy(activeInstitution = institution()))
             )
             whenever(createAuthorizationSession(any(), any())).thenAnswer {
@@ -93,7 +94,7 @@ internal class PartnerAuthViewModelTest {
             activeInstitution = activeInstitution,
             activeAuthSession = activeAuthSession
         )
-        whenever(getSync()).thenReturn(syncResponse(manifest))
+        whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse(manifest))
 
         val viewModel = createViewModel(SharedPartnerAuthState(Pane.PARTNER_AUTH_DRAWER))
 
@@ -123,7 +124,7 @@ internal class PartnerAuthViewModelTest {
                 publicToken = "123456"
             )
 
-            whenever(getSync()).thenReturn(
+            whenever(getOrFetchSync(anyOrNull())).thenReturn(
                 syncResponse(
                     sessionManifest().copy(activeAuthSession = activeAuthSession)
                 )
@@ -148,7 +149,7 @@ internal class PartnerAuthViewModelTest {
         val activeAuthSession = authorizationSession()
         val viewModel = createViewModel()
 
-        whenever(getSync()).thenReturn(
+        whenever(getOrFetchSync(anyOrNull())).thenReturn(
             syncResponse(
                 manifest = sessionManifest().copy(activeAuthSession = activeAuthSession)
             )
@@ -168,7 +169,7 @@ internal class PartnerAuthViewModelTest {
             val activeAuthSession = authorizationSession().copy(_isOAuth = false)
             val viewModel = createViewModel()
 
-            whenever(getSync())
+            whenever(getOrFetchSync(anyOrNull()))
                 .thenReturn(
                     syncResponse(
                         sessionManifest().copy(
@@ -202,7 +203,7 @@ internal class PartnerAuthViewModelTest {
                 activeInstitution = activeInstitution
             )
             val syncResponse = syncResponse(manifest)
-            whenever(getSync()).thenReturn(syncResponse)
+            whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse)
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
             // simulate that auth session succeeded in abstract auth:
             whenever(retrieveAuthorizationSession.invoke(any()))
@@ -231,7 +232,7 @@ internal class PartnerAuthViewModelTest {
                 )
             )
             val syncResponse = syncResponse(manifest)
-            whenever(getSync()).thenReturn(syncResponse)
+            whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse)
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
             // simulate that auth session succeeded in abstract auth:
             whenever(retrieveAuthorizationSession.invoke(any()))
@@ -269,7 +270,7 @@ internal class PartnerAuthViewModelTest {
                 activeInstitution = activeInstitution
             )
             val syncResponse = syncResponse(manifest)
-            whenever(getSync()).thenReturn(syncResponse)
+            whenever(getOrFetchSync(anyOrNull())).thenReturn(syncResponse)
             whenever(createAuthorizationSession.invoke(any(), any())).thenReturn(activeAuthSession)
             // simulate that auth session succeeded in abstract auth:
             whenever(retrieveAuthorizationSession.invoke(any()))
@@ -307,7 +308,7 @@ internal class PartnerAuthViewModelTest {
             retrieveAuthorizationSession = retrieveAuthorizationSession,
             eventTracker = eventTracker,
             postAuthSessionEvent = postAuthSessionEvent,
-            getOrFetchSync = getSync,
+            getOrFetchSync = getOrFetchSync,
             pollAuthorizationSessionOAuthResults = pollAuthorizationSessionOAuthResults,
             logger = logger,
             initialState = initialState,

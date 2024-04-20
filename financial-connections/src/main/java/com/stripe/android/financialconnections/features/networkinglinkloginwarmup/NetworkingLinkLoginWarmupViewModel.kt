@@ -10,7 +10,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.DisableNetworking
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.common.getBusinessName
@@ -35,7 +35,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val handleError: HandleError,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val disableNetworking: DisableNetworking,
     private val navigationManager: NavigationManager
 ) : FinancialConnectionsViewModel<NetworkingLinkLoginWarmupState>(initialState, nativeAuthFlowCoordinator) {
@@ -43,7 +43,7 @@ internal class NetworkingLinkLoginWarmupViewModel @AssistedInject constructor(
     init {
         logErrors()
         suspend {
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             eventTracker.track(PaneLoaded(PANE))
             NetworkingLinkLoginWarmupState.Payload(
                 merchantName = manifest.getBusinessName(),

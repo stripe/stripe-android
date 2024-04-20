@@ -15,11 +15,11 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.FetchCondition
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
-import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
 import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
@@ -63,8 +63,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     private val uriUtils: UriUtils,
     private val getCachedAccounts: GetCachedAccounts,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val getManifest: GetManifest,
-    private val sync: SynchronizeFinancialConnectionsSession,
+    private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val logger: Logger,
     private val presentNoticeSheet: PresentNoticeSheet,
@@ -75,19 +74,22 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
     init {
         observeAsyncs()
         suspend {
-            val manifest = getManifest()
-            val content = requireNotNull(sync().text?.networkingLinkSignupPane)
+            val sync = getOrFetchSync(
+                // Force synchronize to retrieve the networking signup pane content.
+                fetchCondition = FetchCondition.Always
+            )
+            val content = requireNotNull(sync.text?.networkingLinkSignupPane)
             eventTracker.track(PaneLoaded(PANE))
             NetworkingLinkSignupState.Payload(
                 content = content,
-                merchantName = manifest.getBusinessName(),
+                merchantName = sync.manifest.getBusinessName(),
                 emailController = SimpleTextFieldController(
                     textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
-                    initialValue = manifest.accountholderCustomerEmailAddress,
+                    initialValue = sync.manifest.accountholderCustomerEmailAddress,
                     showOptionalLabel = false
                 ),
                 phoneController = PhoneNumberController
-                    .createPhoneNumberController(manifest.accountholderPhoneNumber ?: ""),
+                    .createPhoneNumberController(sync.manifest.accountholderPhoneNumber ?: ""),
             )
         }.execute { copy(payload = it) }
     }
@@ -224,7 +226,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
             eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
             val state = stateFlow.value
             val selectedAccounts = getCachedAccounts()
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             val phoneController = state.payload()!!.phoneController
             require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
             saveAccountToLink.new(

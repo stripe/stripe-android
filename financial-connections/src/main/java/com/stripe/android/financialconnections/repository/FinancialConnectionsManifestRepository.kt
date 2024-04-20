@@ -35,24 +35,10 @@ internal interface FinancialConnectionsManifestRepository {
         APIConnectionException::class,
         APIException::class
     )
-    suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
+    suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse
-
-    /**
-     * Triggers a session synchronization, and caches the updated [SynchronizeSessionResponse] object
-     * received as result.
-     */
-    @Throws(
-        AuthenticationException::class,
-        InvalidRequestException::class,
-        APIConnectionException::class,
-        APIException::class
-    )
-    suspend fun synchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
+        applicationId: String,
+        fetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse
 
     /**
@@ -208,63 +194,54 @@ private class FinancialConnectionsManifestRepositoryImpl(
 ) : FinancialConnectionsManifestRepository {
 
     /**
-     * Ensures that manifest accesses via [getOrFetchSynchronizeFinancialConnectionsSession] suspend until
+     * Ensures that manifest accesses via [getOrSynchronizeFinancialConnectionsSession] suspend until
      * current writes are running.
      */
     val mutex = Mutex()
     private var cachedSynchronizeSessionResponse: SynchronizeSessionResponse? = initialSync
 
-    override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
+    override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
-        applicationId: String
+        applicationId: String,
+        fetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse = mutex.withLock {
-        cachedSynchronizeSessionResponse ?: run {
-            // fetch manifest and save it locally
-            return requestExecutor.execute(
-                synchronizeRequest(
-                    applicationId = applicationId,
-                    clientSecret = clientSecret,
-                ),
-                SynchronizeSessionResponse.serializer()
-            ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
+        return when (val cachedSync = cachedSynchronizeSessionResponse) {
+            // no cached session, fetch from backend
+            null -> synchronize(
+                applicationId = applicationId,
+                clientSecret = clientSecret
+            )
+            // cached session available, check if we need to fetch from backend
+            else -> cachedSync.takeUnless { fetchCondition(it) } ?: synchronize(
+                applicationId = applicationId,
+                clientSecret = clientSecret
+            )
         }
     }
 
-    override suspend fun synchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse = mutex.withLock {
-        val financialConnectionsRequest =
-            synchronizeRequest(
-                applicationId = applicationId,
-                clientSecret = clientSecret,
-            )
-        return requestExecutor.execute(
-            financialConnectionsRequest,
-            SynchronizeSessionResponse.serializer()
-        ).also { updateCachedSynchronizeSessionResponse("synchronize", it) }
-    }
-
-    private fun synchronizeRequest(
+    private suspend fun synchronize(
         applicationId: String,
         clientSecret: String,
-    ): ApiRequest = apiRequestFactory.createPost(
-        url = synchronizeSessionUrl,
-        options = apiOptions,
-        params = mapOf(
-            "expand" to listOf("manifest.active_auth_session"),
-            "emit_events" to true,
-            "locale" to locale.toLanguageTag(),
-            "mobile" to mapOf(
-                // TODO REMOVE BEFORE MERGING INTEGRATION BRANCH
-                "forced_authflow_version" to "v3",
-                PARAMS_FULLSCREEN to true,
-                PARAMS_HIDE_CLOSE_BUTTON to true,
-                NetworkConstants.PARAMS_APPLICATION_ID to applicationId
-            ),
-            NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
-        )
-    )
+    ): SynchronizeSessionResponse = requestExecutor.execute(
+        apiRequestFactory.createPost(
+            url = synchronizeSessionUrl,
+            options = apiOptions,
+            params = mapOf(
+                "expand" to listOf("manifest.active_auth_session"),
+                "emit_events" to true,
+                "locale" to locale.toLanguageTag(),
+                "mobile" to mapOf(
+                    // TODO REMOVE BEFORE MERGING INTEGRATION BRANCH
+                    "forced_authflow_version" to "v3",
+                    PARAMS_FULLSCREEN to true,
+                    PARAMS_HIDE_CLOSE_BUTTON to true,
+                    NetworkConstants.PARAMS_APPLICATION_ID to applicationId
+                ),
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+            )
+        ),
+        SynchronizeSessionResponse.serializer()
+    ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
 
     override suspend fun markConsentAcquired(
         clientSecret: String
