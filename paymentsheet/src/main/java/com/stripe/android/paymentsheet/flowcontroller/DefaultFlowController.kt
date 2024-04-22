@@ -383,42 +383,30 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
-        runCatching {
-            requireNotNull(paymentLauncher)
-        }.fold(
-            onSuccess = {
-                when (confirmStripeIntentParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        it.confirm(confirmStripeIntentParams)
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        it.confirm(confirmStripeIntentParams)
-                    }
-                }
-            },
-            onFailure = ::error
-        )
+        when (confirmStripeIntentParams) {
+            is ConfirmPaymentIntentParams -> {
+                paymentLauncher?.confirm(confirmStripeIntentParams)
+            }
+
+            is ConfirmSetupIntentParams -> {
+                paymentLauncher?.confirm(confirmStripeIntentParams)
+            }
+        }
     }
 
     private fun handleNextAction(
         clientSecret: String,
         stripeIntent: StripeIntent,
     ) {
-        runCatching {
-            requireNotNull(paymentLauncher)
-        }.fold(
-            onSuccess = {
-                when (stripeIntent) {
-                    is PaymentIntent -> {
-                        it.handleNextActionForPaymentIntent(clientSecret)
-                    }
-                    is SetupIntent -> {
-                        it.handleNextActionForSetupIntent(clientSecret)
-                    }
-                }
-            },
-            onFailure = ::error
-        )
+        when (stripeIntent) {
+            is PaymentIntent -> {
+                paymentLauncher?.handleNextActionForPaymentIntent(clientSecret)
+            }
+
+            is SetupIntent -> {
+                paymentLauncher?.handleNextActionForSetupIntent(clientSecret)
+            }
+        }
     }
 
     internal fun onGooglePayResult(
