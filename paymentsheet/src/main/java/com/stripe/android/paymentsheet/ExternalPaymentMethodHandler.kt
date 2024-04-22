@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 
@@ -10,4 +11,14 @@ interface ExternalPaymentMethodHandler {
     fun createIntent(context: Context, input : ExternalPaymentMethodInput) : Intent
 }
 
-data class ExternalPaymentMethodInput(val name : String, val billingDetails: PaymentSheet.BillingDetails)
+data class ExternalPaymentMethodInput(val externalPaymentMethod : String, val billingDetails: PaymentSheet.BillingDetails)
+
+enum class ExternalPaymentMethodResult(val resultCode: Int) {
+    RESULT_SUCCESS(resultCode = Activity.RESULT_OK),
+    RESULT_CANCELED(resultCode = Activity.RESULT_CANCELED),
+    RESULT_FAILED(resultCode = Activity.RESULT_FIRST_USER)
+}
+
+enum class ExternalPaymentMethodExtras(val key: String) {
+    EXTRA_ERROR_MESSAGE(key = "error_message")
+}

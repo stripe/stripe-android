@@ -11,13 +11,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.stripe.android.utils.rememberActivity
 
-// TODO: update javadoc
 /**
  * Creates a [PaymentSheet] that is remembered across compositions.
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
  * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+ * @param externalPaymentMethodHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheet(
@@ -49,7 +49,6 @@ fun rememberPaymentSheet(
     }
 }
 
-// TODO: update javadoc
 /**
  * Creates a [PaymentSheet] that is remembered across compositions. Use this method when you intend
  * to create the [com.stripe.android.model.PaymentIntent] or [com.stripe.android.model.SetupIntent]
@@ -59,6 +58,7 @@ fun rememberPaymentSheet(
  *
  * @param createIntentCallback Called when the customer confirms the payment or setup.
  * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+ * @param externalPaymentMethodHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheet(

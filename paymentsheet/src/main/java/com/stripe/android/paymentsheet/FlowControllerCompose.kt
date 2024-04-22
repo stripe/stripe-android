@@ -9,7 +9,6 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
 
-// TODO: update javadoc
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
  *
@@ -17,6 +16,7 @@ import com.stripe.android.utils.rememberActivity
  *
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
+ * @param externalPaymentMethodHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheetFlowController(
@@ -50,7 +50,6 @@ fun rememberPaymentSheetFlowController(
     }
 }
 
-// TODO: update javadoc
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions. Use this method
  * when you intend to create the [com.stripe.android.model.PaymentIntent] or
@@ -61,6 +60,7 @@ fun rememberPaymentSheetFlowController(
  * @param createIntentCallback Called when the customer confirms the payment or setup.
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
+ * @param externalPaymentMethodHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheetFlowController(
