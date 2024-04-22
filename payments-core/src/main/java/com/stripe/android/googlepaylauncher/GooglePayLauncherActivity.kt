@@ -63,19 +63,12 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             }
         }
 
-        if (!viewModel.hasLaunched) {
-            lifecycleScope.launch {
-                viewModel.createLoadPaymentDataTask().fold(
-                    onSuccess = {
-                        payWithGoogle(it)
-                        viewModel.hasLaunched = true
-                    },
-                    onFailure = {
-                        viewModel.updateResult(
-                            GooglePayLauncher.Result.Failed(it)
-                        )
-                    }
-                )
+        lifecycleScope.launch {
+            viewModel.googlePayLaunchTask.collect { task ->
+                if (task != null) {
+                    payWithGoogle(task)
+                    viewModel.markTaskAsLaunched()
+                }
             }
         }
     }
@@ -132,12 +125,10 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 }
             }
         } else {
-            lifecycleScope.launch {
-                viewModel.onConfirmResult(
-                    requestCode,
-                    data ?: Intent()
-                )
-            }
+            viewModel.onConfirmResult(
+                requestCode,
+                data ?: Intent()
+            )
         }
     }
 
@@ -157,9 +148,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
         val host = AuthActivityStarterHost.create(this)
-        lifecycleScope.launch {
-            viewModel.confirmStripeIntent(host, params)
-        }
+        viewModel.confirmStripeIntent(host, params)
     }
 
     private fun finishWithResult(result: GooglePayLauncher.Result) {
