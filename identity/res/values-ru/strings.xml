@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Не удалось получить изображение</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Детали не видны</string>
+  <string name="stripe_decrease_lighting_2">Перейдите в более темное место</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">значок камеры</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Документ не в фокусе</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Детали не видны</string>
+  <string name="stripe_reduce_glare_2">Постарайтесь, чтобы не было бликов и чтобы документ был хорошо виден</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Повторные фото</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

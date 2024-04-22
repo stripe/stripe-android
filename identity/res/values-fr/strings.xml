@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Impossible de prendre une photo</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Détails non visibles</string>
+  <string name="stripe_decrease_lighting_2">Prenez votre photo dans un endroit plus sombre</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">Icône d\'appareil photo</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">La pièce d\'identité est floue</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Détails non visibles</string>
+  <string name="stripe_reduce_glare_2">Essayez de réduire la luminosité et assurez-vous que la pièce d\'identité est visible</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Reprendre des photos</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

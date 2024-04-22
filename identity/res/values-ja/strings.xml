@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">画像をキャプチャーできませんでした</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">詳細が見えません</string>
+  <string name="stripe_decrease_lighting_2">もっと暗い場所に移動してください</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">カメラアイコン</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">身分証明書に焦点が合っていません</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">詳細が見えません</string>
+  <string name="stripe_reduce_glare_2">光の反射を抑えて、身分証明書が見えるようにしてください</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">写真を撮り直す</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

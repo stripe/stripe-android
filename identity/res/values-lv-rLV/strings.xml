@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Neizdevās uzņemt attēlu</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detaļas nav redzamas</string>
+  <string name="stripe_decrease_lighting_2">Pārvietojiet uz tumšāku vietu</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">kameras ikona</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">ID nav fokusēts</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaļas nav redzamas</string>
+  <string name="stripe_reduce_glare_2">Mēģiniet mazināt atspīdumu un pārliecinieties, ka ID ir redzams</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Uzņemt vēlreiz fotogrāfijas</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->
