@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -8,6 +9,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.address.AddressSchemas
 
 internal object PaymentMethodMetadataFactory {
     fun create(
@@ -22,6 +24,7 @@ internal object PaymentMethodMetadataFactory {
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
+        addressSchemas: AddressSchemas = AddressFixtures.ADDRESS_SCHEMA_ELEMENTS,
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -36,6 +39,7 @@ internal object PaymentMethodMetadataFactory {
             shippingDetails = shippingDetails,
             hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
+            addressSchemas = addressSchemas,
         )
     }
 

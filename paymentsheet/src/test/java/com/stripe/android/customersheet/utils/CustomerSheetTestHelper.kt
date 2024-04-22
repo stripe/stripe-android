@@ -19,6 +19,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.networking.StripeRepository
@@ -94,7 +95,8 @@ internal object CustomerSheetTestHelper {
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            merchantName = ""
+            merchantName = "",
+            addressSchemas = AddressFixtures.ADDRESS_SCHEMA_ELEMENTS,
         ),
         usBankAccountFormArguments = usBankAccountFormArguments,
         supportedPaymentMethods = listOf(

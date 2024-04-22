@@ -5,6 +5,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.AddressSchemas
 
 internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
@@ -15,4 +16,5 @@ internal data class FormArguments(
     val shippingDetails: AddressDetails? = null,
     val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
         PaymentSheet.BillingDetailsCollectionConfiguration(),
+    val addressSchemas: AddressSchemas,
 )

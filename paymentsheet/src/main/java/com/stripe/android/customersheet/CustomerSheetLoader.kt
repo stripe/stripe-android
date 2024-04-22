@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -37,6 +38,7 @@ internal class DefaultCustomerSheetLoader(
     @Named(IS_LIVE_MODE) private val isLiveModeProvider: () -> Boolean,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
+    private val addressRepository: AddressRepository,
     private val isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
     private val lpmRepository: LpmRepository,
     private val customerAdapterProvider: Deferred<CustomerAdapter>,
@@ -47,6 +49,7 @@ internal class DefaultCustomerSheetLoader(
         @Named(IS_LIVE_MODE) isLiveModeProvider: () -> Boolean,
         googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
         elementsSessionRepository: ElementsSessionRepository,
+        addressRepository: AddressRepository,
         isFinancialConnectionsAvailable: IsFinancialConnectionsAvailable,
         lpmRepository: LpmRepository,
         errorReporter: ErrorReporter,
@@ -54,6 +57,7 @@ internal class DefaultCustomerSheetLoader(
         isLiveModeProvider = isLiveModeProvider,
         googlePayRepositoryFactory = googlePayRepositoryFactory,
         elementsSessionRepository = elementsSessionRepository,
+        addressRepository = addressRepository,
         isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
         lpmRepository = lpmRepository,
         customerAdapterProvider = CustomerSheetHacks.adapter,
@@ -138,6 +142,7 @@ internal class DefaultCustomerSheetLoader(
                 shippingDetails = null,
                 hasCustomerConfiguration = true,
                 sharedDataSpecs = sharedDataSpecs,
+                addressSchemas = addressRepository.load(),
                 financialConnectionsAvailable = isFinancialConnectionsAvailable()
             )
 

@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -39,7 +40,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -379,7 +379,6 @@ private object TransformSpecToElementsFactory {
 
         return TransformSpecToElements(
             UiDefinitionFactory.Arguments(
-                addressRepository = mock(),
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,
@@ -389,6 +388,7 @@ private object TransformSpecToElementsFactory {
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
                 requiresMandate = requiresMandate,
+                addressSchemas = AddressFixtures.ADDRESS_SCHEMA_ELEMENTS,
             )
         )
     }

@@ -2,7 +2,7 @@ package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
-import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.address.AddressSchemas
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressType
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.StateFlow
 class CardBillingAddressElement(
     identifier: IdentifierSpec,
     rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-    addressRepository: AddressRepository,
+    addressSchemas: AddressSchemas,
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
@@ -34,7 +34,7 @@ class CardBillingAddressElement(
         BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : AddressElement(
     identifier,
-    addressRepository,
+    addressSchemas,
     rawValuesMap,
     AddressType.Normal(),
     countryCodes,

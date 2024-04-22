@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
 import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcomponent
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -21,6 +22,7 @@ internal class InputAddressViewModel @Inject constructor(
     val args: AddressElementActivityContract.Args,
     val navigator: AddressElementNavigator,
     private val eventReporter: AddressLauncherEventReporter,
+    private val addressRepository: AddressRepository,
     formControllerProvider: Provider<FormControllerSubcomponent.Builder>
 ) : ViewModel() {
     private val _collectedAddress = MutableStateFlow(args.config?.address)
@@ -51,6 +53,8 @@ internal class InputAddressViewModel @Inject constructor(
         }
 
         viewModelScope.launch {
+            val addressSchemas = addressRepository.load()
+
             collectedAddress.collect { addressDetails ->
                 val initialValues: Map<IdentifierSpec, String?> = addressDetails
                     ?.toIdentifierMap()
@@ -62,6 +66,7 @@ internal class InputAddressViewModel @Inject constructor(
                     .shippingValues(null)
                     .formSpec(buildFormSpec(addressDetails?.address?.line1 == null))
                     .initialValues(initialValues)
+                    .addressSchemas(addressSchemas)
                     .build().formController
             }
         }

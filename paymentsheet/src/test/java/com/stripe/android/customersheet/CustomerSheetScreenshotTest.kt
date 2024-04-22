@@ -7,6 +7,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -79,7 +80,8 @@ internal class CustomerSheetScreenshotTest {
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-            merchantName = ""
+            merchantName = "",
+            addressSchemas = AddressFixtures.ADDRESS_SCHEMA_ELEMENTS,
         ),
         usBankAccountFormArguments = usBankAccountFormArguments,
         supportedPaymentMethods = listOf(

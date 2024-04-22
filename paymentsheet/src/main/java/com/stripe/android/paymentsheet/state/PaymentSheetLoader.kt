@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -53,6 +54,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
     private val googlePayRepositoryFactory: @JvmSuppressWildcards (GooglePayEnvironment) -> GooglePayRepository,
     private val elementsSessionRepository: ElementsSessionRepository,
+    private val addressRepository: AddressRepository,
     private val customerRepository: CustomerRepository,
     private val lpmRepository: LpmRepository,
     private val logger: Logger,
@@ -99,6 +101,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
                 shippingDetails = paymentSheetConfiguration.shippingDetails,
                 hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
+                addressSchemas = addressRepository.load(),
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
             )
 

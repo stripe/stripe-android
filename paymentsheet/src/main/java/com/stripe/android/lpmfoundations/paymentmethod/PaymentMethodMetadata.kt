@@ -12,6 +12,7 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
+import com.stripe.android.uicore.address.AddressSchemas
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.parcelize.Parcelize
 
@@ -32,6 +33,7 @@ internal data class PaymentMethodMetadata(
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
     val hasCustomerConfiguration: Boolean,
+    val addressSchemas: AddressSchemas,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
     fun hasIntentToSetup(): Boolean {

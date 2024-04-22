@@ -73,7 +73,7 @@ internal class TransformSpecToElements(
                 is CountrySpec -> it.transform(arguments.initialValues)
                 is AddressSpec -> it.transform(
                     arguments.initialValues,
-                    arguments.addressRepository,
+                    arguments.addressSchemas,
                     arguments.shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(arguments.merchantName)

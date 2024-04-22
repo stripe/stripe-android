@@ -1,8 +1,11 @@
 package com.stripe.android.paymentsheet.addresselement
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.analytics.AddressLauncherEventReporter
+import com.stripe.android.uicore.address.AddressRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -19,6 +22,7 @@ import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import javax.inject.Provider
+import kotlin.coroutines.coroutineContext
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 
@@ -38,12 +42,13 @@ class InputAddressViewModelTest {
             whenever(merchantName(anyOrNull())).thenReturn(this)
             whenever(stripeIntent(anyOrNull())).thenReturn(this)
             whenever(shippingValues(anyOrNull())).thenReturn(this)
+            whenever(addressSchemas(anyOrNull())).thenReturn(this)
             whenever(build()).thenReturn(formControllerSubcomponent)
         }
     }
     private val eventReporter = mock<AddressLauncherEventReporter>()
 
-    private fun createViewModel(address: AddressDetails? = null): InputAddressViewModel {
+    private suspend fun createViewModel(address: AddressDetails? = null): InputAddressViewModel {
         address?.let {
             whenever(config.address).thenReturn(address)
         }
@@ -52,7 +57,15 @@ class InputAddressViewModelTest {
             args,
             navigator,
             eventReporter,
-            formControllerProvider
+            createAddressRepository(),
+            formControllerProvider,
+        )
+    }
+
+    private suspend fun createAddressRepository(): AddressRepository {
+        return AddressRepository(
+            resources = ApplicationProvider.getApplicationContext<Context>().resources,
+            workContext = coroutineContext
         )
     }
 

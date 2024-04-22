@@ -4,6 +4,7 @@ import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.ui.core.elements.LayoutSpec
+import com.stripe.android.uicore.address.AddressSchemas
 import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.BindsInstance
 import dagger.Subcomponent
@@ -33,6 +34,11 @@ internal interface FormControllerSubcomponent {
         @BindsInstance
         fun shippingValues(
             @Named(SHIPPING_VALUES) shippingAddress: Map<IdentifierSpec, String?>?
+        ): Builder
+
+        @BindsInstance
+        fun addressSchemas(
+            addressSchemas: AddressSchemas
         ): Builder
 
         @BindsInstance

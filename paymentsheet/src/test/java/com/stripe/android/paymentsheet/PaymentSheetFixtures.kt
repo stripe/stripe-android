@@ -4,6 +4,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import androidx.core.graphics.toColorInt
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -187,6 +188,7 @@ internal object PaymentSheetFixtures {
                 name = "Jenny Rosen",
                 phone = "+18008675309"
             ),
-            cbcEligibility = CardBrandChoiceEligibility.Ineligible
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            addressSchemas = AddressFixtures.ADDRESS_SCHEMA_ELEMENTS,
         )
 }

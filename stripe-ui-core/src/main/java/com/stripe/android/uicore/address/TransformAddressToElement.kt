@@ -1,5 +1,6 @@
 package com.stripe.android.uicore.address
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -18,6 +19,7 @@ import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldConfig
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -28,11 +30,12 @@ import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
+@Parcelize
 enum class FieldType(
     val serializedValue: String,
     val identifierSpec: IdentifierSpec,
     @StringRes val defaultLabel: Int
-) {
+) : Parcelable {
     @SerialName("addressLine1")
     AddressLine1(
         "addressLine1",
@@ -193,25 +196,27 @@ class StateSchema(
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-class FieldSchema(
+@Parcelize
+data class FieldSchema(
     @SerialName("isNumeric")
     val isNumeric: Boolean = false,
     @SerialName("examples")
     val examples: ArrayList<String> = arrayListOf(),
     @SerialName("nameType")
     val nameType: NameType // label,
-)
+) : Parcelable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-class CountryAddressSchema(
+@Parcelize
+data class CountryAddressSchema(
     @SerialName("type")
     val type: FieldType?,
     @SerialName("required")
     val required: Boolean,
     @SerialName("schema")
     val schema: FieldSchema? = null
-)
+) : Parcelable
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun parseAddressesSchema(inputStream: InputStream?) =

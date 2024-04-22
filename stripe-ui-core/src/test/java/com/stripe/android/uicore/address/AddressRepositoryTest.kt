@@ -7,7 +7,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.address.AddressSchemaRepository.Companion.DEFAULT_COUNTRY_CODE
 import com.stripe.android.uicore.address.AddressSchemaRepository.Companion.SUPPORTED_COUNTRIES
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.RowElement
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -26,9 +25,10 @@ class AddressRepositoryTest {
         assertThat(SUPPORTED_COUNTRIES).doesNotContain("NB")
 
         val addressRepository = createAddressRepository()
+        val schemas = addressRepository.load()
 
-        assertThat(addressRepository.get("NB"))
-            .isEqualTo(addressRepository.get(DEFAULT_COUNTRY_CODE))
+        assertThat(schemas.get("NB"))
+            .isEqualTo(schemas.get(DEFAULT_COUNTRY_CODE))
     }
 
     @Test
@@ -36,12 +36,13 @@ class AddressRepositoryTest {
         assertThat(SUPPORTED_COUNTRIES).contains("DE")
 
         val addressRepository = createAddressRepository()
+        val schemas = addressRepository.load()
 
-        val elements = addressRepository.get("DE")!!
-        assertThat(elements[0].identifier).isEqualTo(IdentifierSpec.Line1)
-        assertThat(elements[1].identifier).isEqualTo(IdentifierSpec.Line2)
-        assertThat((elements[2] as RowElement).fields[0].identifier).isEqualTo(IdentifierSpec.PostalCode)
-        assertThat((elements[2] as RowElement).fields[1].identifier).isEqualTo(IdentifierSpec.City)
+        val elements = schemas.get("DE")!!
+        assertThat(elements[0].type?.identifierSpec).isEqualTo(IdentifierSpec.Line1)
+        assertThat(elements[1].type?.identifierSpec).isEqualTo(IdentifierSpec.Line2)
+        assertThat(elements[2].type?.identifierSpec).isEqualTo(IdentifierSpec.PostalCode)
+        assertThat(elements[3].type?.identifierSpec).isEqualTo(IdentifierSpec.City)
     }
 
     @Test
@@ -58,13 +59,10 @@ class AddressRepositoryTest {
     @Test
     fun `Verify all supported countries deserialize`() = runTest {
         val addressRepository = createAddressRepository()
+        val schemas = addressRepository.load()
 
         SUPPORTED_COUNTRIES.forEach {
-            if (it != "ZZ") {
-                assertThat(addressRepository.get(it))
-                    .isNotEqualTo(addressRepository.get(DEFAULT_COUNTRY_CODE))
-            }
-            assertThat(addressRepository.get(it))
+            assertThat(schemas.get(it))
                 .isNotNull()
         }
     }

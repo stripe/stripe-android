@@ -16,6 +16,7 @@ import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createView
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
@@ -335,7 +336,8 @@ internal class CustomerSheetActivityTest {
             formArguments = FormArguments(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
-                merchantName = ""
+                merchantName = "",
+                addressSchemas = AddressFixtures.ADDRESS_SCHEMA_ELEMENTS,
             ),
             usBankAccountFormArguments = mock(),
             selectedPaymentMethod = card,

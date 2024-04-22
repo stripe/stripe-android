@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
@@ -12,6 +11,7 @@ import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.model.Address
+import com.stripe.android.model.AddressFixtures
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -27,7 +27,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
@@ -60,6 +59,7 @@ class USBankAccountFormViewModelTest {
                 email = CUSTOMER_EMAIL
             ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            addressSchemas = AddressFixtures.ADDRESS_SCHEMA_ELEMENTS,
         ),
         showCheckbox = false,
         isCompleteFlow = true,
@@ -1064,7 +1064,6 @@ class USBankAccountFormViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
-            addressRepository = createAddressRepository(),
         )
     }
 
@@ -1137,11 +1136,4 @@ class USBankAccountFormViewModelTest {
             country = "US",
         )
     }
-}
-
-private fun createAddressRepository(): AddressRepository {
-    return AddressRepository(
-        resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        workContext = Dispatchers.Unconfined,
-    )
 }

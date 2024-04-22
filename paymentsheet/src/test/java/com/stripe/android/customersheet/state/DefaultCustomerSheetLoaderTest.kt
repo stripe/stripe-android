@@ -1,6 +1,9 @@
 package com.stripe.android.customersheet.state
 
+import android.app.Application
 import androidx.lifecycle.testing.TestLifecycleOwner
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.customersheet.CustomerAdapter
@@ -24,6 +27,7 @@ import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Deferred
@@ -33,13 +37,16 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.withTimeout
 import org.junit.Before
 import org.junit.Test
+import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import kotlin.coroutines.coroutineContext
 import kotlin.time.Duration.Companion.milliseconds
 
 @Suppress("LargeClass")
 @OptIn(ExperimentalCustomerSheetApi::class)
+@RunWith(AndroidJUnit4::class)
 class DefaultCustomerSheetLoaderTest {
     private val lpmRepository = LpmRepository()
 
@@ -555,6 +562,7 @@ class DefaultCustomerSheetLoaderTest {
                 isCbcEligible = false,
             ),
             lpmRepository = lpmRepository,
+            addressRepository = createAddressRepository(),
             isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
         )
@@ -592,6 +600,7 @@ class DefaultCustomerSheetLoaderTest {
                 isCbcEligible = false,
             ),
             lpmRepository = lpmRepository,
+            addressRepository = createAddressRepository(),
             isFinancialConnectionsAvailable = { false },
             errorReporter = FakeErrorReporter(),
         )
@@ -672,7 +681,7 @@ class DefaultCustomerSheetLoaderTest {
         )
     }
 
-    private fun createCustomerSheetLoader(
+    private suspend fun createCustomerSheetLoader(
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
         isCbcEligible: Boolean = false,
@@ -699,7 +708,7 @@ class DefaultCustomerSheetLoaderTest {
         )
     }
 
-    private fun createCustomerSheetLoader(
+    private suspend fun createCustomerSheetLoader(
         customerAdapterProvider: Deferred<CustomerAdapter>,
         isGooglePayReady: Boolean = true,
         isLiveModeProvider: () -> Boolean = { false },
@@ -723,7 +732,15 @@ class DefaultCustomerSheetLoaderTest {
             lpmRepository = lpmRepository,
             isFinancialConnectionsAvailable = isFinancialConnectionsAvailable,
             customerAdapterProvider = customerAdapterProvider,
+            addressRepository = createAddressRepository(),
             errorReporter = errorReporter,
+        )
+    }
+
+    private suspend fun createAddressRepository(): AddressRepository {
+        return AddressRepository(
+            resources = ApplicationProvider.getApplicationContext<Application>().resources,
+            workContext = coroutineContext,
         )
     }
 

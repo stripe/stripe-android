@@ -1,5 +1,8 @@
 package com.stripe.android.paymentsheet.state
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -30,11 +33,13 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
@@ -44,9 +49,11 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
+import kotlin.coroutines.coroutineContext
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
+@RunWith(AndroidJUnit4::class)
 internal class DefaultPaymentSheetLoaderTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
@@ -113,6 +120,7 @@ internal class DefaultPaymentSheetLoaderTest {
                     allowsDelayedPaymentMethods = false,
                     sharedDataSpecs = emptyList(),
                     hasCustomerConfiguration = true,
+                    addressSchemas = createAddressRepository().load()
                 ),
             )
         )
@@ -1000,7 +1008,7 @@ internal class DefaultPaymentSheetLoaderTest {
         )
     }
 
-    private fun createPaymentSheetLoader(
+    private suspend fun createPaymentSheetLoader(
         isGooglePayReady: Boolean = true,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         customerRepo: CustomerRepository = customerRepository,
@@ -1032,6 +1040,7 @@ internal class DefaultPaymentSheetLoaderTest {
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
             linkStore = linkStore,
+            addressRepository = createAddressRepository(),
         )
     }
 
@@ -1050,6 +1059,13 @@ internal class DefaultPaymentSheetLoaderTest {
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 countryCode = CountryCode.US.value
             ).takeIf { isGooglePayEnabled }
+        )
+    }
+
+    private suspend fun createAddressRepository(): AddressRepository {
+        return AddressRepository(
+            resources = ApplicationProvider.getApplicationContext<Context>().resources,
+            workContext = coroutineContext,
         )
     }
 

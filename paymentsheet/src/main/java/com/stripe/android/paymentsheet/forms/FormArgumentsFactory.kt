@@ -7,6 +7,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.address.AddressSchemas
 
 internal object FormArgumentsFactory {
 
@@ -22,6 +23,7 @@ internal object FormArgumentsFactory {
             shippingDetails = metadata.shippingDetails,
             billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
             cbcEligibility = metadata.cbcEligibility,
+            addressSchemas = metadata.addressSchemas,
         )
     }
 
@@ -31,6 +33,7 @@ internal object FormArgumentsFactory {
         configuration: CustomerSheet.Configuration,
         merchantName: String,
         cbcEligibility: CardBrandChoiceEligibility,
+        addressSchemas: AddressSchemas,
     ): FormArguments {
         return FormArguments(
             paymentMethodCode = paymentMethodCode,
@@ -38,6 +41,7 @@ internal object FormArgumentsFactory {
             billingDetails = configuration.defaultBillingDetails,
             billingDetailsCollectionConfiguration = configuration.billingDetailsCollectionConfiguration,
             cbcEligibility = cbcEligibility,
+            addressSchemas = addressSchemas,
         )
     }
 }
