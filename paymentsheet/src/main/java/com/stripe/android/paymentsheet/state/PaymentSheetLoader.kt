@@ -71,6 +71,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
+            externalPaymentMethods = null,
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
@@ -241,8 +242,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
+        externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode)
+        return elementsSessionRepository.get(initializationMode, externalPaymentMethods)
     }
 
     private suspend fun loadLinkState(

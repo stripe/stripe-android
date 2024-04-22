@@ -1492,6 +1492,7 @@ class StripeApiRepository @JvmOverloads internal constructor(
             this["type"] = params.type
             params.clientSecret?.let { this["client_secret"] = it }
             params.locale.let { this["locale"] = it }
+            params.externalPaymentMethods?.takeIf { it.isNotEmpty() }?.let { this["external_payment_methods"] = it }
             (params as? ElementsSessionParams.DeferredIntentType)?.let { type ->
                 this.putAll(type.deferredIntentParams.toQueryParams())
             }
