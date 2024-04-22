@@ -160,6 +160,9 @@ interface ErrorReporter {
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),
+        EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE(
+            partialEventName = "elements.external_payment_methods_serializer.error"
+        ),
         ;
 
         override val eventName: String

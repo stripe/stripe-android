@@ -36,6 +36,7 @@ internal object PaymentMethodMetadataFactory {
             shippingDetails = shippingDetails,
             hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
+            externalPaymentMethodSpecs = emptyList(),
         )
     }
 
