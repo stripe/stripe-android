@@ -5,7 +5,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
@@ -64,10 +66,12 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
-            viewModel.googlePayLaunchTask.collect { task ->
-                if (task != null) {
-                    payWithGoogle(task)
-                    viewModel.markTaskAsLaunched()
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.googlePayLaunchTask.collect { task ->
+                    if (task != null) {
+                        payWithGoogle(task)
+                        viewModel.markTaskAsLaunched()
+                    }
                 }
             }
         }
