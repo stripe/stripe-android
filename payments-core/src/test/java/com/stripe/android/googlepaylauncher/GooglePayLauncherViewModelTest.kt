@@ -29,7 +29,6 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.testing.AbsPaymentController
 import com.stripe.android.testing.FakeErrorReporter
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -72,7 +71,6 @@ class GooglePayLauncherViewModelTest {
         runTest {
             googlePayRepository.value = false
             createViewModel().googlePayResult.test {
-                assertThat(awaitItem()).isNull() // Initial Value.
                 testDispatcher.scheduler.advanceUntilIdle()
                 val failed = awaitItem() as GooglePayLauncher.Result.Failed
                 val error = failed.error
@@ -84,7 +82,6 @@ class GooglePayLauncherViewModelTest {
     @Test
     fun `googlePayLaunchTask should return task when Google Pay is available`() = runTest {
         createViewModel().googlePayLaunchTask.test {
-            assertThat(awaitItem()).isNull() // Initial Value.
             testDispatcher.scheduler.advanceUntilIdle()
             assertThat(awaitItem()).isNotNull()
         }
@@ -135,7 +132,6 @@ class GooglePayLauncherViewModelTest {
         val viewModel = createViewModel()
 
         viewModel.googlePayLaunchTask.test {
-            assertThat(awaitItem()).isNull() // Initial Value.
             testDispatcher.scheduler.advanceUntilIdle()
             assertThat(awaitItem()).isNotNull()
             assertThat(savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY)).isNull()
@@ -149,7 +145,10 @@ class GooglePayLauncherViewModelTest {
     fun `hasLaunched=true prevents initial loading of googlePayLaunchTask`() = runTest {
         savedStateHandle[HAS_LAUNCHED_KEY] = true
         val viewModel = createViewModel()
-        assertThat(viewModel.googlePayLaunchTask.first()).isNull()
+        viewModel.googlePayLaunchTask.test {
+            testDispatcher.scheduler.advanceUntilIdle()
+            expectNoEvents() // We already launched, so we don't expect an emission here.
+        }
     }
 
     @Test

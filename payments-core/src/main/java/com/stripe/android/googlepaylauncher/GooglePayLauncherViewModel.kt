@@ -35,9 +35,8 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
@@ -64,18 +63,18 @@ internal class GooglePayLauncherViewModel(
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    private val _googleResult = MutableStateFlow<GooglePayLauncher.Result?>(null)
+    private val _googleResult = MutableSharedFlow<GooglePayLauncher.Result?>(replay = 1)
     internal val googlePayResult = _googleResult.asSharedFlow()
 
-    private val _googlePayLaunchTask = MutableStateFlow<Task<PaymentData>?>(null)
-    val googlePayLaunchTask = _googlePayLaunchTask.asStateFlow()
+    private val _googlePayLaunchTask = MutableSharedFlow<Task<PaymentData>?>(replay = 1)
+    val googlePayLaunchTask = _googlePayLaunchTask.asSharedFlow()
 
     init {
         viewModelScope.launch(workContext) {
             if (!hasLaunched) {
                 createLoadPaymentDataTask().fold(
                     onSuccess = {
-                        _googlePayLaunchTask.value = it
+                        _googlePayLaunchTask.emit(it)
                     },
                     onFailure = {
                         updateResult(
@@ -88,7 +87,7 @@ internal class GooglePayLauncherViewModel(
     }
 
     fun updateResult(result: GooglePayLauncher.Result) {
-        _googleResult.value = result
+        _googleResult.tryEmit(result)
     }
 
     @VisibleForTesting
@@ -225,7 +224,7 @@ internal class GooglePayLauncherViewModel(
     ) {
         viewModelScope.launch(workContext) {
             val result = getResultFromConfirmation(requestCode, data)
-            _googleResult.value = result
+            _googleResult.emit(result)
         }
     }
 
@@ -260,7 +259,7 @@ internal class GooglePayLauncherViewModel(
 
     fun markTaskAsLaunched() {
         hasLaunched = true
-        _googlePayLaunchTask.value = null
+        _googlePayLaunchTask.tryEmit(null)
     }
 
     internal class Factory(
