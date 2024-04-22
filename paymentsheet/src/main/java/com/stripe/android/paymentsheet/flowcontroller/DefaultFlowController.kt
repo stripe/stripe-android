@@ -384,14 +384,13 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
-        val paymentLauncher = requireNotNull(paymentLauncher)
         when (confirmStripeIntentParams) {
             is ConfirmPaymentIntentParams -> {
-                paymentLauncher.confirm(confirmStripeIntentParams)
+                paymentLauncher?.confirm(confirmStripeIntentParams)
             }
 
             is ConfirmSetupIntentParams -> {
-                paymentLauncher.confirm(confirmStripeIntentParams)
+                paymentLauncher?.confirm(confirmStripeIntentParams)
             }
         }
     }
@@ -400,14 +399,13 @@ internal class DefaultFlowController @Inject internal constructor(
         clientSecret: String,
         stripeIntent: StripeIntent,
     ) {
-        val paymentLauncher = requireNotNull(paymentLauncher)
         when (stripeIntent) {
             is PaymentIntent -> {
-                paymentLauncher.handleNextActionForPaymentIntent(clientSecret)
+                paymentLauncher?.handleNextActionForPaymentIntent(clientSecret)
             }
 
             is SetupIntent -> {
-                paymentLauncher.handleNextActionForSetupIntent(clientSecret)
+                paymentLauncher?.handleNextActionForSetupIntent(clientSecret)
             }
         }
     }
