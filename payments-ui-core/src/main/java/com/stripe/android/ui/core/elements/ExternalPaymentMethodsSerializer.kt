@@ -10,10 +10,6 @@ internal object ExternalPaymentMethodsSerializer {
 
     private val format = Json {
         ignoreUnknownKeys = true
-        classDiscriminator = "#class"
-
-        // needed so that null values in the spec are parsed correctly
-        coerceInputValues = true
     }
 
     @WorkerThread
