@@ -221,9 +221,7 @@ internal class CustomerSheetViewModel(
     fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
             paymentMethodMetadata?.supportedPaymentMethodForCode(code)
-        }?.displayNameResource?.let {
-            resources.getString(it)
-        }.orEmpty()
+        }?.displayName?.resolve(context = application).orEmpty()
     }
 
     fun registerFromActivity(
@@ -455,7 +453,7 @@ internal class CustomerSheetViewModel(
                     ),
                     primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
                     draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
-                        resources = resources,
+                        context = application,
                         paymentMethod = it.selectedPaymentMethod,
                         paymentMethodMetadata = paymentMethodMetadata
                     )
