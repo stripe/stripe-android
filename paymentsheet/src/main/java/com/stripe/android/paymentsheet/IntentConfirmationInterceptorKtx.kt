@@ -32,10 +32,16 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 requiresSaveOnConfirmation = paymentSelection.requiresSaveOnConfirmation,
             )
         }
+        null -> {
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = IllegalStateException("Nothing selected."),
+                message = context.getString(R.string.stripe_something_went_wrong),
+            )
+        }
         else -> {
             val exception =
                 IllegalStateException("Attempting to confirm intent for invalid payment selection: $paymentSelection")
-            val paymentSelectionName = paymentSelection?.javaClass?.name ?: "empty"
+            val paymentSelectionName = paymentSelection.javaClass.name
             val errorReporter = ErrorReporter.createFallbackInstance(context)
             errorReporter.report(
                 errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION,
