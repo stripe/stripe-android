@@ -4,6 +4,9 @@
 
 ## 20.41.1 - 2024-04-22
 
+### PaymentSheet
+* [FIXED][8297](https://github.com/stripe/stripe-android/pull/8297) Improve `PaymentSheet` and `CustomerSheet` loading user experience.
+
 ## 20.41.0 - 2024-04-15
 
 ### PaymentSheet
