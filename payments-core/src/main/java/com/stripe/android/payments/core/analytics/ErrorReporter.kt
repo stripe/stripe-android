@@ -160,6 +160,9 @@ interface ErrorReporter {
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),
+        INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
+            partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
+        ),
         ;
 
         override val eventName: String

@@ -102,6 +102,7 @@ class DefaultIntentConfirmationInterceptorTest {
                     requiresSaveOnConfirmation = true
                 ),
                 shippingValues = null,
+                context = context,
             )
 
             val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
