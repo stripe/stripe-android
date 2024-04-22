@@ -281,6 +281,7 @@ class USBankAccountFormViewModelTest {
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
                     input = input,
+                    instantDebits = null,
                     screenState = USBankAccountFormScreenState.SavedAccount(
                         financialConnectionsSessionId = "session_1234",
                         intentId = "intent_1234",
@@ -332,6 +333,7 @@ class USBankAccountFormViewModelTest {
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
                     input = input,
+                    instantDebits = null,
                     screenState = USBankAccountFormScreenState.SavedAccount(
                         financialConnectionsSessionId = "session_1234",
                         intentId = "intent_1234",
@@ -384,7 +386,7 @@ class USBankAccountFormViewModelTest {
                 isProcessing = false,
             ),
             USBankAccountFormScreenState.MandateCollection(
-                financialConnectionsSessionId = "session_1234",
+                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.Session("session_1234"),
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = null,
@@ -426,6 +428,7 @@ class USBankAccountFormViewModelTest {
                             address = CUSTOMER_ADDRESS.asAddressModel(),
                             saveForFutureUse = true,
                         ),
+                        instantDebits = null,
                         screenState = screenState,
                     )
                 )
@@ -452,6 +455,7 @@ class USBankAccountFormViewModelTest {
                             address = null,
                             saveForFutureUse = false,
                         ),
+                        instantDebits = null,
                         screenState = USBankAccountFormScreenState.SavedAccount(
                             financialConnectionsSessionId = "session_1234",
                             intentId = "intent_1234",

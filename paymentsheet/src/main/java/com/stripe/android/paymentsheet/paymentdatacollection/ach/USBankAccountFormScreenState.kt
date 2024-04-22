@@ -25,9 +25,9 @@ internal sealed class USBankAccountFormScreenState(
 
     @Parcelize
     data class MandateCollection(
-        val bankName: String,
+        val resultIdentifier: ResultIdentifier,
+        val bankName: String?,
         val last4: String?,
-        val financialConnectionsSessionId: String,
         val intentId: String?,
         override val primaryButtonText: String,
         override val mandateText: String?,
@@ -51,4 +51,12 @@ internal sealed class USBankAccountFormScreenState(
         override val primaryButtonText: String,
         override val mandateText: String?,
     ) : USBankAccountFormScreenState()
+
+    internal sealed interface ResultIdentifier : Parcelable {
+        @Parcelize
+        data class Session(val id: String) : ResultIdentifier
+
+        @Parcelize
+        data class PaymentMethod(val id: String) : ResultIdentifier
+    }
 }
