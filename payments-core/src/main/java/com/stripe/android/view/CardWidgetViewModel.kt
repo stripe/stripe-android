@@ -55,7 +55,7 @@ internal class CardWidgetViewModel(
         return config?.cardBrandChoice?.eligible ?: false
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory : ViewModelProvider.AndroidViewModelFactory() {
 
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             val context = extras.requireApplication()

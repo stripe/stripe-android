@@ -565,7 +565,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     internal class Factory(
         private val argsSupplier: () -> Args,
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

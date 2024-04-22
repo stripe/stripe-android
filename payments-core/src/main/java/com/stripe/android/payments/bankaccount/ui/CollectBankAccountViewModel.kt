@@ -232,7 +232,7 @@ internal class CollectBankAccountViewModel @Inject constructor(
 
     class Factory(
         private val argsSupplier: () -> CollectBankAccountContract.Args,
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

@@ -298,7 +298,7 @@ internal sealed class NextStep {
 
 internal class Stripe3ds2TransactionViewModelFactory(
     private val argsSupplier: () -> Stripe3ds2TransactionContract.Args,
-) : ViewModelProvider.Factory {
+) : ViewModelProvider.AndroidViewModelFactory() {
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

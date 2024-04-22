@@ -133,7 +133,7 @@ internal class PaymentMethodsViewModel(
         private val customerSession: Result<CustomerSession>,
         private val initialPaymentMethodId: String?,
         private val startedFromPaymentSession: Boolean
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return PaymentMethodsViewModel(

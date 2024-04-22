@@ -251,7 +251,7 @@ internal class PaymentSessionViewModel(
     internal class Factory(
         private val paymentSessionData: PaymentSessionData,
         private val customerSession: CustomerSession
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

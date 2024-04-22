@@ -37,7 +37,7 @@ internal class FpxViewModel internal constructor(
 
     internal class Factory(
         private val application: Application
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>): T {
             val publishableKey = PaymentConfiguration.getInstance(application).publishableKey

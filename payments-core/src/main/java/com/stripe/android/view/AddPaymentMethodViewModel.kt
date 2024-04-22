@@ -142,7 +142,7 @@ internal class AddPaymentMethodViewModel(
     internal class Factory(
         private val stripe: Stripe,
         private val args: AddPaymentMethodActivityStarter.Args
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
             return AddPaymentMethodViewModel(

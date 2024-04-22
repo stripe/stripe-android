@@ -120,7 +120,7 @@ internal class StripeBrowserLauncherViewModel(
         )
     }
 
-    class Factory : ViewModelProvider.Factory {
+    class Factory : ViewModelProvider.AndroidViewModelFactory() {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

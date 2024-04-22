@@ -241,7 +241,7 @@ internal class GooglePayLauncherViewModel(
         private val args: GooglePayLauncherContract.Args,
         private val enableLogging: Boolean = false,
         private val workContext: CoroutineContext = Dispatchers.IO,
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {

@@ -344,7 +344,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     internal class Factory(
         private val starterArgsSupplier: () -> PaymentOptionContract.Args,
-    ) : ViewModelProvider.Factory {
+    ) : ViewModelProvider.AndroidViewModelFactory() {
 
         @Suppress("UNCHECKED_CAST")
         override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
