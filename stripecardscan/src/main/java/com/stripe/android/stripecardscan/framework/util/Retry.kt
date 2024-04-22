@@ -1,8 +1,8 @@
 package com.stripe.android.stripecardscan.framework.util
 
-import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.camera.framework.util.UnexpectedRetryException
 import kotlinx.coroutines.delay
+import kotlin.time.Duration
 
 private const val DEFAULT_RETRIES = 3
 
@@ -34,7 +34,7 @@ internal suspend fun <T> retry(
                 throw t
             }
             if (attempt < times) {
-                delay(retryDelayFunction(attempt, times).inMilliseconds.toLong())
+                delay(retryDelayFunction(attempt, times).inWholeMilliseconds)
             }
         }
     }
