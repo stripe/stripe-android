@@ -11,6 +11,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
 import com.stripe.android.utils.rememberActivity
 
+// TODO: update javadoc
 /**
  * Creates a [PaymentSheet] that is remembered across compositions.
  *
@@ -21,6 +22,7 @@ import com.stripe.android.utils.rememberActivity
 @Composable
 fun rememberPaymentSheet(
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
 ): PaymentSheet {
     val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
@@ -47,6 +49,7 @@ fun rememberPaymentSheet(
     }
 }
 
+// TODO: update javadoc
 /**
  * Creates a [PaymentSheet] that is remembered across compositions. Use this method when you intend
  * to create the [com.stripe.android.model.PaymentIntent] or [com.stripe.android.model.SetupIntent]
@@ -61,6 +64,7 @@ fun rememberPaymentSheet(
 fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
 ): PaymentSheet {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
     return rememberPaymentSheet(paymentResultCallback)

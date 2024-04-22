@@ -38,9 +38,11 @@ class PaymentSheet internal constructor(
      * @param activity The Activity that is presenting [PaymentSheet].
      * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
      */
+    @JvmOverloads
     constructor(
         activity: ComponentActivity,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     )
@@ -54,10 +56,12 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
+    @JvmOverloads
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
+        externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
@@ -70,9 +74,11 @@ class PaymentSheet internal constructor(
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
      */
+    @JvmOverloads
     constructor(
         fragment: Fragment,
-        callback: PaymentSheetResultCallback
+        callback: PaymentSheetResultCallback,
+        externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     )
@@ -86,10 +92,12 @@ class PaymentSheet internal constructor(
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
      */
+    @JvmOverloads
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
+        externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
@@ -438,10 +446,13 @@ class PaymentSheet internal constructor(
          */
         val preferredNetworks: List<CardBrand> = ConfigurationDefaults.preferredNetworks,
 
+
         internal val allowsRemovalOfLastSavedPaymentMethod: Boolean =
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+
+        internal val externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods,
     ) : Parcelable {
 
         @JvmOverloads
@@ -563,6 +574,7 @@ class PaymentSheet internal constructor(
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             preferredNetworks = preferredNetworks,
             allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+            externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
         )
 
         /**
@@ -588,6 +600,7 @@ class PaymentSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            private var externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -662,6 +675,10 @@ class PaymentSheet internal constructor(
                 this.paymentMethodOrder = paymentMethodOrder
             }
 
+            fun externalPaymentMethods(externalPaymentMethods: List<String>?): Builder = apply {
+                this.externalPaymentMethods = externalPaymentMethods
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -677,6 +694,7 @@ class PaymentSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
+                externalPaymentMethods = externalPaymentMethods,
             )
         }
 

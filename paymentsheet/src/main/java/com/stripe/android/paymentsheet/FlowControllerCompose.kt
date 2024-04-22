@@ -9,6 +9,7 @@ import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.utils.rememberActivity
 
+// TODO: update javadoc
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions.
  *
@@ -21,6 +22,7 @@ import com.stripe.android.utils.rememberActivity
 fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
 ): PaymentSheet.FlowController {
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
@@ -48,6 +50,7 @@ fun rememberPaymentSheetFlowController(
     }
 }
 
+// TODO: update javadoc
 /**
  * Creates a [PaymentSheet.FlowController] that is remembered across compositions. Use this method
  * when you intend to create the [com.stripe.android.model.PaymentIntent] or
@@ -64,6 +67,7 @@ fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodHandler: ExternalPaymentMethodHandler? = null,
 ): PaymentSheet.FlowController {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
     return rememberPaymentSheetFlowController(
