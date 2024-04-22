@@ -41,12 +41,10 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
         else -> {
             val exception =
                 IllegalStateException("Attempting to confirm intent for invalid payment selection: $paymentSelection")
-            val paymentSelectionName = paymentSelection.javaClass.name
             val errorReporter = ErrorReporter.createFallbackInstance(context)
             errorReporter.report(
                 errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION,
                 stripeException = StripeException.create(exception),
-                additionalNonPiiParams = mapOf("payment_section" to paymentSelectionName)
             )
             IntentConfirmationInterceptor.NextStep.Fail(
                 cause = exception,

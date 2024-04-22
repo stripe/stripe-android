@@ -69,10 +69,7 @@ abstract class StripeException(
 
         private fun analyticsValueForThrowable(throwable: Throwable): String? {
             val throwableClass = throwable.javaClass
-            if (throwableClass.name.startsWith("android.")) {
-                return throwableClass.name
-            }
-            if (throwableClass.name.startsWith("java.")) {
+            if (throwableClass.name.startsWith("android.") || throwableClass.name.startsWith("java.")) {
                 return throwableClass.name
             }
             return null
