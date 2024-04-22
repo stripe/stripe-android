@@ -1,6 +1,10 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 
@@ -8,6 +12,7 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
     initializationMode: PaymentSheet.InitializationMode,
     paymentSelection: PaymentSelection?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    context: Context,
 ): IntentConfirmationInterceptor.NextStep {
     return when (paymentSelection) {
         is PaymentSelection.New -> {
@@ -28,7 +33,19 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
             )
         }
         else -> {
-            error("Attempting to confirm intent for invalid payment selection: $paymentSelection")
+            val exception =
+                IllegalStateException("Attempting to confirm intent for invalid payment selection: $paymentSelection")
+            val paymentSelectionName = paymentSelection?.javaClass?.name ?: "empty"
+            val errorReporter = ErrorReporter.createFallbackInstance(context)
+            errorReporter.report(
+                errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION,
+                stripeException = StripeException.create(exception),
+                additionalNonPiiParams = mapOf("payment_section" to paymentSelectionName)
+            )
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = exception,
+                message = context.getString(R.string.stripe_something_went_wrong),
+            )
         }
     }
 }
