@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Fotoğraf alınamadı</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Ayrıntılar görünmüyor</string>
+  <string name="stripe_decrease_lighting_2">Daha karanlık bir yere geçin</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">kamera simgesi</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Kimlik odakta değil</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Ayrıntılar görünmüyor</string>
+  <string name="stripe_reduce_glare_2">Parlamayı azaltmaya ve kimlik kartını görünür hale getirmeye çalışın</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Fotoğrafları Tekrar Çek</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

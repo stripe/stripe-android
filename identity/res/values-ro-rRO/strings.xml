@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Nu s-a putut capta imaginea</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Datele nu sunt vizibile</string>
+  <string name="stripe_decrease_lighting_2">Mutați-vă într-o zonă mai întunecată</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">pictogramă cameră</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Documentul de identitate nu este focalizat</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Informațiile nu sunt vizibile</string>
+  <string name="stripe_reduce_glare_2">Încercați să reduceți strălucirea și să faceți vizibil documentul de identitate</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Faceți din nou fotografii</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

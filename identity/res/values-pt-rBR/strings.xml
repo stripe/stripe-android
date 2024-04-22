@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Não foi possível capturar a imagem</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detalhes não visíveis</string>
+  <string name="stripe_decrease_lighting_2">Mova para uma área mais escura</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">ícone de câmera</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Documento fora de foco</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detalhes não visíveis</string>
+  <string name="stripe_reduce_glare_2">Tente reduzir o brilho e tornar o documento visível</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Tirar fotos novamente</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

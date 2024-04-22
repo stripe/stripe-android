@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">이미지를 캡처할 수 없음</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">세부사항이 보이지 않음</string>
+  <string name="stripe_decrease_lighting_2">조명이 어두운 곳으로 이동해 주십시오</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">카메라 아이콘</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">신분증의 초점이 맞지 않음</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">세부사항이 보이지 않음</string>
+  <string name="stripe_reduce_glare_2">반사광을 줄이고 신분증이 보이도록 해 주십시오</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">사진 다시 찍기</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->
