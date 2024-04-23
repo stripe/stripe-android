@@ -76,7 +76,7 @@ import javax.inject.Provider
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val viewModelScope: CoroutineScope,
-    lifecycleOwner: LifecycleOwner,
+    private val lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -251,18 +251,38 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    override fun presentPaymentOptions() {
-        val state = viewModel.state ?: error(
-            "FlowController must be successfully initialized " +
-                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
-                "configureWithIntentConfiguration() before calling presentPaymentOptions()."
-        )
+    private fun currentStateForPresenting(): Result<PaymentSheetState.Full> {
+        val state = viewModel.state
+            ?: return Result.failure(
+                IllegalStateException(
+                    "FlowController must be successfully initialized " +
+                        "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                        "configureWithIntentConfiguration() before calling presentPaymentOptions()."
+                )
+            )
 
         if (!configurationHandler.isConfigured) {
-            // For now, we fail silently in these situations. In the future, we should either log
-            // or emit an event in a to-be-added event listener.
-            return
+            return Result.failure(
+                IllegalStateException(
+                    "FlowController is not configured, or has a configuration update in flight."
+                )
+            )
         }
+
+        return Result.success(state)
+    }
+
+    override fun presentPaymentOptions() {
+        val stateResult = currentStateForPresenting()
+        val state = stateResult.fold(
+            onSuccess = {
+                it
+            },
+            onFailure = {
+                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(it))
+                return
+            }
+        )
 
         val args = PaymentOptionContract.Args(
             state = state.copy(paymentSelection = viewModel.paymentSelection),
@@ -277,7 +297,12 @@ internal class DefaultFlowController @Inject internal constructor(
             AnimationConstants.FADE_OUT,
         )
 
-        paymentOptionActivityLauncher.launch(args, options)
+        try {
+            paymentOptionActivityLauncher.launch(args, options)
+        } catch (e: IllegalStateException) {
+            val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
+            paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
+        }
     }
 
     override fun confirm() {
