@@ -45,7 +45,7 @@ class AddressElementTest {
                 shippingValuesMap = null
             )
 
-            var postalCodeController = addressElement.fields.usZipController()
+            var postalCodeController = addressElement.fields.postalCodeController()
 
             countryDropdownFieldController.onValueChange(0)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -61,7 +61,7 @@ class AddressElementTest {
             countryDropdownFieldController.onValueChange(1)
             ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
 
-            postalCodeController = addressElement.fields.canadaPostalCodeController()
+            postalCodeController = addressElement.fields.postalCodeController()
 
             postalCodeController.onValueChange("6E7")
             postalCodeController.onFocusChange(false)
@@ -81,7 +81,7 @@ class AddressElementTest {
             shippingValuesMap = null
         )
         val formFieldValueFlow = addressElement.getFormFieldValueFlow()
-        var postalCodeController = addressElement.fields.usZipController()
+        var postalCodeController = addressElement.fields.postalCodeController()
 
         countryDropdownFieldController.onValueChange(0)
 
@@ -100,7 +100,7 @@ class AddressElementTest {
         countryDropdownFieldController.onValueChange(1)
 
         // Add values to the fields
-        postalCodeController = addressElement.fields.canadaPostalCodeController()
+        postalCodeController = addressElement.fields.postalCodeController()
         postalCodeController.onValueChange("A1B2C3")
 
         ShadowLooper.runUiThreadTasksIncludingDelayedTasks()
@@ -511,12 +511,20 @@ class AddressElementTest {
     }
 }
 
-private suspend fun Flow<List<SectionFieldElement>>.usZipController(): TextFieldController {
-    return (first()[3] as RowElement).fields[1].controller as TextFieldController
-}
+private suspend fun Flow<List<SectionFieldElement>>.postalCodeController(): TextFieldController {
+    val fields = first()
 
-private suspend fun Flow<List<SectionFieldElement>>.canadaPostalCodeController(): TextFieldController {
-    return (first()[5] as SimpleTextElement).controller
+    val element = fields.map { element ->
+        if (element is RowElement) {
+            element.fields
+        } else {
+            listOf(element)
+        }
+    }.flatten().find { element ->
+        element.identifier == IdentifierSpec.PostalCode
+    }
+
+    return (element as SimpleTextElement).controller
 }
 
 private suspend fun AddressElement.trailingIconFor(
