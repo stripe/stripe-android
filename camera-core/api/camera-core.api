@@ -20,10 +20,6 @@ public final class com/stripe/android/camera/framework/time/EpochMillisecondsTim
 	public fun <init> (J)V
 }
 
-public final class com/stripe/android/camera/framework/time/EpochMillisecondsTimeSourceKt {
-	public static final fun asEpochMillisecondsComparableTimeMark (J)Lkotlin/time/ComparableTimeMark;
-}
-
 public final class com/stripe/android/camera/framework/util/MemoizeKt {
 	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
 	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
