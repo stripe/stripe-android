@@ -33,6 +33,7 @@ internal class FakeElementsSessionRepository(
                     isEligibleForCardBrandChoice = isCbcEligible,
                     isGooglePayEnabled = isGooglePayEnabled,
                     sessionsError = sessionsError,
+                    externalPaymentMethodData = null,
                 )
             )
         }

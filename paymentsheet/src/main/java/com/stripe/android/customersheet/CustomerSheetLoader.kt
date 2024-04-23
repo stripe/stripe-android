@@ -138,7 +138,8 @@ internal class DefaultCustomerSheetLoader(
                 shippingDetails = null,
                 hasCustomerConfiguration = true,
                 sharedDataSpecs = sharedDataSpecs,
-                financialConnectionsAvailable = isFinancialConnectionsAvailable()
+                financialConnectionsAvailable = isFinancialConnectionsAvailable(),
+                externalPaymentMethodSpecs = emptyList(),
             )
 
             ElementsSessionWithMetadata(elementsSession = elementsSession, metadata = metadata)

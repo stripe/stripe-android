@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -60,6 +61,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val linkStore: LinkStore,
+    private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -87,6 +89,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             )
+            val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+                elementsSession.externalPaymentMethodData
+            )
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
@@ -100,6 +105,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 shippingDetails = paymentSheetConfiguration.shippingDetails,
                 hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs
             )
 
             if (sharedDataSpecsResult.failedToParseServerResponse) {

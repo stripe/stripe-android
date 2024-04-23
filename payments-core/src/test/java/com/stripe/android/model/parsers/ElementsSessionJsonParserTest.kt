@@ -449,6 +449,39 @@ class ElementsSessionJsonParserTest {
     }
 
     @Test
+    fun `ElementsSesssion has no external payment methods when they are not included in response`() {
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = listOf("external_venmo"),
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.EXPANDED_PAYMENT_INTENT_JSON
+        val session = parser.parse(intent)
+
+        assertThat(session?.externalPaymentMethodData).isNull()
+    }
+
+    @Test
+    fun `ElementsSession has external payment methods when they are included in response`() {
+        val venmo = "external_venmo"
+        val parser = ElementsSessionJsonParser(
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = "secret",
+                externalPaymentMethods = listOf(venmo),
+            ),
+            apiKey = "test",
+        )
+
+        val intent = ElementsSessionFixtures.PAYMENT_INTENT_WITH_EXTERNAL_VENMO_JSON
+        val session = parser.parse(intent)
+
+        assertThat(session?.externalPaymentMethodData).contains(venmo)
+    }
+
+    @Test
     fun parsePaymentIntent_shouldCreateObjectWithCorrectGooglePayEnabled() {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
