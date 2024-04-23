@@ -16,61 +16,6 @@ public final class com/stripe/android/camera/framework/AnalyzerPool$Companion {
 	public static synthetic fun of$default (Lcom/stripe/android/camera/framework/AnalyzerPool$Companion;Lcom/stripe/android/camera/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public final class com/stripe/android/camera/framework/time/EpochMillisecondsTimeSource : kotlin/time/AbstractLongTimeSource {
-	public fun <init> (J)V
-}
-
-public final class com/stripe/android/camera/framework/util/MemoizeKt {
-	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
-	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun cacheFirstResult (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun cacheFirstResultSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
-	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
-	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun cachedFirstResult (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
-	public static final fun memoize (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
-	public static final fun memoize (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoize (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoize (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
-	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
-	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
-	public static final fun memoized (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
-	public static final fun memoized (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoized (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoized (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function0;J)Lkotlin/jvm/functions/Function0;
-	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function1;J)Lkotlin/jvm/functions/Function1;
-	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function2;J)Lkotlin/jvm/functions/Function2;
-	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function3;J)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
-	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function1;J)Lkotlin/jvm/functions/Function1;
-	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function2;J)Lkotlin/jvm/functions/Function2;
-	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function3;J)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function4;J)Lkotlin/jvm/functions/Function4;
-}
-
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {
 	public fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;)V
 	public synthetic fun <init> (Landroid/content/Context;Landroid/util/AttributeSet;ILkotlin/jvm/internal/DefaultConstructorMarker;)V

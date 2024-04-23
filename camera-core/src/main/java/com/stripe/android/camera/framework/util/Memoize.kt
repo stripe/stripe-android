@@ -1,5 +1,8 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.camera.framework.util
 
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.ComparableTimeMark
