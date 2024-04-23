@@ -50,7 +50,7 @@ internal class PaymentOptionFactory @Inject constructor(
             loadIcon(darkThemeIconUrl)
         } else if (lightThemeIconUrl != null) {
             loadIcon(lightThemeIconUrl)
-        } else if (paymentOption.drawableResourceId == MISSING_DRAWABLE_RESOURCE) {
+        } else if (@Suppress("DEPRECATION") paymentOption.drawableResourceId == MISSING_DRAWABLE_RESOURCE) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.PAYMENT_OPTION_MISSING_ICON_URL_AND_RES,
                 additionalNonPiiParams = mapOf("payment_option" to paymentOption.label)
