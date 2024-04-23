@@ -13,8 +13,6 @@ import com.stripe.android.uicore.elements.TextFieldController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
-import java.io.File
-import java.security.InvalidParameterException
 import com.stripe.android.core.R as CoreR
 
 class TransformAddressToElementTest {
@@ -22,14 +20,13 @@ class TransformAddressToElementTest {
         val apiPath: IdentifierSpec,
         val label: Int,
         val keyboardCapitalization: KeyboardCapitalization,
-        val keyboardType: androidx.compose.ui.text.input.KeyboardType,
+        val keyboardType: KeyboardType,
         val showOptionalLabel: Boolean
     )
 
     @Test
-    fun `Read US Json`() = runBlocking {
-        val addressSchema = readFile("src/main/assets/addressinfo/US.json")!!
-        val simpleTextList = addressSchema.transformToElementList("US")
+    fun `Read US schema`() = runBlocking {
+        val simpleTextList = AddressSchemaRegistry.get("US")!!.transformToElementList("US")
 
         val addressLine1 = TestTextSpec(
             IdentifierSpec.Line1,
@@ -93,6 +90,35 @@ class TransformAddressToElementTest {
         )
     }
 
+    @Test
+    fun `Make sure name schema is not found on fields not processed`() {
+        AddressSchemaRegistry.all.forEach { (_, schema) ->
+            val invalidNameType = schema.schemaElements().filter { addressSchema ->
+                addressSchema.schema?.nameType != null
+            }.filter {
+                it.type == FieldType.AddressLine1 || it.type == FieldType.AddressLine2
+            }
+
+            invalidNameType.forEach { println(it.type?.name) }
+            assertThat(invalidNameType).isEmpty()
+        }
+    }
+
+    @Test
+    fun `Make sure sorting code and dependent locality is never required`() {
+        // Sorting code and dependent locality are not actually sent to the server.
+        AddressSchemaRegistry.all.forEach { (_, schema) ->
+            val invalidNameType = schema.schemaElements().filter { addressSchema ->
+                addressSchema.required && (
+                    addressSchema.type == FieldType.SortingCode ||
+                        addressSchema.type == FieldType.DependentLocality
+                    )
+            }
+            invalidNameType.forEach { println(it.type?.name) }
+            assertThat(invalidNameType).isEmpty()
+        }
+    }
+
     private suspend fun verifySimpleTextSpecInTextFieldController(
         textElement: SectionSingleFieldElement,
         simpleTextSpec: TestTextSpec
@@ -103,65 +129,5 @@ class TransformAddressToElementTest {
         assertThat(actualController.label.first()).isEqualTo(
             simpleTextSpec.label
         )
-    }
-
-    @Test
-    fun `Make sure name schema is not found on fields not processed`() {
-        AddressSchemaRegistry.all.forEach { (countryCode, _) ->
-            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
-            val invalidNameType = schemaList?.filter { addressSchema ->
-                addressSchema.schema?.nameType != null
-            }
-                ?.filter {
-                    it.type == FieldType.AddressLine1 &&
-                        it.type == FieldType.AddressLine2 &&
-                        it.type == FieldType.Locality
-                }
-            invalidNameType?.forEach { println(it.type?.name) }
-            assertThat(invalidNameType).isEmpty()
-        }
-    }
-
-    @Test
-    fun `Make sure sorting code and dependent locality is never required`() {
-        // Sorting code and dependent locality are not actually sent to the server.
-        AddressSchemaRegistry.all.forEach { (countryCode, _) ->
-            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
-            val invalidNameType = schemaList?.filter { addressSchema ->
-                addressSchema.required &&
-                    (
-                        addressSchema.type == FieldType.SortingCode ||
-                            addressSchema.type == FieldType.DependentLocality
-                        )
-            }
-            invalidNameType?.forEach { println(it.type?.name) }
-            assertThat(invalidNameType).isEmpty()
-        }
-    }
-
-    @Test
-    fun `Make sure all country code json files are serializable`() {
-        AddressSchemaRegistry.all.forEach { (countryCode, _) ->
-            val schemaList = readFile("src/main/assets/addressinfo/$countryCode.json")
-            schemaList?.filter { addressSchema ->
-                addressSchema.schema?.nameType != null
-            }
-                ?.filter {
-                    it.type == FieldType.AddressLine1 &&
-                        it.type == FieldType.AddressLine2 &&
-                        it.type == FieldType.Locality
-                }
-                ?.forEach { println(it.type?.name) }
-        }
-    }
-
-    private fun readFile(filename: String): List<CountryAddressSchema>? {
-        val file = File(filename)
-
-        if (file.exists()) {
-            return parseAddressesSchema(file.inputStream())
-        } else {
-            throw InvalidParameterException("Error could not find the test files.")
-        }
     }
 }
