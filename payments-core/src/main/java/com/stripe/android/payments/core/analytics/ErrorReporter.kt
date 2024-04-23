@@ -163,6 +163,9 @@ interface ErrorReporter {
         EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE(
             partialEventName = "elements.external_payment_methods_serializer.error"
         ),
+        INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
+            partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
+        ),
         ;
 
         override val eventName: String

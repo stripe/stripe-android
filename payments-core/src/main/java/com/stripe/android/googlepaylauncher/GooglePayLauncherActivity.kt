@@ -5,7 +5,9 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
@@ -63,19 +65,14 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             }
         }
 
-        if (!viewModel.hasLaunched) {
-            lifecycleScope.launch {
-                viewModel.createLoadPaymentDataTask().fold(
-                    onSuccess = {
-                        payWithGoogle(it)
-                        viewModel.hasLaunched = true
-                    },
-                    onFailure = {
-                        viewModel.updateResult(
-                            GooglePayLauncher.Result.Failed(it)
-                        )
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.RESUMED) {
+                viewModel.googlePayLaunchTask.collect { task ->
+                    if (task != null) {
+                        payWithGoogle(task)
+                        viewModel.markTaskAsLaunched()
                     }
-                )
+                }
             }
         }
     }
@@ -132,12 +129,10 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 }
             }
         } else {
-            lifecycleScope.launch {
-                viewModel.onConfirmResult(
-                    requestCode,
-                    data ?: Intent()
-                )
-            }
+            viewModel.onConfirmResult(
+                requestCode,
+                data ?: Intent()
+            )
         }
     }
 
@@ -157,9 +152,7 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
         val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
         val host = AuthActivityStarterHost.create(this)
-        lifecycleScope.launch {
-            viewModel.confirmStripeIntent(host, params)
-        }
+        viewModel.confirmStripeIntent(host, params)
     }
 
     private fun finishWithResult(result: GooglePayLauncher.Result) {

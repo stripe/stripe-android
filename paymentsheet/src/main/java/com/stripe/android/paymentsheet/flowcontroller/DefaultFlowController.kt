@@ -354,6 +354,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 initializationMode = initializationMode!!,
                 paymentSelection = paymentSelection,
                 shippingValues = state.config.shippingDetails?.toConfirmPaymentIntentShipping(),
+                context = context.applicationContext,
             )
 
             viewModel.deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
