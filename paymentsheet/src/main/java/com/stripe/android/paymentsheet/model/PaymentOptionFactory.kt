@@ -6,6 +6,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
 import androidx.core.content.res.ResourcesCompat
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.createCardLabel
 import com.stripe.android.paymentsheet.ui.getCardBrandIcon
@@ -18,7 +19,10 @@ import com.stripe.android.R as StripeR
 internal class PaymentOptionFactory @Inject constructor(
     private val resources: Resources,
     private val imageLoader: StripeImageLoader,
+    private val errorReporter: ErrorReporter,
 ) {
+    private val MISSING_DRAWABLE_RESOURCE = 0
+
     private fun isDarkTheme(): Boolean {
         return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
@@ -48,6 +52,12 @@ internal class PaymentOptionFactory @Inject constructor(
             loadIcon(darkThemeIconUrl)
         } else if (lightThemeIconUrl != null) {
             loadIcon(lightThemeIconUrl)
+        } else if (paymentOption.drawableResourceId == MISSING_DRAWABLE_RESOURCE) {
+            errorReporter.report(
+                ErrorReporter.UnexpectedErrorEvent.PAYMENT_OPTION_MISSING_ICON_URL_AND_RES,
+                additionalNonPiiParams = mapOf("payment_option" to paymentOption.label)
+            )
+            throw IllegalStateException("Missing icon resource and icon URLs - can't load")
         } else {
             loadResource()
         }
@@ -106,9 +116,9 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
-                    drawableResourceId = selection.iconResource,
-                    lightThemeIconUrl = selection.lightThemeIconUrl,
-                    darkThemeIconUrl = selection.darkThemeIconUrl,
+                    drawableResourceId = selection.paymentMethodIcon.getNullableIconResource() ?: MISSING_DRAWABLE_RESOURCE,
+                    lightThemeIconUrl = selection.paymentMethodIcon.getNullableLightThemeIconUrl(),
+                    darkThemeIconUrl = selection.paymentMethodIcon.getNullableDarkThemeIconUrl(),
                     label = selection.labelResource,
                     imageLoader = ::loadPaymentOption,
                 )

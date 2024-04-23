@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -217,9 +218,7 @@ internal sealed class PaymentSelection : Parcelable {
         @Parcelize
         data class GenericPaymentMethod(
             val labelResource: String,
-            @DrawableRes val iconResource: Int,
-            val lightThemeIconUrl: String?,
-            val darkThemeIconUrl: String?,
+            val paymentMethodIcon: PaymentMethodIcon,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,

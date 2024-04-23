@@ -166,6 +166,9 @@ interface ErrorReporter {
         INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
             partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
         ),
+        PAYMENT_OPTION_MISSING_ICON_URL_AND_RES(
+            partialEventName = "paymentsheet.payment_option_factory.icon_res_and_urls_missing"
+        )
         ;
 
         override val eventName: String

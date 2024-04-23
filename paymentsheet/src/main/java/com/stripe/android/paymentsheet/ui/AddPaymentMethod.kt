@@ -216,9 +216,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
     } else {
         PaymentSelection.New.GenericPaymentMethod(
             labelResource = paymentMethod.displayName.resolve(context),
-            iconResource = paymentMethod.iconResource,
-            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
-            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
+            paymentMethodIcon = paymentMethod.paymentMethodIcon,
             paymentMethodCreateParams = params,
             paymentMethodOptionsParams = options,
             paymentMethodExtraParams = extras,

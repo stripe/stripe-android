@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
 import com.stripe.android.uicore.getBorderStroke
@@ -88,18 +89,12 @@ internal fun PaymentMethodsUI(
             modifier = Modifier.testTag(TEST_TAG_LIST)
         ) {
             itemsIndexed(items = paymentMethods) { index, item ->
-                val iconUrl = if (isSystemInDarkTheme() && item.darkThemeIconUrl != null) {
-                    item.darkThemeIconUrl
-                } else {
-                    item.lightThemeIconUrl
-                }
                 PaymentMethodUI(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + item.code
                     ),
                     minViewWidth = viewWidth,
-                    iconRes = item.iconResource,
-                    iconUrl = iconUrl,
+                    paymentMethodIcon = item.paymentMethodIcon,
                     imageLoader = imageLoader,
                     title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,
@@ -171,8 +166,7 @@ private fun computeItemWidthWhenExceedingMaxWidth(
 @Composable
 internal fun PaymentMethodUI(
     minViewWidth: Dp,
-    iconRes: Int,
-    iconUrl: String?,
+    paymentMethodIcon: PaymentMethodIcon,
     imageLoader: StripeImageLoader,
     title: String,
     isSelected: Boolean,
@@ -216,8 +210,7 @@ internal fun PaymentMethodUI(
                     )
             ) {
                 PaymentMethodIconUi(
-                    iconRes = iconRes,
-                    iconUrl = iconUrl,
+                    paymentMethodIcon = paymentMethodIcon,
                     imageLoader = imageLoader,
                     color = color,
                     tintOnSelected = tintOnSelected
@@ -240,8 +233,7 @@ internal fun PaymentMethodUI(
 
 @Composable
 private fun PaymentMethodIconUi(
-    iconRes: Int,
-    iconUrl: String?,
+    paymentMethodIcon: PaymentMethodIcon,
     imageLoader: StripeImageLoader,
     tintOnSelected: Boolean,
     color: Color,
@@ -254,18 +246,43 @@ private fun PaymentMethodIconUi(
         }
     }
 
-    if (iconUrl != null) {
-        StripeImage(
-            url = iconUrl,
-            imageLoader = imageLoader,
-            contentDescription = null,
-            contentScale = ContentScale.Fit,
-        )
-    } else {
-        Image(
-            painter = painterResource(iconRes),
-            contentDescription = null,
-            colorFilter = colorFilter,
-        )
+    when (paymentMethodIcon) {
+        is PaymentMethodIcon.ResourceOnly ->
+            Image(
+                painter = painterResource(paymentMethodIcon.iconResource),
+                contentDescription = null,
+                colorFilter = colorFilter,
+            )
+        is PaymentMethodIcon.UrlOrResource ->
+            IconFromUrl(
+                lightThemeIconUrl = paymentMethodIcon.lightThemeIconUrl,
+                darkThemeIconUrl = paymentMethodIcon.darkThemeIconUrl,
+                imageLoader = imageLoader
+            )
+        is PaymentMethodIcon.UrlsOnly ->
+            IconFromUrl(
+                lightThemeIconUrl = paymentMethodIcon.lightThemeIconUrl,
+                darkThemeIconUrl = paymentMethodIcon.darkThemeIconUrl,
+                imageLoader = imageLoader
+            )
     }
+}
+
+@Composable
+private fun IconFromUrl(
+    lightThemeIconUrl: String,
+    darkThemeIconUrl: String?,
+    imageLoader: StripeImageLoader,
+) {
+    val iconUrl = if (isSystemInDarkTheme() && darkThemeIconUrl != null) {
+        darkThemeIconUrl
+    } else {
+        lightThemeIconUrl
+    }
+    StripeImage(
+        url = iconUrl,
+        imageLoader = imageLoader,
+        contentDescription = null,
+        contentScale = ContentScale.Fit,
+    )
 }

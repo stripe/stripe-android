@@ -18,14 +18,8 @@ internal data class SupportedPaymentMethod(
     /** This describes the name that appears under the selector. */
     val displayName: ResolvableString,
 
-    /** This describes the image in the LPM selector.  These can be found internally [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0) */
-    @DrawableRes val iconResource: Int,
-
-    /** An optional light theme icon url if it's supported. */
-    val lightThemeIconUrl: String?,
-
-    /** An optional dark theme icon url if it's supported. */
-    val darkThemeIconUrl: String?,
+    /** This describes the image in the LPM selector. */
+    val paymentMethodIcon: PaymentMethodIcon,
 
     /** Indicates if the lpm icon in the selector is a single color and should be tinted
      * on selection.
@@ -41,9 +35,11 @@ internal data class SupportedPaymentMethod(
     ) : this(
         code = paymentMethodDefinition.type.code,
         displayName = resolvableString(id = displayNameResource),
-        iconResource = iconResource,
-        lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
-        darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
+        paymentMethodIcon = PaymentMethodIcon.create(
+            iconResource = iconResource,
+            lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
+            darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
+        ),
         tintIconOnSelection = tintIconOnSelection,
     )
 
@@ -57,9 +53,11 @@ internal data class SupportedPaymentMethod(
     ) : this(
         code = code,
         displayName = resolvableString(id = displayNameResource),
-        iconResource = iconResource,
-        lightThemeIconUrl = lightThemeIconUrl,
-        darkThemeIconUrl = darkThemeIconUrl,
+        paymentMethodIcon = PaymentMethodIcon.create(
+            iconResource = iconResource,
+            lightThemeIconUrl = lightThemeIconUrl,
+            darkThemeIconUrl = darkThemeIconUrl,
+        ),
         tintIconOnSelection = tintIconOnSelection,
     )
 }
