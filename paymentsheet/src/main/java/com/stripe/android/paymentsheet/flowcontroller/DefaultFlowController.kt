@@ -10,7 +10,6 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
@@ -270,14 +269,6 @@ internal class DefaultFlowController @Inject internal constructor(
             )
         }
 
-        if (lifecycleOwner.lifecycle.currentState != Lifecycle.State.RESUMED) {
-            return Result.failure(
-                IllegalStateException(
-                    "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
-                )
-            )
-        }
-
         return Result.success(state)
     }
 
@@ -306,7 +297,12 @@ internal class DefaultFlowController @Inject internal constructor(
             AnimationConstants.FADE_OUT,
         )
 
-        paymentOptionActivityLauncher.launch(args, options)
+        try {
+            paymentOptionActivityLauncher.launch(args, options)
+        } catch (e: IllegalStateException) {
+            val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
+            paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
+        }
     }
 
     override fun confirm() {

@@ -443,6 +443,7 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         )
         lifeCycleOwner.currentState = Lifecycle.State.DESTROYED
+        whenever(paymentOptionActivityLauncher.launch(any(), any())).thenThrow(IllegalStateException("Boom"))
         verifyNoInteractions(paymentResultCallback)
 
         flowController.presentPaymentOptions()
