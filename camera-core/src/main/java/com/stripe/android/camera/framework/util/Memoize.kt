@@ -612,8 +612,8 @@ fun <Input, Result> ((Input) -> Result).memoized(): (Input) -> Result = Memoize1
 fun <Input1, Input2, Result> ((Input1, Input2) -> Result).memoized(): (Input1, Input2) -> Result =
     Memoize2(this)
 
-fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).memoized(): (Input1, Input2, Input3) -> Result =
-    Memoize3(this)
+fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).memoized():
+    (Input1, Input2, Input3) -> Result = Memoize3(this)
 
 /* mark: memoized with duration function extensions */
 fun <Result> (() -> Result).memoized(validFor: Duration): () -> Result =
