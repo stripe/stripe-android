@@ -1310,8 +1310,16 @@ class PaymentSheet internal constructor(
         }
     }
 
+    internal sealed interface CustomerAccessType : Parcelable {
+        @Parcelize
+        data class LegacyCustomerEphemeralKey(val ephemeralKeySecret: String) : CustomerAccessType
+
+        @Parcelize
+        data class CustomerSession(val customerSessionClientSecret: String) : CustomerAccessType
+    }
+
     @Parcelize
-    data class CustomerConfiguration(
+    data class CustomerConfiguration internal constructor(
         /**
          * The identifier of the Stripe Customer object.
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
@@ -1321,8 +1329,35 @@ class PaymentSheet internal constructor(
         /**
          * A short-lived token that allows the SDK to access a Customer's payment methods.
          */
-        val ephemeralKeySecret: String
-    ) : Parcelable
+        val ephemeralKeySecret: String,
+
+        internal val accessType: CustomerAccessType,
+    ) : Parcelable {
+        constructor(
+            id: String,
+            ephemeralKeySecret: String,
+        ) : this(
+            id = id,
+            ephemeralKeySecret = ephemeralKeySecret,
+            accessType = CustomerAccessType.LegacyCustomerEphemeralKey(ephemeralKeySecret)
+        )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @ExperimentalCustomerSessionApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun createWithCustomerSession(
+                id: String,
+                customerSessionClientSecret: String
+            ): CustomerConfiguration {
+                return CustomerConfiguration(
+                    id = id,
+                    ephemeralKeySecret = "",
+                    accessType = CustomerAccessType.CustomerSession(customerSessionClientSecret)
+                )
+            }
+        }
+    }
 
     /**
      * @param environment The Google Pay environment to use. See
