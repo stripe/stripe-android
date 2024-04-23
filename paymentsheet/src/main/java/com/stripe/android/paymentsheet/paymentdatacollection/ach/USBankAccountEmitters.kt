@@ -53,6 +53,7 @@ internal fun USBankAccountEmitters(
                 merchantName = merchantName,
                 isSaveForFutureUseSelected = saved,
                 isSetupFlow = !usBankAccountFormArgs.isPaymentFlow,
+                isInstantDebits = screenState.showInstantDebitsTerms,
             )
             usBankAccountFormArgs.updateMandateText(
                 context = context,

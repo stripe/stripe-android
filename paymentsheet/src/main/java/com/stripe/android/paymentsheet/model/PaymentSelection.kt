@@ -98,6 +98,7 @@ internal sealed class PaymentSelection : Parcelable {
                         merchantName = merchantName,
                         isSaveForFutureUseSelected = isSaveForFutureUseSelected,
                         isSetupFlow = isSetupFlow,
+                        isInstantDebits = false,
                     )
                 }
                 PaymentMethod.Type.SepaDebit -> {

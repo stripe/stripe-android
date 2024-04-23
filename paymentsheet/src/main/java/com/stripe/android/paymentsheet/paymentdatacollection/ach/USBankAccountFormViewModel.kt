@@ -640,6 +640,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             merchantName = formattedMerchantName(),
             isSaveForFutureUseSelected = saveForFutureUse.value,
             isSetupFlow = !args.isPaymentFlow,
+            isInstantDebits = args.instantDebits,
         )
     }
 

@@ -3,6 +3,8 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import com.stripe.android.financialconnections.model.BankAccount
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.MandateCollection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.ResultIdentifier
 import kotlinx.parcelize.Parcelize
 
 internal sealed class USBankAccountFormScreenState(
@@ -60,3 +62,6 @@ internal sealed class USBankAccountFormScreenState(
         data class PaymentMethod(val id: String) : ResultIdentifier
     }
 }
+
+internal val USBankAccountFormScreenState.showInstantDebitsTerms: Boolean
+    get() = this is MandateCollection && resultIdentifier is ResultIdentifier.PaymentMethod
