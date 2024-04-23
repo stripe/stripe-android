@@ -11,7 +11,6 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -100,7 +99,6 @@ class FormElementsBuilderTest {
     ): UiDefinitionFactory.Arguments {
         val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
-            addressRepository = mock(),
             initialValues = emptyMap(),
             shippingValues = emptyMap(),
             amount = null,

@@ -3,7 +3,7 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.uicore.R
-import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -17,7 +17,6 @@ import com.stripe.android.core.R as CoreR
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 open class AddressElement constructor(
     _identifier: IdentifierSpec,
-    private val addressRepository: AddressRepository,
     private var rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
     private val addressType: AddressType = AddressType.Normal(),
     countryCodes: Set<String> = emptySet(),
@@ -65,12 +64,14 @@ open class AddressElement constructor(
 
     private val currentValuesMap = mutableMapOf<IdentifierSpec, String?>()
 
+    private val elementsRegistry = AddressElementUiRegistry(AddressSchemaRegistry)
+
     private val otherFields = countryElement.controller.rawFieldValue
         .map { countryCode ->
             countryCode?.let {
                 phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
             }
-            (addressRepository.get(countryCode) ?: emptyList()).onEach { field ->
+            (elementsRegistry.get(countryCode) ?: emptyList()).onEach { field ->
                 updateLine1WithAutocompleteAffordance(
                     field = field,
                     countryCode = countryCode,

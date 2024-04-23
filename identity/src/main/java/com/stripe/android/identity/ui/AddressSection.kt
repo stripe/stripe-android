@@ -20,7 +20,7 @@ import com.stripe.android.identity.navigation.CountryNotListedDestination
 import com.stripe.android.identity.navigation.navigateTo
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.RequiredInternationalAddress
-import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.transformToElementList
 import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.CountryElement
@@ -39,7 +39,6 @@ import com.stripe.android.uicore.R as UiCoreR
 @Composable
 internal fun AddressSection(
     enabled: Boolean,
-    identityViewModel: IdentityViewModel,
     addressCountries: List<Country>,
     addressNotListedText: String,
     navController: NavController,
@@ -56,8 +55,7 @@ internal fun AddressSection(
     val selectedCountryCode by controller.rawFieldValue.collectAsState(addressCountries[0].code.value)
     val addressDetailSectionElements = remember(selectedCountryCode) {
         requireNotNull(
-            identityViewModel.addressSchemaRepository
-                .getSchema(selectedCountryCode)
+            AddressSchemaRegistry.get(selectedCountryCode)
         ).transformToElementList(
             requireNotNull(selectedCountryCode)
         )

@@ -11,13 +11,11 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal sealed interface UiDefinitionFactory {
     class Arguments(
-        val addressRepository: AddressRepository,
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val initialValues: Map<IdentifierSpec, String?>,
         val shippingValues: Map<IdentifierSpec, String?>?,
@@ -35,7 +33,6 @@ internal sealed interface UiDefinitionFactory {
             ): Arguments
 
             class Default(
-                private val addressRepository: AddressRepository,
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
@@ -45,7 +42,6 @@ internal sealed interface UiDefinitionFactory {
                     definition: PaymentMethodDefinition,
                 ): Arguments {
                     return Arguments(
-                        addressRepository = addressRepository,
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                         amount = metadata.amount(),
                         merchantName = metadata.merchantName,

@@ -9,6 +9,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextInput
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
@@ -63,7 +64,6 @@ class IndividualScreenTest {
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
         on { missingRequirements } doReturn missingRequirementsFlow
-        on { addressSchemaRepository } doReturn mock()
     }
     private val mockNavController = mock<NavController>()
 
@@ -104,7 +104,9 @@ class IndividualScreenTest {
             onNodeWithTag(ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG).assertTextEquals(
                 ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TEXT
             )
-            onNodeWithTag(ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG).performClick()
+            onNodeWithTag(ADDRESS_COUNTRY_NOT_LISTED_BUTTON_TAG)
+                .performScrollTo()
+                .performClick()
 
             verify(mockNavController).navigate(
                 argWhere {

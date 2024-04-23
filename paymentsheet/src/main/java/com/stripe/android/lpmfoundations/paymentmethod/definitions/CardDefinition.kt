@@ -15,7 +15,6 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -79,7 +78,6 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     cardBillingElement(
                         billingDetailsCollectionConfiguration.address.toInternal(),
                         arguments.initialValues,
-                        arguments.addressRepository,
                         arguments.shippingValues,
                     )
                 )
@@ -116,7 +114,6 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectio
 private fun cardBillingElement(
     collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
     initialValues: Map<IdentifierSpec, String?>,
-    addressRepository: AddressRepository,
     shippingValues: Map<IdentifierSpec, String?>?,
 ): FormElement {
     val sameAsShippingElement =
@@ -130,7 +127,6 @@ private fun cardBillingElement(
             }
     val addressElement = CardBillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
-        addressRepository = addressRepository,
         countryCodes = CountryUtils.supportedBillingCountries,
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,

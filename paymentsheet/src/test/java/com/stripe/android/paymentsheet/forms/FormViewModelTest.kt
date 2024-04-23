@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.StringRes
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
@@ -24,7 +22,6 @@ import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
@@ -35,14 +32,12 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
 
@@ -50,10 +45,6 @@ import com.stripe.android.uicore.R as UiCoreR
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
-    private val context = ContextThemeWrapper(
-        ApplicationProvider.getApplicationContext(),
-        StripeR.style.StripeDefaultTheme
-    )
 
     @Test
     fun `Verify completeFormValues is not null when no elements exist`() = runTest {
@@ -300,7 +291,7 @@ internal class FormViewModelTest {
                 AddressSpec(
                     IdentifierSpec.Generic("address"),
                     allowedCountryCodes = setOf("US", "JP")
-                ).transform(emptyMap(), AddressRepository(context.resources, Dispatchers.Unconfined), emptyMap()),
+                ).transform(emptyMap(), emptyMap()),
                 MandateTextSpec(
                     IdentifierSpec.Generic("mandate"),
                     R.string.stripe_sepa_mandate
@@ -381,7 +372,7 @@ internal class FormViewModelTest {
                 AddressSpec(
                     IdentifierSpec.Generic("address"),
                     allowedCountryCodes = setOf("US", "JP")
-                ).transform(emptyMap(), AddressRepository(context.resources, Dispatchers.Unconfined), emptyMap()),
+                ).transform(emptyMap(), emptyMap()),
                 MandateTextSpec(
                     IdentifierSpec.Generic("mandate"),
                     R.string.stripe_sepa_mandate
@@ -627,7 +618,6 @@ internal class FormViewModelTest {
                     CountrySpec().transform(emptyMap()),
                     AddressSpec(hideCountry = true).transform(
                         initialValues = emptyMap(),
-                        addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
                         shippingValues = emptyMap(),
                     ),
                 ),
