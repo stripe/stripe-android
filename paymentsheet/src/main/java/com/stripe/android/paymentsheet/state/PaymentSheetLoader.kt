@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
@@ -73,7 +74,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
-            externalPaymentMethods = null,
+            externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
@@ -91,6 +92,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             )
             val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
                 elementsSession.externalPaymentMethodData
+            )
+            logIfMissingExternalPaymentMethods(
+                requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+                actualExternalPaymentMethods = externalPaymentMethodSpecs
             )
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
@@ -428,6 +433,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ) {
         logger.error("Failure loading PaymentSheetState", error)
         eventReporter.onLoadFailed(error)
+    }
+
+    private fun logIfMissingExternalPaymentMethods(
+        requestedExternalPaymentMethods: List<String>?,
+        actualExternalPaymentMethods: List<ExternalPaymentMethodSpec>?,
+    ) {
+        if (requestedExternalPaymentMethods.isNullOrEmpty()) {
+            return
+        }
+        val actualExternalPaymentMethodTypes = actualExternalPaymentMethods?.map { it.type }
+        for (requestedExternalPaymentMethod in requestedExternalPaymentMethods) {
+            if (actualExternalPaymentMethodTypes == null || !actualExternalPaymentMethodTypes.contains(
+                    requestedExternalPaymentMethod
+                )
+            ) {
+                logger.warning(
+                    "Requested external payment method $requestedExternalPaymentMethod is not supported."
+                )
+            }
+        }
     }
 }
 

@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -442,6 +443,8 @@ class PaymentSheet internal constructor(
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+
+        internal val externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods,
     ) : Parcelable {
 
         @JvmOverloads
@@ -563,6 +566,7 @@ class PaymentSheet internal constructor(
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             preferredNetworks = preferredNetworks,
             allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+            externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
         )
 
         /**
@@ -588,6 +592,7 @@ class PaymentSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            private var externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -662,6 +667,11 @@ class PaymentSheet internal constructor(
                 this.paymentMethodOrder = paymentMethodOrder
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun externalPaymentMethods(externalPaymentMethods: List<String>?): Builder = apply {
+                this.externalPaymentMethods = externalPaymentMethods
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -677,6 +687,7 @@ class PaymentSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
+                externalPaymentMethods = externalPaymentMethods,
             )
         }
 
