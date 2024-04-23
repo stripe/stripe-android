@@ -10,6 +10,7 @@ internal class FakeElementsSessionRepository(
     private val error: Throwable?,
     private val sessionsError: Throwable? = null,
     private val linkSettings: ElementsSession.LinkSettings?,
+    private val customer: ElementsSession.Customer? = null,
     private val isGooglePayEnabled: Boolean = true,
     private val isCbcEligible: Boolean = false,
     private val externalPaymentMethodData: String? = null,
@@ -35,6 +36,7 @@ internal class FakeElementsSessionRepository(
                     isGooglePayEnabled = isGooglePayEnabled,
                     sessionsError = sessionsError,
                     externalPaymentMethodData = externalPaymentMethodData,
+                    customer = customer,
                 )
             )
         }

@@ -14,6 +14,7 @@ data class ElementsSession(
     val paymentMethodSpecs: String?,
     val externalPaymentMethodData: String?,
     val stripeIntent: StripeIntent,
+    val customer: Customer?,
     val merchantCountry: String?,
     val isEligibleForCardBrandChoice: Boolean,
     val isGooglePayEnabled: Boolean,
@@ -46,6 +47,24 @@ data class ElementsSession(
     ) : StripeModel
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @Parcelize
+    data class Customer(
+        val paymentMethods: List<PaymentMethod>,
+        val defaultPaymentMethod: String?,
+        val session: Session,
+    ) : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        @Parcelize
+        data class Session(
+            val id: String,
+            val liveMode: Boolean,
+            val apiKey: String,
+            val apiKeyExpiry: Int,
+            val customerId: String
+        ) : StripeModel
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
         fun createFromFallback(
             stripeIntent: StripeIntent,
@@ -56,6 +75,7 @@ data class ElementsSession(
                 paymentMethodSpecs = null,
                 externalPaymentMethodData = null,
                 stripeIntent = stripeIntent,
+                customer = null,
                 merchantCountry = null,
                 isEligibleForCardBrandChoice = false,
                 isGooglePayEnabled = true,

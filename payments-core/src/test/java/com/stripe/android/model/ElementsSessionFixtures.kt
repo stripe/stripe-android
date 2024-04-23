@@ -166,6 +166,129 @@ internal object ElementsSessionFixtures {
         """.trimIndent()
     )
 
+    val EXPANDED_PAYMENT_INTENT_WITH_CUSTOMER_SESSION = JSONObject(
+        """
+        {
+          "business_name": "Mybusiness",
+          "link_settings": {
+            "link_bank_enabled": false,
+            "link_bank_onboarding_enabled": false
+          },
+          "merchant_country": "US",
+          "payment_method_preference": {
+            "object": "payment_method_preference",
+            "country_code": "US",
+            "ordered_payment_method_types": [
+              "card",
+              "ideal",
+              "sepa_debit",
+              "bancontact",
+              "sofort"
+            ],
+            "payment_intent": {
+              "id": "pi_123",
+              "object": "payment_intent",
+              "amount": 973,
+              "canceled_at": null,
+              "cancellation_reason": null,
+              "capture_method": "automatic",
+              "client_secret": "pi_1234567",
+              "confirmation_method": "automatic",
+              "created": 1630103948,
+              "currency": "eur",
+              "description": null,
+              "last_payment_error": null,
+              "livemode": false,
+              "next_action": null,
+              "payment_method": null,
+              "payment_method_types": [
+                "bancontact",
+                "card",
+                "sepa_debit",
+                "sofort",
+                "ideal"
+              ],
+              "receipt_email": null,
+              "setup_future_usage": null,
+              "shipping": {
+                "address": {
+                  "city": "San Francisco",
+                  "country": "US",
+                  "line1": "510 Townsend St",
+                  "line2": null,
+                  "postal_code": "94102",
+                  "state": "California"
+                },
+                "carrier": null,
+                "name": "Bruno",
+                "phone": null,
+                "tracking_number": null
+              },
+              "source": null,
+              "status": "requires_payment_method"
+            },
+            "type": "payment_intent"
+          },
+          "customer": {
+            "customer_session": {
+              "id": "cuss_123",
+              "object": "customer_session",
+              "api_key": "ek_test_1234",
+              "api_key_expiry": 1713890664,
+              "components": {
+                "buy_button": {
+                  "enabled": false
+                },
+                "payment_element": {
+                  "enabled": true,
+                  "features": {
+                    "payment_method_remove": "enabled",
+                    "payment_method_save": "enabled",
+                    "payment_method_set_as_default": "enabled",
+                    "payment_method_update": "enabled"
+                  }
+                },
+                "pricing_table": {
+                  "enabled": false
+                }
+              },
+              "customer": "cus_1",
+              "livemode": false
+            },
+            "default_payment_method": null,
+            "payment_methods": [
+              {
+                "id": "pm_123",
+                "created": 1550757934255,
+                "customer": "cus_1",
+                "livemode": false,
+                "metadata": null,
+                "type": "card",
+                "billing_details": null,
+                "card": {
+                  "brand": "visa",
+                  "checks": {
+                    "address_line1_check": "unchecked",
+                    "cvc_check": "unchecked"
+                  },
+                  "country": "US",
+                  "exp_month": 8,
+                  "exp_year": 2032,
+                  "funding": "credit",
+                  "fingerprint": "fingerprint123",
+                  "last4": "4242",
+                  "three_d_secure_usage": {
+                    "supported": true
+                  }
+                }
+              }
+            ],
+            "payment_methods_with_link_details": []
+          }
+        }
+        """.trimIndent()
+    )
+
     val EXPANDED_PAYMENT_INTENT_JSON_WITH_CBC_ELIGIBLE = JSONObject(
         """
         {
