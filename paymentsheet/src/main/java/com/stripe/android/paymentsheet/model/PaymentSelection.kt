@@ -153,6 +153,7 @@ internal sealed class PaymentSelection : Parcelable {
             @DrawableRes val iconResource: Int,
             val input: Input,
             val screenState: USBankAccountFormScreenState,
+            val instantDebits: InstantDebitsInfo?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             override val customerRequestedSave: CustomerRequestedSave,
             override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
@@ -167,6 +168,11 @@ internal sealed class PaymentSelection : Parcelable {
             ): String? {
                 return screenState.mandateText
             }
+
+            @Parcelize
+            data class InstantDebitsInfo(
+                val paymentMethodId: String,
+            ) : Parcelable
 
             @Parcelize
             data class Input(

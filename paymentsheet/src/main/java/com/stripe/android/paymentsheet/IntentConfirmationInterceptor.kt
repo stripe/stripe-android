@@ -347,10 +347,21 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
             clientSecret = clientSecret,
             shipping = shippingValues,
         )
-        val confirmParams = paramsFactory.create(
-            paymentMethodCreateParams,
-            paymentMethodOptionsParams,
-        )
+
+        val instantDebitsPaymentMethodId = paymentMethodCreateParams.instantDebitsPaymentMethodId()
+
+        val confirmParams = if (instantDebitsPaymentMethodId != null) {
+            // Instant Debits is a new payment selection, but we need to confirm the intent with a PaymentMethod ID.
+            paramsFactory.create(
+                paymentMethodId = instantDebitsPaymentMethodId,
+                paymentMethodType = PaymentMethod.Type.Link,
+            )
+        } else {
+            paramsFactory.create(
+                paymentMethodCreateParams,
+                paymentMethodOptionsParams,
+            )
+        }
 
         return NextStep.Confirm(
             confirmParams = confirmParams,

@@ -11,6 +11,7 @@ import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetInstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
+import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.bankaccount.di.DaggerCollectBankAccountComponent
 import com.stripe.android.payments.bankaccount.domain.AttachFinancialConnectionsSession
 import com.stripe.android.payments.bankaccount.domain.CreateFinancialConnectionsSession
@@ -131,23 +132,15 @@ internal class CollectBankAccountViewModel @Inject constructor(
         hasLaunched = false
         viewModelScope.launch {
             when (result) {
-                is FinancialConnectionsSheetInstantDebitsResult.Canceled -> finishWithResult(Cancelled)
-
-                is FinancialConnectionsSheetInstantDebitsResult.Failed -> finishWithError(result.error)
-
-                is FinancialConnectionsSheetInstantDebitsResult.Completed -> finishWithResult(
-                    Completed(
-                        CollectBankAccountResponseInternal(
-                            intent = null,
-                            usBankAccountData = null,
-                            instantDebitsData = InstantDebitsData(
-                                result.paymentMethodId,
-                                result.last4,
-                                result.bankName
-                            ),
-                        )
-                    )
-                )
+                is FinancialConnectionsSheetInstantDebitsResult.Canceled -> {
+                    finishWithResult(Cancelled)
+                }
+                is FinancialConnectionsSheetInstantDebitsResult.Failed -> {
+                    finishWithError(result.error)
+                }
+                is FinancialConnectionsSheetInstantDebitsResult.Completed -> {
+                    finishWithPaymentMethodId(result)
+                }
             }
         }
     }
@@ -159,29 +152,52 @@ internal class CollectBankAccountViewModel @Inject constructor(
     private fun finishWithSession(
         financialConnectionsSession: FinancialConnectionsSession
     ) {
+        finishWithRefreshedIntent { intent ->
+            CollectBankAccountResponseInternal(
+                intent = intent,
+                usBankAccountData = USBankAccountData(
+                    financialConnectionsSession
+                ),
+                instantDebitsData = null,
+            )
+        }
+    }
+
+    private fun finishWithPaymentMethodId(
+        result: FinancialConnectionsSheetInstantDebitsResult.Completed,
+    ) {
+        finishWithRefreshedIntent { intent ->
+            CollectBankAccountResponseInternal(
+                intent = intent,
+                usBankAccountData = null,
+                instantDebitsData = InstantDebitsData(
+                    paymentMethodId = result.paymentMethodId,
+                    last4 = result.last4,
+                    bankName = result.bankName,
+                ),
+            )
+        }
+    }
+
+    private fun finishWithRefreshedIntent(
+        action: (StripeIntent?) -> CollectBankAccountResponseInternal,
+    ) {
         viewModelScope.launch {
             val clientSecret = args.clientSecret
+
             val retrieveIntentResult = if (clientSecret == null) {
                 // client secret is null for deferred intents.
                 Result.success(null)
             } else {
                 retrieveStripeIntent(args.publishableKey, clientSecret)
             }
-            retrieveIntentResult
-                .onFailure { finishWithError(it) }
-                .onSuccess { intent ->
-                    finishWithResult(
-                        Completed(
-                            CollectBankAccountResponseInternal(
-                                intent = intent,
-                                usBankAccountData = USBankAccountData(
-                                    financialConnectionsSession
-                                ),
-                                instantDebitsData = null,
-                            )
-                        )
-                    )
-                }
+
+            retrieveIntentResult.onFailure {
+                finishWithError(it)
+            }.onSuccess { intent ->
+                val response = action(intent)
+                finishWithResult(Completed(response))
+            }
         }
     }
 

@@ -1950,6 +1950,7 @@ internal class PaymentSheetViewModelTest {
                 address = null,
                 saveForFutureUse = false,
             ),
+            instantDebits = null,
             screenState = USBankAccountFormScreenState.SavedAccount(
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
@@ -1990,6 +1991,7 @@ internal class PaymentSheetViewModelTest {
                 address = null,
                 saveForFutureUse = false,
             ),
+            instantDebits = null,
             screenState = USBankAccountFormScreenState.SavedAccount(
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
