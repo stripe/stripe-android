@@ -635,10 +635,11 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     }
 
     private fun buildMandateText(): String {
-        return ACHText.getContinueMandateText(
+        return USBankAccountTextBuilder.getContinueMandateText(
             context = application,
             merchantName = formattedMerchantName(),
             isSaveForFutureUseSelected = saveForFutureUse.value,
+            isInstantDebits = args.instantDebits,
             isSetupFlow = !args.isPaymentFlow,
         )
     }
