@@ -247,19 +247,13 @@ private fun PaymentMethodIconUi(
     }
 
     when (paymentMethodIcon) {
-        is PaymentMethodIcon.ResourceOnly ->
+        is PaymentMethodIcon.Resource ->
             Image(
                 painter = painterResource(paymentMethodIcon.iconResource),
                 contentDescription = null,
                 colorFilter = colorFilter,
             )
-        is PaymentMethodIcon.UrlOrResource ->
-            IconFromUrl(
-                lightThemeIconUrl = paymentMethodIcon.lightThemeIconUrl,
-                darkThemeIconUrl = paymentMethodIcon.darkThemeIconUrl,
-                imageLoader = imageLoader
-            )
-        is PaymentMethodIcon.UrlsOnly ->
+        is PaymentMethodIcon.Url ->
             IconFromUrl(
                 lightThemeIconUrl = paymentMethodIcon.lightThemeIconUrl,
                 darkThemeIconUrl = paymentMethodIcon.darkThemeIconUrl,

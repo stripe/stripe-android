@@ -221,6 +221,22 @@ public abstract interface class com/stripe/android/customersheet/SetupIntentClie
 	public abstract fun provideSetupIntentClientSecret (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
 
+public final class com/stripe/android/lpmfoundations/luxe/PaymentMethodIcon$Resource$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/luxe/PaymentMethodIcon$Resource;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/luxe/PaymentMethodIcon$Resource;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/lpmfoundations/luxe/PaymentMethodIcon$Url$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/luxe/PaymentMethodIcon$Url;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/lpmfoundations/luxe/PaymentMethodIcon$Url;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/lpmfoundations/paymentmethod/PaymentMethodMetadata;

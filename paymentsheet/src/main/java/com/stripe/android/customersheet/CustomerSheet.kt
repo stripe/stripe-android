@@ -12,6 +12,7 @@ import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.common.configuration.ConfigurationDefaults
 import com.stripe.android.customersheet.util.CustomerSheetHacks
 import com.stripe.android.model.CardBrand
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -371,6 +372,7 @@ class CustomerSheet @Inject internal constructor(
                 paymentOptionFactory = PaymentOptionFactory(
                     resources = application.resources,
                     imageLoader = StripeImageLoader(application),
+                    errorReporter = ErrorReporter.createFallbackInstance(application)
                 ),
                 callback = callback,
                 statusBarColor = statusBarColor,

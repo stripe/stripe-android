@@ -21,8 +21,6 @@ internal class PaymentOptionFactory @Inject constructor(
     private val imageLoader: StripeImageLoader,
     private val errorReporter: ErrorReporter,
 ) {
-    private val MISSING_DRAWABLE_RESOURCE = 0
-
     private fun isDarkTheme(): Boolean {
         return resources.configuration?.uiMode?.and(Configuration.UI_MODE_NIGHT_MASK) ==
             Configuration.UI_MODE_NIGHT_YES
@@ -116,7 +114,8 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
-                    drawableResourceId = selection.paymentMethodIcon.getNullableIconResource() ?: MISSING_DRAWABLE_RESOURCE,
+                    drawableResourceId = selection.paymentMethodIcon.getNullableIconResource()
+                        ?: MISSING_DRAWABLE_RESOURCE,
                     lightThemeIconUrl = selection.paymentMethodIcon.getNullableLightThemeIconUrl(),
                     darkThemeIconUrl = selection.paymentMethodIcon.getNullableDarkThemeIconUrl(),
                     label = selection.labelResource,
@@ -156,5 +155,9 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             else -> resourceId
         }
+    }
+
+    companion object {
+        private const val MISSING_DRAWABLE_RESOURCE = 0
     }
 }
