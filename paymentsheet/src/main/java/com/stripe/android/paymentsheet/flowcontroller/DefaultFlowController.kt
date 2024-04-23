@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.VisibleForTesting
 import androidx.core.app.ActivityOptionsCompat
 import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.SavedStateViewModelFactory
 import androidx.lifecycle.ViewModelProvider
@@ -76,7 +77,7 @@ import javax.inject.Provider
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val viewModelScope: CoroutineScope,
-    lifecycleOwner: LifecycleOwner,
+    private val lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -251,18 +252,46 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    override fun presentPaymentOptions() {
-        val state = viewModel.state ?: error(
-            "FlowController must be successfully initialized " +
-                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
-                "configureWithIntentConfiguration() before calling presentPaymentOptions()."
-        )
+    private fun currentStateForPresenting(): Result<PaymentSheetState.Full> {
+        val state = viewModel.state
+            ?: return Result.failure(
+                IllegalStateException(
+                    "FlowController must be successfully initialized " +
+                        "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                        "configureWithIntentConfiguration() before calling presentPaymentOptions()."
+                )
+            )
 
         if (!configurationHandler.isConfigured) {
-            // For now, we fail silently in these situations. In the future, we should either log
-            // or emit an event in a to-be-added event listener.
-            return
+            return Result.failure(
+                IllegalStateException(
+                    "FlowController is not configured, or has a configuration update in flight."
+                )
+            )
         }
+
+        if (lifecycleOwner.lifecycle.currentState != Lifecycle.State.RESUMED) {
+            return Result.failure(
+                IllegalStateException(
+                    "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
+                )
+            )
+        }
+
+        return Result.success(state)
+    }
+
+    override fun presentPaymentOptions() {
+        val stateResult = currentStateForPresenting()
+        val state = stateResult.fold(
+            onSuccess = {
+                it
+            },
+            onFailure = {
+                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(it))
+                return
+            }
+        )
 
         val args = PaymentOptionContract.Args(
             state = state.copy(paymentSelection = viewModel.paymentSelection),
