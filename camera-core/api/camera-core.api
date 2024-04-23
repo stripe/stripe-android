@@ -16,53 +16,12 @@ public final class com/stripe/android/camera/framework/AnalyzerPool$Companion {
 	public static synthetic fun of$default (Lcom/stripe/android/camera/framework/AnalyzerPool$Companion;Lcom/stripe/android/camera/framework/AnalyzerFactory;ILkotlin/coroutines/Continuation;ILjava/lang/Object;)Ljava/lang/Object;
 }
 
-public final class com/stripe/android/camera/framework/time/Duration$Companion {
-	public final fun getINFINITE ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun getNEGATIVE_INFINITE ()Lcom/stripe/android/camera/framework/time/Duration;
-	public final fun getZERO ()Lcom/stripe/android/camera/framework/time/Duration;
+public final class com/stripe/android/camera/framework/time/EpochMillisecondsTimeSource : kotlin/time/AbstractLongTimeSource {
+	public fun <init> (J)V
 }
 
-public final class com/stripe/android/camera/framework/time/DurationKt {
-	public static final fun getDays (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getDays (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getDays (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getDays (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getHours (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getHours (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getHours (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getHours (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMicroseconds (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMicroseconds (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMicroseconds (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMicroseconds (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMilliseconds (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMilliseconds (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMilliseconds (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMilliseconds (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMinutes (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMinutes (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMinutes (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMinutes (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMonths (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMonths (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMonths (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getMonths (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getNanoseconds (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getNanoseconds (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getNanoseconds (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getNanoseconds (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getSeconds (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getSeconds (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getSeconds (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getSeconds (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getWeeks (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getWeeks (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getWeeks (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getWeeks (J)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getYears (D)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getYears (F)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getYears (I)Lcom/stripe/android/camera/framework/time/Duration;
-	public static final fun getYears (J)Lcom/stripe/android/camera/framework/time/Duration;
+public final class com/stripe/android/camera/framework/time/EpochMillisecondsTimeSourceKt {
+	public static final fun asEpochMillisecondsComparableTimeMark (J)Lkotlin/time/ComparableTimeMark;
 }
 
 public final class com/stripe/android/camera/framework/util/MemoizeKt {
@@ -82,38 +41,38 @@ public final class com/stripe/android/camera/framework/util/MemoizeKt {
 	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
 	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
 	public static final fun cachedFirstResultSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
-	public static final fun memoize (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
-	public static final fun memoize (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoize (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoize (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
 	public static final fun memoize (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
 	public static final fun memoize (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
 	public static final fun memoize (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
 	public static final fun memoize (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizeSuspend (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoizeSuspend (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoizeSuspend (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizeSuspend (Lcom/stripe/android/camera/framework/time/Duration;Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
+	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
+	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoize-VtjQ1oo (JLkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
 	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
 	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
 	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
 	public static final fun memoizeSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
+	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
+	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
+	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizeSuspend-VtjQ1oo (JLkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
 	public static final fun memoized (Lkotlin/jvm/functions/Function0;)Lkotlin/jvm/functions/Function0;
-	public static final fun memoized (Lkotlin/jvm/functions/Function0;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function0;
 	public static final fun memoized (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoized (Lkotlin/jvm/functions/Function1;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function1;
 	public static final fun memoized (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoized (Lkotlin/jvm/functions/Function2;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function2;
 	public static final fun memoized (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoized (Lkotlin/jvm/functions/Function3;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function3;
+	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function0;J)Lkotlin/jvm/functions/Function0;
+	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function1;J)Lkotlin/jvm/functions/Function1;
+	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function2;J)Lkotlin/jvm/functions/Function2;
+	public static final fun memoized-HG0u8IE (Lkotlin/jvm/functions/Function3;J)Lkotlin/jvm/functions/Function3;
 	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function1;)Lkotlin/jvm/functions/Function1;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function1;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function1;
 	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function2;)Lkotlin/jvm/functions/Function2;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function2;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function2;
 	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function3;)Lkotlin/jvm/functions/Function3;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function3;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function3;
 	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;)Lkotlin/jvm/functions/Function4;
-	public static final fun memoizedSuspend (Lkotlin/jvm/functions/Function4;Lcom/stripe/android/camera/framework/time/Duration;)Lkotlin/jvm/functions/Function4;
+	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function1;J)Lkotlin/jvm/functions/Function1;
+	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function2;J)Lkotlin/jvm/functions/Function2;
+	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function3;J)Lkotlin/jvm/functions/Function3;
+	public static final fun memoizedSuspend-HG0u8IE (Lkotlin/jvm/functions/Function4;J)Lkotlin/jvm/functions/Function4;
 }
 
 public final class com/stripe/android/camera/scanui/ViewFinderBackground : android/view/View {
