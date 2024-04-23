@@ -4,7 +4,6 @@ import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressType
 import com.stripe.android.uicore.elements.CountryConfig
@@ -56,7 +55,6 @@ data class AddressSpec(
 ) : FormItemSpec(), Parcelable {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
-        addressRepository: AddressRepository,
         shippingValues: Map<IdentifierSpec, String?>?,
     ): SectionElement? {
         val label = if (showLabel) R.string.stripe_billing_details else null
@@ -83,7 +81,6 @@ data class AddressSpec(
                     }
             val addressElement = AddressElement(
                 _identifier = apiPath,
-                addressRepository = addressRepository,
                 rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
                 addressType = type,

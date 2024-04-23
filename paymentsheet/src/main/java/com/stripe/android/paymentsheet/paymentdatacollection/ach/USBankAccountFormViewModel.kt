@@ -35,7 +35,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState.ResultIdentifier
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.di.DaggerUSBankAccountFormComponent
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
@@ -64,7 +63,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     private val application: Application,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle,
-    addressRepository: AddressRepository,
 ) : ViewModel() {
     private val defaultBillingDetails = args.formArgs.billingDetails
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
@@ -159,7 +157,6 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
 
     val addressElement = AddressElement(
         _identifier = IdentifierSpec.Generic("billing_details[address]"),
-        addressRepository = addressRepository,
         rawValuesMap = defaultAddress?.asFormFieldValues() ?: emptyMap(),
         sameAsShippingElement = sameAsShippingElement,
         shippingValuesMap = args.formArgs.shippingDetails?.toIdentifierMap(args.formArgs.billingDetails),

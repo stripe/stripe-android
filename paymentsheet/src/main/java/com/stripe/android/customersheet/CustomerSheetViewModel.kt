@@ -59,7 +59,6 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.transformToPaymentMethodCreateParams
 import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
@@ -137,7 +136,6 @@ internal class CustomerSheetViewModel(
         editInteractorFactory = editInteractorFactory,
     )
 
-    private val addressRepository = AddressRepository(application.resources, workContext)
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
     private val backStack = MutableStateFlow(initialBackStack)
@@ -778,7 +776,6 @@ internal class CustomerSheetViewModel(
         val formElements = paymentMethodMetadata?.formElementsForCode(
             code = selectedPaymentMethod.code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                addressRepository = addressRepository,
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
             )
         ) ?: emptyList()

@@ -49,7 +49,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -88,7 +87,6 @@ internal abstract class BaseSheetViewModel(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
-    private val addressRepository = AddressRepository(application.resources, workContext)
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
     internal val customerConfig = config.customer
@@ -698,7 +696,6 @@ internal abstract class BaseSheetViewModel(
         return paymentMethodMetadata.value?.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                addressRepository = addressRepository,
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
                 paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
