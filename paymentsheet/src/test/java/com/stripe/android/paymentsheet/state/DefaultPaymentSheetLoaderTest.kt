@@ -977,6 +977,45 @@ internal class DefaultPaymentSheetLoaderTest {
         assertThat(result.linkState).isNull()
     }
 
+    @Test
+    fun `When EPMs are requested but not returned by elements session, no EPMs are used`() = runTest {
+        testExternalPaymentMethods(
+            requestedExternalPaymentMethods = listOf("external_paypal"),
+            externalPaymentMethodData = null,
+            expectedExternalPaymentMethods = emptyList(),
+        )
+    }
+
+    @Test
+    fun `When EPMs are requested and returned by elements session, EPMs are used`() = runTest {
+        val requestedExternalPaymentMethods = listOf("external_venmo", "external_paypal")
+
+        testExternalPaymentMethods(
+            requestedExternalPaymentMethods,
+            externalPaymentMethodData = PaymentSheetFixtures.PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA,
+            expectedExternalPaymentMethods = requestedExternalPaymentMethods
+        )
+    }
+
+    private suspend fun testExternalPaymentMethods(
+        requestedExternalPaymentMethods: List<String>?,
+        externalPaymentMethodData: String?,
+        expectedExternalPaymentMethods: List<String>?
+    ) {
+        val loader = createPaymentSheetLoader(externalPaymentMethodData = externalPaymentMethodData)
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .externalPaymentMethods(requestedExternalPaymentMethods).build()
+        ).getOrThrow()
+
+        val actualExternalPaymentMethods = result.paymentMethodMetadata.externalPaymentMethodSpecs.map { it.type }
+        assertThat(actualExternalPaymentMethods).isEqualTo(expectedExternalPaymentMethods)
+    }
+
     private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
         prefsRepository.savePaymentSelection(paymentSelection)
 
@@ -1013,6 +1052,7 @@ internal class DefaultPaymentSheetLoaderTest {
         fallbackError: Throwable? = null,
         isCbcEligible: Boolean = false,
         linkStore: LinkStore = mock(),
+        externalPaymentMethodData: String? = null,
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             prefsRepositoryFactory = { prefsRepository },
@@ -1026,6 +1066,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 linkSettings = linkSettings,
                 isGooglePayEnabled = isGooglePayEnabledFromBackend,
                 isCbcEligible = isCbcEligible,
+                externalPaymentMethodData = externalPaymentMethodData,
             ),
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,

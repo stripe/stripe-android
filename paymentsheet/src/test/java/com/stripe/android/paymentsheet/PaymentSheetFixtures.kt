@@ -189,4 +189,21 @@ internal object PaymentSheetFixtures {
             ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible
         )
+
+    internal val PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA = """
+       [
+            {
+                "dark_image_url":null,
+                "label":"Venmo",
+                "light_image_url":"https:\/\/js.stripe.com\/v3\/fingerprinted\/img\/payment-methods\/icon-epm-venmo-162b3cf0020c8fe2ce4bde7ec3845941.png",
+                "type":"external_venmo"
+            },
+            {
+                "dark_image_url":"https:\/\/js.stripe.com\/v3\/fingerprinted\/img\/payment-methods\/icon-pm-paypal_dark@3x-26040e151c8f87187da2f997791fcc31.png",
+                "label":"PayPal",
+                "light_image_url":"https:\/\/js.stripe.com\/v3\/fingerprinted\/img\/payment-methods\/icon-pm-paypal@3x-5227ab4fca3d36846bd6622f495cdf4b.png",
+                "type":"external_paypal"
+            }
+        ] 
+    """.trimIndent()
 }
