@@ -13,6 +13,7 @@ import com.stripe.android.stripecardscan.payment.card.CardMatchResult
 import com.stripe.android.stripecardscan.payment.card.RequiresMatchingCard
 import com.stripe.android.stripecardscan.payment.card.isValidPanLastFour
 import kotlinx.coroutines.runBlocking
+import kotlin.time.TimeSource
 
 /**
  * Aggregate results from the main loop. Each frame will trigger an [InterimResult] to the
@@ -38,6 +39,7 @@ internal class MainLoopAggregator(
         >(
         listener = listener,
         initialState = MainLoopState.Initial(
+            timeSource = TimeSource.Monotonic,
             requiredCardIssuer = requiredCardIssuer,
             requiredLastFour = requiredLastFour,
             strictModeFrames = strictModeFrames

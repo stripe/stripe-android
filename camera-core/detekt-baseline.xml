@@ -6,14 +6,15 @@
     <ID>ComplexCondition:NV21Image.kt$NV21Image$left == 0 &amp;&amp; top == 0 &amp;&amp; right == width &amp;&amp; bottom == height</ID>
     <ID>EmptyFunctionBlock:Camera1Adapter.kt$Camera1Adapter.CameraPreview${}</ID>
     <ID>ForbiddenComment:CameraAdapter.kt$CameraAdapter$// TODO: change this to be a channelFlow once it's no longer experimental, add some capacity and use a backpressure drop strategy</ID>
-    <ID>ForbiddenComment:Clock.kt$* Measure the amount of time a process takes. * * TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Memoize.kt$CachedFirstResult1$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
     <ID>ForbiddenComment:Memoize.kt$CachedFirstResult2$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
     <ID>ForbiddenComment:Memoize.kt$CachedFirstResult3$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
     <ID>ForbiddenComment:Memoize.kt$CachedFirstResultSuspend1$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
     <ID>ForbiddenComment:Memoize.kt$CachedFirstResultSuspend2$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
     <ID>ForbiddenComment:Memoize.kt$CachedFirstResultSuspend3$* Cache the result from calling this method. Subsequent calls, even with different parameters, will * not change the cached output. * * TODO: use contracts when they're no longer experimental</ID>
+    <ID>ForbiddenComment:MemoizeTest.kt$MemoizeTest$// TODO: this should ideally use `runBlockingTest`, but that does not actually advance the</ID>
     <ID>ForbiddenComment:NV21Image.kt$NV21Image$* https://github.com/silvaren/easyrs/blob/c8eed0f0b713bbb1eb375aca23d615677e8adb3c/easyrs/src/main/java/io/github/silvaren/easyrs/tools/YuvToRgb.java * * TODO: once the renderscript toolkit is available in maven central, replace this method with * the yuvToRgbBitmap from that https://github.com/android/renderscript-intrinsics-replacement-toolkit/blob/main/renderscript-toolkit/src/main/java/com/google/android/renderscript/Toolkit.kt#L1079</ID>
+    <ID>LargeClass:MemoizeTest.kt$MemoizeTest</ID>
     <ID>LongMethod:Layout.kt$@CheckResult @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) fun Size.resizeRegion( originalRegion: Rect, newRegion: Rect, newSize: Size ): Map&lt;Rect, Rect></ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$1.5</ID>
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter$1000</ID>
@@ -22,13 +23,6 @@
     <ID>MagicNumber:Camera1Adapter.kt$Camera1Adapter.CameraPreview$8</ID>
     <ID>MagicNumber:CameraAdapter.kt$CameraAdapter.Companion$90</ID>
     <ID>MagicNumber:CameraXAdapter.kt$4</ID>
-    <ID>MagicNumber:Duration.kt$10</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$1000</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$12</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$24</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$365.25</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$60</ID>
-    <ID>MagicNumber:Duration.kt$DurationNanoseconds.Companion$7</ID>
     <ID>MagicNumber:Image.kt$0x00030001</ID>
     <ID>MagicNumber:NV21Image.kt$4</ID>
     <ID>MagicNumber:NV21Image.kt$8</ID>
@@ -72,7 +66,6 @@
     <ID>TooManyFunctions:BitmapExtensions.kt$com.stripe.android.camera.framework.image.BitmapExtensions.kt</ID>
     <ID>TooManyFunctions:CameraAdapter.kt$CameraAdapter&lt;CameraOutput> : LifecycleEventObserver</ID>
     <ID>TooManyFunctions:CameraXAdapter.kt$CameraXAdapter : CameraAdapter</ID>
-    <ID>TooManyFunctions:Duration.kt$Duration : Comparable</ID>
     <ID>TooManyFunctions:Layout.kt$com.stripe.android.camera.framework.util.Layout.kt</ID>
     <ID>TooManyFunctions:Memoize.kt$com.stripe.android.camera.framework.util.Memoize.kt</ID>
     <ID>UnnecessaryAbstractClass:SimpleScanStateful.kt$ScanState$ScanState</ID>

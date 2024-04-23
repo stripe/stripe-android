@@ -68,8 +68,8 @@ internal data class TaskStatistics(
     companion object {
         @JvmStatic
         internal fun fromTaskStats(taskStats: TaskStats) = TaskStatistics(
-            startedAtMs = taskStats.started.toMillisecondsSinceEpoch(),
-            durationMs = taskStats.duration.inMilliseconds.toLong(),
+            startedAtMs = taskStats.started.elapsedNow().inWholeMilliseconds,
+            durationMs = taskStats.duration.inWholeMilliseconds,
             result = taskStats.result
         )
     }
