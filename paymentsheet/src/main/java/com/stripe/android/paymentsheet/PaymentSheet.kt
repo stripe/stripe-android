@@ -1348,12 +1348,12 @@ class PaymentSheet internal constructor(
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
             fun createWithCustomerSession(
                 id: String,
-                customerSessionClientSecret: String
+                clientSecret: String
             ): CustomerConfiguration {
                 return CustomerConfiguration(
                     id = id,
                     ephemeralKeySecret = "",
-                    accessType = CustomerAccessType.CustomerSession(customerSessionClientSecret)
+                    accessType = CustomerAccessType.CustomerSession(clientSecret)
                 )
             }
         }
