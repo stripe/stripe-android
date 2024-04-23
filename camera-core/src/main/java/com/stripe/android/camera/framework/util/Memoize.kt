@@ -1,10 +1,10 @@
 package com.stripe.android.camera.framework.util
 
-import kotlin.time.Duration
-import kotlin.time.TimeSource
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 /**
  * A symbol for identifying values that have not yet been initialized.

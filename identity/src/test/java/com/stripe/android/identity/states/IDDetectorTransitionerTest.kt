@@ -579,7 +579,8 @@ internal class IDDetectorTransitionerTest {
     fun `Satisfied transitions to Finished when displaySatisfiedDuration has passed`() =
         runBlocking {
             val mockReachAtClockMark: ComparableTimeMark = mock()
-            whenever(mockReachAtClockMark.elapsedNow()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION + 1).milliseconds)
+            whenever(mockReachAtClockMark.elapsedNow())
+                .thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION + 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
                 timeout = TIMEOUT_DURATION,
@@ -605,7 +606,8 @@ internal class IDDetectorTransitionerTest {
     fun `Satisfied stays in Satisfied when displaySatisfiedDuration has not passed`() =
         runBlocking {
             val mockReachAtClockMark: ComparableTimeMark = mock()
-            whenever(mockReachAtClockMark.elapsedNow()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)
+            whenever(mockReachAtClockMark.elapsedNow())
+                .thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
                 timeout = TIMEOUT_DURATION,
@@ -652,7 +654,8 @@ internal class IDDetectorTransitionerTest {
     fun `Unsatisfied stays in Unsatisfied when displaySatisfiedDuration has not passed`() =
         runBlocking {
             val mockReachAtClockMark: ComparableTimeMark = mock()
-            whenever(mockReachAtClockMark.elapsedNow()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)
+            whenever(mockReachAtClockMark.elapsedNow())
+                .thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
                 timeout = TIMEOUT_DURATION,
@@ -683,7 +686,8 @@ internal class IDDetectorTransitionerTest {
     fun `Unsatisfied transitions to Initial when displaySatisfiedDuration has passed`() =
         runBlocking {
             val mockReachAtClockMark: ComparableTimeMark = mock()
-            whenever(mockReachAtClockMark.elapsedNow()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)
+            whenever(mockReachAtClockMark.elapsedNow())
+                .thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)
 
             val transitioner = IDDetectorTransitioner(
                 timeout = TIMEOUT_DURATION,

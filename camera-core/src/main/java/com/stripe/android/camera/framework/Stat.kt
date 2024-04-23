@@ -4,8 +4,6 @@ import android.util.Log
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
 import com.stripe.android.camera.BuildConfig
-import kotlin.time.Duration
-import kotlin.time.TimeSource
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.supervisorScope
@@ -13,6 +11,8 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.UUID
 import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object Stats {

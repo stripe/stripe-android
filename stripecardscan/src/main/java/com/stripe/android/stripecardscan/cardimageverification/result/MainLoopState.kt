@@ -319,7 +319,11 @@ internal sealed class MainLoopState(
         }
     }
 
-    class Finished(timeSource: TimeSource, val pan: String) : MainLoopState(timeSource, runOcr = false, runCardDetect = false) {
+    class Finished(timeSource: TimeSource, val pan: String) : MainLoopState(
+        timeSource,
+        runOcr = false,
+        runCardDetect = false
+    ) {
         override suspend fun consumeTransition(
             transition: MainLoopAnalyzer.Prediction
         ): MainLoopState = this

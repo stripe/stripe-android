@@ -10,7 +10,6 @@ import com.stripe.android.camera.framework.FiniteAnalyzerLoop
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.framework.StatefulResultHandler
 import com.stripe.android.camera.framework.TerminatingResultHandler
-import kotlin.time.Duration
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -26,6 +25,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.nanoseconds
 
 class LoopTest {

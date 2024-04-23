@@ -3,12 +3,12 @@ package com.stripe.android.camera.framework.util
 import android.util.Log
 import com.stripe.android.camera.BuildConfig
 import com.stripe.android.camera.framework.time.Rate
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeSource
 
 internal interface FrameRateListener {

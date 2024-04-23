@@ -3,9 +3,9 @@ package com.stripe.android.stripecardscan.framework.time
 import android.util.Log
 import androidx.annotation.CheckResult
 import androidx.annotation.RestrictTo
+import kotlinx.coroutines.runBlocking
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.runBlocking
 import kotlin.time.TimeSource
 
 /**

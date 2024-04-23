@@ -1,8 +1,6 @@
 package com.stripe.android.camera.framework
 
 import androidx.annotation.RestrictTo
-import kotlin.time.TimeSource
-import kotlin.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,6 +19,8 @@ import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.TimeSource
 
 internal object NoAnalyzersAvailableException : Exception()
 

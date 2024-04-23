@@ -3,11 +3,11 @@ package com.stripe.android.identity.analytics
 import android.util.Log
 import com.stripe.android.camera.framework.StatTracker
 import com.stripe.android.identity.injection.IdentityVerificationScope
-import kotlin.time.TimeSource
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.time.ComparableTimeMark
+import kotlin.time.TimeSource
 
 /**
  * Tracker for screen transition.
