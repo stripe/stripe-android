@@ -979,25 +979,20 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @Test
     fun `When EPMs are requested but not returned by elements session, no EPMs are used`() = runTest {
-        val requestedExternalPaymentMethods = listOf("external_paypal")
-        val externalPaymentMethodData = null
-        val expectedExternalPaymentMethods = emptyList<String>()
-
         testExternalPaymentMethods(
-            requestedExternalPaymentMethods,
-            externalPaymentMethodData,
-            expectedExternalPaymentMethods
+            requestedExternalPaymentMethods = listOf("external_paypal"),
+            externalPaymentMethodData = null,
+            expectedExternalPaymentMethods = emptyList(),
         )
     }
 
     @Test
     fun `When EPMs are requested and returned by elements session, EPMs are used`() = runTest {
         val requestedExternalPaymentMethods = listOf("external_venmo", "external_paypal")
-        val externalPaymentMethodData = PaymentSheetFixtures.PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA
 
         testExternalPaymentMethods(
             requestedExternalPaymentMethods,
-            externalPaymentMethodData,
+            externalPaymentMethodData = PaymentSheetFixtures.PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA,
             expectedExternalPaymentMethods = requestedExternalPaymentMethods
         )
     }
