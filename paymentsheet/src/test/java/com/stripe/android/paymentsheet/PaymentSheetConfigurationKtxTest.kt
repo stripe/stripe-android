@@ -105,7 +105,7 @@ class PaymentSheetConfigurationKtxTest {
             IllegalArgumentException::class,
             message = "When a CustomerConfiguration is passed to PaymentSheet, " +
                 "the ephemeralKeySecret cannot be an empty string."
-        )  {
+        ) {
             configWithBlankEphemeralKeySecret.validate()
         }
     }
