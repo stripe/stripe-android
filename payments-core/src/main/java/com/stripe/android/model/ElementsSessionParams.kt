@@ -11,6 +11,7 @@ sealed interface ElementsSessionParams : Parcelable {
 
     val type: String
     val clientSecret: String?
+    val customerSessionClientSecret: String?
     val locale: String?
     val expandFields: List<String>
     val externalPaymentMethods: List<String>?
@@ -20,6 +21,7 @@ sealed interface ElementsSessionParams : Parcelable {
     data class PaymentIntentType(
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
+        override val customerSessionClientSecret: String? = null,
         override val externalPaymentMethods: List<String>?,
     ) : ElementsSessionParams {
 
@@ -35,6 +37,7 @@ sealed interface ElementsSessionParams : Parcelable {
     data class SetupIntentType(
         override val clientSecret: String,
         override val locale: String? = Locale.getDefault().toLanguageTag(),
+        override val customerSessionClientSecret: String? = null,
         override val externalPaymentMethods: List<String>?,
     ) : ElementsSessionParams {
 
@@ -51,6 +54,7 @@ sealed interface ElementsSessionParams : Parcelable {
         override val locale: String? = Locale.getDefault().toLanguageTag(),
         val deferredIntentParams: DeferredIntentParams,
         override val externalPaymentMethods: List<String>?,
+        override val customerSessionClientSecret: String? = null,
     ) : ElementsSessionParams {
 
         override val clientSecret: String?

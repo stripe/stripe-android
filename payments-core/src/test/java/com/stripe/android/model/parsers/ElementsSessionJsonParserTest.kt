@@ -489,6 +489,7 @@ class ElementsSessionJsonParserTest {
         val parser = ElementsSessionJsonParser(
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = "secret",
+                customerSessionClientSecret = "customer_session_client_secret",
                 externalPaymentMethods = null,
             ),
             apiKey = "test",

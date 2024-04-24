@@ -74,6 +74,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
+            customer = paymentSheetConfiguration.customer,
             externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
         )
 
@@ -170,13 +171,20 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             isGooglePayReady(config, elementsSession)
         }
 
+        val customerConfig = config.customer
+
         val paymentMethods = async {
-            when (val customerConfig = config.customer) {
+            when (customerConfig?.accessType) {
+                is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                    elementsSession.customer?.paymentMethods ?: emptyList()
+                }
+                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                    retrieveCustomerPaymentMethods(
+                        metadata = metadata,
+                        customerConfig = customerConfig,
+                    )
+                }
                 null -> emptyList()
-                else -> retrieveCustomerPaymentMethods(
-                    metadata = metadata,
-                    customerConfig = customerConfig,
-                )
             }
         }
 
@@ -253,9 +261,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode, externalPaymentMethods)
+        return elementsSessionRepository.get(initializationMode, customer, externalPaymentMethods)
     }
 
     private suspend fun loadLinkState(

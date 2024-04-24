@@ -23,6 +23,7 @@ import kotlin.coroutines.CoroutineContext
 internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>?,
     ): Result<ElementsSession>
 }
@@ -46,9 +47,13 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        val params = initializationMode.toElementsSessionParams(externalPaymentMethods = externalPaymentMethods)
+        val params = initializationMode.toElementsSessionParams(
+            customer = customer,
+            externalPaymentMethods = externalPaymentMethods
+        )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
             params = params,
@@ -107,12 +112,16 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 }
 
 internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
+    customer: PaymentSheet.CustomerConfiguration?,
     externalPaymentMethods: List<String>?,
 ): ElementsSessionParams {
+    val customerSessionClientSecret = customer?.toElementSessionParam()
+
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
             ElementsSessionParams.PaymentIntentType(
                 clientSecret = clientSecret,
+                customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
             )
         }
@@ -120,6 +129,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
         is PaymentSheet.InitializationMode.SetupIntent -> {
             ElementsSessionParams.SetupIntentType(
                 clientSecret = clientSecret,
+                customerSessionClientSecret = customerSessionClientSecret,
                 externalPaymentMethods = externalPaymentMethods,
             )
         }
@@ -133,6 +143,7 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
                     paymentMethodConfigurationId = intentConfiguration.paymentMethodConfigurationId,
                 ),
                 externalPaymentMethods = externalPaymentMethods,
+                customerSessionClientSecret = customerSessionClientSecret,
             )
         }
     }
@@ -169,6 +180,13 @@ private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionPara
         PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> CaptureMethod.Automatic
         PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync -> CaptureMethod.AutomaticAsync
         PaymentSheet.IntentConfiguration.CaptureMethod.Manual -> CaptureMethod.Manual
+    }
+}
+
+private fun PaymentSheet.CustomerConfiguration.toElementSessionParam(): String? {
+    return when (accessType) {
+        is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
+        is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> null
     }
 }
 
