@@ -15,14 +15,24 @@ internal class FakeElementsSessionRepository(
     private val isCbcEligible: Boolean = false,
     private val externalPaymentMethodData: String? = null,
 ) : ElementsSessionRepository {
+    data class Params(
+        val initializationMode: PaymentSheet.InitializationMode,
+        val customer: PaymentSheet.CustomerConfiguration?,
+        val externalPaymentMethods: List<String>?,
+    )
 
-    var lastGetParam: PaymentSheet.InitializationMode? = null
+    var lastParams: Params? = null
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        lastGetParam = initializationMode
+        lastParams = Params(
+            initializationMode = initializationMode,
+            customer = customer,
+            externalPaymentMethods = externalPaymentMethods
+        )
         return if (error != null) {
             Result.failure(error)
         } else {
@@ -36,7 +46,7 @@ internal class FakeElementsSessionRepository(
                     isGooglePayEnabled = isGooglePayEnabled,
                     sessionsError = sessionsError,
                     externalPaymentMethodData = externalPaymentMethodData,
-                    customer = customer,
+                    customer = this.customer,
                 )
             )
         }

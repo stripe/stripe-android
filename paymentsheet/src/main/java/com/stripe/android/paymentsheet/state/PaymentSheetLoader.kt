@@ -74,6 +74,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
+            customer = paymentSheetConfiguration.customer,
             externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
         )
 
@@ -171,12 +172,14 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val paymentMethods = async {
-            when (val customerConfig = config.customer) {
-                null -> emptyList()
-                else -> retrieveCustomerPaymentMethods(
-                    metadata = metadata,
-                    customerConfig = customerConfig,
-                )
+            elementsSession.customer?.paymentMethods ?: run {
+                when (val customerConfig = config.customer) {
+                    null -> emptyList()
+                    else -> retrieveCustomerPaymentMethods(
+                        metadata = metadata,
+                        customerConfig = customerConfig,
+                    )
+                }
             }
         }
 
@@ -253,9 +256,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
         externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode, externalPaymentMethods)
+        return elementsSessionRepository.get(initializationMode, customer, externalPaymentMethods)
     }
 
     private suspend fun loadLinkState(
