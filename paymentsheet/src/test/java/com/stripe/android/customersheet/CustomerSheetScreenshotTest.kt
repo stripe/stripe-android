@@ -11,7 +11,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -70,12 +69,11 @@ internal class CustomerSheetScreenshotTest {
 
     private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
         paymentMethodCode = PaymentMethod.Type.Card.code,
-        formViewData = FormViewModel.ViewData(
-            completeFormValues = FormFieldValues(
-                showsMandate = false,
-                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-            ),
+        formFieldValues = FormFieldValues(
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         ),
+        formElements = emptyList(),
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
@@ -227,7 +225,6 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
                     mandateText = "This is a mandate.",
@@ -245,7 +242,6 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
                     isFirstPaymentMethod = true,
                     primaryButtonEnabled = false,
                     mandateText = "This is a mandate.",
@@ -263,7 +259,6 @@ internal class CustomerSheetScreenshotTest {
             CustomerSheetScreen(
                 viewState = addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    formViewData = FormViewModel.ViewData(),
                     displayDismissConfirmationModal = true,
                 ),
                 paymentMethodNameProvider = { it!! },

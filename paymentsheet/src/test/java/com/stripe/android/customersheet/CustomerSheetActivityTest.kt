@@ -19,7 +19,6 @@ import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryAr
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -329,9 +328,8 @@ internal class CustomerSheetActivityTest {
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
             supportedPaymentMethods = listOf(card),
-            formViewData = FormViewModel.ViewData(
-                elements = cardFormElements,
-            ),
+            formFieldValues = null,
+            formElements = cardFormElements,
             formArguments = FormArguments(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
