@@ -7,6 +7,10 @@ import kotlinx.parcelize.Parcelize
 @Parcelize
 internal sealed class PaymentMethodIcon : Parcelable {
 
+    abstract val iconResource: Int?
+    abstract val lightThemeIconUrl: String?
+    abstract val darkThemeIconUrl: String?
+
     internal data class Resource(
         /**
          * This describes the image in the LPM selector.
@@ -14,37 +18,40 @@ internal sealed class PaymentMethodIcon : Parcelable {
          * These can be found internally
          * [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0).
          * */
-        @DrawableRes val iconResource: Int,
-    ) : PaymentMethodIcon()
+        @DrawableRes override val iconResource: Int,
+    ) : PaymentMethodIcon() {
+        override val lightThemeIconUrl: String?
+            get() = null
+        override val darkThemeIconUrl: String?
+            get() = null
+    }
 
     internal data class Url(
         /** A light theme icon url. */
-        val lightThemeIconUrl: String,
+        override val lightThemeIconUrl: String,
 
         /** An optional dark theme icon url. */
-        val darkThemeIconUrl: String?,
+        override val darkThemeIconUrl: String?,
+    ) : PaymentMethodIcon() {
+        override val iconResource: Int?
+            get() = null
+    }
+
+    internal data class UrlOrResource(
+        /**
+         * This describes the image in the LPM selector.
+         *
+         * These can be found internally
+         * [here](https://www.figma.com/file/2b9r3CJbyeVAmKi1VHV2h9/Mobile-Payment-Element?node-id=1128%3A0).
+         * */
+        @DrawableRes override val iconResource: Int,
+
+        /** A light theme icon url. */
+        override val lightThemeIconUrl: String,
+
+        /** An optional dark theme icon url. */
+        override val darkThemeIconUrl: String?,
     ) : PaymentMethodIcon()
-
-    fun getNullableIconResource(): Int? {
-        return when (this) {
-            is Resource -> iconResource
-            is Url -> null
-        }
-    }
-
-    fun getNullableLightThemeIconUrl(): String? {
-        return when (this) {
-            is Url -> lightThemeIconUrl
-            is Resource -> null
-        }
-    }
-
-    fun getNullableDarkThemeIconUrl(): String? {
-        return when (this) {
-            is Url -> darkThemeIconUrl
-            is Resource -> null
-        }
-    }
 
     companion object {
         fun create(
@@ -55,7 +62,8 @@ internal sealed class PaymentMethodIcon : Parcelable {
             return if (lightThemeIconUrl == null) {
                 Resource(iconResource = iconResource)
             } else {
-                Url(
+                UrlOrResource(
+                    iconResource = iconResource,
                     lightThemeIconUrl = lightThemeIconUrl,
                     darkThemeIconUrl = darkThemeIconUrl,
                 )

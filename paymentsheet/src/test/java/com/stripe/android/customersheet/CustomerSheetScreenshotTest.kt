@@ -4,11 +4,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.versionedparcelable.R
 import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.forms.FormViewModel
@@ -338,5 +341,66 @@ internal class CustomerSheetScreenshotTest {
                 paymentMethodNameProvider = { it!! },
             )
         }
+    }
+
+    @Test
+    fun testIconUrlFailsToLoad_noResource_paymentSelectionShowsEmptyIcon() {
+        paparazzi.snapshot {
+            var counter = 0
+            CustomerSheetScreen(
+                viewState = selectPaymentMethodViewState.copy(
+                    title = "Screenshot testing",
+                    savedPaymentMethods = emptyList(),
+                    paymentSelection = getPaymentSelectionWithInvalidIconUrl(hasIconResource = false),
+                    primaryButtonLabel = "Continue",
+                    errorMessage = "This is an error message.",
+                ),
+                paymentMethodNameProvider = {
+                    counter++
+                    "424$counter"
+                },
+            )
+        }
+    }
+
+    @Test
+    fun testIconUrlFailsToLoad_paymentSelectionIconUsesResourceAsFallback() {
+        paparazzi.snapshot {
+            var counter = 0
+            CustomerSheetScreen(
+                viewState = selectPaymentMethodViewState.copy(
+                    title = "Screenshot testing",
+                    savedPaymentMethods = emptyList(),
+                    paymentSelection = getPaymentSelectionWithInvalidIconUrl(hasIconResource = true),
+                    primaryButtonLabel = "Continue",
+                    errorMessage = "This is an error message.",
+                ),
+                paymentMethodNameProvider = {
+                    counter++
+                    "424$counter"
+                },
+            )
+        }
+    }
+
+    private fun getPaymentSelectionWithInvalidIconUrl(hasIconResource: Boolean): PaymentSelection {
+        val paymentMethodIcon = if (hasIconResource) {
+            PaymentMethodIcon.UrlOrResource(
+                iconResource = com.stripe.android.ui.core.R.drawable.stripe_ic_paymentsheet_pm_cash_app_pay,
+                lightThemeIconUrl = "fake url",
+                darkThemeIconUrl = null,
+            )
+        } else {
+            PaymentMethodIcon.Url(
+                lightThemeIconUrl = "fake url",
+                darkThemeIconUrl = null,
+            )
+        }
+        return PaymentSelection.New.GenericPaymentMethod(
+            labelResource = "",
+            paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
+            customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+            paymentMethodIcon = paymentMethodIcon,
+        )
     }
 }

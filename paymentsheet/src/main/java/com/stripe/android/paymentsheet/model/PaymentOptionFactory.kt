@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.R
@@ -29,9 +30,17 @@ internal class PaymentOptionFactory @Inject constructor(
     private suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
         fun loadResource(): Drawable {
             @Suppress("DEPRECATION")
+            val drawableResourceId = paymentOption.drawableResourceId
+
+            if (drawableResourceId == MISSING_DRAWABLE_RESOURCE)  {
+                errorReporter.report(
+                    ErrorReporter.UnexpectedErrorEvent.PAYMENT_OPTION_MISSING_ICON_URL_AND_RES,
+                )
+            }
+
             return ResourcesCompat.getDrawable(
                 resources,
-                paymentOption.drawableResourceId,
+                drawableResourceId,
                 null
             ) ?: ShapeDrawable()
         }
@@ -46,19 +55,10 @@ internal class PaymentOptionFactory @Inject constructor(
         // Some payment options don't have an icon URL, and are loaded locally via resource.
         val lightThemeIconUrl = paymentOption.lightThemeIconUrl
         val darkThemeIconUrl = paymentOption.darkThemeIconUrl
-
-        @Suppress("DEPRECATION")
-        val drawableIsMissing = paymentOption.drawableResourceId == MISSING_DRAWABLE_RESOURCE
-
         return if (isDarkTheme() && darkThemeIconUrl != null) {
             loadIcon(darkThemeIconUrl)
         } else if (lightThemeIconUrl != null) {
             loadIcon(lightThemeIconUrl)
-        } else if (drawableIsMissing) {
-            errorReporter.report(
-                ErrorReporter.UnexpectedErrorEvent.PAYMENT_OPTION_MISSING_ICON_URL_AND_RES,
-            )
-            throw IllegalStateException("Missing icon resource and icon URLs - can't load")
         } else {
             loadResource()
         }
@@ -117,10 +117,10 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             is PaymentSelection.New.GenericPaymentMethod -> {
                 PaymentOption(
-                    drawableResourceId = selection.paymentMethodIcon.getNullableIconResource()
+                    drawableResourceId = selection.paymentMethodIcon.iconResource
                         ?: MISSING_DRAWABLE_RESOURCE,
-                    lightThemeIconUrl = selection.paymentMethodIcon.getNullableLightThemeIconUrl(),
-                    darkThemeIconUrl = selection.paymentMethodIcon.getNullableDarkThemeIconUrl(),
+                    lightThemeIconUrl = selection.paymentMethodIcon.lightThemeIconUrl,
+                    darkThemeIconUrl = selection.paymentMethodIcon.darkThemeIconUrl,
                     label = selection.labelResource,
                     imageLoader = ::loadPaymentOption,
                 )

@@ -259,6 +259,12 @@ private fun PaymentMethodIconUi(
                 darkThemeIconUrl = paymentMethodIcon.darkThemeIconUrl,
                 imageLoader = imageLoader
             )
+        is PaymentMethodIcon.UrlOrResource ->
+            IconFromUrl(
+                lightThemeIconUrl = paymentMethodIcon.lightThemeIconUrl,
+                darkThemeIconUrl = paymentMethodIcon.darkThemeIconUrl,
+                imageLoader = imageLoader
+            )
     }
 }
 
