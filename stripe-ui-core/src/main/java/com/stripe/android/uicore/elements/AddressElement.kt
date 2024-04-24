@@ -68,9 +68,7 @@ open class AddressElement constructor(
     private val otherFields = countryElement.controller.rawFieldValue
         .mapAsStateFlow { countryCode ->
             countryCode?.let {
-                if (phoneNumberElement.controller.fieldValue.value.isBlank()) {
-                    phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
-                }
+                phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
             }
             (elementsRegistry.get(countryCode) ?: emptyList()).onEach { field ->
                 updateLine1WithAutocompleteAffordance(

@@ -12,9 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 
 /**
  * A subclass of [StateFlow] that allows us to turn a [Flow] into a [StateFlow].
@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.flatMapLatest
  * @param produceValue The producer of the [StateFlow's] value
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Deprecated("Use helpers such as 'mapAsStateFlow' rather than use this class directly")
 class FlowToStateFlow<T>(
     private val flow: Flow<T>,
     private val produceValue: () -> T,
@@ -58,6 +59,7 @@ class FlowToStateFlow<T>(
 fun <T, R> StateFlow<T>.mapAsStateFlow(
     transform: (T) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
         flow = map(transform),
         produceValue = { transform(value) },
@@ -72,8 +74,9 @@ fun <T, R> StateFlow<T>.mapAsStateFlow(
 fun <T, R> StateFlow<T>.flatMapLatestAsStateFlow(
     transform: (T) -> StateFlow<R>,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = flatMapLatest(transform).distinctUntilChanged(),
+        flow = flatMapLatest(transform),
         produceValue = {
             transform(value).value
         },
@@ -85,8 +88,15 @@ fun <T, R> StateFlow<T>.flatMapLatestAsStateFlow(
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun <T> StateFlow<StateFlow<T>>.flattenConcatAsStateFlow(): StateFlow<T> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = value,
+        flow = flow {
+            this@flattenConcatAsStateFlow.collect { internalStateFlow ->
+                internalStateFlow.collect { value ->
+                    emit(value)
+                }
+            }
+        },
         produceValue = {
             value.value
         },
@@ -102,8 +112,9 @@ fun <T1, T2, R> combineAsStateFlow(
     flow2: StateFlow<T2>,
     transform: (T1, T2) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, transform).distinctUntilChanged(),
+        flow = combine(flow1, flow2, transform),
         produceValue = { transform(flow1.value, flow2.value) },
     )
 }
@@ -118,8 +129,9 @@ fun <T1, T2, T3, R> combineAsStateFlow(
     flow3: StateFlow<T3>,
     transform: (T1, T2, T3) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, flow3, transform).distinctUntilChanged(),
+        flow = combine(flow1, flow2, flow3, transform),
         produceValue = { transform(flow1.value, flow2.value, flow3.value) },
     )
 }
@@ -135,8 +147,9 @@ fun <T1, T2, T3, T4, R> combineAsStateFlow(
     flow4: StateFlow<T4>,
     transform: (T1, T2, T3, T4) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, flow3, flow4, transform).distinctUntilChanged(),
+        flow = combine(flow1, flow2, flow3, flow4, transform),
         produceValue = { transform(flow1.value, flow2.value, flow3.value, flow4.value) },
     )
 }
@@ -154,7 +167,7 @@ fun <T1, T2, T3, T4, T5, T6, R> combineAsStateFlow(
     flow6: StateFlow<T6>,
     transform: (T1, T2, T3, T4, T5, T6) -> R,
 ): StateFlow<R> {
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("DEPRECATION", "UNCHECKED_CAST")
     return FlowToStateFlow(
         flow = combine(listOf(flow1, flow2, flow3, flow4, flow5, flow6)) { values ->
             val flow1Value = values[0] as T1
@@ -177,6 +190,7 @@ inline fun <reified T, R> combineAsStateFlow(
     flows: List<StateFlow<T>>,
     crossinline transform: (List<T>) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
         flow = combine(flows) { values ->
             transform(values.toList())
