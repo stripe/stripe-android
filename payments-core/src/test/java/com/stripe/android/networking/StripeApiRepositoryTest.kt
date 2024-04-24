@@ -2572,8 +2572,8 @@ internal class StripeApiRepositoryTest {
         )
 
         with(params) {
-            assertThat("payment_intent").isEqualTo(this["type"])
-            assertThat("en-US").isEqualTo(this["locale"])
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
             assertThat(this["customer_session_client_secret"]).isNull()
         }
     }
@@ -2608,9 +2608,9 @@ internal class StripeApiRepositoryTest {
         )
 
         with(params) {
-            assertThat("payment_intent").isEqualTo(this["type"])
-            assertThat("en-US").isEqualTo(this["locale"])
-            assertThat("customer_session_client_secret").isEqualTo(this["customer_session_client_secret"])
+            assertThat(this["type"]).isEqualTo("payment_intent")
+            assertThat(this["locale"]).isEqualTo("en-US")
+            assertThat(this["customer_session_client_secret"]).isEqualTo("customer_session_client_secret")
         }
     }
 
