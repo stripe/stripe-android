@@ -456,7 +456,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         // do stuff
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
-                println("YEET CardMultilineWidget updating isCbcEligible with value: $isCbcEligible")
                 cardBrandView.isCbcEligible = isCbcEligible
             }
         }

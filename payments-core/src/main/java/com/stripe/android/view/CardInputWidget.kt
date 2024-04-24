@@ -392,7 +392,6 @@ class CardInputWidget @JvmOverloads constructor(
 
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
-                println("YEET CardInputWidget updating isCbcEligible with value: $isCbcEligible")
                 cardBrandView.isCbcEligible = isCbcEligible
             }
         }
