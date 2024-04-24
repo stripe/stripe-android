@@ -448,6 +448,14 @@ constructor(
             requiresMandate = false,
             hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = false,
+        ),
+        ExternalPaymentMethod(
+            code = "external_payment_method",
+            isReusable = false,
+            isVoucher = false,
+            requiresMandate = false,
+            hasDelayedSettlement = false,
+            shouldRefreshIfIntentRequiresAction = false,
         );
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet

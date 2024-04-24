@@ -59,9 +59,9 @@ internal class PaymentMethodMetadataTest {
             paymentMethodTypes = listOf("card", "pay_now"),
         )
         val metadata = PaymentMethodMetadataFactory.create(stripeIntent)
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first().type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods.first().code).isEqualTo("card")
     }
 
     @Test
@@ -72,9 +72,9 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first().type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods.first().code).isEqualTo("card")
     }
 
     @Test
@@ -85,10 +85,10 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(supportedPaymentMethods).hasSize(2)
-        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
-        assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
+        assertThat(supportedPaymentMethods[0].code).isEqualTo("card")
+        assertThat(supportedPaymentMethods[1].code).isEqualTo("klarna")
     }
 
     @Test
@@ -101,9 +101,9 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods[0].code).isEqualTo("card")
     }
 
     @Test
@@ -116,10 +116,10 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
         assertThat(supportedPaymentMethods).hasSize(2)
-        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
-        assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
+        assertThat(supportedPaymentMethods[0].code).isEqualTo("card")
+        assertThat(supportedPaymentMethods[1].code).isEqualTo("klarna")
     }
 
     @Test
