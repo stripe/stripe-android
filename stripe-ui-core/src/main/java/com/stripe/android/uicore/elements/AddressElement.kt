@@ -7,7 +7,6 @@ import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
-import com.stripe.android.uicore.utils.flattenConcatAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -124,7 +123,7 @@ open class AddressElement constructor(
     private val fieldsUpdatedFlow =
         combineAsStateFlow(
             countryElement.controller.rawFieldValue,
-            otherFields.mapAsStateFlow { fieldElements ->
+            otherFields.flatMapLatestAsStateFlow { fieldElements ->
                 combineAsStateFlow(
                     fieldElements
                         .map {
@@ -133,7 +132,7 @@ open class AddressElement constructor(
                 ) {
                     it.toList().flatten()
                 }
-            }.flattenConcatAsStateFlow()
+            }
         ) { country, values ->
             country?.let {
                 currentValuesMap[IdentifierSpec.Country] = it

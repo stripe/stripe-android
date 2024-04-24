@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 
 /**
@@ -23,7 +22,10 @@ import kotlinx.coroutines.flow.map
  * @param produceValue The producer of the [StateFlow's] value
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Deprecated("Use helpers such as 'mapAsStateFlow' rather than use this class directly")
+@Deprecated(
+    message = "Use helpers such as 'mapAsStateFlow' rather than use this class directly. " +
+        "This is only public to allow for the inline function usage below."
+)
 class FlowToStateFlow<T>(
     private val flow: Flow<T>,
     private val produceValue: () -> T,
@@ -79,26 +81,6 @@ fun <T, R> StateFlow<T>.flatMapLatestAsStateFlow(
         flow = flatMapLatest(transform),
         produceValue = {
             transform(value).value
-        },
-    )
-}
-
-/**
- * Combines a list of [StateFlow]s into another, instead of loosening the result to a [Flow].
- */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-fun <T> StateFlow<StateFlow<T>>.flattenConcatAsStateFlow(): StateFlow<T> {
-    @Suppress("DEPRECATION")
-    return FlowToStateFlow(
-        flow = flow {
-            this@flattenConcatAsStateFlow.collect { internalStateFlow ->
-                internalStateFlow.collect { value ->
-                    emit(value)
-                }
-            }
-        },
-        produceValue = {
-            value.value
         },
     )
 }
