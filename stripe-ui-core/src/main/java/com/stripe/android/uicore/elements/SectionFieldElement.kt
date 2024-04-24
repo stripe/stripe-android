@@ -2,7 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface SectionFieldElement {
@@ -10,8 +10,8 @@ interface SectionFieldElement {
     val shouldRenderOutsideCard: Boolean
         get() = false
 
-    fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>>
+    fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>>
     fun sectionFieldErrorController(): SectionFieldErrorController
     fun setRawValue(rawValuesMap: Map<IdentifierSpec, String?>)
-    fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>>
+    fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>>
 }

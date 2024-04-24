@@ -33,6 +33,7 @@
     <ID>MagicNumber:StripeTheme.kt$0.32</ID>
     <ID>MagicNumber:StripeTheme.kt$3</ID>
     <ID>MagicNumber:TextFieldUI.kt$1000</ID>
+    <ID>MatchingDeclarationName:StateFlows.kt$FlowToStateFlow&lt;T> : StateFlow</ID>
     <ID>MaxLineLength:DrawablePainter.kt$*</ID>
     <ID>MaxLineLength:Html.kt$*</ID>
     <ID>MaxLineLength:UiUtils.kt$*</ID>
