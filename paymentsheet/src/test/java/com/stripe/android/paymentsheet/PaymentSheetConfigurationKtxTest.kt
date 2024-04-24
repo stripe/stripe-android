@@ -5,7 +5,7 @@ import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
-import java.security.InvalidParameterException
+import java.lang.IllegalArgumentException
 import kotlin.test.assertFailsWith
 
 class PaymentSheetConfigurationKtxTest {
@@ -101,7 +101,11 @@ class PaymentSheetConfigurationKtxTest {
             ),
         )
 
-        assertFailsWith<InvalidParameterException> {
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "When a CustomerConfiguration is passed to PaymentSheet, " +
+                "the ephemeralKeySecret cannot be an empty string."
+        )  {
             configWithBlankEphemeralKeySecret.validate()
         }
     }
@@ -116,7 +120,11 @@ class PaymentSheetConfigurationKtxTest {
             ),
         )
 
-        assertFailsWith<InvalidParameterException> {
+        assertFailsWith(
+            IllegalArgumentException::class,
+            message = "When a CustomerConfiguration is passed to PaymentSheet, " +
+                "the customerSessionClientSecret cannot be an empty string."
+        ) {
             configWithBlankCustomerSessionClientSecret.validate()
         }
     }
