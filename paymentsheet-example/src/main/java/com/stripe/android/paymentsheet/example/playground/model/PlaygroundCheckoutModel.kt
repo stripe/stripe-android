@@ -35,6 +35,7 @@ class CheckoutRequest private constructor(
     enum class CustomerKeyType {
         @SerialName("customer_session")
         CustomerSession,
+
         @SerialName("legacy")
         Legacy;
     }
