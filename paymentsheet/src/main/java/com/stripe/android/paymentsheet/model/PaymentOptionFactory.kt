@@ -46,14 +46,17 @@ internal class PaymentOptionFactory @Inject constructor(
         // Some payment options don't have an icon URL, and are loaded locally via resource.
         val lightThemeIconUrl = paymentOption.lightThemeIconUrl
         val darkThemeIconUrl = paymentOption.darkThemeIconUrl
+
+        @Suppress("DEPRECATION")
+        val drawableIsMissing = paymentOption.drawableResourceId == MISSING_DRAWABLE_RESOURCE
+
         return if (isDarkTheme() && darkThemeIconUrl != null) {
             loadIcon(darkThemeIconUrl)
         } else if (lightThemeIconUrl != null) {
             loadIcon(lightThemeIconUrl)
-        } else if (@Suppress("DEPRECATION") paymentOption.drawableResourceId == MISSING_DRAWABLE_RESOURCE) {
+        } else if (drawableIsMissing) {
             errorReporter.report(
                 ErrorReporter.UnexpectedErrorEvent.PAYMENT_OPTION_MISSING_ICON_URL_AND_RES,
-                additionalNonPiiParams = mapOf("payment_option" to paymentOption.label)
             )
             throw IllegalStateException("Missing icon resource and icon URLs - can't load")
         } else {

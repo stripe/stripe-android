@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.paymentsheet.PaymentMethodUI
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -28,8 +29,11 @@ internal class PaymentMethodUIScreenshotTest {
         paparazziRule.snapshot {
             PaymentMethodUI(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
+                paymentMethodIcon = PaymentMethodIcon.create(
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                ),
                 imageLoader = mock(),
                 title = "Card",
                 isSelected = true,
@@ -46,8 +50,11 @@ internal class PaymentMethodUIScreenshotTest {
         paparazziRule.snapshot {
             PaymentMethodUI(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
+                paymentMethodIcon = PaymentMethodIcon.create(
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                ),
                 imageLoader = mock(),
                 title = "Card",
                 isSelected = false,
@@ -64,8 +71,11 @@ internal class PaymentMethodUIScreenshotTest {
         paparazziRule.snapshot {
             PaymentMethodUI(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
+                PaymentMethodIcon.create(
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                ),
                 imageLoader = mock(),
                 title = "Card",
                 isSelected = false,
@@ -82,8 +92,11 @@ internal class PaymentMethodUIScreenshotTest {
         paparazziRule.snapshot {
             PaymentMethodUI(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
-                iconUrl = null,
+                PaymentMethodIcon.create(
+                    iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                ),
                 imageLoader = mock(),
                 title = "The Greatest US Bank Account",
                 isSelected = false,

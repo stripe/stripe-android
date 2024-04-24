@@ -30,6 +30,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.SignUpConsentAction
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -1222,12 +1223,14 @@ internal class PaymentSheetViewModelTest {
 
         viewModel.updateSelection(
             PaymentSelection.New.GenericPaymentMethod(
-                iconResource = 0,
                 labelResource = "",
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
+                paymentMethodIcon = PaymentMethodIcon.create(
+                    iconResource = 0,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                ),
             )
         )
 
@@ -2747,7 +2750,6 @@ internal class PaymentSheetViewModelTest {
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
             labelResource = "Test",
-            iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
@@ -2759,8 +2761,11 @@ internal class PaymentSheetViewModelTest {
                 )
             ),
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
+            paymentMethodIcon = PaymentMethodIcon.create(
+                iconResource = 0,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+            ),
         )
     }
 

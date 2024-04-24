@@ -23,6 +23,7 @@ import com.stripe.android.link.LinkActivityContract
 import com.stripe.android.link.LinkActivityResult
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.LinkPaymentLauncher
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
@@ -74,6 +75,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -1892,6 +1894,7 @@ internal class DefaultFlowControllerTest {
         paymentOptionFactory = PaymentOptionFactory(
             resources = context.resources,
             imageLoader = StripeImageLoader(context),
+            errorReporter = FakeErrorReporter(),
         ),
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
@@ -1928,7 +1931,6 @@ internal class DefaultFlowControllerTest {
     private fun createBacsPaymentSelection(): PaymentSelection {
         return PaymentSelection.New.GenericPaymentMethod(
             labelResource = "Test",
-            iconResource = 0,
             paymentMethodCreateParams = PaymentMethodCreateParams.Companion.create(
                 bacsDebit = PaymentMethodCreateParams.BacsDebit(
                     accountNumber = BACS_ACCOUNT_NUMBER,
@@ -1940,8 +1942,11 @@ internal class DefaultFlowControllerTest {
                 )
             ),
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
+            paymentMethodIcon = PaymentMethodIcon.create(
+                iconResource = 0,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+            ),
         )
     }
 
@@ -1952,12 +1957,14 @@ internal class DefaultFlowControllerTest {
             PaymentSelection.CustomerRequestedSave.NoRequest
         )
         private val GENERIC_PAYMENT_SELECTION = PaymentSelection.New.GenericPaymentMethod(
-            iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
             labelResource = "Bancontact",
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-            lightThemeIconUrl = null,
-            darkThemeIconUrl = null,
+            paymentMethodIcon = PaymentMethodIcon.create(
+                iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+            ),
         )
         private val VISA_PAYMENT_OPTION = PaymentOption(
             drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,

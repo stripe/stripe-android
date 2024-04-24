@@ -12,6 +12,7 @@ import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntentFixtures
@@ -501,12 +502,14 @@ internal class PaymentOptionsViewModelTest {
             // Simulate user filling out a different payment method, but not confirming it
             viewModel.updateSelection(
                 PaymentSelection.New.GenericPaymentMethod(
-                    iconResource = 0,
                     labelResource = "",
                     paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT,
                     customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
-                    lightThemeIconUrl = null,
-                    darkThemeIconUrl = null,
+                    paymentMethodIcon = PaymentMethodIcon.create(
+                        iconResource = 0,
+                        lightThemeIconUrl = null,
+                        darkThemeIconUrl = null,
+                    ),
                 )
             )
 

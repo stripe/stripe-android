@@ -8,6 +8,7 @@ import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.utils.DurationProvider
+import com.stripe.android.lpmfoundations.luxe.PaymentMethodIcon
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodFixtures
@@ -489,9 +490,11 @@ class DefaultEventReporterTest {
         customEventReporter.onPressConfirmButton(
             PaymentSelection.New.GenericPaymentMethod(
                 labelResource = "Cash App Pay",
-                iconResource = 0,
-                lightThemeIconUrl = null,
-                darkThemeIconUrl = null,
+                paymentMethodIcon = PaymentMethodIcon.create(
+                    iconResource = 0,
+                    lightThemeIconUrl = null,
+                    darkThemeIconUrl = null,
+                ),
                 paymentMethodCreateParams = PaymentMethodCreateParams.createCashAppPay(),
                 customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             )
