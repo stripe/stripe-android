@@ -1,12 +1,10 @@
 package com.stripe.android.paymentsheet
 
 import com.stripe.android.model.DeferredIntentParams
-import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntent.ConfirmationMethod.Manual
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.paymentsheet.repositories.toElementsSessionParams
 
 internal object DeferredIntentValidator {
 
@@ -19,7 +17,7 @@ internal object DeferredIntentValidator {
         intentConfiguration: PaymentSheet.IntentConfiguration,
         isFlowController: Boolean,
     ): StripeIntent {
-        val params = mapToDeferredIntentParams(intentConfiguration)
+        val params = intentConfiguration.toDeferredIntentParams()
 
         when (stripeIntent) {
             is PaymentIntent -> {
@@ -69,13 +67,5 @@ internal object DeferredIntentValidator {
         }
 
         return stripeIntent
-    }
-
-    private fun mapToDeferredIntentParams(
-        intentConfiguration: PaymentSheet.IntentConfiguration,
-    ): DeferredIntentParams {
-        val initializationMode = PaymentSheet.InitializationMode.DeferredIntent(intentConfiguration)
-        val params = initializationMode.toElementsSessionParams(customer = null, externalPaymentMethods = null)
-        return (params as ElementsSessionParams.DeferredIntentType).deferredIntentParams
     }
 }
