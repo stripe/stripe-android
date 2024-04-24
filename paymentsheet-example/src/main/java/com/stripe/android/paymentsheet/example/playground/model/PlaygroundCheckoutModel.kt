@@ -13,7 +13,7 @@ class CheckoutRequest private constructor(
     @SerialName("customer")
     val customer: String?,
     @SerialName("customer_key_type")
-    val customerKeyType: String?,
+    val customerKeyType: CustomerKeyType?,
     @SerialName("currency")
     val currency: String?,
     @SerialName("mode")
@@ -31,10 +31,18 @@ class CheckoutRequest private constructor(
     @SerialName("payment_method_configuration")
     val paymentMethodConfigurationId: String?,
 ) {
+    @Serializable
+    enum class CustomerKeyType {
+        @SerialName("customer_session")
+        CustomerSession,
+        @SerialName("legacy")
+        Legacy;
+    }
+
     class Builder {
         private var initialization: String? = null
         private var customer: String? = null
-        private var customerKeyType: String? = null
+        private var customerKeyType: CustomerKeyType? = null
         private var currency: String? = null
         private var mode: String? = null
         private var setShippingAddress: Boolean? = null
@@ -52,7 +60,7 @@ class CheckoutRequest private constructor(
             this.customer = customer
         }
 
-        fun customerKeyType(customerKeyType: String?) = apply {
+        fun customerKeyType(customerKeyType: CustomerKeyType?) = apply {
             this.customerKeyType = customerKeyType
         }
 
@@ -124,17 +132,27 @@ data class CheckoutResponse(
     val paymentMethodTypes: String? = null,
 ) {
     @OptIn(ExperimentalCustomerSessionApi::class)
-    fun makeCustomerConfig() = customerId?.let { id ->
-        customerSessionClientSecret?.let { clientSecret ->
-            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                id = id,
-                clientSecret = clientSecret,
-            )
-        } ?: customerEphemeralKeySecret?.let { ephemeralKeySecret ->
-            PaymentSheet.CustomerConfiguration(
-                id = id,
-                ephemeralKeySecret = ephemeralKeySecret
-            )
+    fun makeCustomerConfig(
+        customerKeyType: CheckoutRequest.CustomerKeyType?
+    ) = customerId?.let { id ->
+        when (customerKeyType) {
+            CheckoutRequest.CustomerKeyType.CustomerSession -> {
+                customerSessionClientSecret?.let { clientSecret ->
+                    PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = id,
+                        clientSecret = clientSecret,
+                    )
+                }
+            }
+            CheckoutRequest.CustomerKeyType.Legacy,
+            null -> {
+                customerEphemeralKeySecret?.let { ephemeralKeySecret ->
+                    PaymentSheet.CustomerConfiguration(
+                        id = id,
+                        ephemeralKeySecret = ephemeralKeySecret
+                    )
+                }
+            }
         }
     }
 }

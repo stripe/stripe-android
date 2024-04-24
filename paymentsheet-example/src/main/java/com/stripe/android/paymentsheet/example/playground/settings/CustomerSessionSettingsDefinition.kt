@@ -9,9 +9,9 @@ internal object CustomerSessionSettingsDefinition : BooleanSettingsDefinition(
 ) {
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         if (value) {
-            checkoutRequestBuilder.customerKeyType("customer_session")
+            checkoutRequestBuilder.customerKeyType(CheckoutRequest.CustomerKeyType.CustomerSession)
         } else {
-            checkoutRequestBuilder.customerKeyType("legacy")
+            checkoutRequestBuilder.customerKeyType(CheckoutRequest.CustomerKeyType.Legacy)
         }
     }
 }
