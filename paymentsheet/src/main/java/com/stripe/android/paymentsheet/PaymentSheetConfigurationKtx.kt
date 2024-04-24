@@ -28,11 +28,26 @@ internal fun PaymentSheet.Configuration.validate() {
                     " the Customer ID cannot be an empty string."
             )
         }
-        customer?.ephemeralKeySecret?.isBlank() == true -> {
-            throw InvalidParameterException(
-                "When a CustomerConfiguration is passed to PaymentSheet, " +
-                    "the ephemeralKeySecret cannot be an empty string."
-            )
+    }
+
+    customer?.accessType?.let { customerAccessType ->
+        when (customerAccessType) {
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
+                    throw InvalidParameterException(
+                        "When a CustomerConfiguration is passed to PaymentSheet, " +
+                            "the ephemeralKeySecret cannot be an empty string."
+                    )
+                }
+            }
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                if (customerAccessType.customerSessionClientSecret.isBlank()) {
+                    throw InvalidParameterException(
+                        "When a CustomerConfiguration is passed to PaymentSheet, " +
+                            "the customerSessionClientSecret cannot be an empty string."
+                    )
+                }
+            }
         }
     }
 }

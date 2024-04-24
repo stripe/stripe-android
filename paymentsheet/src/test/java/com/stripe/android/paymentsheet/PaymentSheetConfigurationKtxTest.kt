@@ -5,6 +5,8 @@ import android.graphics.Color
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import org.junit.Test
+import java.security.InvalidParameterException
+import kotlin.test.assertFailsWith
 
 class PaymentSheetConfigurationKtxTest {
     @Test
@@ -88,6 +90,35 @@ class PaymentSheetConfigurationKtxTest {
         assertThat(
             configuration.containsVolatileDifferences(configWithAllowRemovalOfLastPaymentMethodChanges)
         ).isTrue()
+    }
+
+    @Test
+    fun `'validate' should fail when ephemeral key secret is blank`() {
+        val configWithBlankEphemeralKeySecret = configuration.copy(
+            customer = PaymentSheet.CustomerConfiguration(
+                id = "cus_1",
+                ephemeralKeySecret = "   "
+            ),
+        )
+
+        assertFailsWith<InvalidParameterException> {
+            configWithBlankEphemeralKeySecret.validate()
+        }
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `'validate' should fail when customer client secret key is secret is blank`() {
+        val configWithBlankCustomerSessionClientSecret = configuration.copy(
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "   "
+            ),
+        )
+
+        assertFailsWith<InvalidParameterException> {
+            configWithBlankCustomerSessionClientSecret.validate()
+        }
     }
 
     private companion object {
