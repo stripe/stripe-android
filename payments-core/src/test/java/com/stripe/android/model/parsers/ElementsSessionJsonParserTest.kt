@@ -506,7 +506,7 @@ class ElementsSessionJsonParserTest {
                     customerId = "cus_1",
                     liveMode = false,
                 ),
-                defaultPaymentMethod = null,
+                defaultPaymentMethod = "pm_123",
                 paymentMethods = listOf(
                     PaymentMethod(
                         id = "pm_123",

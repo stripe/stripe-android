@@ -255,7 +255,7 @@ internal object ElementsSessionFixtures {
               "customer": "cus_1",
               "livemode": false
             },
-            "default_payment_method": null,
+            "default_payment_method": "pm_123",
             "payment_methods": [
               {
                 "id": "pm_123",
