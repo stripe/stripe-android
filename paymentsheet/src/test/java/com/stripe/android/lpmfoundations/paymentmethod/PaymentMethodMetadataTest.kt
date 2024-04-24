@@ -1,6 +1,8 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
@@ -9,6 +11,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.EmailElement
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -59,9 +62,9 @@ internal class PaymentMethodMetadataTest {
             paymentMethodTypes = listOf("card", "pay_now"),
         )
         val metadata = PaymentMethodMetadataFactory.create(stripeIntent)
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first().type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods.first()).isEqualTo("card")
     }
 
     @Test
@@ -72,9 +75,9 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods.first().type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods.first()).isEqualTo("card")
     }
 
     @Test
@@ -85,10 +88,10 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(2)
-        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
-        assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
+        assertThat(supportedPaymentMethods[0]).isEqualTo("card")
+        assertThat(supportedPaymentMethods[1]).isEqualTo("klarna")
     }
 
     @Test
@@ -101,9 +104,9 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(1)
-        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
+        assertThat(supportedPaymentMethods[0]).isEqualTo("card")
     }
 
     @Test
@@ -116,10 +119,10 @@ internal class PaymentMethodMetadataTest {
             ),
             sharedDataSpecs = listOf(SharedDataSpec("card"), SharedDataSpec("klarna")),
         )
-        val supportedPaymentMethods = metadata.supportedPaymentMethodDefinitions()
+        val supportedPaymentMethods = metadata.supportedPaymentMethodTypes()
         assertThat(supportedPaymentMethods).hasSize(2)
-        assertThat(supportedPaymentMethods[0].type.code).isEqualTo("card")
-        assertThat(supportedPaymentMethods[1].type.code).isEqualTo("klarna")
+        assertThat(supportedPaymentMethods[0]).isEqualTo("card")
+        assertThat(supportedPaymentMethods[1]).isEqualTo("klarna")
     }
 
     @Test
@@ -441,4 +444,140 @@ internal class PaymentMethodMetadataTest {
         // Check that the address element doesn't contain country.
         assertThat(addressIdentifiers).doesNotContain(IdentifierSpec.Country)
     }
+
+    @Test
+    fun `When external payment methods are present and no payment method order, external payment methods are shown last`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "affirm", "klarna"),
+                ),
+                allowsPaymentMethodsRequiringShippingAddress = true,
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("affirm"),
+                    SharedDataSpec("card"),
+                    SharedDataSpec("klarna"),
+                ),
+                externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+            )
+            val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+            assertThat(sortedSupportedPaymentMethods).hasSize(4)
+            assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("card")
+            assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("affirm")
+            assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("klarna")
+            assertThat(sortedSupportedPaymentMethods[3].code).isEqualTo("external_paypal")
+        }
+
+    @Test
+    fun `When external payment methods are present and in payment method order, payment method order works`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "affirm", "klarna"),
+                ),
+                allowsPaymentMethodsRequiringShippingAddress = true,
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("affirm"),
+                    SharedDataSpec("card"),
+                    SharedDataSpec("klarna"),
+                ),
+                externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+                paymentMethodOrder = listOf("affirm", "external_paypal")
+            )
+            val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+            assertThat(sortedSupportedPaymentMethods).hasSize(4)
+            assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
+            assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("external_paypal")
+            assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("card")
+            assertThat(sortedSupportedPaymentMethods[3].code).isEqualTo("klarna")
+        }
+
+    @Test
+    fun `When external payment methods are present and not in payment method order, payment method order works`() =
+        runTest {
+            val metadata = PaymentMethodMetadataFactory.create(
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    paymentMethodTypes = listOf("card", "affirm", "klarna"),
+                ),
+                allowsPaymentMethodsRequiringShippingAddress = true,
+                sharedDataSpecs = listOf(
+                    SharedDataSpec("affirm"),
+                    SharedDataSpec("card"),
+                    SharedDataSpec("klarna"),
+                ),
+                externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+                paymentMethodOrder = listOf("affirm")
+            )
+            val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
+            assertThat(sortedSupportedPaymentMethods).hasSize(4)
+            assertThat(sortedSupportedPaymentMethods[0].code).isEqualTo("affirm")
+            assertThat(sortedSupportedPaymentMethods[1].code).isEqualTo("card")
+            assertThat(sortedSupportedPaymentMethods[2].code).isEqualTo("klarna")
+            assertThat(sortedSupportedPaymentMethods[3].code).isEqualTo("external_paypal")
+        }
+
+    @Test
+    fun `External payment method does not require mandate`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+        )
+
+        assertThat(metadata.requiresMandate("external_paypal")).isFalse()
+    }
+
+    @Test
+    fun `External payment methods are included in supported payment method types`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+        )
+
+        assertThat(metadata.supportedPaymentMethodTypes().contains("external_paypal")).isTrue()
+    }
+
+    @Test
+    fun `External payment methods are not included in supported saved payment method types`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+        )
+
+        assertThat(metadata.supportedSavedPaymentMethodTypes().map { it.code }.contains("external_paypal")).isFalse()
+    }
+
+    @Test
+    fun `External payment methods return correct supported payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+        )
+        val expectedSupportedPaymentMethod = SupportedPaymentMethod(
+            code = "external_paypal",
+            displayName = resolvableString("PayPal"),
+            lightThemeIconUrl = "example_url",
+            darkThemeIconUrl = null,
+            iconResource = 0,
+            tintIconOnSelection = false,
+        )
+
+        val actualSupportedPaymentMethod = metadata.supportedPaymentMethodForCode("external_paypal")
+
+        assertThat(actualSupportedPaymentMethod).isEqualTo(expectedSupportedPaymentMethod)
+    }
+
+    private val externalPaypalSpec = ExternalPaymentMethodSpec(
+        type = "external_paypal",
+        label = "PayPal",
+        lightImageUrl = "example_url",
+        darkImageUrl = null
+    )
 }
