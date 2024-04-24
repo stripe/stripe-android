@@ -1035,83 +1035,119 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When customer object is returned, should use payment methods from object and not fetch`() = runTest {
-        var attemptedToRetrievePaymentMethods = false
+    fun `When 'CustomerSession' config is provided, should use payment methods from elements_session and not fetch`() =
+        runTest {
+            var attemptedToRetrievePaymentMethods = false
 
-        val repository = FakeCustomerRepository(
-            onGetPaymentMethods = {
-                attemptedToRetrievePaymentMethods = true
-                Result.success(listOf())
-            }
-        )
-
-        val cards = PaymentMethodFactory.cards(4)
-        val loader = createPaymentSheetLoader(
-            customerRepo = repository,
-            customer = ElementsSession.Customer(
-                paymentMethods = cards,
-                session = ElementsSession.Customer.Session(
-                    id = "cuss_1",
-                    customerId = "cus_1",
-                    liveMode = false,
-                    apiKey = "ek_123",
-                    apiKeyExpiry = 555555555
-                ),
-                defaultPaymentMethod = null,
+            val repository = FakeCustomerRepository(
+                onGetPaymentMethods = {
+                    attemptedToRetrievePaymentMethods = true
+                    Result.success(listOf())
+                }
             )
-        )
 
-        val state = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = "client_secret"
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Merchant, Inc.",
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "customer_client_secret",
-                ),
+            val cards = PaymentMethodFactory.cards(4)
+            val loader = createPaymentSheetLoader(
+                customerRepo = repository,
+                customer = ElementsSession.Customer(
+                    paymentMethods = cards,
+                    session = ElementsSession.Customer.Session(
+                        id = "cuss_1",
+                        customerId = "cus_1",
+                        liveMode = false,
+                        apiKey = "ek_123",
+                        apiKeyExpiry = 555555555
+                    ),
+                    defaultPaymentMethod = null,
+                )
             )
-        ).getOrThrow()
 
-        assertThat(attemptedToRetrievePaymentMethods).isFalse()
-        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
-    }
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                )
+            ).getOrThrow()
+
+            assertThat(attemptedToRetrievePaymentMethods).isFalse()
+            assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
+        }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When customer object is null, should fetch payment methods`() = runTest {
-        var attemptedToRetrievePaymentMethods = false
+    fun `When 'CustomerSession' config is provided but no customer object was returned, should not fetch and return no payment methods`() =
+        runTest {
+            var attemptedToRetrievePaymentMethods = false
 
-        val cards = PaymentMethodFactory.cards(2)
-        val repository = FakeCustomerRepository(
-            onGetPaymentMethods = {
-                attemptedToRetrievePaymentMethods = true
-                Result.success(cards)
-            }
-        )
-
-        val loader = createPaymentSheetLoader(
-            customerRepo = repository,
-            customer = null
-        )
-
-        val state = loader.load(
-            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
-                clientSecret = "client_secret"
-            ),
-            paymentSheetConfiguration = PaymentSheet.Configuration(
-                merchantDisplayName = "Merchant, Inc.",
-                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
-                    id = "cus_1",
-                    clientSecret = "customer_client_secret",
-                ),
+            val repository = FakeCustomerRepository(
+                onGetPaymentMethods = {
+                    attemptedToRetrievePaymentMethods = true
+                    Result.success(listOf())
+                }
             )
-        ).getOrThrow()
 
-        assertThat(attemptedToRetrievePaymentMethods).isTrue()
-        assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
-    }
+            val loader = createPaymentSheetLoader(
+                customerRepo = repository,
+                customer = null,
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                )
+            ).getOrThrow()
+
+            assertThat(attemptedToRetrievePaymentMethods).isFalse()
+            assertThat(state.customerPaymentMethods).isEmpty()
+        }
+
+    @Test
+    fun `When 'LegacyEphemeralKey' is provided, should fetch and use payment methods from 'CustomerRepository'`() =
+        runTest {
+            var attemptedToRetrievePaymentMethods = false
+
+            val cards = PaymentMethodFactory.cards(2)
+            val repository = FakeCustomerRepository(
+                onGetPaymentMethods = {
+                    attemptedToRetrievePaymentMethods = true
+                    Result.success(cards)
+                }
+            )
+
+            val loader = createPaymentSheetLoader(
+                customerRepo = repository,
+                customer = null
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ephemeral_key_secret",
+                    ),
+                )
+            ).getOrThrow()
+
+            assertThat(attemptedToRetrievePaymentMethods).isTrue()
+            assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
+        }
 
     private suspend fun testExternalPaymentMethods(
         requestedExternalPaymentMethods: List<String>?,

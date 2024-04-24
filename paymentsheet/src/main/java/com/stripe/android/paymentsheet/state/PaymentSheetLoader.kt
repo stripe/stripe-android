@@ -171,15 +171,20 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             isGooglePayReady(config, elementsSession)
         }
 
+        val customerConfig = config.customer
+
         val paymentMethods = async {
-            elementsSession.customer?.paymentMethods ?: run {
-                when (val customerConfig = config.customer) {
-                    null -> emptyList()
-                    else -> retrieveCustomerPaymentMethods(
+            when (customerConfig?.accessType) {
+                is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                    elementsSession.customer?.paymentMethods ?: emptyList()
+                }
+                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                    retrieveCustomerPaymentMethods(
                         metadata = metadata,
                         customerConfig = customerConfig,
                     )
                 }
+                null -> emptyList()
             }
         }
 
