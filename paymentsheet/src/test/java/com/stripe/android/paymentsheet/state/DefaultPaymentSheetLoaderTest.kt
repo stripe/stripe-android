@@ -1211,7 +1211,7 @@ internal class DefaultPaymentSheetLoaderTest {
             error = error,
             sessionsError = fallbackError,
             linkSettings = linkSettings,
-            customer = customer,
+            sessionsCustomer = customer,
             isGooglePayEnabled = isGooglePayEnabledFromBackend,
             isCbcEligible = isCbcEligible,
             externalPaymentMethodData = externalPaymentMethodData,
