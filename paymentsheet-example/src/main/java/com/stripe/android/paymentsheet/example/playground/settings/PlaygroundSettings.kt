@@ -207,6 +207,7 @@ internal class PlaygroundSettings private constructor(
             AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition,
             PaymentMethodOrderSettingsDefinition,
             IntegrationTypeSettingsDefinition,
+            ExternalPaymentMethodSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
