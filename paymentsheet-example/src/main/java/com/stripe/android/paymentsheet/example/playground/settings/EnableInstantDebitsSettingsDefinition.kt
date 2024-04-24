@@ -12,6 +12,12 @@ internal object EnableInstantDebitsSettingsDefinition : BooleanSettingsDefinitio
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         // Hijacking this method to synchronize the setting with the feature flag
         FeatureFlags.instantDebits.setEnabled(value)
+
+        if (value) {
+            checkoutRequestBuilder.supportedPaymentMethods(
+                supportedPaymentMethods = listOf("card", "link")
+            )
+        }
     }
 
     override fun valueUpdated(value: Boolean, playgroundSettings: PlaygroundSettings) {
