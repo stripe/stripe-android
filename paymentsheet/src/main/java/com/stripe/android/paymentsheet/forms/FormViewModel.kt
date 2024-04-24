@@ -162,24 +162,4 @@ internal class FormViewModel @Inject internal constructor(
             !hiddenIds.contains(it)
         }
     }
-
-    internal val viewDataFlow = combine(
-        completeFormValues,
-        hiddenIdentifiers,
-        lastTextFieldIdentifier,
-    ) { completeFormValues, hiddenIdentifiers, lastTextFieldIdentifier ->
-        ViewData(
-            elements = elements,
-            completeFormValues = completeFormValues,
-            hiddenIdentifiers = hiddenIdentifiers,
-            lastTextFieldIdentifier = lastTextFieldIdentifier,
-        )
-    }
-
-    internal data class ViewData(
-        val elements: List<FormElement> = listOf(),
-        val completeFormValues: FormFieldValues? = null,
-        val hiddenIdentifiers: Set<IdentifierSpec> = setOf(),
-        val lastTextFieldIdentifier: IdentifierSpec? = null,
-    )
 }

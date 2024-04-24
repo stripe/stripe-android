@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.StringRes
-import app.cash.turbine.test
 import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
@@ -13,7 +12,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
@@ -646,38 +644,6 @@ internal class FormViewModelTest {
             assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
                 .isEqualTo("CA")
         }
-
-    @Test
-    fun `Test viewData flow`() = runTest {
-        val formViewModel = createViewModel(
-            COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = PaymentMethod.Type.Card.code,
-            ),
-            PaymentMethodMetadataFactory.create().formElementsForCode(
-                code = "card",
-                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
-            )!!,
-        )
-
-        formViewModel.viewDataFlow.test {
-            val viewData = awaitItem()
-            assertThat(viewData.elements.first())
-                .isInstanceOf(CardDetailsSectionElement::class.java)
-            assertThat(viewData.completeFormValues)
-                .isNull()
-            assertThat(viewData.hiddenIdentifiers)
-                .doesNotContain(IdentifierSpec("test"))
-            assertThat(viewData.lastTextFieldIdentifier)
-                .isNotNull()
-
-            formViewModel.addHiddenIdentifiers(
-                setOf(IdentifierSpec("test"))
-            )
-
-            assertThat(expectMostRecentItem().hiddenIdentifiers)
-                .contains(IdentifierSpec("test"))
-        }
-    }
 
     private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
