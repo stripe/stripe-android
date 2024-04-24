@@ -1460,12 +1460,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
 
     override suspend fun retrieveCardElementConfig(
         requestOptions: ApiRequest.Options,
+        params: Map<String, String>?
     ): Result<MobileCardElementConfig> {
         return fetchStripeModelResult(
             apiRequestFactory.createGet(
                 url = mobileCardElementConfigUrl,
                 options = requestOptions,
-                params = null,
+                params = params,
             ),
             jsonParser = MobileCardElementConfigParser(),
         )

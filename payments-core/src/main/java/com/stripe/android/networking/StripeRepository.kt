@@ -394,6 +394,7 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveCardElementConfig(
         requestOptions: ApiRequest.Options,
+        params: Map<String, String>? = null
     ): Result<MobileCardElementConfig>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

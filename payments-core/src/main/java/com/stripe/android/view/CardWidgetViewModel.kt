@@ -29,13 +29,22 @@ import javax.inject.Provider
 internal class CardWidgetViewModel(
     private val paymentConfigProvider: Provider<PaymentConfiguration>,
     private val stripeRepository: StripeRepository,
-    dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
 ) : ViewModel() {
 
     private val _isCbcEligible = MutableStateFlow(false)
     val isCbcEligible: StateFlow<Boolean> = _isCbcEligible
+    var onBehalfOf: String? = null
+        set(value) {
+            field = value
+            getEligibility()
+        }
 
     init {
+        getEligibility()
+    }
+
+    private fun getEligibility() {
         viewModelScope.launch(dispatcher) {
             _isCbcEligible.value = determineCbcEligibility()
         }
@@ -49,6 +58,9 @@ internal class CardWidgetViewModel(
                 apiKey = paymentConfig.publishableKey,
                 stripeAccount = paymentConfig.stripeAccountId,
             ),
+            params = onBehalfOf?.let {
+                mapOf("on_behalf_of" to it)
+            }
         )
 
         val config = response.getOrNull()
