@@ -184,6 +184,7 @@ internal class PlaygroundSettings private constructor(
 
         val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
+            CustomerSessionSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,

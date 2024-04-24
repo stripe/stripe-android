@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.model
 
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -11,6 +12,8 @@ class CheckoutRequest private constructor(
     val initialization: String?,
     @SerialName("customer")
     val customer: String?,
+    @SerialName("customer_key_type")
+    val customerKeyType: String?,
     @SerialName("currency")
     val currency: String?,
     @SerialName("mode")
@@ -31,6 +34,7 @@ class CheckoutRequest private constructor(
     class Builder {
         private var initialization: String? = null
         private var customer: String? = null
+        private var customerKeyType: String? = null
         private var currency: String? = null
         private var mode: String? = null
         private var setShippingAddress: Boolean? = null
@@ -46,6 +50,10 @@ class CheckoutRequest private constructor(
 
         fun customer(customer: String?) = apply {
             this.customer = customer
+        }
+
+        fun customerKeyType(customerKeyType: String?) = apply {
+            this.customerKeyType = customerKeyType
         }
 
         fun currency(currency: String?) = apply {
@@ -84,6 +92,7 @@ class CheckoutRequest private constructor(
             return CheckoutRequest(
                 initialization = initialization,
                 customer = customer,
+                customerKeyType = customerKeyType,
                 currency = currency,
                 mode = mode,
                 setShippingAddress = setShippingAddress,
@@ -107,20 +116,27 @@ data class CheckoutResponse(
     val customerId: String? = null,
     @SerialName("customerEphemeralKeySecret")
     val customerEphemeralKeySecret: String? = null,
+    @SerialName("customerSessionClientSecret")
+    val customerSessionClientSecret: String? = null,
     @SerialName("amount")
     val amount: Long,
     @SerialName("paymentMethodTypes")
     val paymentMethodTypes: String? = null,
 ) {
-    fun makeCustomerConfig() =
-        if (customerId != null && customerEphemeralKeySecret != null) {
-            PaymentSheet.CustomerConfiguration(
-                id = customerId,
-                ephemeralKeySecret = customerEphemeralKeySecret
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    fun makeCustomerConfig() = customerId?.let { id ->
+        customerSessionClientSecret?.let { clientSecret ->
+            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = id,
+                clientSecret = clientSecret,
             )
-        } else {
-            null
+        } ?: customerEphemeralKeySecret?.let { ephemeralKeySecret ->
+            PaymentSheet.CustomerConfiguration(
+                id = id,
+                ephemeralKeySecret = ephemeralKeySecret
+            )
         }
+    }
 }
 
 @Serializable
