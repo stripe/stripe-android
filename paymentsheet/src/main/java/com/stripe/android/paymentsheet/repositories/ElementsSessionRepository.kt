@@ -3,18 +3,15 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.DeferredIntentParams
-import com.stripe.android.model.DeferredIntentParams.Mode
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntent
-import com.stripe.android.model.PaymentIntent.CaptureMethod
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
@@ -136,50 +133,11 @@ internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
 
         is PaymentSheet.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
-                deferredIntentParams = DeferredIntentParams(
-                    mode = intentConfiguration.mode.toElementsSessionParam(),
-                    paymentMethodTypes = intentConfiguration.paymentMethodTypes,
-                    onBehalfOf = intentConfiguration.onBehalfOf,
-                    paymentMethodConfigurationId = intentConfiguration.paymentMethodConfigurationId,
-                ),
+                deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
                 externalPaymentMethods = externalPaymentMethods,
                 customerSessionClientSecret = customerSessionClientSecret,
             )
         }
-    }
-}
-
-private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode {
-    return when (this) {
-        is PaymentSheet.IntentConfiguration.Mode.Payment -> {
-            Mode.Payment(
-                amount = amount,
-                currency = currency,
-                setupFutureUsage = setupFutureUse?.toElementsSessionParam(),
-                captureMethod = captureMethod.toElementsSessionParam(),
-            )
-        }
-        is PaymentSheet.IntentConfiguration.Mode.Setup -> {
-            Mode.Setup(
-                currency = currency,
-                setupFutureUsage = setupFutureUse.toElementsSessionParam(),
-            )
-        }
-    }
-}
-
-private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionParam(): Usage {
-    return when (this) {
-        PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> Usage.OnSession
-        PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> Usage.OffSession
-    }
-}
-
-private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionParam(): CaptureMethod {
-    return when (this) {
-        PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> CaptureMethod.Automatic
-        PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync -> CaptureMethod.AutomaticAsync
-        PaymentSheet.IntentConfiguration.CaptureMethod.Manual -> CaptureMethod.Manual
     }
 }
 
