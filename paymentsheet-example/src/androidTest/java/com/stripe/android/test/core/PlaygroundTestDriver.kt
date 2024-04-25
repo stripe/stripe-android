@@ -39,7 +39,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTy
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
-import com.stripe.android.test.core.ui.UiAutomatorWebViewText
+import com.stripe.android.test.core.ui.clickTextInWebView
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
@@ -889,13 +889,17 @@ internal class PlaygroundTestDriver(
         Espresso.pressBack()
     }
 
-    private fun executeEntireInstantDebitsFlow() {
-        UiAutomatorWebViewText("Agree and continue", device = device).click()
-        UiAutomatorWebViewText("Continue with Link", device = device).click { it.last() }
-        UiAutomatorWebViewText("Use test code", device = device).click()
-        UiAutomatorWebViewText("Success", device = device).click()
-        UiAutomatorWebViewText("Connect account", device = device).click()
-        UiAutomatorWebViewText("Done", device = device).click()
+    private fun executeEntireInstantDebitsFlow() = with(device) {
+        clickTextInWebView(label = "Agree and continue")
+        clickTextInWebView(
+            label = "Continue with Link",
+            delay = true,
+            selectAmongOccurrences = { it.last() },
+        )
+        clickTextInWebView(label = "Use test code")
+        clickTextInWebView(label = "Success")
+        clickTextInWebView(label = "Connect account")
+        clickTextInWebView(label = "Done")
     }
 
     private fun doUSBankAccountAuthorization() {
