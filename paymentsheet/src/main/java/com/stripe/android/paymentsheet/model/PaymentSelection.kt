@@ -14,8 +14,8 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -93,10 +93,11 @@ internal sealed class PaymentSelection : Parcelable {
         ): String? {
             return when (paymentMethod.type) {
                 USBankAccount -> {
-                    ACHText.getContinueMandateText(
+                    USBankAccountTextBuilder.getContinueMandateText(
                         context = context,
                         merchantName = merchantName,
                         isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isInstantDebits = false,
                         isSetupFlow = isSetupFlow,
                     )
                 }
