@@ -7,9 +7,9 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.view.BecsDebitBanks
-import kotlinx.coroutines.flow.combine
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class BsbElement(
@@ -34,7 +34,7 @@ class BsbElement(
             .firstOrNull()
     }
 
-    override fun getFormFieldValueFlow() = combine(
+    override fun getFormFieldValueFlow() = combineAsStateFlow(
         textElement.controller.isComplete,
         textElement.controller.fieldValue
     ) { complete, fieldValue ->

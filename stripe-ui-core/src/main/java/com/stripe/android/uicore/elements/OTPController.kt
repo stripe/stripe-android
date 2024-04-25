@@ -2,10 +2,9 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardType
-import kotlinx.coroutines.flow.Flow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OTPController(val otpLength: Int = 6) : Controller {
@@ -20,9 +19,9 @@ class OTPController(val otpLength: Int = 6) : Controller {
         MutableStateFlow("")
     }
 
-    val fieldValue: Flow<String> = combine(fieldValues) {
+    val fieldValue: StateFlow<String> = combineAsStateFlow(fieldValues) {
         it.joinToString("")
-    }.distinctUntilChanged()
+    }
 
     /**
      * Filter invalid values and set the value of the fields to the entered text, one character per
