@@ -5,7 +5,7 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 
@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.flatMapLatest
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressController(
-    val fieldsFlowable: Flow<List<SectionFieldElement>>
+    val fieldsFlowable: StateFlow<List<SectionFieldElement>>
 ) : SectionFieldErrorController, SectionFieldComposable {
     @StringRes
     val label: Int? = null
