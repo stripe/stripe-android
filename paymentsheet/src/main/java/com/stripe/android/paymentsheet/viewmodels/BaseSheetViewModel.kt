@@ -51,13 +51,13 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -232,7 +232,7 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentOptionsState(),
         )
 
-    private val canEdit: StateFlow<Boolean> = paymentOptionsState.map { state ->
+    private val canEdit: StateFlow<Boolean> = paymentOptionsState.mapAsStateFlow { state ->
         val paymentMethods = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
         if (config.allowsRemovalOfLastSavedPaymentMethod) {
             paymentMethods.isNotEmpty()
@@ -244,23 +244,15 @@ internal abstract class BaseSheetViewModel(
                 paymentMethods.size > 1
             }
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = false,
-    )
+    }
 
-    val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
+    val topBarState: StateFlow<PaymentSheetTopBarState> = combineAsStateFlow(
         currentScreen,
-        paymentMethodMetadata.map { it?.stripeIntent?.isLiveMode ?: true },
+        paymentMethodMetadata.mapAsStateFlow { it?.stripeIntent?.isLiveMode ?: true },
         processing,
         editing,
         canEdit,
         PaymentSheetTopBarStateFactory::create,
-    ).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = PaymentSheetTopBarStateFactory.createDefault(),
     )
 
     val linkSignupMode: StateFlow<LinkSignupMode?> = linkHandler.linkSignupMode.stateIn(
