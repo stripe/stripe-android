@@ -3,9 +3,11 @@ package com.stripe.android.view
 import android.view.View
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.findViewTreeLifecycleOwner
 import androidx.lifecycle.findViewTreeViewModelStoreOwner
 import androidx.lifecycle.lifecycleScope
@@ -30,13 +32,15 @@ internal class CardWidgetViewModel(
     private val paymentConfigProvider: Provider<PaymentConfiguration>,
     private val stripeRepository: StripeRepository,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO,
+    private val handle: SavedStateHandle
 ) : ViewModel() {
 
     private val _isCbcEligible = MutableStateFlow(false)
     val isCbcEligible: StateFlow<Boolean> = _isCbcEligible
-    var onBehalfOf: String? = null
+    var onBehalfOf: String? = handle[ON_BEHALF_OF]
         set(value) {
             field = value
+            handle[ON_BEHALF_OF] = value
             getEligibility()
         }
 
@@ -81,8 +85,13 @@ internal class CardWidgetViewModel(
             return CardWidgetViewModel(
                 paymentConfigProvider = { PaymentConfiguration.getInstance(context) },
                 stripeRepository = stripeRepository,
+                handle = extras.createSavedStateHandle()
             ) as T
         }
+    }
+
+    companion object {
+        internal const val ON_BEHALF_OF = "on_behalf_of"
     }
 }
 

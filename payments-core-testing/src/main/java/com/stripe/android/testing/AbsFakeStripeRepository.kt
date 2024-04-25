@@ -431,6 +431,7 @@ abstract class AbsFakeStripeRepository : StripeRepository {
 
     override suspend fun retrieveCardElementConfig(
         requestOptions: ApiRequest.Options,
+        params: Map<String, String>?
     ): Result<MobileCardElementConfig> {
         TODO("Not yet implemented")
     }

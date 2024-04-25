@@ -453,7 +453,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         // see https://github.com/stripe/stripe-android/pull/3154
         cvcEditText.hint = null
 
-        // do stuff
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
@@ -469,8 +468,10 @@ class CardMultilineWidget @JvmOverloads constructor(
      * provided on the Intent used when confirming payment.
      */
     fun setOnBehalfOf(onBehalfOf: String) {
-        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
-            viewModel.onBehalfOf = onBehalfOf
+        if (isAttachedToWindow) {
+            doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                viewModel.onBehalfOf = onBehalfOf
+            }
         }
     }
 

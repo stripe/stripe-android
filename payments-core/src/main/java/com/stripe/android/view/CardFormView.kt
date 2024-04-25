@@ -233,8 +233,10 @@ class CardFormView @JvmOverloads constructor(
      * provided on the Intent used when confirming payment.
      */
     fun setOnBehalfOf(onBehalfOf: String) {
-        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
-            viewModel.onBehalfOf = onBehalfOf
+        if (isAttachedToWindow) {
+            doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                viewModel.onBehalfOf = onBehalfOf
+            }
         }
     }
 

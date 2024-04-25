@@ -1,5 +1,6 @@
 package com.stripe.android.view
 
+import androidx.lifecycle.SavedStateHandle
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
@@ -26,6 +27,7 @@ class CardWidgetViewModelTest {
                 paymentConfigProvider = { paymentConfig },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher,
+                handle = SavedStateHandle()
             )
 
             viewModel.isCbcEligible.test {
@@ -44,6 +46,7 @@ class CardWidgetViewModelTest {
                 paymentConfigProvider = { paymentConfig },
                 stripeRepository = stripeRepository,
                 dispatcher = testDispatcher,
+                handle = SavedStateHandle()
             )
 
             viewModel.isCbcEligible.test {
@@ -61,6 +64,7 @@ class CardWidgetViewModelTest {
             paymentConfigProvider = { paymentConfig },
             stripeRepository = stripeRepository,
             dispatcher = testDispatcher,
+            handle = SavedStateHandle()
         )
 
         viewModel.isCbcEligible.test {
