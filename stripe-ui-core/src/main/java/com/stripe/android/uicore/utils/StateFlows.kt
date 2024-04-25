@@ -41,7 +41,7 @@ class FlowToStateFlow<T>(
     @InternalCoroutinesApi
     override suspend fun collect(collector: FlowCollector<T>): Nothing {
         val collectorJob = currentCoroutineContext()[Job]
-        flow.collect(collector)
+        flow.distinctUntilChanged().collect(collector)
 
         try {
             while (true) {
@@ -64,7 +64,7 @@ fun <T, R> StateFlow<T>.mapAsStateFlow(
 ): StateFlow<R> {
     @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = map(transform).distinctUntilChanged(),
+        flow = map(transform),
         produceValue = { transform(value) },
     )
 }
@@ -79,7 +79,7 @@ fun <T, R> StateFlow<T>.flatMapLatestAsStateFlow(
 ): StateFlow<R> {
     @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = flatMapLatest(transform).distinctUntilChanged(),
+        flow = flatMapLatest(transform),
         produceValue = {
             transform(value).value
         },
@@ -97,7 +97,7 @@ fun <T1, T2, R> combineAsStateFlow(
 ): StateFlow<R> {
     @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, transform).distinctUntilChanged(),
+        flow = combine(flow1, flow2, transform),
         produceValue = { transform(flow1.value, flow2.value) },
     )
 }
@@ -114,7 +114,7 @@ fun <T1, T2, T3, R> combineAsStateFlow(
 ): StateFlow<R> {
     @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, flow3, transform).distinctUntilChanged(),
+        flow = combine(flow1, flow2, flow3, transform),
         produceValue = { transform(flow1.value, flow2.value, flow3.value) },
     )
 }
@@ -132,7 +132,7 @@ fun <T1, T2, T3, T4, R> combineAsStateFlow(
 ): StateFlow<R> {
     @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = combine(flow1, flow2, flow3, flow4, transform).distinctUntilChanged(),
+        flow = combine(flow1, flow2, flow3, flow4, transform),
         produceValue = { transform(flow1.value, flow2.value, flow3.value, flow4.value) },
     )
 }
@@ -160,7 +160,7 @@ fun <T1, T2, T3, T4, T5, T6, R> combineAsStateFlow(
             val flow5Value = values[4] as T5
             val flow6Value = values[5] as T6
             transform(flow1Value, flow2Value, flow3Value, flow4Value, flow5Value, flow6Value)
-        }.distinctUntilChanged(),
+        },
         produceValue = { transform(flow1.value, flow2.value, flow3.value, flow4.value, flow5.value, flow6.value) },
     )
 }
@@ -177,7 +177,7 @@ inline fun <reified T, R> combineAsStateFlow(
     return FlowToStateFlow(
         flow = combine(flows) { values ->
             transform(values.toList())
-        }.distinctUntilChanged(),
+        },
         produceValue = { transform(flows.map { it.value }) },
     )
 }
