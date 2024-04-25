@@ -446,7 +446,7 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
-    fun `When external payment methods are present and no payment method order, external payment methods are shown last`() =
+    fun `When external payment methods are present and no payment method order, EPMs are shown last`() =
         runTest {
             val metadata = PaymentMethodMetadataFactory.create(
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
