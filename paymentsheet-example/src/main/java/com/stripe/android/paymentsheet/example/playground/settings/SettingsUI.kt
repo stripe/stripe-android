@@ -114,8 +114,9 @@ private fun <T> RadioButtonSetting(
             )
         }
 
+        val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
+
         Row {
-            val selectedOption = remember(value) { options.firstOrNull { it.value == value } }
             options.forEach { option ->
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -136,6 +137,14 @@ private fun <T> RadioButtonSetting(
                         text = option.name,
                     )
                 }
+            }
+        }
+
+        Row {
+            if (selectedOption == null) {
+                Text(
+                    text = value.toString(),
+                )
             }
         }
     }
