@@ -23,6 +23,8 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
+import com.stripe.android.uicore.elements.RowElement
+import com.stripe.android.uicore.elements.SectionFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.utils.stateFlowOf
 import org.junit.Rule
@@ -44,6 +46,25 @@ internal class BillingDetailsCollectionScreenshotTest {
                 formArgs = createFormArguments(),
                 isProcessing = false,
                 isPaymentFlow = true,
+                instantDebits = false,
+                nameController = createNameController(),
+                emailController = createEmailController(),
+                phoneController = createPhoneNumberController(),
+                addressController = createAddressController(),
+                lastTextFieldIdentifier = null,
+                sameAsShippingElement = null
+            )
+        }
+    }
+
+    @Test
+    fun testEmptySetupFlow() {
+        paparazzi.snapshot {
+            BillingDetailsCollectionScreen(
+                formArgs = createFormArguments(),
+                isProcessing = false,
+                isPaymentFlow = false,
+                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
@@ -61,6 +82,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 formArgs = createFormArguments(),
                 isProcessing = false,
                 isPaymentFlow = true,
+                instantDebits = false,
                 nameController = createNameController("John Doe"),
                 emailController = createEmailController("email@email.com"),
                 phoneController = createPhoneNumberController(),
@@ -82,6 +104,7 @@ internal class BillingDetailsCollectionScreenshotTest {
                 ),
                 isProcessing = false,
                 isPaymentFlow = true,
+                instantDebits = false,
                 nameController = createNameController(),
                 emailController = createEmailController(),
                 phoneController = createPhoneNumberController(),
@@ -96,11 +119,16 @@ internal class BillingDetailsCollectionScreenshotTest {
     fun testFilledWithBillingAddress() {
         paparazzi.snapshot {
             BillingDetailsCollectionScreen(
-                formArgs = createFormArguments(),
+                formArgs = createFormArguments(
+                    billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                        address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+                    ),
+                ),
                 isProcessing = false,
                 isPaymentFlow = true,
-                nameController = createNameController(),
-                emailController = createEmailController(),
+                instantDebits = false,
+                nameController = createNameController("John Doe"),
+                emailController = createEmailController("email@email.com"),
                 phoneController = createPhoneNumberController(),
                 addressController = createAddressController(fillAddress = true),
                 lastTextFieldIdentifier = null,
@@ -169,16 +197,11 @@ internal class BillingDetailsCollectionScreenshotTest {
 
         if (fillAddress) {
             elements.forEach { element ->
-                val value = when (element.identifier) {
-                    FieldType.AddressLine1.identifierSpec -> "354 Oyster Point Blvd"
-                    FieldType.AddressLine2.identifierSpec -> "Levels 1-5"
-                    FieldType.Locality.identifierSpec -> "South San Francisco"
-                    FieldType.AdministrativeArea.identifierSpec -> "CA"
-                    FieldType.PostalCode.identifierSpec -> "94080"
-                    else -> ""
+                if (element is RowElement) {
+                    element.fields.forEach(::setAddressValueForElement)
+                } else {
+                    setAddressValueForElement(element)
                 }
-
-                element.setRawValue(mapOf(element.identifier to value))
             }
         }
 
@@ -195,5 +218,22 @@ internal class BillingDetailsCollectionScreenshotTest {
                 ).plus(elements)
             )
         )
+    }
+
+    private fun setAddressValueForElement(element: SectionFieldElement) {
+        val identifier = element.identifier
+
+        element.setRawValue(mapOf(identifier to identifier.toTestAddressValue()))
+    }
+
+    private fun IdentifierSpec.toTestAddressValue(): String {
+        return when (this) {
+            FieldType.AddressLine1.identifierSpec -> "354 Oyster Point Blvd"
+            FieldType.AddressLine2.identifierSpec -> "Levels 1-5"
+            FieldType.Locality.identifierSpec -> "South San Francisco"
+            FieldType.AdministrativeArea.identifierSpec -> "CA"
+            FieldType.PostalCode.identifierSpec -> "94080"
+            else -> ""
+        }
     }
 }
