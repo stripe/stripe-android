@@ -29,7 +29,7 @@ internal sealed interface UiDefinitionFactory {
         interface Factory {
             fun create(
                 metadata: PaymentMethodMetadata,
-                definition: PaymentMethodDefinition,
+                requiresMandate: Boolean,
             ): Arguments
 
             class Default(
@@ -39,7 +39,7 @@ internal sealed interface UiDefinitionFactory {
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
-                    definition: PaymentMethodDefinition,
+                    requiresMandate: Boolean,
                 ): Arguments {
                     return Arguments(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
@@ -54,7 +54,7 @@ internal sealed interface UiDefinitionFactory {
                         shippingValues = metadata.shippingDetails?.toIdentifierMap(metadata.defaultBillingDetails),
                         saveForFutureUseInitialValue = false,
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
-                        requiresMandate = definition.requiresMandate(metadata),
+                        requiresMandate = requiresMandate,
                     )
                 }
             }

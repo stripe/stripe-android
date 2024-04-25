@@ -6,6 +6,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.LpmSerializer
 import com.stripe.android.ui.core.elements.SharedDataSpec
 
@@ -22,6 +23,7 @@ internal object PaymentMethodMetadataFactory {
         cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
         hasCustomerConfiguration: Boolean = false,
         sharedDataSpecs: List<SharedDataSpec> = createSharedDataSpecs(),
+        externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList()
     ): PaymentMethodMetadata {
         return PaymentMethodMetadata(
             stripeIntent = stripeIntent,
@@ -36,7 +38,7 @@ internal object PaymentMethodMetadataFactory {
             shippingDetails = shippingDetails,
             hasCustomerConfiguration = hasCustomerConfiguration,
             sharedDataSpecs = sharedDataSpecs,
-            externalPaymentMethodSpecs = emptyList(),
+            externalPaymentMethodSpecs = externalPaymentMethodSpecs,
         )
     }
 

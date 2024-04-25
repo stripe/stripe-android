@@ -410,7 +410,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private fun supportsIntent(
         metadata: PaymentMethodMetadata,
     ): Boolean {
-        return metadata.supportedPaymentMethodDefinitions().isNotEmpty()
+        return metadata.supportedPaymentMethodTypes().isNotEmpty()
     }
 
     private fun reportSuccessfulLoad(
