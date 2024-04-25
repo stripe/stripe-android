@@ -4,6 +4,9 @@
 
 ## 20.41.1 - 2024-04-22
 
+### Payments
+* [ADDED][8344](https://github.com/stripe/stripe-android/pull/8344) Added support for `onBehalfOf` to `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`. This parameter may be required when setting a connected account as the merchant of record for a payment. For more information, see the [Connect docs](https://docs.stripe.com/connect/charges#on_behalf_of).
+
 ### PaymentSheet
 * [FIXED][8297](https://github.com/stripe/stripe-android/pull/8297) Improve `PaymentSheet` and `CustomerSheet` loading user experience.
 
