@@ -43,6 +43,7 @@ internal class PaymentSheetPlaygroundViewModel(
         Settings(application)
     }
 
+    private val inTestMode = PaymentSheetPlaygroundUrlHelper.inTestModeFromUri(launchUri)
     val playgroundSettingsFlow = MutableStateFlow<PlaygroundSettings?>(null)
     val status = MutableStateFlow<StatusMessage?>(null)
     val state = MutableStateFlow<PlaygroundState?>(null)
@@ -97,6 +98,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
                     state.value = checkoutResponse.asPlaygroundState(
                         snapshot = playgroundSettingsSnapshot,
+                        inTestMode = inTestMode
                     )
                 }
             }

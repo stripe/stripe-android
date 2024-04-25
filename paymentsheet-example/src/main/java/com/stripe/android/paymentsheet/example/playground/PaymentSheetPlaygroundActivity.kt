@@ -59,7 +59,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
         fun createTestIntent(settingsJson: String): Intent {
             return Intent(
                 Intent.ACTION_VIEW,
-                PaymentSheetPlaygroundUrlHelper.createUri(settingsJson)
+                PaymentSheetPlaygroundUrlHelper.createUri(settingsJson, inTestMode = true)
             )
         }
     }

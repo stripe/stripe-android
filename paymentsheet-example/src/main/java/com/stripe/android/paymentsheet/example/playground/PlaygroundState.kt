@@ -19,6 +19,7 @@ internal data class PlaygroundState(
     val paymentMethodTypes: List<String>,
     val customerConfig: PaymentSheet.CustomerConfiguration?,
     val clientSecret: String,
+    val inTestMode: Boolean,
 ) {
     val initializationType = snapshot[InitializationTypeSettingsDefinition]
     val currencyCode = snapshot[CurrencySettingsDefinition]
@@ -37,6 +38,7 @@ internal data class PlaygroundState(
     companion object {
         fun CheckoutResponse.asPlaygroundState(
             snapshot: PlaygroundSettings.Snapshot,
+            inTestMode: Boolean,
         ): PlaygroundState {
             val paymentMethodTypes = if (snapshot[AutomaticPaymentMethodsSettingsDefinition]) {
                 emptyList()
@@ -51,6 +53,7 @@ internal data class PlaygroundState(
                 paymentMethodTypes = paymentMethodTypes,
                 customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
                 clientSecret = intentClientSecret,
+                inTestMode = inTestMode
             )
         }
     }

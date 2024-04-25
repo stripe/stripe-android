@@ -8,6 +8,8 @@ internal object CustomerSettingsDefinition :
     PlaygroundSettingDefinition<CustomerType>,
     PlaygroundSettingDefinition.Saveable<CustomerType>,
     PlaygroundSettingDefinition.Displayable<CustomerType> {
+    private var previouslyUsedId: String? = null
+
     override val displayName: String = "Customer"
     override val options: List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> =
         listOf(
@@ -20,7 +22,12 @@ internal object CustomerSettingsDefinition :
         value: CustomerType,
         checkoutRequestBuilder: CheckoutRequest.Builder,
     ) {
-        checkoutRequestBuilder.customer(value.value)
+        when {
+            value == CustomerType.NEW -> previouslyUsedId?.let { id ->
+                checkoutRequestBuilder.customer(id)
+            } ?: checkoutRequestBuilder.customer(value.value)
+            else -> checkoutRequestBuilder.customer(value.value)
+        }
     }
 
     override fun configure(
@@ -29,6 +36,17 @@ internal object CustomerSettingsDefinition :
         playgroundState: PlaygroundState,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
+        when {
+            value == CustomerType.NEW && !playgroundState.inTestMode -> {
+                if (previouslyUsedId == null) {
+                    previouslyUsedId = playgroundState.customerConfig?.id
+                }
+            }
+            else -> {
+                previouslyUsedId = null
+            }
+        }
+
         configurationBuilder.customer(playgroundState.customerConfig)
     }
 
