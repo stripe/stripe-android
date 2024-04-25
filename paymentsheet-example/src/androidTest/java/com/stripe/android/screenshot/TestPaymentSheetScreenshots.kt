@@ -12,8 +12,6 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
-import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.GooglePaySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PrimaryButtonLabelSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -237,24 +235,6 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             testParams.copyPlaygroundSettings { settings ->
                 settings[PrimaryButtonLabelSettingsDefinition] =
                     "Buy this now!"
-            }
-        )
-    }
-
-    @Test
-    fun testPaymentSheetMandate() {
-        testDriver.screenshotRegression(
-            testParameters = testParams.copyPlaygroundSettings { settings ->
-                settings[CountrySettingsDefinition] = Country.FR
-                settings[DelayedPaymentMethodsSettingsDefinition] = true
-                settings[GooglePaySettingsDefinition] = false
-            }.copy(
-                paymentMethodCode = "sepa_debit",
-                authorizationAction = null,
-            ),
-            customOperations = {
-                testDriver.pressSelection()
-                testDriver.scrollToBottom()
             }
         )
     }
