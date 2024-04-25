@@ -416,6 +416,66 @@ internal class PaymentMethodMetadataTest {
     }
 
     @Test
+    fun `formElementsForCode is constructed correctly for external payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "bancontact")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
+                name = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                email = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                phone = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always,
+                address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
+                attachDefaultsToPaymentMethod = false,
+            ),
+            externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+        )
+        val formElement = metadata.formElementsForCode(
+            code = externalPaypalSpec.type,
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        val nameSection = formElement[0] as SectionElement
+        val nameElement = nameSection.fields[0] as SimpleTextElement
+        assertThat(nameElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_full_name)
+        assertThat(nameElement.identifier.v1).isEqualTo("billing_details[name]")
+
+        val phoneSection = formElement[1] as SectionElement
+        val phoneElement = phoneSection.fields[0] as PhoneNumberElement
+        assertThat(phoneElement.controller.label.first()).isEqualTo(CoreR.string.stripe_address_label_phone_number)
+        assertThat(phoneElement.identifier.v1).isEqualTo("billing_details[phone]")
+
+        val emailSection = formElement[2] as SectionElement
+        val emailElement = emailSection.fields[0] as EmailElement
+        assertThat(emailElement.controller.label.first()).isEqualTo(UiCoreR.string.stripe_email)
+        assertThat(emailElement.identifier.v1).isEqualTo("billing_details[email]")
+
+        val addressSection = formElement[3] as SectionElement
+        val addressElement = addressSection.fields[0] as AddressElement
+
+        val identifiers = addressElement.fields.first().map { it.identifier }
+        // Check that the address element contains country.
+        assertThat(identifiers).contains(IdentifierSpec.Country)
+    }
+
+    @Test
+    fun `formElementsForCode is empty by default for external payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "bancontact")
+            ),
+            billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
+            externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+        )
+        val formElement = metadata.formElementsForCode(
+            code = externalPaypalSpec.type,
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
+        )!!
+
+        assertThat(formElement.isEmpty()).isTrue()
+    }
+
+    @Test
     fun `formElementsForCode replaces country placeholder fields correctly`() = runTest {
         val metadata = PaymentMethodMetadataFactory.create(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
