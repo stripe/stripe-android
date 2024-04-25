@@ -8,11 +8,9 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flowOf
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SameAsShippingController(
@@ -24,7 +22,7 @@ class SameAsShippingController(
     override val fieldValue: StateFlow<String> = value.mapAsStateFlow { it.toString() }
     override val rawFieldValue: StateFlow<String?> = fieldValue
 
-    override val error: Flow<FieldError?> = flowOf(null)
+    override val error: StateFlow<FieldError?> = stateFlowOf(null)
     override val showOptionalLabel: Boolean = false
     override val isComplete: StateFlow<Boolean> = stateFlowOf(true)
     override val formFieldValue: StateFlow<FormFieldEntry> =
