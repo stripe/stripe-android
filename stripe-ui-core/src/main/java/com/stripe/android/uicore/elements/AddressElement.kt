@@ -5,13 +5,11 @@ import androidx.annotation.VisibleForTesting
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.address.AddressSchemaRegistry
 import com.stripe.android.uicore.address.AutocompleteCapableAddressType
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flattenConcat
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -67,7 +65,7 @@ open class AddressElement constructor(
     private val elementsRegistry = AddressElementUiRegistry(AddressSchemaRegistry)
 
     private val otherFields = countryElement.controller.rawFieldValue
-        .map { countryCode ->
+        .mapAsStateFlow { countryCode ->
             countryCode?.let {
                 phoneNumberElement.controller.countryDropdownController.onRawValueChange(it)
             }
@@ -89,9 +87,9 @@ open class AddressElement constructor(
      * if sameAsShipping == false, set values to [currentValuesMap] map
      */
     private var lastSameAsShipping: Boolean? = null
-    private val sameAsShippingUpdatedFlow = combine(
+    private val sameAsShippingUpdatedFlow = combineAsStateFlow(
         otherFields,
-        sameAsShippingElement?.controller?.value ?: flowOf(null)
+        sameAsShippingElement?.controller?.value ?: stateFlowOf(null)
     ) { fields, sameAsShippingValue ->
         val sameAsShipping = if (sameAsShippingValue != lastSameAsShipping) {
             lastSameAsShipping = sameAsShippingValue
@@ -123,10 +121,10 @@ open class AddressElement constructor(
     }
 
     private val fieldsUpdatedFlow =
-        combine(
+        combineAsStateFlow(
             countryElement.controller.rawFieldValue,
-            otherFields.map { fieldElements ->
-                combine(
+            otherFields.flatMapLatestAsStateFlow { fieldElements ->
+                combineAsStateFlow(
                     fieldElements
                         .map {
                             it.getFormFieldValueFlow()
@@ -134,7 +132,7 @@ open class AddressElement constructor(
                 ) {
                     it.toList().flatten()
                 }
-            }.flattenConcat().distinctUntilChanged()
+            }
         ) { country, values ->
             country?.let {
                 currentValuesMap[IdentifierSpec.Country] = it
@@ -153,7 +151,7 @@ open class AddressElement constructor(
             )
         }
 
-    val fields = combine(
+    val fields = combineAsStateFlow(
         countryElement.controller.rawFieldValue,
         otherFields,
         sameAsShippingUpdatedFlow,
@@ -205,8 +203,8 @@ open class AddressElement constructor(
     override fun sectionFieldErrorController(): SectionFieldErrorController =
         controller
 
-    override fun getFormFieldValueFlow() = fields.flatMapLatest { fieldElements ->
-        combine(
+    override fun getFormFieldValueFlow() = fields.flatMapLatestAsStateFlow { fieldElements ->
+        combineAsStateFlow(
             fieldElements
                 .map {
                     it.getFormFieldValueFlow()
@@ -216,8 +214,8 @@ open class AddressElement constructor(
         }
     }
 
-    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> = fields.flatMapLatest {
-        combine(
+    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> = fields.flatMapLatestAsStateFlow {
+        combineAsStateFlow(
             it
                 .map {
                     it.getTextFieldIdentifiers()
@@ -232,7 +230,7 @@ open class AddressElement constructor(
     }
 }
 
-internal suspend fun updateLine1WithAutocompleteAffordance(
+internal fun updateLine1WithAutocompleteAffordance(
     field: SectionFieldElement,
     countryCode: String?,
     addressType: AddressType,
@@ -253,7 +251,7 @@ internal suspend fun updateLine1WithAutocompleteAffordance(
     }
 }
 
-private suspend fun updateLine1ConfigForAutocompleteAffordance(
+private fun updateLine1ConfigForAutocompleteAffordance(
     textConfig: SimpleTextFieldConfig,
     countryCode: String?,
     addressType: AddressType,
@@ -273,5 +271,5 @@ private suspend fun updateLine1ConfigForAutocompleteAffordance(
     } else {
         null
     }
-    textConfig.trailingIcon.emit(icon)
+    textConfig.trailingIcon.value = icon
 }

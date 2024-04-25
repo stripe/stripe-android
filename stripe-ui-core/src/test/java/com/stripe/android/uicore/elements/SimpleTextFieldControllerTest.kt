@@ -95,7 +95,7 @@ internal class SimpleTextFieldControllerTest {
         controller.isComplete.test {
             assertThat(awaitItem()).isEqualTo(false)
             controller.onValueChange("invalid")
-            assertThat(awaitItem()).isEqualTo(false)
+            expectNoEvents()
 
             controller.onValueChange("limitless")
             assertThat(awaitItem()).isEqualTo(true)

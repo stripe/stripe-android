@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.utils
 
 import androidx.annotation.RestrictTo
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.currentCoroutineContext
@@ -12,6 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 
 /**
@@ -20,7 +22,12 @@ import kotlinx.coroutines.flow.map
  * @param flow The [Flow] that should be converted to a [StateFlow]
  * @param produceValue The producer of the [StateFlow's] value
  */
-private class FlowToStateFlow<T>(
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Deprecated(
+    message = "Use helpers such as 'mapAsStateFlow' rather than use this class directly. " +
+        "This is only public to allow for the inline function usage below."
+)
+class FlowToStateFlow<T>(
     private val flow: Flow<T>,
     private val produceValue: () -> T,
 ) : StateFlow<T> {
@@ -55,9 +62,27 @@ private class FlowToStateFlow<T>(
 fun <T, R> StateFlow<T>.mapAsStateFlow(
     transform: (T) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = map(transform),
+        flow = map(transform).distinctUntilChanged(),
         produceValue = { transform(value) },
+    )
+}
+
+/**
+ * Combines a list of [StateFlow]s into another, instead of loosening the result to a [Flow].
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <T, R> StateFlow<T>.flatMapLatestAsStateFlow(
+    transform: (T) -> StateFlow<R>,
+): StateFlow<R> {
+    @Suppress("DEPRECATION")
+    return FlowToStateFlow(
+        flow = flatMapLatest(transform).distinctUntilChanged(),
+        produceValue = {
+            transform(value).value
+        },
     )
 }
 
@@ -70,6 +95,7 @@ fun <T1, T2, R> combineAsStateFlow(
     flow2: StateFlow<T2>,
     transform: (T1, T2) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
         flow = combine(flow1, flow2, transform).distinctUntilChanged(),
         produceValue = { transform(flow1.value, flow2.value) },
@@ -86,6 +112,7 @@ fun <T1, T2, T3, R> combineAsStateFlow(
     flow3: StateFlow<T3>,
     transform: (T1, T2, T3) -> R,
 ): StateFlow<R> {
+    @Suppress("DEPRECATION")
     return FlowToStateFlow(
         flow = combine(flow1, flow2, flow3, transform).distinctUntilChanged(),
         produceValue = { transform(flow1.value, flow2.value, flow3.value) },
@@ -94,6 +121,24 @@ fun <T1, T2, T3, R> combineAsStateFlow(
 
 /**
  * Combines three [StateFlow]s into another, instead of loosening the result to a [Flow].
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun <T1, T2, T3, T4, R> combineAsStateFlow(
+    flow1: StateFlow<T1>,
+    flow2: StateFlow<T2>,
+    flow3: StateFlow<T3>,
+    flow4: StateFlow<T4>,
+    transform: (T1, T2, T3, T4) -> R,
+): StateFlow<R> {
+    @Suppress("DEPRECATION")
+    return FlowToStateFlow(
+        flow = combine(flow1, flow2, flow3, flow4, transform).distinctUntilChanged(),
+        produceValue = { transform(flow1.value, flow2.value, flow3.value, flow4.value) },
+    )
+}
+
+/**
+ * Combines six [StateFlow]s into another, instead of loosening the result to a [Flow].
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun <T1, T2, T3, T4, T5, T6, R> combineAsStateFlow(
@@ -105,7 +150,7 @@ fun <T1, T2, T3, T4, T5, T6, R> combineAsStateFlow(
     flow6: StateFlow<T6>,
     transform: (T1, T2, T3, T4, T5, T6) -> R,
 ): StateFlow<R> {
-    @Suppress("UNCHECKED_CAST")
+    @Suppress("DEPRECATION", "UNCHECKED_CAST")
     return FlowToStateFlow(
         flow = combine(listOf(flow1, flow2, flow3, flow4, flow5, flow6)) { values ->
             val flow1Value = values[0] as T1
@@ -115,8 +160,25 @@ fun <T1, T2, T3, T4, T5, T6, R> combineAsStateFlow(
             val flow5Value = values[4] as T5
             val flow6Value = values[5] as T6
             transform(flow1Value, flow2Value, flow3Value, flow4Value, flow5Value, flow6Value)
-        },
+        }.distinctUntilChanged(),
         produceValue = { transform(flow1.value, flow2.value, flow3.value, flow4.value, flow5.value, flow6.value) },
+    )
+}
+
+/**
+ * Combines a list of [StateFlow]s into another, instead of loosening the result to a [Flow].
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+inline fun <reified T, R> combineAsStateFlow(
+    flows: List<StateFlow<T>>,
+    crossinline transform: (List<T>) -> R,
+): StateFlow<R> {
+    @Suppress("DEPRECATION")
+    return FlowToStateFlow(
+        flow = combine(flows) { values ->
+            transform(values.toList())
+        }.distinctUntilChanged(),
+        produceValue = { transform(flows.map { it.value }) },
     )
 }
 

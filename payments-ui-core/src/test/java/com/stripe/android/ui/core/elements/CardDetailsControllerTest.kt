@@ -46,8 +46,6 @@ class CardDetailsControllerTest {
             cardController.numberElement.controller.onValueChange("4242424242424242")
             idleLooper()
 
-            skipItems(1)
-
             assertThat(awaitItem()?.errorMessage).isEqualTo(
                 UiCoreR.string.stripe_incomplete_expiry_date
             )

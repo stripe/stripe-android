@@ -2,8 +2,8 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class RowElement constructor(
@@ -11,8 +11,8 @@ class RowElement constructor(
     val fields: List<SectionSingleFieldElement>,
     val controller: RowController
 ) : SectionMultiFieldElement(_identifier) {
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
-        combine(fields.map { it.getFormFieldValueFlow() }) {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+        combineAsStateFlow(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()
         }
 
@@ -24,6 +24,6 @@ class RowElement constructor(
         }
     }
 
-    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         fields.map { it.getTextFieldIdentifiers() }.last()
 }
