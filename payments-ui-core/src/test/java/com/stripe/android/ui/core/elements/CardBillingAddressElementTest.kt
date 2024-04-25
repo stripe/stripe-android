@@ -28,34 +28,31 @@ internal class CardBillingAddressElementTest {
     fun `Verify that when US is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
             dropdownFieldController.onRawValueChange("US")
-            verifyPostalShown(awaitItem())
+            verifyPostalShown(expectMostRecentItem())
         }
     }
 
     @Test
     fun `Verify that when GB is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
-            skipItems(1)
             dropdownFieldController.onRawValueChange("GB")
-            verifyPostalShown(awaitItem())
+            verifyPostalShown(expectMostRecentItem())
         }
     }
 
     @Test
     fun `Verify that when CA is selected postal is not hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
-            skipItems(1)
             dropdownFieldController.onRawValueChange("CA")
-            verifyPostalShown(awaitItem())
+            verifyPostalShown(expectMostRecentItem())
         }
     }
 
     @Test
     fun `Verify that when DE is selected postal IS hidden`() = runTest {
         cardBillingElement.hiddenIdentifiers.test {
-            skipItems(1)
             dropdownFieldController.onRawValueChange("DE")
-            verifyPostalHidden(awaitItem())
+            verifyPostalHidden(expectMostRecentItem())
         }
     }
 
