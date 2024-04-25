@@ -73,4 +73,21 @@ class CardWidgetViewModelTest {
             expectNoEvents()
         }
     }
+
+    @Test
+    fun `Saves OBO to savedStateHandle`() = runTest(testDispatcher) {
+        val stripeRepository = FakeCardElementConfigRepository()
+        val handle = SavedStateHandle()
+
+        val viewModel = CardWidgetViewModel(
+            paymentConfigProvider = { paymentConfig },
+            stripeRepository = stripeRepository,
+            dispatcher = testDispatcher,
+            handle = handle
+        )
+
+        viewModel.onBehalfOf = "test"
+        val obo: String? = handle["on_behalf_of"]
+        assertThat(obo).isEqualTo("test")
+    }
 }
