@@ -302,6 +302,7 @@ def zipFiles(files):
     return zip
 
 
+# https://www.browserstack.com/docs/app-automate/espresso/view-test-reports#junit-xml-report
 def getJunitXmlReport(buildId, sessionId):
     url = f"https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/{buildId}/sessions/{sessionId}/report"
     return requests.get(url, auth=(user, authKey)).text
@@ -316,6 +317,7 @@ def getJunitXmlReports(buildId):
     return reports
 
 
+# https://www.browserstack.com/docs/test-observability/quick-start/junit-reports#integrate-with-test-observability-using-junit-reports
 def uploadTestReportsToObservability():
     files = {"data": ("test-reports.zip", open("test-reports/test-reports.zip", "rb"))}
     url = "https://upload-observability.browserstack.com/upload"
