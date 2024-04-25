@@ -35,6 +35,7 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ExternalPaymentMethodHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -326,44 +327,56 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.GooglePay -> launchGooglePay(state)
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
-            is PaymentSelection.New.GenericPaymentMethod -> {
-                if (paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
-                    BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
-                        bacsMandateConfirmationLauncher.launch(
-                            data = data,
-                            appearance = getPaymentAppearance()
-                        )
-                    } ?: run {
-                        paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(
-                                BacsMandateException(
-                                    type = BacsMandateException.Type.MissingInformation
-                                )
-                            )
-                        )
-                    }
-                } else {
-                    confirmPaymentSelection(paymentSelection, state)
-                }
-            }
-            is PaymentSelection.New,
-            null -> confirmPaymentSelection(paymentSelection, state)
-            is PaymentSelection.Saved -> {
-                if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
-                    viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
-                ) {
-                    // We're legally required to show the customer the SEPA mandate before every payment/setup.
-                    // In the edge case where the customer never opened the sheet, and thus never saw the mandate,
-                    // we present the mandate directly.
-                    sepaMandateActivityLauncher.launch(
-                        SepaMandateContract.Args(
-                            merchantName = state.config.merchantDisplayName
+            is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodHandler.confirm(
+                paymentResultCallback::onPaymentSheetResult
+            )
+            is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
+            is PaymentSelection.New, null -> confirmPaymentSelection(paymentSelection, state)
+            is PaymentSelection.Saved -> confirmSavedPaymentMethod(paymentSelection, state)
+        }
+    }
+
+    private fun confirmSavedPaymentMethod(
+        paymentSelection: PaymentSelection.Saved,
+        state: PaymentSheetState.Full
+    ) {
+        if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
+            viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
+        ) {
+            // We're legally required to show the customer the SEPA mandate before every payment/setup.
+            // In the edge case where the customer never opened the sheet, and thus never saw the mandate,
+            // we present the mandate directly.
+            sepaMandateActivityLauncher.launch(
+                SepaMandateContract.Args(
+                    merchantName = state.config.merchantDisplayName
+                )
+            )
+        } else {
+            confirmPaymentSelection(paymentSelection, state)
+        }
+    }
+
+    private fun confirmGenericPaymentMethod(
+        paymentSelection: PaymentSelection.New.GenericPaymentMethod,
+        state: PaymentSheetState.Full
+    ) {
+        if (paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
+            BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
+                bacsMandateConfirmationLauncher.launch(
+                    data = data,
+                    appearance = getPaymentAppearance()
+                )
+            } ?: run {
+                paymentResultCallback.onPaymentSheetResult(
+                    PaymentSheetResult.Failed(
+                        BacsMandateException(
+                            type = BacsMandateException.Type.MissingInformation
                         )
                     )
-                } else {
-                    confirmPaymentSelection(paymentSelection, state)
-                }
+                )
             }
+        } else {
+            confirmPaymentSelection(paymentSelection, state)
         }
     }
 

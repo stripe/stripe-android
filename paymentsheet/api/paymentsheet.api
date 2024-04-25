@@ -1546,6 +1546,14 @@ public final class com/stripe/android/paymentsheet/model/PaymentOption {
 	public fun toString ()Ljava/lang/String;
 }
 
+public final class com/stripe/android/paymentsheet/model/PaymentSelection$ExternalPaymentMethod$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$ExternalPaymentMethod;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/model/PaymentSelection$ExternalPaymentMethod;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/paymentsheet/model/PaymentSelection$GooglePay$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/model/PaymentSelection$GooglePay;

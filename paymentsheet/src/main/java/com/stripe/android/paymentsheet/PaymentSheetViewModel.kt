@@ -456,6 +456,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     label = args.googlePayConfig?.label,
                 )
             }
+        } else if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
+            ExternalPaymentMethodHandler.confirm(_paymentSheetResult::tryEmit)
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
             paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code

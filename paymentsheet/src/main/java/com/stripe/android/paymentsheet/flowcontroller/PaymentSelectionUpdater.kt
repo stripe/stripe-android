@@ -56,6 +56,9 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             is PaymentSelection.Link -> {
                 state.linkState != null
             }
+            is PaymentSelection.ExternalPaymentMethod -> {
+                true
+            }
         }
     }
 

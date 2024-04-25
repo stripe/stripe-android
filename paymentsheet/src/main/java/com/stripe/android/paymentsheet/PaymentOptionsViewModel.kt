@@ -276,7 +276,8 @@ internal class PaymentOptionsViewModel @Inject constructor(
                 is PaymentSelection.Saved,
                 is PaymentSelection.GooglePay,
                 is PaymentSelection.Link -> processExistingPaymentMethod(paymentSelection)
-                is PaymentSelection.New -> processNewPaymentMethod(paymentSelection)
+                is PaymentSelection.New -> processNewOrExternalPaymentMethod(paymentSelection)
+                is PaymentSelection.ExternalPaymentMethod -> processNewOrExternalPaymentMethod(paymentSelection)
             }
         }
     }
@@ -314,7 +315,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    private fun processNewPaymentMethod(paymentSelection: PaymentSelection) {
+    private fun processNewOrExternalPaymentMethod(paymentSelection: PaymentSelection) {
         _paymentOptionResult.tryEmit(
             PaymentOptionResult.Succeeded(
                 paymentSelection = paymentSelection,

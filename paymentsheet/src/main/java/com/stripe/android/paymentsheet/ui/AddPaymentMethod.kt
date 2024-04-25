@@ -200,7 +200,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
     context: Context,
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-): PaymentSelection.New {
+): PaymentSelection {
     val params = transformToPaymentMethodCreateParams(paymentMethod, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     val extras = transformToExtraParams(paymentMethod)
@@ -212,6 +212,14 @@ internal fun FormFieldValues.transformToPaymentSelection(
             paymentMethodCreateParams = params,
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
+        )
+    } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
+        PaymentSelection.ExternalPaymentMethod(
+            type = paymentMethod.code,
+            label = paymentMethod.displayName.resolve(context),
+            iconResource = paymentMethod.iconResource,
+            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
+            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
         )
     } else {
         PaymentSelection.New.GenericPaymentMethod(
