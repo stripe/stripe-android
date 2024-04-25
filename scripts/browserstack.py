@@ -8,10 +8,13 @@ import argparse
 import sys
 import json
 import math
+import zipfile
 
 # These need to be set in environment variables.
 user = os.getenv("BROWSERSTACK_USERNAME")
 authKey = os.getenv("BROWSERSTACK_ACCESS_KEY")
+
+PROJECT_NAME = "Mobile Payments"
 
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/apps#list-uploaded-apps
@@ -245,7 +248,7 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
             "acceptInsecureCerts": True,
             "locale": "en_US",
             "enableSpoonFramework": False,
-            "project": "Mobile Payments",
+            "project": PROJECT_NAME,
             "shards": {
                 "numberOfShards": len(shards),
                 "mapping": shards,
@@ -283,6 +286,65 @@ def get_build_status(buildId):
         "https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/" + buildId
     )
     return requests.get(url, auth=(user, authKey))
+
+
+def zipFiles(files):
+    def testReportName(idx):
+        return f"test-reports/test-report-{idx}.xml"
+
+    zip = zipfile.ZipFile("test-reports/test-reports.zip", "w")
+    for idx in range(len(files)):
+        f = open(testReportName(idx), "w")
+        f.write(files[idx])
+        f.close()
+        zip.write(testReportName(idx))
+    zip.close()
+    return zip
+
+
+def getJunitXmlReport(buildId, sessionId):
+    url = f"https://api-cloud.browserstack.com/app-automate/espresso/v2/builds/{buildId}/sessions/{sessionId}/report"
+    return requests.get(url, auth=(user, authKey)).text
+
+
+def getJunitXmlReports(buildId):
+    reports = []
+    sessionIds = getSessionIdsForBuild(buildId)
+    for sessionId in sessionIds:
+        reports.append(getJunitXmlReport(buildId, sessionId))
+
+    return reports
+
+
+def uploadTestReportsToObservability():
+    files = {"data": ("test-reports.zip", open("test-reports/test-reports.zip", "rb"))}
+    url = "https://upload-observability.browserstack.com/upload"
+    response = requests.post(
+        url,
+        data={
+            "projectName": PROJECT_NAME,
+            "buildName": "Android SDK",
+        },
+        files=files,
+        auth=(user, authKey),
+    )
+    observabilityUrl = response.json()["message"].split(" ")[-1]
+    print(f"View observability results for this build: {observabilityUrl}")
+
+
+def deleteObservabilityFiles():
+    testReportFiles = os.listdir("test-reports")
+    for testReportFile in testReportFiles:
+        os.remove(f"test-reports/{testReportFile}")
+    os.removedirs("test-reports")
+
+
+def updateObservabilityWithResults(buildId):
+    os.makedirs("test-reports")
+    reportsForBuildId = getJunitXmlReports(buildId)
+    zipFiles(reportsForBuildId)
+    uploadTestReportsToObservability()
+    deleteObservabilityFiles()
 
 
 def waitForBuildComplete(buildId):
@@ -466,6 +528,7 @@ if __name__ == "__main__":
                 )
                 print("-----------------")
                 exitStatus = testResults["exitStatus"]
+                updateObservabilityWithResults(testResults["buildId"])
                 if exitStatus == 0:
                     break
                 else:
