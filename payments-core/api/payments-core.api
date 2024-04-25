@@ -7415,6 +7415,7 @@ public final class com/stripe/android/view/CardFormView : android/widget/LinearL
 	public final fun getPaymentMethodCreateParams ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun setCardValidCallback (Lcom/stripe/android/view/CardValidCallback;)V
 	public fun setEnabled (Z)V
+	public final fun setOnBehalfOf (Ljava/lang/String;)V
 	public final fun setPreferredNetworks (Ljava/util/List;)V
 }
 
@@ -7463,6 +7464,7 @@ public final class com/stripe/android/view/CardInputWidget : android/widget/Line
 	public fun setEnabled (Z)V
 	public fun setExpiryDate (II)V
 	public fun setExpiryDateTextWatcher (Landroid/text/TextWatcher;)V
+	public final fun setOnBehalfOf (Ljava/lang/String;)V
 	public final fun setPostalCodeEnabled (Z)V
 	public final fun setPostalCodeRequired (Z)V
 	public fun setPostalCodeTextWatcher (Landroid/text/TextWatcher;)V
@@ -7499,6 +7501,7 @@ public final class com/stripe/android/view/CardMultilineWidget : android/widget/
 	public fun setEnabled (Z)V
 	public fun setExpiryDate (II)V
 	public fun setExpiryDateTextWatcher (Landroid/text/TextWatcher;)V
+	public final fun setOnBehalfOf (Ljava/lang/String;)V
 	public final fun setPostalCodeRequired (Z)V
 	public fun setPostalCodeTextWatcher (Landroid/text/TextWatcher;)V
 	public final fun setPreferredNetworks (Ljava/util/List;)V
