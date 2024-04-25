@@ -68,7 +68,7 @@ fun PhoneNumberCollectionSection(
     focusRequester: FocusRequester = remember { FocusRequester() },
     imeAction: ImeAction = ImeAction.Done
 ) {
-    val error by phoneNumberController.error.collectAsState(null)
+    val error by phoneNumberController.error.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
@@ -118,7 +118,7 @@ fun PhoneNumberElementUI(
 
     val value by controller.fieldValue.collectAsState()
     val isComplete by controller.isComplete.collectAsState()
-    val shouldShowError by controller.error.collectAsState(null)
+    val shouldShowError by controller.error.collectAsState()
     val label by controller.label.collectAsState()
     val placeholder by controller.placeholder.collectAsState()
     val visualTransformation by controller.visualTransformation.collectAsState()

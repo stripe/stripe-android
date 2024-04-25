@@ -95,7 +95,7 @@ fun TextFieldSection(
     @StringRes sectionTitle: Int? = null,
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
-    val error by textFieldController.error.collectAsState(null)
+    val error by textFieldController.error.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->

@@ -21,7 +21,7 @@ fun BsbElementUI(
     element: BsbElement,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
-    val error by element.textElement.controller.error.collectAsState(null)
+    val error by element.textElement.controller.error.collectAsState()
     val bankName by element.bankName.collectAsState()
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
