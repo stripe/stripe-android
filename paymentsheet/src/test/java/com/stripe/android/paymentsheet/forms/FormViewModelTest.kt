@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.StringRes
-import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
@@ -13,7 +12,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
 import com.stripe.android.ui.core.elements.CountrySpec
-import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
@@ -57,49 +55,6 @@ internal class FormViewModelTest {
         assertThat(
             formViewModel.completeFormValues.first()
         ).isNotNull()
-    }
-
-    @Test
-    fun `Verify setting save for future use value is updated in flowable`() = runTest {
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code,
-        )
-        val formViewModel = createViewModel(
-            arguments = args,
-            formElements = listOf(
-                SectionElement.wrap(EmailElement()),
-                SaveForFutureUseElement(true, ""),
-            ),
-        )
-
-        // Set all the card fields, billing is set in the args
-        val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, UiCoreR.string.stripe_email)
-
-        emailController?.onValueChange("joe@email.com")
-
-        assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-        ).isNotNull()
-
-        turbineScope {
-            val receiver = formViewModel.saveForFutureUse.testIn(this)
-            assertThat(receiver.awaitItem()).isTrue()
-
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-            ).isEqualTo("true")
-
-            formViewModel.setSaveForFutureUse(false)
-
-            assertThat(receiver.awaitItem()).isFalse()
-
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-            ).isEqualTo("false")
-
-            receiver.cancel()
-        }
     }
 
     @Test
@@ -722,10 +677,4 @@ internal class FormViewModelTest {
         formArguments = arguments,
         elements = formElements,
     )
-}
-
-private fun FormViewModel.setSaveForFutureUse(value: Boolean) {
-    elements
-        .filterIsInstance<SaveForFutureUseElement>()
-        .firstOrNull()?.controller?.onValueChange(value)
 }
