@@ -12,7 +12,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.EmailElement
-import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -635,5 +634,39 @@ internal class PaymentMethodMetadataTest {
         assertThat(actualSupportedPaymentMethod).isEqualTo(expectedSupportedPaymentMethod)
     }
 
+    @Test
+    fun `isExternalPaymentMethod returns true for supported EPM`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        )
 
+        assertThat(metadata.isExternalPaymentMethod("external_paypal")).isTrue()
+    }
+
+    @Test
+    fun `isExternalPaymentMethod returns false for unsupported EPM`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        )
+
+        assertThat(metadata.isExternalPaymentMethod("external_venmo")).isFalse()
+    }
+
+    @Test
+    fun `isExternalPaymentMethod returns false for non-external payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        )
+
+        assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
+    }
 }
