@@ -124,6 +124,31 @@ internal class PaymentOptionsViewModelTest {
         }
 
     @Test
+    fun `onUserSelection() when external payment method should set the view state to process result`() =
+        runTest {
+            val viewModel = createViewModel()
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION)
+                viewModel.onUserSelection()
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentOptionResult.Succeeded(
+                            EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
+                            listOf()
+                        )
+                    )
+                ensureAllEventsConsumed()
+            }
+
+            verify(eventReporter)
+                .onSelectPaymentOption(
+                    paymentSelection = EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION
+                )
+            assertThat(prefsRepository.getSavedSelection(true, true))
+                .isEqualTo(SavedSelection.None)
+        }
+
+    @Test
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
         runTest {
             val viewModel = createViewModel()
@@ -811,6 +836,8 @@ internal class PaymentOptionsViewModelTest {
             CardBrand.Visa,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
+        private val EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION =
+            PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_CARD,
             CardBrand.Discover,
