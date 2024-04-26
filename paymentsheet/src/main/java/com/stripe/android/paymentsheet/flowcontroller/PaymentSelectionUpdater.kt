@@ -57,7 +57,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
                 state.linkState != null
             }
             is PaymentSelection.ExternalPaymentMethod -> {
-                true
+                state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)
             }
         }
     }

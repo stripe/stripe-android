@@ -69,7 +69,9 @@ internal sealed class PaymentSelection : Parcelable {
     data class ExternalPaymentMethod(
         val type: String,
         val label: String,
+        // In practice, we don't have an iconResource for external payment methods.
         @DrawableRes val iconResource: Int,
+        // In practice, we always have a lightThemeIconUrl for external payment methods.
         val lightThemeIconUrl: String?,
         val darkThemeIconUrl: String?,
     ) : PaymentSelection() {
