@@ -1,6 +1,8 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
+import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import org.json.JSONObject
 import java.util.UUID
 import java.util.concurrent.ThreadLocalRandom
@@ -131,6 +133,13 @@ internal object PaymentMethodFixtures {
     )
 
     val SEPA_DEBIT_PAYMENT_METHOD = PaymentMethodJsonParser().parse(SEPA_DEBIT_JSON)
+
+    val PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC = ExternalPaymentMethodSpec(
+        type = "external_paypal",
+        label = "PayPal",
+        lightImageUrl = "example_url",
+        darkImageUrl = null
+    )
 
     //
 //    internal val CARD_JSON: JSONObject = JSONObject(
@@ -479,6 +488,16 @@ internal object PaymentMethodFixtures {
                 last4 = createLast4()
             ),
             code = "card"
+        )
+    }
+
+    fun createExternalPaymentMethod(spec: ExternalPaymentMethodSpec): PaymentSelection.ExternalPaymentMethod {
+        return PaymentSelection.ExternalPaymentMethod(
+            type = spec.type,
+            label = spec.type,
+            iconResource = 0,
+            lightThemeIconUrl = spec.lightImageUrl,
+            darkThemeIconUrl = spec.darkImageUrl,
         )
     }
 
