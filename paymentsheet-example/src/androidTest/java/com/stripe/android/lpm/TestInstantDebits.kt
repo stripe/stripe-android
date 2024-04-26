@@ -16,6 +16,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillin
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.EnableInstantDebitsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
@@ -36,6 +37,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         settings[LinkSettingsDefinition] = true
+        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "link")
         settings[EnableInstantDebitsSettingsDefinition] = true
     }
 

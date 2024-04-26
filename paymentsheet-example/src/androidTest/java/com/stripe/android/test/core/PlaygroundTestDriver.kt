@@ -491,7 +491,7 @@ internal class PlaygroundTestDriver(
 
     private fun confirmBankAccount(
         testParameters: TestParameters,
-        executeFlow: PlaygroundTestDriver.() -> Unit,
+        executeFlow: () -> Unit,
         afterCollectingBankInfo: (Selectors) -> Unit = {},
         confirmIntent: Boolean = false,
     ): PlaygroundState? {
@@ -519,7 +519,7 @@ internal class PlaygroundTestDriver(
 
         pressBuy()
 
-        this.executeFlow()
+        executeFlow()
 
         afterCollectingBankInfo(selectors)
 
