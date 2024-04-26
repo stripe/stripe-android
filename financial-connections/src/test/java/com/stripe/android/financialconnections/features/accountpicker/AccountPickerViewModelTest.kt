@@ -10,6 +10,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
+import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -300,7 +301,7 @@ internal class AccountPickerViewModelTest {
 
         verify(saveAccountToLink).existing(
             consumerSessionClientSecret = consumerSession.clientSecret,
-            selectedAccounts = accounts.data,
+            selectedAccounts = accounts.data.map { CachedPartnerAccount(it.id, it.linkedAccountId) },
             shouldPollAccountNumbers = true,
         )
 

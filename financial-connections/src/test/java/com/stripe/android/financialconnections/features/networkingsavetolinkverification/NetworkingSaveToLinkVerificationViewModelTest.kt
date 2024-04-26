@@ -2,8 +2,8 @@ package com.stripe.android.financialconnections.features.networkingsavetolinkver
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.ApiKeyFixtures.cachedPartnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
-import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
@@ -82,7 +82,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     fun `otpEntered - on valid OTP confirms, saves accounts and navigates to success pane`() =
         runTest {
             val consumerSession = consumerSession()
-            val selectedAccount = partnerAccount()
+            val selectedAccount = cachedPartnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
             whenever(getManifest()).thenReturn(sessionManifest())
@@ -122,7 +122,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     fun `otpEntered - on valid OTP fails, sends event and navigates to terminal error`() =
         runTest {
             val consumerSession = consumerSession()
-            val selectedAccount = partnerAccount()
+            val selectedAccount = cachedPartnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
             whenever(getManifest()).thenReturn(sessionManifest())
@@ -161,7 +161,7 @@ class NetworkingSaveToLinkVerificationViewModelTest {
     @Test
     fun `onSkipClick - navigates to success without networking accounts`() = runTest {
         val consumerSession = consumerSession()
-        val selectedAccount = partnerAccount()
+        val selectedAccount = cachedPartnerAccount()
         val linkVerifiedManifest = sessionManifest()
         whenever(getCachedConsumerSession()).thenReturn(consumerSession)
         whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)

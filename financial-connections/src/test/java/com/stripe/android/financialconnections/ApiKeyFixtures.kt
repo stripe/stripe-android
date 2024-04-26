@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections
 
+import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccountList
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
@@ -112,6 +113,18 @@ internal object ApiKeyFixtures {
         status = FinancialConnectionsAccount.Status.ACTIVE,
         subcategory = FinancialConnectionsAccount.Subcategory.CHECKING,
         supportedPaymentMethodTypes = listOf(FinancialConnectionsAccount.SupportedPaymentMethodTypes.US_BANK_ACCOUNT)
+    )
+
+    fun cachedPartnerAccounts(): List<CachedPartnerAccount> {
+        return listOf(
+            CachedPartnerAccount(id = "id_1", linkedAccountId = "linked_id_1"),
+            CachedPartnerAccount(id = "id_2", linkedAccountId = "linked_id_2"),
+        )
+    }
+
+    fun cachedPartnerAccount() = CachedPartnerAccount(
+        id = "id",
+        linkedAccountId = "linked_id",
     )
 
     fun consumerSession() = ConsumerSession(

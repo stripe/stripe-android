@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.domain
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
@@ -30,10 +29,7 @@ internal class SaveAccountToLinkTest {
     fun `Polls account numbers if requested to do so`() = runTest(testDispatcher) {
         val polledAccountIds = mutableSetOf<String>()
 
-        val partnerAccounts = listOf(
-            partnerAccount().copy(id = "id_1", linkedAccountId = "lid_1"),
-            partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
-        )
+        val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
 
         val accountsRepository = mockAccountsRepository(
             onPollAccountNumbers = polledAccountIds::addAll,
@@ -49,17 +45,14 @@ internal class SaveAccountToLinkTest {
             shouldPollAccountNumbers = true,
         )
 
-        assertThat(polledAccountIds).containsExactly("lid_1", "lid_2")
+        assertThat(polledAccountIds).containsExactly("linked_id_1", "linked_id_2")
     }
 
     @Test
     fun `Skips polling account numbers if not requested to do so`() = runTest(testDispatcher) {
         val polledAccountIds = mutableSetOf<String>()
 
-        val partnerAccounts = listOf(
-            partnerAccount().copy(id = "id_1", linkedAccountId = "lid_1"),
-            partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
-        )
+        val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
 
         val accountsRepository = mockAccountsRepository(
             onPollAccountNumbers = polledAccountIds::addAll,
@@ -82,10 +75,7 @@ internal class SaveAccountToLinkTest {
     fun `Disables networking if polling account numbers fails`() = runTest(testDispatcher) {
         var disabledNetworking = false
 
-        val partnerAccounts = listOf(
-            partnerAccount().copy(id = "id_1", linkedAccountId = "lid_1"),
-            partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
-        )
+        val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
 
         val repository = mockManifestRepository(
             onDisabledNetworking = { disabledNetworking = true },
@@ -115,10 +105,7 @@ internal class SaveAccountToLinkTest {
 
     @Test
     fun `Sets custom success message if polling account numbers fails`() = runTest(testDispatcher) {
-        val partnerAccounts = listOf(
-            partnerAccount().copy(id = "id_1", linkedAccountId = "lid_1"),
-            partnerAccount().copy(id = "id_2", linkedAccountId = "lid_2"),
-        )
+        val partnerAccounts = ApiKeyFixtures.cachedPartnerAccounts()
 
         val accountsRepository = mockAccountsRepository(
             onPollAccountNumbers = { error("This is failing") },

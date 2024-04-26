@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.networking
 
+import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
@@ -10,7 +11,7 @@ import com.stripe.android.financialconnections.repository.FinancialConnectionsAc
 
 internal abstract class AbsFinancialConnectionsAccountsRepository : FinancialConnectionsAccountsRepository {
 
-    override suspend fun getCachedAccounts(): List<PartnerAccount>? {
+    override suspend fun getCachedAccounts(): List<CachedPartnerAccount>? {
         TODO("Not yet implemented")
     }
 
