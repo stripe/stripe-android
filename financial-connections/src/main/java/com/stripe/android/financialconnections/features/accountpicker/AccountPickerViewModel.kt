@@ -23,6 +23,7 @@ import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionAccounts
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SelectAccounts
+import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerClickableText.DATA
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect
@@ -299,7 +300,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                 // it happens in the AttachPaymentScreen.
                 saveAccountToLink.existing(
                     consumerSessionClientSecret = consumerSessionClientSecret,
-                    selectedAccounts = accountsList.data,
+                    selectedAccounts = accountsList.data.toCachedPartnerAccounts(),
                     shouldPollAccountNumbers = manifest.isDataFlow,
                 )
             }

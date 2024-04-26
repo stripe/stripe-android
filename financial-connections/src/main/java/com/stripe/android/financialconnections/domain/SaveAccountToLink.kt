@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.domain
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
-import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.repository.FinancialConnectionsAccountsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsManifestRepository
 import com.stripe.android.financialconnections.repository.SuccessContentRepository
@@ -26,7 +25,7 @@ internal class SaveAccountToLink @Inject constructor(
     suspend fun new(
         email: String,
         phoneNumber: String,
-        selectedAccounts: List<PartnerAccount>,
+        selectedAccounts: List<CachedPartnerAccount>,
         country: String,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
@@ -45,7 +44,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     suspend fun existing(
         consumerSessionClientSecret: String,
-        selectedAccounts: List<PartnerAccount>,
+        selectedAccounts: List<CachedPartnerAccount>,
         shouldPollAccountNumbers: Boolean,
     ): FinancialConnectionsSessionManifest {
         return ensureReadyAccounts(shouldPollAccountNumbers, selectedAccounts) { selectedAccountIds ->
@@ -63,7 +62,7 @@ internal class SaveAccountToLink @Inject constructor(
 
     private suspend fun ensureReadyAccounts(
         shouldPollAccountNumbers: Boolean,
-        partnerAccounts: List<PartnerAccount>,
+        partnerAccounts: List<CachedPartnerAccount>,
         action: suspend (Set<String>) -> FinancialConnectionsSessionManifest,
     ): FinancialConnectionsSessionManifest {
         val selectedAccountIds = partnerAccounts.map { it.id }.toSet()

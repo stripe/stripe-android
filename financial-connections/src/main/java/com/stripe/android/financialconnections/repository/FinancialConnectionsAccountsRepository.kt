@@ -1,7 +1,11 @@
 package com.stripe.android.financialconnections.repository
 
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.financialconnections.domain.CachedPartnerAccount
+import com.stripe.android.financialconnections.domain.CachedPartnerAccountsState
+import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.LinkAccountSessionPaymentAccount
@@ -16,8 +20,6 @@ import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_C
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAMS_ID
 import com.stripe.android.financialconnections.network.NetworkConstants.PARAM_SELECTED_ACCOUNTS
 import com.stripe.android.financialconnections.utils.filterNotNullValues
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 /**
  * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
@@ -25,7 +27,7 @@ import kotlinx.coroutines.sync.withLock
  */
 internal interface FinancialConnectionsAccountsRepository {
 
-    suspend fun getCachedAccounts(): List<PartnerAccount>?
+    suspend fun getCachedAccounts(): List<CachedPartnerAccount>?
 
     suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?)
 
@@ -70,13 +72,15 @@ internal interface FinancialConnectionsAccountsRepository {
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiRequestFactory: ApiRequest.Factory,
             apiOptions: ApiRequest.Options,
-            logger: Logger
+            logger: Logger,
+            savedStateHandle: SavedStateHandle,
         ): FinancialConnectionsAccountsRepository =
             FinancialConnectionsAccountsRepositoryImpl(
                 requestExecutor,
                 apiRequestFactory,
                 apiOptions,
-                logger
+                logger,
+                savedStateHandle,
             )
     }
 }
@@ -85,21 +89,20 @@ private class FinancialConnectionsAccountsRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
     val apiOptions: ApiRequest.Options,
-    val logger: Logger
+    val logger: Logger,
+    private val savedStateHandle: SavedStateHandle,
 ) : FinancialConnectionsAccountsRepository {
 
-    /**
-     * Ensures that [cachedAccounts] accesses via [getCachedAccounts] suspend until
-     * current writes are running.
-     */
-    val mutex = Mutex()
-    private var cachedAccounts: List<PartnerAccount>? = null
+    override suspend fun getCachedAccounts(): List<CachedPartnerAccount>? {
+        return savedStateHandle.get<CachedPartnerAccountsState>(CachedPartnerAccountsKey)?.accounts
+    }
 
-    override suspend fun getCachedAccounts(): List<PartnerAccount>? =
-        mutex.withLock { cachedAccounts }
-
-    override suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?) =
-        mutex.withLock { cachedAccounts = partnerAccountsList }
+    override suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?) {
+        updateCachedAccounts(
+            source = "updateCachedAccounts",
+            accounts = partnerAccountsList.orEmpty(),
+        )
+    }
 
     override suspend fun postAuthorizationSessionAccounts(
         clientSecret: String,
@@ -230,10 +233,15 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         accounts: List<PartnerAccount>
     ) {
         logger.debug("updating local partner accounts from $source")
-        cachedAccounts = accounts
+        val state = CachedPartnerAccountsState(
+            accounts = accounts.toCachedPartnerAccounts(),
+        )
+        savedStateHandle[CachedPartnerAccountsKey] = state
     }
 
     companion object {
+        private const val CachedPartnerAccountsKey = "CachedPartnerAccounts"
+
         internal const val accountsSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/accounts"
 
