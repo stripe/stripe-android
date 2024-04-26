@@ -9,7 +9,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.MandateTextElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -49,12 +48,6 @@ internal class FormViewModel @Inject internal constructor(
             ) as T
         }
     }
-
-    private val saveForFutureUseElement = elements.find { element ->
-        element is SaveForFutureUseElement
-    } as? SaveForFutureUseElement
-
-    internal val saveForFutureUse = saveForFutureUseElement?.controller?.saveForFutureUse ?: flowOf(false)
 
     private val cardBillingElement = elements.filterIsInstance<SectionElement>()
         .flatMap { it.fields }
