@@ -6,6 +6,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException
@@ -16,7 +17,7 @@ import kotlin.time.Duration
 internal class FakePaymentSheetLoader(
     private val stripeIntent: StripeIntent = PaymentIntentFixtures.PI_SUCCEEDED,
     private val shouldFail: Boolean = false,
-    private var customerPaymentMethods: List<PaymentMethod> = emptyList(),
+    private var customer: CustomerState? = null,
     private var paymentSelection: PaymentSelection? = null,
     private val isGooglePayAvailable: Boolean = false,
     private val delay: Duration = Duration.ZERO,
@@ -25,7 +26,9 @@ internal class FakePaymentSheetLoader(
 ) : PaymentSheetLoader {
 
     fun updatePaymentMethods(paymentMethods: List<PaymentMethod>) {
-        this.customerPaymentMethods = paymentMethods
+        this.customer = customer?.copy(
+            paymentMethods = paymentMethods
+        )
         this.paymentSelection = paymentSelection.takeIf {
             (it !is PaymentSelection.Saved) || it.paymentMethod in paymentMethods
         }
@@ -43,7 +46,7 @@ internal class FakePaymentSheetLoader(
             Result.success(
                 PaymentSheetState.Full(
                     config = paymentSheetConfiguration,
-                    customerPaymentMethods = customerPaymentMethods,
+                    customer = customer,
                     isGooglePayReady = isGooglePayAvailable,
                     linkState = linkState,
                     paymentSelection = paymentSelection,

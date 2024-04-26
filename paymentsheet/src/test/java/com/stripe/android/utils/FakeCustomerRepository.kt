@@ -8,6 +8,9 @@ import com.stripe.android.paymentsheet.repositories.CustomerRepository
 internal open class FakeCustomerRepository(
     private val paymentMethods: List<PaymentMethod> = emptyList(),
     private val customer: Customer? = null,
+    private val onRetrieveCustomer: () -> Customer? = {
+        customer
+    },
     private val onGetPaymentMethods: () -> Result<List<PaymentMethod>> = {
         Result.success(paymentMethods)
     },
@@ -25,7 +28,7 @@ internal open class FakeCustomerRepository(
 
     override suspend fun retrieveCustomer(
         customerInfo: CustomerRepository.CustomerInfo
-    ): Customer? = customer
+    ): Customer? = onRetrieveCustomer()
 
     override suspend fun getPaymentMethods(
         customerInfo: CustomerRepository.CustomerInfo,

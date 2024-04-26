@@ -378,7 +378,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private suspend fun initializeWithState(state: PaymentSheetState.Full) {
-        savedStateHandle[SAVE_PAYMENT_METHODS] = state.customerPaymentMethods
+        customer = state.customer
+
         updateSelection(state.paymentSelection)
 
         savedStateHandle[SAVE_GOOGLE_PAY_STATE] = if (state.isGooglePayReady) {

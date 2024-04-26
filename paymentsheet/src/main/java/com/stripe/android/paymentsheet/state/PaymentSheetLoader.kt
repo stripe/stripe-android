@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.state
 
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayRepository
@@ -14,6 +15,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
@@ -59,6 +61,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private val lpmRepository: LpmRepository,
     private val logger: Logger,
     private val eventReporter: EventReporter,
+    private val errorReporter: ErrorReporter,
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val linkStore: LinkStore,
@@ -173,21 +176,6 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val customerConfig = config.customer
 
-        val paymentMethods = async {
-            when (customerConfig?.accessType) {
-                is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                    elementsSession.customer?.paymentMethods ?: emptyList()
-                }
-                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                    retrieveCustomerPaymentMethods(
-                        metadata = metadata,
-                        customerConfig = customerConfig,
-                    )
-                }
-                null -> emptyList()
-            }
-        }
-
         val savedSelection = async {
             retrieveSavedSelection(
                 config = config,
@@ -196,19 +184,55 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             )
         }
 
-        val sortedPaymentMethods = async {
-            paymentMethods.await().withLastUsedPaymentMethodFirst(savedSelection.await())
+        val customer = async {
+            when (customerConfig?.accessType) {
+                is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                    elementsSession.customer?.let { customer ->
+                        CustomerState(
+                            id = customer.session.customerId,
+                            ephemeralKeySecret = customer.session.apiKey,
+                            paymentMethods = customer.paymentMethods
+                                .withLastUsedPaymentMethodFirst(savedSelection.await()),
+                        )
+                    } ?: run {
+                        val exception = IllegalStateException(
+                            "Excepted 'customer' attribute as part of 'elements_session' response!"
+                        )
+
+                        errorReporter.report(
+                            ErrorReporter
+                                .UnexpectedErrorEvent
+                                .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
+                            StripeException.create(exception)
+                        )
+
+                        throw exception
+                    }
+                }
+                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                    CustomerState(
+                        id = customerConfig.id,
+                        ephemeralKeySecret = customerConfig.ephemeralKeySecret,
+                        paymentMethods = retrieveCustomerPaymentMethods(
+                            metadata = metadata,
+                            customerConfig = customerConfig,
+                        ).withLastUsedPaymentMethodFirst(savedSelection.await())
+                    )
+                }
+                else -> null
+            }
         }
 
         val initialPaymentSelection = async {
-            retrieveInitialPaymentSelection(savedSelection, paymentMethods)
-                ?: sortedPaymentMethods.await().firstOrNull()?.toPaymentSelection()
+            retrieveInitialPaymentSelection(savedSelection, customer)
+                ?: customer.await()?.paymentMethods?.firstOrNull()?.toPaymentSelection()
         }
 
         val linkState = async {
             if (elementsSession.isLinkEnabled && !config.billingDetailsCollectionConfiguration.collectsAnything) {
                 loadLinkState(
                     config = config,
+                    customer = customer.await(),
                     metadata = metadata,
                     merchantCountry = merchantCountry,
                     passthroughModeEnabled = elementsSession.linkPassthroughModeEnabled,
@@ -225,7 +249,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         if (supportsIntent(metadata)) {
             PaymentSheetState.Full(
                 config = config,
-                customerPaymentMethods = sortedPaymentMethods.await(),
+                customer = customer.await(),
                 isGooglePayReady = isGooglePayReady.await(),
                 linkState = linkState.await(),
                 isEligibleForCardBrandChoice = elementsSession.isEligibleForCardBrandChoice,
@@ -269,6 +293,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun loadLinkState(
         config: PaymentSheet.Configuration,
+        customer: CustomerState?,
         metadata: PaymentMethodMetadata,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
@@ -277,6 +302,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ): LinkState {
         val linkConfig = createLinkConfiguration(
             config = config,
+            customer = customer,
             metadata = metadata,
             merchantCountry = merchantCountry,
             passthroughModeEnabled = passthroughModeEnabled,
@@ -300,6 +326,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun createLinkConfiguration(
         config: PaymentSheet.Configuration,
+        customer: CustomerState?,
         metadata: PaymentMethodMetadata,
         merchantCountry: String?,
         passthroughModeEnabled: Boolean,
@@ -320,7 +347,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             null
         }
 
-        val customerEmail = config.defaultBillingDetails?.email ?: config.customer?.let {
+        val customerEmail = config.defaultBillingDetails?.email ?: customer?.let {
             customerRepository.retrieveCustomer(
                 CustomerRepository.CustomerInfo(
                     id = it.id,
@@ -366,13 +393,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveInitialPaymentSelection(
         savedSelection: Deferred<SavedSelection>,
-        paymentMethods: Deferred<List<PaymentMethod>>
+        customer: Deferred<CustomerState?>
     ): PaymentSelection? {
         return when (val selection = savedSelection.await()) {
             is SavedSelection.GooglePay -> PaymentSelection.GooglePay
             is SavedSelection.Link -> PaymentSelection.Link
             is SavedSelection.PaymentMethod -> {
-                paymentMethods.await().find { it.id == selection.id }?.toPaymentSelection()
+                customer.await()?.paymentMethods?.find { it.id == selection.id }?.toPaymentSelection()
             }
             is SavedSelection.None -> null
         }

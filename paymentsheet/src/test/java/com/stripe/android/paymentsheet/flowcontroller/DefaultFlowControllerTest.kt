@@ -67,6 +67,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -334,7 +335,7 @@ internal class DefaultFlowControllerTest {
         val last4 = paymentMethods.first().card?.last4.orEmpty()
 
         val flowController = createFlowController(
-            paymentMethods = paymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
             paymentSelection = PaymentSelection.Saved(paymentMethods.first()),
         )
 
@@ -358,7 +359,7 @@ internal class DefaultFlowControllerTest {
 
         // Initially configure for a customer with saved payment methods
         val paymentSheetLoader = FakePaymentSheetLoader(
-            customerPaymentMethods = paymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
             paymentSelection = PaymentSelection.Saved(paymentMethods.first()),
         )
 
@@ -406,7 +407,7 @@ internal class DefaultFlowControllerTest {
 
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                customerPaymentMethods = emptyList(),
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
                 isGooglePayReady = false,
                 paymentSelection = null,
@@ -515,7 +516,7 @@ internal class DefaultFlowControllerTest {
         // Create a default flow controller with the paymentMethods initialized with cards.
         val initialPaymentMethods = PaymentMethodFixtures.createCards(5)
         val flowController = createFlowController(
-            paymentMethods = initialPaymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = initialPaymentMethods),
             paymentSelection = PaymentSelection.Saved(initialPaymentMethods.first())
         )
         flowController.configureExpectingSuccess(
@@ -530,7 +531,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionActivityLauncher).launch(
             argWhere {
                 // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
-                it.state.customerPaymentMethods == initialPaymentMethods
+                it.state.customer?.paymentMethods == initialPaymentMethods
             },
             anyOrNull(),
         )
@@ -605,7 +606,9 @@ internal class DefaultFlowControllerTest {
             NEW_CARD_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                customerPaymentMethods = PAYMENT_METHODS,
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = PAYMENT_METHODS
+                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
@@ -644,7 +647,9 @@ internal class DefaultFlowControllerTest {
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                customerPaymentMethods = PAYMENT_METHODS,
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = PAYMENT_METHODS
+                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
@@ -686,7 +691,9 @@ internal class DefaultFlowControllerTest {
             paymentSelection,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                customerPaymentMethods = PAYMENT_METHODS,
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = PAYMENT_METHODS
+                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
@@ -1876,7 +1883,7 @@ internal class DefaultFlowControllerTest {
     }
 
     private fun createFlowController(
-        paymentMethods: List<PaymentMethod> = emptyList(),
+        customer: CustomerState? = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         paymentSelection: PaymentSelection? = null,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         linkState: LinkState? = LinkState(
@@ -1888,7 +1895,7 @@ internal class DefaultFlowControllerTest {
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
-                customerPaymentMethods = paymentMethods,
+                customer = customer,
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,

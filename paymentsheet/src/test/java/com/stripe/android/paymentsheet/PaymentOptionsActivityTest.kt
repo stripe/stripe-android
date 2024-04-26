@@ -353,10 +353,8 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `mandate text is shown below primary button when showAbove is false`() {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
-                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->
@@ -381,10 +379,8 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `mandate text is shown above primary button when showAbove is true`() {
-        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTIONS_CONTRACT_ARGS.state.copy(
-                customerPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
         runActivityScenario(args) { scenario ->
             scenario.onActivity { activity ->

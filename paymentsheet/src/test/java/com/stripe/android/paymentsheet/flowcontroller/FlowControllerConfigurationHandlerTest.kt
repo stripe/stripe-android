@@ -310,7 +310,7 @@ class FlowControllerConfigurationHandlerTest {
 
             val configurationHandler = createConfigurationHandler(
                 FakePaymentSheetLoader(
-                    customerPaymentMethods = emptyList(),
+                    customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                     delay = 2.seconds,
                 )
             )
@@ -502,7 +502,7 @@ class FlowControllerConfigurationHandlerTest {
 
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
         return FakePaymentSheetLoader(
-            customerPaymentMethods = emptyList(),
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Link,
             linkState = LinkState(

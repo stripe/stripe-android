@@ -166,6 +166,9 @@ interface ErrorReporter {
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
         ),
+        PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND(
+            partialEventName = "paymentsheet.loader.elements_session.customer.not_found"
+        ),
         EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE(
             partialEventName = "elements.external_payment_methods_serializer.error"
         ),

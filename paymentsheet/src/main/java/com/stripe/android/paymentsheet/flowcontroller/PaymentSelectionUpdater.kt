@@ -48,7 +48,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             is PaymentSelection.Saved -> {
                 val paymentMethod = selection.paymentMethod
                 val code = paymentMethod.type?.code
-                code in allowedTypes && paymentMethod in state.customerPaymentMethods
+                code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
                 state.isGooglePayReady
