@@ -37,6 +37,7 @@ internal class FakePrefsRepository(
             is PaymentSelection.New.GenericPaymentMethod,
             is PaymentSelection.New.LinkInline,
             is PaymentSelection.New.USBankAccount,
+            is PaymentSelection.ExternalPaymentMethod,
             null -> SavedSelection.None
         }.let {
             savedSelection = it

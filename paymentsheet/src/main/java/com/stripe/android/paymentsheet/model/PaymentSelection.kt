@@ -66,6 +66,29 @@ internal sealed class PaymentSelection : Parcelable {
     }
 
     @Parcelize
+    data class ExternalPaymentMethod(
+        val type: String,
+        val label: String,
+        // In practice, we don't have an iconResource for external payment methods.
+        @DrawableRes val iconResource: Int,
+        // In practice, we always have a lightThemeIconUrl for external payment methods.
+        val lightThemeIconUrl: String?,
+        val darkThemeIconUrl: String?,
+    ) : PaymentSelection() {
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(
+            context: Context,
+            merchantName: String,
+            isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean
+        ): String? {
+            return null
+        }
+    }
+
+    @Parcelize
     data class Saved(
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
@@ -242,4 +265,5 @@ internal val PaymentSelection.isLink: Boolean
         is PaymentSelection.New.LinkInline -> true
         is PaymentSelection.New -> false
         is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
+        is PaymentSelection.ExternalPaymentMethod -> false
     }

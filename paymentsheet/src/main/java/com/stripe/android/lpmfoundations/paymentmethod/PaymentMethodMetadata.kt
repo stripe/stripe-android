@@ -114,7 +114,7 @@ internal data class PaymentMethodMetadata(
         return externalPaymentMethodSpecs.map { it.type }
     }
 
-    private fun isExternalPaymentMethod(code: String): Boolean {
+    fun isExternalPaymentMethod(code: String): Boolean {
         return externalPaymentMethodTypes().contains(code)
     }
 

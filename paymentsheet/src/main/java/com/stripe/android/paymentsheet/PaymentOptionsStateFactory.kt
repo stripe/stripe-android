@@ -104,6 +104,7 @@ private fun List<PaymentOptionsItem>.findSelectedPosition(paymentSelection: Paym
                 }
             }
             is PaymentSelection.New -> false
+            is PaymentSelection.ExternalPaymentMethod -> false
         }
     }
 }

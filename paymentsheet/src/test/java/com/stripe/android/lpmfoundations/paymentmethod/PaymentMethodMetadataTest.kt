@@ -6,12 +6,12 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.AffirmDefinition
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.elements.EmailElement
-import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
@@ -428,10 +428,10 @@ internal class PaymentMethodMetadataTest {
                 address = PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full,
                 attachDefaultsToPaymentMethod = false,
             ),
-            externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
         )
         val formElement = metadata.formElementsForCode(
-            code = externalPaypalSpec.type,
+            code = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC.type,
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
@@ -465,10 +465,10 @@ internal class PaymentMethodMetadataTest {
                 paymentMethodTypes = listOf("card", "bancontact")
             ),
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
-            externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
         )
         val formElement = metadata.formElementsForCode(
-            code = externalPaypalSpec.type,
+            code = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC.type,
             uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
         )!!
 
@@ -518,7 +518,7 @@ internal class PaymentMethodMetadataTest {
                     SharedDataSpec("card"),
                     SharedDataSpec("klarna"),
                 ),
-                externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
             )
             val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
             assertThat(sortedSupportedPaymentMethods).hasSize(4)
@@ -541,7 +541,7 @@ internal class PaymentMethodMetadataTest {
                     SharedDataSpec("card"),
                     SharedDataSpec("klarna"),
                 ),
-                externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm", "external_paypal")
             )
             val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -565,7 +565,7 @@ internal class PaymentMethodMetadataTest {
                     SharedDataSpec("card"),
                     SharedDataSpec("klarna"),
                 ),
-                externalPaymentMethodSpecs = listOf(externalPaypalSpec),
+                externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC),
                 paymentMethodOrder = listOf("affirm")
             )
             val sortedSupportedPaymentMethods = metadata.sortedSupportedPaymentMethods()
@@ -582,7 +582,7 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
             ),
-            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         )
 
         assertThat(metadata.requiresMandate("external_paypal")).isFalse()
@@ -594,7 +594,7 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
             ),
-            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         )
 
         assertThat(metadata.supportedPaymentMethodTypes().contains("external_paypal")).isTrue()
@@ -606,7 +606,7 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
             ),
-            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         )
 
         assertThat(metadata.supportedSavedPaymentMethodTypes().map { it.code }.contains("external_paypal")).isFalse()
@@ -618,7 +618,7 @@ internal class PaymentMethodMetadataTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
                 paymentMethodTypes = listOf("card", "klarna")
             ),
-            externalPaymentMethodSpecs = listOf(externalPaypalSpec)
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         )
         val expectedSupportedPaymentMethod = SupportedPaymentMethod(
             code = "external_paypal",
@@ -634,10 +634,39 @@ internal class PaymentMethodMetadataTest {
         assertThat(actualSupportedPaymentMethod).isEqualTo(expectedSupportedPaymentMethod)
     }
 
-    private val externalPaypalSpec = ExternalPaymentMethodSpec(
-        type = "external_paypal",
-        label = "PayPal",
-        lightImageUrl = "example_url",
-        darkImageUrl = null
-    )
+    @Test
+    fun `isExternalPaymentMethod returns true for supported EPM`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        )
+
+        assertThat(metadata.isExternalPaymentMethod("external_paypal")).isTrue()
+    }
+
+    @Test
+    fun `isExternalPaymentMethod returns false for unsupported EPM`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        )
+
+        assertThat(metadata.isExternalPaymentMethod("external_venmo")).isFalse()
+    }
+
+    @Test
+    fun `isExternalPaymentMethod returns false for non-external payment method`() = runTest {
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card", "klarna")
+            ),
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        )
+
+        assertThat(metadata.isExternalPaymentMethod("card")).isFalse()
+    }
 }
