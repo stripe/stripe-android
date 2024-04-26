@@ -678,9 +678,3 @@ internal class FormViewModelTest {
         elements = formElements,
     )
 }
-
-private fun FormViewModel.setSaveForFutureUse(value: Boolean) {
-    elements
-        .filterIsInstance<SaveForFutureUseElement>()
-        .firstOrNull()?.controller?.onValueChange(value)
-}
