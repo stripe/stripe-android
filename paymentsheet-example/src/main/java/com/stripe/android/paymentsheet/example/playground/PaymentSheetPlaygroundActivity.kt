@@ -161,7 +161,9 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 context.startActivity(
                     QrCodeActivity.create(
                         context = context,
-                        settingsJson = playgroundSettings.snapshot().asJsonString(),
+                        settingsUri = PaymentSheetPlaygroundUrlHelper.createUri(
+                            playgroundSettings.snapshot().asJsonString()
+                        ),
                     )
                 )
             },

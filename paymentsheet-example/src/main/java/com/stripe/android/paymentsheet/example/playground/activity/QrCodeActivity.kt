@@ -20,15 +20,14 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
-import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundUrlHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 internal class QrCodeActivity : AppCompatActivity() {
     companion object {
-        fun create(context: Context, settingsJson: String): Intent {
+        fun create(context: Context, settingsUri: Uri): Intent {
             return Intent(context, QrCodeActivity::class.java).apply {
-                putExtra("settingsJson", settingsJson)
+                putExtra("settingsUri", settingsUri.toString())
             }
         }
     }
@@ -36,20 +35,19 @@ internal class QrCodeActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val settingsJson = intent.getStringExtra("settingsJson")
-        if (settingsJson == null) {
+        val settingsUri = Uri.parse(intent.getStringExtra("settingsUri"))
+
+        if (settingsUri == null) {
             finish()
             return
         }
 
-        val uri = PaymentSheetPlaygroundUrlHelper.createUri(settingsJson)
-
         setContent {
             var bitmap: Bitmap? by remember { mutableStateOf(null) }
 
-            LaunchedEffect(uri) {
+            LaunchedEffect(settingsUri) {
                 launch(Dispatchers.IO) {
-                    bitmap = getQrCodeBitmap(uri)
+                    bitmap = getQrCodeBitmap(settingsUri)
                 }
             }
 
