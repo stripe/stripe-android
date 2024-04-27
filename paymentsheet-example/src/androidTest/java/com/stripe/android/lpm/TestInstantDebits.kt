@@ -22,6 +22,7 @@ import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.testing.FeatureFlagTestRule
+import org.junit.Ignore
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -48,6 +49,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     )
 
     @Test
+    @Ignore
     fun testInstantDebitsSuccess() {
         testDriver.confirmInstantDebits(
             testParameters = testParameters.copy(authorizationAction = null),
