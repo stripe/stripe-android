@@ -24,12 +24,13 @@ internal class PaymentSheetTest {
 //    private val retryRule = RetryRule(5)
     private val networkRule = NetworkRule()
     private val composeTestRule = createEmptyComposeRule()
+    private val shampooRule = ShampooRule(50)
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()
         .around(networkRule)
         .around(composeTestRule)
-//        .around(retryRule)
+        .around(shampooRule)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 

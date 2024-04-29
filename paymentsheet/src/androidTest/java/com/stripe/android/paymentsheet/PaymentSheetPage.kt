@@ -159,6 +159,9 @@ internal class PaymentSheetPage(
     }
 
     private fun clickDropdownMenu() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
         composeTestRule.onNode(hasTestTag(DROPDOWN_MENU_CLICKABLE_TEST_TAG))
             .performScrollTo()
             .performClick()
