@@ -48,7 +48,7 @@ data class CustomerEphemeralKeyResponse(
     @SerialName("publishableKey")
     val publishableKey: String,
     @SerialName("customerId")
-    val customerId: String? = null,
+    val customerId: String,
     @SerialName("customerEphemeralKeySecret")
     val customerEphemeralKeySecret: String? = null,
     @SerialName("customerSessionClientSecret")

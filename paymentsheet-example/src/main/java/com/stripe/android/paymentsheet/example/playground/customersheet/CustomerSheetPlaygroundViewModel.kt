@@ -179,10 +179,7 @@ internal class CustomerSheetPlaygroundViewModel(
                 try {
                     CustomerAdapter.Result.success(
                         CustomerEphemeralKey.create(
-                            customerId = response.customerId
-                                ?: throw IllegalStateException(
-                                    "No 'customerId' was found in backend response!"
-                                ),
+                            customerId = response.customerId,
                             ephemeralKey = response.customerEphemeralKeySecret
                                 ?: throw IllegalStateException(
                                     "No 'customerEphemeralKeySecret' was found in backend response!"

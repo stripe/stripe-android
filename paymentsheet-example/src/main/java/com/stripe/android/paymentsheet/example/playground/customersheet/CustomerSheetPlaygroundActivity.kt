@@ -171,7 +171,7 @@ internal class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             callback = callback,
         )
 
-        LaunchedEffect(playgroundState, customerSheet) {
+        LaunchedEffect(customerSheet) {
             viewModel.fetchOption(customerSheet)
         }
 
