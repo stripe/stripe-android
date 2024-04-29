@@ -140,19 +140,21 @@ internal fun SelectPaymentMethod(
             )
         }
 
-        viewState.primaryButtonLabel?.let {
-            PrimaryButton(
-                label = it,
-                isEnabled = viewState.primaryButtonEnabled,
-                isLoading = viewState.isProcessing,
-                onButtonClick = {
-                    viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
-                },
-                modifier = Modifier
-                    .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
-                    .padding(top = 20.dp)
-                    .padding(horizontal = horizontalPadding),
-            )
+        if (viewState.primaryButtonVisible) {
+            viewState.primaryButtonLabel?.let {
+                PrimaryButton(
+                    label = it,
+                    isEnabled = viewState.primaryButtonEnabled,
+                    isLoading = viewState.isProcessing,
+                    onButtonClick = {
+                        viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
+                    },
+                    modifier = Modifier
+                        .testTag(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
+                        .padding(top = 20.dp)
+                        .padding(horizontal = horizontalPadding),
+                )
+            }
         }
 
         Mandate(
