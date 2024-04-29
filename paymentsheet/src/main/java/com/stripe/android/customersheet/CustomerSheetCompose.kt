@@ -31,7 +31,11 @@ fun rememberCustomerSheet(
         "CustomerSheet must be created in the context of an Activity"
     }
 
-    return remember(configuration) {
+    return remember(
+        configuration,
+        customerAdapter,
+        callback,
+    ) {
         CustomerSheet.getInstance(
             application = activity.application,
             lifecycleOwner = lifecycleOwner,
