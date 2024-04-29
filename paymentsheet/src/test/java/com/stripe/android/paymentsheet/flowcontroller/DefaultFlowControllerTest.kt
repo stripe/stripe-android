@@ -45,6 +45,8 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -217,6 +219,14 @@ internal class DefaultFlowControllerTest {
             activityResultRegistry.register(
                 any(),
                 any<BacsMandateConfirmationContract>(),
+                any()
+            )
+        ).thenReturn(mock())
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<ExternalPaymentMethodContract>(),
                 any()
             )
         ).thenReturn(mock())
