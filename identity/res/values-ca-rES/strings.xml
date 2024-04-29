@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">No s\'ha pogut capturar la imatge</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Els detalls no es veuen bé</string>
+  <string name="stripe_decrease_lighting_2">Mou-lo a un espai més fosc</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">icona de la càmera</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">El document d\'identitat no està enfocat</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Els detalls no es veuen bé</string>
+  <string name="stripe_reduce_glare_2">Intenteu reduir l\'enlluernament i feu que l\'ID sigui visible.</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Torna a fer les fotos</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

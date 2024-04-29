@@ -4,6 +4,7 @@ import androidx.appcompat.view.ContextThemeWrapper
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.R
@@ -38,7 +39,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -378,12 +378,11 @@ private object TransformSpecToElementsFactory {
 
         return TransformSpecToElements(
             UiDefinitionFactory.Arguments(
-                addressRepository = mock(),
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,
                 merchantName = "Merchant, Inc.",
-                context = context,
+                cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
                 shippingValues = null,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,

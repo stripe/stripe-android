@@ -7,6 +7,9 @@ import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
+import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
@@ -23,7 +26,7 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
     private val testParams = TestParameters.create(
         paymentMethodCode = "card",
     ) { settings ->
-        settings[PaymentMethodOrderSettingsDefinition] = "card,klarna,p24,eps"
+        settings[PaymentMethodOrderSettingsDefinition] = "card,amazon_pay,klarna,p24,eps"
     }.copy(
         saveForFutureUseCheckboxVisible = true,
         authorizationAction = null,
@@ -232,6 +235,20 @@ internal class TestPaymentSheetScreenshots : BasePlaygroundTest(disableAnimation
             testParams.copyPlaygroundSettings { settings ->
                 settings[PrimaryButtonLabelSettingsDefinition] =
                     "Buy this now!"
+            }
+        )
+    }
+
+    @Test
+    fun testDefaultBillingAndPhoneDetails() {
+        testDriver.screenshotRegression(
+            testParameters = testParams.copyPlaygroundSettings { settings ->
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CollectPhoneSettingsDefinition] = PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+            },
+            customOperations = {
+                testDriver.pressSelection()
+                testDriver.scrollToBottom()
             }
         )
     }

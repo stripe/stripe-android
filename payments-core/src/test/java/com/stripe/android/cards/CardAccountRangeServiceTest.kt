@@ -6,6 +6,7 @@ import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.ACCOUNTS
+import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.CARTES_BANCAIRES_ACCOUNT_RANGES
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY16_ACCOUNTS
 import com.stripe.android.cards.DefaultStaticCardAccountRanges.Companion.UNIONPAY19_ACCOUNTS
 import com.stripe.android.core.networking.ApiRequest
@@ -62,10 +63,12 @@ class CardAccountRangeServiceTest {
 
     @Test
     fun `test the card metadata service is always called if CBC eligible`() = runTest {
-        ACCOUNTS.forEach {
-            testIfRemoteCalled(isCbcEligible = true, it.binRange.low, expectedRemoteCall = true)
-            testIfRemoteCalled(isCbcEligible = true, it.binRange.high, expectedRemoteCall = true)
-        }
+        ACCOUNTS
+            .filterNot { CARTES_BANCAIRES_ACCOUNT_RANGES.contains(it) }
+            .forEach {
+                testIfRemoteCalled(isCbcEligible = true, it.binRange.low, expectedRemoteCall = true)
+                testIfRemoteCalled(isCbcEligible = true, it.binRange.high, expectedRemoteCall = true)
+            }
     }
 
     @SuppressWarnings("EmptyFunctionBlock")
@@ -103,23 +106,24 @@ class CardAccountRangeServiceTest {
     }
 
     @Test
-    fun `If CBC is disabled, return the matched brand as soon as there is input`() = runTest {
-        val expectedAccountRange = AccountRange(
-            binRange = BinRange(
-                low = "4000000000000000",
-                high = "4999999999999999",
-            ),
-            panLength = 16,
-            brandInfo = AccountRange.BrandInfo.Visa,
-        )
+    fun `If CBC is disabled and only one brand matches, return the matched brand as soon as there is input`() =
+        runTest {
+            val expectedAccountRange = AccountRange(
+                binRange = BinRange(
+                    low = "2221000000000000",
+                    high = "2720999999999999",
+                ),
+                panLength = 16,
+                brandInfo = AccountRange.BrandInfo.Mastercard,
+            )
 
-        val accountRanges = testBehavior(
-            cardNumber = "4",
-            isCbcEligible = false,
-        )
+            val accountRanges = testBehavior(
+                cardNumber = "2",
+                isCbcEligible = false,
+            )
 
-        assertThat(accountRanges).containsExactly(expectedAccountRange)
-    }
+            assertThat(accountRanges).containsExactly(expectedAccountRange)
+        }
 
     @Test
     fun `If CBC is enabled, don't return a matched brand until 8 characters are entered`() = runTest {

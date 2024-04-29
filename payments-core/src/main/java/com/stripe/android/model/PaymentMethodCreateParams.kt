@@ -283,6 +283,12 @@ data class PaymentMethodCreateParams internal constructor(
         return ((toParamMap()["card"] as? Map<*, *>?)?.get("number") as? String)?.takeLast(4)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun instantDebitsPaymentMethodId(): String? {
+        val linkParams = (toParamMap()["link"] as? Map<*, *>) ?: return null
+        return linkParams["payment_method_id"] as? String
+    }
+
     @Parcelize
     data class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1059,6 +1065,23 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Alma] as the payment
+         * method type
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createAlma(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Alma,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
          * Helper method to create [PaymentMethodCreateParams] with [Swish] as the payment
          * method type.
          */
@@ -1110,6 +1133,24 @@ data class PaymentMethodCreateParams internal constructor(
                     consumerSessionClientSecret,
                     extraParams
                 )
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun createInstantDebits(
+            paymentMethodId: String,
+            requiresMandate: Boolean,
+            productUsage: Set<String>,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                code = PaymentMethod.Type.Link.code,
+                requiresMandate = requiresMandate,
+                overrideParamMap = mapOf(
+                    "link" to mapOf(
+                        "payment_method_id" to paymentMethodId,
+                    ),
+                ),
+                productUsage = productUsage,
             )
         }
 

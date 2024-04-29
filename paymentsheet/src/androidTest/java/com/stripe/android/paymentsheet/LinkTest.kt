@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
@@ -21,23 +22,29 @@ import com.stripe.android.paymentsheet.utils.LinkIntegrationType
 import com.stripe.android.paymentsheet.utils.LinkIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runLinkTest
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class LinkTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
-
-    private val activityScenarioRule = composeTestRule.activityRule
+    private val retryRule = RetryRule(5)
 
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
+    private val networkRule = NetworkRule(validationTimeout = 5.seconds)
+
+    private val composeTestRule = createEmptyComposeRule()
+
     @get:Rule
-    val networkRule = NetworkRule(validationTimeout = 5.seconds)
+    val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(networkRule)
+        .around(composeTestRule)
+        .around(retryRule)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
@@ -45,7 +52,8 @@ internal class LinkTest {
     lateinit var integrationType: LinkIntegrationType
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUp() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUp() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -128,13 +136,14 @@ internal class LinkTest {
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUpAndSaveForFutureUsage() =
-        activityScenarioRule.runLinkTest(
+        runLinkTest(
+            networkRule = networkRule,
             integrationType = integrationType,
             paymentOptionCallback = { paymentOption ->
                 assertThat(paymentOption?.label).endsWith("4242")
 
                 @Suppress("DEPRECATION")
-                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
+                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -242,7 +251,8 @@ internal class LinkTest {
         }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpAndCardBrandChoice() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -329,13 +339,14 @@ internal class LinkTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughMode() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughMode() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
 
             @Suppress("DEPRECATION")
-            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -427,13 +438,14 @@ internal class LinkTest {
 
     @Test
     fun testSuccessfulCardPaymentWithLinkSignUpAndLinkPassthroughModeAndSaveForFutureUsage() =
-        activityScenarioRule.runLinkTest(
+        runLinkTest(
+            networkRule = networkRule,
             integrationType = integrationType,
             paymentOptionCallback = { paymentOption ->
                 assertThat(paymentOption?.label).endsWith("4242")
 
                 @Suppress("DEPRECATION")
-                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
+                assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
             },
             resultCallback = ::assertCompleted,
         ) { testContext ->
@@ -548,13 +560,14 @@ internal class LinkTest {
         }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpPassthroughModeAndCardBrandChoice() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("1001")
 
             @Suppress("DEPRECATION")
-            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link_2024)
+            assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
         },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -650,7 +663,8 @@ internal class LinkTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpFailure() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpFailure() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -708,7 +722,8 @@ internal class LinkTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpFailureInPassthroughMode() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpFailureInPassthroughMode() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -766,7 +781,8 @@ internal class LinkTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpShareFailureInPassthroughMode() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpShareFailureInPassthroughMode() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -831,7 +847,8 @@ internal class LinkTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithExistingLinkEmailUsed() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithExistingLinkEmailUsed() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -881,7 +898,8 @@ internal class LinkTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkPreviouslyUsed() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkPreviouslyUsed() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -896,9 +914,7 @@ internal class LinkTest {
             response.testBodyFromFile("elements-sessions-requires_payment_method.json")
         }
 
-        testContext.scenario.onActivity {
-            LinkStore(it).markLinkAsUsed()
-        }
+        LinkStore(ApplicationProvider.getApplicationContext()).markLinkAsUsed()
 
         testContext.launch()
 
@@ -916,7 +932,8 @@ internal class LinkTest {
     }
 
     @Test
-    fun testLogoutAfterLinkTransaction() = activityScenarioRule.runLinkTest(
+    fun testLogoutAfterLinkTransaction() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -997,7 +1014,8 @@ internal class LinkTest {
     }
 
     @Test
-    fun testSuccessfulCardPaymentWithLinkSignUpWithAlbaniaPhoneNumber() = activityScenarioRule.runLinkTest(
+    fun testSuccessfulCardPaymentWithLinkSignUpWithAlbaniaPhoneNumber() = runLinkTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")

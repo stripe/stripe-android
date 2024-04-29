@@ -1,7 +1,5 @@
 package com.stripe.android.paymentsheet.state
 
-import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.APIConnectionException
@@ -23,6 +21,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures
@@ -30,14 +29,16 @@ import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.paymentsheet.state.PaymentSheetLoadingException.PaymentIntentInTerminalState
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import com.stripe.android.utils.FakeCustomerRepository
 import com.stripe.android.utils.FakeElementsSessionRepository
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.MockitoAnnotations
@@ -47,22 +48,16 @@ import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import org.robolectric.RobolectricTestRunner
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 
-@RunWith(RobolectricTestRunner::class)
 internal class DefaultPaymentSheetLoaderTest {
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val eventReporter = mock<EventReporter>()
 
     private val customerRepository = FakeCustomerRepository(PAYMENT_METHODS)
-    private val lpmRepository = LpmRepository(
-        arguments = LpmRepository.LpmRepositoryArguments(
-            resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        ),
-    )
+    private val lpmRepository = LpmRepository()
 
     private val prefsRepository = FakePrefsRepository()
 
@@ -121,9 +116,25 @@ internal class DefaultPaymentSheetLoaderTest {
                     stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
                     allowsDelayedPaymentMethods = false,
                     sharedDataSpecs = emptyList(),
+                    hasCustomerConfiguration = true,
                 ),
             )
         )
+    }
+
+    @Test
+    fun `load without customer should return expected result`() = runTest {
+        val loader = createPaymentSheetLoader(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            PaymentSheetFixtures.CONFIG_MINIMUM
+        ).getOrThrow()
+        assertThat(result.paymentMethodMetadata.hasCustomerConfiguration).isFalse()
     }
 
     @Test
@@ -968,6 +979,195 @@ internal class DefaultPaymentSheetLoaderTest {
         assertThat(result.linkState).isNull()
     }
 
+    @Test
+    fun `When EPMs are requested but not returned by elements session, no EPMs are used`() = runTest {
+        testExternalPaymentMethods(
+            requestedExternalPaymentMethods = listOf("external_paypal"),
+            externalPaymentMethodData = null,
+            expectedExternalPaymentMethods = emptyList(),
+        )
+    }
+
+    @Test
+    fun `When EPMs are requested and returned by elements session, EPMs are used`() = runTest {
+        val requestedExternalPaymentMethods = listOf("external_venmo", "external_paypal")
+
+        testExternalPaymentMethods(
+            requestedExternalPaymentMethods,
+            externalPaymentMethodData = PaymentSheetFixtures.PAYPAL_AND_VENMO_EXTERNAL_PAYMENT_METHOD_DATA,
+            expectedExternalPaymentMethods = requestedExternalPaymentMethods
+        )
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When customer session configuration is provided, should pass it to 'ElementsSessionRepository'`() = runTest {
+        val repository = FakeElementsSessionRepository(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
+            error = null,
+            linkSettings = null,
+        )
+
+        val loader = createPaymentSheetLoader(
+            elementsSessionRepository = repository
+        )
+
+        loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration(
+                merchantDisplayName = "Merchant, Inc.",
+                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "cus_1",
+                    clientSecret = "customer_client_secret",
+                ),
+            )
+        )
+
+        assertThat(repository.lastParams?.customer).isEqualTo(
+            PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "customer_client_secret",
+            )
+        )
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When 'CustomerSession' config is provided, should use payment methods from elements_session and not fetch`() =
+        runTest {
+            var attemptedToRetrievePaymentMethods = false
+
+            val repository = FakeCustomerRepository(
+                onGetPaymentMethods = {
+                    attemptedToRetrievePaymentMethods = true
+                    Result.success(listOf())
+                }
+            )
+
+            val cards = PaymentMethodFactory.cards(4)
+            val loader = createPaymentSheetLoader(
+                customerRepo = repository,
+                customer = ElementsSession.Customer(
+                    paymentMethods = cards,
+                    session = ElementsSession.Customer.Session(
+                        id = "cuss_1",
+                        customerId = "cus_1",
+                        liveMode = false,
+                        apiKey = "ek_123",
+                        apiKeyExpiry = 555555555
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                )
+            ).getOrThrow()
+
+            assertThat(attemptedToRetrievePaymentMethods).isFalse()
+            assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When 'CustomerSession' config is provided but no customer object was returned, should not fetch and return no payment methods`() =
+        runTest {
+            var attemptedToRetrievePaymentMethods = false
+
+            val repository = FakeCustomerRepository(
+                onGetPaymentMethods = {
+                    attemptedToRetrievePaymentMethods = true
+                    Result.success(listOf())
+                }
+            )
+
+            val loader = createPaymentSheetLoader(
+                customerRepo = repository,
+                customer = null,
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                )
+            ).getOrThrow()
+
+            assertThat(attemptedToRetrievePaymentMethods).isFalse()
+            assertThat(state.customerPaymentMethods).isEmpty()
+        }
+
+    @Test
+    fun `When 'LegacyEphemeralKey' is provided, should fetch and use payment methods from 'CustomerRepository'`() =
+        runTest {
+            var attemptedToRetrievePaymentMethods = false
+
+            val cards = PaymentMethodFactory.cards(2)
+            val repository = FakeCustomerRepository(
+                onGetPaymentMethods = {
+                    attemptedToRetrievePaymentMethods = true
+                    Result.success(cards)
+                }
+            )
+
+            val loader = createPaymentSheetLoader(
+                customerRepo = repository,
+                customer = null
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ephemeral_key_secret",
+                    ),
+                )
+            ).getOrThrow()
+
+            assertThat(attemptedToRetrievePaymentMethods).isTrue()
+            assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
+        }
+
+    private suspend fun testExternalPaymentMethods(
+        requestedExternalPaymentMethods: List<String>?,
+        externalPaymentMethodData: String?,
+        expectedExternalPaymentMethods: List<String>?
+    ) {
+        val loader = createPaymentSheetLoader(externalPaymentMethodData = externalPaymentMethodData)
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
+            ),
+            paymentSheetConfiguration = PaymentSheet.Configuration.Builder(merchantDisplayName = "Example, Inc.")
+                .externalPaymentMethods(requestedExternalPaymentMethods).build()
+        ).getOrThrow()
+
+        val actualExternalPaymentMethods = result.paymentMethodMetadata.externalPaymentMethodSpecs.map { it.type }
+        assertThat(actualExternalPaymentMethods).isEqualTo(expectedExternalPaymentMethods)
+    }
+
     private suspend fun testSuccessfulLoadSendsEventsCorrectly(paymentSelection: PaymentSelection?) {
         prefsRepository.savePaymentSelection(paymentSelection)
 
@@ -1004,20 +1204,25 @@ internal class DefaultPaymentSheetLoaderTest {
         fallbackError: Throwable? = null,
         isCbcEligible: Boolean = false,
         linkStore: LinkStore = mock(),
+        customer: ElementsSession.Customer? = null,
+        externalPaymentMethodData: String? = null,
+        elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
+            stripeIntent = stripeIntent,
+            error = error,
+            sessionsError = fallbackError,
+            linkSettings = linkSettings,
+            sessionsCustomer = customer,
+            isGooglePayEnabled = isGooglePayEnabledFromBackend,
+            isCbcEligible = isCbcEligible,
+            externalPaymentMethodData = externalPaymentMethodData,
+        ),
     ): PaymentSheetLoader {
         return DefaultPaymentSheetLoader(
             prefsRepositoryFactory = { prefsRepository },
             googlePayRepositoryFactory = {
                 if (isGooglePayReady) readyGooglePayRepository else unreadyGooglePayRepository
             },
-            elementsSessionRepository = FakeElementsSessionRepository(
-                stripeIntent = stripeIntent,
-                error = error,
-                sessionsError = fallbackError,
-                linkSettings = linkSettings,
-                isGooglePayEnabled = isGooglePayEnabledFromBackend,
-                isCbcEligible = isCbcEligible,
-            ),
+            elementsSessionRepository = elementsSessionRepository,
             customerRepository = customerRepo,
             lpmRepository = lpmRepository,
             logger = Logger.noop(),
@@ -1025,6 +1230,7 @@ internal class DefaultPaymentSheetLoaderTest {
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
             linkStore = linkStore,
+            externalPaymentMethodsRepository = ExternalPaymentMethodsRepository(errorReporter = FakeErrorReporter()),
         )
     }
 

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
@@ -16,6 +15,7 @@ import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponseInternal
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.stateIn
@@ -37,6 +36,7 @@ import kotlinx.coroutines.test.setMain
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -51,7 +51,6 @@ class USBankAccountFormViewModelTest {
     private val defaultArgs = USBankAccountFormViewModel.Args(
         formArgs = FormArguments(
             paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-            showCheckbox = false,
             merchantName = MERCHANT_NAME,
             amount = Amount(5099, "usd"),
             billingDetails = PaymentSheet.BillingDetails(
@@ -60,6 +59,7 @@ class USBankAccountFormViewModelTest {
             ),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
         ),
+        showCheckbox = false,
         isCompleteFlow = true,
         isPaymentFlow = true,
         stripeIntentId = "id_12345",
@@ -67,9 +67,10 @@ class USBankAccountFormViewModelTest {
         onBehalfOf = "on_behalf_of_id",
         savedPaymentMethod = null,
         shippingDetails = null,
+        instantDebits = false,
     )
 
-    private val collectBankAccountLauncher = mock<CollectBankAccountLauncher>()
+    private val mockCollectBankAccountLauncher = mock<CollectBankAccountLauncher>()
     private val savedStateHandle = SavedStateHandle()
 
     @BeforeTest
@@ -122,7 +123,7 @@ class USBankAccountFormViewModelTest {
     fun `collect bank account is callable with initial screen state`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+            viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             val currentScreenState =
                 viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
 
@@ -136,7 +137,7 @@ class USBankAccountFormViewModelTest {
                 currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
             )
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
@@ -201,7 +202,8 @@ class USBankAccountFormViewModelTest {
     fun `when payment options, verified bank account, then result has correct paymentMethodOptionsParams`() = runTest {
         val viewModel = createViewModel(
             defaultArgs.copy(
-                formArgs = defaultArgs.formArgs.copy(showCheckbox = true)
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
             )
         )
         val bankAccount = mockVerifiedBankAccount()
@@ -224,7 +226,7 @@ class USBankAccountFormViewModelTest {
     fun `when reset, primary button launches bank account collection`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
-            viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+            viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             viewModel.reset()
 
             val currentScreenState =
@@ -234,13 +236,13 @@ class USBankAccountFormViewModelTest {
                 currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
             )
 
-            verify(collectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
+            verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(any(), any(), any(), any())
         }
 
     @Test
     fun `when reset, save for future usage should be false`() = runTest {
         val viewModel = createViewModel()
-        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         viewModel.saveForFutureUseElement.controller.onValueChange(false)
 
@@ -277,6 +279,7 @@ class USBankAccountFormViewModelTest {
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
                     input = input,
+                    instantDebits = null,
                     screenState = USBankAccountFormScreenState.SavedAccount(
                         financialConnectionsSessionId = "session_1234",
                         intentId = "intent_1234",
@@ -328,6 +331,7 @@ class USBankAccountFormViewModelTest {
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
                     input = input,
+                    instantDebits = null,
                     screenState = USBankAccountFormScreenState.SavedAccount(
                         financialConnectionsSessionId = "session_1234",
                         intentId = "intent_1234",
@@ -354,7 +358,7 @@ class USBankAccountFormViewModelTest {
                     billingDetails = PaymentSheet.BillingDetails(
                         name = CUSTOMER_NAME,
                         email = CUSTOMER_EMAIL,
-                        phone = CUSTOMER_PHONE,
+                        phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
                         address = CUSTOMER_ADDRESS,
                     ),
                     billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -367,6 +371,7 @@ class USBankAccountFormViewModelTest {
 
         assertThat(viewModel.name.value).isEqualTo(CUSTOMER_NAME)
         assertThat(viewModel.email.value).isEqualTo(CUSTOMER_EMAIL)
+        assertThat(viewModel.phoneController.getCountryCode()).isEqualTo(CUSTOMER_COUNTRY)
         assertThat(viewModel.phone.value).isEqualTo(CUSTOMER_PHONE)
         assertThat(viewModel.address.value).isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
     }
@@ -379,15 +384,10 @@ class USBankAccountFormViewModelTest {
                 isProcessing = false,
             ),
             USBankAccountFormScreenState.MandateCollection(
-                financialConnectionsSessionId = "session_1234",
+                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.Session("session_1234"),
                 intentId = "intent_1234",
-                paymentAccount = FinancialConnectionsAccount(
-                    created = 0,
-                    id = "fc_id",
-                    institutionName = "Stripe Bank",
-                    livemode = false,
-                    supportedPaymentMethodTypes = emptyList(),
-                ),
+                bankName = "Stripe Bank",
+                last4 = null,
                 primaryButtonText = "Continue",
                 mandateText = null,
             ),
@@ -426,6 +426,7 @@ class USBankAccountFormViewModelTest {
                             address = CUSTOMER_ADDRESS.asAddressModel(),
                             saveForFutureUse = true,
                         ),
+                        instantDebits = null,
                         screenState = screenState,
                     )
                 )
@@ -452,6 +453,7 @@ class USBankAccountFormViewModelTest {
                             address = null,
                             saveForFutureUse = false,
                         ),
+                        instantDebits = null,
                         screenState = USBankAccountFormScreenState.SavedAccount(
                             financialConnectionsSessionId = "session_1234",
                             intentId = "intent_1234",
@@ -483,7 +485,7 @@ class USBankAccountFormViewModelTest {
                         billingDetails = PaymentSheet.BillingDetails(
                             name = CUSTOMER_NAME,
                             email = CUSTOMER_EMAIL,
-                            phone = CUSTOMER_PHONE,
+                            phone = CUSTOMER_PHONE_COUNTRY_CODE + CUSTOMER_PHONE,
                             address = CUSTOMER_ADDRESS,
                         ),
                         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(
@@ -503,6 +505,7 @@ class USBankAccountFormViewModelTest {
                 .isEqualTo(CUSTOMER_EMAIL)
             assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value)
                 .isEqualTo(CUSTOMER_PHONE)
+            assertThat(viewModel.phoneController.getCountryCode()).isEqualTo(CUSTOMER_COUNTRY)
             assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value)
                 .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
             assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
@@ -628,9 +631,8 @@ class USBankAccountFormViewModelTest {
     fun `Doesn't save for future use by default`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
-                formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
-                ),
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
             ),
         )
         assertThat(viewModel.saveForFutureUse.value).isFalse()
@@ -640,9 +642,8 @@ class USBankAccountFormViewModelTest {
     fun `Produces correct lastTextFieldIdentifier for default config`() = runTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
-                formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
-                ),
+                formArgs = defaultArgs.formArgs,
+                showCheckbox = true,
             ),
         )
 
@@ -664,9 +665,9 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                 ),
+                showCheckbox = true,
             ),
         )
 
@@ -689,13 +690,13 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
                 ),
+                showCheckbox = true,
             ),
         )
 
@@ -717,13 +718,13 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
                 ),
+                showCheckbox = true,
             ),
         )
 
@@ -745,13 +746,13 @@ class USBankAccountFormViewModelTest {
         val viewModel = createViewModel(
             args = defaultArgs.copy(
                 formArgs = defaultArgs.formArgs.copy(
-                    showCheckbox = true,
                     billingDetailsCollectionConfiguration = billingDetailsConfig,
                     billingDetails = PaymentSheet.BillingDetails(
                         name = "My myself and I",
                         email = "myself@me.com",
                     ),
                 ),
+                showCheckbox = true,
             ),
         )
 
@@ -769,7 +770,7 @@ class USBankAccountFormViewModelTest {
             )
         )
 
-        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         val currentScreenState =
             viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
@@ -784,7 +785,7 @@ class USBankAccountFormViewModelTest {
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
         )
 
-        verify(collectBankAccountLauncher).presentWithDeferredPayment(
+        verify(mockCollectBankAccountLauncher).presentWithDeferredPayment(
             publishableKey = any(),
             stripeAccountId = any(),
             configuration = any(),
@@ -805,7 +806,7 @@ class USBankAccountFormViewModelTest {
             )
         )
 
-        viewModel.collectBankAccountLauncher = collectBankAccountLauncher
+        viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         val currentScreenState =
             viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
@@ -820,7 +821,7 @@ class USBankAccountFormViewModelTest {
             currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
         )
 
-        verify(collectBankAccountLauncher).presentWithDeferredSetup(
+        verify(mockCollectBankAccountLauncher).presentWithDeferredSetup(
             publishableKey = any(),
             stripeAccountId = any(),
             configuration = any(),
@@ -1003,6 +1004,56 @@ class USBankAccountFormViewModelTest {
         ).isEqualTo(PaymentSelection.CustomerRequestedSave.NoRequest)
     }
 
+    @Test
+    fun `Uses CollectBankAccountLauncher for ACH when not in Instant Debits flow`() {
+        val viewModel = createViewModel().apply {
+            this.collectBankAccountLauncher = mockCollectBankAccountLauncher
+        }
+
+        viewModel.nameController.onValueChange("Some Name")
+        viewModel.emailController.onValueChange("email@email.com")
+
+        val currentState = viewModel.currentScreenState.value
+        viewModel.handlePrimaryButtonClick(currentState)
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.USBankAccount(
+                    name = "Some Name",
+                    email = "email@email.com",
+                )
+            ),
+        )
+    }
+
+    @Test
+    fun `Uses CollectBankAccountLauncher for Instant Debits when in Instant Debits flow`() {
+        val viewModel = createViewModel(
+            args = defaultArgs.copy(instantDebits = true),
+        ).apply {
+            this.collectBankAccountLauncher = mockCollectBankAccountLauncher
+        }
+
+        viewModel.emailController.onValueChange("email@email.com")
+
+        val currentState = viewModel.currentScreenState.value
+        viewModel.handlePrimaryButtonClick(currentState)
+
+        verify(mockCollectBankAccountLauncher).presentWithPaymentIntent(
+            publishableKey = any(),
+            stripeAccountId = anyOrNull(),
+            clientSecret = any(),
+            configuration = eq(
+                CollectBankAccountConfiguration.InstantDebits(
+                    email = "email@email.com",
+                )
+            ),
+        )
+    }
+
     private fun createViewModel(
         args: USBankAccountFormViewModel.Args = defaultArgs
     ): USBankAccountFormViewModel {
@@ -1015,7 +1066,6 @@ class USBankAccountFormViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
-            addressRepository = createAddressRepository(),
         )
     }
 
@@ -1036,7 +1086,10 @@ class USBankAccountFormViewModelTest {
         return CollectBankAccountResultInternal.Completed(
             CollectBankAccountResponseInternal(
                 intent = paymentIntent,
-                financialConnectionsSession = financialConnectionsSession
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
             )
         )
     }
@@ -1060,7 +1113,10 @@ class USBankAccountFormViewModelTest {
         return CollectBankAccountResultInternal.Completed(
             CollectBankAccountResponseInternal(
                 intent = paymentIntent,
-                financialConnectionsSession = financialConnectionsSession
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
             )
         )
     }
@@ -1070,7 +1126,9 @@ class USBankAccountFormViewModelTest {
         const val CUSTOMER_NAME = "Jenny Rose"
         const val CUSTOMER_EMAIL = "email@email.com"
         const val STRIPE_ACCOUNT_ID = "stripe_account_id"
-        const val CUSTOMER_PHONE = "+13105551234"
+        const val CUSTOMER_COUNTRY = "US"
+        const val CUSTOMER_PHONE_COUNTRY_CODE = "+1"
+        const val CUSTOMER_PHONE = "3105551234"
         val CUSTOMER_ADDRESS = PaymentSheet.Address(
             line1 = "123 Main Street",
             line2 = "Apt 456",
@@ -1080,11 +1138,4 @@ class USBankAccountFormViewModelTest {
             country = "US",
         )
     }
-}
-
-private fun createAddressRepository(): AddressRepository {
-    return AddressRepository(
-        resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        workContext = Dispatchers.Unconfined,
-    )
 }

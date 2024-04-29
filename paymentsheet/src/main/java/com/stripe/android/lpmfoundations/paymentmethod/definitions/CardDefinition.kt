@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -14,7 +15,6 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -63,7 +63,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
 
             add(
                 CardDetailsSectionElement(
-                    context = arguments.context,
+                    cardAccountRangeRepositoryFactory = arguments.cardAccountRangeRepositoryFactory,
                     initialValues = arguments.initialValues,
                     identifier = IdentifierSpec.Generic("card_details"),
                     collectName = billingDetailsCollectionConfiguration.collectsName,
@@ -78,12 +78,18 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
                     cardBillingElement(
                         billingDetailsCollectionConfiguration.address.toInternal(),
                         arguments.initialValues,
-                        arguments.addressRepository,
                         arguments.shippingValues,
                     )
                 )
             }
-            add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
+            if (
+                isSaveForFutureUseValueChangeable(
+                    code = PaymentMethod.Type.Card.code,
+                    metadata = metadata,
+                )
+            ) {
+                add(SaveForFutureUseElement(arguments.saveForFutureUseInitialValue, arguments.merchantName))
+            }
         }
     }
 }
@@ -108,7 +114,6 @@ internal fun PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectio
 private fun cardBillingElement(
     collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode,
     initialValues: Map<IdentifierSpec, String?>,
-    addressRepository: AddressRepository,
     shippingValues: Map<IdentifierSpec, String?>?,
 ): FormElement {
     val sameAsShippingElement =
@@ -122,7 +127,6 @@ private fun cardBillingElement(
             }
     val addressElement = CardBillingAddressElement(
         IdentifierSpec.Generic("credit_billing"),
-        addressRepository = addressRepository,
         countryCodes = CountryUtils.supportedBillingCountries,
         rawValuesMap = initialValues,
         sameAsShippingElement = sameAsShippingElement,
@@ -150,7 +154,9 @@ private fun contactInformationElement(
         ).takeIf { collectEmail },
         PhoneNumberElement(
             identifier = IdentifierSpec.Phone,
-            controller = PhoneNumberController(initialValues[IdentifierSpec.Phone] ?: "")
+            controller = PhoneNumberController.createPhoneNumberController(
+                initialValue = initialValues[IdentifierSpec.Phone] ?: "",
+            )
         ).takeIf { collectPhone },
     )
 

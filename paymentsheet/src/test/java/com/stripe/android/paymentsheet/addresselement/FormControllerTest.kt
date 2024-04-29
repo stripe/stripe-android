@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.addresselement
 
-import android.app.Application
 import androidx.annotation.StringRes
 import androidx.appcompat.view.ContextThemeWrapper
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -13,12 +13,10 @@ import com.stripe.android.ui.core.elements.CountrySpec
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.ui.core.elements.NameSpec
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.TextFieldController
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -37,12 +35,11 @@ class FormControllerTest {
 
     private val transformSpecToElements = TransformSpecToElements(
         UiDefinitionFactory.Arguments(
-            addressRepository = createAddressRepository(),
             initialValues = emptyMap(),
             amount = null,
             saveForFutureUseInitialValue = false,
             merchantName = "Merchant",
-            context = context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             shippingValues = null,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
@@ -102,11 +99,4 @@ class FormControllerTest {
             .firstOrNull {
                 it.label.first() == label
             }
-}
-
-private fun createAddressRepository(): AddressRepository {
-    return AddressRepository(
-        resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        workContext = Dispatchers.Unconfined,
-    )
 }

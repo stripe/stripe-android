@@ -143,6 +143,8 @@ private fun AccountPickerLoaded(
     LazyLayout(
         lazyListState = lazyListState,
         verticalArrangement = Arrangement.spacedBy(16.dp),
+        loading = payload is Loading,
+        showPillOnSlowLoad = true,
         body = {
             payload()
                 ?.takeIf { it.shouldSkipPane.not() }

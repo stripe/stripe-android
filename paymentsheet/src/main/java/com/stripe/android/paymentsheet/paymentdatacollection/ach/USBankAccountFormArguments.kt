@@ -28,7 +28,9 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
  * @param onError emitted when there is an error
  */
 internal class USBankAccountFormArguments(
+    val instantDebits: Boolean,
     val onBehalfOf: String?,
+    val showCheckbox: Boolean,
     val isCompleteFlow: Boolean,
     val isPaymentFlow: Boolean,
     val stripeIntentId: String?,

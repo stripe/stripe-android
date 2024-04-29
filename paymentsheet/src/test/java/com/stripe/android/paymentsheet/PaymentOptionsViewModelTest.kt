@@ -45,6 +45,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
@@ -70,7 +71,8 @@ internal class PaymentOptionsViewModelTest {
     private val customerRepository = mock<CustomerRepository>()
 
     @Before
-    fun before() {
+    @After
+    fun resetMainDispatcher() {
         Dispatchers.resetMain()
     }
 
@@ -116,6 +118,31 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                )
+            assertThat(prefsRepository.getSavedSelection(true, true))
+                .isEqualTo(SavedSelection.None)
+        }
+
+    @Test
+    fun `onUserSelection() when external payment method should set the view state to process result`() =
+        runTest {
+            val viewModel = createViewModel()
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION)
+                viewModel.onUserSelection()
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentOptionResult.Succeeded(
+                            EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
+                            listOf()
+                        )
+                    )
+                ensureAllEventsConsumed()
+            }
+
+            verify(eventReporter)
+                .onSelectPaymentOption(
+                    paymentSelection = EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION
                 )
             assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
@@ -180,6 +207,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(cards[1])
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
@@ -197,6 +225,7 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(selection)
 
         viewModel.removePaymentMethod(selection.paymentMethod)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.selection.value).isNull()
     }
@@ -211,6 +240,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(paymentMethod)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value).isEmpty()
         assertThat(viewModel.primaryButtonUiState.value).isNull()
@@ -462,6 +492,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.paymentOptionResult.test {
             // Simulate user removing the selected payment method
             viewModel.removePaymentMethod(selection.paymentMethod)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             viewModel.onUserCancel()
 
@@ -805,6 +836,8 @@ internal class PaymentOptionsViewModelTest {
             CardBrand.Visa,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
+        private val EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION =
+            PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_CARD,
             CardBrand.Discover,

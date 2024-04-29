@@ -73,11 +73,10 @@ internal class TransformSpecToElements(
                 is CountrySpec -> it.transform(arguments.initialValues)
                 is AddressSpec -> it.transform(
                     arguments.initialValues,
-                    arguments.addressRepository,
                     arguments.shippingValues
                 )
                 is SepaMandateTextSpec -> it.transform(arguments.merchantName)
-                is PlaceholderSpec -> error("Placeholders should be processed before calling transform.")
+                is PlaceholderSpec -> null // Placeholders should be processed before calling transform.
                 is CashAppPayMandateTextSpec -> it.transform(arguments.merchantName)
                 is KlarnaMandateTextSpec -> it.transform(arguments.merchantName)
             }

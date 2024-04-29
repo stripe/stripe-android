@@ -7,7 +7,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
-import com.stripe.android.paymentsheet.forms.FormViewModel
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -17,6 +17,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.elements.FormElement
 
 internal sealed class CustomerSheetViewState(
     open val savedPaymentMethods: List<PaymentMethod>,
@@ -27,35 +28,13 @@ internal sealed class CustomerSheetViewState(
     open val cbcEligibility: CardBrandChoiceEligibility,
     open val allowsRemovalOfLastSavedPaymentMethod: Boolean,
 ) {
-
-    private fun isModifiable(paymentMethod: PaymentMethod): Boolean {
-        val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
-            available.size > 1
-        } ?: false
-
-        return cbcEligibility is CardBrandChoiceEligibility.Eligible && hasMultipleNetworks
-    }
-
-    private val canEdit: Boolean
-        get() {
-            return if (allowsRemovalOfLastSavedPaymentMethod) {
-                savedPaymentMethods.isNotEmpty()
-            } else {
-                if (savedPaymentMethods.size == 1) {
-                    isModifiable(savedPaymentMethods.first())
-                } else {
-                    savedPaymentMethods.size > 1
-                }
-            }
-        }
-
     val topBarState: PaymentSheetTopBarState
         get() = PaymentSheetTopBarStateFactory.create(
             screen = screen,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,
             isEditing = isEditing,
-            canEdit = canEdit,
+            canEdit = canEdit(allowsRemovalOfLastSavedPaymentMethod, savedPaymentMethods, cbcEligibility),
         )
 
     fun shouldDisplayDismissConfirmationModal(
@@ -65,7 +44,9 @@ internal sealed class CustomerSheetViewState(
             paymentMethodCode == PaymentMethod.Type.USBankAccount.code &&
             isFinancialConnectionsAvailable() &&
             bankAccountResult is CollectBankAccountResultInternal.Completed &&
-            bankAccountResult.response.financialConnectionsSession.paymentAccount is FinancialConnectionsAccount
+            bankAccountResult.response.usBankAccountData
+                ?.financialConnectionsSession
+                ?.paymentAccount is FinancialConnectionsAccount
     }
 
     data class Loading(
@@ -111,7 +92,8 @@ internal sealed class CustomerSheetViewState(
     data class AddPaymentMethod(
         val paymentMethodCode: PaymentMethodCode,
         val supportedPaymentMethods: List<SupportedPaymentMethod>,
-        val formViewData: FormViewModel.ViewData,
+        val formFieldValues: FormFieldValues?,
+        val formElements: List<FormElement>,
         val formArguments: FormArguments,
         val usBankAccountFormArguments: USBankAccountFormArguments,
         val selectedPaymentMethod: SupportedPaymentMethod,
@@ -158,4 +140,28 @@ internal sealed class CustomerSheetViewState(
         cbcEligibility = cbcEligibility,
         allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
     )
+}
+
+internal fun canEdit(
+    allowsRemovalOfLastSavedPaymentMethod: Boolean,
+    savedPaymentMethods: List<PaymentMethod>,
+    cbcEligibility: CardBrandChoiceEligibility,
+): Boolean {
+    return if (allowsRemovalOfLastSavedPaymentMethod) {
+        savedPaymentMethods.isNotEmpty()
+    } else {
+        if (savedPaymentMethods.size == 1) {
+            isModifiable(savedPaymentMethods.first(), cbcEligibility)
+        } else {
+            savedPaymentMethods.size > 1
+        }
+    }
+}
+
+private fun isModifiable(paymentMethod: PaymentMethod, cbcEligibility: CardBrandChoiceEligibility): Boolean {
+    val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->
+        available.size > 1
+    } ?: false
+
+    return cbcEligibility is CardBrandChoiceEligibility.Eligible && hasMultipleNetworks
 }

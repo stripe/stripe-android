@@ -4,14 +4,10 @@ import androidx.compose.material.Colors
 import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
-import com.stripe.android.link.ui.LinkUi
 
-private val LinkTeal = Color(0xFF33DDB3)
-private val LinkTeal2024 = Color(0xFF00D66F)
-private val ActionLightGreen = Color(0xFF1AC59B)
-private val ActionLightGreen2024 = Color(0xFF00A355)
-private val ButtonLabel = Color(0xFF1D3944)
-private val ButtonLabel2024 = Color(0xFF011E0F)
+private val LinkTeal = Color(0xFF00D66F)
+private val ActionLightGreen = Color(0xFF00A355)
+private val ButtonLabel = Color(0xFF011E0F)
 private val ErrorText = Color(0xFFFF2F4C)
 private val ErrorBackground = Color(0x2EFE87A1)
 
@@ -39,12 +35,12 @@ internal object LinkThemeConfig {
     }
 
     private val colorsLight = LinkColors(
-        buttonLabel = if (LinkUi.useNewBrand) ButtonLabel2024 else ButtonLabel,
-        actionLabelLight = if (LinkUi.useNewBrand) ActionLightGreen2024 else ActionLightGreen,
+        buttonLabel = ButtonLabel,
+        actionLabelLight = ActionLightGreen,
         errorText = ErrorText,
         errorComponentBackground = ErrorBackground,
         materialColors = lightColors(
-            primary = if (LinkUi.useNewBrand) LinkTeal2024 else LinkTeal,
+            primary = LinkTeal,
             secondary = LightFill,
             background = LightBackground,
             surface = LightBackground,
@@ -55,7 +51,7 @@ internal object LinkThemeConfig {
 
     private val colorsDark = colorsLight.copy(
         materialColors = darkColors(
-            primary = if (LinkUi.useNewBrand) LinkTeal2024 else LinkTeal,
+            primary = LinkTeal,
             secondary = DarkFill,
             background = DarkBackground,
             surface = DarkBackground,

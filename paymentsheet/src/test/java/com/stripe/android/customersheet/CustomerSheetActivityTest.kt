@@ -15,10 +15,10 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.utils.CustomerSheetTestHelper.createViewModel
 import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -323,19 +323,15 @@ internal class CustomerSheetActivityTest {
         val card = LpmRepositoryTestHelpers.card
         val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
             code = "card",
-            context = context,
-            paymentMethodCreateParams = null,
-            paymentMethodExtraParams = null,
+            uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create()
         )!!
         return CustomerSheetViewState.AddPaymentMethod(
             paymentMethodCode = paymentMethodCode,
             supportedPaymentMethods = listOf(card),
-            formViewData = FormViewModel.ViewData(
-                elements = cardFormElements,
-            ),
+            formFieldValues = null,
+            formElements = cardFormElements,
             formArguments = FormArguments(
                 paymentMethodCode = PaymentMethod.Type.Card.code,
-                showCheckbox = false,
                 cbcEligibility = CardBrandChoiceEligibility.Ineligible,
                 merchantName = ""
             ),

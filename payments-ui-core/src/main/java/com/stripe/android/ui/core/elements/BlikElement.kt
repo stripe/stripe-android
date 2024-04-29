@@ -6,8 +6,8 @@ import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 class BlikElement(
@@ -17,8 +17,8 @@ class BlikElement(
     )
 ) : SectionSingleFieldElement(identifier = identifier) {
 
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return controller.formFieldValue.map { entry ->
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return controller.formFieldValue.mapAsStateFlow { entry ->
             listOf(identifier to entry)
         }
     }

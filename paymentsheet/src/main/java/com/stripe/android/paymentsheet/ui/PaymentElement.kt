@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -24,7 +23,8 @@ import com.stripe.android.link.ui.inline.LinkInlineSignup
 import com.stripe.android.link.ui.inline.LinkOptionalInlineSignup
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethod.Type.Link
+import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -33,7 +33,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFo
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.image.StripeImageLoader
-import kotlinx.coroutines.flow.Flow
 import java.util.UUID
 
 @Composable
@@ -44,7 +43,6 @@ internal fun PaymentElement(
     formElements: List<FormElement>,
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
-    showCheckboxFlow: Flow<Boolean>,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
@@ -81,7 +79,6 @@ internal fun PaymentElement(
             enabled = enabled,
             selectedItem = selectedItem,
             formElements = formElements,
-            showCheckboxFlow = showCheckboxFlow,
             formArguments = formArguments,
             usBankAccountFormArguments = usBankAccountFormArguments,
             horizontalPadding = horizontalPadding,
@@ -104,7 +101,6 @@ private fun FormElement(
     enabled: Boolean,
     selectedItem: SupportedPaymentMethod,
     formElements: List<FormElement>,
-    showCheckboxFlow: Flow<Boolean>,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
     horizontalPadding: Dp,
@@ -117,7 +113,6 @@ private fun FormElement(
 
     Box(
         modifier = Modifier
-            .animateContentSize()
             .pointerInput("AddPaymentMethod") {
                 awaitEachGesture {
                     val gesture = awaitPointerEvent()
@@ -134,7 +129,7 @@ private fun FormElement(
                 }
             }
     ) {
-        if (selectedItem.code == PaymentMethod.Type.USBankAccount.code) {
+        if (selectedItem.code == USBankAccount.code || selectedItem.code == Link.code) {
             USBankAccountForm(
                 formArgs = formArguments,
                 usBankAccountFormArgs = usBankAccountFormArguments,
@@ -146,7 +141,6 @@ private fun FormElement(
                 args = formArguments,
                 enabled = enabled,
                 onFormFieldValuesChanged = onFormFieldValuesChanged,
-                showCheckboxFlow = showCheckboxFlow,
                 formElements = formElements,
                 modifier = Modifier.padding(horizontal = horizontalPadding)
             )

@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -65,12 +67,15 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback {
             finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
         }
-        setContent { Loading() }
+        setContent {
+            val state by viewModel.stateFlow.collectAsState()
+            Loading(state.isInstantDebits)
+        }
     }
 
     @Composable
-    private fun Loading() {
-        FinancialConnectionsTheme {
+    private fun Loading(instantDebits: Boolean) {
+        FinancialConnectionsTheme(instantDebits = instantDebits) {
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center

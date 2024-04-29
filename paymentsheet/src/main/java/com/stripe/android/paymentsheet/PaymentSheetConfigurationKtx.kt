@@ -11,28 +11,43 @@ import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import java.security.InvalidParameterException
+import java.lang.IllegalArgumentException
 
 internal fun PaymentSheet.Configuration.validate() {
     // These are not localized as they are not intended to be displayed to a user.
     when {
         merchantDisplayName.isBlank() -> {
-            throw InvalidParameterException(
+            throw IllegalArgumentException(
                 "When a Configuration is passed to PaymentSheet," +
                     " the Merchant display name cannot be an empty string."
             )
         }
         customer?.id?.isBlank() == true -> {
-            throw InvalidParameterException(
+            throw IllegalArgumentException(
                 "When a CustomerConfiguration is passed to PaymentSheet," +
                     " the Customer ID cannot be an empty string."
             )
         }
-        customer?.ephemeralKeySecret?.isBlank() == true -> {
-            throw InvalidParameterException(
-                "When a CustomerConfiguration is passed to PaymentSheet, " +
-                    "the ephemeralKeySecret cannot be an empty string."
-            )
+    }
+
+    customer?.accessType?.let { customerAccessType ->
+        when (customerAccessType) {
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
+                    throw IllegalArgumentException(
+                        "When a CustomerConfiguration is passed to PaymentSheet, " +
+                            "the ephemeralKeySecret cannot be an empty string."
+                    )
+                }
+            }
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                if (customerAccessType.customerSessionClientSecret.isBlank()) {
+                    throw IllegalArgumentException(
+                        "When a CustomerConfiguration is passed to PaymentSheet, " +
+                            "the customerSessionClientSecret cannot be an empty string."
+                    )
+                }
+            }
         }
     }
 }

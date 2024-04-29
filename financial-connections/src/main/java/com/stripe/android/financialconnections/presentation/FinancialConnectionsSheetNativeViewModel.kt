@@ -12,7 +12,6 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavDestination
 import androidx.navigation.compose.NavHost
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.FinancialConnections
@@ -43,11 +42,9 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.UNEXPECTED_ERROR
 import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
 import com.stripe.android.financialconnections.navigation.destination
-import com.stripe.android.financialconnections.navigation.pane
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarState
 import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
@@ -377,15 +374,22 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
         }
     }
 
-    fun onBackgrounded(currentDestination: NavDestination?, backgrounded: Boolean) {
-        viewModelScope.launch {
-            eventTracker.track(
-                AppBackgrounded(
-                    pane = currentDestination?.pane ?: UNEXPECTED_ERROR,
-                    backgrounded = backgrounded
-                )
+    fun onBackgrounded() {
+        trackBackgroundStateChanged(backgrounded = true)
+    }
+
+    fun onForegrounded() {
+        trackBackgroundStateChanged(backgrounded = false)
+    }
+
+    private fun trackBackgroundStateChanged(backgrounded: Boolean) {
+        val pane = currentPane.value
+        eventTracker.track(
+            AppBackgrounded(
+                pane = pane,
+                backgrounded = backgrounded,
             )
-        }
+        )
     }
 
     override fun updateTopAppBarElevation(isElevated: Boolean) {

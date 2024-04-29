@@ -77,7 +77,6 @@ internal class FormElementsBuilder(
             if (requireBillingAddressCollection) {
                 val addressElement = AddressSpec(allowedCountryCodes = availableCountries).transform(
                     initialValues = arguments.initialValues,
-                    addressRepository = arguments.addressRepository,
                     shippingValues = arguments.shippingValues,
                 )
                 if (addressElement != null) {

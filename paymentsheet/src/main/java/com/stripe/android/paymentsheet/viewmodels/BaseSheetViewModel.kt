@@ -5,6 +5,7 @@ import androidx.annotation.StringRes
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
@@ -12,6 +13,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
+import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
@@ -49,14 +51,13 @@ import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
@@ -65,7 +66,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.io.Closeable
-import java.lang.IllegalStateException
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -86,6 +86,8 @@ internal abstract class BaseSheetViewModel(
     private val headerTextFactory: HeaderTextFactory,
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
+
+    private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
     internal val customerConfig = config.customer
     internal val merchantName = config.merchantDisplayName
@@ -129,8 +131,8 @@ internal abstract class BaseSheetViewModel(
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
 
-    internal val headerText: Flow<Int?> by lazy {
-        combine(
+    internal val headerText: StateFlow<Int?> by lazy {
+        combineAsStateFlow(
             currentScreen,
             walletsState,
             supportedPaymentMethodsFlow,
@@ -219,9 +221,7 @@ internal abstract class BaseSheetViewModel(
     private fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
-        }?.displayNameResource?.let {
-            getApplication<Application>().getString(it)
-        }.orEmpty()
+        }?.displayName?.resolve(getApplication()).orEmpty()
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
@@ -232,7 +232,7 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentOptionsState(),
         )
 
-    private val canEdit: StateFlow<Boolean> = paymentOptionsState.map { state ->
+    private val canEdit: StateFlow<Boolean> = paymentOptionsState.mapAsStateFlow { state ->
         val paymentMethods = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
         if (config.allowsRemovalOfLastSavedPaymentMethod) {
             paymentMethods.isNotEmpty()
@@ -244,23 +244,15 @@ internal abstract class BaseSheetViewModel(
                 paymentMethods.size > 1
             }
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = false,
-    )
+    }
 
-    val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
+    val topBarState: StateFlow<PaymentSheetTopBarState> = combineAsStateFlow(
         currentScreen,
-        paymentMethodMetadata.map { it?.stripeIntent?.isLiveMode ?: true },
+        paymentMethodMetadata.mapAsStateFlow { it?.stripeIntent?.isLiveMode ?: true },
         processing,
         editing,
         canEdit,
         PaymentSheetTopBarStateFactory::create,
-    ).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = PaymentSheetTopBarStateFactory.createDefault(),
     )
 
     val linkSignupMode: StateFlow<LinkSignupMode?> = linkHandler.linkSignupMode.stateIn(
@@ -490,7 +482,7 @@ internal abstract class BaseSheetViewModel(
     fun removePaymentMethod(paymentMethod: PaymentMethod) {
         val paymentMethodId = paymentMethod.id ?: return
 
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             removeDeletedPaymentMethodFromState(paymentMethodId)
             removePaymentMethodInternal(paymentMethodId)
         }
@@ -593,7 +585,7 @@ internal abstract class BaseSheetViewModel(
         val result = removePaymentMethodInternal(paymentMethodId)
 
         if (result.isSuccess) {
-            viewModelScope.launch {
+            viewModelScope.launch(workContext) {
                 onUserBack()
                 delay(PaymentMethodRemovalDelayMillis)
                 removeDeletedPaymentMethodFromState(paymentMethodId = paymentMethodId)
@@ -673,7 +665,7 @@ internal abstract class BaseSheetViewModel(
     abstract val shouldCompleteLinkFlowInline: Boolean
 
     private fun payWithLinkInline(userInput: UserInput?) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             linkHandler.payWithLinkInline(
                 userInput = userInput,
                 paymentSelection = selection.value,
@@ -695,9 +687,11 @@ internal abstract class BaseSheetViewModel(
 
         return paymentMethodMetadata.value?.formElementsForCode(
             code = code,
-            context = getApplication(),
-            paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
-            paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+            uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
+                paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+            ),
         ) ?: emptyList()
     }
 
@@ -708,7 +702,6 @@ internal abstract class BaseSheetViewModel(
         return FormArgumentsFactory.create(
             paymentMethod = selectedItem,
             metadata = metadata,
-            customerConfig = config.customer,
         )
     }
 

@@ -34,7 +34,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         state: PaymentSheetState.Full,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
-        val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodDefinitions().map { it.type.code }
+        val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
 
         return when (selection) {
             is PaymentSelection.New -> {
@@ -55,6 +55,9 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             }
             is PaymentSelection.Link -> {
                 state.linkState != null
+            }
+            is PaymentSelection.ExternalPaymentMethod -> {
+                state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)
             }
         }
     }

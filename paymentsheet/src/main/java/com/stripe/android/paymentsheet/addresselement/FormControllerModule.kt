@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.addresselement
 
 import android.content.Context
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.injection.INITIAL_VALUES
 import com.stripe.android.core.injection.SHIPPING_VALUES
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
@@ -10,7 +11,6 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import dagger.Module
 import dagger.Provides
@@ -20,7 +20,6 @@ import javax.inject.Named
 internal object FormControllerModule {
     @Provides
     fun provideTransformSpecToElements(
-        addressRepository: AddressRepository,
         context: Context,
         merchantName: String,
         stripeIntent: StripeIntent?,
@@ -28,7 +27,6 @@ internal object FormControllerModule {
         @Named(SHIPPING_VALUES) shippingValues: Map<IdentifierSpec, String?>?
     ) = TransformSpecToElements(
         arguments = UiDefinitionFactory.Arguments(
-            addressRepository = addressRepository,
             initialValues = initialValues,
             shippingValues = shippingValues,
             amount = (stripeIntent as? PaymentIntent)?.let {
@@ -41,7 +39,7 @@ internal object FormControllerModule {
             },
             saveForFutureUseInitialValue = false,
             merchantName = merchantName,
-            context = context,
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context.applicationContext),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(),
             requiresMandate = false,

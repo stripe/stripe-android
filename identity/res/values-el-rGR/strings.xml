@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Δεν ήταν δυνατή η καταγραφή εικόνας</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Οι λεπτομέρειες δεν είναι ορατές</string>
+  <string name="stripe_decrease_lighting_2">Μεταβείτε σε έναν σκοτεινότερο χώρο</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">εικονίδιο κάμερας</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Η ταυτότητα δεν είναι εστιασμένη</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Οι λεπτομέρειες δεν είναι ορατές</string>
+  <string name="stripe_reduce_glare_2">Δοκιμάστε να μειώσετε την αντανάκλαση για να είναι ορατή η ταυτότητα</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Λήψη φωτογραφιών εκ νέου</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

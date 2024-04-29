@@ -4,7 +4,6 @@ import android.os.Parcelable
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
 import kotlinx.parcelize.Parcelize
-import java.security.InvalidParameterException
 
 /**
  * Represents the client secret for a [SetupIntent] or [PaymentIntent]
@@ -23,7 +22,7 @@ internal data class PaymentIntentClientSecret(
 ) : ClientSecret() {
     override fun validate() {
         if (value.isBlank()) {
-            throw InvalidParameterException(
+            throw IllegalArgumentException(
                 "The PaymentIntent client_secret cannot be an empty string."
             )
         }
@@ -39,7 +38,7 @@ internal data class SetupIntentClientSecret(
 ) : ClientSecret() {
     override fun validate() {
         if (value.isBlank()) {
-            throw InvalidParameterException(
+            throw IllegalArgumentException(
                 "The SetupIntent client_secret cannot be an empty string."
             )
         }

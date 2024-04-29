@@ -4,25 +4,27 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-object FeatureFlags
+object FeatureFlags {
+    val instantDebits = FeatureFlag()
+}
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class FeatureFlag {
 
-    private var overrideInTest: Boolean? = null
+    private var overrideEnabledValue: Boolean? = null
 
     val isEnabled: Boolean
         get() = if (BuildConfig.DEBUG) {
-            overrideInTest ?: true
+            overrideEnabledValue ?: false
         } else {
             false
         }
 
     fun setEnabled(isEnabled: Boolean) {
-        overrideInTest = isEnabled
+        overrideEnabledValue = isEnabled
     }
 
     fun reset() {
-        overrideInTest = null
+        overrideEnabledValue = null
     }
 }

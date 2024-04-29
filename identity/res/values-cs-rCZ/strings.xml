@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Nebylo možné pořídit obrázek</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detaily nejsou viditelné</string>
+  <string name="stripe_decrease_lighting_2">Přesuňte se do tmavší oblasti.</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">ikona kamery</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Doklad není zaostřen</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaily nejsou viditelné</string>
+  <string name="stripe_reduce_glare_2">Zkuste snížit jas a zviditelnit doklad.</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Znovu pořídit fotografie</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

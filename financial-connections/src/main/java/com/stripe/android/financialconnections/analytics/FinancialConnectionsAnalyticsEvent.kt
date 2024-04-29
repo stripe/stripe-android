@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.analytics
 
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree.analyticsValue
 import com.stripe.android.financialconnections.domain.ConfirmVerification.OTPError
 import com.stripe.android.financialconnections.exception.FinancialConnectionsError
 import com.stripe.android.financialconnections.exception.WebAuthFlowFailedException
@@ -24,7 +25,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         "pane.launched",
         mapOf(
             "referrer_pane" to referrer?.value,
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -34,7 +35,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         if (backgrounded) "mobile.app_entered_background" else "mobile.app_entered_foreground",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -43,7 +44,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         "pane.loaded",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -52,7 +53,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.nav_bar.back",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -61,7 +62,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.nav_bar.close",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -84,7 +85,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.data_access.learn_more",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -93,7 +94,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.disconnect_link",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -103,7 +104,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = eventName,
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -119,7 +120,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
                 .toMap()
                 .plus(
                     mapOf(
-                        "pane" to pane.value,
+                        "pane" to pane.analyticsValue,
                         "result_count" to institutionIds.size.toString(),
                         "duration" to duration.toString(),
                     )
@@ -137,7 +138,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
                 .mapIndexed { index, id -> "institution_ids[$index]" to id }
                 .toMap()
                 .plus(
-                    mapOf("pane" to pane.value)
+                    mapOf("pane" to pane.analyticsValue)
                 )
             ).filterNotNullValues()
     )
@@ -149,7 +150,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = if (fromFeatured) "search.featured_institution_selected" else "search.search_result_selected",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
             "institution_id" to institutionId
         ).filterNotNullValues()
     )
@@ -162,7 +163,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "search.succeeded",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
             "query" to query,
             "duration" to duration.toString(),
             "result_count" to resultCount.toString()
@@ -203,7 +204,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "account_picker.accounts_submitted",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
             "account_ids" to accountIds.joinToString(" "),
             "is_skip_account_selection" to isSkipAccountSelection.toString(),
         ).filterNotNullValues()
@@ -236,7 +237,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.link_accounts",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -245,7 +246,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "networking.new_consumer",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -254,7 +255,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "networking.returning_consumer",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -263,7 +264,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "networking.verification.success",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -272,7 +273,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "networking.verification.success_no_accounts",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -282,7 +283,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "networking.verification.error",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
             "error" to error.value,
         ).filterNotNullValues()
     ) {
@@ -301,7 +302,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "networking.verification.step_up.success",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -311,7 +312,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "networking.verification.step_up.error",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
             "error" to error.value,
         ).filterNotNullValues()
     ) {
@@ -328,7 +329,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.done",
         mapOf(
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
         ).filterNotNullValues()
     )
 
@@ -345,7 +346,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             else -> "error.unexpected"
         },
         params = (
-            mapOf("pane" to pane.value)
+            mapOf("pane" to pane.analyticsValue)
                 .plus(exception.toEventParams(extraMessage))
                 .filterNotNullValues()
             )
@@ -393,7 +394,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         pane: Pane
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.prepane.continue",
-        mapOf("pane" to pane.value)
+        mapOf("pane" to pane.analyticsValue)
     )
 
     class AuthSessionOpened(
@@ -405,11 +406,19 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         "auth_session.opened",
         mapOf(
             "auth_session_id" to id,
-            "pane" to pane.value,
+            "pane" to pane.analyticsValue,
             "flow" to (flow ?: "unknown"),
             "browser" to (defaultBrowser ?: "unknown")
         ).filterNotNullValues()
     )
+
+    internal val Pane.analyticsValue
+        get() = when (this) {
+            // We want to log partner_auth regardless of the pane being shown full-screen or as a drawer.
+            Pane.PARTNER_AUTH_DRAWER,
+            Pane.PARTNER_AUTH -> Pane.PARTNER_AUTH.value
+            else -> value
+        }
 
     override fun toString(): String {
         return "FinancialConnectionsEvent(name='$name', params=$params)"

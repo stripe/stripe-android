@@ -9,7 +9,7 @@
     <ID>LargeClass:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest</ID>
     <ID>LargeClass:IdentityViewModel.kt$IdentityViewModel : AndroidViewModel</ID>
     <ID>LargeClass:IdentityViewModelTest.kt$IdentityViewModelTest</ID>
-    <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, identityViewModel: IdentityViewModel, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
+    <ID>LongMethod:AddressSection.kt$@Composable internal fun AddressSection( enabled: Boolean, addressCountries: List&lt;Country>, addressNotListedText: String, navController: NavController, onAddressCollected: (Resource&lt;RequiredInternationalAddress>) -> Unit )</ID>
     <ID>LongMethod:ConfirmationScreen.kt$@Composable internal fun ConfirmationScreen( navController: NavController, identityViewModel: IdentityViewModel, verificationFlowFinishable: VerificationFlowFinishable )</ID>
     <ID>LongMethod:ConsentScreen.kt$@Composable private fun SuccessUI( merchantLogoUri: Uri, consentPage: VerificationPageStaticContentConsentPage, bottomSheets: Map&lt;String, VerificationPageStaticContentBottomSheetContent>?, visitedIndividualWelcomePage: Boolean, onConsentAgreed: () -> Unit, onConsentDeclined: () -> Unit )</ID>
     <ID>LongMethod:ConsentWelcomeHeader.kt$@Composable internal fun ConsentWelcomeHeader( modifier: Modifier = Modifier, merchantLogoUri: Uri, title: String?, showLogos: Boolean = true )</ID>
@@ -27,7 +27,7 @@
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadDocumentScanSuccessResult(isFront: Boolean, isLegacy: Boolean)</ID>
     <ID>LongMethod:IdentityViewModelTest.kt$IdentityViewModelTest$private fun testUploadSelfieScanSuccessResult( selfie: FaceDetectorTransitioner.Selfie, isHighRes: Boolean )</ID>
     <ID>LongMethod:IndividualScreen.kt$@Composable internal fun IndividualScreen( navController: NavController, identityViewModel: IdentityViewModel )</ID>
-    <ID>LongMethod:IndividualScreen.kt$@Composable private fun IndividualScreenBodyContent( enabled: Boolean, navController: NavController, identityViewModel: IdentityViewModel, individualPage: VerificationPageStaticContentIndividualPage, missing: Set&lt;Requirement>, collectedStates: IndividualCollectedStates, onUpdateLoadingButtonState: (LoadingButtonState) -> Unit )</ID>
+    <ID>LongMethod:IndividualScreen.kt$@Composable private fun IndividualScreenBodyContent( enabled: Boolean, navController: NavController, individualPage: VerificationPageStaticContentIndividualPage, missing: Set&lt;Requirement>, collectedStates: IndividualCollectedStates, onUpdateLoadingButtonState: (LoadingButtonState) -> Unit )</ID>
     <ID>LongMethod:OTPScreen.kt$@Composable internal fun OTPScreen( navController: NavController, identityViewModel: IdentityViewModel, otpViewModelFactory: ViewModelProvider.Factory = OTPViewModel.Factory( identityRepository = identityViewModel.identityRepository, verificationArgs = identityViewModel.verificationArgs ) )</ID>
     <ID>LongMethod:OTPScreen.kt$@Composable private fun OTPViewStateEffect( viewState: OTPViewState?, navController: NavController, identityViewModel: IdentityViewModel, viewModel: OTPViewModel, focusRequester: FocusRequester )</ID>
     <ID>LongMethod:SelfieScreen.kt$@Composable internal fun SelfieScanScreen( navController: NavController, identityViewModel: IdentityViewModel, selfieScanViewModel: SelfieScanViewModel, )</ID>
@@ -56,10 +56,6 @@
     <ID>MatchingDeclarationName:ComposeLoadingButton.kt$LoadingButtonState</ID>
     <ID>MaxLineLength:DefaultIdentityRepositoryTest.kt$DefaultIdentityRepositoryTest$fun</ID>
     <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$fun</ID>
-    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION + 1).milliseconds)</ID>
-    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_SATISFIED_DURATION - 1).milliseconds)</ID>
-    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION + 1).milliseconds)</ID>
-    <ID>MaxLineLength:IDDetectorTransitionerTest.kt$IDDetectorTransitionerTest$whenever(mockReachAtClockMark.elapsedSince()).thenReturn((DEFAULT_DISPLAY_UNSATISFIED_DURATION - 1).milliseconds)</ID>
     <ID>MaxLineLength:InjectableActivityScenario.kt$InjectableActivityScenario$?:</ID>
     <ID>MaxLineLength:VerificationPage.kt$VerificationPage$* A VerificationPage contains the static content and initial state that is required for Stripe Identity's native mobile SDKs to render the verification flow.</ID>
     <ID>MaxLineLength:VerificationPageData.kt$VerificationPageData$* VerificationPageData contains the state of a verification, including what information needs to be collected to complete the verification flow.</ID>

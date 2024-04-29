@@ -1,7 +1,5 @@
 package com.stripe.android.lpmfoundations.luxe
 
-import android.app.Application
-import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
@@ -13,11 +11,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class LpmRepositoryTest {
-    private val lpmRepository = LpmRepository(
-        LpmRepository.LpmRepositoryArguments(
-            resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        )
-    )
+    private val lpmRepository = LpmRepository()
 
     private val paymentIntentWithShipping = PaymentIntentFactory.create(
         paymentMethodTypes = listOf("card", "afterpay_clearpay", "affirm"),

@@ -7,9 +7,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.plusAssign
@@ -106,7 +105,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
@@ -146,7 +144,7 @@ internal class DefaultFlowControllerTest {
 
     private val prefsRepository = FakePrefsRepository()
 
-    private val lifeCycleOwner = mock<LifecycleOwner>()
+    private val lifeCycleOwner = TestLifecycleOwner()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -226,10 +224,7 @@ internal class DefaultFlowControllerTest {
         whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
 
-        // set lifecycle to CREATED to trigger creation of payment launcher object within flowController.
-        val lifecycle = LifecycleRegistry(lifeCycleOwner)
-        lifecycle.currentState = Lifecycle.State.CREATED
-        whenever(lifeCycleOwner.lifecycle).thenReturn(lifecycle)
+        lifeCycleOwner.currentState = Lifecycle.State.RESUMED
     }
 
     @AfterTest
@@ -431,9 +426,32 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `presentPaymentOptions() without successful init should fail`() {
         val flowController = createFlowController()
-        assertFailsWith<IllegalStateException> {
-            flowController.presentPaymentOptions()
-        }
+
+        verifyNoInteractions(paymentResultCallback)
+        flowController.presentPaymentOptions()
+        val resultCaptor = argumentCaptor<PaymentSheetResult.Failed>()
+        verify(paymentResultCallback).onPaymentSheetResult(resultCaptor.capture())
+
+        assertThat(resultCaptor.firstValue.error).hasMessageThat()
+            .startsWith("FlowController must be successfully initialized")
+    }
+
+    @Test
+    fun `presentPaymentOptions() with activity destroyed should fail`() = runTest {
+        val flowController = createFlowController()
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+        )
+        lifeCycleOwner.currentState = Lifecycle.State.DESTROYED
+        whenever(paymentOptionActivityLauncher.launch(any(), any())).thenThrow(IllegalStateException("Boom"))
+        verifyNoInteractions(paymentResultCallback)
+
+        flowController.presentPaymentOptions()
+        val resultCaptor = argumentCaptor<PaymentSheetResult.Failed>()
+        verify(paymentResultCallback).onPaymentSheetResult(resultCaptor.capture())
+
+        assertThat(resultCaptor.firstValue.error).hasMessageThat()
+            .isEqualTo("The host activity is not in a valid state (DESTROYED).")
     }
 
     @Test

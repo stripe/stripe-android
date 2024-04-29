@@ -1,11 +1,21 @@
 # CHANGELOG
 
 ## XX.XX.XX - 2023-XX-XX
+
+## 20.41.1 - 2024-04-22
+
+### PaymentSheet
+* [FIXED][8297](https://github.com/stripe/stripe-android/pull/8297) Improve `PaymentSheet` and `CustomerSheet` loading user experience.
+
+## 20.41.0 - 2024-04-15
+
 ### PaymentSheet
 * [CHANGED][8231](https://github.com/stripe/stripe-android/pull/8231) Separator text under Link/Google Pay button from "Or pay using"/"Or pay with a card" to "Or use"/"Or use a card" when using SetupIntent.
 
 ### Payments
 * [FIXED][8243](https://github.com/stripe/stripe-android/pull/8243) Fixed an issue with R8 when depending directly on `payments-core`.
+* [FIXED][8259](https://github.com/stripe/stripe-android/pull/8258) Fixed an issue with retrievePossibleBrands returning incorrect brands for Cartes Bancaires test cards.
+* [ADDED][8257](https://github.com/stripe/stripe-android/pull/8257) Added support for Alma to API bindings.
 
 ## 20.40.4 - 2024-04-04
 

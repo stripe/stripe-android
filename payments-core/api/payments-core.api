@@ -2728,6 +2728,22 @@ public final class com/stripe/android/model/ElementsSession$Creator : android/os
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/model/ElementsSession$Customer$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSession$Customer;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSession$Customer;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/model/ElementsSession$Customer$Session$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSession$Customer$Session;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/model/ElementsSession$Customer$Session;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/model/ElementsSession$LinkSettings$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/model/ElementsSession$LinkSettings;
@@ -3961,6 +3977,9 @@ public final class com/stripe/android/model/PaymentMethodCreateParams : android/
 	public static final fun createAfterpayClearpay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createAlipay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createAlipay (Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createAlma ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createAlma (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static final fun createAlma (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createAmazonPay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createAmazonPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static final fun createAmazonPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -4200,6 +4219,10 @@ public final class com/stripe/android/model/PaymentMethodCreateParams$Companion 
 	public final fun createAlipay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createAlipay (Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public static synthetic fun createAlipay$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createAlma ()Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createAlma (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public final fun createAlma (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
+	public static synthetic fun createAlma$default (Lcom/stripe/android/model/PaymentMethodCreateParams$Companion;Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;ILjava/lang/Object;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createAmazonPay ()Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createAmazonPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;)Lcom/stripe/android/model/PaymentMethodCreateParams;
 	public final fun createAmazonPay (Lcom/stripe/android/model/PaymentMethod$BillingDetails;Ljava/util/Map;)Lcom/stripe/android/model/PaymentMethodCreateParams;
@@ -6734,11 +6757,18 @@ public final class com/stripe/android/payments/PaymentFlowResult$Unvalidated$Cre
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public abstract class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration : android/os/Parcelable {
-	public static final field $stable I
+public abstract interface class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration : android/os/Parcelable {
 }
 
-public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount : com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration, android/os/Parcelable {
+public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$InstantDebits$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$InstantDebits;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$InstantDebits;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration$USBankAccount : android/os/Parcelable, com/stripe/android/payments/bankaccount/CollectBankAccountConfiguration {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public fun <init> (Ljava/lang/String;Ljava/lang/String;)V
@@ -6825,6 +6855,30 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Cancelled$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Cancelled;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Cancelled;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Completed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Completed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Completed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Failed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Failed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountForInstantDebitsResult$Failed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponse : com/stripe/android/core/model/StripeModel {
 	public static final field $stable I
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
@@ -6855,6 +6909,22 @@ public final class com/stripe/android/payments/bankaccount/navigation/CollectBan
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal;
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal$InstantDebitsData$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal$InstantDebitsData;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal$InstantDebitsData;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal$USBankAccountData$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal$USBankAccountData;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/payments/bankaccount/navigation/CollectBankAccountResponseInternal$USBankAccountData;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 

@@ -6,7 +6,7 @@ tags:
 ---
 - startRecording: ${'/tmp/test_results/testmode-paymentintent-testinstitution-networking-' + new Date().getTime()}
 - clearState
-- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=networking_testmode&permissions=transactions,payment_method
+- openLink: stripeconnectionsexample://playground?flow=PaymentIntent&financial_connections_override_native=native&merchant=networking_testmode&permissions=transactions,payment_method&financial_connections_confirm_intent=true
 - tapOn:
     id: "Customer email setting"
 - inputRandomEmail
@@ -45,7 +45,9 @@ tags:
 - assertVisible: "Your account was connected and saved with Link."
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Intent Confirmed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Intent Confirmed!.*"
 ###########################################
 # REUSE NEWLY CREATED LINK ACCOUNT
 ###########################################
@@ -80,5 +82,7 @@ tags:
 - assertVisible: "Your account was connected."
 - tapOn:
     id: "done_button"
-- assertVisible: ".*Intent Confirmed!.*"
+- scrollUntilVisible:
+    element:
+      text: ".*Intent Confirmed!.*"
 - stopRecording

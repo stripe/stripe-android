@@ -56,6 +56,14 @@ private val Colors = FinancialConnectionsColors(
     borderBrand = Color(0xFF675DFF),
 )
 
+internal val InstantDebitsColors = Colors.copy(
+    textBrand = Color(0XFF00A355),
+    iconBrand = Color(0XFF00D66F),
+    buttonPrimary = Color(0XFF00D66F),
+    buttonPrimaryPressed = Color(0XFF00D66F),
+    borderBrand = Color(0XFF00D66F),
+)
+
 private val lineHeightStyle = LineHeightStyle(
     alignment = LineHeightStyle.Alignment.Center,
     trim = LineHeightStyle.Trim.None
@@ -161,11 +169,14 @@ private object FinancialConnectionsRippleTheme : RippleTheme {
 }
 
 @Composable
-internal fun FinancialConnectionsTheme(content: @Composable () -> Unit) {
+internal fun FinancialConnectionsTheme(
+    instantDebits: Boolean = false,
+    content: @Composable () -> Unit
+) {
     CompositionLocalProvider(
         LocalNavHostController provides rememberNavController(),
         LocalTypography provides Typography,
-        LocalColors provides Colors
+        LocalColors provides if (instantDebits) InstantDebitsColors else Colors
     ) {
         val view = LocalView.current
         val window = findWindow()

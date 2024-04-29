@@ -14,6 +14,7 @@ import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.utils.filterNotNullValues
 import dagger.Binds
 import dagger.BindsInstance
 import dagger.Component
@@ -73,9 +74,6 @@ interface ErrorReporter {
                 "error_code" to stripeException.stripeError?.code,
             ).filterNotNullValues()
         }
-
-        private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
-            mapNotNull { (key, value) -> value?.let { key to it } }.toMap()
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -92,6 +90,15 @@ interface ErrorReporter {
         GET_SAVED_PAYMENT_METHODS_FAILURE(
             eventName = "elements.customer_repository.get_saved_payment_methods_failure"
         ),
+        CUSTOMER_SHEET_ELEMENTS_SESSION_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.elements_session.load_failure"
+        ),
+        CUSTOMER_SHEET_PAYMENT_METHODS_LOAD_FAILURE(
+            eventName = "elements.customer_sheet.payment_methods.load_failure"
+        ),
+        CUSTOMER_SHEET_ADAPTER_NOT_FOUND(
+            eventName = "elements.customer_sheet.customer_adapter.not_found"
+        ),
         PLACES_FIND_AUTOCOMPLETE_ERROR(
             eventName = "address_element.find_autocomplete.error"
         ),
@@ -106,6 +113,15 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_FAILURE(
             eventName = "link.log_out.failure"
+        ),
+        PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS(
+            eventName = "payments.paymentlauncherconfirmation.null_args"
+        ),
+        BROWSER_LAUNCHER_ACTIVITY_NOT_FOUND(
+            eventName = "payments.browserlauncher.activity_not_found"
+        ),
+        BROWSER_LAUNCHER_NULL_ARGS(
+            eventName = "payments.browserlauncher.null_args"
         ),
     }
 
@@ -141,10 +157,43 @@ interface ErrorReporter {
         LINK_ATTACH_CARD_WITH_NULL_ACCOUNT(
             partialEventName = "link.create_new_card.missing_link_account"
         ),
+        PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
+            partialEventName = "paymentsheet.authenticators.not_found"
+        ),
+        EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE(
+            partialEventName = "elements.external_payment_methods_serializer.error"
+        ),
+        INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
+            partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
+        ),
         ;
 
         override val eventName: String
-            get() = "unexpected.$partialEventName"
+            get() = "unexpected_error.$partialEventName"
+    }
+
+    /**
+     * Success events that correspond to an [ExpectedErrorEvent].
+     *
+     * This exists so that we can compute failure rates for [ExpectedErrorEvent]s to enable adding meaningful alerts.
+     */
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class SuccessEvent(override val eventName: String) : ErrorEvent {
+        GET_SAVED_PAYMENT_METHODS_SUCCESS(
+            eventName = "elements.customer_repository.get_saved_payment_methods_success"
+        ),
+        PLACES_FIND_AUTOCOMPLETE_SUCCESS(
+            eventName = "address_element.find_autocomplete.success"
+        ),
+        PLACES_FETCH_PLACE_SUCCESS(
+            eventName = "address_element.fetch_place.success"
+        ),
+        LINK_CREATE_CARD_SUCCESS(
+            eventName = "link.create_new_card.success"
+        ),
+        LINK_LOG_OUT_SUCCESS(
+            eventName = "link.log_out.success"
+        ),
     }
 }
 

@@ -21,7 +21,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filterNotNull
-import java.security.InvalidParameterException
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
@@ -101,7 +100,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                 starterArgs.config.validate()
                 starterArgs.config.appearance.parseAppearance()
                 Result.success(starterArgs)
-            } catch (e: InvalidParameterException) {
+            } catch (e: IllegalArgumentException) {
                 Result.failure(e)
             }
         }

@@ -29,7 +29,6 @@ import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssisted
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
@@ -52,6 +51,8 @@ internal object CustomerSheetTestHelper {
     internal val application = ApplicationProvider.getApplicationContext<Application>()
 
     internal val usBankAccountFormArguments = USBankAccountFormArguments(
+        showCheckbox = false,
+        instantDebits = false,
         onBehalfOf = null,
         isCompleteFlow = false,
         isPaymentFlow = false,
@@ -83,15 +84,13 @@ internal object CustomerSheetTestHelper {
 
     internal val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
         paymentMethodCode = PaymentMethod.Type.Card.code,
-        formViewData = FormViewModel.ViewData(
-            completeFormValues = FormFieldValues(
-                showsMandate = false,
-                userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
-            ),
+        formFieldValues = FormFieldValues(
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
         ),
+        formElements = emptyList(),
         formArguments = FormArguments(
             paymentMethodCode = PaymentMethod.Type.Card.code,
-            showCheckbox = false,
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             merchantName = ""
         ),

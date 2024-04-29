@@ -184,9 +184,11 @@ internal class PlaygroundSettings private constructor(
 
         val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
+            CustomerSessionSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
+            EnableInstantDebitsSettingsDefinition,
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
@@ -204,6 +206,7 @@ internal class PlaygroundSettings private constructor(
             PreferredNetworkSettingsDefinition,
             AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition,
             PaymentMethodOrderSettingsDefinition,
+            ExternalPaymentMethodSettingsDefinition,
             IntegrationTypeSettingsDefinition,
         )
 

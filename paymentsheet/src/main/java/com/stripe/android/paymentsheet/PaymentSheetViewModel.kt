@@ -273,7 +273,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             isDeferred = isDeferred,
         )
 
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             loadPaymentSheetState()
         }
     }
@@ -456,6 +456,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                     label = args.googlePayConfig?.label,
                 )
             }
+        } else if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
+            ExternalPaymentMethodHandler.confirm(_paymentSheetResult::tryEmit)
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
             paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
@@ -590,13 +592,14 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     private fun confirmPaymentSelection(paymentSelection: PaymentSelection?) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
 
             val nextStep = intentConfirmationInterceptor.intercept(
                 initializationMode = args.initializationMode,
                 paymentSelection = paymentSelection,
                 shippingValues = args.config.shippingDetails?.toConfirmPaymentIntentShipping(),
+                context = getApplication(),
             )
 
             deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
@@ -622,7 +625,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             val stripeIntent = awaitStripeIntent()
             processPayment(stripeIntent, paymentResult)
         }

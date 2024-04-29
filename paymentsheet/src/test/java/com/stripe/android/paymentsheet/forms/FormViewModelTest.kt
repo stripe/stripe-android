@@ -1,12 +1,9 @@
 package com.stripe.android.paymentsheet.forms
 
 import androidx.annotation.StringRes
-import androidx.appcompat.view.ContextThemeWrapper
-import androidx.test.core.app.ApplicationProvider
-import app.cash.turbine.test
-import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
+import com.stripe.android.lpmfoundations.paymentmethod.TestUiDefinitionFactoryArgumentsFactory
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetFixtures.COMPOSE_FRAGMENT_ARGS
@@ -14,16 +11,13 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.R
 import com.stripe.android.ui.core.elements.AddressSpec
-import com.stripe.android.ui.core.elements.CardDetailsSectionElement
 import com.stripe.android.ui.core.elements.CountrySpec
-import com.stripe.android.ui.core.elements.EmailElement
 import com.stripe.android.ui.core.elements.EmailSpec
 import com.stripe.android.ui.core.elements.IbanSpec
 import com.stripe.android.ui.core.elements.MandateTextSpec
 import com.stripe.android.ui.core.elements.NameSpec
 import com.stripe.android.ui.core.elements.PhoneSpec
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.CountryElement
 import com.stripe.android.uicore.elements.FormElement
@@ -34,15 +28,12 @@ import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionSingleFieldElement
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldController
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
 import com.stripe.android.uicore.R as UiCoreR
 
@@ -50,12 +41,6 @@ import com.stripe.android.uicore.R as UiCoreR
 @RunWith(RobolectricTestRunner::class)
 internal class FormViewModelTest {
     private val emailSection = EmailSpec()
-    private val context = ContextThemeWrapper(
-        ApplicationProvider.getApplicationContext(),
-        StripeR.style.StripeDefaultTheme
-    )
-
-    private val showCheckboxFlow = MutableStateFlow(false)
 
     @Test
     fun `Verify completeFormValues is not null when no elements exist`() = runTest {
@@ -71,75 +56,6 @@ internal class FormViewModelTest {
             formViewModel.completeFormValues.first()
         ).isNotNull()
     }
-
-    @Test
-    fun `Verify setting save for future use value is updated in flowable`() = runTest {
-        val args = COMPOSE_FRAGMENT_ARGS.copy(
-            paymentMethodCode = PaymentMethod.Type.Card.code
-        )
-        val formViewModel = createViewModel(
-            args,
-            listOf(
-                SectionElement.wrap(EmailElement()),
-                SaveForFutureUseElement(true, ""),
-            )
-        )
-
-        showCheckboxFlow.emit(true)
-
-        // Set all the card fields, billing is set in the args
-        val emailController =
-            getSectionFieldTextControllerWithLabel(formViewModel, UiCoreR.string.stripe_email)
-
-        emailController?.onValueChange("joe@email.com")
-
-        assertThat(
-            formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-        ).isNotNull()
-
-        turbineScope {
-            val receiver = formViewModel.saveForFutureUse.testIn(this)
-            assertThat(receiver.awaitItem()).isTrue()
-
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-            ).isEqualTo("true")
-
-            formViewModel.setSaveForFutureUse(false)
-
-            assertThat(receiver.awaitItem()).isFalse()
-
-            assertThat(
-                formViewModel.completeFormValues.first()?.fieldValuePairs?.get(IdentifierSpec.SaveForFutureUse)?.value
-            ).isEqualTo("false")
-
-            receiver.cancel()
-        }
-    }
-
-    @Test
-    fun `Verify setting save for future use visibility removes it from completed values`() =
-        runTest {
-            val args = COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = PaymentMethod.Type.Card.code
-            )
-            val formViewModel = createViewModel(
-                args,
-                listOf(
-                    SaveForFutureUseElement(true, ""),
-                )
-            )
-
-            formViewModel.hiddenIdentifiers.test {
-                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
-
-                showCheckboxFlow.tryEmit(true)
-                assertThat(awaitItem()).isEmpty()
-
-                showCheckboxFlow.tryEmit(false)
-                assertThat(awaitItem()).containsExactly(IdentifierSpec.SaveForFutureUse)
-            }
-        }
 
     @Test
     fun `Verify if there are no text fields, there is no last text field id`() = runTest {
@@ -266,7 +182,6 @@ internal class FormViewModelTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.P24.code,
             billingDetails = null,
-            showCheckbox = true,
         )
         val formViewModel = createViewModel(
             args,
@@ -318,7 +233,6 @@ internal class FormViewModelTest {
     fun `Verify params are set when element address fields are complete`() = runTest {
         val args = COMPOSE_FRAGMENT_ARGS.copy(
             paymentMethodCode = PaymentMethod.Type.SepaDebit.code,
-            showCheckbox = false,
             billingDetails = null
         )
         val formViewModel = createViewModel(
@@ -330,7 +244,7 @@ internal class FormViewModelTest {
                 AddressSpec(
                     IdentifierSpec.Generic("address"),
                     allowedCountryCodes = setOf("US", "JP")
-                ).transform(emptyMap(), AddressRepository(context.resources, Dispatchers.Unconfined), emptyMap()),
+                ).transform(emptyMap(), emptyMap()),
                 MandateTextSpec(
                     IdentifierSpec.Generic("mandate"),
                     R.string.stripe_sepa_mandate
@@ -411,7 +325,7 @@ internal class FormViewModelTest {
                 AddressSpec(
                     IdentifierSpec.Generic("address"),
                     allowedCountryCodes = setOf("US", "JP")
-                ).transform(emptyMap(), AddressRepository(context.resources, Dispatchers.Unconfined), emptyMap()),
+                ).transform(emptyMap(), emptyMap()),
                 MandateTextSpec(
                     IdentifierSpec.Generic("mandate"),
                     R.string.stripe_sepa_mandate
@@ -599,9 +513,7 @@ internal class FormViewModelTest {
 
             val cardFormElements = PaymentMethodMetadataFactory.create().formElementsForCode(
                 code = "card",
-                context = context,
-                paymentMethodCreateParams = null,
-                paymentMethodExtraParams = null,
+                uiDefinitionFactoryArgumentsFactory = TestUiDefinitionFactoryArgumentsFactory.create(),
             )!!
 
             val formViewModel = createViewModel(
@@ -659,7 +571,6 @@ internal class FormViewModelTest {
                     CountrySpec().transform(emptyMap()),
                     AddressSpec(hideCountry = true).transform(
                         initialValues = emptyMap(),
-                        addressRepository = AddressRepository(context.resources, Dispatchers.Unconfined),
                         shippingValues = emptyMap(),
                     ),
                 ),
@@ -688,40 +599,6 @@ internal class FormViewModelTest {
             assertThat(phoneElement?.controller?.countryDropdownController?.rawFieldValue?.first())
                 .isEqualTo("CA")
         }
-
-    @Test
-    fun `Test viewData flow`() = runTest {
-        val formViewModel = createViewModel(
-            COMPOSE_FRAGMENT_ARGS.copy(
-                paymentMethodCode = PaymentMethod.Type.Card.code,
-            ),
-            PaymentMethodMetadataFactory.create().formElementsForCode(
-                code = "card",
-                context = context,
-                paymentMethodCreateParams = null,
-                paymentMethodExtraParams = null,
-            )!!,
-        )
-
-        formViewModel.viewDataFlow.test {
-            val viewData = awaitItem()
-            assertThat(viewData.elements.first())
-                .isInstanceOf(CardDetailsSectionElement::class.java)
-            assertThat(viewData.completeFormValues)
-                .isNull()
-            assertThat(viewData.hiddenIdentifiers)
-                .doesNotContain(IdentifierSpec("test"))
-            assertThat(viewData.lastTextFieldIdentifier)
-                .isNotNull()
-
-            formViewModel.addHiddenIdentifiers(
-                setOf(IdentifierSpec("test"))
-            )
-
-            assertThat(expectMostRecentItem().hiddenIdentifiers)
-                .contains(IdentifierSpec("test"))
-        }
-    }
 
     private suspend fun getSectionFieldTextControllerWithLabel(
         formViewModel: FormViewModel,
@@ -798,13 +675,6 @@ internal class FormViewModelTest {
         formElements: List<FormElement>,
     ) = FormViewModel(
         formArguments = arguments,
-        showCheckboxFlow = showCheckboxFlow,
         elements = formElements,
     )
-}
-
-private fun FormViewModel.setSaveForFutureUse(value: Boolean) {
-    elements
-        .filterIsInstance<SaveForFutureUseElement>()
-        .firstOrNull()?.controller?.onValueChange(value)
 }

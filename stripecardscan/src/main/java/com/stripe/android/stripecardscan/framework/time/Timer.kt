@@ -1,11 +1,26 @@
 package com.stripe.android.stripecardscan.framework.time
 
 import android.util.Log
-import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.Duration
-import com.stripe.android.camera.framework.time.measureTime
-import com.stripe.android.camera.framework.time.seconds
+import androidx.annotation.CheckResult
+import androidx.annotation.RestrictTo
 import kotlinx.coroutines.runBlocking
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
+
+/**
+ * Measure the amount of time a process takes.
+ *
+ * TODO: use contracts when they are no longer experimental
+ */
+@CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+inline fun <T> measureTime(block: () -> T): Pair<Duration, T> {
+    // contract { callsInPlace(block, EXACTLY_ONCE) }
+    val mark = TimeSource.Monotonic.markNow()
+    val result = block()
+    return mark.elapsedNow() to result
+}
 
 internal sealed class Timer {
 
@@ -55,7 +70,7 @@ private class LoggingTimer(
 ) : Timer() {
     private var executionCount = 0
     private var executionTotalDuration = Duration.ZERO
-    private var updateClock = Clock.markNow()
+    private var updateClock = TimeSource.Monotonic.markNow()
 
     // TODO: use contracts when they are no longer experimental
     override suspend fun <T> measureSuspend(taskName: String?, task: suspend () -> T): T {
@@ -65,14 +80,14 @@ private class LoggingTimer(
         executionCount++
         executionTotalDuration += duration
 
-        if (updateClock.elapsedSince() > updateInterval) {
-            updateClock = Clock.markNow()
+        if (updateClock.elapsedNow() > updateInterval) {
+            updateClock = TimeSource.Monotonic.markNow()
             Log.d(
                 tag,
                 "$name${if (!taskName.isNullOrEmpty()) ".$taskName" else ""} executing on " +
                     "thread ${Thread.currentThread().name} " +
-                    "AT ${executionCount / executionTotalDuration.inSeconds} FPS, " +
-                    "${executionTotalDuration.inMilliseconds / executionCount} MS/F"
+                    "AT ${executionCount.toDouble() / executionTotalDuration.inWholeSeconds} FPS, " +
+                    "${executionTotalDuration.inWholeMilliseconds.toDouble() / executionCount} MS/F"
             )
         }
         return result

@@ -7,12 +7,10 @@ import com.stripe.android.googlepaylauncher.GooglePayRepository
 import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.model.AccountStatus
-import com.stripe.android.link.ui.LinkUi
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.LpmRepository
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
-import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
-import com.stripe.android.lpmfoundations.paymentmethod.getSetupFutureUsageFieldConfiguration
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
@@ -28,6 +26,8 @@ import com.stripe.android.paymentsheet.model.validate
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodsRepository
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -62,6 +62,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     @IOContext private val workContext: CoroutineContext,
     private val accountStatusProvider: LinkAccountStatusProvider,
     private val linkStore: LinkStore,
+    private val externalPaymentMethodsRepository: ExternalPaymentMethodsRepository,
 ) : PaymentSheetLoader {
 
     override suspend fun load(
@@ -73,13 +74,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val elementsSessionResult = retrieveElementsSession(
             initializationMode = initializationMode,
+            customer = paymentSheetConfiguration.customer,
+            externalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
         )
 
         elementsSessionResult.mapCatching { elementsSession ->
-            // If Link is enabled, set the `useNewBrand`.
-            LinkUi.useNewBrand = elementsSession.linkSettings?.useRebrand
-                ?: ElementsSession.LinkSettings.useRebrandDefault
-
             val billingDetailsCollectionConfig =
                 paymentSheetConfiguration.billingDetailsCollectionConfiguration
 
@@ -92,6 +91,13 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 stripeIntent = elementsSession.stripeIntent,
                 serverLpmSpecs = elementsSession.paymentMethodSpecs,
             )
+            val externalPaymentMethodSpecs = externalPaymentMethodsRepository.getExternalPaymentMethodSpecs(
+                elementsSession.externalPaymentMethodData
+            )
+            logIfMissingExternalPaymentMethods(
+                requestedExternalPaymentMethods = paymentSheetConfiguration.externalPaymentMethods,
+                actualExternalPaymentMethods = externalPaymentMethodSpecs
+            )
             val metadata = PaymentMethodMetadata(
                 stripeIntent = elementsSession.stripeIntent,
                 billingDetailsCollectionConfiguration = billingDetailsCollectionConfig,
@@ -103,7 +109,9 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 merchantName = paymentSheetConfiguration.merchantDisplayName,
                 defaultBillingDetails = paymentSheetConfiguration.defaultBillingDetails,
                 shippingDetails = paymentSheetConfiguration.shippingDetails,
+                hasCustomerConfiguration = paymentSheetConfiguration.customer != null,
                 sharedDataSpecs = sharedDataSpecsResult.sharedDataSpecs,
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs
             )
 
             if (sharedDataSpecsResult.failedToParseServerResponse) {
@@ -163,13 +171,20 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
             isGooglePayReady(config, elementsSession)
         }
 
+        val customerConfig = config.customer
+
         val paymentMethods = async {
-            when (val customerConfig = config.customer) {
+            when (customerConfig?.accessType) {
+                is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                    elementsSession.customer?.paymentMethods ?: emptyList()
+                }
+                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                    retrieveCustomerPaymentMethods(
+                        metadata = metadata,
+                        customerConfig = customerConfig,
+                    )
+                }
                 null -> emptyList()
-                else -> retrieveCustomerPaymentMethods(
-                    metadata = metadata,
-                    customerConfig = customerConfig,
-                )
             }
         }
 
@@ -246,8 +261,10 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
     private suspend fun retrieveElementsSession(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
+        externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        return elementsSessionRepository.get(initializationMode)
+        return elementsSessionRepository.get(initializationMode, customer, externalPaymentMethods)
     }
 
     private suspend fun loadLinkState(
@@ -314,17 +331,15 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
 
         val merchantName = config.merchantDisplayName
 
-        val setupFutureUsageFieldConfiguration = requireNotNull(
-            CardDefinition.getSetupFutureUsageFieldConfiguration(
-                metadata = metadata,
-                customerConfiguration = config.customer,
-            )
+        val isSaveForFutureUseValueChangeable = isSaveForFutureUseValueChangeable(
+            code = PaymentMethod.Type.Card.code,
+            metadata = metadata,
         )
         val hasUsedLink = linkStore.hasUsedLink()
 
         val linkSignupMode = if (hasUsedLink || linkSignUpDisabled) {
             null
-        } else if (setupFutureUsageFieldConfiguration.isSaveForFutureUseValueChangeable) {
+        } else if (isSaveForFutureUseValueChangeable) {
             LinkSignupMode.AlongsideSaveForFutureUse
         } else {
             LinkSignupMode.InsteadOfSaveForFutureUse
@@ -395,7 +410,7 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     private fun supportsIntent(
         metadata: PaymentMethodMetadata,
     ): Boolean {
-        return metadata.supportedPaymentMethodDefinitions().isNotEmpty()
+        return metadata.supportedPaymentMethodTypes().isNotEmpty()
     }
 
     private fun reportSuccessfulLoad(
@@ -427,6 +442,26 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
     ) {
         logger.error("Failure loading PaymentSheetState", error)
         eventReporter.onLoadFailed(error)
+    }
+
+    private fun logIfMissingExternalPaymentMethods(
+        requestedExternalPaymentMethods: List<String>?,
+        actualExternalPaymentMethods: List<ExternalPaymentMethodSpec>?,
+    ) {
+        if (requestedExternalPaymentMethods.isNullOrEmpty()) {
+            return
+        }
+        val actualExternalPaymentMethodTypes = actualExternalPaymentMethods?.map { it.type }
+        for (requestedExternalPaymentMethod in requestedExternalPaymentMethods) {
+            if (actualExternalPaymentMethodTypes == null || !actualExternalPaymentMethodTypes.contains(
+                    requestedExternalPaymentMethod
+                )
+            ) {
+                logger.warning(
+                    "Requested external payment method $requestedExternalPaymentMethod is not supported."
+                )
+            }
+        }
     }
 }
 

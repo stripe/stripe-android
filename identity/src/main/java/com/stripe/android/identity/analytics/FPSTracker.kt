@@ -1,10 +1,10 @@
 package com.stripe.android.identity.analytics
 
-import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.identity.injection.IdentityVerificationScope
 import java.util.concurrent.atomic.AtomicInteger
 import javax.inject.Inject
+import kotlin.time.ComparableTimeMark
+import kotlin.time.TimeSource
 
 /**
  * Tracker for frames processed per second.
@@ -13,14 +13,14 @@ import javax.inject.Inject
 internal class FPSTracker @Inject constructor(
     private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory
 ) {
-    private lateinit var startedAt: ClockMark
+    private lateinit var startedAt: ComparableTimeMark
     private val frames: AtomicInteger = AtomicInteger(0)
 
     /**
      * Resets tracking status and starts tracking.
      */
     fun start() {
-        startedAt = Clock.markNow()
+        startedAt = TimeSource.Monotonic.markNow()
     }
 
     /**
@@ -33,11 +33,11 @@ internal class FPSTracker @Inject constructor(
     /**
      * Reports FPS since last start.
      */
-    suspend fun reportAndReset(type: String) {
+    fun reportAndReset(type: String) {
         frames.get().let { totalFrames ->
             identityAnalyticsRequestFactory.averageFps(
                 type = type,
-                value = totalFrames.div(startedAt.elapsedSince().inSeconds).toInt(),
+                value = totalFrames.div(startedAt.elapsedNow().inWholeSeconds).toInt(),
                 frames = totalFrames
             )
         }

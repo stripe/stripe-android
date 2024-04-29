@@ -32,7 +32,6 @@ import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResp
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
@@ -46,7 +45,6 @@ import com.stripe.android.testing.CoroutineTestRule
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.CardDetailsSectionElement
-import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionElement
@@ -439,7 +437,7 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
-    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
+    fun `When CustomerViewAction#OnAddCardPressed, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shown`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher
         )
@@ -452,37 +450,12 @@ class CustomerSheetViewModelTest {
             val item = awaitItem()
             assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
 
-            val formElements = item.asAddState().formViewData.elements
+            val formElements = item.asAddState().formElements
 
             assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
             assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
             assertThat(formElements[1].asSectionElement().fields[0])
                 .isInstanceOf(CardBillingAddressElement::class.java)
-            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
-        }
-    }
-
-    @Test
-    fun `When CustomerViewAction#OnAddCardPressed & ACHv2 disabled, view state is updated to CustomerViewAction#AddPaymentMethod and fields are shwon`() = runTest(testDispatcher) {
-        val viewModel = createViewModel(
-            workContext = testDispatcher
-        )
-
-        viewModel.viewState.test {
-            assertThat(awaitItem())
-                .isInstanceOf(SelectPaymentMethod::class.java)
-            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
-
-            val item = awaitItem()
-            assertThat(item).isInstanceOf(AddPaymentMethod::class.java)
-
-            val formElements = item.asAddState().formViewData.elements
-
-            assertThat(formElements[0]).isInstanceOf(CardDetailsSectionElement::class.java)
-            assertThat(formElements[1]).isInstanceOf(SectionElement::class.java)
-            assertThat(formElements[1].asSectionElement().fields[0])
-                .isInstanceOf(CardBillingAddressElement::class.java)
-            assertThat(formElements[2]).isInstanceOf(SaveForFutureUseElement::class.java)
         }
     }
 
@@ -493,20 +466,50 @@ class CustomerSheetViewModelTest {
         )
         viewModel.viewState.test {
             var viewState = awaitViewState<SelectPaymentMethod>()
-            assertThat(viewState.isEditing)
-                .isFalse()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
 
             viewState = awaitViewState()
-            assertThat(viewState.isEditing)
-                .isTrue()
+            assertThat(viewState.isEditing).isTrue()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
 
             viewState = awaitViewState()
-            assertThat(viewState.isEditing)
-                .isTrue()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isFalse()
+        }
+    }
+
+    @Test
+    fun `When CustomerSheetViewAction#OnItemRemoved with allowsRemovalOfLastSavedPaymentMethod=false, view state isEditing should be updated`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            configuration = CustomerSheet.Configuration(
+                merchantDisplayName = "Example",
+                googlePayEnabled = true,
+                allowsRemovalOfLastSavedPaymentMethod = false,
+            ),
+            customerPaymentMethods = listOf(CARD_PAYMENT_METHOD, CARD_PAYMENT_METHOD.copy(id = "pm_543")),
+        )
+        viewModel.viewState.test {
+            var viewState = awaitViewState<SelectPaymentMethod>()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnEditPressed)
+
+            viewState = awaitViewState()
+            assertThat(viewState.isEditing).isTrue()
+            assertThat(viewState.topBarState.showEditMenu).isTrue()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnItemRemoved(CARD_PAYMENT_METHOD))
+
+            viewState = awaitViewState()
+            assertThat(viewState.isEditing).isFalse()
+            assertThat(viewState.topBarState.showEditMenu).isFalse()
         }
     }
 
@@ -911,9 +914,7 @@ class CustomerSheetViewModelTest {
         val viewModel = createViewModel(
             workContext = testDispatcher,
             initialBackStack = listOf(
-                addPaymentMethodViewState.copy(
-                    formViewData = FormViewModel.ViewData(),
-                )
+                addPaymentMethodViewState
             ),
         )
 
@@ -942,7 +943,7 @@ class CustomerSheetViewModelTest {
             workContext = testDispatcher,
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
-                    formViewData = FormViewModel.ViewData()
+                    formFieldValues = null,
                 )
             ),
         )
@@ -1861,6 +1862,7 @@ class CustomerSheetViewModelTest {
                 address = null,
                 saveForFutureUse = false,
             ),
+            instantDebits = null,
             screenState = USBankAccountFormScreenState.SavedAccount(
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
@@ -2458,7 +2460,7 @@ class CustomerSheetViewModelTest {
                     )
                 )
             )
-            assertThat(awaitViewState<AddPaymentMethod>().formViewData.completeFormValues).isNotNull()
+            assertThat(awaitViewState<AddPaymentMethod>().formFieldValues).isNotNull()
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnPrimaryButtonPressed)
             assertThat(awaitItem()).isInstanceOf(AddPaymentMethod::class.java)
@@ -2467,7 +2469,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
             val newViewState = awaitViewState<AddPaymentMethod>()
-            assertThat(newViewState.formViewData.completeFormValues).isNull()
+            assertThat(newViewState.formFieldValues).isNull()
         }
     }
 
@@ -2485,6 +2487,7 @@ class CustomerSheetViewModelTest {
                 address = null,
                 saveForFutureUse = false,
             ),
+            instantDebits = null,
             screenState = USBankAccountFormScreenState.SavedAccount(
                 financialConnectionsSessionId = "session_1234",
                 intentId = "intent_1234",
@@ -2911,8 +2914,6 @@ class CustomerSheetViewModelTest {
         val paymentAccount = mock<PaymentAccount>()
         val financialConnectionsAccount = mock<FinancialConnectionsAccount>()
         val financialConnectionsSession = mock<FinancialConnectionsSession>()
-        val bankAccountResponse = mock<CollectBankAccountResponseInternal>()
-        whenever(bankAccountResponse.financialConnectionsSession).thenReturn(financialConnectionsSession)
         whenever(financialConnectionsSession.paymentAccount).thenReturn(
             if (isVerified) {
                 financialConnectionsAccount
@@ -2921,7 +2922,13 @@ class CustomerSheetViewModelTest {
             }
         )
         return CollectBankAccountResultInternal.Completed(
-            response = bankAccountResponse,
+            response = CollectBankAccountResponseInternal(
+                intent = null,
+                usBankAccountData = CollectBankAccountResponseInternal.USBankAccountData(
+                    financialConnectionsSession = financialConnectionsSession
+                ),
+                instantDebitsData = null
+            ),
         )
     }
 

@@ -16,11 +16,13 @@ import com.stripe.android.financialconnections.FinancialConnectionsSheetResult
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.example.data.BackendRepository
 import com.stripe.android.financialconnections.example.data.Settings
+import com.stripe.android.financialconnections.example.settings.ConfirmIntentSetting
 import com.stripe.android.financialconnections.example.settings.FinancialConnectionsPlaygroundUrlHelper
 import com.stripe.android.financialconnections.example.settings.FlowSetting
 import com.stripe.android.financialconnections.example.settings.PlaygroundSettings
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResponse
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResult
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -217,28 +219,23 @@ internal class FinancialConnectionsPlaygroundViewModel(
                     val account = session.accounts.data.firstOrNull()
                     it.copy(
                         status = it.status + listOf(
-                            "Session Completed! ${session.id} (account: ${account?.id})",
-                            "Confirming Intent: ${result.response.intent.id}",
+                            "Session Completed! ${session.id} (account: ${account?.id})"
                         )
                     )
                 }
-                val params = ConfirmPaymentIntentParams.create(
-                    clientSecret = requireNotNull(result.response.intent.clientSecret),
-                    paymentMethodType = PaymentMethod.Type.USBankAccount
-                )
-                stripe(_state.value.publishableKey!!).confirmPaymentIntent(params)
+                confirmIntentIfNeeded(result.response)
             }.onSuccess {
                 _state.update {
                     it.copy(
                         loading = false,
-                        status = it.status + "Intent Confirmed!"
+                        status = it.status + "Completed!"
                     )
                 }
             }.onFailure { error ->
                 _state.update {
                     it.copy(
                         loading = false,
-                        status = it.status + "Confirming intent Failed!: $error"
+                        status = it.status + "Failed!: $error"
                     )
                 }
             }
@@ -258,13 +255,37 @@ internal class FinancialConnectionsPlaygroundViewModel(
         }
     }
 
-    private fun stripe(publishableKey: String) = Stripe(
-        getApplication(),
-        publishableKey,
-        null,
-        true,
-        emptySet()
-    )
+    private suspend fun confirmIntentIfNeeded(response: CollectBankAccountResponse) {
+        val shouldConfirmIntent = state.value.settings.get<ConfirmIntentSetting>().selectedOption
+        if (shouldConfirmIntent) {
+            val params = ConfirmPaymentIntentParams.create(
+                clientSecret = requireNotNull(response.intent.clientSecret),
+                paymentMethodType = PaymentMethod.Type.USBankAccount
+            )
+            stripe().confirmPaymentIntent(params)
+            _state.update {
+                it.copy(status = it.status + "Intent Confirmed!")
+            }
+        } else {
+            _state.update {
+                it.copy(status = it.status + "Skipping intent confirmation.")
+            }
+        }
+    }
+
+    private fun stripe() = kotlin.runCatching {
+        Stripe(
+            getApplication(),
+            requireNotNull(_state.value.publishableKey),
+            null,
+            true,
+            emptySet()
+        )
+    }.onFailure {
+        _state.update {
+            it.copy(status = it.status + "Failed to create Stripe instance: $it")
+        }
+    }.getOrThrow()
 
     fun onSettingsChanged(playgroundSettings: PlaygroundSettings) {
         _state.update {

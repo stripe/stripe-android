@@ -149,6 +149,7 @@ internal data class PlaygroundSettings(
             FlowSetting(),
             NativeSetting(),
             PermissionsSetting(),
+            ConfirmIntentSetting(),
             EmailSetting(),
         )
     }

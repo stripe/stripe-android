@@ -1,15 +1,14 @@
 package com.stripe.android.paymentsheet.utils
 
-import androidx.test.core.app.ActivityScenario
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 
-internal fun ActivityScenarioRule<MainActivity>.runLinkTest(
+internal fun runLinkTest(
+    networkRule: NetworkRule,
     integrationType: LinkIntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,
@@ -19,21 +18,23 @@ internal fun ActivityScenarioRule<MainActivity>.runLinkTest(
     when (integrationType) {
         LinkIntegrationType.PaymentSheet -> {
             runPaymentSheetTest(
+                networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
                 resultCallback = resultCallback,
                 block = { context ->
-                    block(LinkTestRunnerContext.WithPaymentSheet(scenario, context))
+                    block(LinkTestRunnerContext.WithPaymentSheet(context))
                 },
             )
         }
         LinkIntegrationType.FlowController -> {
             runFlowControllerTest(
+                networkRule = networkRule,
                 integrationType = IntegrationType.Compose,
                 createIntentCallback = createIntentCallback,
                 paymentOptionCallback = paymentOptionCallback,
                 resultCallback = resultCallback,
                 block = { context ->
-                    block(LinkTestRunnerContext.WithFlowController(scenario, context))
+                    block(LinkTestRunnerContext.WithFlowController(context))
                 }
             )
         }
@@ -41,7 +42,6 @@ internal fun ActivityScenarioRule<MainActivity>.runLinkTest(
 }
 
 internal sealed interface LinkTestRunnerContext {
-    val scenario: ActivityScenario<MainActivity>
 
     fun launch(
         configuration: PaymentSheet.Configuration = PaymentSheet.Configuration(
@@ -50,7 +50,6 @@ internal sealed interface LinkTestRunnerContext {
     )
 
     class WithPaymentSheet(
-        override val scenario: ActivityScenario<MainActivity>,
         private val context: PaymentSheetTestRunnerContext
     ) : LinkTestRunnerContext {
         override fun launch(configuration: PaymentSheet.Configuration) {
@@ -64,7 +63,6 @@ internal sealed interface LinkTestRunnerContext {
     }
 
     class WithFlowController(
-        override val scenario: ActivityScenario<MainActivity>,
         private val context: FlowControllerTestRunnerContext
     ) : LinkTestRunnerContext {
         override fun launch(configuration: PaymentSheet.Configuration) {

@@ -45,6 +45,11 @@ internal object CountrySettingsDefinition :
         }.let { currency ->
             playgroundSettings[CurrencySettingsDefinition] = currency
         }
+
+        // When the changes via the UI, reset the customer.
+        if (playgroundSettings[CustomerSettingsDefinition].value is CustomerType.Existing) {
+            playgroundSettings[CustomerSettingsDefinition] = CustomerType.NEW
+        }
     }
 }
 

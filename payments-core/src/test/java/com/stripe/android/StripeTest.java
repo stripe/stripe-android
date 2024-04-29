@@ -43,6 +43,7 @@ import com.stripe.android.networking.StripeApiRepository;
 import com.stripe.android.networking.StripeRepository;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -1215,6 +1216,48 @@ public class StripeTest {
 
         stripe.retrievePossibleBrands(
                 "5131 30",
+                possibleBrands
+        );
+
+        idle();
+
+        verify(possibleBrands).onSuccess(possibleBrandsArgumentCaptor.capture());
+
+        final PossibleBrands result = possibleBrandsArgumentCaptor.getValue();
+
+        assertFalse(result.getBrands().isEmpty());
+        assertEquals(result.getBrands().size(), 2);
+        assertTrue(result.getBrands().contains(CardBrand.MasterCard));
+        assertTrue(result.getBrands().contains(CardBrand.CartesBancaires));
+    }
+
+    @Test
+    public void retrievePossibleBrands_forVisaAndCartesBancaires_shouldReturnMultipleCardBrands() {
+        final Stripe stripe = createStripe(testDispatcher);
+
+        stripe.retrievePossibleBrands(
+                "4000 0025 0000 1001",
+                possibleBrands
+        );
+
+        idle();
+
+        verify(possibleBrands).onSuccess(possibleBrandsArgumentCaptor.capture());
+
+        final PossibleBrands result = possibleBrandsArgumentCaptor.getValue();
+
+        assertFalse(result.getBrands().isEmpty());
+        assertEquals(result.getBrands().size(), 2);
+        assertTrue(result.getBrands().contains(CardBrand.Visa));
+        assertTrue(result.getBrands().contains(CardBrand.CartesBancaires));
+    }
+
+    @Test
+    public void retrievePossibleBrands_forMastercardAndCartesBancaires_shouldReturnMultipleCardBrands() {
+        final Stripe stripe = createStripe(testDispatcher);
+
+        stripe.retrievePossibleBrands(
+                "5555 5525 0000 1001",
                 possibleBrands
         );
 

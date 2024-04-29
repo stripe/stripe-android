@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.res.Resources
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
@@ -34,7 +35,6 @@ import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventR
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 import com.stripe.android.uicore.elements.ParameterDestination
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
 internal fun AddPaymentMethod(
@@ -50,10 +50,6 @@ internal fun AddPaymentMethod(
     }
     val arguments = remember(selectedItem) {
         sheetViewModel.createFormArguments(selectedItem)
-    }
-    val showCheckboxFlow = remember { MutableStateFlow(false) }
-    LaunchedEffect(arguments) {
-        showCheckboxFlow.emit(arguments.showCheckbox)
     }
 
     val paymentSelection by sheetViewModel.selection.collectAsState()
@@ -92,12 +88,23 @@ internal fun AddPaymentMethod(
             val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
                 ?.intentConfiguration
                 ?.onBehalfOf
-            val processing by sheetViewModel.processing.collectAsState(false)
+            val processing by sheetViewModel.processing.collectAsState()
             val context = LocalContext.current
             val paymentMethodMetadata by sheetViewModel.paymentMethodMetadata.collectAsState()
             val stripeIntent = paymentMethodMetadata?.stripeIntent
             val formElements = remember(selectedItem.code) {
                 sheetViewModel.formElementsForCode(selectedItem.code)
+            }
+
+            val isSaveForFutureUseValueChangeable = paymentMethodMetadata?.let {
+                isSaveForFutureUseValueChangeable(
+                    code = arguments.paymentMethodCode,
+                    metadata = it,
+                )
+            } ?: false
+
+            val instantDebits = remember(supportedPaymentMethods) {
+                supportedPaymentMethods.find { it.code == PaymentMethod.Type.Link.code } != null
             }
 
             PaymentElement(
@@ -107,7 +114,6 @@ internal fun AddPaymentMethod(
                 formElements = formElements,
                 linkSignupMode = linkInlineSignupMode,
                 linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
-                showCheckboxFlow = showCheckboxFlow,
                 onItemSelectedListener = { selectedLpm ->
                     if (selectedItem != selectedLpm) {
                         selectedPaymentMethodCode = selectedLpm.code
@@ -119,6 +125,8 @@ internal fun AddPaymentMethod(
                 },
                 formArguments = arguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
+                    showCheckbox = isSaveForFutureUseValueChangeable,
+                    instantDebits = instantDebits,
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
                     isPaymentFlow = stripeIntent is PaymentIntent,
@@ -136,7 +144,7 @@ internal fun AddPaymentMethod(
                 onFormFieldValuesChanged = { formValues ->
                     paymentMethodMetadata?.let { paymentMethodMetadata ->
                         val newSelection = formValues?.transformToPaymentSelection(
-                            resources = context.resources,
+                            context = context,
                             paymentMethod = selectedItem,
                             paymentMethodMetadata = paymentMethodMetadata,
                         )
@@ -189,10 +197,10 @@ internal fun FormFieldValues.transformToExtraParams(
 }
 
 internal fun FormFieldValues.transformToPaymentSelection(
-    resources: Resources,
+    context: Context,
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-): PaymentSelection.New {
+): PaymentSelection {
     val params = transformToPaymentMethodCreateParams(paymentMethod, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     val extras = transformToExtraParams(paymentMethod)
@@ -205,9 +213,17 @@ internal fun FormFieldValues.transformToPaymentSelection(
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
         )
+    } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
+        PaymentSelection.ExternalPaymentMethod(
+            type = paymentMethod.code,
+            label = paymentMethod.displayName.resolve(context),
+            iconResource = paymentMethod.iconResource,
+            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
+            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
+        )
     } else {
         PaymentSelection.New.GenericPaymentMethod(
-            labelResource = resources.getString(paymentMethod.displayNameResource),
+            labelResource = paymentMethod.displayName.resolve(context),
             iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,

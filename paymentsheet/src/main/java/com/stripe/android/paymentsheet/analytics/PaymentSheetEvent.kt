@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
 import com.stripe.android.uicore.StripeThemeDefaults
+import com.stripe.android.utils.filterNotNullValues
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
 
@@ -545,6 +546,7 @@ internal fun PaymentSelection?.code(): String? {
         is PaymentSelection.Link -> "link"
         is PaymentSelection.New -> paymentMethodCreateParams.typeCode
         is PaymentSelection.Saved -> paymentMethod.type?.code
+        is PaymentSelection.ExternalPaymentMethod -> type
         null -> null
     }
 }
@@ -554,6 +556,3 @@ private fun PaymentSelection?.selectedPaymentMethodType(): Map<String, String> {
         mapOf(PaymentSheetEvent.FIELD_SELECTED_LPM to it)
     }.orEmpty()
 }
-
-private fun <K, V> Map<K, V?>.filterNotNullValues(): Map<K, V> =
-    mapNotNull { (key, value) -> value?.let { key to it } }.toMap()

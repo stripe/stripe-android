@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Niet gelukt om afbeelding vast te leggen</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Details niet zichtbaar</string>
+  <string name="stripe_decrease_lighting_2">Ga naar een donkerdere plek</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">camerapictogram</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Identiteitsbewijs niet in focus</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Details niet zichtbaar</string>
+  <string name="stripe_reduce_glare_2">Probeer de glans te verminderen en zorg dat de ID zichtbaar is</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Nieuwe foto\'s maken</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Imej tidak dapat ditangkap</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Butiran tidak kelihatan</string>
+  <string name="stripe_decrease_lighting_2">Beralih ke kawasan yang lebih gelap</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">ikon kamera</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">ID tidak berada dalam fokus</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Butiran tidak kelihatan</string>
+  <string name="stripe_reduce_glare_2">Cuba kurangkan silau dan pastikan ID dapat dilihat</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Ambil Semula Foto</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

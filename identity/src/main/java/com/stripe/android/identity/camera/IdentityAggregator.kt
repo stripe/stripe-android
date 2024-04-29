@@ -2,7 +2,6 @@ package com.stripe.android.identity.camera
 
 import com.stripe.android.camera.framework.AggregateResultListener
 import com.stripe.android.camera.framework.ResultAggregator
-import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.networking.models.VerificationPage
@@ -10,6 +9,7 @@ import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IDDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.states.IdentityScanStateTransitioner
+import kotlin.time.Duration.Companion.milliseconds
 
 /**
  * [ResultAggregator] for Identity.

@@ -4,18 +4,18 @@ import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.isEnabled
-import androidx.compose.ui.test.junit4.AndroidComposeTestRule
+import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
 import androidx.compose.ui.test.performTextReplacement
 import androidx.test.espresso.Espresso
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG
 import com.stripe.android.customersheet.ui.CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.uicore.elements.DROPDOWN_MENU_CLICKABLE_TEST_TAG
 
 internal class CustomerSheetPage(
-    private val composeTestRule: AndroidComposeTestRule<ActivityScenarioRule<MainActivity>, MainActivity>,
+    private val composeTestRule: ComposeTestRule,
 ) {
     fun waitForText(text: String, substring: Boolean = false) {
         waitUntil(hasText(text, substring = substring))
@@ -63,6 +63,14 @@ internal class CustomerSheetPage(
 
     fun clickConfirmButton() {
         clickPrimaryButton(CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG)
+    }
+
+    fun clickSavedPaymentMethod(endsWith: String) {
+        val savedPaymentMethodMatcher = hasTestTag(SAVED_PAYMENT_OPTION_TEST_TAG)
+            .and(hasText(endsWith, substring = true))
+
+        waitUntil(savedPaymentMethodMatcher)
+        click(savedPaymentMethodMatcher)
     }
 
     private fun clickPrimaryButton(tag: String) {

@@ -8,8 +8,8 @@ import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
+import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.AuthSessionEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
@@ -21,7 +21,9 @@ import com.stripe.android.financialconnections.domain.RetrieveAuthorizationSessi
 import com.stripe.android.financialconnections.exception.InstitutionUnplannedDowntimeError
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.MixedOAuthParams
+import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.WebAuthFlowState
+import com.stripe.android.financialconnections.presentation.withState
 import com.stripe.android.financialconnections.utils.TestHandleError
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import com.stripe.android.financialconnections.utils.UriUtils
@@ -35,6 +37,7 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
 import org.mockito.kotlin.whenever
+import kotlin.test.assertEquals
 
 @Suppress("MaxLineLength")
 @ExperimentalCoroutinesApi
@@ -47,7 +50,7 @@ internal class PartnerAuthViewModelTest {
     private val getSync = mock<GetOrFetchSync>()
     private val postAuthSessionEvent = mock<PostAuthSessionEvent>()
     private val retrieveAuthorizationSession = mock<RetrieveAuthorizationSession>()
-    private val eventTracker = mock<FinancialConnectionsAnalyticsTracker>()
+    private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val pollAuthorizationSessionOAuthResults = mock<PollAuthorizationSessionOAuthResults>()
     private val completeAuthorizationSession = mock<CompleteAuthorizationSession>()
     private val cancelAuthorizationSession = mock<CancelAuthorizationSession>()
@@ -81,6 +84,31 @@ internal class PartnerAuthViewModelTest {
                 displayErrorScreen = true
             )
         }
+
+    @Test
+    fun `init - when existing auth session available, payload succeeds pane loaded emits`() = runTest {
+        val activeAuthSession = authorizationSession()
+        val activeInstitution = institution()
+        val manifest = sessionManifest().copy(
+            activeInstitution = activeInstitution,
+            activeAuthSession = activeAuthSession
+        )
+        whenever(getSync()).thenReturn(syncResponse(manifest))
+
+        val viewModel = createViewModel(SharedPartnerAuthState(Pane.PARTNER_AUTH_DRAWER))
+
+        eventTracker.assertContainsEvent(
+            "linked_accounts.pane.loaded",
+            mapOf(
+                "pane" to Pane.PARTNER_AUTH.value,
+            )
+        )
+
+        withState(viewModel) {
+            assertThat(it.payload).isInstanceOf(Async.Success::class.java)
+            assertEquals(requireNotNull(it.payload()).authSession, activeAuthSession)
+        }
+    }
 
     @Test
     fun `onWebAuthFlowFinished - when webStatus Success, polls accounts and authorizes with token`() =

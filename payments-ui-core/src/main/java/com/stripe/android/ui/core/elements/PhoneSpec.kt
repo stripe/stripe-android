@@ -18,8 +18,8 @@ data class PhoneSpec(
     fun transform(initialValues: Map<IdentifierSpec, String?>) = createSectionElement(
         PhoneNumberElement(
             this.apiPath,
-            PhoneNumberController(
-                initialPhoneNumber = initialValues[IdentifierSpec.Phone] ?: "",
+            PhoneNumberController.createPhoneNumberController(
+                initialValue = initialValues[IdentifierSpec.Phone] ?: "",
             )
         )
     )

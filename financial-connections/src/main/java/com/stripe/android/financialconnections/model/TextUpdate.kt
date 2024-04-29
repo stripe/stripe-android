@@ -48,7 +48,7 @@ internal data class ConsentPane(
     @Serializable(with = MarkdownToHtmlSerializer::class)
     val cta: String,
     @SerialName("data_access_notice")
-    val dataAccessNotice: DataAccessNotice,
+    val dataAccessNotice: DataAccessNotice? = null,
     @SerialName("legal_details_notice")
     val legalDetailsNotice: LegalDetailsNotice,
     @SerialName("title")

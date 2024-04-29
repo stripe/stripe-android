@@ -17,6 +17,8 @@ internal data class FinancialConnectionsSheetState(
     val webAuthFlowStatus: AuthFlowStatus,
     val viewEffect: FinancialConnectionsSheetViewEffect?
 ) {
+    val isInstantDebits: Boolean
+        get() = initialArgs is FinancialConnectionsSheetActivityArgs.ForInstantDebits
 
     val sessionSecret: String
         get() = initialArgs.configuration.financialConnectionsSessionClientSecret

@@ -8,7 +8,6 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 
 internal data class FormArguments(
     val paymentMethodCode: PaymentMethodCode,
-    val showCheckbox: Boolean,
     val cbcEligibility: CardBrandChoiceEligibility,
     val merchantName: String,
     val amount: Amount? = null,

@@ -35,14 +35,12 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.text.autofill
 import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
-import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val PHONE_NUMBER_TEXT_FIELD_TAG = "PhoneNumberTextField"
@@ -118,12 +116,12 @@ fun PhoneNumberElementUI(
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
 
-    val value by controller.fieldValue.collectAsState("")
-    val isComplete by controller.isComplete.collectAsState(false)
+    val value by controller.fieldValue.collectAsState()
+    val isComplete by controller.isComplete.collectAsState()
     val shouldShowError by controller.error.collectAsState(null)
-    val label by controller.label.collectAsState(CoreR.string.stripe_address_label_phone_number)
-    val placeholder by controller.placeholder.collectAsState("")
-    val visualTransformation by controller.visualTransformation.collectAsState(VisualTransformation.None)
+    val label by controller.label.collectAsState()
+    val placeholder by controller.placeholder.collectAsState()
+    val visualTransformation by controller.visualTransformation.collectAsState()
     val colors = TextFieldColors(shouldShowError != null)
     var hasFocus by rememberSaveable { mutableStateOf(false) }
 

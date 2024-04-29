@@ -87,7 +87,6 @@ import com.stripe.android.identity.ui.IndividualCollectedStates
 import com.stripe.android.identity.utils.IdentityIO
 import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.mlcore.base.InterpreterInitializer
-import com.stripe.android.uicore.address.AddressSchemaRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -111,7 +110,6 @@ internal class IdentityViewModel constructor(
     internal val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
     internal val screenTracker: ScreenTracker,
     internal val imageHandler: IdentityImageHandler,
-    internal val addressSchemaRepository: AddressSchemaRepository,
     private val tfLiteInitializer: InterpreterInitializer,
     private val savedStateHandle: SavedStateHandle,
     @UIContext internal val uiContext: CoroutineContext,
@@ -1852,7 +1850,6 @@ internal class IdentityViewModel constructor(
                 subcomponent.identityAnalyticsRequestFactory,
                 subcomponent.screenTracker,
                 subcomponent.identityImageHandler,
-                subcomponent.addressRepository,
                 subcomponent.tfLiteInitializer,
                 savedStateHandle,
                 uiContextSupplier(),

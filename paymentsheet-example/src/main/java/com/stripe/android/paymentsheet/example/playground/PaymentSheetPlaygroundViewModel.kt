@@ -23,6 +23,8 @@ import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentResponse
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
@@ -87,6 +89,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
                 is Result.Success -> {
                     val checkoutResponse = apiResponse.value
+                    println("StripeIntent ${checkoutResponse.intentClientSecret.substringBefore("_secret_")}")
 
                     // Init PaymentConfiguration with the publishable key returned from the backend,
                     // which will be used on all Stripe API calls
@@ -95,9 +98,20 @@ internal class PaymentSheetPlaygroundViewModel(
                         checkoutResponse.publishableKey
                     )
 
-                    state.value = checkoutResponse.asPlaygroundState(
-                        snapshot = playgroundSettingsSnapshot,
+                    val customerId = checkoutResponse.customerId
+                    val updatedSettings = playgroundSettingsSnapshot.playgroundSettings()
+                    if (
+                        playgroundSettingsSnapshot[CustomerSettingsDefinition] == CustomerType.NEW &&
+                        customerId != null
+                    ) {
+                        println("Customer $customerId")
+                        updatedSettings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
+                    }
+                    playgroundSettingsFlow.value = updatedSettings
+                    val updatedState = checkoutResponse.asPlaygroundState(
+                        snapshot = updatedSettings.snapshot(),
                     )
+                    state.value = updatedState
                 }
             }
         }

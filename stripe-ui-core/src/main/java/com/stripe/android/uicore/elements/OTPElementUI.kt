@@ -137,7 +137,7 @@ fun OTPElementUI(
                     }
                 )
             ) {
-                val value by element.controller.fieldValues[index].collectAsState("")
+                val value by element.controller.fieldValues[index].collectAsState()
 
                 var textFieldModifier = Modifier
                     .height(56.dp)

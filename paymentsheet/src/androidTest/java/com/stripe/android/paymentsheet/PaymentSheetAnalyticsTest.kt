@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
@@ -19,29 +19,36 @@ import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
+import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAnalyticsTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    private val retryRule = RetryRule(5)
+    private val networkRule = NetworkRule(
+        hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
+        validationTimeout = 1.seconds, // Analytics requests happen async.
+    )
+    private val composeTestRule = createEmptyComposeRule()
 
-    private val activityScenarioRule = composeTestRule.activityRule
+    @get:Rule
+    val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(networkRule)
+        .around(composeTestRule)
+        .around(retryRule)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
-
-    @get:Rule
-    val networkRule = NetworkRule(
-        hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
-    )
 
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
 
     @Test
-    fun testSuccessfulCardPayment() = activityScenarioRule.runPaymentSheetTest(
+    fun testSuccessfulCardPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -81,15 +88,26 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "mc_complete_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()
     }
 
     @Test
-    fun testSuccessfulCardPaymentInFlowController() = activityScenarioRule.runFlowControllerTest(
+    fun testSuccessfulCardPaymentInFlowController() = runFlowControllerTest(
+        networkRule = networkRule,
         integrationType = integrationType,
         paymentOptionCallback = { paymentOption ->
             assertThat(paymentOption?.label).endsWith("4242")
@@ -138,8 +156,18 @@ internal class PaymentSheetAnalyticsTest {
         }
 
         validateAnalyticsRequest(eventName = "mc_confirm_button_tapped")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.started",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "stripe_android.confirm_returnurl_null")
         validateAnalyticsRequest(eventName = "stripe_android.payment_intent_confirmation")
+        validateAnalyticsRequest(
+            eventName = "stripe_android.paymenthandler.confirm.finished",
+            query("intent_id", "pi_example"),
+            query("payment_method_type", "card"),
+        )
         validateAnalyticsRequest(eventName = "mc_custom_payment_newpm_success", hasQueryParam("duration"))
 
         page.clickPrimaryButton()

@@ -26,6 +26,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.ui.BottomSheetContentTestTag
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -171,8 +172,15 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be hidden when returning to payment options`() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            )
+        )
+
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-            paymentMethods = PaymentMethodFixtures.createCards(5)
+            paymentMethods = PaymentMethodFixtures.createCards(5),
+            stripeIntent = paymentMethodMetadata.stripeIntent,
         )
 
         runActivityScenario(args) {

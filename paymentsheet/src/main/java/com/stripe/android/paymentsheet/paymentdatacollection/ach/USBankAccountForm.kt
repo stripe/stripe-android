@@ -59,7 +59,9 @@ internal fun USBankAccountForm(
     val viewModel = viewModel<USBankAccountFormViewModel>(
         factory = USBankAccountFormViewModel.Factory {
             USBankAccountFormViewModel.Args(
+                instantDebits = usBankAccountFormArgs.instantDebits,
                 formArgs = formArgs,
+                showCheckbox = usBankAccountFormArgs.showCheckbox,
                 isCompleteFlow = usBankAccountFormArgs.isCompleteFlow,
                 isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                 stripeIntentId = usBankAccountFormArgs.stripeIntentId,
@@ -83,6 +85,7 @@ internal fun USBankAccountForm(
         when (val screenState = currentScreenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     formArgs = formArgs,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
                     isProcessing = screenState.isProcessing,
@@ -95,11 +98,14 @@ internal fun USBankAccountForm(
                 )
             }
             is USBankAccountFormScreenState.MandateCollection -> {
-                MandateCollectionScreen(
+                AccountPreviewScreen(
                     formArgs = formArgs,
+                    bankName = screenState.bankName,
+                    last4 = screenState.last4,
+                    showCheckbox = usBankAccountFormArgs.showCheckbox,
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                    screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -111,11 +117,14 @@ internal fun USBankAccountForm(
                 )
             }
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
-                VerifyWithMicrodepositsScreen(
+                AccountPreviewScreen(
                     formArgs = formArgs,
+                    bankName = screenState.paymentAccount.bankName,
+                    last4 = screenState.paymentAccount.last4,
+                    showCheckbox = usBankAccountFormArgs.showCheckbox,
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                    screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -127,11 +136,14 @@ internal fun USBankAccountForm(
                 )
             }
             is USBankAccountFormScreenState.SavedAccount -> {
-                SavedAccountScreen(
+                AccountPreviewScreen(
                     formArgs = formArgs,
+                    bankName = screenState.bankName,
+                    last4 = screenState.last4,
+                    showCheckbox = usBankAccountFormArgs.showCheckbox,
+                    instantDebits = usBankAccountFormArgs.instantDebits,
                     isProcessing = screenState.isProcessing,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
-                    screenState = screenState,
                     nameController = viewModel.nameController,
                     emailController = viewModel.emailController,
                     phoneController = viewModel.phoneController,
@@ -149,6 +161,7 @@ internal fun USBankAccountForm(
 @Composable
 internal fun BillingDetailsCollectionScreen(
     formArgs: FormArguments,
+    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
     nameController: TextFieldController,
@@ -160,6 +173,7 @@ internal fun BillingDetailsCollectionScreen(
 ) {
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
+            instantDebits = instantDebits,
             formArgs = formArgs,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
@@ -174,11 +188,14 @@ internal fun BillingDetailsCollectionScreen(
 }
 
 @Composable
-internal fun MandateCollectionScreen(
+internal fun AccountPreviewScreen(
     formArgs: FormArguments,
+    bankName: String?,
+    last4: String?,
+    showCheckbox: Boolean,
+    instantDebits: Boolean,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
-    screenState: USBankAccountFormScreenState.MandateCollection,
     nameController: TextFieldController,
     emailController: TextFieldController,
     phoneController: PhoneNumberController,
@@ -191,6 +208,7 @@ internal fun MandateCollectionScreen(
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
             formArgs = formArgs,
+            instantDebits = instantDebits,
             isProcessing = isProcessing,
             isPaymentFlow = isPaymentFlow,
             nameController = nameController,
@@ -201,86 +219,10 @@ internal fun MandateCollectionScreen(
             sameAsShippingElement = sameAsShippingElement,
         )
         AccountDetailsForm(
-            formArgs = formArgs,
+            showCheckbox = showCheckbox,
             isProcessing = isProcessing,
-            bankName = screenState.paymentAccount.institutionName,
-            last4 = screenState.paymentAccount.last4,
-            saveForFutureUseElement = saveForFutureUseElement,
-            onRemoveAccount = onRemoveAccount,
-        )
-    }
-}
-
-@Composable
-internal fun VerifyWithMicrodepositsScreen(
-    formArgs: FormArguments,
-    isProcessing: Boolean,
-    isPaymentFlow: Boolean,
-    screenState: USBankAccountFormScreenState.VerifyWithMicrodeposits,
-    nameController: TextFieldController,
-    emailController: TextFieldController,
-    phoneController: PhoneNumberController,
-    addressController: AddressController,
-    lastTextFieldIdentifier: IdentifierSpec?,
-    sameAsShippingElement: SameAsShippingElement?,
-    saveForFutureUseElement: SaveForFutureUseElement,
-    onRemoveAccount: () -> Unit,
-) {
-    Column(Modifier.fillMaxWidth()) {
-        BillingDetailsForm(
-            formArgs = formArgs,
-            isProcessing = isProcessing,
-            isPaymentFlow = isPaymentFlow,
-            nameController = nameController,
-            emailController = emailController,
-            phoneController = phoneController,
-            addressController = addressController,
-            lastTextFieldIdentifier = lastTextFieldIdentifier,
-            sameAsShippingElement = sameAsShippingElement,
-        )
-        AccountDetailsForm(
-            formArgs = formArgs,
-            isProcessing = isProcessing,
-            bankName = screenState.paymentAccount.bankName,
-            last4 = screenState.paymentAccount.last4,
-            saveForFutureUseElement = saveForFutureUseElement,
-            onRemoveAccount = onRemoveAccount,
-        )
-    }
-}
-
-@Composable
-internal fun SavedAccountScreen(
-    formArgs: FormArguments,
-    isProcessing: Boolean,
-    isPaymentFlow: Boolean,
-    screenState: USBankAccountFormScreenState.SavedAccount,
-    nameController: TextFieldController,
-    emailController: TextFieldController,
-    phoneController: PhoneNumberController,
-    addressController: AddressController,
-    lastTextFieldIdentifier: IdentifierSpec?,
-    sameAsShippingElement: SameAsShippingElement?,
-    saveForFutureUseElement: SaveForFutureUseElement,
-    onRemoveAccount: () -> Unit,
-) {
-    Column(Modifier.fillMaxWidth()) {
-        BillingDetailsForm(
-            formArgs = formArgs,
-            isProcessing = isProcessing,
-            isPaymentFlow = isPaymentFlow,
-            nameController = nameController,
-            emailController = emailController,
-            phoneController = phoneController,
-            addressController = addressController,
-            lastTextFieldIdentifier = lastTextFieldIdentifier,
-            sameAsShippingElement = sameAsShippingElement,
-        )
-        AccountDetailsForm(
-            formArgs = formArgs,
-            isProcessing = isProcessing,
-            bankName = screenState.bankName,
-            last4 = screenState.last4,
+            bankName = bankName,
+            last4 = last4,
             saveForFutureUseElement = saveForFutureUseElement,
             onRemoveAccount = onRemoveAccount,
         )
@@ -289,6 +231,7 @@ internal fun SavedAccountScreen(
 
 @Composable
 internal fun BillingDetailsForm(
+    instantDebits: Boolean,
     formArgs: FormArguments,
     isProcessing: Boolean,
     isPaymentFlow: Boolean,
@@ -308,7 +251,15 @@ internal fun BillingDetailsForm(
             },
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
         )
-        if (formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never) {
+
+        val showName = if (instantDebits) {
+            // Only show if we're being forced to
+            formArgs.billingDetailsCollectionConfiguration.name == CollectionMode.Always
+        } else {
+            formArgs.billingDetailsCollectionConfiguration.name != CollectionMode.Never
+        }
+
+        if (showName) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -439,7 +390,7 @@ private fun AddressSection(
 
 @Composable
 private fun AccountDetailsForm(
-    formArgs: FormArguments,
+    showCheckbox: Boolean,
     isProcessing: Boolean,
     bankName: String?,
     last4: String?,
@@ -495,7 +446,7 @@ private fun AccountDetailsForm(
                 )
             }
         }
-        if (formArgs.showCheckbox) {
+        if (showCheckbox) {
             SaveForFutureUseElementUI(
                 enabled = true,
                 element = saveForFutureUseElement,

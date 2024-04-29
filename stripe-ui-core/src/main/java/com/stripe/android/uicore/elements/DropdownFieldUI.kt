@@ -82,8 +82,8 @@ fun DropDown(
     modifier: Modifier = Modifier,
     showChevron: Boolean = true
 ) {
-    val label by controller.label.collectAsState(null)
-    val selectedIndex by controller.selectedIndex.collectAsState(0)
+    val label by controller.label.collectAsState()
+    val selectedIndex by controller.selectedIndex.collectAsState()
     val items = controller.displayItems
     val shouldDisableDropdownWithSingleItem =
         items.count() == 1 && controller.disableDropdownWithSingleElement

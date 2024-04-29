@@ -1,5 +1,7 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.testing.LocaleTestRule
@@ -14,6 +16,9 @@ import kotlin.test.Test
 internal class AfterpayClearpayDefinitionTest {
     @get:Rule
     val localeRule = LocaleTestRule()
+
+    private val context = ApplicationProvider.getApplicationContext<Context>()
+    private val res = context.resources
 
     @Test
     fun `Test label for afterpay show correctly when clearpay string`() {
@@ -35,7 +40,7 @@ internal class AfterpayClearpayDefinitionTest {
         val supportedPaymentMethod = paymentMethodMetadata.supportedPaymentMethodForCode(
             code = "afterpay_clearpay",
         )!!
-        assertThat(supportedPaymentMethod.displayNameResource)
-            .isEqualTo(resourceId)
+        assertThat(supportedPaymentMethod.displayName.resolve(context))
+            .isEqualTo(res.getString(resourceId))
     }
 }

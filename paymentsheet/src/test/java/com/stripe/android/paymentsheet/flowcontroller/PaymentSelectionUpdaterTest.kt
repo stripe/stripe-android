@@ -14,6 +14,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -131,6 +132,42 @@ class PaymentSelectionUpdaterTest {
 
         val result = updater(
             currentSelection = existingSelection,
+            previousConfig = null,
+            newState = newState,
+        )
+        assertThat(result).isNull()
+    }
+
+    @Test
+    fun `Can use external payment method if it's supported`() {
+        val paymentSelection =
+            PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            externalPaymentMethodSpecs = listOf(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+        )
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = paymentSelection,
+            previousConfig = null,
+            newState = newState,
+        )
+        assertThat(result).isEqualTo(paymentSelection)
+    }
+
+    @Test
+    fun `Can't use external payment method if it's not returned by backend`() {
+        val paymentSelection =
+            PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
+
+        val newState = mockPaymentSheetStateWithPaymentIntent(
+            externalPaymentMethodSpecs = emptyList()
+        )
+        val updater = createUpdater()
+
+        val result = updater(
+            currentSelection = paymentSelection,
             previousConfig = null,
             newState = newState,
         )
@@ -296,6 +333,7 @@ class PaymentSelectionUpdaterTest {
         paymentSelection: PaymentSelection? = null,
         customerPaymentMethods: List<PaymentMethod> = emptyList(),
         config: PaymentSheet.Configuration = defaultPaymentSheetConfiguration,
+        externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec> = emptyList(),
     ): PaymentSheetState.Full {
         val intent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
 
@@ -315,7 +353,8 @@ class PaymentSelectionUpdaterTest {
                     SharedDataSpec("card"),
                     SharedDataSpec("paypal"),
                     SharedDataSpec("sofort"),
-                )
+                ),
+                externalPaymentMethodSpecs = externalPaymentMethodSpecs,
             ),
         )
     }

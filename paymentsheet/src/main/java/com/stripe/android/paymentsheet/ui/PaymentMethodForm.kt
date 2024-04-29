@@ -21,7 +21,6 @@ internal fun PaymentMethodForm(
     args: FormArguments,
     enabled: Boolean,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
-    showCheckboxFlow: Flow<Boolean>,
     formElements: List<FormElement>,
     modifier: Modifier = Modifier,
 ) {
@@ -30,12 +29,11 @@ internal fun PaymentMethodForm(
         factory = FormViewModel.Factory(
             formElements = formElements,
             formArguments = args,
-            showCheckboxFlow = showCheckboxFlow,
         )
     )
 
     val elements = formViewModel.elements
-    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState(emptySet())
+    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState()
     val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState(null)
 
     PaymentMethodForm(

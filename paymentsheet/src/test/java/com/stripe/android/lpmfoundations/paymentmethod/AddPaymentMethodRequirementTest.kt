@@ -1,14 +1,26 @@
 package com.stripe.android.lpmfoundations.paymentmethod
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement.InstantDebits
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.testing.FeatureFlagTestRule
+import com.stripe.android.testing.PaymentIntentFactory
+import org.junit.Rule
 import org.junit.Test
 
 internal class AddPaymentMethodRequirementTest {
+
+    @get:Rule
+    val instantDebitsFeatureRule = FeatureFlagTestRule(
+        featureFlag = FeatureFlags.instantDebits,
+        isEnabled = false,
+    )
+
     @Test
     fun testUnsupportedReturnsFalse() {
         val metadata = PaymentMethodMetadataFactory.create()
@@ -155,5 +167,73 @@ internal class AddPaymentMethodRequirementTest {
     fun testValidUsBankVerificationMethodReturnsFalse() {
         val metadata = PaymentMethodMetadataFactory.create()
         assertThat(AddPaymentMethodRequirement.ValidUsBankVerificationMethod.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsTrue() {
+        instantDebitsFeatureRule.setEnabled(true)
+
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isTrue()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsFalseIfFeatureNotEnabled() {
+        instantDebitsFeatureRule.setEnabled(false)
+
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent(),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsFalseIfDeferredIntent() {
+        instantDebitsFeatureRule.setEnabled(true)
+
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent().copy(
+                clientSecret = null,
+            ),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsFalseIfShowingUsBankAccount() {
+        instantDebitsFeatureRule.setEnabled(true)
+
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent().copy(
+                paymentMethodTypes = listOf("card", "link", "us_bank_account"),
+            ),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    @Test
+    fun testInstantDebitsReturnsFalseIfOnlyCardFundingSource() {
+        instantDebitsFeatureRule.setEnabled(true)
+
+        val metadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = createValidInstantDebitsPaymentIntent().copy(
+                linkFundingSources = listOf("card"),
+            ),
+        )
+
+        assertThat(InstantDebits.isMetBy(metadata)).isFalse()
+    }
+
+    private fun createValidInstantDebitsPaymentIntent(): PaymentIntent {
+        return PaymentIntentFactory.create(
+            paymentMethodTypes = listOf("card", "link"),
+            linkFundingSources = listOf("card", "bank_account"),
+        )
     }
 }

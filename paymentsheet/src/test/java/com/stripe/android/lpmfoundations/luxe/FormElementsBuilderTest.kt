@@ -1,7 +1,9 @@
 package com.stripe.android.lpmfoundations.luxe
 
+import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -9,7 +11,6 @@ import com.stripe.android.ui.core.elements.EmptyFormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
@@ -96,14 +97,14 @@ class FormElementsBuilderTest {
         billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration =
             PaymentSheet.BillingDetailsCollectionConfiguration(),
     ): UiDefinitionFactory.Arguments {
+        val context = ApplicationProvider.getApplicationContext<Application>()
         return UiDefinitionFactory.Arguments(
-            addressRepository = mock(),
             initialValues = emptyMap(),
             shippingValues = emptyMap(),
             amount = null,
             saveForFutureUseInitialValue = false,
             merchantName = "Example Inc.",
-            context = ApplicationProvider.getApplicationContext(),
+            cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             cbcEligibility = CardBrandChoiceEligibility.Ineligible,
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             requiresMandate = false,

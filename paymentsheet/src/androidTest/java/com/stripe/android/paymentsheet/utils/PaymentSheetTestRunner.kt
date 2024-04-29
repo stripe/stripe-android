@@ -3,10 +3,10 @@ package com.stripe.android.paymentsheet.utils
 import androidx.activity.ComponentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
-import androidx.test.ext.junit.rules.ActivityScenarioRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.link.account.LinkStore
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -42,7 +42,8 @@ internal class PaymentSheetTestRunnerContext(
     }
 }
 
-internal fun ActivityScenarioRule<MainActivity>.runPaymentSheetTest(
+internal fun runPaymentSheetTest(
+    networkRule: NetworkRule,
     integrationType: IntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     resultCallback: PaymentSheetResultCallback,
@@ -60,32 +61,38 @@ internal fun ActivityScenarioRule<MainActivity>.runPaymentSheetTest(
     )
 
     runPaymentSheetTestInternal(
+        networkRule = networkRule,
         countDownLatch = countDownLatch,
         makePaymentSheet = factory::make,
         block = block,
     )
 }
 
-private fun ActivityScenarioRule<MainActivity>.runPaymentSheetTestInternal(
+private fun runPaymentSheetTestInternal(
+    networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makePaymentSheet: (ComponentActivity) -> PaymentSheet,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
-    scenario.moveToState(Lifecycle.State.CREATED)
-    scenario.onActivity {
-        PaymentConfiguration.init(it, "pk_test_123")
-        LinkStore(it.applicationContext).clear()
+    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            LinkStore(it.applicationContext).clear()
+        }
+
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            paymentSheet = makePaymentSheet(it)
+        }
+
+        scenario.moveToState(Lifecycle.State.RESUMED)
+
+        val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
+        block(testContext)
+
+        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+        networkRule.validate()
+        assertThat(didCompleteSuccessfully).isTrue()
     }
-
-    lateinit var paymentSheet: PaymentSheet
-    scenario.onActivity {
-        paymentSheet = makePaymentSheet(it)
-    }
-
-    scenario.moveToState(Lifecycle.State.RESUMED)
-
-    val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
-    block(testContext)
-
-    assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
 }
