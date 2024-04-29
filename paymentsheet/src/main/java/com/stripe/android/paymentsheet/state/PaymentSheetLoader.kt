@@ -206,7 +206,11 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                             StripeException.create(exception)
                         )
 
-                        throw exception
+                        if (!stripeIntent.isLiveMode) {
+                            throw exception
+                        }
+
+                        null
                     }
                 }
                 is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
