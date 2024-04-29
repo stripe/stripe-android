@@ -123,6 +123,9 @@ interface ErrorReporter {
         BROWSER_LAUNCHER_NULL_ARGS(
             eventName = "payments.browserlauncher.null_args"
         ),
+        GOOGLE_PAY_FAILED(
+            eventName = "google_pay.confirm.error"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -141,6 +144,9 @@ interface ErrorReporter {
         ),
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
+        ),
+        GOOGLE_PAY_UNEXPECTED_RESULT_CODE(
+            partialEventName = "google_pay.confirm.unexpected_result_code"
         ),
         GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
             partialEventName = "google_pay.confirm.unexpected_result"
