@@ -185,45 +185,19 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
         }
 
         val customer = async {
-            when (customerConfig?.accessType) {
-                is PaymentSheet.CustomerAccessType.CustomerSession -> {
-                    elementsSession.customer?.let { customer ->
-                        CustomerState(
-                            id = customer.session.customerId,
-                            ephemeralKeySecret = customer.session.apiKey,
-                            paymentMethods = customer.paymentMethods
-                                .withLastUsedPaymentMethodFirst(savedSelection.await()),
-                        )
-                    } ?: run {
-                        val exception = IllegalStateException(
-                            "Excepted 'customer' attribute as part of 'elements_session' response!"
-                        )
-
-                        errorReporter.report(
-                            ErrorReporter
-                                .UnexpectedErrorEvent
-                                .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
-                            StripeException.create(exception)
-                        )
-
-                        if (!stripeIntent.isLiveMode) {
-                            throw exception
-                        }
-
-                        null
-                    }
-                }
-                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
-                    CustomerState(
-                        id = customerConfig.id,
-                        ephemeralKeySecret = customerConfig.ephemeralKeySecret,
-                        paymentMethods = retrieveCustomerPaymentMethods(
-                            metadata = metadata,
-                            customerConfig = customerConfig,
-                        ).withLastUsedPaymentMethodFirst(savedSelection.await())
-                    )
-                }
+            val customerState = when (customerConfig?.accessType) {
+                is PaymentSheet.CustomerAccessType.CustomerSession ->
+                    elementsSession.toCustomerState()
+                is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey ->
+                    customerConfig.toCustomerState(metadata)
                 else -> null
+            }
+
+            customerState?.let { state ->
+                state.copy(
+                    paymentMethods = state.paymentMethods
+                        .withLastUsedPaymentMethodFirst(savedSelection.await())
+                )
             }
         }
 
@@ -493,6 +467,46 @@ internal class DefaultPaymentSheetLoader @Inject constructor(
                 )
             }
         }
+    }
+
+    private fun ElementsSession.toCustomerState(): CustomerState? {
+        return customer?.let { customer ->
+            CustomerState(
+                id = customer.session.customerId,
+                ephemeralKeySecret = customer.session.apiKey,
+                paymentMethods = customer.paymentMethods,
+            )
+        } ?: run {
+            val exception = IllegalStateException(
+                "Excepted 'customer' attribute as part of 'elements_session' response!"
+            )
+
+            errorReporter.report(
+                ErrorReporter
+                    .UnexpectedErrorEvent
+                    .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND,
+                StripeException.create(exception)
+            )
+
+            if (!stripeIntent.isLiveMode) {
+                throw exception
+            }
+
+            null
+        }
+    }
+
+    private suspend fun PaymentSheet.CustomerConfiguration.toCustomerState(
+        metadata: PaymentMethodMetadata,
+    ): CustomerState {
+        return CustomerState(
+            id = id,
+            ephemeralKeySecret = ephemeralKeySecret,
+            paymentMethods = retrieveCustomerPaymentMethods(
+                metadata = metadata,
+                customerConfig = this,
+            )
+        )
     }
 }
 

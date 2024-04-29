@@ -263,7 +263,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `removePaymentMethod uses retrieved 'CustomerState' info, not 'CustomerConfiguration' info`() = runTest {
+    fun `removePaymentMethod should use loaded customer info when removing payment methods`() = runTest {
         val paymentMethods = PaymentMethodFactory.cards(1)
 
         val customerRepository = spy(
@@ -342,7 +342,7 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
-    fun `modifyPaymentMethod uses retrieved 'CustomerState' info, not 'CustomerConfiguration' info`() = runTest {
+    fun `modifyPaymentMethod should use loaded customer info when modifying payment methods`() = runTest {
         val paymentMethods = listOf(CARD_WITH_NETWORKS_PAYMENT_METHOD)
 
         val customerRepository = spy(
