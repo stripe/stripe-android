@@ -255,7 +255,7 @@ class FieldValuesToParamsMapConverterTest {
     @Test
     fun `transformToPaymentMethodOptionsParams returns correct params for Blik`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
-            .transformToPaymentMethodCreateParams(
+            .transformToPaymentMethodOptionsParams(
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(
                         "joe",
@@ -279,23 +279,13 @@ class FieldValuesToParamsMapConverterTest {
                     )
                 ),
                 PaymentMethod.Type.Blik.code,
-                PaymentMethod.Type.Blik.requiresMandate
             )
 
+        assertThat(paymentMethodParams).isNotNull()
         assertThat(
-            paymentMethodParams.toParamMap().toString()
+            paymentMethodParams?.toParamMap().toString()
         ).isEqualTo(
-            "{" +
-                "type=blik, " +
-                "billing_details={" +
-                "name=joe, " +
-                "email=joe@gmail.com, " +
-                "address={" +
-                "country=US, " +
-                "line1=123 Main Street" +
-                "}" +
-                "}" +
-                "}"
+            "{blik={code=example_blik_code}}"
         )
     }
 
