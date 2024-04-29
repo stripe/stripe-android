@@ -35,7 +35,9 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.ExternalPaymentMethodHandler
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -116,6 +118,8 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
+    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
+
     private val initializationMode: PaymentSheet.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
 
@@ -162,12 +166,19 @@ internal class DefaultFlowController @Inject internal constructor(
             bacsMandateConfirmationActivityLauncher
         )
 
+        val externalPaymentMethodLauncher = activityResultRegistryOwner.register(
+            ExternalPaymentMethodContract(),
+            ::onPaymentResult
+        )
+        this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
+
         val activityResultLaunchers = setOf(
             paymentLauncherActivityResultLauncher,
             paymentOptionActivityLauncher,
             googlePayActivityLauncher,
             sepaMandateActivityLauncher,
-            bacsMandateConfirmationActivityLauncher
+            bacsMandateConfirmationActivityLauncher,
+            externalPaymentMethodLauncher,
         )
 
         linkLauncher.register(
@@ -327,8 +338,10 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.GooglePay -> launchGooglePay(state)
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
-            is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodHandler.confirm(
-                paymentResultCallback::onPaymentSheetResult
+            is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodInterceptor.intercept(
+                externalPaymentMethodType = paymentSelection.type,
+                onPaymentResult = ::onPaymentResult,
+                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
             )
             is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
             is PaymentSelection.New, null -> confirmPaymentSelection(paymentSelection, state)
