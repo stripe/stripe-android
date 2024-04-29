@@ -31,16 +31,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.stripe.android.customersheet.CustomerAdapter
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResultCallback
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
@@ -167,7 +165,7 @@ internal class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
         val customerSheet = rememberCustomerSheet(
             configuration = playgroundState.customerSheetConfiguration(),
-            adapter = playgroundState.adapter,
+            customerAdapter = playgroundState.adapter,
             callback = callback,
         )
 
@@ -184,23 +182,6 @@ internal class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             paymentMethodPainter = option?.iconPainter,
             onClick = customerSheet::present
         )
-    }
-
-    @OptIn(ExperimentalCustomerSheetApi::class)
-    @Composable
-    private fun rememberCustomerSheet(
-        configuration: CustomerSheet.Configuration,
-        adapter: CustomerAdapter,
-        callback: CustomerSheetResultCallback,
-    ): CustomerSheet {
-        return remember(configuration, adapter, callback) {
-            CustomerSheet.create(
-                activity = this,
-                configuration = configuration,
-                customerAdapter = adapter,
-                callback = callback,
-            )
-        }
     }
 }
 
