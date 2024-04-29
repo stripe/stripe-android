@@ -80,28 +80,30 @@ internal class CustomerSheetPlaygroundViewModel(
     }
 
     @OptIn(ExperimentalCustomerSheetApi::class)
-    suspend fun fetchOption(customerSheet: CustomerSheet) {
-        withContext(Dispatchers.IO) {
-            when (val result = customerSheet.retrievePaymentOptionSelection()) {
-                is CustomerSheetResult.Selected -> {
-                    playgroundState.update { existingState ->
-                        existingState?.let { state ->
-                            return@update state.copy(
-                                optionState = CustomerSheetPlaygroundState.PaymentOptionState.Loaded(
-                                    paymentOption = result.selection?.paymentOption
+    fun fetchOption(customerSheet: CustomerSheet) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                when (val result = customerSheet.retrievePaymentOptionSelection()) {
+                    is CustomerSheetResult.Selected -> {
+                        playgroundState.update { existingState ->
+                            existingState?.let { state ->
+                                return@update state.copy(
+                                    optionState = CustomerSheetPlaygroundState.PaymentOptionState.Loaded(
+                                        paymentOption = result.selection?.paymentOption
+                                    )
                                 )
-                            )
+                            }
                         }
                     }
-                }
-                is CustomerSheetResult.Failed -> {
-                    status.emit(
-                        StatusMessage(
-                            message = "Failed to retrieve payment options:\n${result.exception.message}"
+                    is CustomerSheetResult.Failed -> {
+                        status.emit(
+                            StatusMessage(
+                                message = "Failed to retrieve payment options:\n${result.exception.message}"
+                            )
                         )
-                    )
+                    }
+                    is CustomerSheetResult.Canceled -> Unit
                 }
-                is CustomerSheetResult.Canceled -> Unit
             }
         }
     }
