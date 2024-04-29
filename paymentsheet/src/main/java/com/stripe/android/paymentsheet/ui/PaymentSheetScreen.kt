@@ -219,10 +219,15 @@ private fun PaymentSheetContent(
         )
     }
 
-    Box(modifier = Modifier.animateContentSize()) {
-        currentScreen.Content(
+    AnimatedContent(
+        targetState = currentScreen,
+        label = "CurrentScreen",
+    ) { animatedCurrentScreen ->
+        animatedCurrentScreen.Content(
             viewModel = viewModel,
-            modifier = Modifier.padding(bottom = 8.dp),
+            modifier = Modifier
+                .padding(bottom = 8.dp)
+                .animateContentSize(),
         )
     }
 
