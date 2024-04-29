@@ -1,7 +1,6 @@
 package com.stripe.android.customersheet.ui
 
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -59,7 +58,7 @@ internal fun CustomerSheetScreen(
             )
         },
         content = {
-            Column(modifier = Modifier.animateContentSize(tween(3000))) {
+            Column(modifier = Modifier.animateContentSize()) {
                 when (viewState) {
                     is CustomerSheetViewState.Loading -> {
                         BottomSheetLoadingIndicator()
