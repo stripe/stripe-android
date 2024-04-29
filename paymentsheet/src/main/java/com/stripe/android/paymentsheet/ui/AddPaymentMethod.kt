@@ -164,11 +164,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-        fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.destination == ParameterDestination.Api.Params
-        }.filterNot { entry ->
-            entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
-        },
+        fieldValuePairs = fieldValuePairs,
         code = paymentMethod.code,
         requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethod.code),
     )
@@ -178,9 +174,7 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
     paymentMethod: SupportedPaymentMethod
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
-        fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.destination == ParameterDestination.Api.Options
-        },
+        fieldValuePairs = fieldValuePairs,
         code = paymentMethod.code,
     )
 }
@@ -189,9 +183,7 @@ internal fun FormFieldValues.transformToExtraParams(
     paymentMethod: SupportedPaymentMethod
 ): PaymentMethodExtraParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodExtraParams(
-        fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.destination == ParameterDestination.Local.Extras
-        },
+        fieldValuePairs = fieldValuePairs,
         code = paymentMethod.code,
     )
 }

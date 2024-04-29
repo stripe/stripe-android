@@ -8,6 +8,7 @@ import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.uicore.elements.IdentifierSpec
+import com.stripe.android.uicore.elements.ParameterDestination
 import com.stripe.android.uicore.forms.FormFieldEntry
 
 /**
@@ -23,20 +24,27 @@ class FieldValuesToParamsMapConverter {
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
             requiresMandate: Boolean
-        ) = transformToParamsMap(
-            fieldValuePairs,
-            code
-        )
-            .filterOutNullValues()
-            .toMap()
-            .run {
-                PaymentMethodCreateParams.createWithOverride(
-                    code,
-                    requiresMandate = requiresMandate,
-                    overrideParamMap = this,
-                    productUsage = setOf("PaymentSheet")
-                )
+        ): PaymentMethodCreateParams {
+            val fieldValuePairsForCreateParams =  fieldValuePairs.filter { entry ->
+                entry.key.destination == ParameterDestination.Api.Params
+            }.filterNot { entry ->
+                entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
             }
+            return transformToParamsMap(
+                fieldValuePairsForCreateParams,
+                code
+            )
+                .filterOutNullValues()
+                .toMap()
+                .run {
+                    PaymentMethodCreateParams.createWithOverride(
+                        code,
+                        requiresMandate = requiresMandate,
+                        overrideParamMap = this,
+                        productUsage = setOf("PaymentSheet")
+                    )
+                }
+        }
 
         /**
          * This function will convert fieldValuePairs to PaymentMethodOptionsParams.
@@ -47,15 +55,18 @@ class FieldValuesToParamsMapConverter {
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
         ): PaymentMethodOptionsParams? {
+            val fieldValuePairsForOptions = fieldValuePairs.filter { entry ->
+                entry.key.destination == ParameterDestination.Api.Options
+            }
             return when (code) {
                 PaymentMethod.Type.Blik.code -> {
-                    val blikCode = fieldValuePairs[IdentifierSpec.BlikCode]?.value
+                    val blikCode = fieldValuePairsForOptions[IdentifierSpec.BlikCode]?.value
                     blikCode?.let {
                         PaymentMethodOptionsParams.Blik(it)
                     }
                 }
                 PaymentMethod.Type.Konbini.code -> {
-                    val confirmationNumber = fieldValuePairs[IdentifierSpec.KonbiniConfirmationNumber]?.value
+                    val confirmationNumber = fieldValuePairsForOptions[IdentifierSpec.KonbiniConfirmationNumber]?.value
                     confirmationNumber?.let {
                         PaymentMethodOptionsParams.Konbini(confirmationNumber)
                     }
@@ -74,9 +85,12 @@ class FieldValuesToParamsMapConverter {
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
             code: PaymentMethodCode,
         ): PaymentMethodExtraParams? {
+            val fieldValuePairsForExtras = fieldValuePairs.filter { entry ->
+                    entry.key.destination == ParameterDestination.Local.Extras
+                }
             return when (code) {
                 PaymentMethod.Type.BacsDebit.code -> PaymentMethodExtraParams.BacsDebit(
-                    confirmed = fieldValuePairs[IdentifierSpec.BacsDebitConfirmed]?.value?.toBoolean()
+                    confirmed = fieldValuePairsForExtras[IdentifierSpec.BacsDebitConfirmed]?.value?.toBoolean()
                 )
                 else -> null
             }
