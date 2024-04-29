@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.ui
 
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -114,7 +113,6 @@ private fun FormElement(
 
     Box(
         modifier = Modifier
-            .animateContentSize()
             .pointerInput("AddPaymentMethod") {
                 awaitEachGesture {
                     val gesture = awaitPointerEvent()
