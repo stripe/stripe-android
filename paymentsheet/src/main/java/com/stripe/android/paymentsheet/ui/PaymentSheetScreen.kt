@@ -138,7 +138,7 @@ internal fun PaymentSheetScreenContent(
     val currentScreen by viewModel.currentScreen.collectAsState()
     val mandateText by viewModel.mandateText.collectAsState()
 
-    Column(modifier) {
+    Column(modifier = modifier.animateContentSize()) {
         PaymentSheetContent(
             viewModel = viewModel,
             type = type,
@@ -219,7 +219,7 @@ private fun PaymentSheetContent(
         )
     }
 
-    Box(modifier = Modifier.animateContentSize()) {
+    Box {
         currentScreen.Content(
             viewModel = viewModel,
             modifier = Modifier.padding(bottom = 8.dp),
