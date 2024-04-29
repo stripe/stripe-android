@@ -161,6 +161,7 @@ internal class DefaultFlowControllerTest {
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
+    @Suppress("LongMethod")
     @BeforeTest
     fun setup() {
         Dispatchers.setMain(testDispatcher)
