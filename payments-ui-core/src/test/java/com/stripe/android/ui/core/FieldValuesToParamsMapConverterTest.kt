@@ -282,7 +282,6 @@ class FieldValuesToParamsMapConverterTest {
                 PaymentMethod.Type.Blik.requiresMandate
             )
 
-        // TODO: never actually updates the billing details
         assertThat(
             paymentMethodParams.toParamMap().toString()
         ).isEqualTo(

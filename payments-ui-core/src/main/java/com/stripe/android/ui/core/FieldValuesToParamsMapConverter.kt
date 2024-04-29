@@ -25,7 +25,7 @@ class FieldValuesToParamsMapConverter {
             code: PaymentMethodCode,
             requiresMandate: Boolean
         ): PaymentMethodCreateParams {
-            val fieldValuePairsForCreateParams =  fieldValuePairs.filter { entry ->
+            val fieldValuePairsForCreateParams = fieldValuePairs.filter { entry ->
                 entry.key.destination == ParameterDestination.Api.Params
             }.filterNot { entry ->
                 entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
@@ -86,12 +86,13 @@ class FieldValuesToParamsMapConverter {
             code: PaymentMethodCode,
         ): PaymentMethodExtraParams? {
             val fieldValuePairsForExtras = fieldValuePairs.filter { entry ->
-                    entry.key.destination == ParameterDestination.Local.Extras
-                }
+                entry.key.destination == ParameterDestination.Local.Extras
+            }
             return when (code) {
                 PaymentMethod.Type.BacsDebit.code -> PaymentMethodExtraParams.BacsDebit(
                     confirmed = fieldValuePairsForExtras[IdentifierSpec.BacsDebitConfirmed]?.value?.toBoolean()
                 )
+
                 else -> null
             }
         }

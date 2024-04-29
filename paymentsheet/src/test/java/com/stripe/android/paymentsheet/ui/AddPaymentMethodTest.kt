@@ -15,7 +15,6 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
-
 @RunWith(RobolectricTestRunner::class)
 internal class AddPaymentMethodTest {
 
@@ -70,7 +69,8 @@ internal class AddPaymentMethodTest {
             metadata
         ) as PaymentSelection.ExternalPaymentMethod
 
-        assertThat(externalPaymentSelection.type).isEqualTo(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC.type)
+        assertThat(externalPaymentSelection.type)
+            .isEqualTo(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC.type)
         assertThat(externalPaymentSelection.label).isEqualTo(paypalSpec.label)
         assertThat(externalPaymentSelection.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
         assertThat(externalPaymentSelection.darkThemeIconUrl).isEqualTo(paypalSpec.darkImageUrl)
