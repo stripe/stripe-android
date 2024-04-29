@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Kunne ikkje ta bilete</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detaljar ikkje synlege</string>
+  <string name="stripe_decrease_lighting_2">Flytt til ein mørkare stad</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">kameraikon</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">ID ikkje i fokus</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaljar ikkje synlege</string>
+  <string name="stripe_reduce_glare_2">Prøv å redusera gjenskinn og gjera ID-en synleg</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Ta bilete på nytt</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->
