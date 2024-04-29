@@ -24,7 +24,7 @@ internal class PaymentSheetTest {
 //    private val retryRule = RetryRule(5)
     private val networkRule = NetworkRule()
     private val composeTestRule = createEmptyComposeRule()
-    private val shampooRule = ShampooRule(50)
+    private val shampooRule = ShampooRule(100)
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()

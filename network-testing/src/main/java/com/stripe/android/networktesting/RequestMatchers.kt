@@ -1,5 +1,7 @@
 package com.stripe.android.networktesting
 
+import java.net.URLDecoder
+
 fun interface RequestMatcher {
     fun matches(request: TestRecordedRequest): Boolean
 }
@@ -95,7 +97,9 @@ object RequestMatchers {
     }
 
     fun bodyPart(name: String, value: String): RequestMatcher {
-        return ToStringRequestMatcher("bodyPart($name, $value)") { request ->
+        return ToStringRequestMatcher(
+            friendlyName = "bodyPart($name, ${URLDecoder.decode(value, Charsets.UTF_8.name())})",
+        ) { request ->
             request.bodyText.substringAfter("?")
                 .split("&")
                 .associate { Pair(it.substringBefore("="), it.substringAfter("=")) }[name] == value
