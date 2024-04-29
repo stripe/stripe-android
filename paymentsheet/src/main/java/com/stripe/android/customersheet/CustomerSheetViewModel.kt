@@ -417,6 +417,12 @@ internal class CustomerSheetViewModel(
                     merchantName = configuration.merchantDisplayName,
                     cbcEligibility = it.cbcEligibility,
                 ),
+                formElements = paymentMethodMetadata?.formElementsForCode(
+                    code = paymentMethod.code,
+                    uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
+                        cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
+                    ),
+                ) ?: listOf(),
                 selectedPaymentMethod = paymentMethod,
                 primaryButtonLabel = if (
                     paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
