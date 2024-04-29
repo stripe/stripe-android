@@ -31,7 +31,6 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 
 internal class CustomerSheetPlaygroundViewModel(
@@ -81,29 +80,27 @@ internal class CustomerSheetPlaygroundViewModel(
 
     @OptIn(ExperimentalCustomerSheetApi::class)
     fun fetchOption(customerSheet: CustomerSheet) {
-        viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                when (val result = customerSheet.retrievePaymentOptionSelection()) {
-                    is CustomerSheetResult.Selected -> {
-                        playgroundState.update { existingState ->
-                            existingState?.let { state ->
-                                return@update state.copy(
-                                    optionState = CustomerSheetPlaygroundState.PaymentOptionState.Loaded(
-                                        paymentOption = result.selection?.paymentOption
-                                    )
+        viewModelScope.launch(Dispatchers.IO) {
+            when (val result = customerSheet.retrievePaymentOptionSelection()) {
+                is CustomerSheetResult.Selected -> {
+                    playgroundState.update { existingState ->
+                        existingState?.let { state ->
+                            return@update state.copy(
+                                optionState = CustomerSheetPlaygroundState.PaymentOptionState.Loaded(
+                                    paymentOption = result.selection?.paymentOption
                                 )
-                            }
+                            )
                         }
                     }
-                    is CustomerSheetResult.Failed -> {
-                        status.emit(
-                            StatusMessage(
-                                message = "Failed to retrieve payment options:\n${result.exception.message}"
-                            )
-                        )
-                    }
-                    is CustomerSheetResult.Canceled -> Unit
                 }
+                is CustomerSheetResult.Failed -> {
+                    status.emit(
+                        StatusMessage(
+                            message = "Failed to retrieve payment options:\n${result.exception.message}"
+                        )
+                    )
+                }
+                is CustomerSheetResult.Canceled -> Unit
             }
         }
     }

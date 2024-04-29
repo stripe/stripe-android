@@ -28,7 +28,7 @@ internal object CountrySettingsDefinition :
     }
 
     override fun valueUpdated(value: Country, playgroundSettings: CustomerSheetPlaygroundSettings) {
-        // When the changes via the UI, reset the customer.
+        // When the country changes via the UI, reset the customer.
         if (playgroundSettings[CustomerSettingsDefinition].value is CustomerType.Existing) {
             playgroundSettings[CustomerSettingsDefinition] = CustomerType.New
         }
