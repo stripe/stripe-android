@@ -32,7 +32,6 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -75,20 +74,6 @@ internal class DefaultCardNumberController(
     override val showOptionalLabel: Boolean = false,
     private val cardBrandChoiceConfig: CardBrandChoiceConfig = CardBrandChoiceConfig.Ineligible,
 ) : CardNumberController() {
-    constructor(
-        cardTextFieldConfig: CardNumberConfig,
-        cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
-        initialValue: String?,
-        cardBrandChoiceConfig: CardBrandChoiceConfig,
-    ) : this(
-        cardTextFieldConfig,
-        cardAccountRangeRepositoryFactory.create(),
-        Dispatchers.Main,
-        Dispatchers.IO,
-        initialValue = initialValue,
-        cardBrandChoiceConfig = cardBrandChoiceConfig,
-    )
-
     override val capitalization: KeyboardCapitalization = cardTextFieldConfig.capitalization
     override val keyboardType: KeyboardType = cardTextFieldConfig.keyboard
     override val visualTransformation = cardTextFieldConfig.visualTransformation
