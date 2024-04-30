@@ -264,7 +264,7 @@ workflows:
             - boot_timeout: 600
       - script@1:
           title: Execute instrumentation tests
-          timeout: 1800
+          timeout: 3000
           inputs:
             - content: ./gradlew :paymentsheet:connectedAndroidTest
   run-example-instrumentation-tests:
