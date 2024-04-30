@@ -570,6 +570,7 @@ internal fun PaymentSelection?.linkContext(): String? {
         is PaymentSelection.GooglePay,
         is PaymentSelection.New,
         is PaymentSelection.Saved,
+        is PaymentSelection.ExternalPaymentMethod,
         null -> null
     }
 }
