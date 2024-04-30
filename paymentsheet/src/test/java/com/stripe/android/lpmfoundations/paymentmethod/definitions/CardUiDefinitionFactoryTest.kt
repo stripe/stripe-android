@@ -35,6 +35,8 @@ class CardUiDefinitionFactoryTest {
                 metadata = metadata,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
                     code = "card",
+                    // TODO: should we set billing details here instead of in the map?
+                    billingDetails = null,
                     requiresMandate = false,
                     overrideParamMap = mapOf(
                         "type" to "card",

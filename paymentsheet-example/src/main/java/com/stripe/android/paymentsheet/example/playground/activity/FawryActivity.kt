@@ -2,19 +2,25 @@ package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
+import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 class FawryActivity : AppCompatActivity() {
 
+    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -25,9 +31,15 @@ class FawryActivity : AppCompatActivity() {
             )
         }
 
+        val billingDetails: PaymentSheet.BillingDetails? =
+            intent.getParcelableExtra(EXTRA_BILLING_DETAILS, PaymentSheet.BillingDetails::class.java)
+
         setContent {
             PaymentSheetExampleTheme {
                 Column {
+                    if (billingDetails != null) {
+                        BillingDetails(billingDetails = billingDetails)
+                    }
                     ResultButton(result = ExternalPaymentMethodResult.Completed)
                     ResultButton(result = ExternalPaymentMethodResult.Canceled)
                     ResultButton(result = ExternalPaymentMethodResult.Failed)
@@ -53,19 +65,28 @@ class FawryActivity : AppCompatActivity() {
         }
     }
 
+    @Composable
+    fun BillingDetails(billingDetails: PaymentSheet.BillingDetails) {
+        Text("Billing details: $billingDetails", color = Color.White)
+    }
+
     companion object {
         private const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
+        private const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
     }
 
     object FawryConfirmHandler : ExternalPaymentMethodConfirmHandler {
         override fun createIntent(
             context: Context,
             externalPaymentMethodType: String,
+            billingDetails: PaymentSheet.BillingDetails,
         ): Intent {
             return Intent().setClass(
                 context,
                 FawryActivity::class.java
-            ).putExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
+            )
+                .putExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
+                .putExtra(EXTRA_BILLING_DETAILS, billingDetails)
         }
     }
 }

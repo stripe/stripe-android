@@ -56,8 +56,10 @@ internal class AddPaymentMethodTest {
     fun `transformToPaymentSelection transforms external payment methods correctly`() {
         val customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestNoReuse
         val paypalSpec = PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
+        val name = "Joe"
+        val addressLine1 = "123 Main Street"
         val formFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(),
+            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry(name, true), IdentifierSpec.Line1 to FormFieldEntry(addressLine1, true)),
             showsMandate = false,
             userRequestedReuse = customerRequestedSave,
         )
@@ -75,6 +77,8 @@ internal class AddPaymentMethodTest {
         assertThat(externalPaymentSelection.lightThemeIconUrl).isEqualTo(paypalSpec.lightImageUrl)
         assertThat(externalPaymentSelection.darkThemeIconUrl).isEqualTo(paypalSpec.darkImageUrl)
         assertThat(externalPaymentSelection.iconResource).isEqualTo(0)
+        assertThat(externalPaymentSelection.billingDetails?.name).isEqualTo(name)
+        assertThat(externalPaymentSelection.billingDetails?.address?.line1).isEqualTo(addressLine1)
     }
 
     @Test

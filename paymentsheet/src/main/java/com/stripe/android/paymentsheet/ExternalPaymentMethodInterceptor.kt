@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet
 
 import androidx.activity.result.ActivityResultLauncher
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import java.lang.IllegalStateException
 
@@ -10,6 +11,7 @@ internal object ExternalPaymentMethodInterceptor {
 
     fun intercept(
         externalPaymentMethodType: String,
+        billingDetails: PaymentMethod.BillingDetails?,
         onPaymentResult: (PaymentResult) -> Unit,
         externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>?
     ) {
@@ -36,6 +38,7 @@ internal object ExternalPaymentMethodInterceptor {
             externalPaymentMethodLauncher.launch(
                 ExternalPaymentMethodInput(
                     type = externalPaymentMethodType,
+                    billingDetails = billingDetails,
                     externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
                 )
             )

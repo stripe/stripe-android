@@ -11,6 +11,7 @@ interface ExternalPaymentMethodConfirmHandler {
     fun createIntent(
         context: Context,
         externalPaymentMethodType: String,
+        billingDetails: PaymentSheet.BillingDetails,
     ): Intent
 }
 

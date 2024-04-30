@@ -205,7 +205,6 @@ internal fun FormFieldValues.transformToPaymentSelection(
             customerRequestedSave = userRequestedReuse,
         )
     } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
-        // TODO: update tests to show that billingDetails exists now
         PaymentSelection.ExternalPaymentMethod(
             type = paymentMethod.code,
             billingDetails = params.billingDetails,

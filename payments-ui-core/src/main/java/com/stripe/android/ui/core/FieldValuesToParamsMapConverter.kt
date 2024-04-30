@@ -48,7 +48,6 @@ class FieldValuesToParamsMapConverter {
                 }
         }
 
-        // TODO: update tests
         private fun createBillingDetails(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
         ): PaymentMethod.BillingDetails {
