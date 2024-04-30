@@ -291,6 +291,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         currency: String?,
         duration: Duration?,
         selectedLpm: String?,
+        linkContext: String?,
         override val isDeferred: Boolean,
         override val linkEnabled: Boolean,
         override val googlePaySupported: Boolean,
@@ -300,6 +301,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             FIELD_DURATION to duration?.asSeconds,
             FIELD_CURRENCY to currency,
             FIELD_SELECTED_LPM to selectedLpm,
+            FIELD_LINK_CONTEXT to linkContext,
         ).filterNotNullValues()
     }
 
@@ -322,7 +324,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
             mapOf(
                 FIELD_DURATION to duration?.asSeconds,
                 FIELD_CURRENCY to currency,
-            ) + buildDeferredIntentConfirmationType() + paymentSelection.selectedPaymentMethodType() + errorMessage()
+            ) + buildDeferredIntentConfirmationType() + paymentSelection.paymentMethodInfo() + errorMessage()
 
         private fun buildDeferredIntentConfirmationType(): Map<String, String> {
             return deferredIntentConfirmationType?.let {
@@ -531,6 +533,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
+        const val FIELD_LINK_CONTEXT = "link_context"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
@@ -551,8 +554,22 @@ internal fun PaymentSelection?.code(): String? {
     }
 }
 
-private fun PaymentSelection?.selectedPaymentMethodType(): Map<String, String> {
-    return code()?.let {
-        mapOf(PaymentSheetEvent.FIELD_SELECTED_LPM to it)
-    }.orEmpty()
+private fun PaymentSelection?.paymentMethodInfo(): Map<String, String> {
+    return mapOf(
+        PaymentSheetEvent.FIELD_SELECTED_LPM to code(),
+        PaymentSheetEvent.FIELD_LINK_CONTEXT to linkContext(),
+    ).filterNotNullValues()
+}
+
+internal fun PaymentSelection?.linkContext(): String? {
+    return when (this) {
+        is PaymentSelection.Link -> "wallet"
+        is PaymentSelection.New.USBankAccount -> {
+            "instant_debits".takeIf { instantDebits != null }
+        }
+        is PaymentSelection.GooglePay,
+        is PaymentSelection.New,
+        is PaymentSelection.Saved,
+        null -> null
+    }
 }
