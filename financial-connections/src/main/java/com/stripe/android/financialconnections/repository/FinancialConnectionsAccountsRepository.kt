@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.domain.CachedPartnerAccount
-import com.stripe.android.financialconnections.domain.CachedPartnerAccountsState
 import com.stripe.android.financialconnections.domain.toCachedPartnerAccounts
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.InstitutionResponse
@@ -94,7 +93,7 @@ private class FinancialConnectionsAccountsRepositoryImpl(
 ) : FinancialConnectionsAccountsRepository {
 
     override suspend fun getCachedAccounts(): List<CachedPartnerAccount>? {
-        return savedStateHandle.get<CachedPartnerAccountsState>(CachedPartnerAccountsKey)?.accounts
+        return savedStateHandle[CachedPartnerAccountsKey]
     }
 
     override suspend fun updateCachedAccounts(partnerAccountsList: List<PartnerAccount>?) {
@@ -233,10 +232,8 @@ private class FinancialConnectionsAccountsRepositoryImpl(
         accounts: List<PartnerAccount>
     ) {
         logger.debug("updating local partner accounts from $source")
-        val state = CachedPartnerAccountsState(
-            accounts = accounts.toCachedPartnerAccounts(),
-        )
-        savedStateHandle[CachedPartnerAccountsKey] = state
+        val cachedAccounts = accounts.toCachedPartnerAccounts()
+        savedStateHandle[CachedPartnerAccountsKey] = cachedAccounts
     }
 
     companion object {

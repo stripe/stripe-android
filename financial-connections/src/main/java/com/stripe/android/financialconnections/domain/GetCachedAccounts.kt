@@ -21,11 +21,6 @@ internal class GetCachedAccounts @Inject constructor(
 }
 
 @Parcelize
-internal data class CachedPartnerAccountsState(
-    val accounts: List<CachedPartnerAccount>,
-) : Parcelable
-
-@Parcelize
 internal data class CachedPartnerAccount(
     val id: String,
     val linkedAccountId: String?,
