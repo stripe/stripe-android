@@ -12,7 +12,6 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.TextFieldIcon
 import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.utils.TestUtils.idleLooper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
@@ -20,7 +19,6 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Before
-import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -48,6 +46,8 @@ class CardDetailsElementTest {
         val cardController = CardDetailsController(
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
         )
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
@@ -108,6 +108,8 @@ class CardDetailsElementTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
         )
         val cardDetailsElement = CardDetailsElement(
             IdentifierSpec.Generic("card_details"),
@@ -137,7 +139,6 @@ class CardDetailsElementTest {
         }
     }
 
-    @Ignore("Figure out why this succeeds in isolation but fails as part of the test suite")
     @Test
     fun `test form field values returned when eligible for card brand choice`() = runTest(testDispatcher) {
         val cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList())
@@ -145,7 +146,9 @@ class CardDetailsElementTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
-            cbcEligibility = cbcEligibility
+            cbcEligibility = cbcEligibility,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
         )
 
         val cardDetailsElement = CardDetailsElement(
@@ -169,8 +172,8 @@ class CardDetailsElementTest {
                     IdentifierSpec.Name to FormFieldEntry("Jane Doe", true),
                     IdentifierSpec.CardNumber to FormFieldEntry("4242424242424242", true),
                     IdentifierSpec.CardCvc to FormFieldEntry("321", true),
-                    IdentifierSpec.PreferredCardBrand to FormFieldEntry(null, true),
                     IdentifierSpec.CardBrand to FormFieldEntry("visa", true),
+                    IdentifierSpec.PreferredCardBrand to FormFieldEntry(null, true),
                     IdentifierSpec.CardExpMonth to FormFieldEntry("01", true),
                     IdentifierSpec.CardExpYear to FormFieldEntry("2030", true)
                 )
@@ -185,7 +188,9 @@ class CardDetailsElementTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
-            cbcEligibility = cbcEligibility
+            cbcEligibility = cbcEligibility,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
         )
 
         val cardDetailsElement = CardDetailsElement(
@@ -210,7 +215,6 @@ class CardDetailsElementTest {
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
         cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
 
-        idleLooper()
         cardDetailsElement.getFormFieldValueFlow().test {
             assertThat(awaitItem()).containsExactlyElementsIn(
                 listOf(
@@ -233,7 +237,9 @@ class CardDetailsElementTest {
             cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(context),
             initialValues = emptyMap(),
             collectName = true,
-            cbcEligibility = cbcEligibility
+            cbcEligibility = cbcEligibility,
+            uiContext = testDispatcher,
+            workContext = testDispatcher,
         )
 
         val cardDetailsElement = CardDetailsElement(
@@ -251,7 +257,6 @@ class CardDetailsElementTest {
         cardDetailsElement.controller.cvcElement.controller.onValueChange("321")
         cardDetailsElement.controller.expirationDateElement.controller.onValueChange("130")
 
-        idleLooper()
         cardDetailsElement.getFormFieldValueFlow().test {
             assertThat(awaitItem()).containsExactlyElementsIn(
                 listOf(
