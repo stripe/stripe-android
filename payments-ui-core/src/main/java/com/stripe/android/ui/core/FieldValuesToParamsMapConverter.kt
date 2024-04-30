@@ -2,6 +2,7 @@ package com.stripe.android.ui.core
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -40,10 +41,40 @@ class FieldValuesToParamsMapConverter {
                     PaymentMethodCreateParams.createWithOverride(
                         code,
                         requiresMandate = requiresMandate,
+                        billingDetails = createBillingDetails(fieldValuePairsForCreateParams),
                         overrideParamMap = this,
                         productUsage = setOf("PaymentSheet")
                     )
                 }
+        }
+
+        // TODO: update tests
+        private fun createBillingDetails(
+            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+        ): PaymentMethod.BillingDetails {
+            val billingDetails = PaymentMethod.BillingDetails.Builder()
+
+            billingDetails.setName(fieldValuePairs[IdentifierSpec.Name]?.value)
+            billingDetails.setEmail(fieldValuePairs[IdentifierSpec.Email]?.value)
+            billingDetails.setPhone(fieldValuePairs[IdentifierSpec.Phone]?.value)
+            billingDetails.setAddress(createAddress(fieldValuePairs))
+
+            return billingDetails.build()
+        }
+
+        private fun createAddress(
+            fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
+        ): Address {
+            val address = Address.Builder()
+
+            address.setLine1(fieldValuePairs[IdentifierSpec.Line1]?.value)
+            address.setLine2(fieldValuePairs[IdentifierSpec.Line2]?.value)
+            address.setCity(fieldValuePairs[IdentifierSpec.City]?.value)
+            address.setState(fieldValuePairs[IdentifierSpec.State]?.value)
+            address.setCountry(fieldValuePairs[IdentifierSpec.Country]?.value)
+            address.setPostalCode(fieldValuePairs[IdentifierSpec.PostalCode]?.value)
+
+            return address.build()
         }
 
         /**

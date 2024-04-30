@@ -13,6 +13,7 @@ import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
@@ -68,6 +69,8 @@ internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     data class ExternalPaymentMethod(
         val type: String,
+        // TODO: thread through to payment method input, etc
+        val billingDetails: PaymentMethod.BillingDetails?,
         val label: String,
         // In practice, we don't have an iconResource for external payment methods.
         @DrawableRes val iconResource: Int,
