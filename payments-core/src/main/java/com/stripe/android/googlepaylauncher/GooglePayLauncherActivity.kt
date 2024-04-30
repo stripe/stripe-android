@@ -117,12 +117,17 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                             )
                         )
                     )
+                    errorReporter.report(
+                        ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
+                        additionalNonPiiParams = mapOf("status_message" to statusMessage)
+                    )
                 }
                 else -> {
+                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_RESULT_CODE)
                     viewModel.updateResult(
                         GooglePayLauncher.Result.Failed(
                             RuntimeException(
-                                "Google Pay returned an expected result code."
+                                "Google Pay returned an unexpected result code."
                             )
                         )
                     )
