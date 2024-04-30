@@ -296,11 +296,14 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             setState { copy(completed = true) }
             runCatching {
                 val session = completeFinancialConnectionsSession(earlyTerminationCause?.value)
+                val status = computeSessionCompletionStatus(session, earlyTerminationCause, closeAuthFlowError)
                 eventTracker.track(
                     Complete(
+                        pane = currentPane.value,
                         exception = null,
                         exceptionExtraMessage = null,
-                        connectedAccounts = session.accounts.data.count()
+                        connectedAccounts = session.accounts.data.count(),
+                        status = status,
                     )
                 )
                 when {
@@ -340,14 +343,24 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 logger.error(errorMessage, completeSessionError)
                 eventTracker.track(
                     Complete(
+                        pane = currentPane.value,
                         exception = completeSessionError,
                         exceptionExtraMessage = errorMessage,
-                        connectedAccounts = null
+                        connectedAccounts = null,
+                        status = "failed",
                     )
                 )
                 finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
             }
         }
+    }
+
+    private fun computeSessionCompletionStatus(
+        session: FinancialConnectionsSession,
+        earlyTerminationCause: EarlyTerminationCause?,
+        closeAuthFlowError: Throwable?,
+    ): String {
+        return earlyTerminationCause?.analyticsValue ?: session.completionStatus(closeAuthFlowError)
     }
 
     private fun finishWithResult(
@@ -566,4 +579,17 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
     )
+}
+
+private fun FinancialConnectionsSession.completionStatus(
+    closeAuthFlowError: Throwable?,
+): String {
+    val completed = accounts.data.isNotEmpty() || paymentAccount != null || bankAccountToken != null
+    return if (completed) {
+        "completed"
+    } else if (closeAuthFlowError != null) {
+        "failed"
+    } else {
+        "canceled"
+    }
 }

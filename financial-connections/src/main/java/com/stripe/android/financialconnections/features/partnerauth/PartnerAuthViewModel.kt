@@ -274,6 +274,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
+                    pane = PANE,
                     url = url,
                     authSessionId = authSession?.id,
                     status = "failed"
@@ -314,6 +315,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             val authSession = manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
+                    pane = PANE,
                     url = url ?: "none",
                     authSessionId = authSession?.id,
                     status = "cancelled"
@@ -388,6 +390,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             ).manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
+                    pane = PANE,
                     url = url,
                     authSessionId = authSession?.id,
                     status = "success"

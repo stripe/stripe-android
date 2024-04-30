@@ -99,6 +99,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (partnerAccountList.data.isNotEmpty()) {
                 eventTracker.track(
                     PollAccountsSucceeded(
+                        pane = PANE,
                         authSessionId = activeAuthSession.id,
                         duration = millis
                     )
@@ -157,6 +158,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     val selectedId = setOfNotNull(payload.selectableAccounts.firstOrNull()?.id)
                     eventTracker.track(
                         AccountsAutoSelected(
+                            pane = PANE,
                             isSingleAccount = true,
                             accountIds = selectedId
                         )
@@ -169,6 +171,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
                     val selectedIds = payload.selectableAccounts.map { it.id }.toSet()
                     eventTracker.track(
                         AccountsAutoSelected(
+                            pane = PANE,
                             isSingleAccount = false,
                             accountIds = selectedIds
                         )
@@ -237,6 +240,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (newIds.size == 1) {
                 eventTracker.track(
                     AccountSelected(
+                        pane = PANE,
                         isSingleAccount = isSingleAccount,
                         selected = true,
                         accountId = newIds.first()
@@ -246,6 +250,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             if (removedIds.size == 1) {
                 eventTracker.track(
                     AccountSelected(
+                        pane = PANE,
                         isSingleAccount = isSingleAccount,
                         selected = false,
                         accountId = removedIds.first()
