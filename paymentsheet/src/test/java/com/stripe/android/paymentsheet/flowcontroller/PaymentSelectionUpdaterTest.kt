@@ -11,6 +11,7 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.model.SetupIntentFixtures
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetFixtures
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.testing.PaymentMethodFactory
@@ -339,7 +340,9 @@ class PaymentSelectionUpdaterTest {
 
         return PaymentSheetState.Full(
             config = config,
-            customerPaymentMethods = customerPaymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = customerPaymentMethods
+            ),
             isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,
@@ -369,7 +372,9 @@ class PaymentSelectionUpdaterTest {
 
         return PaymentSheetState.Full(
             config = config,
-            customerPaymentMethods = customerPaymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                paymentMethods = customerPaymentMethods
+            ),
             isGooglePayReady = true,
             linkState = null,
             paymentSelection = paymentSelection,

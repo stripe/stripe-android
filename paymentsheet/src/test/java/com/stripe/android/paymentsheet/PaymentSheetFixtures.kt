@@ -9,6 +9,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
@@ -72,12 +73,20 @@ internal object PaymentSheetFixtures {
         )
     )
 
+    private val defaultCustomerConfig = PaymentSheet.CustomerConfiguration(
+        id = "customer_id",
+        ephemeralKeySecret = "ephemeral_key"
+    )
+
     internal val CONFIG_CUSTOMER = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
-        customer = PaymentSheet.CustomerConfiguration(
-            "customer_id",
-            "ephemeral_key"
-        )
+        customer = defaultCustomerConfig,
+    )
+
+    internal val EMPTY_CUSTOMER_STATE = CustomerState(
+        id = defaultCustomerConfig.id,
+        ephemeralKeySecret = defaultCustomerConfig.ephemeralKeySecret,
+        paymentMethods = listOf()
     )
 
     internal val CONFIG_GOOGLEPAY
@@ -104,7 +113,7 @@ internal object PaymentSheetFixtures {
 
     internal val PAYMENT_OPTIONS_CONTRACT_ARGS = PaymentOptionContract.Args(
         state = PaymentSheetState.Full(
-            customerPaymentMethods = emptyList(),
+            customer = EMPTY_CUSTOMER_STATE,
             config = CONFIG_GOOGLEPAY,
             isGooglePayReady = false,
             paymentSelection = null,
@@ -119,7 +128,7 @@ internal object PaymentSheetFixtures {
     )
 
     internal fun PaymentOptionContract.Args.updateState(
-        paymentMethods: List<PaymentMethod> = state.customerPaymentMethods,
+        paymentMethods: List<PaymentMethod> = state.customer?.paymentMethods ?: emptyList(),
         isGooglePayReady: Boolean = state.isGooglePayReady,
         stripeIntent: StripeIntent = state.stripeIntent,
         config: PaymentSheet.Configuration = state.config,
@@ -128,7 +137,11 @@ internal object PaymentSheetFixtures {
     ): PaymentOptionContract.Args {
         return copy(
             state = state.copy(
-                customerPaymentMethods = paymentMethods,
+                customer = CustomerState(
+                    id = config.customer?.id ?: "cus_1",
+                    ephemeralKeySecret = config.customer?.ephemeralKeySecret ?: "client_secret",
+                    paymentMethods = paymentMethods,
+                ),
                 isGooglePayReady = isGooglePayReady,
                 config = config,
                 paymentSelection = paymentSelection,

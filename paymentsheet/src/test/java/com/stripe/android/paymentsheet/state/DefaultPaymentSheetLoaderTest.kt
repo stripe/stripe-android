@@ -21,6 +21,7 @@ import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.Status.Canceled
 import com.stripe.android.model.StripeIntent.Status.Succeeded
 import com.stripe.android.model.wallets.Wallet
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -46,6 +47,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.capture
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import kotlin.test.BeforeTest
@@ -94,17 +96,23 @@ internal class DefaultPaymentSheetLoaderTest {
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD_WITHOUT_LINK,
         )
 
+        val config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+
         assertThat(
             loader.load(
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = PaymentSheetFixtures.PAYMENT_INTENT_CLIENT_SECRET.value,
                 ),
-                PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
+                config
             ).getOrThrow()
         ).isEqualTo(
             PaymentSheetState.Full(
-                config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-                customerPaymentMethods = PAYMENT_METHODS,
+                config = config,
+                customer = CustomerState(
+                    id = config.customer!!.id,
+                    ephemeralKeySecret = config.customer!!.ephemeralKeySecret,
+                    paymentMethods = PAYMENT_METHODS
+                ),
                 isGooglePayReady = true,
                 paymentSelection = PaymentSelection.Saved(
                     paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
@@ -332,7 +340,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             ).getOrThrow()
 
-            assertThat(result.customerPaymentMethods)
+            assertThat(result.customer?.paymentMethods)
                 .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         }
 
@@ -358,7 +366,7 @@ internal class DefaultPaymentSheetLoaderTest {
                 PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
             ).getOrThrow()
 
-            assertThat(result.customerPaymentMethods)
+            assertThat(result.customer?.paymentMethods)
                 .containsExactly(PaymentMethodFixtures.CARD_PAYMENT_METHOD, cardWithAmexWallet)
         }
 
@@ -393,7 +401,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ).getOrThrow()
 
-        assertThat(result.customerPaymentMethods)
+        assertThat(result.customer?.paymentMethods)
             .containsExactly(
                 PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD,
@@ -731,7 +739,7 @@ internal class DefaultPaymentSheetLoaderTest {
             ),
         ).getOrThrow()
 
-        val observedElements = result.customerPaymentMethods
+        val observedElements = result.customer?.paymentMethods
         val expectedElements = listOf(lastUsed) + (paymentMethods - lastUsed)
 
         assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
@@ -1076,25 +1084,64 @@ internal class DefaultPaymentSheetLoaderTest {
             ).getOrThrow()
 
             assertThat(attemptedToRetrievePaymentMethods).isFalse()
-            assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
+
+            assertThat(state.customer).isEqualTo(
+                CustomerState(
+                    id = "cus_1",
+                    ephemeralKeySecret = "ek_123",
+                    paymentMethods = cards,
+                )
+            )
         }
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When 'CustomerSession' config is provided but no customer object was returned, should not fetch and return no payment methods`() =
+    fun `When 'CustomerSession' config is provided but no customer object was returned in test mode, should report error and return error`() =
         runTest {
-            var attemptedToRetrievePaymentMethods = false
-
-            val repository = FakeCustomerRepository(
-                onGetPaymentMethods = {
-                    attemptedToRetrievePaymentMethods = true
-                    Result.success(listOf())
-                }
-            )
+            val errorReporter = FakeErrorReporter()
 
             val loader = createPaymentSheetLoader(
-                customerRepo = repository,
-                customer = null,
+                errorReporter = errorReporter,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    isLiveMode = false
+                )
+            )
+
+            val exception = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                )
+            ).exceptionOrNull()
+
+            assertThat(exception).isInstanceOf(IllegalStateException::class.java)
+
+            assertThat(errorReporter.getLoggedErrors())
+                .contains(
+                    ErrorReporter
+                        .UnexpectedErrorEvent
+                        .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND
+                        .eventName
+                )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When 'CustomerSession' config is provided but no customer object was returned in live mode, should report error and continue with loading without customer`() =
+        runTest {
+            val errorReporter = FakeErrorReporter()
+
+            val loader = createPaymentSheetLoader(
+                errorReporter = errorReporter,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    isLiveMode = true
+                )
             )
 
             val state = loader.load(
@@ -1108,10 +1155,18 @@ internal class DefaultPaymentSheetLoaderTest {
                         clientSecret = "customer_client_secret",
                     ),
                 )
-            ).getOrThrow()
+            ).getOrNull()
 
-            assertThat(attemptedToRetrievePaymentMethods).isFalse()
-            assertThat(state.customerPaymentMethods).isEmpty()
+            assertThat(state).isNotNull()
+            assertThat(state?.customer).isNull()
+
+            assertThat(errorReporter.getLoggedErrors())
+                .contains(
+                    ErrorReporter
+                        .UnexpectedErrorEvent
+                        .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND
+                        .eventName
+                )
         }
 
     @Test
@@ -1146,7 +1201,100 @@ internal class DefaultPaymentSheetLoaderTest {
             ).getOrThrow()
 
             assertThat(attemptedToRetrievePaymentMethods).isTrue()
-            assertThat(state.customerPaymentMethods).containsExactlyElementsIn(cards)
+
+            assertThat(state.customer).isEqualTo(
+                CustomerState(
+                    id = "cus_1",
+                    ephemeralKeySecret = "ephemeral_key_secret",
+                    paymentMethods = cards,
+                )
+            )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When using 'CustomerSession', move last-used customer payment method to the front of the list`() = runTest {
+        val paymentMethods = PaymentMethodFixtures.createCards(10)
+        val lastUsed = paymentMethods[6]
+
+        prefsRepository.savePaymentSelection(PaymentSelection.Saved(lastUsed))
+
+        val loader = createPaymentSheetLoader(
+            customer = ElementsSession.Customer(
+                paymentMethods = paymentMethods,
+                session = ElementsSession.Customer.Session(
+                    id = "cuss_1",
+                    customerId = "cus_1",
+                    liveMode = false,
+                    apiKey = "ek_123",
+                    apiKeyExpiry = 555555555
+                ),
+                defaultPaymentMethod = null,
+            )
+        )
+
+        val result = loader.load(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+            paymentSheetConfiguration = mockConfiguration(
+                customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                    id = "id",
+                    clientSecret = "cuss_1",
+                ),
+            ),
+        ).getOrThrow()
+
+        val observedElements = result.customer?.paymentMethods
+        val expectedElements = listOf(lastUsed) + (paymentMethods - lastUsed)
+
+        assertThat(observedElements).containsExactlyElementsIn(expectedElements).inOrder()
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When using 'CustomerSession' & no default billing details, customer email for Link config is fetched using 'elements_session' ephemeral key`() =
+        runTest {
+            val customerRepository = spy(
+                FakeCustomerRepository(
+                    onRetrieveCustomer = {
+                        mock {
+                            on { email } doReturn "email@stripe.com"
+                        }
+                    }
+                )
+            )
+
+            val loader = createPaymentSheetLoader(
+                customerRepo = customerRepository,
+                customer = ElementsSession.Customer(
+                    paymentMethods = PaymentMethodFactory.cards(1),
+                    session = ElementsSession.Customer.Session(
+                        id = "cuss_1",
+                        customerId = "cus_1",
+                        liveMode = false,
+                        apiKey = "ek_123",
+                        apiKeyExpiry = 555555555
+                    ),
+                    defaultPaymentMethod = null,
+                )
+            )
+
+            loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent("secret"),
+                paymentSheetConfiguration = mockConfiguration(
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "id",
+                        clientSecret = "cuss_1",
+                    ),
+                    defaultBillingDetails = null
+                ),
+            )
+
+            verify(customerRepository).retrieveCustomer(
+                CustomerRepository.CustomerInfo(
+                    id = "cus_1",
+                    ephemeralKeySecret = "ek_123",
+                )
+            )
         }
 
     private suspend fun testExternalPaymentMethods(
@@ -1206,6 +1354,7 @@ internal class DefaultPaymentSheetLoaderTest {
         linkStore: LinkStore = mock(),
         customer: ElementsSession.Customer? = null,
         externalPaymentMethodData: String? = null,
+        errorReporter: ErrorReporter = FakeErrorReporter(),
         elementsSessionRepository: ElementsSessionRepository = FakeElementsSessionRepository(
             stripeIntent = stripeIntent,
             error = error,
@@ -1227,6 +1376,7 @@ internal class DefaultPaymentSheetLoaderTest {
             lpmRepository = lpmRepository,
             logger = Logger.noop(),
             eventReporter = eventReporter,
+            errorReporter = errorReporter,
             workContext = testDispatcher,
             accountStatusProvider = { linkAccountState },
             linkStore = linkStore,
