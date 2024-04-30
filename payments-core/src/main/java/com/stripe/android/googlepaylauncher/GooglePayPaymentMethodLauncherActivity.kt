@@ -160,5 +160,3 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         }
     }
 }
-
-

@@ -705,30 +705,30 @@
 |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.7.3
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3 (*)
-|    |    |    +--- com.google.android.gms:play-services-tasks:16.0.1 -> 18.0.1
-|    |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0
+|    |    |    +--- com.google.android.gms:play-services-tasks:16.0.1 -> 18.1.0
+|    |    |    |    \--- com.google.android.gms:play-services-basement:18.3.0
 |    |    |    |         +--- androidx.collection:collection:1.0.0 -> 1.1.0 (*)
 |    |    |    |         +--- androidx.core:core:1.2.0 -> 1.12.0 (*)
-|    |    |    |         \--- androidx.fragment:fragment:1.0.0 -> 1.6.2 (*)
+|    |    |    |         \--- androidx.fragment:fragment:1.1.0 -> 1.6.2 (*)
 |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 -> 1.9.10 (*)
 |    |    +--- com.google.android.material:material:1.11.0 (*)
-|    |    +--- com.google.android.gms:play-services-wallet:19.2.1
+|    |    +--- com.google.android.gms:play-services-wallet:19.3.0
 |    |    |    +--- androidx.fragment:fragment:1.0.0 -> 1.6.2 (*)
-|    |    |    +--- com.google.android.gms:play-services-base:18.0.1
+|    |    |    +--- com.google.android.gms:play-services-base:18.3.0
 |    |    |    |    +--- androidx.collection:collection:1.0.0 -> 1.1.0 (*)
 |    |    |    |    +--- androidx.core:core:1.2.0 -> 1.12.0 (*)
 |    |    |    |    +--- androidx.fragment:fragment:1.0.0 -> 1.6.2 (*)
-|    |    |    |    +--- com.google.android.gms:play-services-basement:18.0.0 (*)
-|    |    |    |    \--- com.google.android.gms:play-services-tasks:18.0.1 (*)
-|    |    |    +--- com.google.android.gms:play-services-basement:18.0.0 (*)
+|    |    |    |    +--- com.google.android.gms:play-services-basement:18.3.0 (*)
+|    |    |    |    \--- com.google.android.gms:play-services-tasks:18.1.0 (*)
+|    |    |    +--- com.google.android.gms:play-services-basement:18.3.0 (*)
 |    |    |    +--- com.google.android.gms:play-services-identity:18.0.1
-|    |    |    |    +--- com.google.android.gms:play-services-base:18.0.1 (*)
-|    |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 (*)
+|    |    |    |    +--- com.google.android.gms:play-services-base:18.0.1 -> 18.3.0 (*)
+|    |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 -> 18.3.0 (*)
 |    |    |    +--- com.google.android.gms:play-services-maps:18.0.2
 |    |    |    |    +--- androidx.fragment:fragment:1.0.0 -> 1.6.2 (*)
-|    |    |    |    +--- com.google.android.gms:play-services-base:18.0.1 (*)
-|    |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 (*)
-|    |    |    \--- com.google.android.gms:play-services-tasks:18.0.1 (*)
+|    |    |    |    +--- com.google.android.gms:play-services-base:18.0.1 -> 18.3.0 (*)
+|    |    |    |    \--- com.google.android.gms:play-services-basement:18.0.0 -> 18.3.0 (*)
+|    |    |    \--- com.google.android.gms:play-services-tasks:18.1.0 (*)
 |    |    +--- com.google.android.instantapps:instantapps:1.1.0
 |    |    +--- com.stripe:stripe-3ds2-android:6.1.8
 |    |    |    +--- org.jetbrains.kotlin:kotlin-parcelize-runtime:1.9.10 -> 1.9.22 (*)
@@ -943,9 +943,9 @@
 |    |    |    +--- androidx.compose.ui:ui:1.5.0 -> 1.5.4 (*)
 |    |    |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4 -> 1.7.3 (*)
 |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.9.0 -> 1.9.10 (*)
-|    |    +--- com.google.android.gms:play-services-wallet:19.2.1 (*)
+|    |    +--- com.google.android.gms:play-services-wallet:19.3.0 (*)
 |    |    +--- com.google.pay.button:compose-pay-button:0.1.3
-|    |    |    +--- com.google.android.gms:play-services-wallet:19.2.1 (*)
+|    |    |    +--- com.google.android.gms:play-services-wallet:19.2.1 -> 19.3.0 (*)
 |    |    |    +--- androidx.compose.ui:ui:1.5.4 (*)
 |    |    |    +--- androidx.compose.material:material:1.5.4 (*)
 |    |    |    +--- androidx.core:core-ktx:1.12.0 (*)
@@ -1027,7 +1027,7 @@
 |    |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
 |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.21 -> 1.9.10 (*)
 +--- com.google.android.material:material:1.11.0 (*)
-+--- com.google.android.gms:play-services-wallet:19.2.1 (*)
++--- com.google.android.gms:play-services-wallet:19.3.0 (*)
 +--- com.squareup.okio:okio:3.7.0 (*)
 +--- com.squareup.retrofit2:retrofit:2.9.0
 |    \--- com.squareup.okhttp3:okhttp:3.14.9 -> 4.12.0 (*)
