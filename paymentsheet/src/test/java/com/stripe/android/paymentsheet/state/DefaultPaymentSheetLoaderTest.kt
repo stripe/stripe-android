@@ -1096,12 +1096,15 @@ internal class DefaultPaymentSheetLoaderTest {
 
     @OptIn(ExperimentalCustomerSessionApi::class)
     @Test
-    fun `When 'CustomerSession' config is provided but no customer object was returned, should report error and return error`() =
+    fun `When 'CustomerSession' config is provided but no customer object was returned in test mode, should report error and return error`() =
         runTest {
             val errorReporter = FakeErrorReporter()
 
             val loader = createPaymentSheetLoader(
                 errorReporter = errorReporter,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    isLiveMode = false
+                )
             )
 
             val exception = loader.load(
@@ -1118,6 +1121,44 @@ internal class DefaultPaymentSheetLoaderTest {
             ).exceptionOrNull()
 
             assertThat(exception).isInstanceOf(IllegalStateException::class.java)
+
+            assertThat(errorReporter.getLoggedErrors())
+                .contains(
+                    ErrorReporter
+                        .UnexpectedErrorEvent
+                        .PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND
+                        .eventName
+                )
+        }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `When 'CustomerSession' config is provided but no customer object was returned in live mode, should report error and continue with loading without customer`() =
+        runTest {
+            val errorReporter = FakeErrorReporter()
+
+            val loader = createPaymentSheetLoader(
+                errorReporter = errorReporter,
+                stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                    isLiveMode = true
+                )
+            )
+
+            val state = loader.load(
+                initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                    clientSecret = "client_secret"
+                ),
+                paymentSheetConfiguration = PaymentSheet.Configuration(
+                    merchantDisplayName = "Merchant, Inc.",
+                    customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                        id = "cus_1",
+                        clientSecret = "customer_client_secret",
+                    ),
+                )
+            ).getOrNull()
+
+            assertThat(state).isNotNull()
+            assertThat(state?.customer).isNull()
 
             assertThat(errorReporter.getLoggedErrors())
                 .contains(

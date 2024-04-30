@@ -52,6 +52,13 @@ internal interface PaymentSheetLoader {
     ): Result<PaymentSheetState.Full>
 }
 
+/**
+ * A default implementation of [PaymentSheetLoader] used to load necessary information for
+ * building [PaymentSheet]. See the linked flow diagram to understand how this implementation
+ * loads [PaymentSheet] information based its provided initialization options.
+ *
+ * @see <a href="https://whimsical.com/paymentsheet-loading-flow-diagram-EwTmrwvNmhcD9B2PKuSu82/">Flow Diagram</a>
+ */
 @Singleton
 internal class DefaultPaymentSheetLoader @Inject constructor(
     private val prefsRepositoryFactory: @JvmSuppressWildcards (PaymentSheet.CustomerConfiguration?) -> PrefsRepository,
