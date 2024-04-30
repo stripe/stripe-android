@@ -12,8 +12,11 @@ import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.fadeOut
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * [GooglePayPaymentMethodLauncherActivity] is used to return the result of a Google Pay operation.
@@ -32,6 +35,10 @@ import kotlinx.coroutines.launch
 internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayPaymentMethodLauncherViewModel by viewModels {
         GooglePayPaymentMethodLauncherViewModel.Factory(args)
+    }
+
+    private val errorReporter: ErrorReporter by lazy {
+        ErrorReporter.createFallbackInstance(context = this)
     }
 
     private lateinit var args: GooglePayPaymentMethodLauncherContractV2.Args
@@ -68,7 +75,9 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
         if (!viewModel.hasLaunched) {
             lifecycleScope.launch {
                 runCatching {
-                    viewModel.loadPaymentData()
+                    withContext(Dispatchers.IO) {
+                        viewModel.loadPaymentData()
+                    }
                 }.fold(
                     onSuccess = {
                         googlePayLauncher.launch(it)
@@ -95,7 +104,20 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
     private fun onGooglePayResult(taskResult: ApiTaskResult<PaymentData>) {
         when (taskResult.status.statusCode) {
             CommonStatusCodes.SUCCESS -> {
-                onGooglePayResult(taskResult.result!!)
+                val result = taskResult.result
+                if (result != null) {
+                    onGooglePayResult(result)
+                } else {
+                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
+                    updateResult(
+                        GooglePayPaymentMethodLauncher.Result.Failed(
+                            RuntimeException(
+                                "Google Pay failed with missing data."
+                            ),
+                            GooglePayPaymentMethodLauncher.INTERNAL_ERROR
+                        )
+                    )
+                }
             }
             CommonStatusCodes.CANCELED -> {
                 updateResult(
@@ -104,16 +126,22 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             }
             AutoResolveHelper.RESULT_ERROR -> {
                 val status = taskResult.status
+                val statusMessage = status.statusMessage.orEmpty()
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
+                    additionalNonPiiParams = mapOf("status_message" to statusMessage)
+                )
                 updateResult(
                     GooglePayPaymentMethodLauncher.Result.Failed(
                         RuntimeException(
-                            "Google Pay failed with error ${status.statusCode}: ${status.statusMessage}"
+                            "Google Pay failed with error ${status.statusCode}: $statusMessage"
                         ),
                         googlePayStatusCodeToErrorCode(status.statusCode)
                     )
                 )
             }
             else -> {
+                errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_RESULT_CODE)
                 updateResult(
                     GooglePayPaymentMethodLauncher.Result.Failed(
                         RuntimeException("Google Pay returned an expected result code."),

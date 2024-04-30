@@ -7,12 +7,16 @@ import java.util.concurrent.Executor
 import kotlin.coroutines.resume
 
 internal suspend fun <T> Task<T>.awaitTask(cancellationTokenSource: CancellationTokenSource? = null): Task<T> {
-    return if (isComplete) this else suspendCancellableCoroutine { cont ->
-        // Run the callback directly to avoid unnecessarily scheduling on the main thread.
-        addOnCompleteListener(DirectExecutor, cont::resume)
+    return if (isComplete) {
+        this
+    } else {
+        suspendCancellableCoroutine { cont ->
+            // Run the callback directly to avoid unnecessarily scheduling on the main thread.
+            addOnCompleteListener(DirectExecutor, cont::resume)
 
-        cancellationTokenSource?.let { cancellationSource ->
-            cont.invokeOnCancellation { cancellationSource.cancel() }
+            cancellationTokenSource?.let { cancellationSource ->
+                cont.invokeOnCancellation { cancellationSource.cancel() }
+            }
         }
     }
 }
