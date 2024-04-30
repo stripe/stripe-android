@@ -45,7 +45,9 @@ internal class CardDetailsElement(
                 controller.nameElement?.identifier,
                 controller.numberElement.identifier,
                 controller.expirationDateElement.identifier,
-                controller.cvcElement.identifier
+                controller.cvcElement.identifier,
+                IdentifierSpec.CardBrand,
+                IdentifierSpec.PreferredCardBrand.takeIf { cbcEligibility is CardBrandChoiceEligibility.Eligible },
             )
         )
 

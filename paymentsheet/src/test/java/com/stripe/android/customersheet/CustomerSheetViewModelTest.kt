@@ -1720,6 +1720,58 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `Payment method form elements are populated when switching payment method types`() = runTest(testDispatcher) {
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            initialBackStack = listOf(
+                selectPaymentMethodViewState,
+                addPaymentMethodViewState,
+            ),
+        )
+
+        viewModel.viewState.test {
+            awaitViewState<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            var viewState = awaitViewState<AddPaymentMethod>()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("card")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.usBankAccount
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("us_bank_account")
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
+
+            awaitViewState<SelectPaymentMethod>()
+
+            viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
+
+            viewState = awaitViewState()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("us_bank_account")
+
+            viewModel.handleViewAction(
+                CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                    LpmRepositoryTestHelpers.card
+                )
+            )
+
+            viewState = awaitViewState()
+            assertThat(viewState.selectedPaymentMethod.code)
+                .isEqualTo("card")
+            assertThat(viewState.formElements).isNotEmpty()
+        }
+    }
+
+    @Test
     fun `Payment method user selection saved after returning to add screen`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
