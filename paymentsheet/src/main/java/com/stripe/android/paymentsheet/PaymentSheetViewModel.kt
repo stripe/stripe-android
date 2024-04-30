@@ -158,6 +158,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
 
+    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
+
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
 
     private val googlePayButtonType: GooglePayButtonType =
@@ -457,7 +459,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             }
         } else if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
-            ExternalPaymentMethodHandler.confirm(_paymentSheetResult::tryEmit)
+            ExternalPaymentMethodInterceptor.intercept(
+                externalPaymentMethodType = paymentSelection.type,
+                onPaymentResult = ::onPaymentResult,
+                externalPaymentMethodLauncher,
+            )
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
             paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code
@@ -576,6 +582,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 ::onInternalPaymentResult
             ),
             includePaymentSheetAuthenticators = true,
+        )
+
+        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
+            ExternalPaymentMethodContract(),
+            ::onPaymentResult
         )
 
         lifecycleOwner.lifecycle.addObserver(
