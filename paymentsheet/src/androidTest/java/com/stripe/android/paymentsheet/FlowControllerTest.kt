@@ -30,15 +30,15 @@ import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
+    private val composeTestRule = createEmptyComposeRule()
     private val retryRule = RetryRule(5)
     private val networkRule = NetworkRule()
-    private val composeTestRule = createEmptyComposeRule()
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(networkRule)
         .around(composeTestRule)
         .around(retryRule)
+        .around(networkRule)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
