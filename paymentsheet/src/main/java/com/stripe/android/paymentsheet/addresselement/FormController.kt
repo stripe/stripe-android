@@ -60,7 +60,7 @@ internal class FormController @Inject constructor(
         elementsList.filter { mapEntry ->
             !hiddenIdentifiers.contains(mapEntry.key)
         }
-    }.map { map ->
+    }.mapAsStateFlow { map ->
         map.takeIf { it.values.all { entry -> entry.isComplete } }
     }
 

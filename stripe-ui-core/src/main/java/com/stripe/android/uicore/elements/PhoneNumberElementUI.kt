@@ -68,7 +68,7 @@ fun PhoneNumberCollectionSection(
     focusRequester: FocusRequester = remember { FocusRequester() },
     imeAction: ImeAction = ImeAction.Done
 ) {
-    val error by phoneNumberController.error.collectAsState(null)
+    val error by phoneNumberController.error.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
@@ -115,15 +115,15 @@ fun PhoneNumberElementUI(
     val coroutineScope = rememberCoroutineScope()
     val bringIntoViewRequester = remember { BringIntoViewRequester() }
     val focusManager = LocalFocusManager.current
+    var hasFocus by rememberSaveable { mutableStateOf(false) }
 
-    val value by controller.fieldValue.collectAsState()
-    val isComplete by controller.isComplete.collectAsState()
-    val shouldShowError by controller.error.collectAsState(null)
     val label by controller.label.collectAsState()
     val placeholder by controller.placeholder.collectAsState()
     val visualTransformation by controller.visualTransformation.collectAsState()
+    val shouldShowError by controller.error.collectAsState()
     val colors = TextFieldColors(shouldShowError != null)
-    var hasFocus by rememberSaveable { mutableStateOf(false) }
+    val isComplete by controller.isComplete.collectAsState()
+    val value by controller.fieldValue.collectAsState()
 
     if (moveToNextFieldOnceComplete) {
         LaunchedEffect(isComplete) {

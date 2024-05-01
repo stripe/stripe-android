@@ -43,13 +43,14 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -177,16 +178,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         )
     }
 
-    val lastTextFieldIdentifier: Flow<IdentifierSpec?> = if (collectingAddress) {
-        addressElement.getTextFieldIdentifiers().map { it.last() }
+    val lastTextFieldIdentifier: StateFlow<IdentifierSpec?> = if (collectingAddress) {
+        addressElement.getTextFieldIdentifiers().mapAsStateFlow { it.last() }
     } else if (collectingPhone) {
-        flowOf(IdentifierSpec.Phone)
+        stateFlowOf(IdentifierSpec.Phone)
     } else if (collectingEmail) {
-        flowOf(IdentifierSpec.Email)
+        stateFlowOf(IdentifierSpec.Email)
     } else if (collectingName) {
-        flowOf(IdentifierSpec.Name)
+        stateFlowOf(IdentifierSpec.Name)
     } else {
-        flowOf(null)
+        stateFlowOf(null)
     }
 
     private val _result = MutableSharedFlow<PaymentSelection.New.USBankAccount?>(replay = 1)

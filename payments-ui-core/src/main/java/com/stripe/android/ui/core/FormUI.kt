@@ -41,13 +41,13 @@ fun FormUI(
     hiddenIdentifiersFlow: Flow<Set<IdentifierSpec>>,
     enabledFlow: StateFlow<Boolean>,
     elementsFlow: StateFlow<List<FormElement>>,
-    lastTextFieldIdentifierFlow: Flow<IdentifierSpec?>,
+    lastTextFieldIdentifierFlow: StateFlow<IdentifierSpec?>,
     modifier: Modifier = Modifier
 ) {
     val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState(emptySet())
     val enabled by enabledFlow.collectAsState()
     val elements by elementsFlow.collectAsState()
-    val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState(null)
+    val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState()
 
     FormUI(
         hiddenIdentifiers = hiddenIdentifiers,

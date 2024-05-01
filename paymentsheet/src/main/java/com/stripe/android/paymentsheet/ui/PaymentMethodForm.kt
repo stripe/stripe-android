@@ -34,7 +34,7 @@ internal fun PaymentMethodForm(
 
     val elements = formViewModel.elements
     val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState()
-    val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState(null)
+    val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState()
 
     PaymentMethodForm(
         paymentMethodCode = args.paymentMethodCode,

@@ -3,7 +3,6 @@ package com.stripe.android.uicore.elements
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.uicore.R
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 
@@ -33,25 +32,17 @@ class CheckboxFieldControllerTest {
         assertThat(controller.isChecked.value).isTrue()
     }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     @Test
     fun `on value change from true then back to false, error should be propagated`() = runTest {
         val controller = CheckboxFieldController()
 
         controller.error.test {
             // Consume initial null event
-            awaitItem()
-
+            assertThat(awaitItem()).isNull()
             controller.onValueChange(value = true)
-
-            // Consume next null event
-            awaitItem()
-
+            expectNoEvents()
             controller.onValueChange(value = false)
-
-            val value = awaitItem()
-
-            assertThat(value?.errorMessage).isEqualTo(R.string.stripe_field_required)
+            assertThat(awaitItem()?.errorMessage).isEqualTo(R.string.stripe_field_required)
         }
     }
 }

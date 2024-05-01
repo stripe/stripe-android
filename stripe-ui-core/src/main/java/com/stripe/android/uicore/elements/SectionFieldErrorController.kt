@@ -2,7 +2,7 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * Any element in a section must have a controller that provides
@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface SectionFieldErrorController : Controller {
-    val error: Flow<FieldError?>
+    val error: StateFlow<FieldError?>
 }
 
 /**
