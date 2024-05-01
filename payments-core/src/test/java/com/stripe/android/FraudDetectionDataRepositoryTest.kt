@@ -3,11 +3,14 @@ package com.stripe.android
 import android.content.Context
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
 import com.stripe.android.networking.DefaultFraudDetectionDataRequestFactory
 import com.stripe.android.networking.FraudDetectionData
 import com.stripe.android.networking.FraudDetectionDataRequestFactory
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.testing.FakeErrorReporter
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
@@ -73,7 +76,8 @@ class FraudDetectionDataRepositoryTest {
                 ),
                 fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
                 stripeNetworkClient = mockStripeNetworkClient,
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                errorReporter = FakeErrorReporter(),
             )
             val expiredFraudDetectionData = createFraudDetectionData(elapsedTime = -60L)
             repository.save(expiredFraudDetectionData)
@@ -101,7 +105,8 @@ class FraudDetectionDataRepositoryTest {
                 localStore = store,
                 fraudDetectionDataRequestFactory = fraudDetectionDataRequestFactory,
                 stripeNetworkClient = mockStripeNetworkClient,
-                workContext = testDispatcher
+                workContext = testDispatcher,
+                errorReporter = FakeErrorReporter(),
             )
             repository.refresh()
 
@@ -109,6 +114,32 @@ class FraudDetectionDataRepositoryTest {
             verify(store, never()).save(any())
             verify(fraudDetectionDataRequestFactory, never()).create(any())
             verify(mockStripeNetworkClient, never()).executeRequest(any())
+        }
+
+    @Test
+    fun `on getLatest() fails, should report error`() =
+        runTest {
+            val errorReporter = FakeErrorReporter()
+            val mockStripeNetworkClient = mock<StripeNetworkClient>()
+
+            whenever(mockStripeNetworkClient.executeRequest(any())).thenThrow(
+                APIConnectionException("API connection failed!")
+            )
+
+            val repository = DefaultFraudDetectionDataRepository(
+                localStore = DefaultFraudDetectionDataStore(
+                    context,
+                    testDispatcher
+                ),
+                fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
+                stripeNetworkClient = mockStripeNetworkClient,
+                workContext = testDispatcher,
+                errorReporter = errorReporter,
+            )
+
+            assertThat(repository.getLatest()).isNull()
+            assertThat(errorReporter.getLoggedErrors().first())
+                .isEqualTo(ErrorReporter.ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE.eventName)
         }
 
     private companion object {
