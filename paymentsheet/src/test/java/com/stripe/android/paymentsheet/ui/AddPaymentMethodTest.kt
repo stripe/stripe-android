@@ -59,7 +59,10 @@ internal class AddPaymentMethodTest {
         val name = "Joe"
         val addressLine1 = "123 Main Street"
         val formFieldValues = FormFieldValues(
-            fieldValuePairs = mapOf(IdentifierSpec.Name to FormFieldEntry(name, true), IdentifierSpec.Line1 to FormFieldEntry(addressLine1, true)),
+            fieldValuePairs = mapOf(
+                IdentifierSpec.Name to FormFieldEntry(name, true),
+                IdentifierSpec.Line1 to FormFieldEntry(addressLine1, true)
+            ),
             showsMandate = false,
             userRequestedReuse = customerRequestedSave,
         )
