@@ -127,16 +127,20 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
             AutoResolveHelper.RESULT_ERROR -> {
                 val status = taskResult.status
                 val statusMessage = status.statusMessage.orEmpty()
+                val statusCode = status.statusCode
                 errorReporter.report(
                     ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
-                    additionalNonPiiParams = mapOf("status_message" to statusMessage)
+                    additionalNonPiiParams = mapOf(
+                        "status_message" to statusMessage,
+                        "status_code" to statusCode.toString(),
+                    )
                 )
                 updateResult(
                     GooglePayPaymentMethodLauncher.Result.Failed(
                         RuntimeException(
-                            "Google Pay failed with error ${status.statusCode}: $statusMessage"
+                            "Google Pay failed with error $statusCode: $statusMessage"
                         ),
-                        googlePayStatusCodeToErrorCode(status.statusCode)
+                        googlePayStatusCodeToErrorCode(statusCode)
                     )
                 )
             }

@@ -15,6 +15,7 @@ import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
@@ -38,6 +39,10 @@ import org.json.JSONObject
 internal class GooglePayLauncherActivity : AppCompatActivity() {
     private val viewModel: GooglePayLauncherViewModel by viewModels {
         GooglePayLauncherViewModel.Factory(args)
+    }
+
+    private val errorReporter: ErrorReporter by lazy {
+        ErrorReporter.createFallbackInstance(context = this)
     }
 
     private lateinit var args: GooglePayLauncherContract.Args
@@ -86,10 +91,15 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
     private fun onGooglePayResult(taskResult: ApiTaskResult<PaymentData>) {
         when (taskResult.status.statusCode) {
             CommonStatusCodes.SUCCESS -> {
-                val paymentDataJson = JSONObject(taskResult.result!!.toJson())
-                val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
-                val host = AuthActivityStarterHost.create(this)
-                viewModel.confirmStripeIntent(host, params)
+                val result = taskResult.result
+                if (result != null) {
+                    val paymentDataJson = JSONObject(result.toJson())
+                    val params = PaymentMethodCreateParams.createFromGooglePay(paymentDataJson)
+                    val host = AuthActivityStarterHost.create(this)
+                    viewModel.confirmStripeIntent(host, params)
+                } else {
+                    errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
+                }
             }
 
             CommonStatusCodes.CANCELED -> {
@@ -99,17 +109,27 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
             }
 
             AutoResolveHelper.RESULT_ERROR -> {
-                val statusMessage = taskResult.status.statusMessage.orEmpty()
+                val status = taskResult.status
+                val statusMessage = status.statusMessage.orEmpty()
+                val statusCode = status.statusCode.toString()
+                errorReporter.report(
+                    ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
+                    additionalNonPiiParams = mapOf(
+                        "status_message" to statusMessage,
+                        "status_code" to statusCode,
+                    )
+                )
                 viewModel.updateResult(
                     GooglePayLauncher.Result.Failed(
                         RuntimeException(
-                            "Google Pay failed with error: $statusMessage"
+                            "Google Pay failed with error $statusCode: $statusMessage"
                         )
                     )
                 )
             }
 
             else -> {
+                errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_RESULT_CODE)
                 viewModel.updateResult(
                     GooglePayLauncher.Result.Failed(
                         RuntimeException(
