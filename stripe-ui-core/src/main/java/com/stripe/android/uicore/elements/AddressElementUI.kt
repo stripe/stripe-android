@@ -21,11 +21,11 @@ fun AddressElementUI(
     hiddenIdentifiers: Set<IdentifierSpec>,
     lastTextFieldIdentifier: IdentifierSpec?
 ) {
-    val fields by controller.fieldsFlowable.collectAsState()
+    val fields by controller.fieldsFlowable.collectAsState(null)
 
     // The last rendered field is not always the last field in the list.
     // So we need to pre filter so we know when to stop drawing dividers.
-    fields.filterNot { hiddenIdentifiers.contains(it.identifier) }.let { fieldList ->
+    fields?.filterNot { hiddenIdentifiers.contains(it.identifier) }?.let { fieldList ->
         Column {
             fieldList.forEachIndexed { index, field ->
                 SectionFieldElementUI(
