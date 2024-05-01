@@ -382,6 +382,7 @@ class PaymentSheetEventTest {
                 "link_enabled" to false,
                 "google_pay_enabled" to false,
                 "selected_lpm" to "link",
+                "link_context" to "wallet",
             )
         )
     }
@@ -564,6 +565,7 @@ class PaymentSheetEventTest {
                 "google_pay_enabled" to false,
                 "selected_lpm" to "link",
                 "error_message" to "apiError",
+                "link_context" to "wallet",
             )
         )
     }
@@ -1040,6 +1042,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            linkContext = null,
         )
         assertThat(
             event.eventName
@@ -1069,6 +1072,7 @@ class PaymentSheetEventTest {
             isDeferred = false,
             linkEnabled = false,
             googlePaySupported = false,
+            linkContext = null,
         )
         assertThat(
             event.eventName
