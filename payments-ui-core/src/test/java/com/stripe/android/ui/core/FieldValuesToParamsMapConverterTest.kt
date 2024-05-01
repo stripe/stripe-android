@@ -117,7 +117,7 @@ class FieldValuesToParamsMapConverterTest {
     }
 
     @Test
-    fun `billing details are null if billing details are not collected`() {
+    fun `billing details are empty if billing details are not collected`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 emptyMap(),
@@ -125,7 +125,7 @@ class FieldValuesToParamsMapConverterTest {
                 PaymentMethod.Type.Sofort.requiresMandate
             )
 
-        assertThat(paymentMethodParams.billingDetails).isNull()
+        assertThat(paymentMethodParams.billingDetails?.toParamMap()).isEmpty()
     }
 
     @Test
