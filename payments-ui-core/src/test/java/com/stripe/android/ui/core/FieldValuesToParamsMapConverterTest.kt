@@ -117,6 +117,18 @@ class FieldValuesToParamsMapConverterTest {
     }
 
     @Test
+    fun `billing details are null if billing details are not collected`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                emptyMap(),
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Sofort.requiresMandate
+            )
+
+        assertThat(paymentMethodParams.billingDetails).isNull()
+    }
+
+    @Test
     fun `transform to payment method params - ignores options params`() {
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
