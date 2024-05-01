@@ -168,7 +168,7 @@ internal class DefaultFlowController @Inject internal constructor(
 
         val externalPaymentMethodLauncher = activityResultRegistryOwner.register(
             ExternalPaymentMethodContract(),
-            ::onPaymentResult
+            ::onExternalPaymentMethodResult
         )
         this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
 
@@ -340,7 +340,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
             is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodInterceptor.intercept(
                 externalPaymentMethodType = paymentSelection.type,
-                onPaymentResult = ::onPaymentResult,
+                onPaymentResult = ::onExternalPaymentMethodResult,
                 externalPaymentMethodLauncher = externalPaymentMethodLauncher,
             )
             is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
@@ -661,6 +661,24 @@ internal class DefaultFlowController @Inject internal constructor(
             is InternalPaymentResult.Canceled -> PaymentResult.Canceled
         }
 
+        onPaymentResult(paymentResult)
+    }
+
+    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
+        val selection = viewModel.paymentSelection
+        when (paymentResult) {
+            is PaymentResult.Completed -> eventReporter.onPaymentSuccess(
+                selection,
+                deferredIntentConfirmationType = null
+            )
+
+            is PaymentResult.Failed -> eventReporter.onPaymentFailure(
+                selection,
+                error = PaymentSheetConfirmationError.ExternalPaymentMethod
+            )
+
+            is PaymentResult.Canceled -> Unit
+        }
         onPaymentResult(paymentResult)
     }
 

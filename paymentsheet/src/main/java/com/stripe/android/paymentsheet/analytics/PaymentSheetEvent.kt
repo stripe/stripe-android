@@ -172,6 +172,10 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     brand.code
                 }
 
+                val externalPaymentMethods = configuration.externalPaymentMethods.takeIf {
+                    it?.isNotEmpty() ?: false
+                }?.take(MAX_EXTERNAL_PAYMENT_METHODS)
+
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
@@ -182,7 +186,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_APPEARANCE to appearanceConfigMap,
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
                         billingDetailsCollectionConfigMap,
-                    FIELD_PREFERRED_NETWORKS to preferredNetworks
+                    FIELD_PREFERRED_NETWORKS to preferredNetworks,
+                    FIELD_EXTERNAL_PAYMENT_METHODS to externalPaymentMethods,
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -534,9 +539,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_LINK_CONTEXT = "link_context"
+        const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
+
+        const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }
 }
 
