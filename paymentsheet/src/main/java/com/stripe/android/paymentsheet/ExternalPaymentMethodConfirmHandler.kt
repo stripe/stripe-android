@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.RestrictTo
+import com.stripe.android.model.PaymentMethod
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface ExternalPaymentMethodConfirmHandler {
@@ -11,6 +12,7 @@ interface ExternalPaymentMethodConfirmHandler {
     fun createIntent(
         context: Context,
         externalPaymentMethodType: String,
+        billingDetails: PaymentMethod.BillingDetails?,
     ): Intent
 }
 

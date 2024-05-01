@@ -66,23 +66,27 @@ class FieldValuesToParamsMapConverterTest {
 
     @Test
     fun `transform to payment method params`() {
+        val name = "joe"
+        val email = "joe@gmail.com"
+        val country = "US"
+        val line1 = "123 Main Street"
         val paymentMethodParams = FieldValuesToParamsMapConverter
             .transformToPaymentMethodCreateParams(
                 mapOf(
                     IdentifierSpec.Name to FormFieldEntry(
-                        "joe",
+                        name,
                         true
                     ),
                     IdentifierSpec.Email to FormFieldEntry(
-                        "joe@gmail.com",
+                        email,
                         true
                     ),
                     IdentifierSpec.Generic("billing_details[address][country]") to FormFieldEntry(
-                        "US",
+                        country,
                         true
                     ),
                     IdentifierSpec.Line1 to FormFieldEntry(
-                        "123 Main Street",
+                        line1,
                         true
                     )
                 ),
@@ -105,6 +109,23 @@ class FieldValuesToParamsMapConverterTest {
                 "}" +
                 "}"
         )
+        assertThat(paymentMethodParams.billingDetails?.name).isEqualTo(name)
+        assertThat(paymentMethodParams.billingDetails?.email).isEqualTo(email)
+        assertThat(paymentMethodParams.billingDetails?.address?.country).isEqualTo(country)
+        assertThat(paymentMethodParams.billingDetails?.address?.line1).isEqualTo(line1)
+        assertThat(paymentMethodParams.billingDetails?.address?.postalCode).isNull()
+    }
+
+    @Test
+    fun `billing details are empty if billing details are not collected`() {
+        val paymentMethodParams = FieldValuesToParamsMapConverter
+            .transformToPaymentMethodCreateParams(
+                emptyMap(),
+                PaymentMethod.Type.Sofort.code,
+                PaymentMethod.Type.Sofort.requiresMandate
+            )
+
+        assertThat(paymentMethodParams.billingDetails).isNull()
     }
 
     @Test

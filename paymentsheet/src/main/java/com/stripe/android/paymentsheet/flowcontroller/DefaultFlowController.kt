@@ -340,6 +340,7 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
             is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodInterceptor.intercept(
                 externalPaymentMethodType = paymentSelection.type,
+                billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
                 externalPaymentMethodLauncher = externalPaymentMethodLauncher,
             )

@@ -126,6 +126,9 @@ interface ErrorReporter {
         GOOGLE_PAY_FAILED(
             eventName = "google_pay.confirm.error"
         ),
+        FRAUD_DETECTION_API_FAILURE(
+            eventName = "fraud_detection_data_repository.api_failure"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

@@ -1157,12 +1157,14 @@ data class PaymentMethodCreateParams internal constructor(
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createWithOverride(
             code: PaymentMethodCode,
+            billingDetails: PaymentMethod.BillingDetails?,
             requiresMandate: Boolean,
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,
+                billingDetails = billingDetails,
                 requiresMandate = requiresMandate,
                 overrideParamMap = overrideParamMap,
                 productUsage = productUsage

@@ -72,7 +72,7 @@ internal class GooglePayLauncherViewModel(
     init {
         viewModelScope.launch(workContext) {
             if (!hasLaunched) {
-                createLoadPaymentDataTask().fold(
+                resolveLoadPaymentDataTask().fold(
                     onSuccess = {
                         _googlePayLaunchTask.emit(it)
                     },
@@ -180,7 +180,7 @@ internal class GooglePayLauncherViewModel(
         }
     }
 
-    private suspend fun createLoadPaymentDataTask(): Result<Task<PaymentData>> {
+    private suspend fun resolveLoadPaymentDataTask(): Result<Task<PaymentData>> {
         return runCatching {
             check(isReadyToPay()) { "Google Pay is unavailable." }
         }.mapResult {
@@ -188,7 +188,7 @@ internal class GooglePayLauncherViewModel(
         }.mapCatching { json ->
             PaymentDataRequest.fromJson(json)
         }.map { request ->
-            paymentsClient.loadPaymentData(request)
+            paymentsClient.loadPaymentData(request).awaitTask()
         }
     }
 

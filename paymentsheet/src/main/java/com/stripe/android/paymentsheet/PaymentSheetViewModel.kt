@@ -462,6 +462,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         } else if (paymentSelection is PaymentSelection.ExternalPaymentMethod) {
             ExternalPaymentMethodInterceptor.intercept(
                 externalPaymentMethodType = paymentSelection.type,
+                billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
                 externalPaymentMethodLauncher,
             )

@@ -84,13 +84,13 @@ internal class GooglePayPaymentMethodLauncherViewModel @Inject constructor(
         )
     }
 
-    suspend fun createLoadPaymentDataTask(): Task<PaymentData> {
+    suspend fun loadPaymentData(): Task<PaymentData> {
         check(isReadyToPay()) {
             "Google Pay is unavailable."
         }
         return paymentsClient.loadPaymentData(
             PaymentDataRequest.fromJson(createPaymentDataRequest().toString())
-        )
+        ).awaitTask()
     }
 
     suspend fun createPaymentMethod(

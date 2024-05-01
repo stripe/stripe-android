@@ -291,6 +291,7 @@ class PaymentMethodCreateParamsTest {
                 )
             ),
             productUsage = setOf(),
+            billingDetails = null,
             requiresMandate = false
         )
 
@@ -325,6 +326,7 @@ class PaymentMethodCreateParamsTest {
                 )
             ),
             productUsage = setOf(),
+            billingDetails = null,
             requiresMandate = false
         )
 
@@ -354,6 +356,7 @@ class PaymentMethodCreateParamsTest {
                 )
             ),
             productUsage = setOf(),
+            billingDetails = null,
             requiresMandate = false
         )
 

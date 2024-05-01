@@ -4,6 +4,7 @@ import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import com.google.common.truth.Truth.assertThat
 import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.Stripe
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.networktesting.NetworkRule
@@ -20,6 +21,8 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.testing.RetryRule
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -45,6 +48,16 @@ internal class PaymentSheetAnalyticsTest {
 
     @TestParameter(valuesProvider = IntegrationTypeProvider::class)
     lateinit var integrationType: IntegrationType
+
+    @Before
+    fun setup() {
+        Stripe.advancedFraudSignalsEnabled = false
+    }
+
+    @After
+    fun teardown() {
+        Stripe.advancedFraudSignalsEnabled = true
+    }
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(

@@ -54,7 +54,9 @@ class GooglePayLauncherViewModelTest {
     private val googlePayRepository = FakeGooglePayRepository(true)
     private val testDispatcher = StandardTestDispatcher()
 
-    private val task = mock<Task<PaymentData>>()
+    private val task = mock<Task<PaymentData>>().also {
+        whenever(it.isComplete).thenReturn(true)
+    }
     private val paymentsClient = mock<PaymentsClient>().also {
         whenever(it.loadPaymentData(any()))
             .thenReturn(task)
