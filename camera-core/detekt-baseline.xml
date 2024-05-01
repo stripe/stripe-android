@@ -46,9 +46,7 @@
     <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType$* The type of viewfinder, decides if [viewFinderBackgroundView] should be drawn and the aspect ratio of [viewFinderWindowView]</ID>
     <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType.CreditCard$* [CreditCard] draws [viewFinderBackgroundView] and draws [viewFinderWindowView] in center with aspect ratio [CREDIT_CARD_ASPECT_RATIO]</ID>
     <ID>MaxLineLength:CameraView.kt$CameraView.ViewFinderType.Passport$* [Passport] draws [viewFinderBackgroundView] and draws [viewFinderWindowView] in center with aspect ratio [Passport]</ID>
-    <ID>MaxLineLength:Memoize.kt$fun</ID>
     <ID>MaxLineLength:NV21Image.kt$NV21Image$// Log.d(Config.logTag, "Bitmap to RGB Byte buffer conversion took: ${System.currentTimeMillis() - startTime} ms")</ID>
-    <ID>MaximumLineLength:com.stripe.android.camera.framework.util.Memoize.kt:612</ID>
     <ID>NestedBlockDepth:NV21Image.kt$@CheckResult private fun yuvPlanesToNV21Compat( width: Int, height: Int, planeBuffers: Array&lt;ByteBuffer>, rowStrides: IntArray, pixelStrides: IntArray, format: Int, crop: Rect = Rect(0, 0, width, height) ): ByteArray</ID>
     <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter$e: java.lang.Exception</ID>
     <ID>SwallowedException:Camera1Adapter.kt$Camera1Adapter$t: Throwable</ID>
