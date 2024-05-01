@@ -28,18 +28,18 @@ import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class PaymentSheetAnalyticsTest {
+    private val composeTestRule = createEmptyComposeRule()
     private val retryRule = RetryRule(5)
     private val networkRule = NetworkRule(
         hostsToTrack = listOf(ApiRequest.API_HOST, AnalyticsRequest.HOST),
         validationTimeout = 1.seconds, // Analytics requests happen async.
     )
-    private val composeTestRule = createEmptyComposeRule()
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(networkRule)
         .around(composeTestRule)
         .around(retryRule)
+        .around(networkRule)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
