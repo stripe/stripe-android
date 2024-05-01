@@ -25,10 +25,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.uicore.StripeTheme
@@ -39,7 +40,7 @@ import com.stripe.android.uicore.utils.stateFlowOf
 
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
-internal fun CvcRecollectionField(element: CvcElement) {
+internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, lastFour: String) {
     val backgroundColor = if (isSystemInDarkTheme()) {
         Color.White.copy(alpha = 0.075f)
     } else {
@@ -66,10 +67,16 @@ internal fun CvcRecollectionField(element: CvcElement) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Image(
-                        painter = painterResource(id = com.stripe.android.model.CardBrand.Visa.icon),
+                        painter = painterResource(id = cardBrand.icon),
                         contentDescription = "",
                     )
-                    Text(text = "••••4242", style = MaterialTheme.typography.h5.copy(fontWeight = FontWeight.Normal))
+                    Text(
+                        text = stringResource(
+                            R.string.stripe_paymentsheet_payment_method_item_card_number,
+                            lastFour
+                        ),
+                        style = MaterialTheme.typography.body1
+                    )
                 }
 
             }
@@ -107,7 +114,7 @@ private fun CvcRecollectionFieldPreview() {
                 .background(Color.White)
                 .padding(20.dp)
         ) {
-            CvcRecollectionField(element = element)
+            CvcRecollectionField(element = element, cardBrand = CardBrand.Visa, lastFour = "4242")
         }
     }
 }
