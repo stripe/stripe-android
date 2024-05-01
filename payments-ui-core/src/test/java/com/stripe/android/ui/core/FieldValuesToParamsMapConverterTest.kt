@@ -125,7 +125,7 @@ class FieldValuesToParamsMapConverterTest {
                 PaymentMethod.Type.Sofort.requiresMandate
             )
 
-        assertThat(paymentMethodParams.billingDetails?.toParamMap()).isEmpty()
+        assertThat(paymentMethodParams.billingDetails).isNull()
     }
 
     @Test

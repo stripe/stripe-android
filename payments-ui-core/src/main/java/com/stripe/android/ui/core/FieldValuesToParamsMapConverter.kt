@@ -50,7 +50,7 @@ class FieldValuesToParamsMapConverter {
 
         private fun createBillingDetails(
             fieldValuePairs: Map<IdentifierSpec, FormFieldEntry>,
-        ): PaymentMethod.BillingDetails {
+        ): PaymentMethod.BillingDetails? {
             val billingDetails = PaymentMethod.BillingDetails.Builder()
 
             billingDetails.setName(fieldValuePairs[IdentifierSpec.Name]?.value)
@@ -58,7 +58,12 @@ class FieldValuesToParamsMapConverter {
             billingDetails.setPhone(fieldValuePairs[IdentifierSpec.Phone]?.value)
             billingDetails.setAddress(createAddress(fieldValuePairs))
 
-            return billingDetails.build()
+            val builtBillingDetails = billingDetails.build()
+            return if (builtBillingDetails.isFilledOut()) {
+                builtBillingDetails
+            } else {
+                null
+            }
         }
 
         private fun createAddress(

@@ -10,6 +10,7 @@ import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -75,7 +76,7 @@ class FawryActivity : AppCompatActivity() {
         override fun createIntent(
             context: Context,
             externalPaymentMethodType: String,
-            billingDetails: PaymentSheet.BillingDetails,
+            billingDetails: PaymentMethod.BillingDetails?,
         ): Intent {
             return Intent().setClass(
                 context,
