@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.42.0 - 2024-05-01
+
 Dependencies updated in [8381](https://github.com/stripe/stripe-android/pull/8381):
 * Bumped Play Services Wallet from 19.2.1 to 19.3.0.
 
