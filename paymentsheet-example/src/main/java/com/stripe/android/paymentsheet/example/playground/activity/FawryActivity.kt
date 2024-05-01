@@ -2,10 +2,8 @@ package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
@@ -19,7 +17,6 @@ import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExa
 
 class FawryActivity : AppCompatActivity() {
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -31,7 +28,7 @@ class FawryActivity : AppCompatActivity() {
         }
 
         val billingDetails: PaymentSheet.BillingDetails? =
-            intent.getParcelableExtra(EXTRA_BILLING_DETAILS, PaymentSheet.BillingDetails::class.java)
+            intent.getParcelableExtra(EXTRA_BILLING_DETAILS)
 
         setContent {
             PaymentSheetExampleTheme {
