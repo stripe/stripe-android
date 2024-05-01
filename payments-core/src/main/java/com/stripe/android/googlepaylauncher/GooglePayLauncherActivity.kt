@@ -13,6 +13,8 @@ import com.google.android.gms.wallet.AutoResolveHelper
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.contract.ApiTaskResult
 import com.google.android.gms.wallet.contract.TaskResultContracts.GetPaymentDataResult
+import com.stripe.android.StripePaymentController.Companion.PAYMENT_REQUEST_CODE
+import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -155,10 +157,12 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
         data: Intent?
     ) {
         super.onActivityResult(requestCode, resultCode, data)
-        viewModel.onConfirmResult(
-            requestCode,
-            data ?: Intent()
-        )
+        if (requestCode == PAYMENT_REQUEST_CODE || requestCode == SETUP_REQUEST_CODE) {
+            viewModel.onConfirmResult(
+                requestCode,
+                data ?: Intent()
+            )
+        }
     }
 
     private fun finishWithResult(result: GooglePayLauncher.Result) {
