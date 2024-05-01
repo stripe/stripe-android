@@ -99,6 +99,13 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                     viewModel.confirmStripeIntent(host, params)
                 } else {
                     errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_MISSING_INTENT_DATA)
+                    viewModel.updateResult(
+                        GooglePayLauncher.Result.Failed(
+                            RuntimeException(
+                                "Google Pay missing result data."
+                            )
+                        )
+                    )
                 }
             }
 
