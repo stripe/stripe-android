@@ -148,7 +148,7 @@ internal class GooglePayPaymentMethodLauncherActivity : AppCompatActivity() {
                 errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_RESULT_CODE)
                 updateResult(
                     GooglePayPaymentMethodLauncher.Result.Failed(
-                        RuntimeException("Google Pay returned an expected result code."),
+                        RuntimeException("Google Pay returned an unexpected result code."),
                         GooglePayPaymentMethodLauncher.INTERNAL_ERROR
                     )
                 )
