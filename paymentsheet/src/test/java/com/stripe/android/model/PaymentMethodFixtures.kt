@@ -498,6 +498,7 @@ internal object PaymentMethodFixtures {
             iconResource = 0,
             lightThemeIconUrl = spec.lightImageUrl,
             darkThemeIconUrl = spec.darkImageUrl,
+            billingDetails = null,
         )
     }
 

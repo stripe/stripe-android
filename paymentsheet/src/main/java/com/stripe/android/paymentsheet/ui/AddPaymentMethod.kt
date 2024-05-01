@@ -207,6 +207,7 @@ internal fun FormFieldValues.transformToPaymentSelection(
     } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
         PaymentSelection.ExternalPaymentMethod(
             type = paymentMethod.code,
+            billingDetails = params.billingDetails,
             label = paymentMethod.displayName.resolve(context),
             iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,

@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import java.lang.IllegalArgumentException
 
@@ -11,6 +12,7 @@ internal class ExternalPaymentMethodContract : ActivityResultContract<ExternalPa
         return input.externalPaymentMethodConfirmHandler.createIntent(
             context = context,
             externalPaymentMethodType = input.type,
+            billingDetails = input.billingDetails,
         )
     }
 
@@ -39,4 +41,5 @@ internal class ExternalPaymentMethodContract : ActivityResultContract<ExternalPa
 internal data class ExternalPaymentMethodInput(
     val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
     val type: String,
+    val billingDetails: PaymentMethod.BillingDetails?,
 )

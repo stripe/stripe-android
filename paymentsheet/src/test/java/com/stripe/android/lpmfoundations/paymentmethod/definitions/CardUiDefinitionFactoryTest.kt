@@ -35,6 +35,7 @@ class CardUiDefinitionFactoryTest {
                 metadata = metadata,
                 paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
                     code = "card",
+                    billingDetails = null,
                     requiresMandate = false,
                     overrideParamMap = mapOf(
                         "type" to "card",

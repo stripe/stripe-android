@@ -68,6 +68,7 @@ internal sealed class PaymentSelection : Parcelable {
     @Parcelize
     data class ExternalPaymentMethod(
         val type: String,
+        val billingDetails: PaymentMethod.BillingDetails?,
         val label: String,
         // In practice, we don't have an iconResource for external payment methods.
         @DrawableRes val iconResource: Int,
