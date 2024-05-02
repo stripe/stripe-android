@@ -4,15 +4,13 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.strings.ResolvableString
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlin.coroutines.CoroutineContext
 
@@ -59,7 +57,6 @@ internal class DefaultEditPaymentMethodViewInteractor(
     private val updateExecutor: PaymentMethodUpdateOperation,
     private val canRemove: Boolean,
     workContext: CoroutineContext = Dispatchers.Default,
-    viewStateSharingStarted: SharingStarted = SharingStarted.WhileSubscribed()
 ) : ModifiableEditPaymentMethodViewInteractor, CoroutineScope {
     private val choice = MutableStateFlow(initialPaymentMethod.getPreferredChoice())
     private val status = MutableStateFlow(EditPaymentMethodViewState.Status.Idle)
@@ -69,7 +66,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
 
     override val coroutineContext: CoroutineContext = workContext + SupervisorJob()
 
-    override val viewState = combine(
+    override val viewState = combineAsStateFlow(
         paymentMethod,
         choice,
         status,
@@ -90,19 +87,7 @@ internal class DefaultEditPaymentMethodViewInteractor(
             confirmRemoval = confirmDeletion,
             canRemove = canRemove,
         )
-    }.stateIn(
-        scope = this,
-        started = viewStateSharingStarted,
-        initialValue = EditPaymentMethodViewState(
-            last4 = initialPaymentMethod.getLast4(),
-            selectedBrand = initialPaymentMethod.getPreferredChoice(),
-            canUpdate = false,
-            availableBrands = initialPaymentMethod.getAvailableNetworks(),
-            status = EditPaymentMethodViewState.Status.Idle,
-            displayName = displayName,
-            canRemove = canRemove,
-        )
-    )
+    }
 
     override fun handleViewAction(viewAction: EditPaymentMethodViewAction) {
         when (viewAction) {
