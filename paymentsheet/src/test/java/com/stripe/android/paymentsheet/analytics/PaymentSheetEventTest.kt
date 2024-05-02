@@ -59,6 +59,9 @@ class PaymentSheetEventTest {
                 ),
                 "usage" to false,
             ),
+            "payment_method_order" to listOf<String>(),
+            "allows_payment_methods_requiring_shipping_address" to false,
+            "allows_removal_of_last_saved_payment_method" to true,
             "billing_details_collection_configuration" to mapOf(
                 "attach_defaults" to false,
                 "name" to "Automatic",
@@ -79,6 +82,65 @@ class PaymentSheetEventTest {
 
     @Test
     fun `Init event with minimum config should return expected params`() {
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Complete,
+            configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_complete_init_default"
+        )
+
+        val expectedConfig = mapOf(
+            "customer" to false,
+            "googlepay" to false,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "payment_method_order" to listOf<String>(),
+            "allows_payment_methods_requiring_shipping_address" to false,
+            "allows_removal_of_last_saved_payment_method" to true,
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+            "preferred_networks" to null,
+        )
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @Test
+    fun `Init event with preferred networks`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
             configuration = PaymentSheetFixtures.CONFIG_MINIMUM.copy(
@@ -117,6 +179,9 @@ class PaymentSheetEventTest {
                 ),
                 "usage" to false,
             ),
+            "payment_method_order" to listOf<String>(),
+            "allows_payment_methods_requiring_shipping_address" to false,
+            "allows_removal_of_last_saved_payment_method" to true,
             "billing_details_collection_configuration" to mapOf(
                 "attach_defaults" to false,
                 "name" to "Automatic",
@@ -125,62 +190,6 @@ class PaymentSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to "cartes_bancaires, visa",
-        )
-
-        assertThat(event.params).run {
-            containsEntry("link_enabled", false)
-            containsEntry("google_pay_enabled", false)
-            containsEntry("is_decoupled", false)
-            containsEntry("mpe_config", expectedConfig)
-        }
-    }
-
-    @Test
-    fun `Init event with preferred networks`() {
-        val event = PaymentSheetEvent.Init(
-            mode = EventReporter.Mode.Complete,
-            configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
-            isDeferred = false,
-            linkEnabled = false,
-            googlePaySupported = false,
-        )
-
-        assertThat(
-            event.eventName
-        ).isEqualTo(
-            "mc_complete_init_default"
-        )
-
-        val expectedConfig = mapOf(
-            "customer" to false,
-            "googlepay" to false,
-            "primary_button_color" to false,
-            "default_billing_details" to false,
-            "allows_delayed_payment_methods" to false,
-            "appearance" to mapOf(
-                "colorsLight" to false,
-                "colorsDark" to false,
-                "corner_radius" to false,
-                "border_width" to false,
-                "font" to false,
-                "size_scale_factor" to false,
-                "primary_button" to mapOf(
-                    "colorsLight" to false,
-                    "colorsDark" to false,
-                    "corner_radius" to false,
-                    "border_width" to false,
-                    "font" to false,
-                ),
-                "usage" to false,
-            ),
-            "billing_details_collection_configuration" to mapOf(
-                "attach_defaults" to false,
-                "name" to "Automatic",
-                "email" to "Automatic",
-                "phone" to "Automatic",
-                "address" to "Automatic",
-            ),
-            "preferred_networks" to null,
         )
 
         assertThat(event.params).run {
@@ -957,6 +966,9 @@ class PaymentSheetEventTest {
             "primary_button_color" to false,
             "default_billing_details" to false,
             "allows_delayed_payment_methods" to false,
+            "payment_method_order" to listOf<String>(),
+            "allows_payment_methods_requiring_shipping_address" to false,
+            "allows_removal_of_last_saved_payment_method" to true,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
@@ -1011,6 +1023,9 @@ class PaymentSheetEventTest {
             "primary_button_color" to true,
             "default_billing_details" to true,
             "allows_delayed_payment_methods" to true,
+            "payment_method_order" to listOf("klarna", "afterpay", "card"),
+            "allows_payment_methods_requiring_shipping_address" to true,
+            "allows_removal_of_last_saved_payment_method" to false,
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
