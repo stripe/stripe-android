@@ -15,6 +15,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_CARD_NUMBER_COMPLETED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_EDITABLE_PAYMENT_OPTION
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_PAYMENT_OPTION_BRANDS
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_INIT
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_DONE_TAPPED
@@ -60,6 +61,17 @@ class CustomerSheetEventReporterTest {
         analyticsRequestFactory = analyticsRequestFactory,
         workContext = testDispatcher,
     )
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Test
+    fun `onInit should fire analytics request with expected event value`() {
+        eventReporter.onInit(configuration = CustomerSheetFixtures.MINIMUM_CONFIG)
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_INIT
+            }
+        )
+    }
 
     @Test
     fun `onScreenPresented should fire analytics request with expected event value`() {

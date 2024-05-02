@@ -143,6 +143,19 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `on init, sends 'onInit' event to event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        verify(eventReporter).onInit(CustomerSheetFixtures.MINIMUM_CONFIG)
+    }
+
+    @Test
     fun `CustomerSheetViewAction#OnBackPressed emits canceled result`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
