@@ -19,16 +19,14 @@ import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.NameConfig
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SectionController
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -78,23 +76,21 @@ internal class InlineSignupViewModel @Inject constructor(
      * Emits the email entered in the form if valid, null otherwise.
      */
     private val consumerEmail: StateFlow<String?> =
-        emailController.formFieldValue.map {
+        emailController.formFieldValue.mapAsStateFlow {
             it.takeIf { it.isComplete }?.value
-        }.stateIn(viewModelScope, SharingStarted.Lazily, prefilledEmail)
+        }
 
     /**
      * Emits the phone number entered in the form if valid, null otherwise.
      */
     private val consumerPhoneNumber: StateFlow<String?> =
-        phoneController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
-            .stateIn(viewModelScope, SharingStarted.Lazily, null)
+        phoneController.formFieldValue.mapAsStateFlow { it.takeIf { it.isComplete }?.value }
 
     /**
      * Emits the name entered in the form if valid, null otherwise.
      */
     private val consumerName: StateFlow<String?> =
-        nameController.formFieldValue.map { it.takeIf { it.isComplete }?.value }
-            .stateIn(viewModelScope, SharingStarted.Lazily, null)
+        nameController.formFieldValue.mapAsStateFlow { it.takeIf { it.isComplete }?.value }
 
     private val _errorMessage = MutableStateFlow<ErrorMessage?>(null)
     val errorMessage: StateFlow<ErrorMessage?> = _errorMessage
