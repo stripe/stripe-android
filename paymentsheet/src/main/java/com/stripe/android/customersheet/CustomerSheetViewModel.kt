@@ -406,6 +406,8 @@ internal class CustomerSheetViewModel(
             }
         }
 
+        eventReporter.onPaymentMethodSelected(paymentMethod.code)
+
         previouslySelectedPaymentMethod = paymentMethod
 
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
