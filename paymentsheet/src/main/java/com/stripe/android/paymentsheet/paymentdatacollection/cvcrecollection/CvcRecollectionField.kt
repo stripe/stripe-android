@@ -78,7 +78,6 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
                         style = MaterialTheme.typography.body1
                     )
                 }
-
             }
             Divider(
                 modifier = Modifier
