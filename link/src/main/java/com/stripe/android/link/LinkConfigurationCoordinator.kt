@@ -6,11 +6,12 @@ import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -19,7 +20,7 @@ import javax.inject.Singleton
 interface LinkConfigurationCoordinator {
 
     val component: LinkComponent?
-    val emailFlow: Flow<String?>
+    val emailFlow: StateFlow<String?>
 
     fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
 
@@ -45,10 +46,9 @@ class RealLinkConfigurationCoordinator @Inject internal constructor(
 ) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
-    override val emailFlow: Flow<String?> = componentFlow
-        .filterNotNull()
-        .flatMapMerge { it.linkAccountManager.linkAccount }
-        .map { it?.email }
+    override val emailFlow: StateFlow<String?> = componentFlow
+        .flatMapLatestAsStateFlow { it?.linkAccountManager?.linkAccount ?: stateFlowOf(null) }
+        .mapAsStateFlow { it?.email }
 
     /**
      * The dependency injector Component for all injectable classes in Link while in an embedded

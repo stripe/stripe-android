@@ -167,11 +167,7 @@ internal abstract class BaseSheetViewModel(
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
 
-    protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow
 
     private var previouslySentDeepLinkEvent: Boolean
         get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
