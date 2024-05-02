@@ -64,10 +64,10 @@ import com.stripe.android.paymentsheet.utils.canSave
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import dagger.Lazy
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.Channel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -145,7 +145,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     internal var checkoutIdentifier: CheckoutIdentifier = CheckoutIdentifier.SheetBottomBuy
 
-    val buyButtonState: Flow<PaymentSheetViewState?> = viewState.map { viewState ->
+    val buyButtonState: StateFlow<PaymentSheetViewState?> = viewState.mapAsStateFlow { viewState ->
         mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetBottomBuy)
     }
 
@@ -208,11 +208,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         initialValue = null,
     )
 
-    override val error: StateFlow<String?> = buyButtonState.map { it?.errorMessage?.message }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = null,
-    )
+    override val error: StateFlow<String?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
 
     override val walletsState: StateFlow<WalletsState?> = combineAsStateFlow(
         linkHandler.isLinkEnabled,
@@ -238,9 +234,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    override val walletsProcessingState: StateFlow<WalletsProcessingState?> = viewState.map { viewState ->
+    override val walletsProcessingState: StateFlow<WalletsProcessingState?> = viewState.mapAsStateFlow { viewState ->
         mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetTopWallet)
-    }.map { viewState ->
+    }.mapAsStateFlow { viewState ->
         when (viewState) {
             null -> null
             is PaymentSheetViewState.Reset -> WalletsProcessingState.Idle(
@@ -251,11 +247,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             is PaymentSheetViewState.StartProcessing -> WalletsProcessingState.Processing
             is PaymentSheetViewState.FinishProcessing -> WalletsProcessingState.Completed(viewState.onComplete)
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    }
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
