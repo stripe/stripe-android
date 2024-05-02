@@ -34,7 +34,7 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
         state: PaymentSheetState.Full,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
-        val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodDefinitions().map { it.type.code }
+        val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
 
         return when (selection) {
             is PaymentSelection.New -> {
@@ -48,13 +48,16 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSel
             is PaymentSelection.Saved -> {
                 val paymentMethod = selection.paymentMethod
                 val code = paymentMethod.type?.code
-                code in allowedTypes && paymentMethod in state.customerPaymentMethods
+                code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
                 state.isGooglePayReady
             }
             is PaymentSelection.Link -> {
                 state.linkState != null
+            }
+            is PaymentSelection.ExternalPaymentMethod -> {
+                state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)
             }
         }
     }

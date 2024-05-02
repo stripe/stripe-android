@@ -11,13 +11,11 @@ import com.stripe.android.paymentsheet.addresselement.toIdentifierMap
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.SharedDataSpec
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 
 internal sealed interface UiDefinitionFactory {
     class Arguments(
-        val addressRepository: AddressRepository,
         val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
         val initialValues: Map<IdentifierSpec, String?>,
         val shippingValues: Map<IdentifierSpec, String?>?,
@@ -31,21 +29,19 @@ internal sealed interface UiDefinitionFactory {
         interface Factory {
             fun create(
                 metadata: PaymentMethodMetadata,
-                definition: PaymentMethodDefinition,
+                requiresMandate: Boolean,
             ): Arguments
 
             class Default(
-                private val addressRepository: AddressRepository,
                 private val cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
                 private val paymentMethodCreateParams: PaymentMethodCreateParams? = null,
                 private val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
             ) : Factory {
                 override fun create(
                     metadata: PaymentMethodMetadata,
-                    definition: PaymentMethodDefinition,
+                    requiresMandate: Boolean,
                 ): Arguments {
                     return Arguments(
-                        addressRepository = addressRepository,
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                         amount = metadata.amount(),
                         merchantName = metadata.merchantName,
@@ -58,7 +54,7 @@ internal sealed interface UiDefinitionFactory {
                         shippingValues = metadata.shippingDetails?.toIdentifierMap(metadata.defaultBillingDetails),
                         saveForFutureUseInitialValue = false,
                         billingDetailsCollectionConfiguration = metadata.billingDetailsCollectionConfiguration,
-                        requiresMandate = definition.requiresMandate(metadata),
+                        requiresMandate = requiresMandate,
                     )
                 }
             }

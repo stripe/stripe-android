@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">無法捕獲圖片</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">細節不可見</string>
+  <string name="stripe_decrease_lighting_2">移動到較暗區域</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">照相機圖示</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">證件未對焦</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">細節不可見</string>
+  <string name="stripe_reduce_glare_2">嘗試減少眩光並使身分證件可見</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">重新拍照</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

@@ -39,6 +39,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTy
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
+import com.stripe.android.test.core.ui.clickTextInWebView
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
@@ -445,9 +446,54 @@ internal class PlaygroundTestDriver(
 
     fun confirmUSBankAccount(
         testParameters: TestParameters,
-        values: FieldPopulator.Values = FieldPopulator.Values(),
         afterAuthorization: (Selectors) -> Unit = {},
-        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
+    ): PlaygroundState? {
+        return confirmBankAccount(
+            testParameters = testParameters,
+            executeFlow = { doUSBankAccountAuthorization() },
+            afterCollectingBankInfo = afterAuthorization,
+        )
+    }
+
+    fun confirmCustomUSBankAccount(
+        testParameters: TestParameters,
+        afterAuthorization: (Selectors) -> Unit = {},
+    ) {
+        confirmBankAccountInCustomFlow(
+            testParameters = testParameters,
+            executeFlow = { doUSBankAccountAuthorization() },
+            afterCollectingBankInfo = afterAuthorization,
+        )
+    }
+
+    fun confirmInstantDebits(
+        testParameters: TestParameters,
+        afterAuthorization: (Selectors) -> Unit = {},
+    ): PlaygroundState? {
+        return confirmBankAccount(
+            testParameters = testParameters,
+            executeFlow = { doInstantDebitsFlow(testParameters.authorizationAction) },
+            afterCollectingBankInfo = afterAuthorization,
+            confirmIntent = testParameters.authorizationAction == null,
+        )
+    }
+
+    fun confirmInstantDebitsInCustomFlow(
+        testParameters: TestParameters,
+        afterAuthorization: (Selectors) -> Unit = {},
+    ) {
+        confirmBankAccountInCustomFlow(
+            testParameters = testParameters,
+            executeFlow = { doInstantDebitsFlow(testParameters.authorizationAction) },
+            afterCollectingBankInfo = afterAuthorization,
+        )
+    }
+
+    private fun confirmBankAccount(
+        testParameters: TestParameters,
+        executeFlow: () -> Unit,
+        afterCollectingBankInfo: (Selectors) -> Unit = {},
+        confirmIntent: Boolean = false,
     ): PlaygroundState? {
         setup(testParameters)
         launchComplete()
@@ -455,11 +501,11 @@ internal class PlaygroundTestDriver(
         selectors.paymentSelection.click()
 
         FieldPopulator(
-            selectors,
-            testParameters,
-            populateCustomLpmFields,
+            selectors = selectors,
+            testParameters = testParameters,
+            populateCustomLpmFields = {},
             verifyCustomLpmFields = {},
-            values = values,
+            values = FieldPopulator.Values(),
         ).populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
@@ -473,21 +519,24 @@ internal class PlaygroundTestDriver(
 
         pressBuy()
 
-        doUSBankAccountAuthorization()
+        executeFlow()
 
-        afterAuthorization(selectors)
+        afterCollectingBankInfo(selectors)
+
+        if (confirmIntent) {
+            pressBuy()
+            finishAfterAuthorization()
+        }
 
         teardown()
 
         return result
     }
 
-    fun confirmCustomUSBankAccount(
+    private fun confirmBankAccountInCustomFlow(
         testParameters: TestParameters,
-        values: FieldPopulator.Values = FieldPopulator.Values(),
-        afterAuthorization: (Selectors) -> Unit = {},
-        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
-        verifyCustomLpmFields: FieldPopulator.() -> Unit = {},
+        executeFlow: PlaygroundTestDriver.() -> Unit,
+        afterCollectingBankInfo: (Selectors) -> Unit = {},
     ) {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
@@ -504,11 +553,11 @@ internal class PlaygroundTestDriver(
         selectors.paymentSelection.click()
 
         FieldPopulator(
-            selectors,
-            testParameters,
-            populateCustomLpmFields,
-            verifyCustomLpmFields,
-            values,
+            selectors = selectors,
+            testParameters = testParameters,
+            populateCustomLpmFields = {},
+            verifyCustomLpmFields = {},
+            values = FieldPopulator.Values(),
         ).populateFields()
 
         // Verify device requirements are met prior to attempting confirmation.  Do this
@@ -520,9 +569,9 @@ internal class PlaygroundTestDriver(
 
         pressContinue(waitForPlayground = false)
 
-        doUSBankAccountAuthorization()
+        this.executeFlow()
 
-        afterAuthorization(selectors)
+        afterCollectingBankInfo(selectors)
 
         teardown()
     }
@@ -808,6 +857,10 @@ internal class PlaygroundTestDriver(
             }
         }
 
+        finishAfterAuthorization()
+    }
+
+    private fun finishAfterAuthorization() {
         val authAction = testParameters.authorizationAction
         val isDone = authAction == null || authAction.isConsideredDone
 
@@ -817,8 +870,40 @@ internal class PlaygroundTestDriver(
         }
     }
 
-    private fun doUSBankAccountAuthorization() {
+    private fun doInstantDebitsFlow(authAction: AuthorizeAction?) {
+        if (authAction == AuthorizeAction.Cancel) {
+            cancelInstantDebitsFlowOnLaunch()
+        } else {
+            executeEntireInstantDebitsFlow()
+        }
+    }
+
+    private fun cancelInstantDebitsFlowOnLaunch() {
         while (currentActivity[0]?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
+            TimeUnit.MILLISECONDS.sleep(250)
+        }
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        Espresso.pressBack()
+    }
+
+    private fun executeEntireInstantDebitsFlow() = with(device) {
+        clickTextInWebView(label = "Agree and continue")
+        clickTextInWebView(
+            label = "Continue with Link",
+            delay = true,
+            selectAmongOccurrences = { it.last() },
+        )
+        clickTextInWebView(label = "Use test code")
+        clickTextInWebView(label = "Success")
+        clickTextInWebView(label = "Connect account")
+        clickTextInWebView(label = "Done")
+    }
+
+    private fun doUSBankAccountAuthorization() {
+        while (currentActivity[0]?.javaClass?.name != FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
@@ -889,6 +974,8 @@ internal class PlaygroundTestDriver(
     private companion object {
         const val ADD_PAYMENT_METHOD_NODE_TAG = "${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
+            "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
+        const val FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY =
             "com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
     }
 }

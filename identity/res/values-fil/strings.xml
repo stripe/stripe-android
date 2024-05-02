@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Hindi makunan ng imahe</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Hindi nakikita ang mga detalye</string>
+  <string name="stripe_decrease_lighting_2">Lumipat sa mas madilim na lugar</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">camera icon</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Hindi nakapokus ang ID</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Hindi nakikita ang mga detalye</string>
+  <string name="stripe_reduce_glare_2">Subukang bawasan ang pagkasilaw at gawing nakikita ang ID</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Kunan Muli Ang Mga Larawan</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

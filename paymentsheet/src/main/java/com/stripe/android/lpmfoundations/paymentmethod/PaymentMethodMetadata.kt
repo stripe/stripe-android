@@ -2,6 +2,7 @@ package com.stripe.android.lpmfoundations.paymentmethod
 
 import android.os.Parcelable
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
@@ -11,6 +12,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import com.stripe.android.ui.core.elements.SharedDataSpec
 import com.stripe.android.uicore.elements.FormElement
 import kotlinx.parcelize.Parcelize
@@ -31,6 +33,7 @@ internal data class PaymentMethodMetadata(
     val defaultBillingDetails: PaymentSheet.BillingDetails?,
     val shippingDetails: AddressDetails?,
     val sharedDataSpecs: List<SharedDataSpec>,
+    val externalPaymentMethodSpecs: List<ExternalPaymentMethodSpec>,
     val hasCustomerConfiguration: Boolean,
     val financialConnectionsAvailable: Boolean = DefaultIsFinancialConnectionsAvailable(),
 ) : Parcelable {
@@ -45,24 +48,17 @@ internal data class PaymentMethodMetadata(
         return PaymentMethodRegistry.definitionsByCode[paymentMethodCode]?.requiresMandate(this) ?: false
     }
 
-    fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
-        return stripeIntent.paymentMethodTypes.mapNotNull {
-            PaymentMethodRegistry.definitionsByCode[it]
-        }.filter {
-            it.isSupported(this)
-        }.filterNot {
-            stripeIntent.isLiveMode &&
-                stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
-        }.filter { paymentMethodDefinition ->
-            paymentMethodDefinition.uiDefinitionFactory().canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
-        }.run {
+    fun supportedPaymentMethodTypes(): List<String> {
+        return supportedPaymentMethodDefinitions().map { paymentMethodDefinition ->
+            paymentMethodDefinition.type.code
+        }.plus(externalPaymentMethodTypes()).run {
             if (paymentMethodOrder.isEmpty()) {
                 // Optimization to early out if we don't have a client side order.
                 this
             } else {
                 val orderedPaymentMethodTypes = orderedPaymentMethodTypes().mapOrderToIndex()
-                sortedBy { paymentMethodDefinition ->
-                    orderedPaymentMethodTypes[paymentMethodDefinition.type.code]
+                sortedBy { code ->
+                    orderedPaymentMethodTypes[code]
                 }
             }
         }
@@ -79,18 +75,20 @@ internal data class PaymentMethodMetadata(
     fun supportedPaymentMethodForCode(
         code: String,
     ): SupportedPaymentMethod? {
-        val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
-        return definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
-    }
-
-    fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
-        return supportedPaymentMethodDefinitions().mapNotNull { definition ->
+        return if (isExternalPaymentMethod(code)) {
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createSupportedPaymentMethod()
+        } else {
+            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
             definition.uiDefinitionFactory().supportedPaymentMethod(definition, sharedDataSpecs)
         }
     }
 
+    fun sortedSupportedPaymentMethods(): List<SupportedPaymentMethod> {
+        return supportedPaymentMethodTypes().mapNotNull { supportedPaymentMethodForCode(it) }
+    }
+
     private fun orderedPaymentMethodTypes(): List<String> {
-        val originalOrderedTypes = stripeIntent.paymentMethodTypes.toMutableList()
+        val originalOrderedTypes = stripeIntent.paymentMethodTypes.plus(externalPaymentMethodTypes()).toMutableList()
         val result = mutableListOf<String>()
         // 1. Add each PM in paymentMethodOrder first
         for (pm in paymentMethodOrder) {
@@ -112,6 +110,32 @@ internal data class PaymentMethodMetadata(
         }.toMap()
     }
 
+    private fun externalPaymentMethodTypes(): List<String> {
+        return externalPaymentMethodSpecs.map { it.type }
+    }
+
+    fun isExternalPaymentMethod(code: String): Boolean {
+        return externalPaymentMethodTypes().contains(code)
+    }
+
+    private fun getUiDefinitionFactoryForExternalPaymentMethod(code: String): UiDefinitionFactory.Simple? {
+        val externalPaymentMethodSpecForCode = externalPaymentMethodSpecs.firstOrNull { it.type == code } ?: return null
+        return ExternalPaymentMethodUiDefinitionFactory(externalPaymentMethodSpecForCode)
+    }
+
+    private fun supportedPaymentMethodDefinitions(): List<PaymentMethodDefinition> {
+        return stripeIntent.paymentMethodTypes.mapNotNull {
+            PaymentMethodRegistry.definitionsByCode[it]
+        }.filter {
+            it.isSupported(this)
+        }.filterNot {
+            stripeIntent.isLiveMode &&
+                stripeIntent.unactivatedPaymentMethods.contains(it.type.code)
+        }.filter { paymentMethodDefinition ->
+            paymentMethodDefinition.uiDefinitionFactory().canBeDisplayedInUi(paymentMethodDefinition, sharedDataSpecs)
+        }
+    }
+
     fun amount(): Amount? {
         if (stripeIntent is PaymentIntent) {
             return Amount(
@@ -126,16 +150,23 @@ internal data class PaymentMethodMetadata(
         code: String,
         uiDefinitionFactoryArgumentsFactory: UiDefinitionFactory.Arguments.Factory,
     ): List<FormElement>? {
-        val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
+        return if (isExternalPaymentMethod(code)) {
+            getUiDefinitionFactoryForExternalPaymentMethod(code)?.createFormElements(
+                this,
+                uiDefinitionFactoryArgumentsFactory.create(this, requiresMandate = false)
+            )
+        } else {
+            val definition = supportedPaymentMethodDefinitions().firstOrNull { it.type.code == code } ?: return null
 
-        return definition.uiDefinitionFactory().formElements(
-            metadata = this,
-            definition = definition,
-            sharedDataSpecs = sharedDataSpecs,
-            arguments = uiDefinitionFactoryArgumentsFactory.create(
+            definition.uiDefinitionFactory().formElements(
                 metadata = this,
                 definition = definition,
-            ),
-        )
+                sharedDataSpecs = sharedDataSpecs,
+                arguments = uiDefinitionFactoryArgumentsFactory.create(
+                    metadata = this,
+                    requiresMandate = definition.requiresMandate(this),
+                ),
+            )
+        }
     }
 }

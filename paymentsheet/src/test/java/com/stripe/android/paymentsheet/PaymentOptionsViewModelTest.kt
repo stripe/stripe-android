@@ -26,7 +26,6 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.Loading
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkState
@@ -118,6 +117,31 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
+                )
+            assertThat(prefsRepository.getSavedSelection(true, true))
+                .isEqualTo(SavedSelection.None)
+        }
+
+    @Test
+    fun `onUserSelection() when external payment method should set the view state to process result`() =
+        runTest {
+            val viewModel = createViewModel()
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION)
+                viewModel.onUserSelection()
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentOptionResult.Succeeded(
+                            EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
+                            listOf()
+                        )
+                    )
+                ensureAllEventsConsumed()
+            }
+
+            verify(eventReporter)
+                .onSelectPaymentOption(
+                    paymentSelection = EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION
                 )
             assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
@@ -417,11 +441,9 @@ internal class PaymentOptionsViewModelTest {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
-                paymentSelection = selection,
-                customerPaymentMethods = paymentMethods,
-            )
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentSelection = selection,
+            paymentMethods = paymentMethods,
         )
 
         val viewModel = createViewModel(args)
@@ -455,11 +477,9 @@ internal class PaymentOptionsViewModelTest {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
-                paymentSelection = selection,
-                customerPaymentMethods = paymentMethods,
-            )
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentSelection = selection,
+            paymentMethods = paymentMethods,
         )
 
         val viewModel = createViewModel(args)
@@ -552,7 +572,6 @@ internal class PaymentOptionsViewModelTest {
                     allowsDelayedPaymentMethods = false,
                 ),
                 isGooglePayReady = false,
-                customerPaymentMethods = emptyList(),
                 paymentMethodMetadata = PaymentMethodMetadataFactory.create(
                     stripeIntent = PAYMENT_INTENT.copy(
                         paymentMethodTypes = listOf(
@@ -583,10 +602,8 @@ internal class PaymentOptionsViewModelTest {
             Result.success(paymentMethodToRemove)
         )
 
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
-                customerPaymentMethods = cards,
-            ),
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentMethods = cards,
         )
 
         val viewModel = createViewModel(
@@ -598,7 +615,6 @@ internal class PaymentOptionsViewModelTest {
             val screenTurbine = viewModel.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
             assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
@@ -638,10 +654,8 @@ internal class PaymentOptionsViewModelTest {
             Result.failure(APIConnectionException())
         )
 
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
-                customerPaymentMethods = cards,
-            ),
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentMethods = cards,
         )
 
         val viewModel = createViewModel(
@@ -653,7 +667,6 @@ internal class PaymentOptionsViewModelTest {
             val screenTurbine = viewModel.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(Loading)
             assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
@@ -811,6 +824,8 @@ internal class PaymentOptionsViewModelTest {
             CardBrand.Visa,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
+        private val EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION =
+            PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_CARD,
             CardBrand.Discover,
@@ -818,7 +833,7 @@ internal class PaymentOptionsViewModelTest {
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                customerPaymentMethods = emptyList(),
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 isGooglePayReady = true,
                 paymentSelection = null,

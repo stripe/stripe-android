@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.addresselement
 
 import android.app.Application
 import android.text.SpannableString
-import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -14,7 +13,6 @@ import com.stripe.android.ui.core.elements.autocomplete.model.FindAutocompletePr
 import com.stripe.android.ui.core.elements.autocomplete.model.Place
 import com.stripe.android.uicore.elements.TextFieldIcon
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
@@ -233,11 +231,11 @@ class AutocompleteViewModelTest {
 
         viewModel.textFieldController.onRawValueChange("")
 
-        assertThat(viewModel.textFieldController.trailingIcon.stateIn(viewModel.viewModelScope).value).isNull()
+        assertThat(viewModel.textFieldController.trailingIcon.value).isNull()
 
         viewModel.textFieldController.onRawValueChange("a")
 
-        assertThat(viewModel.textFieldController.trailingIcon.stateIn(viewModel.viewModelScope).value).isNotNull()
+        assertThat(viewModel.textFieldController.trailingIcon.value).isNotNull()
     }
 
     @Test
@@ -297,6 +295,6 @@ class AutocompleteViewModelTest {
         viewModel.clearQuery()
 
         assertThat(viewModel.predictions.value).isEqualTo(null)
-        assertThat(viewModel.textFieldController.rawFieldValue.stateIn(viewModel.viewModelScope).value).isEqualTo("")
+        assertThat(viewModel.textFieldController.rawFieldValue.value).isEqualTo("")
     }
 }

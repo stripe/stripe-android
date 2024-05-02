@@ -2,7 +2,6 @@ package com.stripe.android.stripecardscan.framework
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.camera.framework.time.days
 import com.stripe.android.camera.framework.util.memoizeSuspend
 import com.stripe.android.stripecardscan.framework.api.downloadFileWithRetries
 import com.stripe.android.stripecardscan.framework.util.HashMismatchException
@@ -14,6 +13,7 @@ import java.io.File
 import java.io.IOException
 import java.net.URL
 import java.security.NoSuchAlgorithmException
+import kotlin.time.Duration.Companion.days
 
 /**
  * Fetched data metadata.

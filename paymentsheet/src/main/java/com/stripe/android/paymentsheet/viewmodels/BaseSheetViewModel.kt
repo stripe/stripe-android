@@ -37,6 +37,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherP
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.GooglePayState
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -49,19 +50,17 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -88,10 +87,8 @@ internal abstract class BaseSheetViewModel(
     private val editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
 ) : AndroidViewModel(application) {
 
-    private val addressRepository = AddressRepository(application.resources, workContext)
     private val cardAccountRangeRepositoryFactory = DefaultCardAccountRangeRepositoryFactory(application)
 
-    internal val customerConfig = config.customer
     internal val merchantName = config.merchantDisplayName
 
     protected var mostRecentError: Throwable? = null
@@ -111,24 +108,28 @@ internal abstract class BaseSheetViewModel(
     private val _supportedPaymentMethodsFlow = MutableStateFlow<List<PaymentMethodCode>>(emptyList())
     val supportedPaymentMethodsFlow: StateFlow<List<PaymentMethodCode>> = _supportedPaymentMethodsFlow
 
+    protected var customer: CustomerState?
+        get() = savedStateHandle[SAVED_CUSTOMER]
+        set(value) {
+            savedStateHandle[SAVED_CUSTOMER] = value
+        }
+
     /**
      * The list of saved payment methods for the current customer.
      * Value is null until it's loaded, and non-null (could be empty) after that.
      */
     internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
-        .getStateFlow(SAVE_PAYMENT_METHODS, null)
+        .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
+        .mapAsStateFlow { state ->
+            state?.paymentMethods
+        }
 
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
         value = listOf(PaymentSheetScreen.Loading),
     )
 
     val currentScreen: StateFlow<PaymentSheetScreen> = backStack
-        .map { it.last() }
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = PaymentSheetScreen.Loading,
-        )
+        .mapAsStateFlow { it.last() }
 
     abstract val walletsState: StateFlow<WalletsState?>
     abstract val walletsProcessingState: StateFlow<WalletsProcessingState?>
@@ -223,9 +224,7 @@ internal abstract class BaseSheetViewModel(
     private fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
-        }?.displayNameResource?.let {
-            getApplication<Application>().getString(it)
-        }.orEmpty()
+        }?.displayName?.resolve(getApplication()).orEmpty()
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
@@ -236,7 +235,7 @@ internal abstract class BaseSheetViewModel(
             initialValue = PaymentOptionsState(),
         )
 
-    private val canEdit: StateFlow<Boolean> = paymentOptionsState.map { state ->
+    private val canEdit: StateFlow<Boolean> = paymentOptionsState.mapAsStateFlow { state ->
         val paymentMethods = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
         if (config.allowsRemovalOfLastSavedPaymentMethod) {
             paymentMethods.isNotEmpty()
@@ -248,23 +247,15 @@ internal abstract class BaseSheetViewModel(
                 paymentMethods.size > 1
             }
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = false,
-    )
+    }
 
-    val topBarState: StateFlow<PaymentSheetTopBarState> = combine(
+    val topBarState: StateFlow<PaymentSheetTopBarState> = combineAsStateFlow(
         currentScreen,
-        paymentMethodMetadata.map { it?.stripeIntent?.isLiveMode ?: true },
+        paymentMethodMetadata.mapAsStateFlow { it?.stripeIntent?.isLiveMode ?: true },
         processing,
         editing,
         canEdit,
         PaymentSheetTopBarStateFactory::create,
-    ).stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = PaymentSheetTopBarStateFactory.createDefault(),
     )
 
     val linkSignupMode: StateFlow<LinkSignupMode?> = linkHandler.linkSignupMode.stateIn(
@@ -509,15 +500,13 @@ internal abstract class BaseSheetViewModel(
     }
 
     private suspend fun removePaymentMethodInternal(paymentMethodId: String): Result<PaymentMethod> {
-        if (customerConfig == null) {
-            // TODO(samer-stripe): Send 'unexpected_error' here
-            return Result.failure(
-                IllegalStateException(
-                    "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
-                        "provided as part of PaymentSheet.Configuration"
-                )
+        // TODO(samer-stripe): Send 'unexpected_error' here
+        val currentCustomer = customer ?: return Result.failure(
+            IllegalStateException(
+                "Could not remove payment method because CustomerConfiguration was not found! Make sure it is " +
+                    "provided as part of PaymentSheet.Configuration"
             )
-        }
+        )
 
         val currentSelection = (selection.value as? PaymentSelection.Saved)?.paymentMethod?.id
         val didRemoveSelectedItem = currentSelection == paymentMethodId
@@ -530,17 +519,21 @@ internal abstract class BaseSheetViewModel(
 
         return customerRepository.detachPaymentMethod(
             CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+                id = currentCustomer.id,
+                ephemeralKeySecret = currentCustomer.ephemeralKeySecret
             ),
             paymentMethodId
         )
     }
 
     private fun removeDeletedPaymentMethodFromState(paymentMethodId: String) {
-        savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods.value?.filter {
-            it.id != paymentMethodId
-        }
+        val currentCustomer = customer ?: return
+
+        customer = currentCustomer.copy(
+            paymentMethods = currentCustomer.paymentMethods.filter {
+                it.id != paymentMethodId
+            }
+        )
 
         val shouldResetToAddPaymentMethodForm = paymentMethods.value.isNullOrEmpty() &&
             currentScreen.value is PaymentSheetScreen.SelectSavedPaymentMethods
@@ -611,20 +604,18 @@ internal abstract class BaseSheetViewModel(
         paymentMethod: PaymentMethod,
         brand: CardBrand
     ): Result<PaymentMethod> {
-        if (customerConfig == null) {
-            // TODO(samer-stripe): Send 'unexpected_error' here
-            return Result.failure(
-                IllegalStateException(
-                    "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
-                        "provided as part of PaymentSheet.Configuration"
-                )
+        // TODO(samer-stripe): Send 'unexpected_error' here
+        val currentCustomer = customer ?: return Result.failure(
+            IllegalStateException(
+                "Could not update payment method because CustomerConfiguration was not found! Make sure it is " +
+                    "provided as part of PaymentSheet.Configuration"
             )
-        }
+        )
 
         return customerRepository.updatePaymentMethod(
             customerInfo = CustomerRepository.CustomerInfo(
-                id = customerConfig.id,
-                ephemeralKeySecret = customerConfig.ephemeralKeySecret
+                id = currentCustomer.id,
+                ephemeralKeySecret = currentCustomer.ephemeralKeySecret
             ),
             paymentMethodId = paymentMethod.id!!,
             params = PaymentMethodUpdateParams.createCard(
@@ -634,20 +625,18 @@ internal abstract class BaseSheetViewModel(
                 productUsageTokens = setOf("PaymentSheet"),
             )
         ).onSuccess { updatedMethod ->
-            savedStateHandle[SAVE_PAYMENT_METHODS] = paymentMethods
-                .value
-                ?.let { savedPaymentMethods ->
-                    savedPaymentMethods.map { savedMethod ->
-                        val savedId = savedMethod.id
-                        val updatedId = updatedMethod.id
+            customer = currentCustomer.copy(
+                paymentMethods = currentCustomer.paymentMethods.map { savedMethod ->
+                    val savedId = savedMethod.id
+                    val updatedId = updatedMethod.id
 
-                        if (updatedId != null && savedId != null && updatedId == savedId) {
-                            updatedMethod
-                        } else {
-                            savedMethod
-                        }
+                    if (updatedId != null && savedId != null && updatedId == savedId) {
+                        updatedMethod
+                    } else {
+                        savedMethod
                     }
                 }
+            )
 
             handleBackPressed()
 
@@ -700,7 +689,6 @@ internal abstract class BaseSheetViewModel(
         return paymentMethodMetadata.value?.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
-                addressRepository = addressRepository,
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                 paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
                 paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
@@ -812,7 +800,7 @@ internal abstract class BaseSheetViewModel(
     data class UserErrorMessage(val message: String)
 
     companion object {
-        internal const val SAVE_PAYMENT_METHODS = "customer_payment_methods"
+        internal const val SAVED_CUSTOMER = "customer_info"
         internal const val SAVE_SELECTION = "selection"
         internal const val SAVE_PROCESSING = "processing"
         internal const val SAVE_GOOGLE_PAY_STATE = "google_pay_state"

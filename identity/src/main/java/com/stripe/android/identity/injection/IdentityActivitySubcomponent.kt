@@ -16,7 +16,6 @@ import com.stripe.android.identity.utils.IdentityImageHandler
 import com.stripe.android.identity.viewmodel.DocumentScanViewModel
 import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import com.stripe.android.mlcore.base.InterpreterInitializer
-import com.stripe.android.uicore.address.AddressRepository
 import dagger.BindsInstance
 import dagger.Subcomponent
 
@@ -33,7 +32,6 @@ internal interface IdentityActivitySubcomponent {
     val screenTracker: ScreenTracker
     val verificationArgs: IdentityVerificationSheetContract.Args
     val identityImageHandler: IdentityImageHandler
-    val addressRepository: AddressRepository
     val tfLiteInitializer: InterpreterInitializer
 
     @Subcomponent.Builder

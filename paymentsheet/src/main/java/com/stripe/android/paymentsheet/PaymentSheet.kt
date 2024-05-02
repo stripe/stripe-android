@@ -6,6 +6,7 @@ import android.os.Parcelable
 import androidx.activity.ComponentActivity
 import androidx.annotation.ColorInt
 import androidx.annotation.FontRes
+import androidx.annotation.RestrictTo
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.fragment.app.Fragment
@@ -442,6 +443,8 @@ class PaymentSheet internal constructor(
             ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
+
+        internal val externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods,
     ) : Parcelable {
 
         @JvmOverloads
@@ -563,6 +566,7 @@ class PaymentSheet internal constructor(
             billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
             preferredNetworks = preferredNetworks,
             allowsRemovalOfLastSavedPaymentMethod = ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod,
+            externalPaymentMethods = ConfigurationDefaults.externalPaymentMethods,
         )
 
         /**
@@ -588,6 +592,7 @@ class PaymentSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
+            private var externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -662,6 +667,11 @@ class PaymentSheet internal constructor(
                 this.paymentMethodOrder = paymentMethodOrder
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun externalPaymentMethods(externalPaymentMethods: List<String>?): Builder = apply {
+                this.externalPaymentMethods = externalPaymentMethods
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -677,6 +687,7 @@ class PaymentSheet internal constructor(
                 preferredNetworks = preferredNetworks,
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
+                externalPaymentMethods = externalPaymentMethods,
             )
         }
 
@@ -1299,8 +1310,16 @@ class PaymentSheet internal constructor(
         }
     }
 
+    internal sealed interface CustomerAccessType : Parcelable {
+        @Parcelize
+        data class LegacyCustomerEphemeralKey(val ephemeralKeySecret: String) : CustomerAccessType
+
+        @Parcelize
+        data class CustomerSession(val customerSessionClientSecret: String) : CustomerAccessType
+    }
+
     @Parcelize
-    data class CustomerConfiguration(
+    data class CustomerConfiguration internal constructor(
         /**
          * The identifier of the Stripe Customer object.
          * See [Stripe's documentation](https://stripe.com/docs/api/customers/object#customer_object-id).
@@ -1310,8 +1329,35 @@ class PaymentSheet internal constructor(
         /**
          * A short-lived token that allows the SDK to access a Customer's payment methods.
          */
-        val ephemeralKeySecret: String
-    ) : Parcelable
+        val ephemeralKeySecret: String,
+
+        internal val accessType: CustomerAccessType,
+    ) : Parcelable {
+        constructor(
+            id: String,
+            ephemeralKeySecret: String,
+        ) : this(
+            id = id,
+            ephemeralKeySecret = ephemeralKeySecret,
+            accessType = CustomerAccessType.LegacyCustomerEphemeralKey(ephemeralKeySecret)
+        )
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        companion object {
+            @ExperimentalCustomerSessionApi
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            fun createWithCustomerSession(
+                id: String,
+                clientSecret: String
+            ): CustomerConfiguration {
+                return CustomerConfiguration(
+                    id = id,
+                    ephemeralKeySecret = "",
+                    accessType = CustomerAccessType.CustomerSession(clientSecret)
+                )
+            }
+        }
+    }
 
     /**
      * @param environment The Google Pay environment to use. See

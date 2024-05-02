@@ -19,8 +19,9 @@ import org.jetbrains.annotations.TestOnly
 internal class DefaultPaymentSheetLauncher(
     private val activityResultLauncher: ActivityResultLauncher<PaymentSheetContractV2.Args>,
     private val activity: Activity,
-    lifecycleOwner: LifecycleOwner,
+    private val lifecycleOwner: LifecycleOwner,
     private val application: Application,
+    private val callback: PaymentSheetResultCallback,
 ) : PaymentSheetLauncher {
     init {
         lifecycleOwner.lifecycle.addObserver(
@@ -45,6 +46,7 @@ internal class DefaultPaymentSheetLauncher(
         activity = activity,
         lifecycleOwner = activity,
         application = activity.application,
+        callback = callback,
     )
 
     constructor(
@@ -59,6 +61,7 @@ internal class DefaultPaymentSheetLauncher(
         activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
+        callback = callback,
     )
 
     @TestOnly
@@ -76,6 +79,7 @@ internal class DefaultPaymentSheetLauncher(
         activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
+        callback = callback,
     )
 
     override fun present(
@@ -94,6 +98,11 @@ internal class DefaultPaymentSheetLauncher(
             AnimationConstants.FADE_OUT,
         )
 
-        activityResultLauncher.launch(args, options)
+        try {
+            activityResultLauncher.launch(args, options)
+        } catch (e: IllegalStateException) {
+            val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
+            callback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
+        }
     }
 }

@@ -7,9 +7,8 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.testing.TestLifecycleOwner
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import app.cash.turbine.plusAssign
@@ -46,6 +45,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -68,6 +68,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
 import com.stripe.android.paymentsheet.state.PaymentSheetState
@@ -106,7 +107,6 @@ import org.robolectric.RobolectricTestRunner
 import kotlin.test.AfterTest
 import kotlin.test.BeforeTest
 import kotlin.test.Test
-import kotlin.test.assertFailsWith
 
 @Suppress("DEPRECATION")
 @RunWith(RobolectricTestRunner::class)
@@ -146,7 +146,7 @@ internal class DefaultFlowControllerTest {
 
     private val prefsRepository = FakePrefsRepository()
 
-    private val lifeCycleOwner = mock<LifecycleOwner>()
+    private val lifeCycleOwner = TestLifecycleOwner()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -162,6 +162,7 @@ internal class DefaultFlowControllerTest {
 
     private val fakeIntentConfirmationInterceptor = FakeIntentConfirmationInterceptor()
 
+    @Suppress("LongMethod")
     @BeforeTest
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -223,13 +224,18 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(mock())
 
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<ExternalPaymentMethodContract>(),
+                any()
+            )
+        ).thenReturn(mock())
+
         whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
 
-        // set lifecycle to CREATED to trigger creation of payment launcher object within flowController.
-        val lifecycle = LifecycleRegistry(lifeCycleOwner)
-        lifecycle.currentState = Lifecycle.State.CREATED
-        whenever(lifeCycleOwner.lifecycle).thenReturn(lifecycle)
+        lifeCycleOwner.currentState = Lifecycle.State.RESUMED
     }
 
     @AfterTest
@@ -339,7 +345,7 @@ internal class DefaultFlowControllerTest {
         val last4 = paymentMethods.first().card?.last4.orEmpty()
 
         val flowController = createFlowController(
-            paymentMethods = paymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
             paymentSelection = PaymentSelection.Saved(paymentMethods.first()),
         )
 
@@ -363,7 +369,7 @@ internal class DefaultFlowControllerTest {
 
         // Initially configure for a customer with saved payment methods
         val paymentSheetLoader = FakePaymentSheetLoader(
-            customerPaymentMethods = paymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
             paymentSelection = PaymentSelection.Saved(paymentMethods.first()),
         )
 
@@ -411,7 +417,7 @@ internal class DefaultFlowControllerTest {
 
         val expectedArgs = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                customerPaymentMethods = emptyList(),
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheet.Configuration("com.stripe.android.paymentsheet.test"),
                 isGooglePayReady = false,
                 paymentSelection = null,
@@ -431,9 +437,32 @@ internal class DefaultFlowControllerTest {
     @Test
     fun `presentPaymentOptions() without successful init should fail`() {
         val flowController = createFlowController()
-        assertFailsWith<IllegalStateException> {
-            flowController.presentPaymentOptions()
-        }
+
+        verifyNoInteractions(paymentResultCallback)
+        flowController.presentPaymentOptions()
+        val resultCaptor = argumentCaptor<PaymentSheetResult.Failed>()
+        verify(paymentResultCallback).onPaymentSheetResult(resultCaptor.capture())
+
+        assertThat(resultCaptor.firstValue.error).hasMessageThat()
+            .startsWith("FlowController must be successfully initialized")
+    }
+
+    @Test
+    fun `presentPaymentOptions() with activity destroyed should fail`() = runTest {
+        val flowController = createFlowController()
+        flowController.configureExpectingSuccess(
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
+        )
+        lifeCycleOwner.currentState = Lifecycle.State.DESTROYED
+        whenever(paymentOptionActivityLauncher.launch(any(), any())).thenThrow(IllegalStateException("Boom"))
+        verifyNoInteractions(paymentResultCallback)
+
+        flowController.presentPaymentOptions()
+        val resultCaptor = argumentCaptor<PaymentSheetResult.Failed>()
+        verify(paymentResultCallback).onPaymentSheetResult(resultCaptor.capture())
+
+        assertThat(resultCaptor.firstValue.error).hasMessageThat()
+            .isEqualTo("The host activity is not in a valid state (DESTROYED).")
     }
 
     @Test
@@ -497,7 +526,7 @@ internal class DefaultFlowControllerTest {
         // Create a default flow controller with the paymentMethods initialized with cards.
         val initialPaymentMethods = PaymentMethodFixtures.createCards(5)
         val flowController = createFlowController(
-            paymentMethods = initialPaymentMethods,
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = initialPaymentMethods),
             paymentSelection = PaymentSelection.Saved(initialPaymentMethods.first())
         )
         flowController.configureExpectingSuccess(
@@ -512,7 +541,7 @@ internal class DefaultFlowControllerTest {
         verify(paymentOptionActivityLauncher).launch(
             argWhere {
                 // Make sure that paymentMethods contains the new added payment methods and the initial payment methods.
-                it.state.customerPaymentMethods == initialPaymentMethods
+                it.state.customer?.paymentMethods == initialPaymentMethods
             },
             anyOrNull(),
         )
@@ -587,7 +616,9 @@ internal class DefaultFlowControllerTest {
             NEW_CARD_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                customerPaymentMethods = PAYMENT_METHODS,
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = PAYMENT_METHODS
+                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
@@ -626,7 +657,9 @@ internal class DefaultFlowControllerTest {
             GENERIC_PAYMENT_SELECTION,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                customerPaymentMethods = PAYMENT_METHODS,
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = PAYMENT_METHODS
+                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
@@ -668,7 +701,9 @@ internal class DefaultFlowControllerTest {
             paymentSelection,
             PaymentSheetState.Full(
                 PaymentSheetFixtures.CONFIG_CUSTOMER,
-                customerPaymentMethods = PAYMENT_METHODS,
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(
+                    paymentMethods = PAYMENT_METHODS
+                ),
                 isGooglePayReady = false,
                 linkState = null,
                 paymentSelection = initialSelection,
@@ -1858,7 +1893,7 @@ internal class DefaultFlowControllerTest {
     }
 
     private fun createFlowController(
-        paymentMethods: List<PaymentMethod> = emptyList(),
+        customer: CustomerState? = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
         paymentSelection: PaymentSelection? = null,
         stripeIntent: StripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
         linkState: LinkState? = LinkState(
@@ -1870,7 +1905,7 @@ internal class DefaultFlowControllerTest {
     ): DefaultFlowController {
         return createFlowController(
             FakePaymentSheetLoader(
-                customerPaymentMethods = paymentMethods,
+                customer = customer,
                 stripeIntent = stripeIntent,
                 paymentSelection = paymentSelection,
                 linkState = linkState,

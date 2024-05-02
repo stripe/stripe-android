@@ -62,5 +62,9 @@ sealed class CustomerType(val value: String) {
 
     object RETURNING : CustomerType("returning")
 
-    class Existing(customerId: String) : CustomerType(customerId)
+    class Existing(val customerId: String) : CustomerType(customerId) {
+        override fun toString(): String {
+            return customerId
+        }
+    }
 }

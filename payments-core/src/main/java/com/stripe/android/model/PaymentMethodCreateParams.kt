@@ -283,6 +283,12 @@ data class PaymentMethodCreateParams internal constructor(
         return ((toParamMap()["card"] as? Map<*, *>?)?.get("number") as? String)?.takeLast(4)
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    fun instantDebitsPaymentMethodId(): String? {
+        val linkParams = (toParamMap()["link"] as? Map<*, *>) ?: return null
+        return linkParams["payment_method_id"] as? String
+    }
+
     @Parcelize
     data class Card
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -1131,14 +1137,34 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
+        fun createInstantDebits(
+            paymentMethodId: String,
+            requiresMandate: Boolean,
+            productUsage: Set<String>,
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                code = PaymentMethod.Type.Link.code,
+                requiresMandate = requiresMandate,
+                overrideParamMap = mapOf(
+                    "link" to mapOf(
+                        "payment_method_id" to paymentMethodId,
+                    ),
+                ),
+                productUsage = productUsage,
+            )
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP) // For paymentsheet
         fun createWithOverride(
             code: PaymentMethodCode,
+            billingDetails: PaymentMethod.BillingDetails?,
             requiresMandate: Boolean,
             overrideParamMap: Map<String, @RawValue Any>?,
             productUsage: Set<String>
         ): PaymentMethodCreateParams {
             return PaymentMethodCreateParams(
                 code = code,
+                billingDetails = billingDetails,
                 requiresMandate = requiresMandate,
                 overrideParamMap = overrideParamMap,
                 productUsage = productUsage

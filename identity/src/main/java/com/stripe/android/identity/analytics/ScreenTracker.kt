@@ -2,12 +2,12 @@ package com.stripe.android.identity.analytics
 
 import android.util.Log
 import com.stripe.android.camera.framework.StatTracker
-import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.identity.injection.IdentityVerificationScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.time.ComparableTimeMark
+import kotlin.time.TimeSource
 
 /**
  * Tracker for screen transition.
@@ -24,7 +24,7 @@ internal class ScreenTracker @Inject constructor(
      */
     fun screenTransitionStart(
         fromScreenName: String? = null,
-        startedAt: ClockMark = Clock.markNow()
+        startedAt: ComparableTimeMark = TimeSource.Monotonic.markNow()
     ) {
         // create a StatTracker with fromScreenName
         // if there is a screen already started, drop it
@@ -39,7 +39,7 @@ internal class ScreenTracker @Inject constructor(
         screenStatTracker =
             ScreenTransitionStatTracker(startedAt, fromScreenName) { toScreenName ->
                 identityAnalyticsRequestFactory.timeToScreen(
-                    value = startedAt.elapsedSince().inMilliseconds.toLong(),
+                    value = startedAt.elapsedNow().inWholeMilliseconds,
                     fromScreenName = fromScreenName,
                     toScreenName = requireNotNull(toScreenName)
                 )
@@ -67,7 +67,7 @@ internal class ScreenTracker @Inject constructor(
 }
 
 private class ScreenTransitionStatTracker(
-    override val startedAt: ClockMark,
+    override val startedAt: ComparableTimeMark,
     val fromScreenName: String?,
     private val onComplete: suspend (String?) -> Unit
 ) : StatTracker {

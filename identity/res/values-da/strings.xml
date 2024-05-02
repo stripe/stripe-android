@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Kunne ikke tage billede</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Detaljer ikke synlige</string>
+  <string name="stripe_decrease_lighting_2">Gå til et mørkere område</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">kameraikon</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Id\'et er ikke i fokus</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Detaljer ikke synlige</string>
+  <string name="stripe_reduce_glare_2">Prøv at reducere genskin, og sørg for, at id\'et er synligt</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Tag billeder igen</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

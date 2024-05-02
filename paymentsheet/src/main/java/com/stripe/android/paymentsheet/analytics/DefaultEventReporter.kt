@@ -199,7 +199,7 @@ internal class DefaultEventReporter @Inject internal constructor(
         )
     }
 
-    override fun onPressConfirmButton(paymentSelection: PaymentSelection?,) {
+    override fun onPressConfirmButton(paymentSelection: PaymentSelection?) {
         val duration = durationProvider.end(DurationProvider.Key.ConfirmButtonClicked)
 
         fireEvent(
@@ -207,6 +207,7 @@ internal class DefaultEventReporter @Inject internal constructor(
                 currency = currency,
                 duration = duration,
                 selectedLpm = paymentSelection.code(),
+                linkContext = paymentSelection.linkContext(),
                 isDeferred = isDeferred,
                 linkEnabled = linkEnabled,
                 googlePaySupported = googlePaySupported,

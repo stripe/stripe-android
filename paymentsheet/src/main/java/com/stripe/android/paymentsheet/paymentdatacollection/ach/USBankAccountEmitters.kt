@@ -48,10 +48,11 @@ internal fun USBankAccountEmitters(
             screenState is USBankAccountFormScreenState.BillingDetailsCollection
         }.collect { saved ->
             val merchantName = viewModel.formattedMerchantName()
-            val mandateText = ACHText.getContinueMandateText(
+            val mandateText = USBankAccountTextBuilder.getContinueMandateText(
                 context = context,
                 merchantName = merchantName,
                 isSaveForFutureUseSelected = saved,
+                isInstantDebits = usBankAccountFormArgs.instantDebits,
                 isSetupFlow = !usBankAccountFormArgs.isPaymentFlow,
             )
             usBankAccountFormArgs.updateMandateText(

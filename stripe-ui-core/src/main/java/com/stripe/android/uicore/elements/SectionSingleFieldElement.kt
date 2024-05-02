@@ -2,9 +2,9 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * This is an element that is in a section and accepts user input.
@@ -23,8 +23,8 @@ abstract class SectionSingleFieldElement(
      */
     override fun sectionFieldErrorController(): SectionFieldErrorController = controller
 
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
-        return controller.formFieldValue.map { formFieldEntry ->
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> {
+        return controller.formFieldValue.mapAsStateFlow { formFieldEntry ->
             listOf(identifier to formFieldEntry)
         }
     }
@@ -33,7 +33,7 @@ abstract class SectionSingleFieldElement(
         rawValuesMap[identifier]?.let { controller.onRawValueChange(it) }
     }
 
-    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         MutableStateFlow(
             listOf(identifier).takeIf { controller is TextFieldController }
                 ?: emptyList()

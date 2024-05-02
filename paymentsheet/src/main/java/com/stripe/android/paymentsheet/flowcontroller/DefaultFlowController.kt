@@ -35,6 +35,9 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -76,7 +79,7 @@ import javax.inject.Provider
 internal class DefaultFlowController @Inject internal constructor(
     // Properties provided through FlowControllerComponent.Builder
     private val viewModelScope: CoroutineScope,
-    lifecycleOwner: LifecycleOwner,
+    private val lifecycleOwner: LifecycleOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionFactory: PaymentOptionFactory,
     private val paymentOptionCallback: PaymentOptionCallback,
@@ -114,6 +117,8 @@ internal class DefaultFlowController @Inject internal constructor(
     lateinit var flowControllerComponent: FlowControllerComponent
 
     private var paymentLauncher: StripePaymentLauncher? = null
+
+    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
 
     private val initializationMode: PaymentSheet.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
@@ -161,12 +166,19 @@ internal class DefaultFlowController @Inject internal constructor(
             bacsMandateConfirmationActivityLauncher
         )
 
+        val externalPaymentMethodLauncher = activityResultRegistryOwner.register(
+            ExternalPaymentMethodContract(),
+            ::onPaymentResult
+        )
+        this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
+
         val activityResultLaunchers = setOf(
             paymentLauncherActivityResultLauncher,
             paymentOptionActivityLauncher,
             googlePayActivityLauncher,
             sepaMandateActivityLauncher,
-            bacsMandateConfirmationActivityLauncher
+            bacsMandateConfirmationActivityLauncher,
+            externalPaymentMethodLauncher,
         )
 
         linkLauncher.register(
@@ -251,18 +263,38 @@ internal class DefaultFlowController @Inject internal constructor(
         }
     }
 
-    override fun presentPaymentOptions() {
-        val state = viewModel.state ?: error(
-            "FlowController must be successfully initialized " +
-                "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
-                "configureWithIntentConfiguration() before calling presentPaymentOptions()."
-        )
+    private fun currentStateForPresenting(): Result<PaymentSheetState.Full> {
+        val state = viewModel.state
+            ?: return Result.failure(
+                IllegalStateException(
+                    "FlowController must be successfully initialized " +
+                        "using configureWithPaymentIntent(), configureWithSetupIntent() or " +
+                        "configureWithIntentConfiguration() before calling presentPaymentOptions()."
+                )
+            )
 
         if (!configurationHandler.isConfigured) {
-            // For now, we fail silently in these situations. In the future, we should either log
-            // or emit an event in a to-be-added event listener.
-            return
+            return Result.failure(
+                IllegalStateException(
+                    "FlowController is not configured, or has a configuration update in flight."
+                )
+            )
         }
+
+        return Result.success(state)
+    }
+
+    override fun presentPaymentOptions() {
+        val stateResult = currentStateForPresenting()
+        val state = stateResult.fold(
+            onSuccess = {
+                it
+            },
+            onFailure = {
+                paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(it))
+                return
+            }
+        )
 
         val args = PaymentOptionContract.Args(
             state = state.copy(paymentSelection = viewModel.paymentSelection),
@@ -277,7 +309,12 @@ internal class DefaultFlowController @Inject internal constructor(
             AnimationConstants.FADE_OUT,
         )
 
-        paymentOptionActivityLauncher.launch(args, options)
+        try {
+            paymentOptionActivityLauncher.launch(args, options)
+        } catch (e: IllegalStateException) {
+            val message = "The host activity is not in a valid state (${lifecycleOwner.lifecycle.currentState})."
+            paymentResultCallback.onPaymentSheetResult(PaymentSheetResult.Failed(IllegalStateException(message, e)))
+        }
     }
 
     override fun confirm() {
@@ -301,44 +338,59 @@ internal class DefaultFlowController @Inject internal constructor(
             is PaymentSelection.GooglePay -> launchGooglePay(state)
             is PaymentSelection.Link,
             is PaymentSelection.New.LinkInline -> confirmLink(paymentSelection, state)
-            is PaymentSelection.New.GenericPaymentMethod -> {
-                if (paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
-                    BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
-                        bacsMandateConfirmationLauncher.launch(
-                            data = data,
-                            appearance = getPaymentAppearance()
-                        )
-                    } ?: run {
-                        paymentResultCallback.onPaymentSheetResult(
-                            PaymentSheetResult.Failed(
-                                BacsMandateException(
-                                    type = BacsMandateException.Type.MissingInformation
-                                )
-                            )
-                        )
-                    }
-                } else {
-                    confirmPaymentSelection(paymentSelection, state)
-                }
-            }
-            is PaymentSelection.New,
-            null -> confirmPaymentSelection(paymentSelection, state)
-            is PaymentSelection.Saved -> {
-                if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
-                    viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
-                ) {
-                    // We're legally required to show the customer the SEPA mandate before every payment/setup.
-                    // In the edge case where the customer never opened the sheet, and thus never saw the mandate,
-                    // we present the mandate directly.
-                    sepaMandateActivityLauncher.launch(
-                        SepaMandateContract.Args(
-                            merchantName = state.config.merchantDisplayName
+            is PaymentSelection.ExternalPaymentMethod -> ExternalPaymentMethodInterceptor.intercept(
+                externalPaymentMethodType = paymentSelection.type,
+                billingDetails = paymentSelection.billingDetails,
+                onPaymentResult = ::onPaymentResult,
+                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+            )
+            is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
+            is PaymentSelection.New, null -> confirmPaymentSelection(paymentSelection, state)
+            is PaymentSelection.Saved -> confirmSavedPaymentMethod(paymentSelection, state)
+        }
+    }
+
+    private fun confirmSavedPaymentMethod(
+        paymentSelection: PaymentSelection.Saved,
+        state: PaymentSheetState.Full
+    ) {
+        if (paymentSelection.paymentMethod.type == PaymentMethod.Type.SepaDebit &&
+            viewModel.paymentSelection?.hasAcknowledgedSepaMandate == false
+        ) {
+            // We're legally required to show the customer the SEPA mandate before every payment/setup.
+            // In the edge case where the customer never opened the sheet, and thus never saw the mandate,
+            // we present the mandate directly.
+            sepaMandateActivityLauncher.launch(
+                SepaMandateContract.Args(
+                    merchantName = state.config.merchantDisplayName
+                )
+            )
+        } else {
+            confirmPaymentSelection(paymentSelection, state)
+        }
+    }
+
+    private fun confirmGenericPaymentMethod(
+        paymentSelection: PaymentSelection.New.GenericPaymentMethod,
+        state: PaymentSheetState.Full
+    ) {
+        if (paymentSelection.paymentMethodCreateParams.typeCode == PaymentMethod.Type.BacsDebit.code) {
+            BacsMandateData.fromPaymentSelection(paymentSelection)?.let { data ->
+                bacsMandateConfirmationLauncher.launch(
+                    data = data,
+                    appearance = getPaymentAppearance()
+                )
+            } ?: run {
+                paymentResultCallback.onPaymentSheetResult(
+                    PaymentSheetResult.Failed(
+                        BacsMandateException(
+                            type = BacsMandateException.Type.MissingInformation
                         )
                     )
-                } else {
-                    confirmPaymentSelection(paymentSelection, state)
-                }
+                )
             }
+        } else {
+            confirmPaymentSelection(paymentSelection, state)
         }
     }
 
@@ -354,6 +406,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 initializationMode = initializationMode!!,
                 paymentSelection = paymentSelection,
                 shippingValues = state.config.shippingDetails?.toConfirmPaymentIntentShipping(),
+                context = context.applicationContext,
             )
 
             viewModel.deferredIntentConfirmationType = nextStep.deferredIntentConfirmationType
@@ -383,42 +436,30 @@ internal class DefaultFlowController @Inject internal constructor(
     }
 
     private fun confirmStripeIntent(confirmStripeIntentParams: ConfirmStripeIntentParams) {
-        runCatching {
-            requireNotNull(paymentLauncher)
-        }.fold(
-            onSuccess = {
-                when (confirmStripeIntentParams) {
-                    is ConfirmPaymentIntentParams -> {
-                        it.confirm(confirmStripeIntentParams)
-                    }
-                    is ConfirmSetupIntentParams -> {
-                        it.confirm(confirmStripeIntentParams)
-                    }
-                }
-            },
-            onFailure = ::error
-        )
+        when (confirmStripeIntentParams) {
+            is ConfirmPaymentIntentParams -> {
+                paymentLauncher?.confirm(confirmStripeIntentParams)
+            }
+
+            is ConfirmSetupIntentParams -> {
+                paymentLauncher?.confirm(confirmStripeIntentParams)
+            }
+        }
     }
 
     private fun handleNextAction(
         clientSecret: String,
         stripeIntent: StripeIntent,
     ) {
-        runCatching {
-            requireNotNull(paymentLauncher)
-        }.fold(
-            onSuccess = {
-                when (stripeIntent) {
-                    is PaymentIntent -> {
-                        it.handleNextActionForPaymentIntent(clientSecret)
-                    }
-                    is SetupIntent -> {
-                        it.handleNextActionForSetupIntent(clientSecret)
-                    }
-                }
-            },
-            onFailure = ::error
-        )
+        when (stripeIntent) {
+            is PaymentIntent -> {
+                paymentLauncher?.handleNextActionForPaymentIntent(clientSecret)
+            }
+
+            is SetupIntent -> {
+                paymentLauncher?.handleNextActionForSetupIntent(clientSecret)
+            }
+        }
     }
 
     internal fun onGooglePayResult(
@@ -545,7 +586,11 @@ internal class DefaultFlowController @Inject internal constructor(
         paymentOptionResult: PaymentOptionResult?
     ) {
         paymentOptionResult?.paymentMethods?.let {
-            viewModel.state = viewModel.state?.copy(customerPaymentMethods = it)
+            val currentState = viewModel.state
+
+            viewModel.state = currentState?.copy(
+                customer = currentState.customer?.copy(paymentMethods = it)
+            )
         }
         when (paymentOptionResult) {
             is PaymentOptionResult.Succeeded -> {

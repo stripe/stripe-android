@@ -11,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.security.InvalidParameterException
+import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -70,7 +70,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         try {
             initializationMode.validate()
             configuration.validate()
-        } catch (e: InvalidParameterException) {
+        } catch (e: IllegalArgumentException) {
             onConfigured(error = e)
             return
         }

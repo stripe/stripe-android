@@ -39,7 +39,6 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
 import com.stripe.android.R as StripeR
 import com.stripe.android.core.R as CoreR
@@ -379,7 +378,6 @@ private object TransformSpecToElementsFactory {
 
         return TransformSpecToElements(
             UiDefinitionFactory.Arguments(
-                addressRepository = mock(),
                 initialValues = mapOf(),
                 amount = null,
                 saveForFutureUseInitialValue = true,

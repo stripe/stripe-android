@@ -997,7 +997,7 @@ internal class PaymentSheetActivityTest {
                 lazyPaymentConfig = { PaymentConfiguration(ApiKeyFixtures.FAKE_PUBLISHABLE_KEY) },
                 paymentSheetLoader = FakePaymentSheetLoader(
                     stripeIntent = paymentIntent,
-                    customerPaymentMethods = paymentMethods,
+                    customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE.copy(paymentMethods = paymentMethods),
                     isGooglePayAvailable = isGooglePayAvailable,
                     linkState = LinkState(
                         configuration = mock(),

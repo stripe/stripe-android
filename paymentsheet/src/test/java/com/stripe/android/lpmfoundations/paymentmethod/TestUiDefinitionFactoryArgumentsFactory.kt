@@ -10,11 +10,8 @@ import com.stripe.android.model.AccountRange
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.networking.StripeRepository
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.StateFlow
-import org.mockito.Mockito.mock
 
 internal object TestUiDefinitionFactoryArgumentsFactory {
     fun create(
@@ -27,19 +24,10 @@ internal object TestUiDefinitionFactoryArgumentsFactory {
             null
         }
         return UiDefinitionFactory.Arguments.Factory.Default(
-            addressRepository = addressRepository(context),
             cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory(context),
             paymentMethodCreateParams = paymentMethodCreateParams,
             paymentMethodExtraParams = paymentMethodExtraParams,
         )
-    }
-
-    private fun addressRepository(context: Context?): AddressRepository {
-        return if (context == null) {
-            mock()
-        } else {
-            AddressRepository(context.resources, Dispatchers.IO)
-        }
     }
 
     private fun cardAccountRangeRepositoryFactory(context: Context?): CardAccountRangeRepository.Factory {

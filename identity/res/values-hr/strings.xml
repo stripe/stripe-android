@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Nismo uspjeli snimiti fotografiju</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Pojedinosti nisu vidljive</string>
+  <string name="stripe_decrease_lighting_2">Pomaknite se u manje osvijetljeni prostor</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">ikona kamere</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Osobni dokument nije fokusiran</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Pojedinosti nisu vidljive</string>
+  <string name="stripe_reduce_glare_2">Pokušajte smanjiti odsjaj i pobrinite se da je osobni dokument vidljiv.</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Ponovo snimi fotografije</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

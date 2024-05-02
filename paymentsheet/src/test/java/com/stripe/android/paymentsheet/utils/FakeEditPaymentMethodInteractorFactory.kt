@@ -7,7 +7,6 @@ import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInterac
 import com.stripe.android.paymentsheet.ui.PaymentMethodRemoveOperation
 import com.stripe.android.paymentsheet.ui.PaymentMethodUpdateOperation
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.SharingStarted
 import kotlin.coroutines.CoroutineContext
 
 internal class FakeEditPaymentMethodInteractorFactory(
@@ -28,7 +27,6 @@ internal class FakeEditPaymentMethodInteractorFactory(
             updateExecutor = updateExecutor,
             displayName = displayName,
             workContext = context,
-            viewStateSharingStarted = SharingStarted.Eagerly,
             canRemove = canRemove,
         )
     }

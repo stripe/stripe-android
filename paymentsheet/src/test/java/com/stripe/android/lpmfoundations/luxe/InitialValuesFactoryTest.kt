@@ -38,9 +38,10 @@ class InitialValuesFactoryTest {
     )
 
     private val paymentMethodCreateParams = PaymentMethodCreateParams.createWithOverride(
-        PaymentMethod.Type.Card.code,
-        PaymentMethod.Type.Card.requiresMandate,
-        mapOf(
+        code = PaymentMethod.Type.Card.code,
+        billingDetails = null,
+        requiresMandate = PaymentMethod.Type.Card.requiresMandate,
+        overrideParamMap = mapOf(
             "type" to "card",
             parameterMapBillingDetails,
             "card" to mapOf(
@@ -50,7 +51,7 @@ class InitialValuesFactoryTest {
                 "cvc" to "111"
             )
         ),
-        emptySet()
+        productUsage = emptySet(),
     )
 
     @Test

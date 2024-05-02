@@ -18,15 +18,19 @@ import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
 internal class CardDetailsController(
     cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
     collectName: Boolean = false,
     cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+    uiContext: CoroutineContext = Dispatchers.Main,
+    workContext: CoroutineContext = Dispatchers.IO,
 ) : SectionFieldErrorController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
@@ -49,10 +53,12 @@ internal class CardDetailsController(
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
         DefaultCardNumberController(
-            CardNumberConfig(),
-            cardAccountRangeRepositoryFactory,
-            initialValues[IdentifierSpec.CardNumber],
-            when (cbcEligibility) {
+            cardTextFieldConfig = CardNumberConfig(),
+            cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
+            uiContext = uiContext,
+            workContext = workContext,
+            initialValue = initialValues[IdentifierSpec.CardNumber],
+            cardBrandChoiceConfig = when (cbcEligibility) {
                 is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(
                     preferredBrands = cbcEligibility.preferredNetworks,
                     initialBrand = initialValues[

@@ -655,6 +655,11 @@ constructor(
                 )
         }
 
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isFilledOut(): Boolean {
+            return (address != null && address.isFilledOut()) || email != null || name != null || phone != null
+        }
+
         class Builder {
             private var address: Address? = null
             private var email: String? = null

@@ -1,6 +1,5 @@
 package com.stripe.android.customersheet.ui
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -132,18 +131,16 @@ internal fun SelectPaymentMethod(
             modifier = Modifier.padding(bottom = 2.dp),
         )
 
-        AnimatedVisibility(visible = viewState.errorMessage != null) {
-            viewState.errorMessage?.let { error ->
-                ErrorMessage(
-                    error = error,
-                    modifier = Modifier
-                        .padding(vertical = 2.dp)
-                        .padding(horizontal = horizontalPadding),
-                )
-            }
+        viewState.errorMessage?.let { error ->
+            ErrorMessage(
+                error = error,
+                modifier = Modifier
+                    .padding(vertical = 2.dp)
+                    .padding(horizontal = horizontalPadding),
+            )
         }
 
-        AnimatedVisibility(visible = viewState.primaryButtonVisible) {
+        if (viewState.primaryButtonVisible) {
             viewState.primaryButtonLabel?.let {
                 PrimaryButton(
                     label = it,
@@ -160,15 +157,13 @@ internal fun SelectPaymentMethod(
             }
         }
 
-        AnimatedVisibility(visible = viewState.mandateText != null) {
-            Mandate(
-                mandateText = viewState.mandateText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
-            )
-        }
+        Mandate(
+            mandateText = viewState.mandateText,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+                .padding(horizontal = horizontalPadding),
+        )
     }
 }
 
@@ -198,85 +193,81 @@ internal fun AddPaymentMethod(
     }
 
     // TODO (jameswoo) make sure that the spacing is consistent with paymentsheet
-    Column {
-        H4Text(
-            text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
-            modifier = Modifier
-                .padding(bottom = 4.dp)
-                .padding(horizontal = horizontalPadding)
-        )
+    H4Text(
+        text = stringResource(id = R.string.stripe_paymentsheet_save_a_new_payment_method),
+        modifier = Modifier
+            .padding(bottom = 4.dp)
+            .padding(horizontal = horizontalPadding)
+    )
 
-        val eventReporter = remember(viewActionHandler) {
-            DefaultCardNumberCompletedEventReporter(viewActionHandler)
-        }
+    val eventReporter = remember(viewActionHandler) {
+        DefaultCardNumberCompletedEventReporter(viewActionHandler)
+    }
 
-        if (displayForm) {
-            CompositionLocalProvider(
-                LocalCardNumberCompletedEventReporter provides eventReporter
-            ) {
-                PaymentElement(
-                    enabled = viewState.enabled,
-                    supportedPaymentMethods = viewState.supportedPaymentMethods,
-                    selectedItem = viewState.selectedPaymentMethod,
-                    formElements = viewState.formViewData.elements,
-                    linkSignupMode = null,
-                    linkConfigurationCoordinator = null,
-                    onItemSelectedListener = {
-                        viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
-                    },
-                    onLinkSignupStateChanged = { _, _ -> },
-                    formArguments = viewState.formArguments,
-                    usBankAccountFormArguments = viewState.usBankAccountFormArguments,
-                    onFormFieldValuesChanged = {
-                        // This only gets emitted if form field values are complete
-                        viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
-                    }
-                )
-            }
-        }
-
-        AnimatedVisibility(visible = viewState.errorMessage != null) {
-            viewState.errorMessage?.let { error ->
-                ErrorMessage(
-                    error = error,
-                    modifier = Modifier.padding(horizontal = horizontalPadding)
-                )
-            }
-        }
-
-        if (viewState.showMandateAbovePrimaryButton) {
-            Mandate(
-                mandateText = viewState.mandateText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
+    if (displayForm) {
+        CompositionLocalProvider(
+            LocalCardNumberCompletedEventReporter provides eventReporter
+        ) {
+            PaymentElement(
+                enabled = viewState.enabled,
+                supportedPaymentMethods = viewState.supportedPaymentMethods,
+                selectedItem = viewState.selectedPaymentMethod,
+                formElements = viewState.formElements,
+                linkSignupMode = null,
+                linkConfigurationCoordinator = null,
+                onItemSelectedListener = {
+                    viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
+                },
+                onLinkSignupStateChanged = { _, _ -> },
+                formArguments = viewState.formArguments,
+                usBankAccountFormArguments = viewState.usBankAccountFormArguments,
+                onFormFieldValuesChanged = {
+                    // This only gets emitted if form field values are complete
+                    viewActionHandler(CustomerSheetViewAction.OnFormFieldValuesCompleted(it))
+                }
             )
         }
+    }
 
-        PrimaryButton(
-            label = viewState.primaryButtonLabel.resolve(),
-            isEnabled = viewState.primaryButtonEnabled,
-            isLoading = viewState.isProcessing,
-            displayLockIcon = true,
-            onButtonClick = {
-                viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
-            },
+    viewState.errorMessage?.let { error ->
+        ErrorMessage(
+            error = error,
+            modifier = Modifier.padding(horizontal = horizontalPadding)
+        )
+    }
+
+    if (viewState.showMandateAbovePrimaryButton) {
+        Mandate(
+            mandateText = viewState.mandateText,
             modifier = Modifier
-                .testTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
-                .padding(top = 10.dp)
+                .fillMaxWidth()
+                .padding(top = 8.dp)
                 .padding(horizontal = horizontalPadding),
         )
+    }
 
-        if (!viewState.showMandateAbovePrimaryButton) {
-            Mandate(
-                mandateText = viewState.mandateText,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .padding(horizontal = horizontalPadding),
-            )
-        }
+    PrimaryButton(
+        label = viewState.primaryButtonLabel.resolve(),
+        isEnabled = viewState.primaryButtonEnabled,
+        isLoading = viewState.isProcessing,
+        displayLockIcon = true,
+        onButtonClick = {
+            viewActionHandler(CustomerSheetViewAction.OnPrimaryButtonPressed)
+        },
+        modifier = Modifier
+            .testTag(CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG)
+            .padding(top = 10.dp)
+            .padding(horizontal = horizontalPadding),
+    )
+
+    if (!viewState.showMandateAbovePrimaryButton) {
+        Mandate(
+            mandateText = viewState.mandateText,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+                .padding(horizontal = horizontalPadding),
+        )
     }
 }
 

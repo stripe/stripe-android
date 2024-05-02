@@ -39,6 +39,7 @@
   <string name="stripe_could_not_capture_title">Ma stajniex nieħdu r-ritratt</string>
   <!-- Instructional text when environment is too bright -->
   <string name="stripe_decrease_lighting">Id-dettalji ma jidhrux</string>
+  <string name="stripe_decrease_lighting_2">Ersaq f\'post iktar mudlam</string>
   <!-- Content description for camera icon -->
   <string name="stripe_description_camera">l-ikona tal-kamera</string>
   <!-- Description of the clock icon, used for A11Y -->
@@ -171,6 +172,7 @@
   <string name="stripe_reduce_blur">Id-dokument tal-identità sfukat</string>
   <!-- Instructional text when the document has too much glare -->
   <string name="stripe_reduce_glare">Id-dettalji ma jidhrux</string>
+  <string name="stripe_reduce_glare_2">Ipprova naqqas id-dija u ara li d-dokument tal-identitá jidher sewwa</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Erġa\' ħu r-ritratti</string>
   <!-- Instructional text when user needs to rotate the document to align with camera -->

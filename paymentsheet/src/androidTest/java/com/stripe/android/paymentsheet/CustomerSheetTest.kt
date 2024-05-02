@@ -34,15 +34,15 @@ import org.junit.runner.RunWith
 @OptIn(ExperimentalCustomerSheetApi::class)
 @RunWith(TestParameterInjector::class)
 internal class CustomerSheetTest {
+    private val composeTestRule = createEmptyComposeRule()
     private val retryRule = RetryRule(5)
     private val networkRule = NetworkRule()
-    private val composeTestRule = createEmptyComposeRule()
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(networkRule)
         .around(composeTestRule)
         .around(retryRule)
+        .around(networkRule)
 
     private val page: CustomerSheetPage = CustomerSheetPage(composeTestRule)
 

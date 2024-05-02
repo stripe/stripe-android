@@ -123,6 +123,12 @@ interface ErrorReporter {
         BROWSER_LAUNCHER_NULL_ARGS(
             eventName = "payments.browserlauncher.null_args"
         ),
+        GOOGLE_PAY_FAILED(
+            eventName = "google_pay.confirm.error"
+        ),
+        FRAUD_DETECTION_API_FAILURE(
+            eventName = "fraud_detection_data_repository.api_failure"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -142,6 +148,9 @@ interface ErrorReporter {
         LINK_INVALID_SESSION_STATE(
             partialEventName = "link.signup.failure.invalidSessionState"
         ),
+        GOOGLE_PAY_UNEXPECTED_RESULT_CODE(
+            partialEventName = "google_pay.confirm.unexpected_result_code"
+        ),
         GOOGLE_PAY_UNEXPECTED_CONFIRM_RESULT(
             partialEventName = "google_pay.confirm.unexpected_result"
         ),
@@ -159,6 +168,15 @@ interface ErrorReporter {
         ),
         PAYMENT_SHEET_AUTHENTICATORS_NOT_FOUND(
             partialEventName = "paymentsheet.authenticators.not_found"
+        ),
+        PAYMENT_SHEET_LOADER_ELEMENTS_SESSION_CUSTOMER_NOT_FOUND(
+            partialEventName = "paymentsheet.loader.elements_session.customer.not_found"
+        ),
+        EXTERNAL_PAYMENT_METHOD_SERIALIZATION_FAILURE(
+            partialEventName = "elements.external_payment_methods_serializer.error"
+        ),
+        INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
+            partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
         ),
         ;
 

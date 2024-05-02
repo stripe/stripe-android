@@ -5,6 +5,7 @@ import com.stripe.android.camera.framework.ResultAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.FinalResult
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator.InterimResult
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
+import kotlin.time.TimeSource
 
 /**
  * Aggregate results from the main loop. Each frame will trigger an [InterimResult] to the
@@ -24,7 +25,7 @@ internal class MainLoopAggregator(
     MainLoopAggregator.FinalResult
     >(
     listener = listener,
-    initialState = MainLoopState.Initial(),
+    initialState = MainLoopState.Initial(TimeSource.Monotonic),
     statsName = null // TODO: when we want to collect this in scan stats, give this a name
 ) {
 

@@ -54,6 +54,34 @@ class DefaultPaymentSheetLauncherTest {
     }
 
     @Test
+    fun `init and present should fail when activity is not resumed`() {
+        val testRegistry = FakeActivityResultRegistry(error = IllegalStateException("Invalid Activity State"))
+
+        with(
+            launchFragmentInContainer(initialState = Lifecycle.State.CREATED) {
+                TestFragment()
+            }
+        ) {
+            onFragment { fragment ->
+                val results = mutableListOf<PaymentSheetResult>()
+                val launcher = DefaultPaymentSheetLauncher(
+                    fragment,
+                    testRegistry
+                ) {
+                    results.add(it)
+                }
+
+                moveToState(Lifecycle.State.DESTROYED)
+                launcher.present(mode = PaymentSheet.InitializationMode.PaymentIntent("pi_fake"))
+                assertThat(results).hasSize(1)
+                assertThat((results.first() as PaymentSheetResult.Failed).error).hasMessageThat().isEqualTo(
+                    "The host activity is not in a valid state (INITIALIZED)."
+                )
+            }
+        }
+    }
+
+    @Test
     fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
         IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
             error("I’m alive")
@@ -66,6 +94,7 @@ class DefaultPaymentSheetLauncherTest {
             activity = mock(),
             lifecycleOwner = lifecycleOwner,
             application = ApplicationProvider.getApplicationContext(),
+            callback = mock(),
         )
 
         lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
@@ -79,7 +108,8 @@ class DefaultPaymentSheetLauncherTest {
     }
 
     private class FakeActivityResultRegistry(
-        private val result: PaymentSheetResult
+        private val result: PaymentSheetResult? = null,
+        private val error: Throwable? = null
     ) : ActivityResultRegistry() {
         override fun <I, O> onLaunch(
             requestCode: Int,
@@ -87,6 +117,9 @@ class DefaultPaymentSheetLauncherTest {
             input: I,
             options: ActivityOptionsCompat?
         ) {
+            if (error != null) {
+                throw error
+            }
             dispatchResult(
                 requestCode,
                 result

@@ -2,14 +2,14 @@ package com.stripe.android.camera.framework.util
 
 import android.util.Log
 import com.stripe.android.camera.BuildConfig
-import com.stripe.android.camera.framework.time.Clock
-import com.stripe.android.camera.framework.time.ClockMark
-import com.stripe.android.camera.framework.time.Duration
 import com.stripe.android.camera.framework.time.Rate
-import com.stripe.android.camera.framework.time.seconds
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import java.util.concurrent.atomic.AtomicLong
+import kotlin.time.ComparableTimeMark
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeSource
 
 internal interface FrameRateListener {
     fun onFrameRateUpdate(overallRate: Rate, instantRate: Rate)
@@ -24,8 +24,8 @@ internal class FrameRateTracker(
     private val listener: FrameRateListener? = null,
     private val notifyInterval: Duration = 1.seconds
 ) {
-    private var firstFrameTime: ClockMark? = null
-    private var lastNotifyTime: ClockMark = Clock.markNow()
+    private var firstFrameTime: ComparableTimeMark? = null
+    private var lastNotifyTime: ComparableTimeMark = TimeSource.Monotonic.markNow()
 
     // This is -1 so that we do not calculate a rate for the first frame
     private val totalFramesProcessed: AtomicLong = AtomicLong(-1)
@@ -43,19 +43,19 @@ internal class FrameRateTracker(
 
         val lastNotifyTime = this.lastNotifyTime
         val shouldNotifyOfFrameRate = totalFrames > 0 && frameRateMutex.withLock {
-            val shouldNotify = lastNotifyTime.elapsedSince() > notifyInterval
+            val shouldNotify = lastNotifyTime.elapsedNow() > notifyInterval
             if (shouldNotify) {
-                this.lastNotifyTime = Clock.markNow()
+                this.lastNotifyTime = TimeSource.Monotonic.markNow()
             }
             shouldNotify
         }
 
-        val firstFrameTime = this.firstFrameTime ?: Clock.markNow()
+        val firstFrameTime = this.firstFrameTime ?: TimeSource.Monotonic.markNow()
         this.firstFrameTime = firstFrameTime
 
         if (shouldNotifyOfFrameRate) {
-            val overallFrameRate = Rate(totalFrames, firstFrameTime.elapsedSince())
-            val instantFrameRate = Rate(framesSinceLastUpdate, lastNotifyTime.elapsedSince())
+            val overallFrameRate = Rate(totalFrames, firstFrameTime.elapsedNow())
+            val instantFrameRate = Rate(framesSinceLastUpdate, lastNotifyTime.elapsedNow())
 
             logProcessingRate(overallFrameRate, instantFrameRate)
             listener?.onFrameRateUpdate(overallFrameRate, instantFrameRate)
@@ -68,7 +68,7 @@ internal class FrameRateTracker(
      */
     fun reset() {
         firstFrameTime = null
-        lastNotifyTime = Clock.markNow()
+        lastNotifyTime = TimeSource.Monotonic.markNow()
         totalFramesProcessed.set(0)
         framesProcessedSinceLastUpdate.set(0)
     }
@@ -78,7 +78,7 @@ internal class FrameRateTracker(
      */
     fun getAverageFrameRate() = Rate(
         amount = totalFramesProcessed.get(),
-        duration = firstFrameTime?.elapsedSince() ?: Duration.ZERO
+        duration = firstFrameTime?.elapsedNow() ?: Duration.ZERO
     )
 
     /**
@@ -89,13 +89,13 @@ internal class FrameRateTracker(
      */
     private fun logProcessingRate(overallRate: Rate, instantRate: Rate) {
         val overallFps = if (overallRate.duration != Duration.ZERO) {
-            overallRate.amount / overallRate.duration.inSeconds
+            overallRate.amount.toDouble() / overallRate.duration.inWholeSeconds
         } else {
             0.0
         }
 
         val instantFps = if (instantRate.duration != Duration.ZERO) {
-            instantRate.amount / instantRate.duration.inSeconds
+            instantRate.amount.toDouble() / instantRate.duration.inWholeSeconds
         } else {
             0.0
         }

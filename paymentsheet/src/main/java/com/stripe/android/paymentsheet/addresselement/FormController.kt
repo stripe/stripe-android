@@ -5,12 +5,11 @@ import com.stripe.android.ui.core.elements.CardBillingAddressElement
 import com.stripe.android.ui.core.elements.LayoutSpec
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.SectionElement
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flattenConcat
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -25,9 +24,9 @@ internal class FormController @Inject constructor(
     transformSpecToElement: TransformSpecToElements,
 ) {
     val elements: StateFlow<List<FormElement>> =
-        MutableStateFlow(transformSpecToElement.transform(formSpec.items))
+        stateFlowOf(transformSpecToElement.transform(formSpec.items))
 
-    private val cardBillingElement = elements.map { elementsList ->
+    private val cardBillingElement = elements.mapAsStateFlow { elementsList ->
         elementsList
             .filterIsInstance<SectionElement>()
             .flatMap { it.fields }
@@ -39,23 +38,23 @@ internal class FormController @Inject constructor(
      * List of field identifiers which should not be visible.
      */
     val hiddenIdentifiers =
-        cardBillingElement.map {
-            it?.hiddenIdentifiers ?: flowOf(emptySet())
-        }.flattenConcat()
+        cardBillingElement.flatMapLatestAsStateFlow {
+            it?.hiddenIdentifiers ?: stateFlowOf(emptySet())
+        }
 
     /**
      * Emits a map of the form values when the form content is valid, null otherwise.
      */
-    val completeFormValues = combine(
-        elements.map { elementsList ->
-            combine(
+    val completeFormValues = combineAsStateFlow(
+        elements.flatMapLatestAsStateFlow { elementsList ->
+            combineAsStateFlow(
                 elementsList.map {
                     it.getFormFieldValueFlow()
                 }
             ) {
                 it.toList().flatten().toMap()
             }
-        }.flattenConcat(),
+        },
         hiddenIdentifiers
     ) { elementsList, hiddenIdentifiers ->
         elementsList.filter { mapEntry ->
@@ -68,32 +67,32 @@ internal class FormController @Inject constructor(
     /**
      * Emits a map of the form values that are complete, empty otherwise.
      */
-    val formValues = combine(
-        elements.map { elementsList ->
-            combine(
+    val formValues = combineAsStateFlow(
+        elements.flatMapLatestAsStateFlow { elementsList ->
+            combineAsStateFlow(
                 elementsList.map {
                     it.getFormFieldValueFlow()
                 }
             ) {
                 it.toList().flatten().toMap()
             }
-        }.flattenConcat(),
+        },
         hiddenIdentifiers
     ) { elementsList, hiddenIdentifiers ->
         elementsList.filter { mapEntry ->
             !hiddenIdentifiers.contains(mapEntry.key)
         }
-    }.map { map ->
+    }.mapAsStateFlow { map ->
         map.filter { it.value.isComplete }
     }
 
-    private val textFieldControllerIdsFlow = elements.filterNotNull().map { elementsList ->
-        combine(elementsList.map { it.getTextFieldIdentifiers() }) {
+    private val textFieldControllerIdsFlow = elements.flatMapLatestAsStateFlow { elementsList ->
+        combineAsStateFlow(elementsList.map { it.getTextFieldIdentifiers() }) {
             it.toList().flatten()
         }
-    }.flattenConcat()
+    }
 
-    val lastTextFieldIdentifier = combine(
+    val lastTextFieldIdentifier = combineAsStateFlow(
         hiddenIdentifiers,
         textFieldControllerIdsFlow
     ) { hiddenIds, textFieldControllerIds ->

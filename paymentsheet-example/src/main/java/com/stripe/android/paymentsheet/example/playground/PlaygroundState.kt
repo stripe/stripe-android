@@ -49,7 +49,7 @@ internal data class PlaygroundState(
                 snapshot = snapshot,
                 amount = amount,
                 paymentMethodTypes = paymentMethodTypes,
-                customerConfig = makeCustomerConfig(),
+                customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
                 clientSecret = intentClientSecret,
             )
         }

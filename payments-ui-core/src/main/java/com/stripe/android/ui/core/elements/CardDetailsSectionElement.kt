@@ -6,7 +6,7 @@ import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class CardDetailsSectionElement(
@@ -22,9 +22,9 @@ class CardDetailsSectionElement(
         cbcEligibility = cbcEligibility,
     ),
 ) : FormElement {
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
         controller.cardDetailsElement.getFormFieldValueFlow()
 
-    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
+    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
         controller.cardDetailsElement.getTextFieldIdentifiers()
 }

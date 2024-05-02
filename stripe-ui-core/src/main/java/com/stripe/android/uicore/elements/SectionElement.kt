@@ -2,8 +2,8 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SectionElement(
@@ -17,13 +17,13 @@ data class SectionElement(
         controller: SectionController
     ) : this(identifier, listOf(field), controller)
 
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
-        combine(fields.map { it.getFormFieldValueFlow() }) {
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+        combineAsStateFlow(fields.map { it.getFormFieldValueFlow() }) {
             it.toList().flatten()
         }
 
-    override fun getTextFieldIdentifiers(): Flow<List<IdentifierSpec>> =
-        combine(
+    override fun getTextFieldIdentifiers(): StateFlow<List<IdentifierSpec>> =
+        combineAsStateFlow(
             fields
                 .map {
                     it.getTextFieldIdentifiers()

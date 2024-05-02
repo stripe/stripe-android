@@ -90,7 +90,6 @@ internal fun IndividualScreen(
                 IndividualScreenBodyContent(
                     enabled = submitButtonState != LoadingButtonState.Loading,
                     navController = navController,
-                    identityViewModel = identityViewModel,
                     individualPage = individualPage,
                     missing = missing,
                     collectedStates = collectedStates,
@@ -122,7 +121,6 @@ internal fun IndividualScreen(
 private fun IndividualScreenBodyContent(
     enabled: Boolean,
     navController: NavController,
-    identityViewModel: IdentityViewModel,
     individualPage: VerificationPageStaticContentIndividualPage,
     missing: Set<Requirement>,
     collectedStates: IndividualCollectedStates,
@@ -185,7 +183,6 @@ private fun IndividualScreenBodyContent(
     if (missing.contains(Requirement.ADDRESS)) {
         AddressSection(
             enabled,
-            identityViewModel,
             individualPage.addressCountries,
             individualPage.addressCountryNotListedTextButtonText,
             navController

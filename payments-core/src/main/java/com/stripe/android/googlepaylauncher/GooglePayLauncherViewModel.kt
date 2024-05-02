@@ -35,11 +35,10 @@ import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.utils.mapResult
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.coroutines.CoroutineContext
 
 @Suppress("LongParameterList")
@@ -53,21 +52,42 @@ internal class GooglePayLauncherViewModel(
     private val googlePayRepository: GooglePayRepository,
     private val savedStateHandle: SavedStateHandle,
     private val errorReporter: ErrorReporter,
+    private val workContext: CoroutineContext,
 ) : ViewModel() {
     /**
      * [hasLaunched] indicates whether Google Pay has already been launched, and must be persisted
      * across process death in case the Activity and ViewModel are destroyed while the user is
      * interacting with Google Pay.
      */
-    var hasLaunched: Boolean
+    private var hasLaunched: Boolean
         get() = savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY) == true
         set(value) = savedStateHandle.set(HAS_LAUNCHED_KEY, value)
 
-    private val _googleResult = MutableStateFlow<GooglePayLauncher.Result?>(null)
+    private val _googleResult = MutableSharedFlow<GooglePayLauncher.Result?>(replay = 1)
     internal val googlePayResult = _googleResult.asSharedFlow()
 
+    private val _googlePayLaunchTask = MutableSharedFlow<Task<PaymentData>?>(replay = 1)
+    val googlePayLaunchTask = _googlePayLaunchTask.asSharedFlow()
+
+    init {
+        viewModelScope.launch(workContext) {
+            if (!hasLaunched) {
+                resolveLoadPaymentDataTask().fold(
+                    onSuccess = {
+                        _googlePayLaunchTask.emit(it)
+                    },
+                    onFailure = {
+                        updateResult(
+                            GooglePayLauncher.Result.Failed(it)
+                        )
+                    }
+                )
+            }
+        }
+    }
+
     fun updateResult(result: GooglePayLauncher.Result) {
-        _googleResult.value = result
+        _googleResult.tryEmit(result)
     }
 
     @VisibleForTesting
@@ -160,7 +180,7 @@ internal class GooglePayLauncherViewModel(
         }
     }
 
-    suspend fun createLoadPaymentDataTask(): Result<Task<PaymentData>> {
+    private suspend fun resolveLoadPaymentDataTask(): Result<Task<PaymentData>> {
         return runCatching {
             check(isReadyToPay()) { "Google Pay is unavailable." }
         }.mapResult {
@@ -168,43 +188,43 @@ internal class GooglePayLauncherViewModel(
         }.mapCatching { json ->
             PaymentDataRequest.fromJson(json)
         }.map { request ->
-            paymentsClient.loadPaymentData(request)
+            paymentsClient.loadPaymentData(request).awaitTask()
         }
     }
 
-    suspend fun confirmStripeIntent(
+    fun confirmStripeIntent(
         host: AuthActivityStarterHost,
         params: PaymentMethodCreateParams
     ) {
-        val confirmStripeIntentParams = when (args) {
-            is GooglePayLauncherContract.PaymentIntentArgs ->
-                ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
-                    paymentMethodCreateParams = params,
-                    clientSecret = args.clientSecret
-                )
-            is GooglePayLauncherContract.SetupIntentArgs ->
-                ConfirmSetupIntentParams.create(
-                    paymentMethodCreateParams = params,
-                    clientSecret = args.clientSecret
-                )
-        }
+        viewModelScope.launch(workContext) {
+            val confirmStripeIntentParams = when (args) {
+                is GooglePayLauncherContract.PaymentIntentArgs ->
+                    ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
+                        paymentMethodCreateParams = params,
+                        clientSecret = args.clientSecret
+                    )
+                is GooglePayLauncherContract.SetupIntentArgs ->
+                    ConfirmSetupIntentParams.create(
+                        paymentMethodCreateParams = params,
+                        clientSecret = args.clientSecret
+                    )
+            }
 
-        paymentController.startConfirmAndAuth(
-            host,
-            confirmStripeIntentParams,
-            requestOptions
-        )
+            paymentController.startConfirmAndAuth(
+                host,
+                confirmStripeIntentParams,
+                requestOptions
+            )
+        }
     }
 
     fun onConfirmResult(
         requestCode: Int,
         data: Intent
     ) {
-        viewModelScope.launch {
+        viewModelScope.launch(workContext) {
             val result = getResultFromConfirmation(requestCode, data)
-            withContext(Dispatchers.Main) {
-                _googleResult.value = result
-            }
+            _googleResult.emit(result)
         }
     }
 
@@ -235,6 +255,11 @@ internal class GooglePayLauncherViewModel(
             onSuccess = { GooglePayLauncher.Result.Completed },
             onFailure = { GooglePayLauncher.Result.Failed(it) },
         )
+    }
+
+    fun markTaskAsLaunched() {
+        hasLaunched = true
+        _googlePayLaunchTask.tryEmit(null)
     }
 
     internal class Factory(
@@ -282,27 +307,28 @@ internal class GooglePayLauncherViewModel(
             val errorReporter = ErrorReporter.createFallbackInstance(context = application)
 
             return GooglePayLauncherViewModel(
-                DefaultPaymentsClientFactory(application).create(googlePayEnvironment),
-                ApiRequest.Options(
+                paymentsClient = DefaultPaymentsClientFactory(context = application).create(googlePayEnvironment),
+                requestOptions = ApiRequest.Options(
                     publishableKey,
                     stripeAccountId
                 ),
-                args,
-                stripeRepository,
-                StripePaymentController(
+                args = args,
+                stripeRepository = stripeRepository,
+                paymentController = StripePaymentController(
                     application,
                     { publishableKey },
                     stripeRepository,
                     enableLogging,
                     workContext = workContext
                 ),
-                GooglePayJsonFactory(
+                googlePayJsonFactory = GooglePayJsonFactory(
                     googlePayConfig = GooglePayConfig(publishableKey, stripeAccountId),
                     isJcbEnabled = args.config.isJcbEnabled
                 ),
-                googlePayRepository,
-                extras.createSavedStateHandle(),
-                errorReporter
+                googlePayRepository = googlePayRepository,
+                savedStateHandle = extras.createSavedStateHandle(),
+                errorReporter = errorReporter,
+                workContext = workContext,
             ) as T
         }
     }

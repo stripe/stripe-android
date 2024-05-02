@@ -33,6 +33,7 @@ internal class ElementsSessionJsonParser(
             jsonArrayToList(json.optJSONArray(FIELD_UNACTIVATED_PAYMENT_METHOD_TYPES))
                 .map { it.lowercase() }
         val paymentMethodSpecs = json.optJSONArray(FIELD_PAYMENT_METHOD_SPECS)?.toString()
+        val externalPaymentMethodData = json.optJSONArray(FIELD_EXTERNAL_PAYMENT_METHOD_DATA)?.toString()
         val linkFundingSources = json.optJSONObject(FIELD_LINK_SETTINGS)?.optJSONArray(
             FIELD_LINK_FUNDING_SOURCES
         )
@@ -47,6 +48,7 @@ internal class ElementsSessionJsonParser(
             paymentMethodPreference.optJSONArray(FIELD_ORDERED_PAYMENT_METHOD_TYPES)
 
         val elementsSessionId = json.optString(FIELD_ELEMENTS_SESSION_ID)
+        val customer = parseCustomer(json.optJSONObject(FIELD_CUSTOMER))
 
         val stripeIntent = parseStripeIntent(
             elementsSessionId = elementsSessionId,
@@ -72,9 +74,11 @@ internal class ElementsSessionJsonParser(
                 ),
                 paymentMethodSpecs = paymentMethodSpecs,
                 stripeIntent = stripeIntent,
+                customer = customer,
                 merchantCountry = merchantCountry,
                 isEligibleForCardBrandChoice = isEligibleForCardBrandChoice,
                 isGooglePayEnabled = googlePayPreference != "disabled",
+                externalPaymentMethodData = externalPaymentMethodData,
             )
         } else {
             null
@@ -140,6 +144,52 @@ internal class ElementsSessionJsonParser(
         }
     }
 
+    private fun parseCustomer(json: JSONObject?): ElementsSession.Customer? {
+        if (json == null) {
+            return null
+        }
+
+        val paymentMethodsJson = json.optJSONArray(FIELD_CUSTOMER_PAYMENT_METHODS)
+        val paymentMethods = paymentMethodsJson?.let { pmsJson ->
+            (0 until pmsJson.length()).mapNotNull { index ->
+                PAYMENT_METHOD_JSON_PARSER.parse(pmsJson.optJSONObject(index))
+            }
+        } ?: emptyList()
+
+        val customerSession = parseCustomerSession(json.optJSONObject(FIELD_CUSTOMER_SESSION))
+            ?: return null
+
+        val defaultPaymentMethod = json.optString(FIELD_DEFAULT_PAYMENT_METHOD).takeIf {
+            it.isNotBlank()
+        }
+
+        return ElementsSession.Customer(
+            paymentMethods = paymentMethods,
+            session = customerSession,
+            defaultPaymentMethod = defaultPaymentMethod
+        )
+    }
+
+    private fun parseCustomerSession(json: JSONObject?): ElementsSession.Customer.Session? {
+        if (json == null) {
+            return null
+        }
+
+        val id = json.optString(FIELD_CUSTOMER_ID) ?: return null
+        val liveMode = json.optBoolean(FIELD_CUSTOMER_LIVE_MODE)
+        val apiKey = json.optString(FIELD_CUSTOMER_API_KEY) ?: return null
+        val apiKeyExpiry = json.optInt(FIELD_CUSTOMER_API_KEY_EXPIRY)
+        val name = json.optString(FIELD_CUSTOMER_NAME) ?: return null
+
+        return ElementsSession.Customer.Session(
+            id = id,
+            liveMode = liveMode,
+            apiKey = apiKey,
+            apiKeyExpiry = apiKeyExpiry,
+            customerId = name
+        )
+    }
+
     private fun parseCardBrandChoiceEligibility(json: JSONObject): Boolean {
         val cardBrandChoice = json.optJSONObject(FIELD_CARD_BRAND_CHOICE) ?: return false
         return cardBrandChoice.optBoolean(FIELD_ELIGIBLE, false)
@@ -175,6 +225,18 @@ internal class ElementsSessionJsonParser(
         private const val FIELD_PAYMENT_METHOD_SPECS = "payment_method_specs"
         private const val FIELD_CARD_BRAND_CHOICE = "card_brand_choice"
         private const val FIELD_ELIGIBLE = "eligible"
+        private const val FIELD_EXTERNAL_PAYMENT_METHOD_DATA = "external_payment_method_data"
+        private const val FIELD_CUSTOMER = "customer"
+        private const val FIELD_CUSTOMER_PAYMENT_METHODS = "payment_methods"
+        private const val FIELD_CUSTOMER_SESSION = "customer_session"
+        private const val FIELD_DEFAULT_PAYMENT_METHOD = "default_payment_method"
+        private const val FIELD_CUSTOMER_ID = "id"
+        private const val FIELD_CUSTOMER_LIVE_MODE = "livemode"
+        private const val FIELD_CUSTOMER_API_KEY = "api_key"
+        private const val FIELD_CUSTOMER_API_KEY_EXPIRY = "api_key_expiry"
+        private const val FIELD_CUSTOMER_NAME = "customer"
         const val FIELD_GOOGLE_PAY_PREFERENCE = "google_pay_preference"
+
+        private val PAYMENT_METHOD_JSON_PARSER = PaymentMethodJsonParser()
     }
 }

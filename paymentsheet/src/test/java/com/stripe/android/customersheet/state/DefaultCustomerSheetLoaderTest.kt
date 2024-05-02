@@ -112,7 +112,8 @@ class DefaultCustomerSheetLoaderTest {
         )
         assertThat(state.validationError).isNull()
 
-        val mode = elementsSessionRepository.lastGetParam as PaymentSheet.InitializationMode.DeferredIntent
+        val mode = elementsSessionRepository.lastParams?.initializationMode
+            as PaymentSheet.InitializationMode.DeferredIntent
         assertThat(mode.intentConfiguration.paymentMethodTypes)
             .isEmpty()
     }
@@ -164,7 +165,8 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(state.paymentMethodMetadata.cbcEligibility).isEqualTo(CardBrandChoiceEligibility.Ineligible)
         assertThat(state.validationError).isNull()
 
-        val mode = elementsSessionRepository.lastGetParam as PaymentSheet.InitializationMode.DeferredIntent
+        val mode = elementsSessionRepository.lastParams?.initializationMode
+            as PaymentSheet.InitializationMode.DeferredIntent
         assertThat(mode.intentConfiguration.paymentMethodTypes)
             .isEqualTo(listOf("card", "us_bank_account"))
     }
@@ -222,8 +224,10 @@ class DefaultCustomerSheetLoaderTest {
         )
 
         assertThat(loader.load(config).getOrThrow()).isNotNull()
-        val params = elementsSessionRepository.lastGetParam?.toElementsSessionParams()
-            as ElementsSessionParams.DeferredIntentType
+        val params = elementsSessionRepository.lastParams?.initializationMode?.toElementsSessionParams(
+            customer = null,
+            externalPaymentMethods = null
+        ) as ElementsSessionParams.DeferredIntentType
         assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
     }
 
@@ -253,8 +257,10 @@ class DefaultCustomerSheetLoaderTest {
         )
 
         assertThat(loader.load(config).getOrThrow()).isNotNull()
-        val params = elementsSessionRepository.lastGetParam?.toElementsSessionParams()
-            as ElementsSessionParams.DeferredIntentType
+        val params = elementsSessionRepository.lastParams?.initializationMode?.toElementsSessionParams(
+            customer = null,
+            externalPaymentMethods = null
+        ) as ElementsSessionParams.DeferredIntentType
         assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
     }
 

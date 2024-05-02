@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
-import android.content.res.Resources
+import android.content.Context
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -34,7 +34,6 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
-import com.stripe.android.uicore.elements.ParameterDestination
 
 @Composable
 internal fun AddPaymentMethod(
@@ -144,7 +143,7 @@ internal fun AddPaymentMethod(
                 onFormFieldValuesChanged = { formValues ->
                     paymentMethodMetadata?.let { paymentMethodMetadata ->
                         val newSelection = formValues?.transformToPaymentSelection(
-                            resources = context.resources,
+                            context = context,
                             paymentMethod = selectedItem,
                             paymentMethodMetadata = paymentMethodMetadata,
                         )
@@ -164,11 +163,7 @@ internal fun FormFieldValues.transformToPaymentMethodCreateParams(
     paymentMethodMetadata: PaymentMethodMetadata,
 ): PaymentMethodCreateParams {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodCreateParams(
-        fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.destination == ParameterDestination.Api.Params
-        }.filterNot { entry ->
-            entry.key == IdentifierSpec.SaveForFutureUse || entry.key == IdentifierSpec.CardBrand
-        },
+        fieldValuePairs = fieldValuePairs,
         code = paymentMethod.code,
         requiresMandate = paymentMethodMetadata.requiresMandate(paymentMethod.code),
     )
@@ -178,9 +173,7 @@ internal fun FormFieldValues.transformToPaymentMethodOptionsParams(
     paymentMethod: SupportedPaymentMethod
 ): PaymentMethodOptionsParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodOptionsParams(
-        fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.destination == ParameterDestination.Api.Options
-        },
+        fieldValuePairs = fieldValuePairs,
         code = paymentMethod.code,
     )
 }
@@ -189,18 +182,16 @@ internal fun FormFieldValues.transformToExtraParams(
     paymentMethod: SupportedPaymentMethod
 ): PaymentMethodExtraParams? {
     return FieldValuesToParamsMapConverter.transformToPaymentMethodExtraParams(
-        fieldValuePairs = fieldValuePairs.filter { entry ->
-            entry.key.destination == ParameterDestination.Local.Extras
-        },
+        fieldValuePairs = fieldValuePairs,
         code = paymentMethod.code,
     )
 }
 
 internal fun FormFieldValues.transformToPaymentSelection(
-    resources: Resources,
+    context: Context,
     paymentMethod: SupportedPaymentMethod,
     paymentMethodMetadata: PaymentMethodMetadata,
-): PaymentSelection.New {
+): PaymentSelection {
     val params = transformToPaymentMethodCreateParams(paymentMethod, paymentMethodMetadata)
     val options = transformToPaymentMethodOptionsParams(paymentMethod)
     val extras = transformToExtraParams(paymentMethod)
@@ -213,9 +204,18 @@ internal fun FormFieldValues.transformToPaymentSelection(
             brand = CardBrand.fromCode(fieldValuePairs[IdentifierSpec.CardBrand]?.value),
             customerRequestedSave = userRequestedReuse,
         )
+    } else if (paymentMethodMetadata.isExternalPaymentMethod(paymentMethod.code)) {
+        PaymentSelection.ExternalPaymentMethod(
+            type = paymentMethod.code,
+            billingDetails = params.billingDetails,
+            label = paymentMethod.displayName.resolve(context),
+            iconResource = paymentMethod.iconResource,
+            lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
+            darkThemeIconUrl = paymentMethod.darkThemeIconUrl,
+        )
     } else {
         PaymentSelection.New.GenericPaymentMethod(
-            labelResource = resources.getString(paymentMethod.displayNameResource),
+            labelResource = paymentMethod.displayName.resolve(context),
             iconResource = paymentMethod.iconResource,
             lightThemeIconUrl = paymentMethod.lightThemeIconUrl,
             darkThemeIconUrl = paymentMethod.darkThemeIconUrl,

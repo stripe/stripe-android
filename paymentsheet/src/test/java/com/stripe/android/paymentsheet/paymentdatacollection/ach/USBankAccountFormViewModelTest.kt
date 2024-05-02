@@ -1,8 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
-import android.app.Application
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.viewModelScope
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
@@ -27,10 +25,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.Amount
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.IdentifierSpec
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -90,14 +86,14 @@ class USBankAccountFormViewModelTest {
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
 
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value).isEqualTo(
+            assertThat(viewModel.name.value).isEqualTo(
                 CUSTOMER_NAME
             )
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value).isEqualTo(
+            assertThat(viewModel.email.value).isEqualTo(
                 CUSTOMER_EMAIL
             )
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+            assertThat(viewModel.requiredFields.value).isTrue()
         }
 
     @Test
@@ -108,17 +104,17 @@ class USBankAccountFormViewModelTest {
             viewModel.nameController.onRawValueChange("      ")
             viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+            assertThat(viewModel.requiredFields.value).isFalse()
 
             viewModel.nameController.onRawValueChange(CUSTOMER_NAME)
             viewModel.emailController.onRawValueChange(CUSTOMER_EMAIL)
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+            assertThat(viewModel.requiredFields.value).isTrue()
 
             viewModel.nameController.onRawValueChange(CUSTOMER_NAME)
             viewModel.emailController.onRawValueChange("")
 
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+            assertThat(viewModel.requiredFields.value).isFalse()
         }
 
     @Test
@@ -127,7 +123,7 @@ class USBankAccountFormViewModelTest {
             val viewModel = createViewModel()
             viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
             val currentScreenState =
-                viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+                viewModel.currentScreenState.value
 
             assertThat(
                 currentScreenState
@@ -149,7 +145,7 @@ class USBankAccountFormViewModelTest {
         viewModel.result.test {
             viewModel.handleCollectBankAccountResult(mockUnverifiedBankAccount())
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
             assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
@@ -163,7 +159,7 @@ class USBankAccountFormViewModelTest {
         viewModel.result.test {
             viewModel.handleCollectBankAccountResult(mockVerifiedBankAccount())
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
             assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
@@ -178,7 +174,7 @@ class USBankAccountFormViewModelTest {
         viewModel.result.test {
             viewModel.handleCollectBankAccountResult(bankAccount)
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.VerifyWithMicrodeposits)
 
             assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
@@ -193,7 +189,7 @@ class USBankAccountFormViewModelTest {
         viewModel.result.test {
             viewModel.handleCollectBankAccountResult(bankAccount)
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
             assertThat(awaitItem()?.screenState).isEqualTo(currentScreenState)
@@ -213,7 +209,7 @@ class USBankAccountFormViewModelTest {
         viewModel.result.test {
             viewModel.handleCollectBankAccountResult(bankAccount)
 
-            val currentScreenState = viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            val currentScreenState = viewModel.currentScreenState.value
             viewModel.handlePrimaryButtonClick(currentScreenState as USBankAccountFormScreenState.MandateCollection)
 
             assertThat(awaitItem()?.paymentMethodOptionsParams).isEqualTo(
@@ -232,7 +228,7 @@ class USBankAccountFormViewModelTest {
             viewModel.reset()
 
             val currentScreenState =
-                viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+                viewModel.currentScreenState.value
 
             viewModel.handlePrimaryButtonClick(
                 currentScreenState as USBankAccountFormScreenState.BillingDetailsCollection
@@ -281,6 +277,7 @@ class USBankAccountFormViewModelTest {
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
                     input = input,
+                    instantDebits = null,
                     screenState = USBankAccountFormScreenState.SavedAccount(
                         financialConnectionsSessionId = "session_1234",
                         intentId = "intent_1234",
@@ -332,6 +329,7 @@ class USBankAccountFormViewModelTest {
                     paymentMethodCreateParams = mock(),
                     customerRequestedSave = mock(),
                     input = input,
+                    instantDebits = null,
                     screenState = USBankAccountFormScreenState.SavedAccount(
                         financialConnectionsSessionId = "session_1234",
                         intentId = "intent_1234",
@@ -384,7 +382,7 @@ class USBankAccountFormViewModelTest {
                 isProcessing = false,
             ),
             USBankAccountFormScreenState.MandateCollection(
-                financialConnectionsSessionId = "session_1234",
+                resultIdentifier = USBankAccountFormScreenState.ResultIdentifier.Session("session_1234"),
                 intentId = "intent_1234",
                 bankName = "Stripe Bank",
                 last4 = null,
@@ -426,6 +424,7 @@ class USBankAccountFormViewModelTest {
                             address = CUSTOMER_ADDRESS.asAddressModel(),
                             saveForFutureUse = true,
                         ),
+                        instantDebits = null,
                         screenState = screenState,
                     )
                 )
@@ -452,6 +451,7 @@ class USBankAccountFormViewModelTest {
                             address = null,
                             saveForFutureUse = false,
                         ),
+                        instantDebits = null,
                         screenState = USBankAccountFormScreenState.SavedAccount(
                             financialConnectionsSessionId = "session_1234",
                             intentId = "intent_1234",
@@ -465,7 +465,7 @@ class USBankAccountFormViewModelTest {
             )
 
             val currentScreenState =
-                viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+                viewModel.currentScreenState.value
 
             assertThat(
                 currentScreenState
@@ -497,16 +497,16 @@ class USBankAccountFormViewModelTest {
                 ),
             )
 
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.name.value)
                 .isEqualTo(CUSTOMER_NAME)
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.email.value)
                 .isEqualTo(CUSTOMER_EMAIL)
-            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.phone.value)
                 .isEqualTo(CUSTOMER_PHONE)
             assertThat(viewModel.phoneController.getCountryCode()).isEqualTo(CUSTOMER_COUNTRY)
-            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.address.value)
                 .isEqualTo(CUSTOMER_ADDRESS.asAddressModel())
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+            assertThat(viewModel.requiredFields.value).isTrue()
         }
 
     @Test
@@ -532,13 +532,13 @@ class USBankAccountFormViewModelTest {
                 ),
             )
 
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.name.value)
                 .isEqualTo(CUSTOMER_NAME)
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.email.value)
                 .isEqualTo(CUSTOMER_EMAIL)
-            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+            assertThat(viewModel.phone.value).isNull()
+            assertThat(viewModel.address.value).isNull()
+            assertThat(viewModel.requiredFields.value).isTrue()
         }
 
     @Test
@@ -564,13 +564,13 @@ class USBankAccountFormViewModelTest {
                 ),
             )
 
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.name.value)
                 .isEqualTo("Jenny Rose")
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.email.value)
                 .isEqualTo("email@email.com")
-            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isTrue()
+            assertThat(viewModel.phone.value).isNull()
+            assertThat(viewModel.address.value).isNull()
+            assertThat(viewModel.requiredFields.value).isTrue()
         }
 
     @Test
@@ -594,13 +594,13 @@ class USBankAccountFormViewModelTest {
                 ),
             )
 
-            assertThat(viewModel.name.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.name.value)
                 .isEqualTo(CUSTOMER_NAME)
-            assertThat(viewModel.email.stateIn(viewModel.viewModelScope).value)
+            assertThat(viewModel.email.value)
                 .isEqualTo(CUSTOMER_EMAIL)
-            assertThat(viewModel.phone.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.address.stateIn(viewModel.viewModelScope).value).isNull()
-            assertThat(viewModel.requiredFields.stateIn(viewModel.viewModelScope).value).isFalse()
+            assertThat(viewModel.phone.value).isNull()
+            assertThat(viewModel.address.value).isNull()
+            assertThat(viewModel.requiredFields.value).isFalse()
         }
 
     @Test
@@ -771,7 +771,7 @@ class USBankAccountFormViewModelTest {
         viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         val currentScreenState =
-            viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            viewModel.currentScreenState.value
 
         assertThat(
             currentScreenState
@@ -807,7 +807,7 @@ class USBankAccountFormViewModelTest {
         viewModel.collectBankAccountLauncher = mockCollectBankAccountLauncher
 
         val currentScreenState =
-            viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+            viewModel.currentScreenState.value
 
         assertThat(
             currentScreenState
@@ -848,7 +848,7 @@ class USBankAccountFormViewModelTest {
             assertThat(awaitItem()).isNull()
 
             val currentScreenState =
-                viewModel.currentScreenState.stateIn(viewModel.viewModelScope).value
+                viewModel.currentScreenState.value
 
             assertThat(currentScreenState)
                 .isInstanceOf(USBankAccountFormScreenState.MandateCollection::class.java)
@@ -1064,7 +1064,6 @@ class USBankAccountFormViewModelTest {
             application = ApplicationProvider.getApplicationContext(),
             lazyPaymentConfig = { paymentConfiguration },
             savedStateHandle = savedStateHandle,
-            addressRepository = createAddressRepository(),
         )
     }
 
@@ -1137,11 +1136,4 @@ class USBankAccountFormViewModelTest {
             country = "US",
         )
     }
-}
-
-private fun createAddressRepository(): AddressRepository {
-    return AddressRepository(
-        resources = ApplicationProvider.getApplicationContext<Application>().resources,
-        workContext = Dispatchers.Unconfined,
-    )
 }

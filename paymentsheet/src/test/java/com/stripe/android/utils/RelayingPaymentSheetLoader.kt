@@ -20,7 +20,7 @@ internal class RelayingPaymentSheetLoader : PaymentSheetLoader {
         enqueue(
             Result.success(
                 PaymentSheetState.Full(
-                    customerPaymentMethods = emptyList(),
+                    customer = null,
                     config = PaymentSheet.Configuration("Example"),
                     isGooglePayReady = false,
                     paymentSelection = null,
