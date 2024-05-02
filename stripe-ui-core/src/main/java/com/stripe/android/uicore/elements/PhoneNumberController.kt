@@ -10,7 +10,6 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -82,7 +81,7 @@ class PhoneNumberController private constructor(
         FormFieldEntry(fieldValue, isComplete)
     }
 
-    override val error: Flow<FieldError?> = combineAsStateFlow(
+    override val error: StateFlow<FieldError?> = combineAsStateFlow(
         fieldValue,
         isComplete,
         _hasFocus
