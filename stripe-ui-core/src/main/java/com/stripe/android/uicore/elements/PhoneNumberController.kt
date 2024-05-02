@@ -14,7 +14,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import com.stripe.android.core.R as CoreR
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -83,7 +82,7 @@ class PhoneNumberController private constructor(
         FormFieldEntry(fieldValue, isComplete)
     }
 
-    override val error: Flow<FieldError?> = combine(
+    override val error: Flow<FieldError?> = combineAsStateFlow(
         fieldValue,
         isComplete,
         _hasFocus
