@@ -12,8 +12,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -32,11 +32,11 @@ class PrimaryButtonUiStateMapperTest {
 
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
-            buttonsEnabledFlow = flowOf(true),
-            amountFlow = flowOf(Amount(value = 1234, currencyCode = "usd")),
-            selectionFlow = flowOf(null),
-            customPrimaryButtonUiStateFlow = flowOf(usBankButton),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(usBankButton),
         )
 
         val result = mapper.forCompleteFlow()
@@ -51,11 +51,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Enables button if selection is not null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
-            buttonsEnabledFlow = flowOf(true),
-            amountFlow = flowOf(Amount(value = 1234, currencyCode = "usd")),
-            selectionFlow = flowOf(cardSelection()),
-            customPrimaryButtonUiStateFlow = flowOf(null),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(cardSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
         )
 
         val result = mapper.forCompleteFlow()
@@ -70,11 +70,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Disables button if selection is null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
-            buttonsEnabledFlow = flowOf(true),
-            amountFlow = flowOf(Amount(value = 1234, currencyCode = "usd")),
-            selectionFlow = flowOf(null),
-            customPrimaryButtonUiStateFlow = flowOf(null),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            buttonsEnabledFlow = stateFlowOf(true),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(null),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
         )
 
         val result = mapper.forCompleteFlow()
@@ -89,11 +89,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Disables button if editing or processing, even if selection is not null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
-            buttonsEnabledFlow = flowOf(false),
-            amountFlow = flowOf(Amount(value = 1234, currencyCode = "usd")),
-            selectionFlow = flowOf(cardSelection()),
-            customPrimaryButtonUiStateFlow = flowOf(null),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            buttonsEnabledFlow = stateFlowOf(false),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(cardSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
         )
 
         val result = mapper.forCompleteFlow()
@@ -108,11 +108,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Hides button in complete flow if on a screen that isn't supposed to show it`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.Loading),
-            buttonsEnabledFlow = flowOf(false),
-            amountFlow = flowOf(Amount(value = 1234, currencyCode = "usd")),
-            selectionFlow = flowOf(cardSelection()),
-            customPrimaryButtonUiStateFlow = flowOf(null),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.Loading),
+            buttonsEnabledFlow = stateFlowOf(false),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(cardSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
         )
 
         val result = mapper.forCompleteFlow()
@@ -127,10 +127,10 @@ class PrimaryButtonUiStateMapperTest {
     fun `Hides button in custom flow if on a screen that isn't supposed to show it`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
-            buttonsEnabledFlow = flowOf(false),
-            selectionFlow = flowOf(cardSelection()),
-            customPrimaryButtonUiStateFlow = flowOf(null),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            buttonsEnabledFlow = stateFlowOf(false),
+            selectionFlow = stateFlowOf(cardSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
         )
 
         val result = mapper.forCustomFlow()
@@ -145,10 +145,10 @@ class PrimaryButtonUiStateMapperTest {
     fun `Shows button in custom flow if selected payment method requires confirmation`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
-            buttonsEnabledFlow = flowOf(false),
-            selectionFlow = flowOf(usBankAccountSelection()),
-            customPrimaryButtonUiStateFlow = flowOf(null),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            buttonsEnabledFlow = stateFlowOf(false),
+            selectionFlow = stateFlowOf(usBankAccountSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
         )
 
         val result = mapper.forCustomFlow()
@@ -163,11 +163,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Shows lock icon correctly based on the flow type`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = flowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
-            buttonsEnabledFlow = flowOf(false),
-            amountFlow = flowOf(Amount(value = 1234, currencyCode = "usd")),
-            selectionFlow = flowOf(usBankAccountSelection()),
-            customPrimaryButtonUiStateFlow = flowOf(null),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            buttonsEnabledFlow = stateFlowOf(false),
+            amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
+            selectionFlow = stateFlowOf(usBankAccountSelection()),
+            customPrimaryButtonUiStateFlow = stateFlowOf(null),
         )
 
         val resultWithLock = mapper.forCompleteFlow()
@@ -189,7 +189,7 @@ class PrimaryButtonUiStateMapperTest {
         config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some Name"),
         currentScreenFlow: Flow<PaymentSheetScreen>,
         buttonsEnabledFlow: Flow<Boolean>,
-        amountFlow: Flow<Amount?> = flowOf(null),
+        amountFlow: Flow<Amount?> = stateFlowOf(null),
         selectionFlow: Flow<PaymentSelection?>,
         customPrimaryButtonUiStateFlow: Flow<PrimaryButton.UIState?>,
     ): PrimaryButtonUiStateMapper {
