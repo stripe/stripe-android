@@ -234,10 +234,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
     }
 
-    override val walletsProcessingState: StateFlow<WalletsProcessingState?> = viewState.mapAsStateFlow { viewState ->
-        mapViewStateToCheckoutIdentifier(viewState, CheckoutIdentifier.SheetTopWallet)
-    }.mapAsStateFlow { viewState ->
-        when (viewState) {
+    override val walletsProcessingState: StateFlow<WalletsProcessingState?> = viewState.mapAsStateFlow { vs ->
+        when (val viewState = mapViewStateToCheckoutIdentifier(vs, CheckoutIdentifier.SheetTopWallet)) {
             null -> null
             is PaymentSheetViewState.Reset -> WalletsProcessingState.Idle(
                 error = viewState.errorMessage?.message?.let { message ->
