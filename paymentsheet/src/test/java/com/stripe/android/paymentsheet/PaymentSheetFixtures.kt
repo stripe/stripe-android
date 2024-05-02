@@ -103,6 +103,11 @@ internal object PaymentSheetFixtures {
             googlePay = ConfigFixtures.GOOGLE_PAY
         )
 
+    internal val CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS
+        get() = CONFIG_CUSTOMER.copy(
+            externalPaymentMethods = listOf("external_paypal", "external_fawry")
+        )
+
     internal val CONFIG_BILLING_DETAILS_COLLECTION = PaymentSheet.Configuration(
         merchantDisplayName = MERCHANT_DISPLAY_NAME,
         billingDetailsCollectionConfiguration = PaymentSheet.BillingDetailsCollectionConfiguration(

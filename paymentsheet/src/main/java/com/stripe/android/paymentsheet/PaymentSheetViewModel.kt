@@ -453,7 +453,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             ExternalPaymentMethodInterceptor.intercept(
                 externalPaymentMethodType = paymentSelection.type,
                 billingDetails = paymentSelection.billingDetails,
-                onPaymentResult = ::onPaymentResult,
+                onPaymentResult = ::onExternalPaymentMethodResult,
                 externalPaymentMethodLauncher,
             )
         } else if (
@@ -578,7 +578,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
         externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
             ExternalPaymentMethodContract(),
-            ::onPaymentResult
+            ::onExternalPaymentMethodResult
         )
 
         lifecycleOwner.lifecycle.addObserver(
@@ -625,6 +625,24 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 }
             }
         }
+    }
+
+    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
+        val selection = selection.value
+        when (paymentResult) {
+            is PaymentResult.Completed -> eventReporter.onPaymentSuccess(
+                selection,
+                deferredIntentConfirmationType = null
+            )
+
+            is PaymentResult.Failed -> eventReporter.onPaymentFailure(
+                selection,
+                error = PaymentSheetConfirmationError.ExternalPaymentMethod
+            )
+
+            is PaymentResult.Canceled -> Unit
+        }
+        onPaymentResult(paymentResult)
     }
 
     override fun onPaymentResult(paymentResult: PaymentResult) {

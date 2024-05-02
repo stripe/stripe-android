@@ -2,6 +2,7 @@ package com.stripe.android.common.analytics
 
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.analytics.PaymentSheetEvent
 import com.stripe.android.uicore.StripeThemeDefaults
 
 internal const val FIELD_APPEARANCE_USAGE = "usage"
@@ -64,4 +65,10 @@ internal fun List<CardBrand>.toAnalyticsValue(): String? {
     }?.joinToString { brand ->
         brand.code
     }
+}
+
+internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(): List<String>? {
+    return this.externalPaymentMethods.takeIf {
+        it?.isNotEmpty() ?: false
+    }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
 }
