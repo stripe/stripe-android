@@ -12,7 +12,6 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Provider
@@ -72,10 +71,9 @@ internal class InputAddressViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getCurrentAddress(): AddressDetails? {
+    private fun getCurrentAddress(): AddressDetails? {
         return formController.value
             ?.formValues
-            ?.stateIn(viewModelScope)
             ?.value
             ?.let {
                 AddressDetails(
