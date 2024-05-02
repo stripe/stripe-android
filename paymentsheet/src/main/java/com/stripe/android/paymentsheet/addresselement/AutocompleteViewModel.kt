@@ -15,14 +15,12 @@ import com.stripe.android.ui.core.elements.autocomplete.model.transformGoogleToS
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
 import com.stripe.android.uicore.elements.TextFieldIcon
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
@@ -58,8 +56,7 @@ internal class AutocompleteViewModel @Inject constructor(
     val textFieldController = SimpleTextFieldController(config)
 
     private val queryFlow = textFieldController.fieldValue
-        .map { it }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(), "")
+        .mapAsStateFlow { it }
 
     private val debouncer = Debouncer()
 
