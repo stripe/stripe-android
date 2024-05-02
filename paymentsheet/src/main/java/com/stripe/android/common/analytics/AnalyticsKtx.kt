@@ -71,5 +71,4 @@ internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(
     return this.externalPaymentMethods.takeIf {
         it?.isNotEmpty() ?: false
     }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
-
 }

@@ -82,6 +82,66 @@ class PaymentSheetEventTest {
     }
 
     @Test
+    fun `Init event with external payment methdos should return expected params`() {
+        val event = PaymentSheetEvent.Init(
+            mode = EventReporter.Mode.Complete,
+            configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_EXTERNAL_PAYMENT_METHODS,
+            isDeferred = false,
+            linkEnabled = false,
+            googlePaySupported = false,
+        )
+
+        assertThat(
+            event.eventName
+        ).isEqualTo(
+            "mc_complete_init_customer"
+        )
+
+        val expectedConfig = mapOf(
+            "customer" to true,
+            "googlepay" to false,
+            "primary_button_color" to false,
+            "default_billing_details" to false,
+            "allows_delayed_payment_methods" to false,
+            "appearance" to mapOf(
+                "colorsLight" to false,
+                "colorsDark" to false,
+                "corner_radius" to false,
+                "border_width" to false,
+                "font" to false,
+                "size_scale_factor" to false,
+                "primary_button" to mapOf(
+                    "colorsLight" to false,
+                    "colorsDark" to false,
+                    "corner_radius" to false,
+                    "border_width" to false,
+                    "font" to false,
+                ),
+                "usage" to false,
+            ),
+            "payment_method_order" to listOf<String>(),
+            "allows_payment_methods_requiring_shipping_address" to false,
+            "allows_removal_of_last_saved_payment_method" to true,
+            "billing_details_collection_configuration" to mapOf(
+                "attach_defaults" to false,
+                "name" to "Automatic",
+                "email" to "Automatic",
+                "phone" to "Automatic",
+                "address" to "Automatic",
+            ),
+            "preferred_networks" to null,
+            "external_payment_methods" to listOf("external_paypal", "external_fawry"),
+        )
+
+        assertThat(event.params).run {
+            containsEntry("link_enabled", false)
+            containsEntry("google_pay_enabled", false)
+            containsEntry("is_decoupled", false)
+            containsEntry("mpe_config", expectedConfig)
+        }
+    }
+
+    @Test
     fun `Init event with minimum config should return expected params`() {
         val event = PaymentSheetEvent.Init(
             mode = EventReporter.Mode.Complete,
