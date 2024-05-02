@@ -60,7 +60,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -224,12 +223,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
-        .filterNotNull()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = PaymentOptionsState(),
-        )
 
     private val canEdit: StateFlow<Boolean> = paymentOptionsState.mapAsStateFlow { state ->
         val paymentMethods = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
