@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.example.settings
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -41,11 +43,12 @@ internal fun SettingsUi(
     playgroundSettings: PlaygroundSettings,
     onSettingsChanged: (PlaygroundSettings) -> Unit,
 ) {
-    Column {
-        for (setting in playgroundSettings.settings) {
-            Row(modifier = Modifier.padding(bottom = 16.dp)) {
-                SingleSelectSetting(setting, playgroundSettings, onSettingsChanged)
-            }
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.animateContentSize(),
+    ) {
+        for (setting in playgroundSettings.displayableSettings) {
+            SingleSelectSetting(setting, playgroundSettings, onSettingsChanged)
         }
     }
 }

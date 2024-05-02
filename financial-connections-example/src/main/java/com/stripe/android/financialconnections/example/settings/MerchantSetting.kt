@@ -5,7 +5,7 @@ import com.stripe.android.financialconnections.example.data.model.LinkAccountSes
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 data class MerchantSetting(
-    override val selectedOption: Merchant = Merchant.Test,
+    override val selectedOption: Merchant = Merchant.Default,
     override val key: String = "merchant"
 ) : Saveable<Merchant>, SingleChoiceSetting<Merchant>(
     displayName = "Merchant",
@@ -21,25 +21,7 @@ data class MerchantSetting(
     )
 
     override fun valueUpdated(currentSettings: List<Setting<*>>, value: Merchant): List<Setting<*>> {
-        val merchantSettings = listOfNotNull(
-            copy(selectedOption = value),
-            PublicKeySetting("").takeIf { value == Merchant.Other },
-            PrivateKeySetting("").takeIf { value == Merchant.Other }
-        )
-        val updatedSettings = currentSettings
-            .filter { it !is PublicKeySetting && it !is PrivateKeySetting }
-            .flatMap { setting ->
-                when (setting) {
-                    is MerchantSetting -> merchantSettings
-                    else -> listOf(setting)
-                }
-            }
-
-        return if (currentSettings.none { it is MerchantSetting }) {
-            updatedSettings + merchantSettings
-        } else {
-            updatedSettings
-        }
+        return replace(currentSettings, this.copy(selectedOption = value))
     }
 
     override fun convertToString(value: Merchant): String = value.apiValue
