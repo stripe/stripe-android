@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -99,11 +100,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         override val additionalParams: Map<String, Any?>
             get() {
-              // TODO: add analytics value like other params now have
-                val externalPaymentMethods = configuration.externalPaymentMethods.takeIf {
-                    it?.isNotEmpty() ?: false
-                }?.take(MAX_EXTERNAL_PAYMENT_METHODS)
-                              
+
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
@@ -120,8 +117,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
                         configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
                         ),
-                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue()
-                    FIELD_EXTERNAL_PAYMENT_METHODS to externalPaymentMethods,
+                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,

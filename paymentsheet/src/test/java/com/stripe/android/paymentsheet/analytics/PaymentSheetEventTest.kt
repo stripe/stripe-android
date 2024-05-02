@@ -70,6 +70,7 @@ class PaymentSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "external_payment_methods" to null,
         )
 
         assertThat(event.params).run {
@@ -129,6 +130,7 @@ class PaymentSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to null,
+            "external_payment_methods" to null,
         )
 
         assertThat(event.params).run {
@@ -190,6 +192,7 @@ class PaymentSheetEventTest {
                 "address" to "Automatic",
             ),
             "preferred_networks" to "cartes_bancaires, visa",
+            "external_payment_methods" to null,
         )
 
         assertThat(event.params).run {
@@ -972,6 +975,7 @@ class PaymentSheetEventTest {
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
+            "external_payment_methods" to null,
         )
         assertThat(
             PaymentSheetEvent.Init(
@@ -1029,6 +1033,7 @@ class PaymentSheetEventTest {
             "appearance" to expectedAppearance,
             "billing_details_collection_configuration" to expectedBillingDetailsCollection,
             "preferred_networks" to null,
+            "external_payment_methods" to null,
         )
         assertThat(
             PaymentSheetEvent.Init(
