@@ -71,12 +71,9 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
@@ -128,7 +125,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         isProcessingPayment = isProcessingPaymentIntent,
         currentScreenFlow = currentScreen,
         buttonsEnabledFlow = buttonsEnabled,
-        amountFlow = paymentMethodMetadata.map { it?.amount() },
+        amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
         onClick = {
@@ -202,11 +199,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow()
 
     override val error: StateFlow<String?> = buyButtonState.mapAsStateFlow { it?.errorMessage?.message }
 
