@@ -7,6 +7,7 @@ import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,7 +29,7 @@ class DropdownFieldController(
     override val label: StateFlow<Int> = MutableStateFlow(config.label)
     override val fieldValue = selectedIndex.mapAsStateFlow { displayItems[it] }
     override val rawFieldValue = selectedIndex.mapAsStateFlow { config.rawItems[it] }
-    override val error: Flow<FieldError?> = MutableStateFlow(null)
+    override val error: Flow<FieldError?> = stateFlowOf(null)
     override val showOptionalLabel: Boolean = false // not supported yet
     override val isComplete: StateFlow<Boolean> = MutableStateFlow(true)
     override val formFieldValue: StateFlow<FormFieldEntry> =

@@ -24,7 +24,7 @@ class SaveForFutureUseController(
     override val fieldValue: StateFlow<String> = saveForFutureUse.mapAsStateFlow { it.toString() }
     override val rawFieldValue: StateFlow<String?> = fieldValue
 
-    override val error: Flow<FieldError?> = MutableStateFlow(null)
+    override val error: Flow<FieldError?> = stateFlowOf(null)
     override val showOptionalLabel: Boolean = false
     override val isComplete: StateFlow<Boolean> = stateFlowOf(true)
     override val formFieldValue: StateFlow<FormFieldEntry> =
