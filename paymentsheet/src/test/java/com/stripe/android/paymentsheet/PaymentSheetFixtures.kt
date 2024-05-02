@@ -41,6 +41,9 @@ internal object PaymentSheetFixtures {
         primaryButtonColor = ColorStateList.valueOf(Color.BLACK),
         defaultBillingDetails = PaymentSheet.BillingDetails(name = "Skyler"),
         allowsDelayedPaymentMethods = true,
+        allowsPaymentMethodsRequiringShippingAddress = true,
+        allowsRemovalOfLastSavedPaymentMethod = false,
+        paymentMethodOrder = listOf("klarna", "afterpay", "card"),
         appearance = PaymentSheet.Appearance(
             colorsLight = PaymentSheet.Colors.defaultLight.copy(primary = 0),
             colorsDark = PaymentSheet.Colors.defaultDark.copy(primary = 0),

@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.analytics.toAnalyticsMap
+import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.model.CardBrand
 import com.stripe.android.payments.core.analytics.ErrorReporter
@@ -7,7 +9,6 @@ import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.asPaymentSheetLoadingException
-import com.stripe.android.uicore.StripeThemeDefaults
 import com.stripe.android.utils.filterNotNullValues
 import kotlin.time.Duration
 import kotlin.time.DurationUnit
@@ -98,95 +99,28 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         override val additionalParams: Map<String, Any?>
             get() {
-                val primaryButtonConfig = configuration.appearance.primaryButton
-                val primaryButtonConfigMap = mapOf(
-                    FIELD_COLORS_LIGHT to (
-                        primaryButtonConfig.colorsLight
-                            != PaymentSheet.PrimaryButtonColors.defaultLight
-                        ),
-                    FIELD_COLORS_DARK to (
-                        primaryButtonConfig.colorsDark
-                            != PaymentSheet.PrimaryButtonColors.defaultDark
-                        ),
-                    FIELD_CORNER_RADIUS to (primaryButtonConfig.shape.cornerRadiusDp != null),
-                    FIELD_BORDER_WIDTH to (primaryButtonConfig.shape.borderStrokeWidthDp != null),
-                    FIELD_FONT to (primaryButtonConfig.typography.fontResId != null)
-                )
-                val appearanceConfigMap = mutableMapOf(
-                    FIELD_COLORS_LIGHT to (
-                        configuration.appearance.colorsLight
-                            != PaymentSheet.Colors.defaultLight
-                        ),
-                    FIELD_COLORS_DARK to (
-                        configuration.appearance.colorsDark
-                            != PaymentSheet.Colors.defaultDark
-                        ),
-                    FIELD_CORNER_RADIUS to (
-                        configuration.appearance.shapes.cornerRadiusDp
-                            != StripeThemeDefaults.shapes.cornerRadius
-                        ),
-                    FIELD_BORDER_WIDTH to (
-                        configuration.appearance.shapes.borderStrokeWidthDp
-                            != StripeThemeDefaults.shapes.borderStrokeWidth
-                        ),
-                    FIELD_FONT to (configuration.appearance.typography.fontResId != null),
-                    FIELD_SIZE_SCALE_FACTOR to (
-                        configuration.appearance.typography.sizeScaleFactor
-                            != StripeThemeDefaults.typography.fontSizeMultiplier
-                        ),
-                    FIELD_PRIMARY_BUTTON to primaryButtonConfigMap
-                )
-                // We add a usage field to make queries easier.
-                val usedPrimaryButtonApi = primaryButtonConfigMap.values.contains(true)
-                val usedAppearanceApi = appearanceConfigMap
-                    .values.filterIsInstance<Boolean>().contains(true)
-
-                appearanceConfigMap[FIELD_APPEARANCE_USAGE] =
-                    usedAppearanceApi || usedPrimaryButtonApi
-
-                val billingDetailsCollectionConfigMap = mapOf(
-                    FIELD_ATTACH_DEFAULTS to configuration
-                        .billingDetailsCollectionConfiguration
-                        .attachDefaultsToPaymentMethod,
-                    FIELD_COLLECT_NAME to configuration
-                        .billingDetailsCollectionConfiguration
-                        .name
-                        .name,
-                    FIELD_COLLECT_EMAIL to configuration
-                        .billingDetailsCollectionConfiguration
-                        .email
-                        .name,
-                    FIELD_COLLECT_PHONE to configuration
-                        .billingDetailsCollectionConfiguration
-                        .phone
-                        .name,
-                    FIELD_COLLECT_ADDRESS to configuration
-                        .billingDetailsCollectionConfiguration
-                        .address
-                        .name,
-                )
-
-                val preferredNetworks = configuration.preferredNetworks.takeIf { brands ->
-                    brands.isNotEmpty()
-                }?.joinToString { brand ->
-                    brand.code
-                }
-
+              // TODO: add analytics value like other params now have
                 val externalPaymentMethods = configuration.externalPaymentMethods.takeIf {
                     it?.isNotEmpty() ?: false
                 }?.take(MAX_EXTERNAL_PAYMENT_METHODS)
-
+                              
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
                     FIELD_GOOGLE_PAY to (configuration.googlePay != null),
                     FIELD_PRIMARY_BUTTON_COLOR to (configuration.primaryButtonColor != null),
                     FIELD_BILLING to (configuration.defaultBillingDetails?.isFilledOut() == true),
-                    FIELD_DELAYED_PMS to (configuration.allowsDelayedPaymentMethods),
-                    FIELD_APPEARANCE to appearanceConfigMap,
-                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to
-                        billingDetailsCollectionConfigMap,
-                    FIELD_PREFERRED_NETWORKS to preferredNetworks,
+                    FIELD_DELAYED_PMS to configuration.allowsDelayedPaymentMethods,
+                    FIELD_APPEARANCE to configuration.appearance.toAnalyticsMap(),
+                    FIELD_PAYMENT_METHOD_ORDER to configuration.paymentMethodOrder,
+                    FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS to
+                        configuration.allowsPaymentMethodsRequiringShippingAddress,
+                    FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
+                        configuration.allowsRemovalOfLastSavedPaymentMethod,
+                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
+                        configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
+                        ),
+                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue()
                     FIELD_EXTERNAL_PAYMENT_METHODS to externalPaymentMethods,
                 )
                 return mapOf(
@@ -514,23 +448,15 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_DELAYED_PMS = "allows_delayed_payment_methods"
         const val FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION = "mpe_config"
         const val FIELD_APPEARANCE = "appearance"
-        const val FIELD_APPEARANCE_USAGE = "usage"
-        const val FIELD_COLORS_LIGHT = "colorsLight"
-        const val FIELD_COLORS_DARK = "colorsDark"
-        const val FIELD_CORNER_RADIUS = "corner_radius"
-        const val FIELD_BORDER_WIDTH = "border_width"
-        const val FIELD_FONT = "font"
-        const val FIELD_SIZE_SCALE_FACTOR = "size_scale_factor"
-        const val FIELD_PRIMARY_BUTTON = "primary_button"
+        const val FIELD_ALLOWS_PAYMENT_METHODS_REQUIRING_SHIPPING_ADDRESS =
+            "allows_payment_methods_requiring_shipping_address"
+        const val FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD =
+            "allows_removal_of_last_saved_payment_method"
         const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION =
             "billing_details_collection_configuration"
+        const val FIELD_PAYMENT_METHOD_ORDER = "payment_method_order"
         const val FIELD_IS_DECOUPLED = "is_decoupled"
         const val FIELD_DEFERRED_INTENT_CONFIRMATION_TYPE = "deferred_intent_confirmation_type"
-        const val FIELD_ATTACH_DEFAULTS = "attach_defaults"
-        const val FIELD_COLLECT_NAME = "name"
-        const val FIELD_COLLECT_EMAIL = "email"
-        const val FIELD_COLLECT_PHONE = "phone"
-        const val FIELD_COLLECT_ADDRESS = "address"
         const val FIELD_DURATION = "duration"
         const val FIELD_LINK_ENABLED = "link_enabled"
         const val FIELD_CURRENCY = "currency"

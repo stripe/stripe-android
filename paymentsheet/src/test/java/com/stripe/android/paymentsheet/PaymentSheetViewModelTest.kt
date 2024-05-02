@@ -932,7 +932,6 @@ internal class PaymentSheetViewModelTest {
             assertThat(walletsProcessingStateTurbine.awaitItem()).isInstanceOf(
                 WalletsProcessingState.Completed::class.java
             )
-            assertThat(buyButtonStateTurbine.awaitItem()).isEqualTo(null)
 
             buyButtonStateTurbine.cancel()
             walletsProcessingStateTurbine.cancel()

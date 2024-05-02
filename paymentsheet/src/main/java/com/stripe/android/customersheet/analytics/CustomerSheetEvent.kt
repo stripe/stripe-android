@@ -1,11 +1,40 @@
 package com.stripe.android.customersheet.analytics
 
+import com.stripe.android.common.analytics.toAnalyticsMap
+import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.CardBrand
 
 internal sealed class CustomerSheetEvent : AnalyticsEvent {
 
     abstract val additionalParams: Map<String, Any?>
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    class Init(
+        private val configuration: CustomerSheet.Configuration,
+    ) : CustomerSheetEvent() {
+        override val eventName: String = CS_INIT
+        override val additionalParams: Map<String, Any?>
+            get() {
+                val configurationMap = mapOf(
+                    FIELD_GOOGLE_PAY_ENABLED to configuration.googlePayEnabled,
+                    FIELD_BILLING to configuration.defaultBillingDetails.isFilledOut(),
+                    FIELD_APPEARANCE to configuration.appearance.toAnalyticsMap(),
+                    FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD to
+                        configuration.allowsRemovalOfLastSavedPaymentMethod,
+                    FIELD_PAYMENT_METHOD_ORDER to configuration.paymentMethodOrder,
+                    FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
+                        configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
+                        ),
+                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue()
+                )
+                return mapOf(
+                    FIELD_CUSTOMER_SHEET_CONFIGURATION to configurationMap,
+                )
+            }
+    }
 
     class ScreenPresented(
         screen: CustomerSheetEventReporter.Screen,
@@ -162,6 +191,8 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
     }
 
     internal companion object {
+        const val CS_INIT = "cs_init"
+
         const val CS_ADD_PAYMENT_METHOD_SCREEN_PRESENTED =
             "cs_add_payment_method_screen_presented"
         const val CS_SELECT_PAYMENT_METHOD_SCREEN_PRESENTED =
@@ -206,6 +237,14 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val CS_UPDATE_PAYMENT_METHOD = "cs_update_card"
         const val CS_UPDATE_PAYMENT_METHOD_FAILED = "cs_update_card_failed"
 
+        const val FIELD_GOOGLE_PAY_ENABLED = "google_pay_enabled"
+        const val FIELD_BILLING = "default_billing_details"
+        const val FIELD_PREFERRED_NETWORKS = "preferred_networks"
+        const val FIELD_CUSTOMER_SHEET_CONFIGURATION = "cs_config"
+        const val FIELD_APPEARANCE = "appearance"
+        const val FIELD_PAYMENT_METHOD_ORDER = "payment_method_order"
+        const val FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION = "billing_details_collection_configuration"
+        const val FIELD_ALLOWS_REMOVAL_OF_LAST_SAVED_PAYMENT_METHOD = "allows_removal_of_last_saved_payment_method"
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_ERROR_MESSAGE = "error_message"

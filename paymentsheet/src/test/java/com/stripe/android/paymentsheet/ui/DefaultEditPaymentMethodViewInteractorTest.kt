@@ -8,7 +8,6 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestCoroutineScheduler
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -299,7 +298,6 @@ class DefaultEditPaymentMethodViewInteractorTest {
             eventHandler = eventHandler,
             removeExecutor = onRemove,
             updateExecutor = onUpdate,
-            viewStateSharingStarted = SharingStarted.Eagerly,
             workContext = workContext,
             canRemove = canRemove,
         )

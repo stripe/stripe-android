@@ -43,15 +43,14 @@ import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.TextFieldController
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -91,9 +90,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         initialValue = defaultName,
     )
 
-    val name: StateFlow<String> = nameController.formFieldValue.map { formFieldEntry ->
+    val name: StateFlow<String> = nameController.formFieldValue.mapAsStateFlow { formFieldEntry ->
         formFieldEntry.takeIf { it.isComplete }?.value ?: ""
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultName ?: "")
+    }
 
     private val defaultEmail: String? = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.email
@@ -107,9 +106,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         initialValue = args.savedPaymentMethod?.input?.email ?: defaultEmail,
     )
 
-    val email: StateFlow<String?> = emailController.formFieldValue.map { formFieldEntry ->
+    val email: StateFlow<String?> = emailController.formFieldValue.mapAsStateFlow { formFieldEntry ->
         formFieldEntry.takeIf { it.isComplete }?.value
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultEmail)
+    }
 
     private val defaultPhoneCountry = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.address?.country
@@ -132,9 +131,9 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         initialValue = defaultPhone ?: "",
     )
 
-    val phone: StateFlow<String?> = phoneController.formFieldValue.map { formFieldEntry ->
+    val phone: StateFlow<String?> = phoneController.formFieldValue.mapAsStateFlow { formFieldEntry ->
         formFieldEntry.takeIf { it.isComplete }?.value
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, defaultPhone)
+    }
 
     private val defaultAddress: Address? = if (args.savedPaymentMethod != null) {
         args.savedPaymentMethod.input.address
@@ -167,14 +166,10 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     val address: StateFlow<Address?> = if (defaultAddress == null) {
         MutableStateFlow(null)
     } else {
-        addressElement.getFormFieldValueFlow().map { formFieldValues ->
+        addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
             val rawMap = formFieldValues.associate { it.first to it.second.value }
             Address.fromFormFieldValues(rawMap)
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Eagerly,
-            initialValue = defaultAddress,
-        )
+        }
     }
 
     val lastTextFieldIdentifier: Flow<IdentifierSpec?> = if (collectingAddress) {
@@ -203,31 +198,22 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
     )
 
     val saveForFutureUse: StateFlow<Boolean> = saveForFutureUseElement.controller.saveForFutureUse
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.Lazily,
-            initialValue = defaultSaveForFutureUse,
-        )
 
     private val _currentScreenState = MutableStateFlow(value = determineInitialState())
     val currentScreenState: StateFlow<USBankAccountFormScreenState> = _currentScreenState
 
-    val requiredFields = combine(
-        nameController.formFieldValue.map { it.isComplete },
-        emailController.formFieldValue.map { it.isComplete },
-        phoneController.formFieldValue.map { it.isComplete },
-        addressElement.getFormFieldValueFlow().map { formFieldValues ->
+    val requiredFields = combineAsStateFlow(
+        nameController.formFieldValue.mapAsStateFlow { it.isComplete },
+        emailController.formFieldValue.mapAsStateFlow { it.isComplete },
+        phoneController.formFieldValue.mapAsStateFlow { it.isComplete },
+        addressElement.getFormFieldValueFlow().mapAsStateFlow { formFieldValues ->
             formFieldValues.all { it.second.isComplete }
         }
     ) { validName, validEmail, validPhone, validAddress ->
         validName && validEmail &&
             (validPhone || collectionConfiguration.phone != CollectionMode.Always) &&
             (validAddress || collectionConfiguration.address != AddressCollectionMode.Full)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = false
-    )
+    }
 
     @VisibleForTesting
     var collectBankAccountLauncher: CollectBankAccountLauncher? = null
