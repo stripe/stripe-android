@@ -35,6 +35,12 @@ internal class DefaultCustomerSheetEventReporter @Inject constructor(
         }
     }
 
+    override fun onPaymentMethodSelected(code: String) {
+        fireEvent(
+            CustomerSheetEvent.SelectPaymentMethod(code)
+        )
+    }
+
     override fun onConfirmPaymentMethodSucceeded(type: String) {
         fireEvent(
             CustomerSheetEvent.ConfirmPaymentMethodSucceeded(

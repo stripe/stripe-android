@@ -15,6 +15,11 @@ internal interface CustomerSheetEventReporter {
     fun onScreenHidden(screen: Screen)
 
     /**
+     * User has selected one of the available payment methods in the payment method form.
+     */
+    fun onPaymentMethodSelected(code: String)
+
+    /**
      * User attempted to confirm their saved payment method selection and succeeded
      */
     fun onConfirmPaymentMethodSucceeded(type: String)
