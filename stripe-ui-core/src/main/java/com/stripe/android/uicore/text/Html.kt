@@ -3,6 +3,7 @@ package com.stripe.android.uicore.text
 import android.content.Intent
 import android.graphics.Typeface
 import android.net.Uri
+import android.text.style.BulletSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.ImageSpan
 import android.text.style.StyleSpan
@@ -203,11 +204,13 @@ private fun rememberRemoteImages(
 
 /**
  * This will display html annotated text in a string.  Images cannot be embedded in
- * <a> link tags.  The following tags are supported: <a>, <b>, <u>, <i>, <img>
+ * <a> link tags.  The following tags are supported: <a>, <b>, <u>, <i>, <img>, <li>
  * Local/remote sources value in the img tab, must map to something in the imageLoader.
  *
  * When an img tag does not map to a EmbeddableImage, then this will use [StripeImageLoader] to
- * retrieve the images and only renders once the images are downlaoded
+ * retrieve the images and only renders once the images are downloaded.
+ *
+ * When the text is clicked, the FIRST parsed URL from <a> is opened through [Intent.ACTION_VIEW].
  *
  * @param html The HTML to render
  * @param imageLoader data source mapping img tags with images
@@ -215,6 +218,7 @@ private fun rememberRemoteImages(
  * @param enabled Whether URLs should be clickable or not, defaults to true
  * @param urlSpanStyle The style given to URLs, defaults to [TextDecoration.Underline]
  * @param imageAlign The vertical alignment for the image in relation to the text, defaults to [PlaceholderVerticalAlign.AboveBaseline]
+ * @param onClick Additional callback when the URL is opened.
  */
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -228,6 +232,56 @@ fun Html(
     urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
     imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
     onClick: () -> Unit = {}
+) {
+    val context = LocalContext.current
+    HtmlWithCustomOnClick(
+        html,
+        modifier,
+        imageLoader,
+        color,
+        style,
+        urlSpanStyle,
+        imageAlign
+    ) { annotatedStringRanges ->
+        if (enabled) {
+            onClick()
+            annotatedStringRanges.firstOrNull()?.let { annotation ->
+                val openURL = Intent(Intent.ACTION_VIEW)
+                openURL.data = Uri.parse(annotation.item)
+                context.startActivity(openURL)
+            }
+        }
+    }
+}
+
+/**
+ * This will display html annotated text in a string.  Images cannot be embedded in
+ * <a> link tags.  The following tags are supported: <a>, <b>, <u>, <i>, <img>, <li>
+ * Local/remote sources value in the img tab, must map to something in the imageLoader.
+ *
+ * When an img tag does not map to a EmbeddableImage, then this will use [StripeImageLoader] to
+ * retrieve the images and only renders once the images are downloaded.
+ *
+ * When the text is clicked, a callback returns ALL URLs from <a> as annotatedStrings.
+ *
+ * @param html The HTML to render
+ * @param imageLoader data source mapping img tags with images
+ * @param color The color of the text defaults to [Color.Unspecified]
+ * @param urlSpanStyle The style given to URLs, defaults to [TextDecoration.Underline]
+ * @param imageAlign The vertical alignment for the image in relation to the text, defaults to [PlaceholderVerticalAlign.AboveBaseline]
+ * @param onClick Callback returning all annotatedStrings with URL when the text is clicked.
+ */
+@Composable
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun HtmlWithCustomOnClick(
+    html: String,
+    modifier: Modifier = Modifier,
+    imageLoader: Map<String, EmbeddableImage> = emptyMap(),
+    color: Color = Color.Unspecified,
+    style: TextStyle = LocalTextStyle.current,
+    urlSpanStyle: SpanStyle = SpanStyle(textDecoration = TextDecoration.Underline),
+    imageAlign: PlaceholderVerticalAlign = PlaceholderVerticalAlign.AboveBaseline,
+    onClick: (List<AnnotatedString.Range<String>>) -> Unit
 ) {
     val context = LocalContext.current
     val annotatedText = annotatedStringResource(html, imageLoader, urlSpanStyle)
@@ -275,17 +329,8 @@ fun Html(
             color = color,
             style = style,
             onClick = {
-                if (enabled) {
-                    onClick()
-                    // Position is the position of the tag in the string
-                    annotatedText
-                        .getStringAnnotations(LINK_TAG, it, it)
-                        .firstOrNull()?.let { annotation ->
-                            val openURL = Intent(Intent.ACTION_VIEW)
-                            openURL.data = Uri.parse(annotation.item)
-                            context.startActivity(openURL)
-                        }
-                }
+                // Position is the position of the tag in the string
+                onClick(annotatedText.getStringAnnotations(LINK_TAG, it, it))
             }
         )
     }
@@ -345,6 +390,10 @@ fun annotatedStringResource(
                                 start,
                                 end
                             )
+                        }
+                        is BulletSpan -> {
+                            // append a bullet and a tab character in front
+                            append("\u2022\t")
                         }
                         is ForegroundColorSpan -> {
                             addStyle(SpanStyle(color = Color(span.foregroundColor)), start, end)

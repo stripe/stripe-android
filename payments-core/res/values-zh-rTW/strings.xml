@@ -75,13 +75,13 @@
   <!-- Placeholder for AU BECS BSB number -->
   <string name="stripe_au_becs_bsb_number">BSB 號碼</string>
   <!-- Legal text shown when using AUBECS. -->
-  <string name="stripe_au_becs_mandate">提供您的銀行帳戶詳情並確認這筆付款即表示您同意該「直接借記請求」以及&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;「直接借記請求」服務協議&lt;/a&gt;，並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343，直接借記用戶 ID 507156 (「Stripe」)透過「批量電子清算系統」(BECS) 代 %s（「商家」）向您收取「商家」單獨與您議定的金額。您確認您是上述所列帳戶的帳戶持有人或授權簽字者。</string>
+  <string name="stripe_au_becs_mandate">提供您的銀行帳戶詳情並確認這筆付款即表示您同意該「直接借記請求」以及&lt;a href=\"https://stripe.com/au-becs-dd-service-agreement/legal\"&gt;「直接借記請求」服務協議&lt;/a&gt;，並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343，直接借記使用者 ID 507156 (「Stripe」)透過「批量電子清算系統」(BECS) 代 %s（「商家」）向您收取「商家」單獨與您議定的金額。您確認您是上述所列帳戶的開戶人或授權簽字者。</string>
   <!-- BECS Debit Widget - mandate acceptance -->
-  <string name="stripe_becs_mandate_acceptance">\n    透過提供您的銀行帳戶資訊並確認該筆付款，\n    表示您同意本「直接簽帳請求」及其服務條款，\n    並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343\n    Direct Debit User ID number 507156 (「Stripe」) 透過過批量電子清算系統 (BECS)\n    代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。\n    您確認您是帳戶持有人或上述帳戶的授權簽署人。\n    \n    </string>
+  <string name="stripe_becs_mandate_acceptance">\n    透過提供您的銀行帳戶資訊並確認該筆付款，\n    表示您同意本「直接借記請求」及其服務條款，\n    並授權 Stripe Payments Australia Pty Ltd ACN 160 180 343\n    直接借記使用者 ID 號 507156 (「Stripe」) 透過過批量電子清算系統 (BECS)\n    代 %1$s（「商家」）向您的帳戶扣取商家單獨告知您的金額。\n    您確認您是開戶人或上述帳戶的授權簽署人。\n    \n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">帳號</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">您的帳號不完整。</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">您輸入的帳號不完整。</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">您需要填寫帳號。</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">您需要填寫姓名。</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">取消</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">未選擇</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">選擇金融卡品牌（可選）</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">您的卡已被拒絕</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
@@ -109,7 +113,7 @@
   <!-- Text for close button -->
   <string name="stripe_close">關閉</string>
   <!-- Accessibility action for deleting a payment method -->
-  <string name="stripe_delete_payment_method">刪除付款方式</string>
+  <string name="stripe_delete_payment_method">刪除支付方式</string>
   <string name="stripe_delete_payment_method_prompt_title">刪除支付方式</string>
   <!-- Done button title -->
   <string name="stripe_done">完成</string>
@@ -125,7 +129,7 @@
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我們未能驗證您的支付方式。請選擇另一支付方式並重試。</string>
   <!-- Error when 3DS2 authentication timed out. -->
-  <string name="stripe_failure_reason_timed_out">驗證您的付款方式時逾時 -- 請重試</string>
+  <string name="stripe_failure_reason_timed_out">驗證您的支付方式時逾時——請重試</string>
   <!-- Label that will show that an FPX bank is offline. For example, &quot;AmBank - Offline&quot; -->
   <string name="stripe_fpx_bank_offline">%s - 線下</string>
   <!-- Error message when a payment method gets declined. -->
@@ -161,9 +165,11 @@
   <!-- Label for Bank Account selection or detail entry form -->
   <string name="stripe_title_bank_account">銀行帳戶</string>
   <!-- Title for Payment Method screen -->
-  <string name="stripe_title_payment_method">付款方式</string>
+  <string name="stripe_title_payment_method">支付方式</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">選擇送貨方式</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">更新卡</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">驗證您的付款</string>
 </resources>

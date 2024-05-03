@@ -16,10 +16,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.Settings
 
 class AddressElementExampleActivity : AppCompatActivity() {
 
@@ -50,11 +53,12 @@ class AddressElementExampleActivity : AppCompatActivity() {
                             Address(address)
                         }
 
+                        val context = LocalContext.current
                         Button(
                             onClick = {
                                 val config = AddressLauncher.Configuration.Builder()
                                     // Provide your Google Places API key to enable autocomplete
-                                    .googlePlacesApiKey(null)
+                                    .googlePlacesApiKey(Settings(context).googlePlacesApiKey)
                                     .build()
 
                                 addressLauncher.present(
@@ -62,6 +66,7 @@ class AddressElementExampleActivity : AppCompatActivity() {
                                     configuration = config,
                                 )
                             },
+                            modifier = Modifier.testTag(SELECT_ADDRESS_BUTTON)
                         ) {
                             Text("Select address")
                         }
@@ -110,3 +115,5 @@ private fun Address(addressDetails: AddressDetails) {
 
     Text(text)
 }
+
+internal const val SELECT_ADDRESS_BUTTON = "SELECT_ADDRESS_BUTTON"

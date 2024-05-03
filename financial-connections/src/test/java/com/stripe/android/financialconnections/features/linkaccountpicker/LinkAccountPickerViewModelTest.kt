@@ -1,19 +1,19 @@
 package com.stripe.android.financialconnections.features.linkaccountpicker
 
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.institution
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
-import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.FetchNetworkedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
-import com.stripe.android.financialconnections.domain.GetManifest
-import com.stripe.android.financialconnections.domain.SelectNetworkedAccount
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
+import com.stripe.android.financialconnections.domain.SelectNetworkedAccounts
 import com.stripe.android.financialconnections.domain.UpdateCachedAccounts
-import com.stripe.android.financialconnections.domain.UpdateLocalManifest
 import com.stripe.android.financialconnections.model.AddNewAccount
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -24,8 +24,8 @@ import com.stripe.android.financialconnections.model.NetworkedAccountsList
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
+import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
+import com.stripe.android.financialconnections.navigation.destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -42,35 +42,38 @@ import org.mockito.kotlin.whenever
 class LinkAccountPickerViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule()
 
-    private val getManifest = mock<GetManifest>()
+    private val getSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
     private val fetchNetworkedAccounts = mock<FetchNetworkedAccounts>()
-    private val updateLocalManifest = mock<UpdateLocalManifest>()
     private val updateCachedAccounts = mock<UpdateCachedAccounts>()
-    private val selectNetworkedAccount = mock<SelectNetworkedAccount>()
+    private val selectNetworkedAccounts = mock<SelectNetworkedAccounts>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: LinkAccountPickerState
     ) = LinkAccountPickerViewModel(
         navigationManager = navigationManager,
-        getManifest = getManifest,
+        getSync = getSync,
         logger = Logger.noop(),
         eventTracker = eventTracker,
         getCachedConsumerSession = getCachedConsumerSession,
         fetchNetworkedAccounts = fetchNetworkedAccounts,
-        selectNetworkedAccount = selectNetworkedAccount,
-        updateLocalManifest = updateLocalManifest,
+        selectNetworkedAccounts = selectNetworkedAccounts,
         updateCachedAccounts = updateCachedAccounts,
-        initialState = state
+        initialState = state,
+        handleClickableUrl = mock(),
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        presentNoticeSheet = mock(),
+        presentUpdateRequiredSheet = mock(),
     )
 
     @Test
     fun `init - Fetches existing accounts and zips them by id`() = runTest {
-        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getSync()).thenReturn(syncResponse())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(
             NetworkedAccountsList(
@@ -91,7 +94,7 @@ class LinkAccountPickerViewModelTest {
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
-        assertThat(viewModel.awaitState().payload()!!.accounts)
+        assertThat(viewModel.stateFlow.value.payload()!!.accounts)
             .isEqualTo(
                 listOf(
                     partnerAccount().copy(id = "id1", _allowSelection = null) to
@@ -109,15 +112,15 @@ class LinkAccountPickerViewModelTest {
         val response = twoAccounts().copy(
             nextPaneOnAddAccount = Pane.INSTITUTION_PICKER
         )
-        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getSync()).thenReturn(syncResponse())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(response)
 
         val viewModel = buildViewModel(LinkAccountPickerState())
         viewModel.onNewBankAccountClick()
 
-        val navigation = response.nextPaneOnAddAccount!!.toNavigationCommand()
-        navigationManager.assertNavigatedTo(navigation)
+        val destination = response.nextPaneOnAddAccount!!.destination
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
@@ -139,27 +142,27 @@ class LinkAccountPickerViewModelTest {
             )
         )
         val selectedAccount = accounts.data.first()
-        whenever(getManifest()).thenReturn(sessionManifest())
+        whenever(getSync()).thenReturn(syncResponse())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession())
         whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
         whenever(
-            selectNetworkedAccount(
+            selectNetworkedAccounts(
                 consumerSessionClientSecret = any(),
-                selectedAccountId = any()
+                selectedAccountIds = any(),
             )
         ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
         val viewModel = buildViewModel(LinkAccountPickerState())
 
         viewModel.onAccountClick(selectedAccount)
-        viewModel.onSelectAccountClick()
+        viewModel.onSelectAccountsClick()
 
         with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
             verify(updateCachedAccounts).invoke(capture())
             assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
         }
-        val destination = accounts.data.first().nextPaneOnSelection!!.toNavigationCommand()
-        navigationManager.assertNavigatedTo(destination)
+        val destination = accounts.data.first().nextPaneOnSelection!!.destination
+        navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
 
     @Test
@@ -182,28 +185,27 @@ class LinkAccountPickerViewModelTest {
                 )
             )
             val selectedAccount = accounts.data.first()
-            whenever(getManifest()).thenReturn(sessionManifest())
+            whenever(getSync()).thenReturn(syncResponse())
             whenever(getCachedConsumerSession()).thenReturn(consumerSession())
             whenever(fetchNetworkedAccounts(any())).thenReturn(accounts)
             whenever(
-                selectNetworkedAccount(
+                selectNetworkedAccounts(
                     consumerSessionClientSecret = any(),
-                    selectedAccountId = any()
+                    selectedAccountIds = any(),
                 )
             ).thenReturn(InstitutionResponse(showManualEntry = false, listOf(institution())))
 
             val viewModel = buildViewModel(LinkAccountPickerState())
 
             viewModel.onAccountClick(selectedAccount)
-            viewModel.onSelectAccountClick()
+            viewModel.onSelectAccountsClick()
 
             with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
                 verify(updateCachedAccounts).invoke(capture())
                 assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
             }
-            verifyNoInteractions(updateLocalManifest)
-            verifyNoInteractions(selectNetworkedAccount)
-            navigationManager.assertNavigatedTo(NavigationDirections.linkStepUpVerification)
+            verifyNoInteractions(selectNetworkedAccounts)
+            navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }
 
     private fun twoAccounts() = NetworkedAccountsList(

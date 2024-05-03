@@ -36,7 +36,7 @@ class GooglePayPaymentMethodLauncherTest {
     @Test
     fun `init should fire expected event`() {
         runGooglePayPaymentMethodLauncherTest(
-            integrationTypes = arrayOf(LauncherIntegrationType.Activity),
+            integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
             val firedEvents = mutableListOf<String>()
@@ -49,9 +49,6 @@ class GooglePayPaymentMethodLauncherTest {
                 skipReadyCheck = true,
                 context = activity,
                 googlePayRepositoryFactory = mock(),
-                productUsage = emptySet(),
-                publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
-                stripeAccountIdProvider = { null },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

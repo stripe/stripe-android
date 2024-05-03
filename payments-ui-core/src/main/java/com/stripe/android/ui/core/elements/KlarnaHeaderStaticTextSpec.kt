@@ -1,7 +1,10 @@
 package com.stripe.android.ui.core.elements
 
+import androidx.annotation.RestrictTo
+import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -9,7 +12,9 @@ import kotlinx.serialization.Serializable
  * This is for the Klarna header
  */
 @Serializable
-internal data class KlarnaHeaderStaticTextSpec(
+@Parcelize
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+data class KlarnaHeaderStaticTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("klarna_header_text")
 ) : FormItemSpec() {
@@ -18,6 +23,6 @@ internal data class KlarnaHeaderStaticTextSpec(
         // since it doesn't provide a form field we leave it out for now
         StaticTextElement(
             this.apiPath,
-            stringResId = KlarnaHelper.getKlarnaHeader()
+            stringResId = R.string.stripe_klarna_buy_now_pay_later
         )
 }

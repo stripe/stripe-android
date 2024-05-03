@@ -8,7 +8,7 @@ import com.stripe.android.model.StripeIntent
 import kotlinx.parcelize.Parcelize
 
 /**
- * The result of an attempt to collect a bank account
+ * The result of an attempt to collect a bank account for ACH payments
  */
 sealed class CollectBankAccountResult : Parcelable {
 
@@ -23,7 +23,7 @@ sealed class CollectBankAccountResult : Parcelable {
     ) : CollectBankAccountResult()
 
     @Parcelize
-    object Cancelled : CollectBankAccountResult()
+    data object Cancelled : CollectBankAccountResult()
 }
 
 @Parcelize
@@ -33,28 +33,36 @@ data class CollectBankAccountResponse(
 ) : StripeModel
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class CollectBankAccountResultInternal : Parcelable {
+fun CollectBankAccountResultInternal.toUSBankAccountResult(): CollectBankAccountResult {
+    return when (this) {
+        is CollectBankAccountResultInternal.Cancelled -> CollectBankAccountResult.Cancelled
 
-    @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Completed(
-        val response: CollectBankAccountResponseInternal
-    ) : CollectBankAccountResultInternal()
+        is CollectBankAccountResultInternal.Completed -> when {
+            response.usBankAccountData == null -> {
+                CollectBankAccountResult.Failed(
+                    IllegalArgumentException("ACH payload cannot be null")
+                )
+            }
 
-    @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class Failed(
-        val error: Throwable
-    ) : CollectBankAccountResultInternal()
+            // TODO allow nullable intents on the exposed results (can be null on deferred payment flows).
+            response.intent == null -> {
+                CollectBankAccountResult.Failed(
+                    IllegalArgumentException("StripeIntent cannot be null")
+                )
+            }
 
-    @Parcelize
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    object Cancelled : CollectBankAccountResultInternal()
+            else -> {
+                CollectBankAccountResult.Completed(
+                    response = CollectBankAccountResponse(
+                        intent = response.intent,
+                        financialConnectionsSession = response.usBankAccountData.financialConnectionsSession
+                    )
+                )
+            }
+        }
+
+        is CollectBankAccountResultInternal.Failed -> {
+            CollectBankAccountResult.Failed(error)
+        }
+    }
 }
-
-@Parcelize
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-data class CollectBankAccountResponseInternal(
-    val intent: StripeIntent?,
-    val financialConnectionsSession: FinancialConnectionsSession
-) : StripeModel

@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.stripe.android.identity.TestApplication
@@ -12,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.verifyNoInteractions
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
@@ -61,7 +63,7 @@ class ErrorScreenTest {
             onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
             onNodeWithTag(ErrorMessage1Tag).assertDoesNotExist()
             onNodeWithTag(ErrorMessage2Tag).assertDoesNotExist()
-            onNodeWithTag(ErrorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorTopButtonTag).onChildAt(0).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
             onNodeWithTag(ErrorBottomButtonTag).assertDoesNotExist()
 
             onNodeWithTag(ErrorTopButtonTag).performClick()
@@ -81,7 +83,7 @@ class ErrorScreenTest {
             onNodeWithTag(ErrorMessage1Tag).assertDoesNotExist()
             onNodeWithTag(ErrorMessage2Tag).assertDoesNotExist()
             onNodeWithTag(ErrorTopButtonTag).assertDoesNotExist()
-            onNodeWithTag(ErrorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorBottomButtonTag).onChildAt(0).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
 
             onNodeWithTag(ErrorBottomButtonTag).performClick()
             verify(mockBottomButtonClicked).invoke()
@@ -105,14 +107,15 @@ class ErrorScreenTest {
             onNodeWithTag(ErrorTitleTag).assertTextEquals(ERROR_TITLE)
             onNodeWithTag(ErrorMessage1Tag).assertTextEquals(ERROR_MESSAGE1)
             onNodeWithTag(ErrorMessage2Tag).assertTextEquals(ERROR_MESSAGE2)
-            onNodeWithTag(ErrorTopButtonTag).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
-            onNodeWithTag(ErrorBottomButtonTag).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorTopButtonTag).onChildAt(0).assertTextEquals(ERROR_TOP_BUTTON_TEXT.uppercase())
+            onNodeWithTag(ErrorBottomButtonTag).onChildAt(0).assertTextEquals(ERROR_BOTTOM_BUTTON_TEXT.uppercase())
 
             onNodeWithTag(ErrorTopButtonTag).performClick()
             verify(mockTopButtonClicked).invoke()
 
+            // Disabled
             onNodeWithTag(ErrorBottomButtonTag).performClick()
-            verify(mockBottomButtonClicked).invoke()
+            verifyNoInteractions(mockBottomButtonClicked)
         }
     }
 

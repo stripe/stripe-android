@@ -38,7 +38,7 @@ data class AddressDetails(
 internal fun AddressDetails.toIdentifierMap(
     billingDetails: PaymentSheet.BillingDetails? = null
 ): Map<IdentifierSpec, String?> {
-    return if (billingDetails == null) {
+    return if (billingDetails == null || !billingDetails.isFilledOut()) {
         mapOf(
             IdentifierSpec.Name to name,
             IdentifierSpec.Line1 to address?.line1,

@@ -1,6 +1,5 @@
 package com.stripe.android.payments.paymentlauncher
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -9,8 +8,12 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.utils.AnimationConstants
+import androidx.lifecycle.lifecycleScope
+import com.stripe.android.core.exception.StripeException
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.launch
 
 /**
  * Host activity to perform actions for [PaymentLauncher].
@@ -30,18 +33,20 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
     @VisibleForTesting
     internal val viewModel: PaymentLauncherViewModel by viewModels { viewModelFactory }
 
-    @SuppressLint("SourceLockedOrientationActivity")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        setFadeAnimations()
 
         val args = runCatching {
             requireNotNull(starterArgs) {
                 EMPTY_ARG_ERROR
             }
         }.getOrElse {
-            finishWithResult(PaymentResult.Failed(it))
+            finishWithResult(InternalPaymentResult.Failed(it))
+            ErrorReporter.createFallbackInstance(applicationContext)
+                .report(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.PAYMENT_LAUNCHER_CONFIRMATION_NULL_ARGS,
+                    stripeException = StripeException.create(it),
+                )
             return
         }
 
@@ -49,7 +54,12 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
             // Prevent back presses while confirming payment
         }
 
-        viewModel.paymentLauncherResult.observe(this, ::finishWithResult)
+        lifecycleScope.launch {
+            viewModel.internalPaymentResult.collect {
+                it?.let(::finishWithResult)
+            }
+        }
+
         viewModel.register(
             activityResultCaller = this,
             lifecycleOwner = this,
@@ -75,18 +85,14 @@ internal class PaymentLauncherConfirmationActivity : AppCompatActivity() {
 
     override fun finish() {
         super.finish()
-        setFadeAnimations()
-    }
-
-    private fun setFadeAnimations() {
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
+        fadeOut()
     }
 
     /**
      * After confirmation and next action is handled, finish the activity with
      * corresponding [PaymentResult]
      */
-    private fun finishWithResult(result: PaymentResult) {
+    private fun finishWithResult(result: InternalPaymentResult) {
         setResult(
             Activity.RESULT_OK,
             Intent()

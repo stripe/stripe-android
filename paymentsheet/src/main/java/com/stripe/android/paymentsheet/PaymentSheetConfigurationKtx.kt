@@ -4,35 +4,58 @@ import androidx.compose.material.darkColors
 import androidx.compose.material.lightColors
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.uicore.PrimaryButtonColors
 import com.stripe.android.uicore.PrimaryButtonShape
 import com.stripe.android.uicore.PrimaryButtonTypography
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.StripeThemeDefaults
-import java.security.InvalidParameterException
+import java.lang.IllegalArgumentException
 
 internal fun PaymentSheet.Configuration.validate() {
     // These are not localized as they are not intended to be displayed to a user.
     when {
         merchantDisplayName.isBlank() -> {
-            throw InvalidParameterException(
+            throw IllegalArgumentException(
                 "When a Configuration is passed to PaymentSheet," +
                     " the Merchant display name cannot be an empty string."
             )
         }
         customer?.id?.isBlank() == true -> {
-            throw InvalidParameterException(
+            throw IllegalArgumentException(
                 "When a CustomerConfiguration is passed to PaymentSheet," +
                     " the Customer ID cannot be an empty string."
             )
         }
-        customer?.ephemeralKeySecret?.isBlank() == true -> {
-            throw InvalidParameterException(
-                "When a CustomerConfiguration is passed to PaymentSheet, " +
-                    "the ephemeralKeySecret cannot be an empty string."
-            )
+    }
+
+    customer?.accessType?.let { customerAccessType ->
+        when (customerAccessType) {
+            is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> {
+                if (customerAccessType.ephemeralKeySecret.isBlank() || customer.ephemeralKeySecret.isBlank()) {
+                    throw IllegalArgumentException(
+                        "When a CustomerConfiguration is passed to PaymentSheet, " +
+                            "the ephemeralKeySecret cannot be an empty string."
+                    )
+                }
+            }
+            is PaymentSheet.CustomerAccessType.CustomerSession -> {
+                if (customerAccessType.customerSessionClientSecret.isBlank()) {
+                    throw IllegalArgumentException(
+                        "When a CustomerConfiguration is passed to PaymentSheet, " +
+                            "the customerSessionClientSecret cannot be an empty string."
+                    )
+                }
+            }
         }
     }
+}
+
+internal fun PaymentSheet.Configuration.containsVolatileDifferences(
+    other: PaymentSheet.Configuration
+): Boolean {
+    return toVolatileConfiguration() != other.toVolatileConfiguration()
 }
 
 internal fun PaymentSheet.Appearance.parseAppearance() {
@@ -82,12 +105,16 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
         colorsLight = PrimaryButtonColors(
             background = Color(primaryButton.colorsLight.background ?: colorsLight.primary),
             onBackground = Color(primaryButton.colorsLight.onBackground),
-            border = Color(primaryButton.colorsLight.border)
+            border = Color(primaryButton.colorsLight.border),
+            successBackground = Color(primaryButton.colorsLight.successBackgroundColor),
+            onSuccessBackground = Color(primaryButton.colorsLight.onSuccessBackgroundColor),
         ),
         colorsDark = PrimaryButtonColors(
             background = Color(primaryButton.colorsDark.background ?: colorsDark.primary),
             onBackground = Color(primaryButton.colorsDark.onBackground),
-            border = Color(primaryButton.colorsDark.border)
+            border = Color(primaryButton.colorsDark.border),
+            successBackground = Color(primaryButton.colorsDark.successBackgroundColor),
+            onSuccessBackground = Color(primaryButton.colorsDark.onSuccessBackgroundColor),
         ),
         shape = PrimaryButtonShape(
             cornerRadius = primaryButton.shape.cornerRadiusDp ?: shapes.cornerRadiusDp,
@@ -99,5 +126,59 @@ internal fun PaymentSheet.Appearance.parseAppearance() {
             fontSize = primaryButton.typography.fontSizeSp?.sp
                 ?: (StripeThemeDefaults.typography.largeFontSize * typography.sizeScaleFactor)
         )
+    )
+}
+
+/**
+ * Creates a subset of the [PaymentSheet.Configuration] of values that affect the functional behavior of
+ * [PaymentSheet]. The items not included mainly affect how [PaymentSheet] will look but not affect what
+ * payment options are available to the customer:
+ * - UI elements in [PaymentSheet.GooglePayConfiguration]:
+ *   - [PaymentSheet.GooglePayConfiguration.amount]
+ *   - [PaymentSheet.GooglePayConfiguration.label]
+ *   - [PaymentSheet.GooglePayConfiguration.buttonType]
+ * - [PaymentSheet.Configuration.merchantDisplayName]
+ * - [PaymentSheet.Configuration.primaryButtonColor]
+ * - [PaymentSheet.Configuration.appearance]
+ * - [PaymentSheet.Configuration.primaryButtonLabel]
+ */
+private fun PaymentSheet.Configuration.toVolatileConfiguration(): VolatilePaymentSheetConfiguration {
+    return VolatilePaymentSheetConfiguration(
+        customer = customer,
+        googlePay = googlePay?.toVolatileConfiguration(),
+        defaultBillingDetails = defaultBillingDetails,
+        shippingDetails = shippingDetails,
+        allowsDelayedPaymentMethods = allowsDelayedPaymentMethods,
+        allowsPaymentMethodsRequiringShippingAddress = allowsPaymentMethodsRequiringShippingAddress,
+        billingDetailsCollectionConfiguration = billingDetailsCollectionConfiguration,
+        preferredNetworks = preferredNetworks,
+        allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
+    )
+}
+
+private fun PaymentSheet.GooglePayConfiguration.toVolatileConfiguration():
+    VolatilePaymentSheetConfiguration.GooglePayConfiguration {
+    return VolatilePaymentSheetConfiguration.GooglePayConfiguration(
+        environment = environment,
+        countryCode = countryCode,
+        currencyCode = currencyCode,
+    )
+}
+
+private data class VolatilePaymentSheetConfiguration(
+    val customer: PaymentSheet.CustomerConfiguration?,
+    val googlePay: GooglePayConfiguration?,
+    val defaultBillingDetails: PaymentSheet.BillingDetails?,
+    val shippingDetails: AddressDetails?,
+    val allowsDelayedPaymentMethods: Boolean,
+    val allowsPaymentMethodsRequiringShippingAddress: Boolean,
+    val billingDetailsCollectionConfiguration: PaymentSheet.BillingDetailsCollectionConfiguration,
+    val preferredNetworks: List<CardBrand>,
+    val allowsRemovalOfLastSavedPaymentMethod: Boolean,
+) {
+    data class GooglePayConfiguration(
+        val environment: PaymentSheet.GooglePayConfiguration.Environment,
+        val countryCode: String,
+        val currencyCode: String? = null,
     )
 }

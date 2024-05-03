@@ -1,59 +1,65 @@
 package com.stripe.android.financialconnections.navigation
 
-import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import javax.inject.Inject
 
 internal interface NavigationManager {
-    val navigationState: MutableStateFlow<NavigationState>
-    fun navigate(state: NavigationState)
-    fun onNavigated(state: NavigationState)
+    val navigationFlow: SharedFlow<NavigationIntent>
+
+    fun tryNavigateTo(
+        route: String,
+        popUpTo: PopUpToBehavior? = null,
+        isSingleTop: Boolean = true,
+    )
+
+    fun tryNavigateBack()
 }
 
-internal class NavigationManagerImpl @Inject constructor(
-    private val logger: Logger
-) : NavigationManager {
+internal sealed interface PopUpToBehavior {
+    val inclusive: Boolean
 
-    override val navigationState: MutableStateFlow<NavigationState> =
-        MutableStateFlow(NavigationState.Idle)
+    data class Current(
+        override val inclusive: Boolean,
+    ) : PopUpToBehavior
 
-    override fun navigate(state: NavigationState) {
-        logger.debug("NavigationManager navigating to: $navigationState")
-        navigationState.value = state
-    }
-
-    override fun onNavigated(state: NavigationState) {
-        // clear navigation state, if state is the current state:
-        navigationState.compareAndSet(state, NavigationState.Idle)
-    }
+    data class Route(
+        override val inclusive: Boolean,
+        val route: String,
+    ) : PopUpToBehavior
 }
 
-@Suppress("ComplexMethod")
-internal fun Pane.toNavigationCommand(
-    args: Map<String, Any?> = emptyMap()
-): NavigationCommand = when (this) {
-    Pane.INSTITUTION_PICKER -> NavigationDirections.institutionPicker
-    Pane.PARTNER_AUTH -> NavigationDirections.partnerAuth
-    Pane.CONSENT -> NavigationDirections.consent
-    Pane.ACCOUNT_PICKER -> NavigationDirections.accountPicker
-    Pane.SUCCESS -> NavigationDirections.success
-    Pane.MANUAL_ENTRY -> NavigationDirections.manualEntry
-    Pane.MANUAL_ENTRY_SUCCESS ->
-        NavigationDirections.ManualEntrySuccess(args)
-    Pane.ATTACH_LINKED_PAYMENT_ACCOUNT -> NavigationDirections.attachLinkedPaymentAccount
-    Pane.RESET -> NavigationDirections.reset
-    Pane.NETWORKING_LINK_SIGNUP_PANE -> NavigationDirections.networkingLinkSignup
-    Pane.NETWORKING_LINK_LOGIN_WARMUP -> NavigationDirections.networkingLinkLoginWarmup
-    Pane.NETWORKING_LINK_VERIFICATION -> NavigationDirections.networkingLinkVerification
-    Pane.LINK_STEP_UP_VERIFICATION -> NavigationDirections.linkStepUpVerification
-    Pane.LINK_ACCOUNT_PICKER -> NavigationDirections.linkAccountPicker
-    Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION -> NavigationDirections.networkingSaveToLinkVerification
-    Pane.BANK_AUTH_REPAIR,
-    Pane.AUTH_OPTIONS,
-    Pane.LINK_CONSENT,
-    Pane.LINK_LOGIN,
-    Pane.UNEXPECTED_ERROR -> {
-        TODO("Unimplemented navigation command: ${this.value}")
+internal sealed class NavigationIntent {
+    data class NavigateTo(
+        val route: String,
+        val popUpTo: PopUpToBehavior?,
+        val isSingleTop: Boolean,
+    ) : NavigationIntent()
+
+    data object NavigateBack : NavigationIntent()
+}
+
+internal class NavigationManagerImpl @Inject constructor() : NavigationManager {
+    private val _navigationFlow = MutableSharedFlow<NavigationIntent>(extraBufferCapacity = 1)
+
+    override val navigationFlow = _navigationFlow.asSharedFlow()
+
+    override fun tryNavigateTo(
+        route: String,
+        popUpTo: PopUpToBehavior?,
+        isSingleTop: Boolean,
+    ) {
+        _navigationFlow.tryEmit(
+            NavigationIntent.NavigateTo(
+                route = route,
+                popUpTo = popUpTo,
+                isSingleTop = isSingleTop,
+            )
+        )
+    }
+
+    override fun tryNavigateBack() {
+        _navigationFlow.tryEmit(NavigationIntent.NavigateBack)
     }
 }

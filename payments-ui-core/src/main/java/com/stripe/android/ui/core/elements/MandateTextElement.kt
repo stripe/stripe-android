@@ -5,16 +5,17 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class MandateTextElement(
     override val identifier: IdentifierSpec,
     val stringResId: Int,
-    val merchantName: String?,
+    val args: List<String>,
     override val controller: InputController? = null
 ) : FormElement {
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
-        MutableStateFlow(emptyList())
+
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+        stateFlowOf(emptyList())
 }

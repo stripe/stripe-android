@@ -8,6 +8,7 @@ import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.UIContext
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.PaymentAnalyticsEvent
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -35,6 +36,7 @@ internal class WebIntentAuthenticator @Inject constructor(
     @Named(PUBLISHABLE_KEY) private val publishableKeyProvider: () -> String,
     @Named(IS_INSTANT_APP) private val isInstantApp: Boolean,
     private val defaultReturnUrl: DefaultReturnUrl,
+    private val redirectResolver: RedirectResolver,
 ) : PaymentAuthenticator<StripeIntent>() {
 
     override suspend fun performAuthentication(
@@ -46,6 +48,9 @@ internal class WebIntentAuthenticator @Inject constructor(
         val returnUrl: String?
         var shouldCancelSource = false
         var shouldCancelIntentOnUserNavigation = true
+
+        var referrer: String? = null
+        var forceInAppWebView = false
 
         when (val nextActionData = authenticatable.nextActionData) {
             // can only triggered when `use_stripe_sdk=true`
@@ -67,8 +72,22 @@ internal class WebIntentAuthenticator @Inject constructor(
                 analyticsRequestExecutor.executeAsync(
                     paymentAnalyticsRequestFactory.createRequest(PaymentAnalyticsEvent.AuthRedirect)
                 )
-                authUrl = nextActionData.url.toString()
+
                 returnUrl = nextActionData.returnUrl
+
+                if (authenticatable.paymentMethod?.code == PaymentMethod.Type.WeChatPay.code) {
+                    val originalUrl = nextActionData.url.toString()
+
+                    authUrl = redirectResolver(originalUrl)
+                    shouldCancelIntentOnUserNavigation = false
+                    referrer = originalUrl
+
+                    // This is crucial so that we can set the "Referer" field in the web view activity.
+                    // WeChat will otherwise fail with an error indicating an incorrect configuration.
+                    forceInAppWebView = true
+                } else {
+                    authUrl = nextActionData.url.toString()
+                }
             }
             is StripeIntent.NextActionData.AlipayRedirect -> {
                 analyticsRequestExecutor.executeAsync(
@@ -84,25 +103,47 @@ internal class WebIntentAuthenticator @Inject constructor(
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
             }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
+                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
+                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayBoletoDetails")
+                returnUrl = null
+                shouldCancelIntentOnUserNavigation = false
+            }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
+                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
+                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayKonbiniDetails")
+                returnUrl = null
+                shouldCancelIntentOnUserNavigation = false
+            }
             is StripeIntent.NextActionData.CashAppRedirect -> {
                 authUrl = nextActionData.mobileAuthUrl
                 returnUrl = defaultReturnUrl.value
                 shouldCancelIntentOnUserNavigation = false
             }
-            else ->
+            is StripeIntent.NextActionData.SwishRedirect -> {
+                authUrl = nextActionData.mobileAuthUrl
+                returnUrl = defaultReturnUrl.value
+                shouldCancelIntentOnUserNavigation = false
+            }
+            else -> {
                 throw IllegalArgumentException("WebAuthenticator can't process nextActionData: $nextActionData")
+            }
         }
 
         beginWebAuth(
-            host,
-            authenticatable,
-            StripePaymentController.getRequestCode(authenticatable),
-            authenticatable.clientSecret.orEmpty(),
-            authUrl,
-            requestOptions.stripeAccount,
+            host = host,
+            stripeIntent = authenticatable,
+            requestCode = StripePaymentController.getRequestCode(authenticatable),
+            clientSecret = authenticatable.clientSecret.orEmpty(),
+            authUrl = authUrl,
+            stripeAccount = requestOptions.stripeAccount,
             returnUrl = returnUrl,
             shouldCancelSource = shouldCancelSource,
-            shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation
+            shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
+            referrer = referrer,
+            forceInAppWebView = forceInAppWebView,
         )
     }
 
@@ -115,7 +156,9 @@ internal class WebIntentAuthenticator @Inject constructor(
         stripeAccount: String?,
         returnUrl: String? = null,
         shouldCancelSource: Boolean = false,
-        shouldCancelIntentOnUserNavigation: Boolean = true
+        shouldCancelIntentOnUserNavigation: Boolean = true,
+        referrer: String?,
+        forceInAppWebView: Boolean,
     ) = withContext(uiContext) {
         val paymentBrowserWebStarter = paymentBrowserAuthStarterFactory(host)
         paymentBrowserWebStarter.start(
@@ -131,7 +174,9 @@ internal class WebIntentAuthenticator @Inject constructor(
                 shouldCancelIntentOnUserNavigation = shouldCancelIntentOnUserNavigation,
                 statusBarColor = host.statusBarColor,
                 publishableKey = publishableKeyProvider(),
-                isInstantApp = isInstantApp
+                isInstantApp = isInstantApp,
+                referrer = referrer,
+                forceInAppWebView = forceInAppWebView,
             )
         )
     }

@@ -5,6 +5,8 @@ import androidx.annotation.StringRes
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
+import kotlinx.parcelize.IgnoredOnParcel
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -14,12 +16,14 @@ import kotlinx.serialization.Transient
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Serializable
-internal data class SepaMandateTextSpec(
+@Parcelize
+data class SepaMandateTextSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("sepa_mandate"),
     @StringRes
     val stringResId: Int = R.string.stripe_sepa_mandate
 ) : FormItemSpec() {
+    @IgnoredOnParcel
     @Transient
     private val mandateTextSpec = MandateTextSpec(apiPath, stringResId)
     fun transform(merchantName: String): FormElement = mandateTextSpec.transform(merchantName)

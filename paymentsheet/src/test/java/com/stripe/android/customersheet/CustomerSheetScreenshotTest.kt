@@ -4,47 +4,105 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
+import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.forms.FormFieldValues
-import com.stripe.android.paymentsheet.forms.FormViewModel
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.forms.FormFieldEntry
-import com.stripe.android.utils.screenshots.FontSize
-import com.stripe.android.utils.screenshots.PaparazziRule
+import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
+import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
-class CustomerSheetScreenshotTest {
+internal class CustomerSheetScreenshotTest {
     @get:Rule
     val paparazzi = PaparazziRule(
-        SystemAppearance.values(),
-        arrayOf(FontSize.DefaultFont),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
+        SystemAppearance.entries,
+        listOf(FontSize.DefaultFont),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
         boxModifier = Modifier
             .padding(0.dp)
             .fillMaxWidth(),
+    )
+
+    private val usBankAccountFormArguments = USBankAccountFormArguments(
+        showCheckbox = false,
+        instantDebits = false,
+        onBehalfOf = null,
+        isCompleteFlow = false,
+        isPaymentFlow = false,
+        stripeIntentId = null,
+        clientSecret = null,
+        shippingDetails = null,
+        draftPaymentSelection = null,
+        onMandateTextChanged = { _, _ -> },
+        onConfirmUSBankAccount = { },
+        onCollectBankAccountResult = { },
+        onUpdatePrimaryButtonState = { },
+        onUpdatePrimaryButtonUIState = { },
+        onError = { },
+    )
+
+    private val selectPaymentMethodViewState = CustomerSheetViewState.SelectPaymentMethod(
+        title = null,
+        savedPaymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD),
+        paymentSelection = null,
+        isLiveMode = false,
+        isProcessing = false,
+        isEditing = false,
+        isGooglePayEnabled = false,
+        primaryButtonVisible = false,
+        primaryButtonLabel = null,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+        allowsRemovalOfLastSavedPaymentMethod = true,
+    )
+
+    private val addPaymentMethodViewState = CustomerSheetViewState.AddPaymentMethod(
+        paymentMethodCode = PaymentMethod.Type.Card.code,
+        formFieldValues = FormFieldValues(
+            showsMandate = false,
+            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestReuse,
+        ),
+        formElements = emptyList(),
+        formArguments = FormArguments(
+            paymentMethodCode = PaymentMethod.Type.Card.code,
+            cbcEligibility = CardBrandChoiceEligibility.Ineligible,
+            merchantName = ""
+        ),
+        usBankAccountFormArguments = usBankAccountFormArguments,
+        supportedPaymentMethods = listOf(
+            LpmRepositoryTestHelpers.card,
+            LpmRepositoryTestHelpers.usBankAccount,
+        ),
+        selectedPaymentMethod = LpmRepositoryTestHelpers.card,
+        enabled = true,
+        isLiveMode = false,
+        isProcessing = false,
+        errorMessage = null,
+        isFirstPaymentMethod = false,
+        primaryButtonLabel = resolvableString("Save"),
+        primaryButtonEnabled = false,
+        customPrimaryButtonUiState = null,
+        bankAccountResult = null,
+        draftPaymentSelection = null,
+        cbcEligibility = CardBrandChoiceEligibility.Ineligible,
     )
 
     @Test
     fun testDefault() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
-                    title = null,
-                    savedPaymentMethods = emptyList(),
-                    paymentSelection = null,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
-                    isGooglePayEnabled = false,
-                    primaryButtonVisible = true,
-                    primaryButtonLabel = null,
-                ),
+                viewState = selectPaymentMethodViewState,
                 paymentMethodNameProvider = { it!! },
             )
         }
@@ -68,24 +126,19 @@ class CustomerSheetScreenshotTest {
             }
             var counter = 0
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
-                    isGooglePayEnabled = true,
-                    primaryButtonVisible = true,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
                     counter++
                     "424$counter"
-                }
+                },
             )
         }
     }
@@ -108,24 +161,21 @@ class CustomerSheetScreenshotTest {
             }
             var counter = 0
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
                     savedPaymentMethods = savedPaymentMethods,
                     paymentSelection = PaymentSelection.Saved(
                         savedPaymentMethods.first()
                     ),
-                    isLiveMode = false,
-                    isProcessing = false,
                     isEditing = true,
                     isGooglePayEnabled = true,
-                    primaryButtonVisible = false,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
                 paymentMethodNameProvider = {
                     counter++
                     "424$counter"
-                }
+                },
             )
         }
     }
@@ -134,105 +184,153 @@ class CustomerSheetScreenshotTest {
     fun testGooglePay() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.SelectPaymentMethod(
+                viewState = selectPaymentMethodViewState.copy(
                     title = "Screenshot testing",
-                    savedPaymentMethods = emptyList(),
                     paymentSelection = PaymentSelection.GooglePay,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isEditing = false,
                     isGooglePayEnabled = true,
-                    primaryButtonVisible = true,
                     primaryButtonLabel = "Continue",
                     errorMessage = "This is an error message.",
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
             )
         }
     }
 
     @Test
-    fun testAddPaymentMethodDisabled() {
+    fun testSelectUSBankAccount() {
         paparazzi.snapshot {
             CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    errorMessage = "This is an error message.",
-                    isFirstPaymentMethod = false
-                ),
-                paymentMethodNameProvider = { it!! }
-            )
-        }
-    }
-
-    @Test
-    fun testAddPaymentMethodEnabled() {
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(
-                        completeFormValues = FormFieldValues(
-                            fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
-                            ),
-                            showsMandate = true,
-                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                        )
+                viewState = selectPaymentMethodViewState.copy(
+                    title = "Screenshot testing",
+                    savedPaymentMethods = listOf(
+                        PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                        PaymentMethodFixtures.US_BANK_ACCOUNT,
                     ),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isFirstPaymentMethod = false
-                ),
-                paymentMethodNameProvider = { it!! }
-            )
-        }
-    }
-
-    @Test
-    fun testAddFirstPaymentMethodDisabled() {
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    errorMessage = "This is an error message.",
-                    isFirstPaymentMethod = true
-                ),
-                paymentMethodNameProvider = { it!! }
-            )
-        }
-    }
-
-    @Test
-    fun testAddFirstPaymentMethodEnabled() {
-        paparazzi.snapshot {
-            CustomerSheetScreen(
-                viewState = CustomerSheetViewState.AddPaymentMethod(
-                    paymentMethodCode = PaymentMethod.Type.Card.code,
-                    formViewData = FormViewModel.ViewData(
-                        completeFormValues = FormFieldValues(
-                            fieldValuePairs = mapOf(
-                                IdentifierSpec.Generic("test") to FormFieldEntry("test", true)
-                            ),
-                            showsMandate = true,
-                            userRequestedReuse = PaymentSelection.CustomerRequestedSave.RequestNoReuse
-                        )
+                    paymentSelection = PaymentSelection.Saved(
+                        PaymentMethodFixtures.US_BANK_ACCOUNT
                     ),
-                    enabled = true,
-                    isLiveMode = false,
-                    isProcessing = false,
-                    isFirstPaymentMethod = true
+                    isGooglePayEnabled = false,
+                    primaryButtonLabel = "Continue",
+                    primaryButtonVisible = true,
+                    mandateText = "Some mandate text."
                 ),
-                paymentMethodNameProvider = { it!! }
+                paymentMethodNameProvider = { it!! },
+            )
+        }
+    }
+
+    @Test
+    fun testMandateAbovePrimaryButton() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    isFirstPaymentMethod = true,
+                    primaryButtonEnabled = false,
+                    mandateText = "This is a mandate.",
+                    showMandateAbovePrimaryButton = true,
+                ),
+                paymentMethodNameProvider = { it!! },
+                displayAddForm = false,
+            )
+        }
+    }
+
+    @Test
+    fun testMandateBelowPrimaryButton() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.Card.code,
+                    isFirstPaymentMethod = true,
+                    primaryButtonEnabled = false,
+                    mandateText = "This is a mandate.",
+                    showMandateAbovePrimaryButton = false,
+                ),
+                paymentMethodNameProvider = { it!! },
+                displayAddForm = false,
+            )
+        }
+    }
+
+    @Test
+    fun testConfirmCloseDialog() {
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = addPaymentMethodViewState.copy(
+                    paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
+                    displayDismissConfirmationModal = true,
+                ),
+                paymentMethodNameProvider = { it!! },
+                displayAddForm = false,
+            )
+        }
+    }
+
+    @Test
+    fun testEditScreen() {
+        val paymentMethod = PaymentMethodFactory.card().copy(
+            card = PaymentMethod.Card(
+                last4 = "1001",
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf(CardBrand.CartesBancaires.code, CardBrand.Visa.code),
+                ),
+            )
+        )
+
+        val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
+            editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
+                initialPaymentMethod = paymentMethod,
+                displayName = "Card",
+                removeExecutor = { null },
+                updateExecutor = { pm, _ -> Result.success(pm) },
+                eventHandler = {},
+                canRemove = true,
+            ),
+            isLiveMode = true,
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
+            savedPaymentMethods = emptyList(),
+            allowsRemovalOfLastSavedPaymentMethod = true,
+        )
+
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = editPaymentMethod,
+                paymentMethodNameProvider = { it!! },
+            )
+        }
+    }
+
+    @Test
+    fun testEditScreenWithoutRemove() {
+        val paymentMethod = PaymentMethodFactory.card().copy(
+            card = PaymentMethod.Card(
+                last4 = "1001",
+                networks = PaymentMethod.Card.Networks(
+                    available = setOf(CardBrand.CartesBancaires.code, CardBrand.Visa.code),
+                ),
+            )
+        )
+
+        val editPaymentMethod = CustomerSheetViewState.EditPaymentMethod(
+            editPaymentMethodInteractor = DefaultEditPaymentMethodViewInteractor(
+                initialPaymentMethod = paymentMethod,
+                displayName = "Card",
+                removeExecutor = { null },
+                updateExecutor = { pm, _ -> Result.success(pm) },
+                eventHandler = {},
+                canRemove = false,
+            ),
+            isLiveMode = true,
+            cbcEligibility = CardBrandChoiceEligibility.Eligible(preferredNetworks = emptyList()),
+            savedPaymentMethods = emptyList(),
+            allowsRemovalOfLastSavedPaymentMethod = false,
+        )
+
+        paparazzi.snapshot {
+            CustomerSheetScreen(
+                viewState = editPaymentMethod,
+                paymentMethodNameProvider = { it!! },
             )
         }
     }

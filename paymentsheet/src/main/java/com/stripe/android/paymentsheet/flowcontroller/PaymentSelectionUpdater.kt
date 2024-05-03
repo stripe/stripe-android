@@ -1,10 +1,10 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.containsVolatileDifferences
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.paymentsheet.model.getPMsToAdd
 import com.stripe.android.paymentsheet.state.PaymentSheetState
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import javax.inject.Inject
 
 internal fun interface PaymentSelectionUpdater {
@@ -15,19 +15,17 @@ internal fun interface PaymentSelectionUpdater {
     ): PaymentSelection?
 }
 
-internal class DefaultPaymentSelectionUpdater @Inject constructor(
-    private val lpmRepository: LpmRepository,
-) : PaymentSelectionUpdater {
+internal class DefaultPaymentSelectionUpdater @Inject constructor() : PaymentSelectionUpdater {
 
     override operator fun invoke(
         currentSelection: PaymentSelection?,
         previousConfig: PaymentSheet.Configuration?,
         newState: PaymentSheetState.Full,
     ): PaymentSelection? {
-        val didConfigChange = previousConfig != newState.config
-
         return currentSelection?.takeIf { selection ->
-            canUseSelection(selection, newState) && !didConfigChange
+            canUseSelection(selection, newState) && previousConfig?.let { previousConfig ->
+                !previousConfig.containsVolatileDifferences(newState.config)
+            } ?: true
         } ?: newState.paymentSelection
     }
 
@@ -36,27 +34,21 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
         state: PaymentSheetState.Full,
     ): Boolean {
         // The types that are allowed for this intent, as returned by the backend
-        val allowedTypes = state.stripeIntent.paymentMethodTypes
-
-        // The types that we actually do support for this intent and configuration
-        val availableTypes = getPMsToAdd(
-            stripeIntent = state.stripeIntent,
-            config = state.config,
-            lpmRepository = lpmRepository,
-        ).map { it.code }
+        val allowedTypes = state.paymentMethodMetadata.supportedPaymentMethodTypes()
 
         return when (selection) {
             is PaymentSelection.New -> {
                 val requiresMandate = shouldAskForMandate(
                     currentSelection = selection,
+                    metadata = state.paymentMethodMetadata,
                 )
                 val code = selection.paymentMethodCreateParams.typeCode
-                code in allowedTypes && code in availableTypes && !requiresMandate
+                code in allowedTypes && !requiresMandate
             }
             is PaymentSelection.Saved -> {
                 val paymentMethod = selection.paymentMethod
                 val code = paymentMethod.type?.code
-                code in allowedTypes && code in availableTypes && paymentMethod in state.customerPaymentMethods
+                code in allowedTypes && paymentMethod in (state.customer?.paymentMethods ?: emptyList())
             }
             is PaymentSelection.GooglePay -> {
                 state.isGooglePayReady
@@ -64,18 +56,19 @@ internal class DefaultPaymentSelectionUpdater @Inject constructor(
             is PaymentSelection.Link -> {
                 state.linkState != null
             }
+            is PaymentSelection.ExternalPaymentMethod -> {
+                state.paymentMethodMetadata.isExternalPaymentMethod(selection.type)
+            }
         }
     }
 
     private fun shouldAskForMandate(
         currentSelection: PaymentSelection.New,
+        metadata: PaymentMethodMetadata,
     ): Boolean {
         val code = currentSelection.paymentMethodCreateParams.typeCode
 
-        // This is the SupportedPaymentMethod based on the most recently fetched StripeIntent
-        val paymentMethodRequiresMandate = lpmRepository.fromCode(code)
-            ?.requiresMandate
-            ?: false
+        val paymentMethodRequiresMandate = metadata.requiresMandate(code)
 
         return if (paymentMethodRequiresMandate) {
             !currentSelection.customerAcknowledgedMandate

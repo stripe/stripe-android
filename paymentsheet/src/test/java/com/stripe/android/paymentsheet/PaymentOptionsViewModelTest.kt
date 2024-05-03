@@ -1,15 +1,21 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Application
 import androidx.appcompat.app.AppCompatActivity
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.test
+import app.cash.turbine.turbineScope
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.R
 import com.stripe.android.core.Logger
+import com.stripe.android.core.exception.APIConnectionException
+import com.stripe.android.link.LinkConfigurationCoordinator
+import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.CardBrand
-import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures.DEFAULT_CARD
@@ -21,31 +27,53 @@ import com.stripe.android.paymentsheet.model.SavedSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods
+import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetState
+import com.stripe.android.paymentsheet.state.WalletsState
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewAction
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.testing.PaymentIntentFactory
-import com.stripe.android.ui.core.forms.resources.LpmRepository
-import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.testing.PaymentMethodFactory
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 internal class PaymentOptionsViewModelTest {
+
     @get:Rule
     val rule = InstantTaskExecutorRule()
+
     private val testDispatcher = StandardTestDispatcher()
 
     private val eventReporter = mock<EventReporter>()
     private val prefsRepository = FakePrefsRepository()
-    private val customerRepository = FakeCustomerRepository()
-    private val paymentMethodRepository = FakeCustomerRepository(PAYMENT_METHOD_REPOSITORY_PARAMS)
+    private val customerRepository = mock<CustomerRepository>()
+
+    @Before
+    @After
+    fun resetMainDispatcher() {
+        Dispatchers.resetMain()
+    }
 
     @Test
     fun `onUserSelection() when selection has been made should set the view state to process result`() =
@@ -66,8 +94,6 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = SELECTION_SAVED_PAYMENT_METHOD,
-                    currency = "usd",
-                    isDecoupling = false,
                 )
         }
 
@@ -91,8 +117,31 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter)
                 .onSelectPaymentOption(
                     paymentSelection = NEW_REQUEST_DONT_SAVE_PAYMENT_SELECTION,
-                    currency = "usd",
-                    isDecoupling = false,
+                )
+            assertThat(prefsRepository.getSavedSelection(true, true))
+                .isEqualTo(SavedSelection.None)
+        }
+
+    @Test
+    fun `onUserSelection() when external payment method should set the view state to process result`() =
+        runTest {
+            val viewModel = createViewModel()
+            viewModel.paymentOptionResult.test {
+                viewModel.updateSelection(EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION)
+                viewModel.onUserSelection()
+                assertThat(awaitItem())
+                    .isEqualTo(
+                        PaymentOptionResult.Succeeded(
+                            EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION,
+                            listOf()
+                        )
+                    )
+                ensureAllEventsConsumed()
+            }
+
+            verify(eventReporter)
+                .onSelectPaymentOption(
+                    paymentSelection = EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION
                 )
             assertThat(prefsRepository.getSavedSelection(true, true))
                 .isEqualTo(SavedSelection.None)
@@ -101,7 +150,6 @@ internal class PaymentOptionsViewModelTest {
     @Test
     fun `onUserSelection() new card with save should complete with succeeded view state`() =
         runTest {
-            paymentMethodRepository.savedPaymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD
             val viewModel = createViewModel()
             viewModel.paymentOptionResult.test {
                 viewModel.updateSelection(NEW_REQUEST_SAVE_PAYMENT_SELECTION)
@@ -113,8 +161,6 @@ internal class PaymentOptionsViewModelTest {
                 verify(eventReporter)
                     .onSelectPaymentOption(
                         paymentSelection = paymentOptionResultSucceeded.paymentSelection,
-                        currency = "usd",
-                        isDecoupling = false,
                     )
                 ensureAllEventsConsumed()
             }
@@ -145,6 +191,8 @@ internal class PaymentOptionsViewModelTest {
         viewModel.currentScreen.test {
             assertThat(awaitItem()).isEqualTo(PaymentSheetScreen.AddAnotherPaymentMethod)
 
+            verify(eventReporter).onShowNewPaymentOptionForm()
+
             viewModel.handleBackPressed()
             assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
         }
@@ -158,6 +206,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(cards[1])
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value)
             .containsExactly(cards[0], cards[2])
@@ -175,6 +224,7 @@ internal class PaymentOptionsViewModelTest {
         assertThat(viewModel.selection.value).isEqualTo(selection)
 
         viewModel.removePaymentMethod(selection.paymentMethod)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.selection.value).isNull()
     }
@@ -189,10 +239,11 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.removePaymentMethod(paymentMethod)
+        testDispatcher.scheduler.advanceUntilIdle()
 
         assertThat(viewModel.paymentMethods.value).isEmpty()
         assertThat(viewModel.primaryButtonUiState.value).isNull()
-        assertThat(viewModel.notesText.value).isNull()
+        assertThat(viewModel.mandateText.value?.text).isNull()
     }
 
     @Test
@@ -285,6 +336,8 @@ internal class PaymentOptionsViewModelTest {
 
             viewModel.currentScreen.test {
                 assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+                verify(eventReporter).onShowExistingPaymentOptions()
             }
         }
 
@@ -388,11 +441,9 @@ internal class PaymentOptionsViewModelTest {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
-                paymentSelection = selection,
-                customerPaymentMethods = paymentMethods,
-            )
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentSelection = selection,
+            paymentMethods = paymentMethods,
         )
 
         val viewModel = createViewModel(args)
@@ -426,11 +477,9 @@ internal class PaymentOptionsViewModelTest {
         val paymentMethods = PaymentMethodFixtures.createCards(3)
         val selection = PaymentSelection.Saved(paymentMethod = paymentMethods.random())
 
-        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
-                paymentSelection = selection,
-                customerPaymentMethods = paymentMethods,
-            )
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentSelection = selection,
+            paymentMethods = paymentMethods,
         )
 
         val viewModel = createViewModel(args)
@@ -438,6 +487,7 @@ internal class PaymentOptionsViewModelTest {
         viewModel.paymentOptionResult.test {
             // Simulate user removing the selected payment method
             viewModel.removePaymentMethod(selection.paymentMethod)
+            testDispatcher.scheduler.advanceUntilIdle()
 
             viewModel.onUserCancel()
 
@@ -496,25 +546,240 @@ internal class PaymentOptionsViewModelTest {
     fun `Sends dismiss event when the user cancels the flow with non-deferred intent`() = runTest {
         val viewModel = createViewModel()
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = false)
+        verify(eventReporter).onDismiss()
     }
 
     @Test
     fun `Sends dismiss event when the user cancels the flow with deferred intent`() = runTest {
         val deferredIntentArgs = PAYMENT_OPTION_CONTRACT_ARGS.copy(
-            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(stripeIntent = DEFERRED_PAYMENT_INTENT),
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                paymentMethodMetadata = PAYMENT_OPTION_CONTRACT_ARGS.state.paymentMethodMetadata.copy(
+                    stripeIntent = DEFERRED_PAYMENT_INTENT,
+                )
+            ),
         )
 
         val viewModel = createViewModel(args = deferredIntentArgs)
         viewModel.onUserCancel()
-        verify(eventReporter).onDismiss(isDecoupling = true)
+        verify(eventReporter).onDismiss()
+    }
+
+    @Test
+    fun `Doesn't consider unsupported payment methods in header text creation`() = runTest {
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.copy(
+            state = PAYMENT_OPTION_CONTRACT_ARGS.state.copy(
+                config = PAYMENT_OPTION_CONTRACT_ARGS.state.config.copy(
+                    allowsDelayedPaymentMethods = false,
+                ),
+                isGooglePayReady = false,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+                    stripeIntent = PAYMENT_INTENT.copy(
+                        paymentMethodTypes = listOf(
+                            PaymentMethod.Type.Card.code,
+                            PaymentMethod.Type.AuBecsDebit.code,
+                        ),
+                    ),
+                    allowsDelayedPaymentMethods = false,
+                )
+            ),
+        )
+
+        val viewModel = createViewModel(args)
+
+        viewModel.headerText.test {
+            assertThat(awaitItem()).isEqualTo(R.string.stripe_title_add_a_card)
+        }
+    }
+
+    @Test
+    fun `Correctly updates state when removing payment method in edit screen succeeds`() = runTest(testDispatcher) {
+        Dispatchers.setMain(testDispatcher)
+
+        val cards = PaymentMethodFactory.cards(3)
+        val paymentMethodToRemove = cards.first()
+
+        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!))).thenReturn(
+            Result.success(paymentMethodToRemove)
+        )
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentMethods = cards,
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
+        )
+
+        turbineScope {
+            val screenTurbine = viewModel.currentScreen.testIn(this)
+            val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
+
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
+
+            viewModel.modifyPaymentMethod(paymentMethodToRemove)
+
+            val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
+            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+
+            screenTurbine.expectNoEvents()
+            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
+
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            // The list of payment methods should not be updated until we're back on the SPM screen
+            paymentMethodsTurbine.expectNoEvents()
+            testScheduler.advanceUntilIdle()
+
+            assertThat(paymentMethodsTurbine.awaitItem()).containsExactly(cards[1], cards[2]).inOrder()
+
+            screenTurbine.ensureAllEventsConsumed()
+            screenTurbine.cancelAndIgnoreRemainingEvents()
+
+            paymentMethodsTurbine.ensureAllEventsConsumed()
+            paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Correctly updates state when removing payment method in edit screen fails`() = runTest(testDispatcher) {
+        Dispatchers.setMain(testDispatcher)
+
+        val cards = PaymentMethodFactory.cards(3)
+        val paymentMethodToRemove = cards.first()
+
+        whenever(customerRepository.detachPaymentMethod(any(), eq(paymentMethodToRemove.id!!))).thenReturn(
+            Result.failure(APIConnectionException())
+        )
+
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            paymentMethods = cards,
+        )
+
+        val viewModel = createViewModel(
+            args = args,
+            editInteractorFactory = DefaultEditPaymentMethodViewInteractor.Factory,
+        )
+
+        turbineScope {
+            val screenTurbine = viewModel.currentScreen.testIn(this)
+            val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
+
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+
+            assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
+
+            viewModel.modifyPaymentMethod(paymentMethodToRemove)
+
+            val editViewState = screenTurbine.awaitItem() as PaymentSheetScreen.EditPaymentMethod
+            editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemovePressed)
+
+            testScheduler.advanceUntilIdle()
+
+            screenTurbine.ensureAllEventsConsumed()
+            screenTurbine.cancelAndIgnoreRemainingEvents()
+
+            paymentMethodsTurbine.ensureAllEventsConsumed()
+            paymentMethodsTurbine.cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `Displays Link wallet button if customer has not saved PMs and Google Pay is not available`() = runTest {
+        val args = PAYMENT_OPTION_CONTRACT_ARGS.updateState(
+            linkState = LinkState(
+                configuration = mock(),
+                loginState = LinkState.LoginState.NeedsVerification,
+            ),
+            isGooglePayReady = false,
+        )
+
+        val viewModel = createViewModel(args = args)
+
+        viewModel.walletsState.test {
+            val state = awaitItem()
+            assertThat(state?.link).isEqualTo(WalletsState.Link(email = null))
+            assertThat(state?.googlePay).isNull()
+        }
+    }
+
+    @Test
+    fun `on cannot properly return from link or other lpms, should report event at maximum once`() = runTest {
+        val viewModel = createViewModel()
+
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+
+        verify(eventReporter, times(1)).onCannotProperlyReturnFromLinkAndOtherLPMs()
+    }
+
+    @Test
+    fun `On link selection with save requested, selection should be updated with saveable link selection`() =
+        runTest {
+            val viewModel = createLinkViewModel()
+
+            viewModel.linkHandler.payWithLinkInline(
+                userInput = UserInput.SignIn("email@email.com"),
+                paymentSelection = createCardPaymentSelection(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                ),
+                shouldCompleteLinkInlineFlow = false
+            )
+
+            assertThat(viewModel.selection.value).isEqualTo(
+                PaymentSelection.New.LinkInline(
+                    linkPaymentDetails = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse,
+                )
+            )
+        }
+
+    @Test
+    fun `On link selection with save not requested, selection should be updated with unsaveable link selection`() =
+        runTest {
+            val viewModel = createLinkViewModel()
+
+            viewModel.linkHandler.payWithLinkInline(
+                userInput = UserInput.SignIn("email@email.com"),
+                paymentSelection = createCardPaymentSelection(
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                ),
+                shouldCompleteLinkInlineFlow = false
+            )
+
+            assertThat(viewModel.selection.value).isEqualTo(
+                PaymentSelection.New.LinkInline(
+                    linkPaymentDetails = LinkTestUtils.LINK_NEW_PAYMENT_DETAILS,
+                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
+                )
+            )
+        }
+
+    private fun createLinkViewModel(): PaymentOptionsViewModel {
+        val linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(
+            attachNewCardToAccountResult = Result.success(LinkTestUtils.LINK_NEW_PAYMENT_DETAILS),
+            accountStatus = AccountStatus.Verified,
+        )
+
+        return createViewModel(
+            linkState = LinkState(
+                configuration = LinkTestUtils.createLinkConfiguration(),
+                loginState = LinkState.LoginState.LoggedOut
+            ),
+            linkConfigurationCoordinator = linkConfigurationCoordinator,
+        )
     }
 
     private fun createViewModel(
         args: PaymentOptionContract.Args = PAYMENT_OPTION_CONTRACT_ARGS,
         linkState: LinkState? = args.state.linkState,
-        lpmRepository: LpmRepository = createLpmRepository()
-    ) = TestViewModelFactory.create { linkHandler, linkInteractor, savedStateHandle ->
+        editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory = mock(),
+        linkConfigurationCoordinator: LinkConfigurationCoordinator = FakeLinkConfigurationCoordinator()
+    ) = TestViewModelFactory.create(linkConfigurationCoordinator) { linkHandler, linkInteractor, savedStateHandle ->
         PaymentOptionsViewModel(
             args = args.copy(state = args.state.copy(linkState = linkState)),
             prefsRepositoryFactory = { prefsRepository },
@@ -523,22 +788,21 @@ internal class PaymentOptionsViewModelTest {
             workContext = testDispatcher,
             application = ApplicationProvider.getApplicationContext(),
             logger = Logger.noop(),
-            lpmRepository = lpmRepository,
             savedStateHandle = savedStateHandle,
             linkHandler = linkHandler,
             linkConfigurationCoordinator = linkInteractor,
-            formViewModelSubComponentBuilderProvider = mock(),
+            editInteractorFactory = editInteractorFactory,
         )
     }
 
-    private fun createLpmRepository(
-        paymentIntent: PaymentIntent = PAYMENT_INTENT
-    ) = LpmRepository(
-        LpmRepository.LpmRepositoryArguments(
-            ApplicationProvider.getApplicationContext<Application>().resources
+    private fun createCardPaymentSelection(
+        customerRequestedSave: PaymentSelection.CustomerRequestedSave
+    ): PaymentSelection.New.Card {
+        return PaymentSelection.New.Card(
+            paymentMethodCreateParams = DEFAULT_CARD,
+            brand = CardBrand.Visa,
+            customerRequestedSave = customerRequestedSave,
         )
-    ).apply {
-        this.update(paymentIntent, null)
     }
 
     private companion object {
@@ -560,6 +824,8 @@ internal class PaymentOptionsViewModelTest {
             CardBrand.Visa,
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest
         )
+        private val EXTERNAL_PAYMENT_METHOD_PAYMENT_SELECTION =
+            PaymentMethodFixtures.createExternalPaymentMethod(PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC)
         private val NEW_CARD_PAYMENT_SELECTION = PaymentSelection.New.Card(
             DEFAULT_CARD,
             CardBrand.Discover,
@@ -567,19 +833,19 @@ internal class PaymentOptionsViewModelTest {
         )
         private val PAYMENT_OPTION_CONTRACT_ARGS = PaymentOptionContract.Args(
             state = PaymentSheetState.Full(
-                stripeIntent = PAYMENT_INTENT,
-                customerPaymentMethods = emptyList(),
+                customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                 config = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
                 isGooglePayReady = true,
                 paymentSelection = null,
                 linkState = null,
+                isEligibleForCardBrandChoice = false,
+                validationError = null,
+                paymentMethodMetadata = PaymentMethodMetadataFactory.create(stripeIntent = PAYMENT_INTENT),
             ),
             statusBarColor = PaymentSheetFixtures.STATUS_BAR_COLOR,
             enableLogging = false,
             productUsage = mock()
         )
-        private val PAYMENT_METHOD_REPOSITORY_PARAMS =
-            listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
     }
 
     private class MyHostActivity : AppCompatActivity()

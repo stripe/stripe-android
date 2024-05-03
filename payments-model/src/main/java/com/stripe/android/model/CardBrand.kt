@@ -157,9 +157,9 @@ enum class CardBrand(
     ),
 
     CartesBancaires(
-        "cartesbancaire",
+        "cartes_bancaires",
         "Cartes Bancaires",
-        R.drawable.stripe_ic_cartebancaire,
+        R.drawable.stripe_ic_cartes_bancaires,
         pattern = Pattern.compile(
             "(^(4)[0-9]*) |" +
                 "^(2221|2222|2223|2224|2225|2226|2227|2228|2229|222|223|224|225|226|" +
@@ -259,7 +259,7 @@ enum class CardBrand(
             } ?: listOf(Unknown)
         }
 
-        private fun getMatchingCards(cardNumber: String) = values().filter { cardBrand ->
+        private fun getMatchingCards(cardNumber: String) = entries.filter { cardBrand ->
             cardBrand.getPatternForLength(cardNumber)?.matcher(cardNumber)
                 ?.matches() == true
         }.filter {
@@ -271,11 +271,10 @@ enum class CardBrand(
          * See [PaymentMethod.Card.brand].
          */
         fun fromCode(code: String?): CardBrand {
-            return values().firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
+            return entries.firstOrNull { it.code.equals(code, ignoreCase = true) } ?: Unknown
         }
 
-        val orderedBrands = values()
-            .toList()
+        val orderedBrands = entries
             .filter { it.shouldRender }
             .filter { it.renderingOrder > 0 }
             .sortedBy { it.renderingOrder }

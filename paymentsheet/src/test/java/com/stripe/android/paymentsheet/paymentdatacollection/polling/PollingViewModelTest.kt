@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.paymentdatacollection.polling
 import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.polling.IntentStatusPoller
 import kotlinx.coroutines.test.TestDispatcher
 import kotlinx.coroutines.test.TestScope
@@ -215,6 +216,7 @@ private fun createPollingViewModel(
             timeLimit = timeLimit,
             initialDelay = initialDelay,
             maxAttempts = 10,
+            ctaText = R.string.stripe_upi_polling_message
         ),
         poller = poller,
         timeProvider = timeProvider,

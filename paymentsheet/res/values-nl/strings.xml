@@ -6,6 +6,12 @@
   <string name="stripe_bank_account_ending_in">Bankrekening verwijderen die eindigt op %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Bevestig de betaling in de app van je bank binnen %s om de aankoop af te ronden.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Je betaalgegevens worden niet opgeslagen.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Wil je dit formulier sluiten?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Er is iets misgegaan. Controleer je verbinding en probeer het opnieuw.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Als je doorgaat, ga je ermee akkoord betalingen in overeenstemming met <terms>deze voorwaarden</terms> te autoriseren.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -20,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Adres opslaan</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Verzendadres</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Binnen drie werkdagen wordt een e-mail gestuurd naar %s om de instelling van deze opdracht voor afschrijving te bevestigen.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Je incassogegevens bevestigen</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Gegevens wijzigen</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Daarnaast ontvang je twee dagen vooraf via e-mail een melding van elk bedrag dat vanwege deze opdracht wordt afgeschreven. Betalingen worden op je bankafschrift weergegeven als \'%s\'.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Je betalingen worden beschermd door %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Een betaalmethode kiezen</string>
   <string name="stripe_paymentsheet_close">Sluiten</string>
@@ -31,10 +47,16 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Uw betaalmethoden beheren</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Binnen 1-2 werkdagen stort Stripe $ 0,01 op je rekening. Daarna krijg je een e-mail met instructies over hoe je de betaling aan %s kunt voltooien.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">%s bewerken</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Of betalen met</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Of met een kaart betalen</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Of gebruik</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Of gebruik een betaalkaart</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Betaal</string>
   <!-- Title shown above a section containing various payment options -->
@@ -45,12 +67,16 @@
   <string name="stripe_paymentsheet_primary_button_processing">Verwerken...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Bankrekening verwijderen</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Betaalkaart verwijderen</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s verwijderen</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Opslaan</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Een nieuwe betaalmethode opslaan</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Sla je bankrekening in een paar stappen op.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Opslaan voor toekomstige betalingen</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -59,6 +85,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Betaalmethode selecteren</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Totaal: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Er is iets misgegaan</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Annuleren en op een andere manier betalen</string>
   <!-- Text on a screen asking the user to approve a payment -->

@@ -1,76 +1,89 @@
 package com.stripe.android.financialconnections.features.reset
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.LinkMoreAccounts
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.ClearPartnerWebAuth
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
-import javax.inject.Inject
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.utils.error
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
-internal class ResetViewModel @Inject constructor(
-    initialState: ResetState,
+internal class ResetViewModel @AssistedInject constructor(
+    @Assisted initialState: ResetState,
     private val linkMoreAccounts: LinkMoreAccounts,
     private val nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
     private val logger: Logger
-) : MavericksViewModel<ResetState>(initialState) {
+) : FinancialConnectionsViewModel<ResetState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
         suspend {
             val updatedManifest = linkMoreAccounts()
             nativeAuthFlowCoordinator().emit(ClearPartnerWebAuth)
-            eventTracker.track(PaneLoaded(Pane.RESET))
-            navigationManager.navigate(
-                NavigateToRoute(
-                    updatedManifest.nextPane.toNavigationCommand(),
-                    popCurrentFromBackStack = true
-                )
+            eventTracker.track(PaneLoaded(PANE))
+            navigationManager.tryNavigateTo(
+                route = updatedManifest.nextPane.destination(referrer = PANE),
+                popUpTo = PopUpToBehavior.Current(inclusive = true),
             )
         }.execute { copy(payload = it) }
     }
+
+    override fun updateTopAppBar(state: ResetState): TopAppBarStateUpdate = TopAppBarStateUpdate(
+        pane = PANE,
+        allowBackNavigation = false,
+        error = state.payload.error,
+    )
 
     private fun logErrors() {
         onAsync(
             ResetState::payload,
             onFail = { error ->
-                logger.error("Error linking more accounts", error)
-                eventTracker.track(Error(Pane.RESET, error))
+                eventTracker.logError(
+                    extraMessage = "Error linking more accounts",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
 
-    companion object : MavericksViewModelFactory<ResetViewModel, ResetState> {
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ResetState): ResetViewModel
+    }
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: ResetState
-        ): ResetViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .resetSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+    companion object {
+
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent.resetViewModelFactory.create(ResetState())
+                }
+            }
+
+        internal val PANE = Pane.RESET
     }
 }
 
 internal data class ResetState(
     val payload: Async<Unit> = Uninitialized
-) : MavericksState
+)

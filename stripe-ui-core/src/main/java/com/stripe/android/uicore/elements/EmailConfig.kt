@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.StateFlow
 import java.util.regex.Pattern
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class EmailConfig : TextFieldConfig {
+class EmailConfig(
+    @StringRes override val label: Int = R.string.stripe_email
+) : TextFieldConfig {
+
     override val capitalization: KeyboardCapitalization = KeyboardCapitalization.None
     override val debugLabel = "email"
-
-    @StringRes
-    override val label = R.string.stripe_email
     override val keyboard = KeyboardType.Email
     override val visualTransformation: VisualTransformation? = null
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null)
@@ -52,9 +52,13 @@ class EmailConfig : TextFieldConfig {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun createController(initialValue: String?) = SimpleTextFieldController(
-            EmailConfig(),
-            initialValue = initialValue
+        fun createController(
+            initialValue: String?,
+            showOptionalLabel: Boolean = false,
+        ) = SimpleTextFieldController(
+            textFieldConfig = EmailConfig(),
+            initialValue = initialValue,
+            showOptionalLabel = showOptionalLabel,
         )
 
         // This is copied from Patterns.EMAIL_ADDRESS because it is not defined for unit tests

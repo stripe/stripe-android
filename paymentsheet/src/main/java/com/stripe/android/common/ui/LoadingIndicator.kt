@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -12,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.dimensionResource
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.ui.core.CircularProgressIndicator
 
 @Composable
 internal fun BottomSheetLoadingIndicator(
@@ -19,7 +19,9 @@ internal fun BottomSheetLoadingIndicator(
 ) {
     val height = dimensionResource(R.dimen.stripe_paymentsheet_loading_container_height)
     LoadingIndicator(
-        modifier = modifier.fillMaxWidth().height(height),
+        modifier = modifier
+            .fillMaxWidth()
+            .height(height),
     )
 }
 
@@ -38,7 +40,7 @@ internal fun LoadingIndicator(
         CircularProgressIndicator(
             color = color,
             strokeWidth = strokeWidth,
-            modifier = Modifier.size(indicatorSize),
+            modifier = Modifier.size(indicatorSize)
         )
     }
 }

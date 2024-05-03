@@ -3,7 +3,6 @@ package com.stripe.android.financialconnections.launcher
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
-import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetForTokenResult.Canceled
@@ -17,10 +16,10 @@ internal class FinancialConnectionsSheetForTokenContract :
     override fun createIntent(
         context: Context,
         input: FinancialConnectionsSheetActivityArgs.ForToken
-    ): Intent {
-        return Intent(context, FinancialConnectionsSheetActivity::class.java)
-            .putExtra(Mavericks.KEY_ARG, input)
-    }
+    ): Intent = FinancialConnectionsSheetActivity.intent(
+        context = context,
+        args = input
+    )
 
     override fun parseResult(
         resultCode: Int,

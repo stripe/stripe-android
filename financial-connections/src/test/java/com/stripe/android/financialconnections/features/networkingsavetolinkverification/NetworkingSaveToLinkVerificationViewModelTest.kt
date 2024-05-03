@@ -1,21 +1,23 @@
 package com.stripe.android.financialconnections.features.networkingsavetolinkverification
 
-import com.airbnb.mvrx.test.MavericksTestRule
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetCachedConsumerSession
+import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.StartVerification
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.INSTITUTION_PICKER
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.utils.TestNavigationManager
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
@@ -32,17 +34,18 @@ import org.mockito.kotlin.whenever
 class NetworkingSaveToLinkVerificationViewModelTest {
 
     @get:Rule
-    val mavericksTestRule = MavericksTestRule()
+    val testRule = CoroutineTestRule()
 
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
     private val startVerification = mock<StartVerification>()
     private val markLinkVerified = mock<MarkLinkVerified>()
-    private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
     private val getCachedAccounts = mock<GetCachedAccounts>()
     private val getCachedConsumerSession = mock<GetCachedConsumerSession>()
+    private val getManifest = mock<GetManifest>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: NetworkingSaveToLinkVerificationState = NetworkingSaveToLinkVerificationState()
@@ -55,19 +58,21 @@ class NetworkingSaveToLinkVerificationViewModelTest {
         getCachedAccounts = getCachedAccounts,
         saveAccountToLink = saveAccountToLink,
         getCachedConsumerSession = getCachedConsumerSession,
-        saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
+        getManifest = getManifest,
         logger = Logger.noop(),
-        initialState = state
+        initialState = state,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
     )
 
     @Test
     fun `init - starts verification with consumer session secret from cached session`() = runTest {
         val consumerSession = consumerSession()
+        whenever(getManifest()).thenReturn(sessionManifest())
         whenever(getCachedConsumerSession()).thenReturn(consumerSession)
 
         val viewModel = buildViewModel()
 
-        val state = viewModel.awaitState()
+        val state = viewModel.stateFlow.value
         verify(startVerification).sms(consumerSession.clientSecret)
         assertThat(state.payload()!!.consumerSessionClientSecret)
             .isEqualTo(consumerSession.clientSecret)
@@ -80,22 +85,24 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val selectedAccount = partnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
+            whenever(getManifest()).thenReturn(sessionManifest())
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
 
             val viewModel = buildViewModel()
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {
                 otpController.onValueChanged(i, "1")
             }
 
-            val state = viewModel.awaitState()
+            val state = viewModel.stateFlow.value
             verify(saveAccountToLink).existing(
                 eq(state.payload()!!.consumerSessionClientSecret),
-                eq(listOf(selectedAccount.id))
+                eq(listOf(selectedAccount)),
+                eq(true),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = consumerSession.clientSecret,
@@ -105,7 +112,10 @@ class NetworkingSaveToLinkVerificationViewModelTest {
                 "linked_accounts.networking.verification.success",
                 mapOf("pane" to "networking_save_to_link_verification")
             )
-            navigationManager.assertNavigatedTo(NavigationDirections.success)
+            navigationManager.assertNavigatedTo(
+                destination = Destination.Success,
+                pane = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
+            )
         }
 
     @Test
@@ -115,23 +125,25 @@ class NetworkingSaveToLinkVerificationViewModelTest {
             val selectedAccount = partnerAccount()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
             whenever(getCachedConsumerSession()).thenReturn(consumerSession)
+            whenever(getManifest()).thenReturn(sessionManifest())
             whenever(markLinkVerified()).thenReturn(linkVerifiedManifest)
             whenever(getCachedAccounts()).thenReturn(listOf(selectedAccount))
-            whenever(saveAccountToLink.existing(any(), any())).thenThrow(RuntimeException("error"))
+            whenever(saveAccountToLink.existing(any(), any(), any())).thenThrow(RuntimeException("error"))
 
             val viewModel = buildViewModel()
 
-            val otpController = viewModel.awaitState().payload()!!.otpElement.controller
+            val otpController = viewModel.stateFlow.value.payload()!!.otpElement.controller
 
             // enters valid OTP
             for (i in 0 until otpController.otpLength) {
                 otpController.onValueChanged(i, "1")
             }
 
-            val state = viewModel.awaitState()
+            val state = viewModel.stateFlow.value
             verify(saveAccountToLink).existing(
                 eq(state.payload()!!.consumerSessionClientSecret),
-                eq(listOf(selectedAccount.id))
+                eq(listOf(selectedAccount)),
+                eq(true),
             )
             verify(confirmVerification).sms(
                 consumerSessionClientSecret = consumerSession.clientSecret,
@@ -161,6 +173,9 @@ class NetworkingSaveToLinkVerificationViewModelTest {
 
         verifyNoInteractions(confirmVerification)
         verifyNoInteractions(saveAccountToLink)
-        navigationManager.assertNavigatedTo(NavigationDirections.success)
+        navigationManager.assertNavigatedTo(
+            destination = Destination.Success,
+            pane = Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION
+        )
     }
 }

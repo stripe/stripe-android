@@ -20,7 +20,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -39,7 +41,9 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
+                optionsParams = PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                )
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -58,7 +62,7 @@ class ConfirmPaymentIntentParamsFactoryTest {
         assertThat(
             factory.create(
                 createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                setupFutureUsage = null,
+                optionsParams = PaymentMethodOptionsParams.Card(),
             )
         ).isEqualTo(
             ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
@@ -108,10 +112,47 @@ class ConfirmPaymentIntentParamsFactoryTest {
 
         val result = factoryWithConfig.create(
             createParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-            setupFutureUsage = null,
         )
 
         assertThat(result.shipping).isEqualTo(shippingDetails)
+    }
+
+    @Test
+    fun `create() with saved card and does not require save on confirmation`() {
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            requiresSaveOnConfirmation = false
+        )
+
+        assertThat(result.paymentMethodOptions).isEqualTo(
+            PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+            )
+        )
+    }
+
+    @Test
+    fun `create() with saved card and requires save on confirmation`() {
+        val factoryWithConfig = ConfirmPaymentIntentParamsFactory(
+            clientSecret = CLIENT_SECRET,
+            shipping = null,
+        )
+
+        val result = factoryWithConfig.create(
+            paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+            requiresSaveOnConfirmation = true
+        )
+
+        assertThat(result.paymentMethodOptions).isEqualTo(
+            PaymentMethodOptionsParams.Card(
+                setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+            )
+        )
     }
 
     private companion object {

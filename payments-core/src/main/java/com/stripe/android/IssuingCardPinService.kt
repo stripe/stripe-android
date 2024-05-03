@@ -19,6 +19,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Methods for retrieval / update of a Stripe Issuing card
  */
+@Deprecated("Please use Issuing Elements instead: https://stripe.com/docs/issuing/elements")
 class IssuingCardPinService @VisibleForTesting internal constructor(
     keyProvider: EphemeralKeyProvider,
     private val stripeRepository: StripeRepository,
@@ -61,7 +62,8 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             override fun onKeyError(
                 operationId: String,
                 errorCode: Int,
-                errorMessage: String
+                errorMessage: String,
+                throwable: Throwable,
             ) {
                 val updateListener = updateListeners.remove(operationId)
                 val retrievalListener = retrievalListeners.remove(operationId)
@@ -108,14 +110,14 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
     }
 
     /**
-     * Retrieves a PIN for a given card
+     * Updates a PIN for a given card
      *
      * @param cardId the ID of the card (looks like ic_abcdef1234)
      * @param newPin the new desired PIN
      * @param verificationId the ID of the verification that was sent to the cardholder
      * (typically server-side, through /v1/issuing/verifications)
      * @param userOneTimeCode the one-time code that was sent to the cardholder through sms or email
-     * @param listener a listener for either the PIN, or any error that can occur
+     * @param listener a listener for either success or any error that can occur
      */
     fun updatePin(
         cardId: String,
@@ -325,6 +327,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
         )
     }
 
+    @Suppress("DEPRECATION")
     companion object {
         private val TAG = IssuingCardPinService::class.java.name
 
@@ -361,6 +364,7 @@ class IssuingCardPinService @VisibleForTesting internal constructor(
             stripeAccountId: String? = null,
             keyProvider: EphemeralKeyProvider
         ): IssuingCardPinService {
+            Log.w(TAG, "Please use Issuing Elements instead: https://stripe.com/docs/issuing/elements")
             return IssuingCardPinService(
                 keyProvider,
                 StripeApiRepository(

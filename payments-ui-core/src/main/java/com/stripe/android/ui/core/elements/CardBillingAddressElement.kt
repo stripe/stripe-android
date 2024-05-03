@@ -1,8 +1,7 @@
 package com.stripe.android.ui.core.elements
 
 import androidx.annotation.RestrictTo
-import com.stripe.android.ui.core.CardBillingDetailsCollectionConfiguration
-import com.stripe.android.uicore.address.AddressRepository
+import com.stripe.android.ui.core.BillingDetailsCollectionConfiguration
 import com.stripe.android.uicore.address.FieldType
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressType
@@ -10,8 +9,8 @@ import com.stripe.android.uicore.elements.CountryConfig
 import com.stripe.android.uicore.elements.DropdownFieldController
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingElement
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * This is a special type of AddressElement that
@@ -22,7 +21,6 @@ import kotlinx.coroutines.flow.map
 class CardBillingAddressElement(
     identifier: IdentifierSpec,
     rawValuesMap: Map<IdentifierSpec, String?> = emptyMap(),
-    addressRepository: AddressRepository,
     countryCodes: Set<String> = emptySet(),
     countryDropdownFieldController: DropdownFieldController = DropdownFieldController(
         CountryConfig(countryCodes),
@@ -30,11 +28,10 @@ class CardBillingAddressElement(
     ),
     sameAsShippingElement: SameAsShippingElement?,
     shippingValuesMap: Map<IdentifierSpec, String?>?,
-    private val collectionMode: CardBillingDetailsCollectionConfiguration.AddressCollectionMode =
-        CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
+    private val collectionMode: BillingDetailsCollectionConfiguration.AddressCollectionMode =
+        BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic,
 ) : AddressElement(
     identifier,
-    addressRepository,
     rawValuesMap,
     AddressType.Normal(),
     countryCodes,
@@ -44,21 +41,21 @@ class CardBillingAddressElement(
 ) {
     // Save for future use puts this in the controller rather than element
     // card and achv2 uses save for future use
-    val hiddenIdentifiers: Flow<Set<IdentifierSpec>> =
-        countryDropdownFieldController.rawFieldValue.map { countryCode ->
+    val hiddenIdentifiers: StateFlow<Set<IdentifierSpec>> =
+        countryDropdownFieldController.rawFieldValue.mapAsStateFlow { countryCode ->
             when (collectionMode) {
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
-                    FieldType.values()
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Never -> {
+                    FieldType.entries
                         .map { it.identifierSpec }
                         .toSet()
                 }
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Full -> {
                     emptySet()
                 }
-                CardBillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
+                BillingDetailsCollectionConfiguration.AddressCollectionMode.Automatic -> {
                     when (countryCode) {
                         "US", "GB", "CA" -> {
-                            FieldType.values()
+                            FieldType.entries
                                 // Filtering name causes the field to be hidden even outside
                                 // of this form.
                                 .filterNot { it == FieldType.PostalCode || it == FieldType.Name }
@@ -66,7 +63,7 @@ class CardBillingAddressElement(
                                 .toSet()
                         }
                         else -> {
-                            FieldType.values()
+                            FieldType.entries
                                 // Filtering name causes the field to be hidden even outside
                                 // of this form.
                                 .filterNot { it == FieldType.Name }

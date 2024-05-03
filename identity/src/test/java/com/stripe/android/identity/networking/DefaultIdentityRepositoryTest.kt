@@ -1,5 +1,7 @@
 package com.stripe.android.identity.networking
 
+import android.content.Context
+import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
@@ -19,6 +21,8 @@ import com.stripe.android.identity.networking.models.CollectedDataParam.Companio
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.networking.models.VerificationPageData
+import com.stripe.android.identity.networking.models.VerificationPageIconType
+import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.utils.IdentityIO
 import kotlinx.coroutines.runBlocking
 import org.json.JSONObject
@@ -44,7 +48,8 @@ class DefaultIdentityRepositoryTest {
     private val mockStripeNetworkClient: StripeNetworkClient = mock()
     private val identityRepository = DefaultIdentityRepository(
         mockStripeNetworkClient,
-        mockIO
+        mockIO,
+        ApplicationProvider.getApplicationContext()
     )
 
     private val requestCaptor: KArgumentCaptor<StripeRequest> = argumentCaptor()
@@ -55,7 +60,6 @@ class DefaultIdentityRepositoryTest {
             assertThat(it.documentCapture.requireLiveCapture).isFalse()
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK
             )
@@ -68,7 +72,6 @@ class DefaultIdentityRepositoryTest {
             assertThat(it.selfieCapture).isNotNull()
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.FACE
@@ -81,7 +84,6 @@ class DefaultIdentityRepositoryTest {
         testFetchVerificationPage(VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ID_NUMBER_JSON_STRING) {
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.IDNUMBER
@@ -94,7 +96,6 @@ class DefaultIdentityRepositoryTest {
         testFetchVerificationPage(VERIFICATION_PAGE_TYPE_DOCUMENT_REQUIRE_ADDRESS_JSON_STRING) {
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.ADDRESS
@@ -109,7 +110,6 @@ class DefaultIdentityRepositoryTest {
         ) {
             assertThat(it.requirements.missing).containsExactly(
                 Requirement.BIOMETRICCONSENT,
-                Requirement.IDDOCUMENTTYPE,
                 Requirement.IDDOCUMENTFRONT,
                 Requirement.IDDOCUMENTBACK,
                 Requirement.ADDRESS,
@@ -167,18 +167,34 @@ class DefaultIdentityRepositoryTest {
             VERIFICATION_PAGE_TYPE_ADDRESS_JSON_STRING
         ) {
             assertThat(it.individualWelcome.getStartedButtonText).isEqualTo("Get started")
-            assertThat(it.individualWelcome.body).isEqualTo(
-                "You’ll need to share some personal information to complete the " +
-                    "verification. <a href='https://stripe.com/privacy-center/legal#stripe-identity'>Learn more</a>"
-            )
             assertThat(it.individualWelcome.title).isEqualTo(
-                "Tora's catfood partners with Stripe for secure Identity verification"
+                "Andrew's Audio works with Stripe to verify your identity"
             )
             assertThat(it.individualWelcome.privacyPolicy).isEqualTo(
-                "Data will be stored and may be used according to the " +
-                    "<a href ='https://stripe.com/privacy'>Stripe Privacy Policy</a> and Tora's catfood Privacy Policy."
+                "<a href='https://stripe.com/privacy'>Stripe Privacy Policy</a> • " +
+                    "<a href='https://aywang.me'>Andrew's Audio Privacy Policy</a>"
             )
-            assertThat(it.individualWelcome.timeEstimate).isEqualTo("Takes less than 1 minute.")
+            assertThat(it.individualWelcome.lines).isEqualTo(
+                listOf(
+                    VerificationPageStaticConsentLineContent(
+                        icon = VerificationPageIconType.DOCUMENT,
+                        content = "You'll provide personal information including your name and " +
+                            "phone number."
+                    ),
+                    VerificationPageStaticConsentLineContent(
+                        icon = VerificationPageIconType.DISPUTE_PROTECTION,
+                        content = "The information you provide Stripe will help us <a " +
+                            "href='stripe_bottomsheet://open/consent_identity'>" +
+                            "confirm your identity</a>."
+                    ),
+                    VerificationPageStaticConsentLineContent(
+                        icon = VerificationPageIconType.LOCK,
+                        content = "Andrew's Audio will only have access to this <a " +
+                            "href='stripe_bottomsheet://open/consent_verification_data'>" +
+                            "verification data</a>."
+                    )
+                )
+            )
         }
     }
 
@@ -503,7 +519,10 @@ class DefaultIdentityRepositoryTest {
 
             assertThat(request).isInstanceOf(ApiRequest::class.java)
             assertThat(request.method).isEqualTo(StripeRequest.Method.GET)
-            assertThat(request.url).isEqualTo("$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID")
+            assertThat(request.url).isEqualTo(
+                "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/$TEST_ID?" +
+                    "$APP_IDENTIFIER=${ApplicationProvider.getApplicationContext<Context>().packageName}"
+            )
             assertThat(request.headers[HEADER_AUTHORIZATION]).isEqualTo("Bearer $TEST_EPHEMERAL_KEY")
 
             verificationPageBlock(verificationPage)

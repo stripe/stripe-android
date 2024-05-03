@@ -2,13 +2,11 @@ package com.stripe.android.model.parsers
 
 import android.net.Uri
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.LUXE_NEXT_ACTION
 import com.stripe.android.model.Address
-import com.stripe.android.model.LuxePostConfirmActionCreator
-import com.stripe.android.model.LuxePostConfirmActionRepository
 import com.stripe.android.model.MicrodepositType
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.model.PaymentIntentFixtures.BOLETO_REQUIRES_ACTION
 import com.stripe.android.model.StripeIntent
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -65,6 +63,17 @@ class PaymentIntentJsonParserTest {
                     expiresAfter = 1617944399,
                     number = "12345678901234657890123456789012",
                     hostedVoucherUrl = "https://payments.stripe.com/oxxo/voucher/test_YWNjdF8xSWN1c1VMMzJLbFJvdDAxLF9KRlBtckVBMERWM0lBZEUyb"
+                )
+            )
+    }
+
+    @Test
+    fun parse_withBoleto_shouldCreateExpectedNextActionData() {
+        val paymentIntent = BOLETO_REQUIRES_ACTION
+        assertThat(paymentIntent.nextActionData)
+            .isEqualTo(
+                StripeIntent.NextActionData.DisplayBoletoDetails(
+                    hostedVoucherUrl = "https://payments.stripe.com/boleto/voucher/test_YWNjdF8xTm5pZllBQVlObzc4dXh0LF9PYk81bUhVTGNSZGNIeHlyckJ4djBFQ3lkNkswS1lt0100qH3SxPW7"
                 )
             )
     }
@@ -143,87 +152,6 @@ class PaymentIntentJsonParserTest {
                     MicrodepositType.AMOUNTS
                 )
             )
-    }
-
-    @Test
-    fun `verify luxe next action is queried first for next action and returns no next action`() {
-        val repository = LuxePostConfirmActionRepository()
-        var stripeIntent = PaymentIntentJsonParser(repository).parse(
-            PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION_JSON
-        )
-        // This is using the old hard coded path
-        assertThat(stripeIntent?.nextActionData)
-            .isInstanceOf(StripeIntent.NextActionData.RedirectToUrl::class.java)
-        assertThat(stripeIntent?.nextActionType)
-            .isEqualTo(StripeIntent.NextActionType.RedirectToUrl)
-
-        repository.update(
-            mapOf(
-                "afterpay_clearpay" to
-                    LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusToAction = mapOf(
-                            StripeIntent.Status.RequiresAction to
-                                LuxePostConfirmActionCreator.NoActionCreator
-                        )
-                    )
-            )
-        )
-
-        stripeIntent = PaymentIntentJsonParser(repository).parse(
-            PaymentIntentFixtures.AFTERPAY_REQUIRES_ACTION_JSON
-        )
-
-        // This will use the result of the LuxeNextActionRepo
-        assertThat(stripeIntent?.nextActionData)
-            .isNull()
-        assertThat(stripeIntent?.nextActionType)
-            .isNull()
-    }
-
-    @Test
-    fun `verify luxe next action is queried first for next action and returns next action`() {
-        val repository = LuxePostConfirmActionRepository()
-        var stripeIntent = PaymentIntentJsonParser(repository).parse(
-            PaymentIntentFixtures.LLAMAPAY_REQUIRES_ACTION_JSON
-        )
-
-        // This is using the old hard coded path
-        assertThat(stripeIntent).isNotNull()
-        assertThat(stripeIntent?.nextActionType).isNull()
-        assertThat(stripeIntent?.nextActionData).isNull()
-
-        repository.update(
-            mapOf(
-                "llamapay" to
-                    LUXE_NEXT_ACTION.copy(
-                        postConfirmStatusToAction = mapOf(
-                            StripeIntent.Status.RequiresAction to
-                                LuxePostConfirmActionCreator.RedirectActionCreator(
-                                    redirectPagePath = "next_action[llamapay_redirect_to_url][url]",
-                                    returnToUrlPath = "next_action[llamapay_redirect_to_url][return_url]"
-                                )
-                        )
-                    )
-            )
-        )
-
-        stripeIntent = PaymentIntentJsonParser(repository).parse(
-            PaymentIntentFixtures.LLAMAPAY_REQUIRES_ACTION_JSON
-        )
-
-        // This will use the result of the LuxeNextActionRepo
-        assertThat(stripeIntent?.nextActionType).isEqualTo(
-            StripeIntent.NextActionType.RedirectToUrl
-        )
-        assertThat(stripeIntent?.nextActionData).isEqualTo(
-            StripeIntent.NextActionData.RedirectToUrl(
-                Uri.parse(
-                    "https://hooks.stripe.com/llamapay/acct_1HvTI7Lu5o3P18Zp/" +
-                        "pa_nonce_M5WcnAEWqB7mMANvtyWuxOWAXIHw9T9/redirect"
-                ),
-                "stripesdk://payment_return_url/com.stripe.android.paymentsheet.example"
-            )
-        )
     }
 
     @Test

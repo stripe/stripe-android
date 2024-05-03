@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Pievienot maksājuma veidu</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Saglabāt manu informāciju, lai varētu droši norēķināties ar vienu klikšķi</string>
+  <string name="stripe_inline_sign_up_header">Saglabāt jūsu informāciju, lai nodrošinātu norēķināšanos Link ar 1 klikšķi</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Izrakstīties no Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Maksājiet ātrāk %s un pie tūkstošiem tirgotāju.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Pievienojoties Link, jūs piekrītat <terms>noteikumiem</terms> un <privacy>konfidencialitātes politikai</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Norādot savu e-pastu, es piekrītu izveidot Link kontu un saglabāt savu maksājuma informāciju Link, ievērojot <terms>Link noteikumus</terms> un <privacy>Konfidencialitātes politiku</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Norādot savu tālruņa numuru, es piekrītu izveidot Link kontu un saglabāt savu maksājuma informāciju Link, ievērojot <terms>Link noteikumus</terms> un <privacy>Konfidencialitātes politiku</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Mainīt e-pastu</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
@@ -50,8 +54,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Drošības nolūkos atkārtoti ievadiet kartes drošības kodu.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Vai tiešām vēlaties noņemt šo saistīto kontu?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Noņemt karti</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Vai tiešām vēlaties noņemt šo karti?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

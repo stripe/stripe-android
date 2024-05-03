@@ -1,44 +1,53 @@
 package com.stripe.android.financialconnections.features.consent
 
-import android.webkit.URLUtil
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnections
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.ConsentAgree
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ConsentAgree
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.AcceptConsent
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.features.consent.ConsentState.BottomSheetContent
-import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.features.consent.ConsentState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
+import com.stripe.android.financialconnections.navigation.Destination
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
+import com.stripe.android.financialconnections.ui.HandleClickableUrl
 import com.stripe.android.financialconnections.utils.Experiment.CONNECTIONS_CONSENT_COMBINED_LOGO
-import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.experimentAssignment
 import com.stripe.android.financialconnections.utils.trackExposure
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.launch
 import java.util.Date
-import javax.inject.Inject
 
-internal class ConsentViewModel @Inject constructor(
-    initialState: ConsentState,
+internal class ConsentViewModel @AssistedInject constructor(
+    @Assisted initialState: ConsentState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val acceptConsent: AcceptConsent,
     private val getOrFetchSync: GetOrFetchSync,
     private val navigationManager: NavigationManager,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
-    private val uriUtils: UriUtils,
-    private val logger: Logger
-) : MavericksViewModel<ConsentState>(initialState) {
+    private val handleClickableUrl: HandleClickableUrl,
+    private val logger: Logger,
+    private val presentNoticeSheet: PresentNoticeSheet,
+) : FinancialConnectionsViewModel<ConsentState>(initialState, nativeAuthFlowCoordinator) {
 
     init {
         logErrors()
@@ -56,88 +65,96 @@ internal class ConsentViewModel @Inject constructor(
         }.execute { copy(consent = it) }
     }
 
+    override fun updateTopAppBar(state: ConsentState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = Pane.CONSENT,
+            hideStripeLogo = state.consent()?.shouldShowMerchantLogos ?: true,
+            allowBackNavigation = true,
+            error = state.consent.error,
+        )
+    }
+
     private fun logErrors() {
         onAsync(
             ConsentState::consent,
-            onSuccess = { eventTracker.track(FinancialConnectionsEvent.PaneLoaded(Pane.CONSENT)) },
+            onSuccess = { eventTracker.track(PaneLoaded(Pane.CONSENT)) },
             onFail = { logger.error("Error retrieving consent content", it) }
         )
         onAsync(ConsentState::acceptConsent, onFail = {
-            eventTracker.track(Error(Pane.CONSENT, it))
-            logger.error("Error accepting consent", it)
+            eventTracker.logError(
+                extraMessage = "Error accepting consent",
+                error = it,
+                logger = logger,
+                pane = Pane.CONSENT
+            )
         })
     }
 
     fun onContinueClick() {
         suspend {
             eventTracker.track(ConsentAgree)
+            FinancialConnections.emitEvent(Name.CONSENT_ACQUIRED)
             val updatedManifest: FinancialConnectionsSessionManifest = acceptConsent()
-            navigationManager.navigate(
-                NavigateToRoute(updatedManifest.nextPane.toNavigationCommand())
-            )
+            navigationManager.tryNavigateTo(updatedManifest.nextPane.destination(referrer = Pane.CONSENT))
+            updatedManifest
         }.execute { copy(acceptConsent = it) }
     }
 
-    fun onClickableTextClick(uri: String) {
-        // if clicked uri contains an eventName query param, track click event.
-        viewModelScope.launch {
-            uriUtils.getQueryParameter(uri, "eventName")?.let { eventName ->
-                eventTracker.track(Click(eventName, pane = Pane.CONSENT))
-            }
-            val date = Date()
-            if (URLUtil.isNetworkUrl(uri)) {
-                setState { copy(viewEffect = OpenUrl(uri, date.time)) }
-            } else {
-                val managedUri = ConsentClickableText.values()
-                    .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
-                when (managedUri) {
-                    ConsentClickableText.DATA -> {
-                        setState {
-                            copy(
-                                currentBottomSheet = BottomSheetContent.DATA,
-                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                            )
-                        }
-                    }
+    fun onClickableTextClick(uri: String) = viewModelScope.launch {
+        val date = Date()
+        handleClickableUrl(
+            currentPane = Pane.CONSENT,
+            uri = uri,
+            onNetworkUrlClicked = { setState { copy(viewEffect = OpenUrl(uri, date.time)) } },
+            knownDeeplinkActions = mapOf(
+                // Clicked on the "Data Access" link -> Open the Data Access bottom sheet
+                ConsentClickableText.DATA.value to {
+                    presentDataAccessBottomSheet()
+                },
+                // Clicked on the "Legal details" link -> Open the Legal Details bottom sheet
+                ConsentClickableText.LEGAL_DETAILS.value to {
+                    presentLegalDetailsBottomSheet()
+                },
+                // Clicked on the "Manual entry" link -> Navigate to the Manual Entry screen
+                ConsentClickableText.MANUAL_ENTRY.value to {
+                    navigationManager.tryNavigateTo(Destination.ManualEntry(referrer = Pane.CONSENT))
+                },
+            )
+        )
+    }
 
-                    ConsentClickableText.MANUAL_ENTRY -> {
-                        navigationManager.navigate(
-                            NavigateToRoute(NavigationDirections.manualEntry)
-                        )
-                    }
+    private fun presentDataAccessBottomSheet() {
+        val dataAccessNotice = stateFlow.value.consent()?.consent?.dataAccessNotice ?: return
+        presentNoticeSheet(
+            content = DataAccess(dataAccessNotice),
+            referrer = Pane.CONSENT,
+        )
+    }
 
-                    ConsentClickableText.LEGAL_DETAILS -> {
-                        setState {
-                            copy(
-                                currentBottomSheet = BottomSheetContent.LEGAL,
-                                viewEffect = ViewEffect.OpenBottomSheet(date.time)
-                            )
-                        }
-                    }
-
-                    null -> logger.error("Unrecognized clickable text: $uri")
-                }
-            }
-        }
+    private fun presentLegalDetailsBottomSheet() {
+        val notice = stateFlow.value.consent()?.consent?.legalDetailsNotice ?: return
+        presentNoticeSheet(
+            content = Legal(notice),
+            referrer = Pane.CONSENT,
+        )
     }
 
     fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
     }
 
-    companion object : MavericksViewModelFactory<ConsentViewModel, ConsentState> {
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: ConsentState): ConsentViewModel
+    }
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: ConsentState
-        ): ConsentViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .consentBuilder
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+    companion object {
+
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent.consentViewModelFactory.create(ConsentState())
+                }
+            }
     }
 }

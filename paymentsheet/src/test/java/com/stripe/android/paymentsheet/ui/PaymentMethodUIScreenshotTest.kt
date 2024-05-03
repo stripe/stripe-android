@@ -4,11 +4,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.PaymentMethodUI
+import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.R
-import com.stripe.android.utils.screenshots.FontSize
-import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.Mockito.mock
@@ -16,9 +16,9 @@ import org.mockito.Mockito.mock
 internal class PaymentMethodUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
-        SystemAppearance.values(),
-        PaymentSheetAppearance.values(),
-        FontSize.values(),
+        SystemAppearance.entries,
+        PaymentSheetAppearance.entries,
+        FontSize.entries,
         boxModifier = Modifier
             .padding(16.dp)
     )
@@ -35,7 +35,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = true,
                 isEnabled = true,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -54,7 +53,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = true,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -73,7 +71,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = false,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -92,7 +89,6 @@ internal class PaymentMethodUIScreenshotTest {
                 isSelected = false,
                 isEnabled = false,
                 tintOnSelected = true,
-                itemIndex = 0,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )

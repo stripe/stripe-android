@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
@@ -18,13 +18,17 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+    implementation libs.androidx.viewModel
 
-    kapt libs.daggerCompiler
+    compileOnly libs.androidx.workManager
+
+    ksp libs.daggerCompiler
 
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.testRunner
+    testImplementation testLibs.androidx.workManager
     testImplementation testLibs.json
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations

@@ -126,7 +126,7 @@ class CameraView : ConstraintLayout {
             R.styleable.StripeCameraView
         ) {
             viewFinderType =
-                ViewFinderType.values()[getInt(R.styleable.StripeCameraView_stripeViewFinderType, 0)]
+                ViewFinderType.entries[getInt(R.styleable.StripeCameraView_stripeViewFinderType, 0)]
             borderDrawable =
                 getResourceId(
                     R.styleable.StripeCameraView_stripeBorderDrawable,

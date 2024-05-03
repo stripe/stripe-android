@@ -53,11 +53,16 @@ class InlineSignupViewModelTest {
                     stripeIntent = mockStripeIntent(),
                     merchantName = MERCHANT_NAME,
                     merchantCountryCode = "US",
-                    customerEmail = CUSTOMER_EMAIL,
-                    customerPhone = CUSTOMER_PHONE,
-                    customerName = CUSTOMER_NAME,
-                    customerBillingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+                    customerInfo = LinkConfiguration.CustomerInfo(
+                        email = CUSTOMER_EMAIL,
+                        phone = CUSTOMER_PHONE,
+                        name = CUSTOMER_NAME,
+                        billingCountryCode = CUSTOMER_BILLING_COUNTRY_CODE,
+                    ),
                     shippingValues = null,
+                    signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+                    passthroughModeEnabled = false,
+                    flags = emptyMap(),
                 ),
                 linkAccountManager = linkAccountManager,
                 linkEventsReporter = linkEventsReporter,
@@ -68,8 +73,8 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             viewModel.toggleExpanded()
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 1) // Trigger lookup by waiting for delay.
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 1) // Trigger lookup by waiting for delay.
+            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
             assertThat(viewModel.emailController.fieldValue.first()).isEqualTo(CUSTOMER_EMAIL)
             assertThat(viewModel.phoneController.fieldValue.first()).isEqualTo(CUSTOMER_PHONE)
 
@@ -87,7 +92,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.failure(APIConnectionException()))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.useLink).isEqualTo(false)
 
@@ -97,7 +102,7 @@ class InlineSignupViewModelTest {
             viewModel.emailController.onRawValueChange("valid2@email.com")
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.useLink).isEqualTo(true)
         }
@@ -120,7 +125,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(linkAccount))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isEqualTo(UserInput.SignIn(email))
         }
@@ -136,10 +141,10 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isNull()
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
+            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
         }
 
     @Test
@@ -156,7 +161,7 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
             assertThat(viewModel.viewState.value.userInput).isNull()
 
@@ -164,7 +169,15 @@ class InlineSignupViewModelTest {
             viewModel.phoneController.onRawValueChange(phone)
 
             assertThat(viewModel.viewState.value.userInput)
-                .isEqualTo(UserInput.SignUp(email, "+1$phone", "US", name = null))
+                .isEqualTo(
+                    UserInput.SignUp(
+                        email = email,
+                        phone = "+1$phone",
+                        country = "US",
+                        name = null,
+                        consentAction = SignUpConsentAction.Checkbox
+                    )
+                )
 
             viewModel.phoneController.onRawValueChange("")
 
@@ -191,9 +204,9 @@ class InlineSignupViewModelTest {
                 .thenReturn(Result.success(null))
 
             // Advance past lookup debounce delay
-            advanceTimeBy(Debouncer.LOOKUP_DEBOUNCE_MS + 100)
+            advanceTimeBy(LOOKUP_DEBOUNCE_MS + 100)
 
-            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingPhoneOrName)
+            assertThat(viewModel.viewState.value.signUpState).isEqualTo(SignUpState.InputtingRemainingFields)
             verify(linkEventsReporter).onSignupStarted(true)
         }
 
@@ -210,7 +223,8 @@ class InlineSignupViewModelTest {
                 email = "valid@email.com",
                 phone = "+11234567890",
                 country = CountryCode.US.value,
-                name = null
+                name = null,
+                consentAction = SignUpConsentAction.Checkbox
             )
         )
     }
@@ -234,7 +248,8 @@ class InlineSignupViewModelTest {
                     email = "valid@email.com",
                     phone = "+11234567890",
                     country = CountryCode.CA.value,
-                    name = "Someone from Canada"
+                    name = "Someone from Canada",
+                    consentAction = SignUpConsentAction.Checkbox
                 )
             )
         }
@@ -254,7 +269,8 @@ class InlineSignupViewModelTest {
             email = CUSTOMER_EMAIL,
             phone = "+44$CUSTOMER_PHONE",
             country = CountryCode.GB.value,
-            name = CUSTOMER_NAME
+            name = CUSTOMER_NAME,
+            consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
         )
 
         assertThat(viewModel.viewState.value.userInput).isEqualTo(expectedInput)
@@ -275,21 +291,147 @@ class InlineSignupViewModelTest {
         assertThat(viewModel.viewState.value.userInput).isNotNull()
     }
 
+    @Test
+    fun `Action is 'Checkbox' when 'InsteadOfSaveForFutureUse' and no prefilled input`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            )
+
+            viewModel.nameController.onValueChange(CUSTOMER_NAME)
+            viewModel.emailController.onValueChange(CUSTOMER_EMAIL)
+            viewModel.phoneController.onValueChange(CUSTOMER_PHONE)
+
+            assertThat(viewModel.viewState.value.userInput)
+                .isEqualTo(
+                    UserInput.SignUp(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = "+1$CUSTOMER_PHONE",
+                        country = CountryCode.US.value,
+                        consentAction = SignUpConsentAction.Checkbox
+                    )
+                )
+        }
+
+    @Test
+    fun `Action is 'CheckboxWithPrefilledEmail' when 'InsteadOfSaveForFutureUse' and prefilled email`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                prefilledEmail = CUSTOMER_EMAIL,
+                countryCode = CountryCode.US,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            )
+
+            viewModel.nameController.onValueChange(CUSTOMER_NAME)
+            viewModel.phoneController.onValueChange(CUSTOMER_PHONE)
+
+            assertThat(viewModel.viewState.value.userInput)
+                .isEqualTo(
+                    UserInput.SignUp(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = "+1$CUSTOMER_PHONE",
+                        country = CountryCode.US.value,
+                        consentAction = SignUpConsentAction.CheckboxWithPrefilledEmail
+                    )
+                )
+        }
+
+    @Test
+    fun `Action is 'CheckboxWithPrefilledEmailAndPhone' when 'InsteadOfSaveForFutureUse' and filled email & phone`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                prefilledEmail = CUSTOMER_EMAIL,
+                prefilledPhone = "+1$CUSTOMER_PHONE",
+                countryCode = CountryCode.US,
+                signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            )
+
+            viewModel.nameController.onValueChange(CUSTOMER_NAME)
+
+            assertThat(viewModel.viewState.value.userInput)
+                .isEqualTo(
+                    UserInput.SignUp(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = "+1$CUSTOMER_PHONE",
+                        country = CountryCode.US.value,
+                        consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone
+                    )
+                )
+        }
+
+    @Test
+    fun `Action is 'Implied' when 'InsteadOfSaveForFutureUse'`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            )
+
+            viewModel.nameController.onValueChange(CUSTOMER_NAME)
+            viewModel.emailController.onValueChange(CUSTOMER_EMAIL)
+            viewModel.phoneController.onValueChange(CUSTOMER_PHONE)
+
+            assertThat(viewModel.viewState.value.userInput)
+                .isEqualTo(
+                    UserInput.SignUp(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = "+1$CUSTOMER_PHONE",
+                        country = CountryCode.US.value,
+                        consentAction = SignUpConsentAction.Implied
+                    )
+                )
+        }
+
+    @Test
+    fun `Action is 'ImpliedWithPrefilledEmail' when 'InsteadOfSaveForFutureUse' & prefilled email`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                countryCode = CountryCode.US,
+                prefilledEmail = CUSTOMER_EMAIL,
+                signupMode = LinkSignupMode.AlongsideSaveForFutureUse,
+            )
+
+            viewModel.nameController.onValueChange(CUSTOMER_NAME)
+            viewModel.phoneController.onValueChange(CUSTOMER_PHONE)
+
+            assertThat(viewModel.viewState.value.userInput)
+                .isEqualTo(
+                    UserInput.SignUp(
+                        name = CUSTOMER_NAME,
+                        email = CUSTOMER_EMAIL,
+                        phone = "+1$CUSTOMER_PHONE",
+                        country = CountryCode.US.value,
+                        consentAction = SignUpConsentAction.ImpliedWithPrefilledEmail
+                    )
+                )
+        }
+
     private fun createViewModel(
         countryCode: CountryCode = CountryCode.US,
         prefilledEmail: String? = null,
         prefilledName: String? = null,
-        prefilledPhone: String? = null
+        prefilledPhone: String? = null,
+        signupMode: LinkSignupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
     ) = InlineSignupViewModel(
         config = LinkConfiguration(
             stripeIntent = mockStripeIntent(countryCode),
             merchantName = MERCHANT_NAME,
             merchantCountryCode = "US",
-            customerEmail = prefilledEmail,
-            customerName = prefilledName,
-            customerPhone = prefilledPhone,
-            customerBillingCountryCode = null,
+            customerInfo = LinkConfiguration.CustomerInfo(
+                email = prefilledEmail,
+                phone = prefilledPhone,
+                name = prefilledName,
+                billingCountryCode = null,
+            ),
             shippingValues = null,
+            signupMode = signupMode,
+            passthroughModeEnabled = false,
+            flags = emptyMap(),
         ),
         linkAccountManager = linkAccountManager,
         linkEventsReporter = linkEventsReporter,
@@ -322,7 +464,7 @@ class InlineSignupViewModelTest {
         val canada = countryDropdownController.displayItems.indexOfFirst {
             it.contains("Canada")
         }
-        onSelectedCountryIndex(canada)
+        countryDropdownController.onValueChange(canada)
     }
 
     private companion object {

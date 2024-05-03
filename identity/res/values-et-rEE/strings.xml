@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <resources>
+  <!-- title for accepted types of ids -->
+  <string name="stripe_accepted_forms_of_id">Aktsepteeritud isikut tõendavad dokumendid</string>
+  <!-- title for accepted types of ids prefix -->
+  <string name="stripe_accepted_forms_of_id_include">Aktsepteeritud isikut tõendavad dokumendid hõlmavad järgmist</string>
+  <!-- Instructional text when user needs to align the edge with camera -->
+  <string name="stripe_align_document">Hoidke isikut tõendavat dokumenti rõhtsalt</string>
   <!-- Opens the app's settings in the Settings app -->
   <string name="stripe_app_settings">Rakenduse sätted</string>
   <!-- Description of back of driver's license image -->
@@ -19,22 +25,49 @@
   <string name="stripe_check_mark">Dokumendi edukat jäädvustamist tähistav märge</string>
   <!-- Text for choosing a photo from gallery -->
   <string name="stripe_choose_file">Vali foto</string>
+  <!-- Close button text -->
+  <string name="stripe_close_button_text">sule</string>
+  <!-- Button to complete with test data -->
+  <string name="stripe_complete_with_test_data">Täida testandmetega</string>
+  <!-- Description for complete button on test mode -->
+  <string name="stripe_complete_with_test_data_details">Säästke aega, valides soovitud tulemuse ja täites koheselt selle tulemusega. Mobiilne SDK voog tagastab tulemuse Lõpetatud.</string>
   <!-- Line1 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body1">Meil ei õnnestunud teha kõrge kvaliteediga pilti.</string>
   <!-- Line2 body text of error screen when live capture fails -->
   <string name="stripe_could_not_capture_body2">Võite kas uuesti proovida või pildi oma seadmest üles laadida.</string>
   <!-- Error title displayed to the user if we could not scan a high quality image of the user's identity document in a reasonable amount of time -->
   <string name="stripe_could_not_capture_title">Pilti ei saanud teha</string>
+  <!-- Instructional text when environment is too bright -->
+  <string name="stripe_decrease_lighting">Üksikasjad pole nähtavad</string>
+  <string name="stripe_decrease_lighting_2">Liikuge pimedamasse kohta</string>
+  <!-- Content description for camera icon -->
+  <string name="stripe_description_camera">kaamera ikoon</string>
   <!-- Description of the clock icon, used for A11Y -->
   <string name="stripe_description_clock">Kellaikoon</string>
   <!-- Content description for close button -->
   <string name="stripe_description_close">sulge kinnitusleht</string>
+  <!-- Content description for cloud icon -->
+  <string name="stripe_description_cloud">pilve ikoon</string>
+  <!-- Content description for create_identity_verification icon -->
+  <string name="stripe_description_create_identity_verification">create_identity_verification ikoon</string>
+  <!-- Content description for dispute_protection icon -->
+  <string name="stripe_description_dispute_protection">dispute_protection ikoon</string>
+  <!-- Content description for document icon -->
+  <string name="stripe_description_document">dokumendi ikoon</string>
+  <!-- Content description for ellipsis icon -->
+  <string name="stripe_description_ellipsis">kolmikpunkti ikoon</string>
   <!-- Content description for exclamation icon -->
   <string name="stripe_description_exclamation">hüüumärgi ikoon</string>
   <!-- Content description for back button -->
   <string name="stripe_description_go_back">mine tagasi eelmisele ekraanile</string>
+  <!-- Content description for lock icon -->
+  <string name="stripe_description_lock">luku ikoon</string>
   <!-- Content description for merchant logo -->
   <string name="stripe_description_merchant_logo">Kaupleja logo</string>
+  <!-- Content description for moved icon -->
+  <string name="stripe_description_moved">liigutatud ikoon</string>
+  <!-- Content description for phone icon -->
+  <string name="stripe_description_phone">telefoni ikoon</string>
   <!-- Content description for plus icon -->
   <string name="stripe_description_plus">plussikoon</string>
   <!-- Content description for the icon for privacy policy -->
@@ -43,8 +76,14 @@
   <string name="stripe_description_stripe_logo">stripe\'i logo</string>
   <!-- Content description for the icon for estimated time to complete verification -->
   <string name="stripe_description_time_estimate">hinnanguline aeg kinnitamise lõpuleviimiseks</string>
+  <!-- Content description for wallet icon -->
+  <string name="stripe_description_wallet">rahakoti ikoon</string>
   <!-- Label for Date of birth field -->
   <string name="stripe_dob">Sünnikuupäev</string>
+  <!-- Body for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_body">Veenduge, et oleksite hästi valgustatud kohas.</string>
+  <!-- Title for doc front warmup page -->
+  <string name="stripe_doc_front_warmup_title">Valmistuge oma fotoga isikut tõendava dokumendi skannimiseks</string>
   <!-- Label of the driver's license option for document type selection -->
   <string name="stripe_driver_license">Juhiluba</string>
   <!-- Text for error labels -->
@@ -71,6 +110,8 @@
   <string name="stripe_front_of_id_selected">Valitud on ID-kaardi esikülg</string>
   <!-- Button to go back to the previous screen -->
   <string name="stripe_go_back">Mine tagasi</string>
+  <!-- display name for Government issued photo ID -->
+  <string name="stripe_government_id">Riigi poolt väljastatud fotoga isikut tõendav dokument</string>
   <!-- Text displayed when requesting camera permissions -->
   <string name="stripe_grant_camera_permission_text">Vajame teie kaamera kasutamiseks luba. Andke rakenduse sätete kaudu juurdepääs kaamerale.</string>
   <!-- Instructional text when camera is focusing on a document while scanning it -->
@@ -79,12 +120,18 @@
   <string name="stripe_id_card">ID-kaart</string>
   <!-- Label for ID number section -->
   <string name="stripe_id_number">Isikukood</string>
+  <!-- I'm ready button text -->
+  <string name="stripe_im_ready">Olen valmis jätkama</string>
   <!-- An error message. -->
   <string name="stripe_incomplete_id_number">Sisestatud isikukood on puudulik.</string>
+  <!-- Instructional text when environment is too dark -->
+  <string name="stripe_increase_lighting">Liikuge hästi valgustatud kohta</string>
   <!-- Label for the ID field to collect individual CPF for Brazilian ID -->
   <string name="stripe_individual_cpf">Eraisiku CPF</string>
   <!-- Message for invalid Date of birth field -->
   <string name="stripe_invalid_dob_error">Sünnikuupäev ei näi olevat õige</string>
+  <!-- Instructional text when user needs remove anything blocking the document -->
+  <string name="stripe_keep_fully_visible">Üksikasjad pole nähtavad</string>
   <!-- Continue button text -->
   <string name="stripe_kontinue">jätka</string>
   <!-- Label for the ID field to collect last 4 of social security number for US ID -->
@@ -93,6 +140,10 @@
   <string name="stripe_last_name">Viimane</string>
   <!-- Status while screen is loading -->
   <string name="stripe_loading">Laadimine</string>
+  <!-- Instructional text when camera is too far from a document -->
+  <string name="stripe_move_closer">Asetage isikut tõendav dokument kaamerale lähemale</string>
+  <!-- Instructional text when camera is too close to a document -->
+  <string name="stripe_move_farther">Asetage isikut tõendav dokument kaamerast kaugemale</string>
   <!-- Label for the ID field to collect NRIC or FIN for Singaporean ID -->
   <string name="stripe_nric_or_fin">NRIC või FIN</string>
   <!-- No comment provided by engineer. -->
@@ -101,6 +152,10 @@
   <string name="stripe_passport">Pass</string>
   <!-- Description of the checkmark to indicate passport uploaded, used for A11Y -->
   <string name="stripe_passport_selected">Valitud on pass</string>
+  <!-- Section title for collection phone number -->
+  <string name="stripe_phone_number">Telefoninumber</string>
+  <!-- Instructional text when there is no document in camera frame -->
+  <string name="stripe_point_camera_to_document">Dokumenti ei tuvastatud</string>
   <!-- Instructional text for scanning back of a driver's license -->
   <string name="stripe_position_dl_back">Pöörake juhiluba ümber</string>
   <!-- Instructional text for scanning front of a driver's license -->
@@ -113,8 +168,15 @@
   <string name="stripe_position_passport">Jälgige, et pass oleks raami keskel</string>
   <!-- Instructional text for capturing selfie -->
   <string name="stripe_position_selfie">Jälgige, et nägu oleks raami keskel.</string>
+  <!-- Instructional text when the document is too blurry -->
+  <string name="stripe_reduce_blur">ID ei ole fookuses</string>
+  <!-- Instructional text when the document has too much glare -->
+  <string name="stripe_reduce_glare">Üksikasjad pole nähtavad</string>
+  <string name="stripe_reduce_glare_2">Proovige vähendada läiget ja veenduge, et ID oleks nähtav</string>
   <!-- Button text displayed to the user to retake photo -->
   <string name="stripe_retake_photos">Tee fotod uuesti</string>
+  <!-- Instructional text when user needs to rotate the document to align with camera -->
+  <string name="stripe_rotate_document">Hoidke isikut tõendavat dokumenti rõhtsalt</string>
   <!-- State when identity document has been successfully scanned -->
   <string name="stripe_scanned">Skannitud</string>
   <!-- Label of a button displayed below a payment method form. Tapping the button closes the form and uses the entered payment method details for checkout in the next step -->
@@ -127,12 +189,22 @@
   <string name="stripe_selfie_item_description">jäädvustatud üks selfi</string>
   <!-- Text for message of warning alert when selfie is not yet saved -->
   <string name="stripe_selfie_not_saved_warning">Teie selfi pilte pole salvestatud. Kas soovite lahkuda?</string>
+  <!-- Body for selfie warmup page -->
+  <string name="stripe_selfie_warmup_body">Järgmises etapis tehakse automaatselt mõned fotod, et kinnitada, et see olete teie</string>
+  <!-- Title for selfie warmup page -->
+  <string name="stripe_selfie_warmup_title">Valmistuge tegema selfit</string>
   <!-- When selected in an action sheet, opens the device's camera interface -->
   <string name="stripe_take_photo">Pildista</string>
+  <!-- Description for test mode -->
+  <string name="stripe_test_model_content">Seda lehte saab vaadata ainult testrežiimis.</string>
+  <!-- Title for test mode -->
+  <string name="stripe_test_model_title">Te olete praegu testrežiimis</string>
   <!-- Button to attempt to re-scan identity document image -->
   <string name="stripe_try_again">Proovi uuesti</string>
   <!-- Unexpected error, such as a 500 from Stripe or a JSON parse error -->
   <string name="stripe_unexpected_error_try_again">Esines ootamatu tõrge – proovige mõne sekundi pärast uuesti</string>
+  <!-- Description to upload a photo -->
+  <string name="stripe_upload_a_photo">Laadige üles foto</string>
   <!-- Title of dialog to upload back of driver license -->
   <string name="stripe_upload_dialog_title_dl_back">Juhiloa tagakülje üleslaadimine</string>
   <!-- Title of dialog to upload front of driver license -->
@@ -143,6 +215,10 @@
   <string name="stripe_upload_dialog_title_id_front">ID-kaardi esikülje üleslaadimine</string>
   <!-- Title of dialog to upload passport -->
   <string name="stripe_upload_dialog_title_passport">Passi üleslaadimine</string>
+  <!-- Generic message for alternative options when uploading a document -->
+  <string name="stripe_upload_file_generic_text">Samuti võite oma foto ID-st foto käsitsi üles laadida</string>
   <!-- Message for alternative options when uploading a document -->
   <string name="stripe_upload_file_text">Samuti võite oma %1$s foto käsitsi üles laadida</string>
+  <!-- Title of document upload screen -->
+  <string name="stripe_upload_your_photo_id">Laadige üles fotoga isikut tõendav dokument</string>
 </resources>

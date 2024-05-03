@@ -1,8 +1,7 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import android.content.Context
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.SavedStateHandle
 import androidx.test.core.app.ApplicationProvider
 import app.cash.turbine.Turbine
 import com.google.common.truth.Truth.assertThat
@@ -18,10 +17,10 @@ import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
+import com.stripe.android.testing.SessionTestRule
 import com.stripe.android.utils.FakePaymentSheetLoader
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import com.stripe.android.utils.RelayingPaymentSheetLoader
-import com.stripe.android.view.ActivityScenarioFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
@@ -36,10 +35,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.Mockito.isNull
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.robolectric.RobolectricTestRunner
 import kotlin.time.Duration.Companion.seconds
@@ -50,12 +49,14 @@ class FlowControllerConfigurationHandlerTest {
     @get:Rule
     val intentConfirmationInterceptorTestRule = IntentConfirmationInterceptorTestRule()
 
+    @get:Rule
+    val sessionRule = SessionTestRule()
+
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
     private val eventReporter = mock<EventReporter>()
 
     private val context = ApplicationProvider.getApplicationContext<Context>()
-    private val activityScenarioFactory = ActivityScenarioFactory(context)
     private lateinit var viewModel: FlowControllerViewModel
 
     @Before
@@ -63,11 +64,11 @@ class FlowControllerConfigurationHandlerTest {
         Dispatchers.setMain(testDispatcher)
 
         PaymentConfiguration.init(context, ApiKeyFixtures.FAKE_PUBLISHABLE_KEY)
-        val activityScenario = activityScenarioFactory.createAddPaymentMethodActivity()
-        activityScenario.moveToState(Lifecycle.State.CREATED)
-        activityScenario.onActivity { activity ->
-            viewModel = ViewModelProvider(activity)[FlowControllerViewModel::class.java]
-        }
+
+        viewModel = FlowControllerViewModel(
+            application = ApplicationProvider.getApplicationContext(),
+            handle = SavedStateHandle()
+        )
     }
 
     @After
@@ -98,7 +99,7 @@ class FlowControllerConfigurationHandlerTest {
         assertThat(viewModel.state).isNotNull()
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
         // Configure should regenerate the analytics sessionId.
         assertThat(beforeSessionId).isNotEqualTo(AnalyticsRequestFactory.sessionId)
@@ -136,7 +137,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running ONLY the second config run, so we don't expect any interactions.
         verify(eventReporter, never()).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
 
         // Configure should not regenerate the analytics sessionId when using the same configuration.
@@ -176,7 +177,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
     }
 
@@ -214,7 +215,7 @@ class FlowControllerConfigurationHandlerTest {
         // We're running a new config, so we DO expect an interaction.
         verify(eventReporter).onInit(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
-            isDecoupling = false,
+            isDeferred = false,
         )
     }
 
@@ -309,7 +310,7 @@ class FlowControllerConfigurationHandlerTest {
 
             val configurationHandler = createConfigurationHandler(
                 FakePaymentSheetLoader(
-                    customerPaymentMethods = emptyList(),
+                    customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
                     delay = 2.seconds,
                 )
             )
@@ -319,7 +320,7 @@ class FlowControllerConfigurationHandlerTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
                     ),
-                    configuration = null,
+                    configuration = PaymentSheet.Configuration("Some name"),
                 ) { _, _ ->
                     onInitCallbacks++
                 }
@@ -353,7 +354,7 @@ class FlowControllerConfigurationHandlerTest {
                         )
                     )
                 ),
-                configuration = null,
+                configuration = PaymentSheet.Configuration("Some name"),
                 callback = { _, _ ->
                     resultTurbine.add(amount)
                 },
@@ -380,7 +381,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
             callback = { _, _ ->
                 resultTurbine.add(Unit)
             },
@@ -404,7 +405,7 @@ class FlowControllerConfigurationHandlerTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = PaymentSheetFixtures.CLIENT_SECRET,
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, exception ->
             resultTurbine.add(exception)
         }
@@ -421,7 +422,7 @@ class FlowControllerConfigurationHandlerTest {
         configurationHandler.configure(
             scope = this,
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent("pi_123_sk_456"),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -429,8 +430,8 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = isNull(),
-            isDecoupling = eq(false),
+            configuration = any(),
+            isDeferred = eq(false),
         )
     }
 
@@ -453,7 +454,7 @@ class FlowControllerConfigurationHandlerTest {
                     ),
                 ),
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -461,8 +462,8 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = isNull(),
-            isDecoupling = eq(true),
+            configuration = any(),
+            isDeferred = eq(true),
         )
     }
 
@@ -486,7 +487,7 @@ class FlowControllerConfigurationHandlerTest {
                     ),
                 ),
             ),
-            configuration = null,
+            configuration = PaymentSheet.Configuration("Some name"),
         ) { _, _ ->
             configureTurbine.close()
         }
@@ -494,14 +495,14 @@ class FlowControllerConfigurationHandlerTest {
         configureTurbine.awaitComplete()
 
         verify(eventReporter).onInit(
-            configuration = isNull(),
-            isDecoupling = eq(true),
+            configuration = any(),
+            isDeferred = eq(true),
         )
     }
 
     private fun defaultPaymentSheetLoader(): PaymentSheetLoader {
         return FakePaymentSheetLoader(
-            customerPaymentMethods = emptyList(),
+            customer = PaymentSheetFixtures.EMPTY_CUSTOMER_STATE,
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             paymentSelection = PaymentSelection.Link,
             linkState = LinkState(

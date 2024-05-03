@@ -12,7 +12,7 @@ class NetworkTypeDetector private constructor(
 ) {
 
     constructor(context: Context) : this(
-        connectivityManager = context.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager,
+        connectivityManager = context.applicationContext.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager,
     )
 
     @Suppress("DEPRECATION")

@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.analytics
 
 import com.stripe.android.core.injection.IOContext
+import com.stripe.android.core.networking.AnalyticsEvent
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -19,8 +20,8 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
 
     override fun onPresented(configuration: FinancialConnectionsSheet.Configuration) {
         fireEvent(
-            FinancialConnectionsAnalyticsEvent(
-                FinancialConnectionsAnalyticsEvent.Code.SheetPresented,
+            Event(
+                Event.Code.SheetPresented,
                 mapOf(PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret)
             )
         )
@@ -32,8 +33,8 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
     ) {
         val event = when (financialConnectionsSheetResult) {
             is FinancialConnectionsSheetActivityResult.Completed ->
-                FinancialConnectionsAnalyticsEvent(
-                    FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
+                Event(
+                    Event.Code.SheetClosed,
                     mapOf(
                         PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "completed"
@@ -41,8 +42,8 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 )
 
             is FinancialConnectionsSheetActivityResult.Canceled ->
-                FinancialConnectionsAnalyticsEvent(
-                    FinancialConnectionsAnalyticsEvent.Code.SheetClosed,
+                Event(
+                    Event.Code.SheetClosed,
                     mapOf(
                         PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "cancelled"
@@ -50,8 +51,8 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                 )
 
             is FinancialConnectionsSheetActivityResult.Failed ->
-                FinancialConnectionsAnalyticsEvent(
-                    FinancialConnectionsAnalyticsEvent.Code.SheetFailed,
+                Event(
+                    Event.Code.SheetFailed,
                     mapOf(
                         PARAM_CLIENT_SECRET to configuration.financialConnectionsSessionClientSecret,
                         PARAM_SESSION_RESULT to "failure"
@@ -66,7 +67,7 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
         fireEvent(event)
     }
 
-    private fun fireEvent(event: FinancialConnectionsAnalyticsEvent) {
+    private fun fireEvent(event: Event) {
         CoroutineScope(workContext).launch {
             analyticsRequestExecutor.executeAsync(
                 analyticsRequestFactory.createRequest(
@@ -74,6 +75,29 @@ internal class DefaultFinancialConnectionsEventReporter @Inject constructor(
                     additionalParams = event.additionalParams
                 )
             )
+        }
+    }
+
+    private data class Event(
+        val eventCode: Code,
+        val additionalParams: Map<String, String> = emptyMap()
+    ) : AnalyticsEvent {
+
+        override val eventName: String = eventCode.toString()
+
+        enum class Code(internal val code: String) {
+
+            SheetPresented("sheet.presented"),
+            SheetClosed("sheet.closed"),
+            SheetFailed("sheet.failed");
+
+            override fun toString(): String {
+                return "$PREFIX.$code"
+            }
+
+            private companion object {
+                private const val PREFIX = "stripe_android.connections"
+            }
         }
     }
 

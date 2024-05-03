@@ -44,11 +44,11 @@ class DateConfig : TextFieldConfig {
                 }
                 else -> {
                     determineTextFieldState(
-                        requireNotNull(newString.take(2).toIntOrNull()),
-                        requireNotNull(newString.takeLast(2).toIntOrNull()),
+                        month1Based = requireNotNull(newString.take(2).toIntOrNull()),
+                        twoDigitYear = requireNotNull(newString.takeLast(2).toIntOrNull()),
                         // Calendar.getInstance().get(Calendar.MONTH) is 0-based, so add 1
-                        Calendar.getInstance().get(Calendar.MONTH) + 1,
-                        Calendar.getInstance().get(Calendar.YEAR)
+                        current1BasedMonth = Calendar.getInstance().get(Calendar.MONTH) + 1,
+                        currentYear = Calendar.getInstance().get(Calendar.YEAR),
                     )
                 }
             }
@@ -63,17 +63,23 @@ class DateConfig : TextFieldConfig {
             month1Based: Int,
             twoDigitYear: Int,
             current1BasedMonth: Int,
-            currentYear: Int
+            currentYear: Int,
         ): TextFieldState {
             val twoDigitCurrentYear = currentYear % 100
 
-            return if ((twoDigitYear - twoDigitCurrentYear) < 0) {
-                Error.Invalid(R.string.stripe_invalid_expiry_year)
-            } else if ((twoDigitYear - twoDigitCurrentYear) > 50) {
-                Error.Invalid(R.string.stripe_invalid_expiry_year)
-            } else if ((twoDigitYear - twoDigitCurrentYear) == 0 && current1BasedMonth > month1Based) {
-                Error.Invalid(R.string.stripe_invalid_expiry_month)
-            } else if (month1Based !in 1..12) {
+            val isExpiredYear = (twoDigitYear - twoDigitCurrentYear) < 0
+            val isYearTooLarge = (twoDigitYear - twoDigitCurrentYear) > 50
+
+            val isExpiredMonth = (twoDigitYear - twoDigitCurrentYear) == 0 && current1BasedMonth > month1Based
+            val isMonthInvalid = month1Based !in 1..12
+
+            return if (isExpiredYear) {
+                Error.Invalid(R.string.stripe_invalid_expiry_year, preventMoreInput = true)
+            } else if (isYearTooLarge) {
+                Error.Invalid(R.string.stripe_invalid_expiry_year, preventMoreInput = true)
+            } else if (isExpiredMonth) {
+                Error.Invalid(R.string.stripe_invalid_expiry_month, preventMoreInput = true)
+            } else if (isMonthInvalid) {
                 Error.Incomplete(R.string.stripe_invalid_expiry_month)
             } else {
                 Valid.Full

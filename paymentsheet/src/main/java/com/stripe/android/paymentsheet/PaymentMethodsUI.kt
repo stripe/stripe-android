@@ -29,14 +29,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
-import com.stripe.android.ui.core.forms.resources.LpmRepository.SupportedPaymentMethod
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
+import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 private object Spacing {
@@ -95,19 +95,18 @@ internal fun PaymentMethodsUI(
                 }
                 PaymentMethodUI(
                     modifier = Modifier.testTag(
-                        TEST_TAG_LIST + stringResource(item.displayNameResource)
+                        TEST_TAG_LIST + item.code
                     ),
                     minViewWidth = viewWidth,
                     iconRes = item.iconResource,
                     iconUrl = iconUrl,
                     imageLoader = imageLoader,
-                    title = stringResource(item.displayNameResource),
+                    title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
                     tintOnSelected = item.tintIconOnSelection,
-                    itemIndex = index,
                     onItemSelectedListener = {
-                        onItemSelectedListener(paymentMethods[it])
+                        onItemSelectedListener(paymentMethods[index])
                     }
                 )
             }
@@ -179,9 +178,8 @@ internal fun PaymentMethodUI(
     isSelected: Boolean,
     isEnabled: Boolean,
     tintOnSelected: Boolean,
-    itemIndex: Int,
     modifier: Modifier = Modifier,
-    onItemSelectedListener: (Int) -> Unit
+    onItemSelectedListener: () -> Unit
 ) {
     val color = if (isSelected) {
         MaterialTheme.colors.primary
@@ -205,7 +203,7 @@ internal fun PaymentMethodUI(
                     selected = isSelected,
                     enabled = isEnabled,
                     onClick = {
-                        onItemSelectedListener(itemIndex)
+                        onItemSelectedListener()
                     }
                 )
         ) {

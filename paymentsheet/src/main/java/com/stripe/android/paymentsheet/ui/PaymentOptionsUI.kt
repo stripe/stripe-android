@@ -1,6 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,12 +16,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.semantics.testTagsAsResourceId
+import androidx.compose.ui.semantics.text
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -44,6 +50,7 @@ internal fun PaymentOptions(
     isProcessing: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
+    onModifyItem: (PaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
     scrollState: LazyListState = rememberLazyListState(),
@@ -72,6 +79,7 @@ internal fun PaymentOptions(
                     onAddCardPressed = onAddCardPressed,
                     onItemSelected = onItemSelected,
                     onItemRemoved = onItemRemoved,
+                    onModifyItem = onModifyItem,
                     modifier = Modifier
                         .semantics { testTagsAsResourceId = true }
                         .testTag(item.viewType.name)
@@ -82,7 +90,7 @@ internal fun PaymentOptions(
     }
 }
 
-@Preview
+@Preview(widthDp = 700)
 @Composable
 private fun PaymentOptionsPreview() {
     DefaultStripeTheme {
@@ -95,7 +103,7 @@ private fun PaymentOptionsPreview() {
                     PaymentOptionsItem.SavedPaymentMethod(
                         displayName = "4242",
                         paymentMethod = PaymentMethod(
-                            id = "id",
+                            id = "001",
                             created = null,
                             liveMode = false,
                             code = PaymentMethod.Type.Card.code,
@@ -106,6 +114,16 @@ private fun PaymentOptionsPreview() {
                             )
                         )
                     ),
+                    PaymentOptionsItem.SavedPaymentMethod(
+                        displayName = "4242",
+                        paymentMethod = PaymentMethod(
+                            id = "002",
+                            created = null,
+                            liveMode = false,
+                            code = PaymentMethod.Type.SepaDebit.code,
+                            type = PaymentMethod.Type.SepaDebit,
+                        )
+                    ),
                 ),
                 selectedIndex = 1
             ),
@@ -113,6 +131,7 @@ private fun PaymentOptionsPreview() {
             isProcessing = false,
             onAddCardPressed = { },
             onItemSelected = { },
+            onModifyItem = { },
             onItemRemoved = { },
         )
     }
@@ -136,6 +155,7 @@ private fun PaymentOption(
     isSelected: Boolean,
     onAddCardPressed: () -> Unit,
     onItemSelected: (PaymentSelection?) -> Unit,
+    onModifyItem: (PaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -172,8 +192,10 @@ private fun PaymentOption(
                 width = width,
                 isEnabled = isEnabled,
                 isEditing = isEditing,
+                isModifiable = item.isModifiable,
                 isSelected = isSelected,
                 onItemSelected = onItemSelected,
+                onModifyItem = onModifyItem,
                 onItemRemoved = onItemRemoved,
                 modifier = modifier,
             )
@@ -196,7 +218,7 @@ private fun AddCard(
 
     PaymentOptionUi(
         viewWidth = width,
-        isEditing = false,
+        editState = PaymentOptionEditState.None,
         isSelected = false,
         isEnabled = isEnabled,
         labelText = stringResource(R.string.stripe_paymentsheet_add_payment_method_button_label),
@@ -217,7 +239,7 @@ private fun GooglePay(
 ) {
     PaymentOptionUi(
         viewWidth = width,
-        isEditing = false,
+        editState = PaymentOptionEditState.None,
         isSelected = isSelected,
         isEnabled = isEnabled,
         iconRes = R.drawable.stripe_google_pay_mark,
@@ -236,22 +258,13 @@ private fun Link(
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val surfaceColor = MaterialTheme.stripeColors.component
-    val linkLogoColor = remember(surfaceColor) {
-        if (surfaceColor.shouldUseDarkDynamicColor()) {
-            Color.Black
-        } else {
-            Color.White
-        }
-    }
-
     PaymentOptionUi(
         viewWidth = width,
-        isEditing = false,
+        editState = PaymentOptionEditState.None,
         isSelected = isSelected,
         isEnabled = isEnabled,
-        iconRes = R.drawable.stripe_link_mark,
-        iconTint = linkLogoColor,
+        iconRes = R.drawable.stripe_ic_paymentsheet_link,
+        iconTint = null,
         labelText = stringResource(StripeR.string.stripe_link),
         description = stringResource(StripeR.string.stripe_link),
         onItemSelectedListener = { onItemSelected(PaymentSelection.Link) },
@@ -265,8 +278,10 @@ private fun SavedPaymentMethod(
     width: Dp,
     isEnabled: Boolean,
     isEditing: Boolean,
+    isModifiable: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
+    onModifyItem: (PaymentMethod) -> Unit,
     onItemRemoved: (PaymentMethod) -> Unit,
     modifier: Modifier = Modifier,
 ) {
@@ -279,19 +294,37 @@ private fun SavedPaymentMethod(
         paymentMethod.displayName,
     )
 
-    PaymentOptionUi(
-        viewWidth = width,
-        isEditing = isEditing,
-        isSelected = isSelected,
-        isEnabled = isEnabled,
-        iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon() ?: 0,
-        labelIcon = labelIcon,
-        labelText = labelText,
-        removePmDialogTitle = removeTitle,
-        description = paymentMethod.getDescription(context.resources),
-        onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
-        onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
-        onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
-        modifier = modifier,
-    )
+    Box(
+        modifier = Modifier.semantics {
+            testTag = SAVED_PAYMENT_OPTION_TEST_TAG
+            selected = isSelected
+            text = AnnotatedString(labelText)
+        }
+    ) {
+        PaymentOptionUi(
+            viewWidth = width,
+            editState = when {
+                isEditing && isModifiable -> PaymentOptionEditState.Modifiable
+                isEditing -> PaymentOptionEditState.Removable
+                else -> PaymentOptionEditState.None
+            },
+            isSelected = isSelected,
+            isEnabled = isEnabled,
+            iconRes = paymentMethod.paymentMethod.getSavedPaymentMethodIcon(),
+            labelIcon = labelIcon,
+            labelText = labelText,
+            removePmDialogTitle = removeTitle,
+            description = paymentMethod.getDescription(context.resources),
+            onModifyListener = { onModifyItem(paymentMethod.paymentMethod) },
+            onModifyAccessibilityDescription = paymentMethod.getModifyDescription(context.resources),
+            onRemoveListener = { onItemRemoved(paymentMethod.paymentMethod) },
+            onRemoveAccessibilityDescription = paymentMethod.getRemoveDescription(context.resources),
+            onItemSelectedListener = { onItemSelected(paymentMethod.toPaymentSelection()) },
+            modifier = modifier,
+        )
+    }
 }
+
+@VisibleForTesting
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val SAVED_PAYMENT_OPTION_TEST_TAG = "PaymentSheetSavedPaymentOption"

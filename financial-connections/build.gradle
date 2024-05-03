@@ -1,6 +1,5 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
@@ -24,7 +23,6 @@ dependencies {
     api project(":stripe-ui-core")
     api project(":payments-model")
 
-    implementation libs.accompanist.webView
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
@@ -43,14 +41,12 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
-    implementation libs.mavericks
-    implementation libs.mavericksCompose
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
     debugImplementation libs.showkase
 
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     kspDebug libs.showkaseProcessor
 
@@ -66,7 +62,6 @@ dependencies {
     testImplementation testLibs.mockito.core
     testImplementation testLibs.mockito.inline
     testImplementation testLibs.mockito.kotlin
-    testImplementation testLibs.mavericks
     testImplementation testLibs.robolectric
     testImplementation testLibs.testParameterInjector
     testImplementation testLibs.turbine
@@ -79,7 +74,7 @@ dependencies {
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.truth
 
-    kaptAndroidTest libs.showkaseProcessor
+    kspAndroidTest libs.showkaseProcessor
 
     androidTestUtil testLibs.testOrchestrator
 }
@@ -91,8 +86,8 @@ android {
 
     kotlinOptions {
         freeCompilerArgs += [
-                "-Xopt-in=kotlin.RequiresOptIn",
-                "-Xopt-in=androidx.compose.material.ExperimentalMaterialApi"
+                "-opt-in=kotlin.RequiresOptIn",
+                "-opt-in=androidx.compose.material.ExperimentalMaterialApi"
         ]
     }
 

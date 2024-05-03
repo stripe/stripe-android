@@ -5,9 +5,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.account.LinkStore
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentOptionCallback
+import com.stripe.android.paymentsheet.PaymentOptionsActivity
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import java.util.concurrent.CountDownLatch
@@ -21,61 +24,75 @@ internal class FlowControllerTestRunnerContext(
     fun configureFlowController(
         block: PaymentSheet.FlowController.() -> Unit,
     ) {
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentOptionsActivity::class.java)
         scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
             flowController.block()
         }
+        activityLaunchObserver.awaitLaunch()
     }
 }
 
 internal fun runFlowControllerTest(
+    networkRule: NetworkRule,
+    integrationType: IntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     paymentOptionCallback: PaymentOptionCallback,
     resultCallback: PaymentSheetResultCallback,
     block: (FlowControllerTestRunnerContext) -> Unit,
 ) {
-    for (integrationType in FlowControllerTestFactory.IntegrationType.values()) {
-        val countDownLatch = CountDownLatch(1)
+    val countDownLatch = CountDownLatch(1)
 
-        val factory = FlowControllerTestFactory(
-            integrationType = integrationType,
-            createIntentCallback = createIntentCallback,
-            paymentOptionCallback = paymentOptionCallback,
-            resultCallback = { result ->
-                resultCallback.onPaymentSheetResult(result)
-                countDownLatch.countDown()
-            }
-        )
+    val factory = FlowControllerTestFactory(
+        integrationType = integrationType,
+        createIntentCallback = createIntentCallback,
+        paymentOptionCallback = paymentOptionCallback,
+        resultCallback = { result ->
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        }
+    )
 
-        runFlowControllerTest(
-            countDownLatch = countDownLatch,
-            makeFlowController = factory::make,
-            block = block,
-        )
-    }
+    runFlowControllerTest(
+        networkRule = networkRule,
+        countDownLatch = countDownLatch,
+        makeFlowController = factory::make,
+        block = block,
+    )
 }
 
 private fun runFlowControllerTest(
+    networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makeFlowController: (ComponentActivity) -> PaymentSheet.FlowController,
     block: (FlowControllerTestRunnerContext) -> Unit,
 ) {
-    val scenario = ActivityScenario.launch(MainActivity::class.java)
-    scenario.moveToState(Lifecycle.State.CREATED)
+    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        scenario.moveToState(Lifecycle.State.CREATED)
 
-    scenario.onActivity {
-        PaymentConfiguration.init(it, "pk_test_123")
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            LinkStore(it.applicationContext).clear()
+        }
+
+        var flowController: PaymentSheet.FlowController? = null
+
+        scenario.onActivity { activity ->
+            flowController = makeFlowController(activity)
+        }
+
+        scenario.moveToState(Lifecycle.State.RESUMED)
+
+        val testContext = FlowControllerTestRunnerContext(
+            scenario = scenario,
+            flowController = flowController ?: throw IllegalStateException(
+                "FlowController should have been created!"
+            )
+        )
+        block(testContext)
+
+        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+        networkRule.validate()
+        assertThat(didCompleteSuccessfully).isTrue()
     }
-
-    lateinit var flowController: PaymentSheet.FlowController
-    scenario.onActivity {
-        flowController = makeFlowController(it)
-    }
-
-    scenario.moveToState(Lifecycle.State.RESUMED)
-
-    val testContext = FlowControllerTestRunnerContext(scenario, flowController)
-    block(testContext)
-
-    assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
-    scenario.close()
 }

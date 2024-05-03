@@ -1,0 +1,133 @@
+{
+  "error": {
+    "code": "incorrect_cvc",
+    "doc_url": "https://stripe.com/docs/error-codes/incorrect-cvc",
+    "message": "Your card's security code is incorrect.",
+    "param": "cvc",
+    "payment_method": {
+      "id": "pm_1234",
+      "object": "payment_method",
+      "billing_details": {
+        "address": {
+          "city": "Seattle",
+          "country": "US",
+          "line1": "123 Main St.",
+          "line2": null,
+          "postal_code": "99999",
+          "state": null
+        },
+        "email": "jenny@example.com",
+        "name": "Jenny Rosen",
+        "phone": null
+      },
+      "card": {
+        "brand": "visa",
+        "checks": {
+          "address_line1_check": null,
+          "address_postal_code_check": null,
+          "cvc_check": null
+        },
+        "country": "US",
+        "display_brand": "visa",
+        "exp_month": 5,
+        "exp_year": 2025,
+        "funding": "credit",
+        "generated_from": null,
+        "last4": "0101",
+        "networks": {
+          "available": [
+            "visa"],
+          "preferred": null
+        },
+        "three_d_secure_usage": {
+          "supported": true
+        },
+        "wallet": null
+      },
+      "created": 1712347494,
+      "customer": null,
+      "livemode": false,
+      "type": "card"
+    },
+    "request_log_url": "https://dashboard.stripe.com/test/logs/req_1",
+    "setup_intent": {
+      "id": "seti_12345",
+      "object": "setup_intent",
+      "automatic_payment_methods": null,
+      "cancellation_reason": null,
+      "client_secret": "seti_12345_secret_12345",
+      "created": 1712347495,
+      "description": null,
+      "last_setup_error": {
+        "code": "incorrect_cvc",
+        "doc_url": "https://stripe.com/docs/error-codes/incorrect-cvc",
+        "message": "Your card's security code is incorrect.",
+        "param": "cvc",
+        "payment_method": {
+          "id": "pm_12345",
+          "object": "payment_method",
+          "billing_details": {
+            "address": {
+              "city": "Seattle",
+              "country": "US",
+              "line1": "123 Main St.",
+              "line2": null,
+              "postal_code": "99999",
+              "state": null
+            },
+            "email": "jenny@example.com",
+            "name": "Jenny Rosen",
+            "phone": null
+          },
+          "card": {
+            "brand": "visa",
+            "checks": {
+              "address_line1_check": null,
+              "address_postal_code_check": null,
+              "cvc_check": null
+            },
+            "country": "US",
+            "display_brand": "visa",
+            "exp_month": 5,
+            "exp_year": 2025,
+            "funding": "credit",
+            "generated_from": null,
+            "last4": "0101",
+            "networks": {
+              "available": [
+                "visa"
+              ],
+              "preferred": null
+            },
+            "three_d_secure_usage": {
+              "supported": true
+            },
+            "wallet": null
+          },
+          "created": 1712347494,
+          "customer": null,
+          "livemode": false,
+          "type": "card"
+        },
+        "type": "card_error"
+      },
+      "livemode": false,
+      "next_action": null,
+      "payment_method": null,
+      "payment_method_configuration_details": null,
+      "payment_method_options": {
+        "us_bank_account": {
+          "verification_method": "automatic"
+        }
+      },
+      "payment_method_types": [
+        "card",
+        "us_bank_account",
+        "sepa_debit"
+      ],
+      "status": "requires_payment_method",
+      "usage": "off_session"
+    },
+    "type": "card_error"
+  }
+}

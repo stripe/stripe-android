@@ -1,39 +1,75 @@
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.accountpicker
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Success
-import com.stripe.android.financialconnections.features.common.AccessibleDataCalloutModel
+import com.stripe.android.core.exception.APIException
+import com.stripe.android.financialconnections.exception.AccountNoneEligibleForPaymentMethodError
+import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
+import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
+import com.stripe.android.financialconnections.model.Bullet
+import com.stripe.android.financialconnections.model.ConnectedAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.DataAccessNoticeBody
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
+import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.PartnerAccount
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
 
 internal class AccountPickerPreviewParameterProvider :
     PreviewParameterProvider<AccountPickerState> {
     override val values = sequenceOf(
+        loading(),
+        error(),
         multiSelect(),
         singleSelect(),
-        singleSelectWithConfirm()
     )
 
     override val count: Int
         get() = super.count
+
+    private fun loading() = AccountPickerState(
+        payload = Loading(),
+        selectedIds = emptySet(),
+    )
+
+    private fun error() = AccountPickerState(
+        payload = Fail(
+            AccountNoneEligibleForPaymentMethodError(
+                accountsCount = 1,
+                institution = FinancialConnectionsInstitution(
+                    id = "2",
+                    name = "Institution 2",
+                    url = "Institution 2 url",
+                    featured = false,
+                    featuredOrder = null,
+                    icon = null,
+                    logo = null,
+                    mobileHandoffCapable = false
+                ),
+                merchantName = "Merchant name",
+                stripeException = APIException()
+            )
+        ),
+        selectedIds = emptySet(),
+    )
 
     private fun multiSelect() = AccountPickerState(
         payload = Success(
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.CHECKBOXES,
-                accessibleData = accessibleCallout(),
+                dataAccessNotice = dataAccessNotice(),
+                selectionMode = SelectionMode.Multiple,
+                merchantDataAccess = accessibleCallout(),
                 singleAccount = false,
                 stripeDirect = false,
                 businessName = "Random business",
                 userSelectedSingleAccountInInstitution = false,
-                requiresSingleAccountConfirmation = false
             )
         ),
-        selectedIds = setOf("id1"),
+        selectedIds = setOf("id1", "id3"),
     )
 
     private fun singleSelect() = AccountPickerState(
@@ -41,33 +77,46 @@ internal class AccountPickerPreviewParameterProvider :
             AccountPickerState.Payload(
                 skipAccountSelection = false,
                 accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.RADIO,
-                accessibleData = accessibleCallout(),
+                dataAccessNotice = dataAccessNotice(),
+                selectionMode = SelectionMode.Single,
+                merchantDataAccess = accessibleCallout(),
                 singleAccount = true,
                 stripeDirect = false,
                 businessName = "Random business",
                 userSelectedSingleAccountInInstitution = false,
-                requiresSingleAccountConfirmation = false
             )
         ),
         selectedIds = setOf("id1"),
     )
 
-    private fun singleSelectWithConfirm() = AccountPickerState(
-        payload = Success(
-            AccountPickerState.Payload(
-                skipAccountSelection = false,
-                accounts = partnerAccountList(),
-                selectionMode = AccountPickerState.SelectionMode.RADIO,
-                accessibleData = accessibleCallout(),
-                singleAccount = true,
-                stripeDirect = false,
-                businessName = "Random business",
-                userSelectedSingleAccountInInstitution = false,
-                requiresSingleAccountConfirmation = true
+    private fun dataAccessNotice() = DataAccessNotice(
+        icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+        title = "Goldilocks uses Stripe to link your accounts",
+        subtitle = "Goldilocks will use your account and routing number, balances and transactions:",
+        body = DataAccessNoticeBody(
+            bullets = bullets()
+        ),
+        disclaimer = "Learn more about data access",
+        connectedAccountNotice = ConnectedAccessNotice(
+            subtitle = "Connected account placeholder",
+            body = DataAccessNoticeBody(
+                bullets = bullets()
             )
         ),
-        selectedIds = setOf("id1"),
+        cta = "OK"
+    )
+
+    private fun bullets() = listOf(
+        Bullet(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+            title = "Account details",
+            content = "Account number, routing number, account type, account nickname."
+        ),
+        Bullet(
+            icon = Image("https://www.cdn.stripe.com/12321312321.png"),
+            title = "Account details",
+            content = "Account number, routing number, account type, account nickname."
+        ),
     )
 
     private fun partnerAccountList() = listOf(
@@ -130,7 +179,7 @@ internal class AccountPickerPreviewParameterProvider :
         ),
     )
 
-    private fun accessibleCallout() = AccessibleDataCalloutModel(
+    private fun accessibleCallout() = MerchantDataAccessModel(
         businessName = "My business",
         permissions = listOf(
             FinancialConnectionsAccount.Permissions.PAYMENT_METHOD,
@@ -138,8 +187,6 @@ internal class AccountPickerPreviewParameterProvider :
             FinancialConnectionsAccount.Permissions.OWNERSHIP,
             FinancialConnectionsAccount.Permissions.TRANSACTIONS
         ),
-        isStripeDirect = false,
-        isNetworking = false,
-        dataPolicyUrl = ""
+        isStripeDirect = false
     )
 }

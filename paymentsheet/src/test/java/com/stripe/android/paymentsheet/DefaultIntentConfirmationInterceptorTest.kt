@@ -6,14 +6,17 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
+import com.stripe.android.model.MandateDataParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode
+import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.testing.AbsFakeStripeRepository
 import com.stripe.android.utils.IntentConfirmationInterceptorTestRule
 import kotlinx.coroutines.test.runTest
@@ -52,7 +55,7 @@ class DefaultIntentConfirmationInterceptorTest {
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
             paymentMethod = paymentMethod,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -78,7 +81,7 @@ class DefaultIntentConfirmationInterceptorTest {
             initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
             paymentMethodCreateParams = createParams,
             shippingValues = null,
-            setupForFutureUsage = null,
+            customerRequestedSave = false,
         )
 
         val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
@@ -87,6 +90,33 @@ class DefaultIntentConfirmationInterceptorTest {
         assertThat(confirmParams?.paymentMethodId).isNull()
         assertThat(confirmParams?.paymentMethodCreateParams).isEqualTo(createParams)
     }
+
+    @Test
+    fun `Returns confirm params with 'setup_future_usage' set to 'off_session' when requires save on confirmation`() =
+        runTest {
+            val interceptor = createIntentConfirmationInterceptor()
+
+            val nextStep = interceptor.intercept(
+                initializationMode = InitializationMode.PaymentIntent("pi_1234_secret_4321"),
+                paymentSelection = PaymentSelection.Saved(
+                    paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
+                    requiresSaveOnConfirmation = true
+                ),
+                shippingValues = null,
+                context = context,
+            )
+
+            val confirmNextStep = nextStep as? IntentConfirmationInterceptor.NextStep.Confirm
+            val confirmParams = confirmNextStep?.confirmParams as? ConfirmPaymentIntentParams
+
+            assertThat(
+                confirmParams?.paymentMethodOptions
+            ).isEqualTo(
+                PaymentMethodOptionsParams.Card(
+                    setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession
+                )
+            )
+        }
 
     @Test
     fun `Fails if invoked without a confirm callback for existing payment method`() = runTest {
@@ -110,7 +140,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
                 paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
                 shippingValues = null,
-                setupForFutureUsage = null,
+                requiresSaveOnConfirmation = false,
             )
         }
 
@@ -141,7 +171,7 @@ class DefaultIntentConfirmationInterceptorTest {
                 initializationMode = InitializationMode.DeferredIntent(mock()),
                 paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
                 shippingValues = null,
-                setupForFutureUsage = null,
+                customerRequestedSave = false,
             )
         }
 
@@ -177,7 +207,7 @@ class DefaultIntentConfirmationInterceptorTest {
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
             shippingValues = null,
-            setupForFutureUsage = null,
+            customerRequestedSave = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -220,7 +250,7 @@ class DefaultIntentConfirmationInterceptorTest {
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -249,7 +279,7 @@ class DefaultIntentConfirmationInterceptorTest {
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -276,7 +306,7 @@ class DefaultIntentConfirmationInterceptorTest {
             initializationMode = InitializationMode.DeferredIntent(mock()),
             paymentMethod = PaymentMethodFixtures.CARD_PAYMENT_METHOD,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -324,7 +354,7 @@ class DefaultIntentConfirmationInterceptorTest {
             ),
             paymentMethod = paymentMethod,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isInstanceOf(IntentConfirmationInterceptor.NextStep.Confirm::class.java)
@@ -363,7 +393,7 @@ class DefaultIntentConfirmationInterceptorTest {
             ),
             paymentMethod = paymentMethod,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -408,7 +438,7 @@ class DefaultIntentConfirmationInterceptorTest {
             ),
             paymentMethod = paymentMethod,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         assertThat(nextStep).isEqualTo(
@@ -437,12 +467,7 @@ class DefaultIntentConfirmationInterceptorTest {
             isFlowController = false,
         )
 
-        val inputs = listOf(
-            null,
-            ConfirmPaymentIntentParams.SetupFutureUsage.Blank,
-            ConfirmPaymentIntentParams.SetupFutureUsage.OffSession,
-            ConfirmPaymentIntentParams.SetupFutureUsage.OnSession,
-        )
+        val inputs = listOf(true, false)
 
         for (input in inputs) {
             IntentConfirmationInterceptor.createIntentCallback =
@@ -462,11 +487,11 @@ class DefaultIntentConfirmationInterceptorTest {
                 ),
                 paymentMethod = paymentMethod,
                 shippingValues = null,
-                setupForFutureUsage = input,
+                requiresSaveOnConfirmation = input,
             )
         }
 
-        assertThat(observedValues).containsExactly(false, false, true, false).inOrder()
+        assertThat(observedValues).containsExactly(true, false).inOrder()
     }
 
     @Test
@@ -497,13 +522,54 @@ class DefaultIntentConfirmationInterceptorTest {
             ),
             paymentMethod = paymentMethod,
             shippingValues = null,
-            setupForFutureUsage = null,
+            requiresSaveOnConfirmation = false,
         )
 
         verify(stripeRepository, never()).retrieveStripeIntent(any(), any(), any())
 
         assertThat(nextStep).isEqualTo(
             IntentConfirmationInterceptor.NextStep.Complete(isForceSuccess = true)
+        )
+    }
+
+    @Test
+    fun `Creates correct confirm step when confirming Instant Debits transaction`() = runTest {
+        val paymentMethodId = PaymentMethodFixtures.CARD_PAYMENT_METHOD.id!!
+        val clientSecret = "pi_1234_secret_4321"
+
+        val interceptor = DefaultIntentConfirmationInterceptor(
+            context = context,
+            stripeRepository = mock(),
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+            isFlowController = false,
+        )
+
+        val createParams = PaymentMethodCreateParams.createInstantDebits(
+            paymentMethodId = paymentMethodId,
+            requiresMandate = false,
+            productUsage = emptySet(),
+        )
+
+        val nextStep = interceptor.intercept(
+            initializationMode = InitializationMode.PaymentIntent(clientSecret),
+            paymentMethodCreateParams = createParams,
+            paymentMethodOptionsParams = null,
+            shippingValues = null,
+            customerRequestedSave = false,
+        )
+
+        val expectedConfirmParams = ConfirmPaymentIntentParams.createWithPaymentMethodId(
+            paymentMethodId = paymentMethodId,
+            clientSecret = clientSecret,
+            mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT),
+        )
+
+        assertThat(nextStep).isEqualTo(
+            IntentConfirmationInterceptor.NextStep.Confirm(
+                confirmParams = expectedConfirmParams,
+                isDeferred = false,
+            )
         )
     }
 
@@ -525,6 +591,16 @@ class DefaultIntentConfirmationInterceptorTest {
                 displayMessage = message
             )
         }
+    }
+
+    private fun createIntentConfirmationInterceptor(): DefaultIntentConfirmationInterceptor {
+        return DefaultIntentConfirmationInterceptor(
+            context = context,
+            stripeRepository = object : AbsFakeStripeRepository() {},
+            publishableKeyProvider = { "pk" },
+            stripeAccountIdProvider = { null },
+            isFlowController = false,
+        )
     }
 
     private class TestException(message: String? = null) : Exception(message) {

@@ -6,9 +6,8 @@ import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.GooglePayState
-import kotlinx.coroutines.flow.Flow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 
 internal class PaymentOptionsStateMapper(
     private val paymentMethods: StateFlow<List<PaymentMethod>?>,
@@ -17,10 +16,11 @@ internal class PaymentOptionsStateMapper(
     private val currentSelection: StateFlow<PaymentSelection?>,
     private val nameProvider: (PaymentMethodCode?) -> String,
     private val isNotPaymentFlow: Boolean,
+    private val isCbcEligible: () -> Boolean
 ) {
 
-    operator fun invoke(): Flow<PaymentOptionsState?> {
-        return combine(
+    operator fun invoke(): StateFlow<PaymentOptionsState> {
+        return combineAsStateFlow(
             paymentMethods,
             currentSelection,
             isLinkEnabled,
@@ -31,7 +31,7 @@ internal class PaymentOptionsStateMapper(
                 currentSelection = currentSelection,
                 isLinkEnabled = isLinkEnabled,
                 googlePayState = googlePayState,
-            )
+            ) ?: PaymentOptionsState()
         }
     }
 
@@ -51,6 +51,7 @@ internal class PaymentOptionsStateMapper(
             showLink = isLinkEnabled && isNotPaymentFlow,
             currentSelection = currentSelection,
             nameProvider = nameProvider,
+            isCbcEligible = isCbcEligible()
         )
     }
 }

@@ -5,9 +5,12 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.link.account.LinkStore
+import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.MainActivity
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.PaymentSheetActivity
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -21,9 +24,12 @@ internal class PaymentSheetTestRunnerContext(
     fun presentPaymentSheet(
         block: PaymentSheet.() -> Unit,
     ) {
+        val activityLaunchObserver = ActivityLaunchObserver(PaymentSheetActivity::class.java)
         scenario.onActivity {
+            activityLaunchObserver.prepareForLaunch(it)
             paymentSheet.block()
         }
+        activityLaunchObserver.awaitLaunch()
     }
 
     /**
@@ -37,52 +43,56 @@ internal class PaymentSheetTestRunnerContext(
 }
 
 internal fun runPaymentSheetTest(
+    networkRule: NetworkRule,
+    integrationType: IntegrationType,
     createIntentCallback: CreateIntentCallback? = null,
     resultCallback: PaymentSheetResultCallback,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
-    for (integrationType in PaymentSheetTestFactory.IntegrationType.values()) {
-        val countDownLatch = CountDownLatch(1)
+    val countDownLatch = CountDownLatch(1)
 
-        val factory = PaymentSheetTestFactory(
-            integrationType = integrationType,
-            createIntentCallback = createIntentCallback,
-            resultCallback = { result ->
-                resultCallback.onPaymentSheetResult(result)
-                countDownLatch.countDown()
-            }
-        )
+    val factory = PaymentSheetTestFactory(
+        integrationType = integrationType,
+        createIntentCallback = createIntentCallback,
+        resultCallback = { result ->
+            resultCallback.onPaymentSheetResult(result)
+            countDownLatch.countDown()
+        }
+    )
 
-        runPaymentSheetTestInternal(
-            countDownLatch = countDownLatch,
-            makePaymentSheet = factory::make,
-            block = block,
-        )
-    }
+    runPaymentSheetTestInternal(
+        networkRule = networkRule,
+        countDownLatch = countDownLatch,
+        makePaymentSheet = factory::make,
+        block = block,
+    )
 }
 
 private fun runPaymentSheetTestInternal(
+    networkRule: NetworkRule,
     countDownLatch: CountDownLatch,
     makePaymentSheet: (ComponentActivity) -> PaymentSheet,
     block: (PaymentSheetTestRunnerContext) -> Unit,
 ) {
-    val scenario = ActivityScenario.launch(MainActivity::class.java)
-    scenario.moveToState(Lifecycle.State.CREATED)
+    ActivityScenario.launch(MainActivity::class.java).use { scenario ->
+        scenario.moveToState(Lifecycle.State.CREATED)
+        scenario.onActivity {
+            PaymentConfiguration.init(it, "pk_test_123")
+            LinkStore(it.applicationContext).clear()
+        }
 
-    scenario.onActivity {
-        PaymentConfiguration.init(it, "pk_test_123")
+        lateinit var paymentSheet: PaymentSheet
+        scenario.onActivity {
+            paymentSheet = makePaymentSheet(it)
+        }
+
+        scenario.moveToState(Lifecycle.State.RESUMED)
+
+        val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
+        block(testContext)
+
+        val didCompleteSuccessfully = countDownLatch.await(5, TimeUnit.SECONDS)
+        networkRule.validate()
+        assertThat(didCompleteSuccessfully).isTrue()
     }
-
-    lateinit var paymentSheet: PaymentSheet
-    scenario.onActivity {
-        paymentSheet = makePaymentSheet(it)
-    }
-
-    scenario.moveToState(Lifecycle.State.RESUMED)
-
-    val testContext = PaymentSheetTestRunnerContext(scenario, paymentSheet, countDownLatch)
-    block(testContext)
-
-    assertThat(countDownLatch.await(5, TimeUnit.SECONDS)).isTrue()
-    scenario.close()
 }

@@ -6,6 +6,12 @@
   <string name="stripe_bank_account_ending_in">Gỡ bỏ tài khoản ngân hàng có đuôi là %s</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">Hãy xác nhận thanh toán trong ứng dụng ngân hàng của quý vị trong vòng %s để hoàn tất giao dịch mua.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">Thông tin thanh toán của bạn sẽ không lưu lại.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">Bạn có muốn đóng biểu mẫu này không?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">Đã xảy ra lỗi. Hãy kiểm tra kết nối của bạn và thử lại.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[Bằng việc tiếp tục, bạn đồng ý cho phép thanh toán tuân theo <terms>các điều khoản này</terms>.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -20,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">Lưu địa chỉ</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">Địa chỉ vận chuyển</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">Một email sẽ được gửi đến %s trong vòng ba ngày làm việc để xác nhận việc thiết lập hướng dẫn ghi nợ này.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">Xác nhận thông tin Ghi nợ Trực tiếp của bạn</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">Sửa đổi thông tin chi tiết</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">Ngoài ra, bạn sẽ nhận được thông báo trước qua email về bất kỳ khoản tiền nào sẽ được ghi nợ theo hướng dẫn này. Các khoản thanh toán sẽ hiển thị là \'%s\' trên bảng sao kê ngân hàng của bạn.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">Các khoản thanh toán của bạn được bảo vệ bởi %s.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">Chọn phương thức thanh toán</string>
   <string name="stripe_paymentsheet_close">Đóng</string>
@@ -31,10 +47,16 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">Quản lý các phương thức thanh toán của bạn</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe sẽ gửi $0.01 vào tài khoản của bạn trong 1-2 ngày làm việc. Khi đó bạn sẽ nhận được một email chứa hướng dẫn để hoàn tất thanh toán cho %s.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">Sửa %s</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">Hoặc thanh toán bằng</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">Hoặc thanh toán bằng thẻ</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">Hoặc dùng</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">Hoặc dùng thẻ</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">Thanh toán</string>
   <!-- Title shown above a section containing various payment options -->
@@ -45,12 +67,16 @@
   <string name="stripe_paymentsheet_primary_button_processing">Đang xử lý...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">Bỏ tài khoản ngân hàng</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">Xóa thẻ</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">Xóa %s</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">Lưu</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">Lưu một phương thức thanh toán mới</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">Lưu tài khoản ngân hàng chỉ trong vài bước.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">Tiết kiệm cho các khoản thanh toán trong tương lai</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -59,6 +85,8 @@
   <string name="stripe_paymentsheet_select_payment_method">Chọn phương thức thanh toán của bạn</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">Tổng cộng: %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">Đã xảy ra sự cố</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">Hủy và thanh toán theo cách khác</string>
   <!-- Text on a screen asking the user to approve a payment -->

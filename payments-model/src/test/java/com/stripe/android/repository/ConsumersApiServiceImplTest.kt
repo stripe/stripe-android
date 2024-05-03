@@ -6,6 +6,7 @@ import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.VerificationType
@@ -44,7 +45,7 @@ class ConsumersApiServiceImplTest {
             header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("email_address", "email%40example.com"),
-            bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
+            bodyPart(urlEncode("cookies[verification_session_client_secrets][]"), cookie),
             bodyPart("request_surface", requestSurface),
         ) { response ->
             response.setBody(ConsumerFixtures.EXISTING_CONSUMER_JSON.toString())
@@ -103,10 +104,10 @@ class ConsumersApiServiceImplTest {
             header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("request_surface", "android_payment_element"),
-            bodyPart("credentials%5Bconsumer_session_client_secret%5D", clientSecret),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
             bodyPart("type", "SMS"),
             bodyPart("locale", locale.toLanguageTag()),
-            bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
+            bodyPart(urlEncode("cookies[verification_session_client_secrets][]"), cookie),
         ) { response ->
             response.setBody(ConsumerFixtures.CONSUMER_VERIFICATION_STARTED_JSON.toString())
         }
@@ -143,10 +144,10 @@ class ConsumersApiServiceImplTest {
             header("Authorization", "Bearer ${DEFAULT_OPTIONS.apiKey}"),
             header("User-Agent", "Stripe/v1 ${StripeSdkVersion.VERSION}"),
             bodyPart("request_surface", "android_payment_element"),
-            bodyPart("credentials%5Bconsumer_session_client_secret%5D", clientSecret),
+            bodyPart(urlEncode("credentials[consumer_session_client_secret]"), clientSecret),
             bodyPart("type", "SMS"),
             bodyPart("code", verificationCode),
-            bodyPart("cookies%5Bverification_session_client_secrets%5D%5B%5D", cookie),
+            bodyPart(urlEncode("cookies[verification_session_client_secrets][]"), cookie),
         ) { response ->
             response.setBody(ConsumerFixtures.CONSUMER_VERIFIED_JSON.toString())
         }
@@ -171,21 +172,18 @@ class ConsumersApiServiceImplTest {
 
     @Test
     fun testConsumerSessionLookupUrl() {
-        ApiRequest.apiTestHost = null
         assertThat("https://api.stripe.com/v1/consumers/sessions/lookup")
             .isEqualTo(ConsumersApiServiceImpl.consumerSessionLookupUrl)
     }
 
     @Test
     fun testStartConsumerVerificationUrl() {
-        ApiRequest.apiTestHost = null
         assertThat("https://api.stripe.com/v1/consumers/sessions/start_verification")
             .isEqualTo(ConsumersApiServiceImpl.startConsumerVerificationUrl)
     }
 
     @Test
     fun testConfirmConsumerVerificationUrl() {
-        ApiRequest.apiTestHost = null
         assertThat("https://api.stripe.com/v1/consumers/sessions/confirm_verification")
             .isEqualTo(ConsumersApiServiceImpl.confirmConsumerVerificationUrl)
     }

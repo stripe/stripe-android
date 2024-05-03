@@ -26,7 +26,7 @@ sealed class LinkPaymentDetails(
      */
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    internal class Saved(
+    class Saved(
         override val paymentDetails: ConsumerPaymentDetails.PaymentDetails,
         override val paymentMethodCreateParams: PaymentMethodCreateParams
     ) : LinkPaymentDetails(paymentDetails, paymentMethodCreateParams)

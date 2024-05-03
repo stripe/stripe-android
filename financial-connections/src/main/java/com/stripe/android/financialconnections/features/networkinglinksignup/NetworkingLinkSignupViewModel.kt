@@ -1,56 +1,63 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import android.webkit.URLUtil
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.R
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Click
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingNewConsumer
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.NetworkingReturningConsumer
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Click
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.NetworkingNewConsumer
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.NetworkingReturningConsumer
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.PaneLoaded
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.features.common.getBusinessName
+import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
+import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.Legal
+import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationDirections.networkingSaveToLinkVerification
+import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
 import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState.NavigateToRoute
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
-import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.utils.ConflatedJob
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.financialconnections.utils.error
 import com.stripe.android.financialconnections.utils.isCancellationError
 import com.stripe.android.model.ConsumerSessionLookup
 import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.InputController
 import com.stripe.android.uicore.elements.PhoneNumberController
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import java.security.InvalidParameterException
 import java.util.Date
-import javax.inject.Inject
+import com.stripe.android.financialconnections.navigation.Destination.Success as SuccessDestination
 
-internal class NetworkingLinkSignupViewModel @Inject constructor(
-    initialState: NetworkingLinkSignupState,
-    private val saveToLinkWithStripeSucceeded: SaveToLinkWithStripeSucceededRepository,
+internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
+    @Assisted initialState: NetworkingLinkSignupState,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     private val saveAccountToLink: SaveAccountToLink,
     private val lookupAccount: LookupAccount,
     private val uriUtils: UriUtils,
@@ -59,13 +66,14 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
     private val getManifest: GetManifest,
     private val sync: SynchronizeFinancialConnectionsSession,
     private val navigationManager: NavigationManager,
-    private val logger: Logger
-) : MavericksViewModel<NetworkingLinkSignupState>(initialState) {
+    private val logger: Logger,
+    private val presentNoticeSheet: PresentNoticeSheet,
+) : FinancialConnectionsViewModel<NetworkingLinkSignupState>(initialState, nativeAuthFlowCoordinator) {
 
     private var searchJob = ConflatedJob()
 
     init {
-        logErrors()
+        observeAsyncs()
         suspend {
             val manifest = getManifest()
             val content = requireNotNull(sync().text?.networkingLinkSignupPane)
@@ -73,15 +81,72 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
             NetworkingLinkSignupState.Payload(
                 content = content,
                 merchantName = manifest.getBusinessName(),
-                emailController = EmailConfig
-                    .createController(manifest.accountholderCustomerEmailAddress),
+                emailController = SimpleTextFieldController(
+                    textFieldConfig = EmailConfig(label = R.string.stripe_networking_signup_email_label),
+                    initialValue = manifest.accountholderCustomerEmailAddress,
+                    showOptionalLabel = false
+                ),
                 phoneController = PhoneNumberController
                     .createPhoneNumberController(manifest.accountholderPhoneNumber ?: ""),
             )
         }.execute { copy(payload = it) }
     }
 
-    private fun logErrors() {
+    override fun updateTopAppBar(state: NetworkingLinkSignupState): TopAppBarStateUpdate {
+        return TopAppBarStateUpdate(
+            pane = PANE,
+            allowBackNavigation = false,
+            error = state.payload.error,
+        )
+    }
+
+    private fun observeAsyncs() {
+        observePayloadResult()
+        observeSaveAccountResult()
+        observeLookupAccountResult()
+    }
+
+    private fun observeLookupAccountResult() {
+        onAsync(
+            NetworkingLinkSignupState::lookupAccount,
+            onSuccess = { consumerSession ->
+                if (consumerSession.exists) {
+                    eventTracker.track(NetworkingReturningConsumer(PANE))
+                    navigateToLinkVerification()
+                } else {
+                    eventTracker.track(NetworkingNewConsumer(PANE))
+                }
+            },
+            onFail = { error ->
+                eventTracker.logError(
+                    extraMessage = "Error looking up account",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+            },
+        )
+    }
+
+    private fun observeSaveAccountResult() {
+        onAsync(
+            NetworkingLinkSignupState::saveAccountToLink,
+            onSuccess = {
+                navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
+            },
+            onFail = { error ->
+                eventTracker.logError(
+                    extraMessage = "Error saving account to Link",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
+                navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
+            },
+        )
+    }
+
+    private fun observePayloadResult() {
         onAsync(
             NetworkingLinkSignupState::payload,
             onSuccess = { payload ->
@@ -98,35 +163,12 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
                 }
             },
             onFail = { error ->
-                logger.error("Error fetching payload", error)
-                eventTracker.track(Error(PANE, error))
-            },
-        )
-        onAsync(
-            NetworkingLinkSignupState::saveAccountToLink,
-            onSuccess = {
-                saveToLinkWithStripeSucceeded.set(true)
-            },
-            onFail = { error ->
-                saveToLinkWithStripeSucceeded.set(false)
-                logger.error("Error saving account to Link", error)
-                eventTracker.track(Error(PANE, error))
-                navigationManager.navigate(NavigateToRoute(NavigationDirections.success))
-            },
-        )
-        onAsync(
-            NetworkingLinkSignupState::lookupAccount,
-            onSuccess = { consumerSession ->
-                if (consumerSession.exists) {
-                    eventTracker.track(NetworkingReturningConsumer(PANE))
-                    navigationManager.navigate(NavigateToRoute(networkingSaveToLinkVerification))
-                } else {
-                    eventTracker.track(NetworkingNewConsumer(PANE))
-                }
-            },
-            onFail = { error ->
-                logger.error("Error looking up account", error)
-                eventTracker.track(Error(PANE, error))
+                eventTracker.logError(
+                    extraMessage = "Error fetching payload",
+                    error = error,
+                    logger = logger,
+                    pane = PANE
+                )
             },
         )
     }
@@ -161,25 +203,42 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
 
     fun onSkipClick() = viewModelScope.launch {
         eventTracker.track(Click(eventName = "click.not_now", pane = PANE))
-        navigationManager.navigate(NavigateToRoute(NavigationDirections.success))
+        navigationManager.tryNavigateTo(SuccessDestination(referrer = PANE))
     }
 
     fun onSaveAccount() {
+        withState { state ->
+            eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
+
+            val hasExistingAccount = state.lookupAccount()?.exists == true
+            if (hasExistingAccount) {
+                navigateToLinkVerification()
+            } else {
+                saveNewAccount()
+            }
+        }
+    }
+
+    private fun saveNewAccount() {
         suspend {
             eventTracker.track(Click(eventName = "click.save_to_link", pane = PANE))
-            val state = awaitState()
+            val state = stateFlow.value
             val selectedAccounts = getCachedAccounts()
+            val manifest = getManifest()
             val phoneController = state.payload()!!.phoneController
-            require(state.valid()) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
+            require(state.valid) { "Form invalid! ${state.validEmail} ${state.validPhone}" }
             saveAccountToLink.new(
                 country = phoneController.getCountryCode(),
                 email = state.validEmail!!,
                 phoneNumber = phoneController.getE164PhoneNumber(state.validPhone!!),
-                selectedAccounts = selectedAccounts.map { it.id },
-            ).also {
-                navigationManager.navigate(NavigateToRoute(NavigationDirections.success))
-            }
+                selectedAccounts = selectedAccounts,
+                shouldPollAccountNumbers = manifest.isDataFlow,
+            )
         }.execute { copy(saveAccountToLink = it) }
+    }
+
+    private fun navigateToLinkVerification() {
+        navigationManager.tryNavigateTo(NetworkingSaveToLinkVerification(referrer = PANE))
     }
 
     fun onClickableTextClick(uri: String) = viewModelScope.launch {
@@ -191,10 +250,24 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         if (URLUtil.isNetworkUrl(uri)) {
             setState { copy(viewEffect = OpenUrl(uri, date.time)) }
         } else {
-            val errorMessage = "Unrecognized clickable text: $uri"
-            logger.error(errorMessage)
-            eventTracker.track(Error(PANE, InvalidParameterException(errorMessage)))
+            val managedUri = NetworkingLinkSignupClickableText.entries
+                .firstOrNull { uriUtils.compareSchemeAuthorityAndPath(it.value, uri) }
+            when (managedUri) {
+                NetworkingLinkSignupClickableText.LEGAL_DETAILS -> {
+                    presentLegalDetailsBottomSheet()
+                }
+
+                null -> logger.error("Unrecognized clickable text: $uri")
+            }
         }
+    }
+
+    private fun presentLegalDetailsBottomSheet() {
+        val notice = stateFlow.value.payload()?.content?.legalDetailsNotice ?: return
+        presentNoticeSheet(
+            content = Legal(notice),
+            referrer = PANE,
+        )
     }
 
     /**
@@ -209,21 +282,19 @@ internal class NetworkingLinkSignupViewModel @Inject constructor(
         setState { copy(viewEffect = null) }
     }
 
-    companion object :
-        MavericksViewModelFactory<NetworkingLinkSignupViewModel, NetworkingLinkSignupState> {
+    @AssistedFactory
+    interface Factory {
+        fun create(initialState: NetworkingLinkSignupState): NetworkingLinkSignupViewModel
+    }
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: NetworkingLinkSignupState
-        ): NetworkingLinkSignupViewModel {
-            return viewModelContext.activity<FinancialConnectionsSheetNativeActivity>()
-                .viewModel
-                .activityRetainedComponent
-                .networkingLinkSignupSubcomponent
-                .initialState(state)
-                .build()
-                .viewModel
-        }
+    companion object {
+
+        fun factory(parentComponent: FinancialConnectionsSheetNativeComponent): ViewModelProvider.Factory =
+            viewModelFactory {
+                initializer {
+                    parentComponent.networkingLinkSignupViewModelFactory.create(NetworkingLinkSignupState())
+                }
+            }
 
         private const val SEARCH_DEBOUNCE_MS = 1000L
         private const val SEARCH_DEBOUNCE_FINISHED_EMAIL_MS = 300L
@@ -238,14 +309,16 @@ internal data class NetworkingLinkSignupState(
     val saveAccountToLink: Async<FinancialConnectionsSessionManifest> = Uninitialized,
     val lookupAccount: Async<ConsumerSessionLookup> = Uninitialized,
     val viewEffect: ViewEffect? = null
-) : MavericksState {
+) {
 
     val showFullForm: Boolean
         get() = lookupAccount()?.let { !it.exists } ?: false
 
-    fun valid(): Boolean {
-        return validEmail != null && validPhone != null
-    }
+    val valid: Boolean
+        get() {
+            val hasExistingAccount = lookupAccount()?.exists == true
+            return validEmail != null && (hasExistingAccount || validPhone != null)
+        }
 
     data class Payload(
         val merchantName: String?,
@@ -260,4 +333,8 @@ internal data class NetworkingLinkSignupState(
             val id: Long
         ) : ViewEffect()
     }
+}
+
+private enum class NetworkingLinkSignupClickableText(val value: String) {
+    LEGAL_DETAILS("stripe://legal-details-notice"),
 }

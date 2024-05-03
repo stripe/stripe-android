@@ -10,23 +10,25 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
     private val config: TextFieldConfig,
     private val onNavigation: (() -> Unit)? = null,
-    initialValue: String? = null
+    override val initialValue: String? = null
 ) : TextFieldController, InputController, SectionFieldErrorController, SectionFieldComposable {
 
     init {
         initialValue?.let { onRawValueChange(it) }
     }
 
-    override val trailingIcon: Flow<TextFieldIcon?> = config.trailingIcon
+    override val trailingIcon: StateFlow<TextFieldIcon?> = config.trailingIcon
     override val capitalization: KeyboardCapitalization = config.capitalization
     override val keyboardType: KeyboardType = config.keyboard
     override val visualTransformation =
@@ -41,32 +43,32 @@ class AddressTextFieldController(
 
     /** This is all the information that can be observed on the element */
     private val _fieldValue = MutableStateFlow("")
-    override val fieldValue: Flow<String> = _fieldValue
+    override val fieldValue: StateFlow<String> = _fieldValue.asStateFlow()
 
-    override val rawFieldValue: Flow<String> = _fieldValue.map { config.convertToRaw(it) }
+    override val rawFieldValue: StateFlow<String> = _fieldValue.mapAsStateFlow { config.convertToRaw(it) }
 
-    override val contentDescription: Flow<String> = _fieldValue
+    override val contentDescription: StateFlow<String> = _fieldValue.asStateFlow()
 
     private val _fieldState = MutableStateFlow<TextFieldState>(TextFieldStateConstants.Error.Blank)
-    override val fieldState: Flow<TextFieldState> = _fieldState
+    override val fieldState: StateFlow<TextFieldState> = _fieldState.asStateFlow()
 
-    override val loading: Flow<Boolean> = config.loading
+    override val loading: StateFlow<Boolean> = config.loading
 
     private val _hasFocus = MutableStateFlow(false)
 
-    override val visibleError: Flow<Boolean> =
-        combine(_fieldState, _hasFocus) { fieldState, hasFocus ->
+    override val visibleError: StateFlow<Boolean> =
+        combineAsStateFlow(_fieldState, _hasFocus) { fieldState, hasFocus ->
             fieldState.shouldShowError(hasFocus)
         }
 
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: Flow<FieldError?> = visibleError.map { visibleError ->
+    override val error: Flow<FieldError?> = visibleError.mapAsStateFlow { visibleError ->
         _fieldState.value.getError()?.takeIf { visibleError }
     }
 
-    override val isComplete: Flow<Boolean> = _fieldState.map {
+    override val isComplete: StateFlow<Boolean> = _fieldState.mapAsStateFlow {
         it.isValid() || (!it.isValid() && showOptionalLabel && it.isBlank())
     }
 
@@ -91,8 +93,8 @@ class AddressTextFieldController(
         _hasFocus.value = newHasFocus
     }
 
-    override val formFieldValue: Flow<FormFieldEntry> =
-        combine(isComplete, rawFieldValue) { complete, value ->
+    override val formFieldValue: StateFlow<FormFieldEntry> =
+        combineAsStateFlow(isComplete, rawFieldValue) { complete, value ->
             FormFieldEntry(value, complete)
         }
 

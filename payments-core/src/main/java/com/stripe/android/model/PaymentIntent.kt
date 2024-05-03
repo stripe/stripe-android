@@ -171,6 +171,12 @@ constructor(
             is StripeIntent.NextActionData.DisplayOxxoDetails -> {
                 StripeIntent.NextActionType.DisplayOxxoDetails
             }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                StripeIntent.NextActionType.DisplayBoletoDetails
+            }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                StripeIntent.NextActionType.DisplayKonbiniDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -182,6 +188,9 @@ constructor(
             }
             is StripeIntent.NextActionData.BlikAuthorize -> {
                 StripeIntent.NextActionType.BlikAuthorize
+            }
+            is StripeIntent.NextActionData.SwishRedirect -> {
+                StripeIntent.NextActionType.SwishRedirect
             }
             is StripeIntent.NextActionData.AlipayRedirect,
             is StripeIntent.NextActionData.WeChatPayRedirect,
@@ -295,7 +304,7 @@ constructor(
             RateLimitError("rate_limit_error");
 
             internal companion object {
-                fun fromCode(typeCode: String?) = values().firstOrNull { it.code == typeCode }
+                fun fromCode(typeCode: String?) = entries.firstOrNull { it.code == typeCode }
             }
         }
 
@@ -382,7 +391,7 @@ constructor(
         Automatic("automatic");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code }
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code }
         }
     }
 
@@ -412,7 +421,7 @@ constructor(
         Manual("manual");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code } ?: Automatic
         }
     }
 
@@ -431,7 +440,7 @@ constructor(
         Manual("manual");
 
         internal companion object {
-            fun fromCode(code: String?) = values().firstOrNull { it.code == code } ?: Automatic
+            fun fromCode(code: String?) = entries.firstOrNull { it.code == code } ?: Automatic
         }
     }
 

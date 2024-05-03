@@ -12,7 +12,7 @@ internal fun startScanning(
     lifecycleOwner: LifecycleOwner
 ) {
     identityViewModel.updateNewScanType(scanType)
-    identityViewModel.fpsTracker.start()
+    identityScanViewModel.fpsTracker.start()
     identityScanViewModel.startScan(
         scanType = scanType,
         lifecycleOwner = lifecycleOwner

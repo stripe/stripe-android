@@ -180,23 +180,20 @@ class ConsumersApiServiceImpl(
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/lookup`
          */
-        internal val consumerSessionLookupUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/sessions/lookup")
+        internal val consumerSessionLookupUrl: String =
+            getApiUrl("consumers/sessions/lookup")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/start_verification`
          */
-        internal val startConsumerVerificationUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/sessions/start_verification")
+        internal val startConsumerVerificationUrl: String =
+            getApiUrl("consumers/sessions/start_verification")
 
         /**
          * @return `https://api.stripe.com/v1/consumers/sessions/confirm_verification`
          */
-        internal val confirmConsumerVerificationUrl: String
-            @JvmSynthetic
-            get() = getApiUrl("consumers/sessions/confirm_verification")
+        internal val confirmConsumerVerificationUrl: String =
+            getApiUrl("consumers/sessions/confirm_verification")
 
         private fun getApiUrl(path: String): String {
             return "${ApiRequest.API_HOST}/v1/$path"

@@ -9,12 +9,14 @@ import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.navigation.ConfirmationDestination
 import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.navigation.ConsentDestination.CONSENT
-import com.stripe.android.identity.navigation.DocSelectionDestination
+import com.stripe.android.identity.navigation.DocWarmupDestination
 import com.stripe.android.identity.navigation.ErrorDestination
 import com.stripe.android.identity.navigation.ErrorDestination.Companion.ARG_SHOULD_FAIL
 import com.stripe.android.identity.navigation.InitialLoadingDestination
 import com.stripe.android.identity.navigation.routeToScreenName
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.anyOrNull
@@ -28,6 +30,7 @@ import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 class IdentityOnBackPressedHandlerTest {
     private val mockFlowFinishable = mock<VerificationFlowFinishable>()
     private val mockNavController = mock<NavController>()
@@ -56,7 +59,7 @@ class IdentityOnBackPressedHandlerTest {
     }
 
     @Test
-    fun testBackPressOnFirstPage() {
+    fun testBackPressOnFirstPage() = runBlocking {
         val loadingNavBackStackEntry = mock<NavBackStackEntry> {
             on { destination } doReturn NavDestination("").also {
                 it.route = InitialLoadingDestination.ROUTE.route
@@ -106,7 +109,7 @@ class IdentityOnBackPressedHandlerTest {
     }
 
     @Test
-    fun testBackPressOnConsentPage() {
+    fun testBackPressOnConsentPage() = runBlocking {
         val mockDestination = mock<NavDestination> {
             on { route } doReturn ConsentDestination.ROUTE.route
         }
@@ -130,7 +133,7 @@ class IdentityOnBackPressedHandlerTest {
     }
 
     @Test
-    fun testBackPressOnErrorPageWithArgShouldFail() {
+    fun testBackPressOnErrorPageWithArgShouldFail() = runBlocking {
         val mockDestination = mock<NavDestination> {
             on { route } doReturn ErrorDestination.ROUTE.route
         }
@@ -181,7 +184,7 @@ class IdentityOnBackPressedHandlerTest {
     @Test
     fun testBackPressOnOtherScreen() {
         val mockDestination = mock<NavDestination> {
-            on { route } doReturn DocSelectionDestination.ROUTE.route
+            on { route } doReturn DocWarmupDestination.ROUTE.route
         }
 
         handler.updateState(

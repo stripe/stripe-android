@@ -2,8 +2,8 @@ package com.stripe.android.view
 
 import android.util.AttributeSet
 import androidx.fragment.app.FragmentActivity
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -11,6 +11,7 @@ import com.stripe.android.R
 import com.stripe.android.databinding.StripeBankListPaymentMethodBinding
 import com.stripe.android.model.BankStatuses
 import com.stripe.android.model.PaymentMethodCreateParams
+import kotlinx.coroutines.launch
 
 internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     activity: FragmentActivity,
@@ -22,7 +23,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
 
     private val fpxAdapter = AddPaymentMethodListAdapter(
         ThemeConfig(activity),
-        items = FpxBank.values().toList(),
+        items = FpxBank.entries,
         itemSelectedCallback = {
             viewModel.selectedPosition = it
         }
@@ -38,7 +39,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     override val createParams: PaymentMethodCreateParams?
         get() {
             return fpxAdapter.selectedPosition.takeIf { it != RecyclerView.NO_POSITION }?.let {
-                val fpxBank = FpxBank.values()[it]
+                val fpxBank = FpxBank.entries[it]
                 PaymentMethodCreateParams.create(
                     PaymentMethodCreateParams.Fpx(bank = fpxBank.code)
                 )
@@ -55,8 +56,9 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         // an id is required for state to be saved
         id = R.id.stripe_payment_methods_add_fpx
 
-        viewModel.getFpxBankStatues()
-            .observe(activity, Observer(::onFpxBankStatusesUpdated))
+        activity.lifecycleScope.launch {
+            viewModel.fpxBankStatues.collect(::onFpxBankStatusesUpdated)
+        }
 
         with(viewBinding.bankList) {
             adapter = fpxAdapter
@@ -81,7 +83,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
         this.fpxAdapter.bankStatuses = fpxBankStatuses
 
         // flag offline bank
-        FpxBank.values().indices
+        FpxBank.entries.indices
             .filterNot { position ->
                 fpxBankStatuses.isOnline(getItem(position))
             }
@@ -91,7 +93,7 @@ internal class AddPaymentMethodFpxView @JvmOverloads internal constructor(
     }
 
     private fun getItem(position: Int): FpxBank {
-        return FpxBank.values()[position]
+        return FpxBank.entries[position]
     }
 
     internal companion object {

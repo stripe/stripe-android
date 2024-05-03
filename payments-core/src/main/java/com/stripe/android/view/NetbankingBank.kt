@@ -446,7 +446,7 @@ internal enum class NetbankingBank(
          */
         @JvmStatic
         fun get(bankCode: String?): NetbankingBank? {
-            return values().firstOrNull { it.code == bankCode }
+            return entries.firstOrNull { it.code == bankCode }
         }
     }
 }

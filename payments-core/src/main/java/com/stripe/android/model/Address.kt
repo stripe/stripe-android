@@ -38,6 +38,10 @@ data class Address @VisibleForTesting constructor(
         ).filterValues { it.isNotEmpty() }
     }
 
+    internal fun isFilledOut(): Boolean {
+        return city != null || country != null || line1 != null || line2 != null || postalCode != null || state != null
+    }
+
     class Builder {
         private var city: String? = null
         private var country: String? = null

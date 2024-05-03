@@ -1,8 +1,8 @@
 package com.stripe.android.identity.networking
 
+import android.content.Context
 import android.util.Log
 import androidx.annotation.VisibleForTesting
-import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
@@ -29,10 +29,12 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
+import kotlin.time.TimeSource
 
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
-    private val identityIO: IdentityIO
+    private val identityIO: IdentityIO,
+    private val context: Context
 ) : IdentityRepository {
 
     @VisibleForTesting
@@ -57,6 +59,9 @@ internal class DefaultIdentityRepository @Inject constructor(
             url = "$BASE_URL/$IDENTITY_VERIFICATION_PAGES/${urlEncode(id)}",
             options = ApiRequest.Options(
                 apiKey = ephemeralKey
+            ),
+            params = mapOf(
+                APP_IDENTIFIER to context.packageName
             )
         ),
         VerificationPage.serializer()
@@ -277,7 +282,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         responseJsonParser: ModelJsonParser<Response>,
         onSuccessExecutionTimeBlock: (Long) -> Unit = {}
     ): Response {
-        val started = Clock.markNow()
+        val started = TimeSource.Monotonic.markNow()
         return runCatching {
             stripeNetworkClient.executeRequest(
                 request
@@ -293,7 +298,7 @@ internal class DefaultIdentityRepository @Inject constructor(
                     )
                 } else {
                     responseJsonParser.parse(response.responseJson())?.let { response ->
-                        onSuccessExecutionTimeBlock(started.elapsedSince().inMilliseconds.toLong())
+                        onSuccessExecutionTimeBlock(started.elapsedNow().inWholeMilliseconds)
                         response
                     } ?: run {
                         throw APIException(

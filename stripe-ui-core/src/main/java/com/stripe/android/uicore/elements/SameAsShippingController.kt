@@ -6,26 +6,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.forms.FormFieldEntry
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class SameAsShippingController(
     initialValue: Boolean
 ) : InputController, SectionFieldComposable {
-    override val label: Flow<Int> = MutableStateFlow(R.string.stripe_billing_same_as_shipping)
+    override val label: StateFlow<Int> = stateFlowOf(R.string.stripe_billing_same_as_shipping)
     private val _value = MutableStateFlow(initialValue)
-    val value: Flow<Boolean> = _value
-    override val fieldValue: Flow<String> = value.map { it.toString() }
-    override val rawFieldValue: Flow<String?> = fieldValue
+    val value: StateFlow<Boolean> = _value.asStateFlow()
+    override val fieldValue: StateFlow<String> = value.mapAsStateFlow { it.toString() }
+    override val rawFieldValue: StateFlow<String?> = fieldValue
 
-    override val error: Flow<FieldError?> = flowOf(null)
+    override val error: Flow<FieldError?> = stateFlowOf(null)
     override val showOptionalLabel: Boolean = false
-    override val isComplete: Flow<Boolean> = flowOf(true)
-    override val formFieldValue: Flow<FormFieldEntry> =
-        rawFieldValue.map { value ->
+    override val isComplete: StateFlow<Boolean> = stateFlowOf(true)
+    override val formFieldValue: StateFlow<FormFieldEntry> =
+        rawFieldValue.mapAsStateFlow { value ->
             FormFieldEntry(value, true)
         }
 

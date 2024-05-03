@@ -12,12 +12,13 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
-import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.MediatorLiveData
 import androidx.navigation.NavController
 import androidx.test.core.app.ApplicationProvider
 import com.stripe.android.camera.CameraPreviewImage
 import com.stripe.android.identity.R
 import com.stripe.android.identity.TestApplication
+import com.stripe.android.identity.camera.IdentityAggregator
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.FaceDetectorOutput
 import com.stripe.android.identity.networking.Resource
@@ -27,6 +28,7 @@ import com.stripe.android.identity.states.FaceDetectorTransitioner
 import com.stripe.android.identity.states.IdentityScanState
 import com.stripe.android.identity.viewmodel.IdentityScanViewModel
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import com.stripe.android.identity.viewmodel.SelfieScanViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
@@ -55,8 +57,10 @@ class SelfieScreenTest {
 
     private val mockNavController = mock<NavController>()
 
-    private val displayStateChangedFlow =
-        MutableStateFlow<Pair<IdentityScanState, IdentityScanState?>?>(null)
+    private val scannerStateFlow =
+        MutableStateFlow<IdentityScanViewModel.State>(IdentityScanViewModel.State.Initializing)
+
+    private val feedbackStateFlow = MutableStateFlow<Int?>(null)
 
     private val selfieCapturePage = mock<VerificationPageStaticContentSelfieCapturePage> {
         on { consentText } doReturn SELFIE_CONSENT_TEXT
@@ -66,16 +70,19 @@ class SelfieScreenTest {
     }
 
     private val mockIdentityViewModel = mock<IdentityViewModel> {
-        on { verificationPage } doReturn MutableLiveData(Resource.success(verificationPage))
-        on { pageAndModelFiles } doReturn mock()
+        on { pageAndModelFiles } doReturn MediatorLiveData<Resource<IdentityViewModel.PageAndModelFiles>>(
+            Resource.success(
+                IdentityViewModel.PageAndModelFiles(verificationPage, mock(), null)
+            )
+        )
         on { identityAnalyticsRequestFactory } doReturn mock()
         on { workContext } doReturn UnconfinedTestDispatcher()
         on { screenTracker } doReturn mock()
     }
-    private val mockIdentityScanViewModel = mock<IdentityScanViewModel> {
-        on { interimResults } doReturn mock()
-        on { finalResult } doReturn mock()
-        on { displayStateChangedFlow } doReturn displayStateChangedFlow
+    private val mockSelfieScanViewModel = mock<SelfieScanViewModel> {
+        on { scannerState } doReturn scannerStateFlow
+        on { fpsTracker } doReturn mock()
+        on { scanFeedback } doReturn feedbackStateFlow
     }
 
     private val dummyBitmap: Bitmap = Bitmap.createBitmap(100, 100, Bitmap.Config.ARGB_8888)
@@ -86,8 +93,11 @@ class SelfieScreenTest {
         ) to mock<FaceDetectorOutput>()
 
     @Test
-    fun verifyNullScanState() {
-        testSelfieScanScreen(null) {
+    fun verifyNullScanningState() {
+        testSelfieScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanning(),
+            messageId = R.string.stripe_position_selfie
+        ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
 
@@ -100,8 +110,11 @@ class SelfieScreenTest {
     }
 
     @Test
-    fun verifyInitialScanState() {
-        testSelfieScanScreen(mock<IdentityScanState.Initial>()) {
+    fun verifyInitialScanningState() {
+        testSelfieScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Initial>()),
+            messageId = R.string.stripe_position_selfie
+        ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_position_selfie))
 
@@ -114,8 +127,11 @@ class SelfieScreenTest {
     }
 
     @Test
-    fun verifyFoundScanState() {
-        testSelfieScanScreen(mock<IdentityScanState.Found>()) {
+    fun verifyFoundScanningState() {
+        testSelfieScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Found>()),
+            messageId = R.string.stripe_capturing
+        ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG).assertTextEquals(context.getString(R.string.stripe_selfie_captures))
             onNodeWithTag(SELFIE_SCAN_MESSAGE_TAG).assertTextEquals(context.getString(R.string.stripe_capturing))
 
@@ -128,8 +144,11 @@ class SelfieScreenTest {
     }
 
     @Test
-    fun verifySatisfiedScanState() {
-        testSelfieScanScreen(mock<IdentityScanState.Satisfied>()) {
+    fun verifySatisfiedScanningState() {
+        testSelfieScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanning(mock<IdentityScanState.Satisfied>()),
+            messageId = R.string.stripe_selfie_capture_complete
+        ) {
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
 
@@ -145,7 +164,7 @@ class SelfieScreenTest {
     }
 
     @Test
-    fun verifyFinishedScanState() {
+    fun verifyScannedState() {
         val mockFilteredFrames = listOf(
             mockFilteredFramePair,
             mockFilteredFramePair,
@@ -158,8 +177,17 @@ class SelfieScreenTest {
         val finishedState = mock<IdentityScanState.Finished> {
             on { transitioner } doReturn faceDetectorTransitioner
         }
-        testSelfieScanScreen(finishedState) {
-            verify(mockIdentityScanViewModel).stopScan(any())
+        testSelfieScanScreen(
+            scannerState = IdentityScanViewModel.State.Scanned(
+                IdentityAggregator.FinalResult(
+                    mock(),
+                    mock(),
+                    finishedState
+                )
+            ),
+            messageId = R.string.stripe_selfie_capture_complete
+        ) {
+            verify(mockSelfieScanViewModel).stopScan(any())
             onNodeWithTag(SELFIE_SCAN_TITLE_TAG)
                 .assertTextEquals(context.getString(R.string.stripe_selfie_captures))
 
@@ -187,19 +215,19 @@ class SelfieScreenTest {
     }
 
     private fun testSelfieScanScreen(
-        newDisplayState: IdentityScanState?,
+        scannerState: IdentityScanViewModel.State,
+        messageId: Int? = null,
         testBlock: ComposeContentTestRule.() -> Unit = {}
     ) {
-        newDisplayState?.let { state ->
-            displayStateChangedFlow.update {
-                state to mock()
-            }
+        scannerStateFlow.update { scannerState }
+        messageId?.let {
+            feedbackStateFlow.value = it
         }
         composeTestRule.setContent {
             SelfieScanScreen(
                 navController = mockNavController,
                 identityViewModel = mockIdentityViewModel,
-                identityScanViewModel = mockIdentityScanViewModel
+                selfieScanViewModel = mockSelfieScanViewModel
             )
         }
         with(composeTestRule, testBlock)

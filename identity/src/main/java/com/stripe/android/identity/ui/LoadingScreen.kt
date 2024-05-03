@@ -19,6 +19,7 @@ import androidx.compose.ui.semantics.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.stripe.android.core.exception.InvalidResponseException
 import com.stripe.android.identity.R
 import com.stripe.android.identity.navigation.navigateToErrorScreenWithDefaultValues
 import com.stripe.android.identity.networking.Resource
@@ -87,6 +88,34 @@ internal fun CheckVerificationPageAndCompose(
         }
         Status.IDLE -> {
             // no-op
+        }
+    }
+}
+
+@Composable
+internal fun CheckVerificationPageModelFilesAndCompose(
+    identityViewModel: IdentityViewModel,
+    navController: NavController,
+    onSuccess: @Composable (IdentityViewModel.PageAndModelFiles) -> Unit
+) {
+    val verificationPageState by identityViewModel.pageAndModelFiles.observeAsState(Resource.loading())
+    val context = LocalContext.current
+    when (verificationPageState.status) {
+        Status.SUCCESS -> {
+            onSuccess(requireNotNull(verificationPageState.data))
+        }
+        Status.LOADING -> {
+            LoadingScreen()
+        } // no-op
+        Status.IDLE -> {} // no-op
+        Status.ERROR -> {
+            identityViewModel.errorCause.postValue(
+                InvalidResponseException(
+                    cause = verificationPageState.throwable,
+                    message = verificationPageState.message
+                )
+            )
+            navController.navigateToErrorScreenWithDefaultValues(context)
         }
     }
 }

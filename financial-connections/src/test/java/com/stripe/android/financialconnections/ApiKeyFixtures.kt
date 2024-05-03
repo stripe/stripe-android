@@ -73,7 +73,7 @@ internal object ApiKeyFixtures {
     fun authorizationSession() = FinancialConnectionsAuthorizationSession(
         id = "id",
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
-        flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH,
+        flow = FinancialConnectionsAuthorizationSession.Flow.MX_OAUTH.value,
         institutionSkipAccountSelection = null,
         showPartnerDisclosure = null,
         skipAccountSelection = null,
@@ -84,6 +84,13 @@ internal object ApiKeyFixtures {
 
     fun partnerAccountList() = PartnerAccountsList(
         data = emptyList(),
+        nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
+    )
+
+    fun partnerAccountList(
+        vararg ids: String,
+    ) = PartnerAccountsList(
+        data = ids.map { partnerAccount().copy(id = it) },
         nextPane = FinancialConnectionsSessionManifest.Pane.CONSENT,
     )
 

@@ -10,13 +10,16 @@ import com.stripe.android.camera.framework.AnalyzerLoopErrorListener
 import com.stripe.android.camera.framework.AnalyzerPool
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.scanui.ScanFlow
+import com.stripe.android.identity.analytics.IdentityAnalyticsRequestFactory
 import com.stripe.android.identity.analytics.ModelPerformanceTracker
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.FaceDetectorAnalyzer
 import com.stripe.android.identity.ml.IDDetectorAnalyzer
+import com.stripe.android.identity.networking.IdentityRepository
 import com.stripe.android.identity.networking.models.VerificationPage
 import com.stripe.android.identity.states.IdentityScanState
+import com.stripe.android.identity.states.LaplacianBlurDetector
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -31,11 +34,15 @@ import java.io.File
  */
 internal class IdentityScanFlow(
     private val analyzerLoopErrorListener: AnalyzerLoopErrorListener,
-    private val aggregateResultListener: AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
+    private val aggregateResultListener:
+        AggregateResultListener<IdentityAggregator.InterimResult, IdentityAggregator.FinalResult>,
     private val idDetectorModelFile: File,
     private val faceDetectorModelFile: File?,
     private val verificationPage: VerificationPage,
-    private val modelPerformanceTracker: ModelPerformanceTracker
+    private val modelPerformanceTracker: ModelPerformanceTracker,
+    private val laplacianBlurDetector: LaplacianBlurDetector,
+    private val identityAnalyticsRequestFactory: IdentityAnalyticsRequestFactory,
+    private val identityRepository: IdentityRepository
 ) : ScanFlow<IdentityScanState.ScanType, CameraPreviewImage<Bitmap>> {
     private var aggregator: IdentityAggregator? = null
 
@@ -101,9 +108,14 @@ internal class IdentityScanFlow(
                         )
                     } else {
                         IDDetectorAnalyzer.Factory(
+                            context,
                             idDetectorModelFile,
                             verificationPage.documentCapture.models.idDetectorMinScore,
-                            modelPerformanceTracker
+                            verificationPage.documentCapture.mbSettings,
+                            modelPerformanceTracker,
+                            laplacianBlurDetector,
+                            identityAnalyticsRequestFactory,
+                            identityRepository
                         )
                     }
                 )

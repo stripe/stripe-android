@@ -3,20 +3,22 @@ package com.stripe.android.paymentsheet.ui
 import android.content.res.Resources
 import androidx.annotation.DrawableRes
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardBrand.Unknown
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
-import com.stripe.android.financialconnections.R as FinancialConnectionsR
-import com.stripe.android.ui.core.R as StripeUiCoreR
-import com.stripe.payments.model.R as PaymentsModelR
 
 @DrawableRes
-internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int? = when (type) {
-    PaymentMethod.Type.Card -> card?.brand?.getCardBrandIcon()
-        ?: R.drawable.stripe_ic_paymentsheet_card_unknown
-    PaymentMethod.Type.SepaDebit -> StripeUiCoreR.drawable.stripe_ic_paymentsheet_pm_sepa_debit
-    PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
-    else -> null
+internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
+    return when (type) {
+        PaymentMethod.Type.Card -> {
+            val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
+            brand?.getCardBrandIcon()
+        }
+        PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
+        PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
+        else -> null
+    } ?: R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
 @DrawableRes
@@ -28,12 +30,12 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
     CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
     CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
-    CardBrand.CartesBancaires -> PaymentsModelR.drawable.stripe_ic_cartebancaire
-    CardBrand.Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
+    CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires
+    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
 }
 
 internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type) {
-    PaymentMethod.Type.Card -> createCardLabel(resources, card?.last4)
+    PaymentMethod.Type.Card -> createCardLabel(resources, card?.last4).takeIf { it.isNotEmpty() }
     PaymentMethod.Type.SepaDebit -> resources.getString(
         R.string.stripe_paymentsheet_payment_method_item_card_number,
         sepaDebit?.last4
@@ -46,7 +48,7 @@ internal fun PaymentMethod.getLabel(resources: Resources): String? = when (type)
 }
 
 internal fun PaymentMethod.getLabelIcon(): Int? = when (type) {
-    PaymentMethod.Type.USBankAccount -> FinancialConnectionsR.drawable.stripe_ic_bank
+    PaymentMethod.Type.USBankAccount -> R.drawable.stripe_ic_paymentsheet_bank
     else -> null
 }
 

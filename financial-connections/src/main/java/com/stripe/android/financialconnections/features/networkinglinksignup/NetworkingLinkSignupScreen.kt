@@ -1,67 +1,78 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.testTagsAsResourceId
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.Fail
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.compose.mavericksViewModel
-import com.stripe.android.financialconnections.R
-import com.stripe.android.financialconnections.features.common.BulletItem
 import com.stripe.android.financialconnections.features.common.FullScreenGenericLoading
+import com.stripe.android.financialconnections.features.common.ListItem
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.Payload
 import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupState.ViewEffect.OpenUrl
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupViewModel.Companion.PANE
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.presentation.Async
+import com.stripe.android.financialconnections.presentation.Async.Fail
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
+import com.stripe.android.financialconnections.presentation.paneViewModel
 import com.stripe.android.financialconnections.presentation.parentViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
 import com.stripe.android.financialconnections.ui.TextResource
 import com.stripe.android.financialconnections.ui.components.AnnotatedText
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
-import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
-import com.stripe.android.financialconnections.ui.components.StringAnnotation
-import com.stripe.android.financialconnections.ui.components.elevation
 import com.stripe.android.financialconnections.ui.sdui.BulletUI
 import com.stripe.android.financialconnections.ui.sdui.fromHtml
-import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.colors
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
+import com.stripe.android.financialconnections.ui.theme.Layout
 import com.stripe.android.financialconnections.ui.theme.StripeThemeForConnections
 import com.stripe.android.model.ConsumerSessionLookup
+import com.stripe.android.uicore.elements.DropDown
 import com.stripe.android.uicore.elements.PhoneNumberCollectionSection
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 
 @Composable
 internal fun NetworkingLinkSignupScreen() {
-    val viewModel: NetworkingLinkSignupViewModel = mavericksViewModel()
+    val viewModel: NetworkingLinkSignupViewModel = paneViewModel(NetworkingLinkSignupViewModel.Companion::factory)
     val parentViewModel = parentViewModel()
-    val state = viewModel.collectAsState()
+    val state = viewModel.stateFlow.collectAsState()
     BackHandler(enabled = true) {}
     val uriHandler = LocalUriHandler.current
 
@@ -76,7 +87,6 @@ internal fun NetworkingLinkSignupScreen() {
 
     NetworkingLinkSignupContent(
         state = state.value,
-        onCloseClick = { parentViewModel.onCloseWithConfirmationClick(PANE) },
         onCloseFromErrorClick = parentViewModel::onCloseFromErrorClick,
         onClickableTextClick = viewModel::onClickableTextClick,
         onSaveToLink = viewModel::onSaveAccount,
@@ -87,27 +97,16 @@ internal fun NetworkingLinkSignupScreen() {
 @Composable
 private fun NetworkingLinkSignupContent(
     state: NetworkingLinkSignupState,
-    onCloseClick: () -> Unit,
     onCloseFromErrorClick: (Throwable) -> Unit,
     onClickableTextClick: (String) -> Unit,
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
 ) {
-    val scrollState = rememberScrollState()
-    FinancialConnectionsScaffold(
-        topBar = {
-            FinancialConnectionsTopAppBar(
-                showBack = false,
-                onCloseClick = onCloseClick,
-                elevation = scrollState.elevation
-            )
-        }
-    ) {
+    Box {
         when (val payload = state.payload) {
             Uninitialized, is Loading -> FullScreenGenericLoading()
             is Success -> NetworkingLinkSignupLoaded(
-                scrollState = scrollState,
-                validForm = state.valid(),
+                validForm = state.valid,
                 payload = payload(),
                 lookupAccountSync = state.lookupAccount,
                 saveAccountToLinkSync = state.saveAccountToLink,
@@ -117,17 +116,13 @@ private fun NetworkingLinkSignupContent(
                 onSkipClick = onSkipClick
             )
 
-            is Fail -> UnclassifiedErrorContent(
-                error = payload.error,
-                onCloseFromErrorClick = onCloseFromErrorClick
-            )
+            is Fail -> UnclassifiedErrorContent { onCloseFromErrorClick(payload.error) }
         }
     }
 }
 
 @Composable
 private fun NetworkingLinkSignupLoaded(
-    scrollState: ScrollState,
     validForm: Boolean,
     payload: Payload,
     saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
@@ -137,142 +132,129 @@ private fun NetworkingLinkSignupLoaded(
     onSaveToLink: () -> Unit,
     onSkipClick: () -> Unit
 ) {
-    Column(
-        Modifier.fillMaxSize()
-    ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .verticalScroll(scrollState)
-                .padding(
-                    top = 0.dp,
-                    start = 24.dp,
-                    end = 24.dp,
-                    bottom = 24.dp
-                )
-        ) {
-            Spacer(modifier = Modifier.size(16.dp))
+    val scrollState = rememberScrollState()
+    val phoneNumberFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(showFullForm) {
+        if (showFullForm) {
+            scrollState.animateScrollToBottom()
+            phoneNumberFocusRequester.requestFocus()
+        }
+    }
+
+    Layout(
+        scrollState = scrollState,
+        body = {
             Title(payload.content.title)
-            Spacer(modifier = Modifier.size(8.dp))
-            payload.content.body.bullets.forEach {
-                BulletItem(
-                    bullet = BulletUI.from(it),
+            Spacer(modifier = Modifier.size(24.dp))
+
+            for (bullet in payload.content.body.bullets) {
+                ListItem(
+                    bullet = BulletUI.from(bullet),
                     onClickableTextClick = onClickableTextClick
                 )
-                Spacer(modifier = Modifier.size(8.dp))
+                Spacer(modifier = Modifier.size(16.dp))
             }
+
             EmailSection(
                 showFullForm = showFullForm,
                 loading = lookupAccountSync is Loading,
                 emailController = payload.emailController,
                 enabled = true,
             )
-            if (showFullForm) {
+
+            AnimatedVisibility(showFullForm) {
                 PhoneNumberSection(
                     payload = payload,
-                    onClickableTextClick = onClickableTextClick
+                    focusRequester = phoneNumberFocusRequester,
                 )
             }
-            Spacer(modifier = Modifier.weight(1f))
-            Spacer(modifier = Modifier.height(16.dp))
-            if (showFullForm) {
-                SaveToLinkCta(
-                    text = payload.content.cta,
-                    aboveCta = payload.content.aboveCta,
-                    onClickableTextClick = onClickableTextClick,
-                    saveAccountToLinkSync = saveAccountToLinkSync,
-                    validForm = validForm,
-                    onSaveToLink = onSaveToLink
-                )
-            }
-            Spacer(modifier = Modifier.size(12.dp))
-            SkipCta(payload.content.skipCta, onSkipClick)
+        },
+        footer = {
+            NetworkingLinkSignupFooter(
+                payload = payload,
+                onClickableTextClick = onClickableTextClick,
+                saveAccountToLinkSync = saveAccountToLinkSync,
+                validForm = validForm,
+                onSaveToLink = onSaveToLink,
+                onSkipClick = onSkipClick
+            )
         }
-    }
+    )
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
 @Composable
-private fun SkipCta(text: String, onSkipClick: () -> Unit) {
+private fun NetworkingLinkSignupFooter(
+    payload: Payload,
+    onClickableTextClick: (String) -> Unit,
+    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
+    validForm: Boolean,
+    onSaveToLink: () -> Unit,
+    onSkipClick: () -> Unit
+) = Column {
+    AnnotatedText(
+        modifier = Modifier.fillMaxWidth(),
+        text = TextResource.Text(fromHtml(payload.content.aboveCta)),
+        onClickableTextClick = onClickableTextClick,
+        defaultStyle = typography.labelSmall.copy(
+            textAlign = TextAlign.Center,
+            color = colors.textDefault
+        )
+    )
+    Spacer(modifier = Modifier.size(16.dp))
+    FinancialConnectionsButton(
+        loading = saveAccountToLinkSync is Loading,
+        enabled = validForm,
+        type = FinancialConnectionsButton.Type.Primary,
+        onClick = onSaveToLink,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(text = payload.content.cta)
+    }
+    Spacer(modifier = Modifier.size(8.dp))
     FinancialConnectionsButton(
         type = FinancialConnectionsButton.Type.Secondary,
         onClick = onSkipClick,
         modifier = Modifier
             .fillMaxWidth()
+            .semantics { testTagsAsResourceId = true }
+            .testTag("skip_cta")
     ) {
-        Text(text = text)
-    }
-}
-
-@Composable
-private fun SaveToLinkCta(
-    aboveCta: String,
-    text: String,
-    onClickableTextClick: (String) -> Unit,
-    saveAccountToLinkSync: Async<FinancialConnectionsSessionManifest>,
-    validForm: Boolean,
-    onSaveToLink: () -> Unit
-) {
-    Column {
-        AnnotatedText(
-            modifier = Modifier.fillMaxWidth(),
-            text = TextResource.Text(fromHtml(aboveCta)),
-            onClickableTextClick = onClickableTextClick,
-            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                textAlign = TextAlign.Center,
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textSecondary),
-            )
-        )
-        Spacer(modifier = Modifier.size(8.dp))
-        FinancialConnectionsButton(
-            loading = saveAccountToLinkSync is Loading,
-            enabled = validForm,
-            type = FinancialConnectionsButton.Type.Primary,
-            onClick = onSaveToLink,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(text = text)
-        }
+        Text(text = payload.content.skipCta)
     }
 }
 
 @Composable
 private fun PhoneNumberSection(
     payload: Payload,
-    onClickableTextClick: (String) -> Unit
+    focusRequester: FocusRequester,
 ) {
+    var focused by remember { mutableStateOf(false) }
     Column {
         StripeThemeForConnections {
             PhoneNumberCollectionSection(
-                requestFocusWhenShown = payload.phoneController.initialPhoneNumber.isEmpty(),
+                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                countryDropdown = {
+                    DropDown(
+                        controller = payload.phoneController.countryDropdownController,
+                        enabled = true,
+                        showChevron = false,
+                        modifier = Modifier
+                            .padding(horizontal = 6.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(colors.background)
+                            .padding(vertical = 12.dp, horizontal = 8.dp)
+                    )
+                },
+                isSelected = focused,
                 phoneNumberController = payload.phoneController,
                 imeAction = ImeAction.Default,
+                focusRequester = focusRequester,
                 enabled = true,
             )
         }
-        AnnotatedText(
-            text = TextResource.StringId(R.string.stripe_networking_signup_phone_number_disclaimer),
-            onClickableTextClick = onClickableTextClick,
-            defaultStyle = FinancialConnectionsTheme.typography.caption.copy(
-                color = FinancialConnectionsTheme.colors.textSecondary
-            ),
-            annotationStyles = mapOf(
-                StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textBrand),
-                StringAnnotation.BOLD to FinancialConnectionsTheme.typography.captionEmphasized
-                    .toSpanStyle()
-                    .copy(color = FinancialConnectionsTheme.colors.textSecondary),
-            )
-        )
     }
 }
 
@@ -280,12 +262,7 @@ private fun PhoneNumberSection(
 private fun Title(title: String) {
     AnnotatedText(
         text = TextResource.Text(fromHtml(title)),
-        defaultStyle = FinancialConnectionsTheme.typography.subtitle,
-        annotationStyles = mapOf(
-            StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.subtitle
-                .toSpanStyle()
-                .copy(color = FinancialConnectionsTheme.colors.textBrand),
-        ),
+        defaultStyle = typography.headingXLarge,
         onClickableTextClick = {},
     )
 }
@@ -297,6 +274,7 @@ internal fun EmailSection(
     showFullForm: Boolean,
     loading: Boolean
 ) {
+    var focused by remember { mutableStateOf(false) }
     StripeThemeForConnections {
         Box(
             modifier = Modifier
@@ -305,12 +283,10 @@ internal fun EmailSection(
             contentAlignment = Alignment.CenterEnd
         ) {
             TextFieldSection(
+                modifier = Modifier.onFocusChanged { focused = it.isFocused },
+                isSelected = focused,
                 textFieldController = emailController,
-                imeAction = if (showFullForm) {
-                    ImeAction.Next
-                } else {
-                    ImeAction.Done
-                },
+                imeAction = if (showFullForm) ImeAction.Next else ImeAction.Done,
                 enabled = enabled
             )
             if (loading) {
@@ -323,12 +299,18 @@ internal fun EmailSection(
                             end = 16.dp,
                             bottom = 8.dp
                         ),
-                    color = FinancialConnectionsTheme.colors.iconBrand,
+                    color = colors.iconBrand,
                     strokeWidth = 2.dp
                 )
             }
         }
     }
+}
+
+private suspend fun ScrollState.animateScrollToBottom(
+    animationSpec: AnimationSpec<Float> = tween(),
+) {
+    animateScrollBy(Float.MAX_VALUE, animationSpec)
 }
 
 @Composable
@@ -340,7 +322,6 @@ internal fun NetworkingLinkSignupScreenPreview(
     FinancialConnectionsPreview {
         NetworkingLinkSignupContent(
             state = state,
-            onCloseClick = {},
             onSaveToLink = {},
             onClickableTextClick = {},
             onCloseFromErrorClick = {},

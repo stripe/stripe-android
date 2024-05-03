@@ -44,17 +44,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.edit
+import com.stripe.android.ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.R
+import com.stripe.android.paymentsheet.example.samples.ui.customersheet.playground.CustomerSheetPlaygroundViewAction.UpdateMerchantCountryCode
 import com.stripe.android.paymentsheet.example.samples.ui.shared.MultiToggleButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
-import com.stripe.android.paymentsheet.example.utils.rememberDrawablePainter
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import java.util.Locale
 
-@OptIn(ExperimentalCustomerSheetApi::class)
+@OptIn(ExperimentalCustomerSheetApi::class, ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi::class)
 class CustomerSheetPlaygroundActivity : AppCompatActivity() {
 
     private val viewModel by viewModels<CustomerSheetPlaygroundViewModel> {
@@ -125,13 +126,21 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                                 onClick = {
                                     paymentSheet.presentWithPaymentIntent(
                                         paymentIntentClientSecret = state.clientSecret!!,
-                                        configuration = PaymentSheet.Configuration(
-                                            merchantDisplayName = "Test Merchant Inc.",
-                                            customer = PaymentSheet.CustomerConfiguration(
+                                        configuration = PaymentSheet.Configuration.Builder(
+                                            merchantDisplayName = "Test Merchant Inc."
+                                        ).customer(
+                                            PaymentSheet.CustomerConfiguration(
                                                 id = state.currentCustomer!!,
                                                 ephemeralKeySecret = state.ephemeralKey!!
                                             )
+                                        ).allowsRemovalOfLastSavedPaymentMethod(
+                                            configurationState.allowsRemovalOfLastSavedPaymentMethod
+                                        ).defaultBillingDetails(
+                                            viewModel.defaultBillingDetails(
+                                                configurationState.attachDefaultBillingAddress
+                                            )
                                         )
+                                            .build()
                                     )
                                 }
                             ) {
@@ -187,11 +196,9 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                     onClick = onUpdateDefaultPaymentMethod,
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        state.selection?.paymentOption?.icon()?.let {
+                        state.selection?.paymentOption?.let {
                             Image(
-                                painter = rememberDrawablePainter(
-                                    drawable = it
-                                ),
+                                painter = it.iconPainter,
                                 contentDescription = "Payment Method Icon",
                                 modifier = Modifier.height(32.dp)
                             )
@@ -235,7 +242,6 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                     color = MaterialTheme.colors.onBackground,
                     fontSize = 18.sp
                 )
-
                 Icon(
                     imageVector = if (collapsed) {
                         Icons.Rounded.KeyboardArrowRight
@@ -256,25 +262,36 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             }
 
             AnimatedVisibility(visible = !collapsed) {
-                Column {
-                    SetupIntentSwitch(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                    GooglePaySwitch(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                    ExistingCustomerSwitch(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                    BillingDetailsConfiguration(
-                        configurationState = configurationState,
-                        viewActionHandler = viewActionHandler,
-                    )
-                }
+                Switches(
+                    configurationState = configurationState,
+                    viewActionHandler = viewActionHandler,
+                )
             }
+        }
+    }
+
+    @Composable
+    private fun Switches(
+        configurationState: CustomerSheetPlaygroundConfigurationState,
+        viewActionHandler: (CustomerSheetPlaygroundViewAction) -> Unit
+    ) {
+        Column {
+            SetupIntentSwitch(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
+            GooglePaySwitch(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
+            ExistingCustomerSwitch(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
+            BillingDetailsConfiguration(
+                configurationState = configurationState,
+                viewActionHandler = viewActionHandler,
+            )
         }
     }
 
@@ -405,6 +422,24 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "Allows removal of last SPM",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                Switch(
+                    checked = configurationState.allowsRemovalOfLastSavedPaymentMethod,
+                    onCheckedChange = {
+                        viewActionHandler(
+                            CustomerSheetPlaygroundViewAction.ToggleAllowsRemovalOfLastSavedPaymentMethod
+                        )
+                    },
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 2.dp)
@@ -496,6 +531,23 @@ class CustomerSheetPlaygroundActivity : AppCompatActivity() {
                             CustomerSheetPlaygroundViewAction.UpdateBillingAddressCollection(it)
                         )
                     }
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp)
+            ) {
+                Text(
+                    text = "Merchant Country",
+                    color = MaterialTheme.colors.onBackground,
+                )
+                MultiToggleButton(
+                    currentSelection = configurationState.merchantCountry,
+                    toggleStates = listOf("US", "FR"),
+                    onToggleChange = { viewActionHandler(UpdateMerchantCountryCode(it)) },
                 )
             }
         }

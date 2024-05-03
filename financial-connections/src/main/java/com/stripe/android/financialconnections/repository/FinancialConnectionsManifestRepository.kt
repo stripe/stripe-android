@@ -23,7 +23,6 @@ import java.util.Locale
  * Repository to centralize reads and writes to the [FinancialConnectionsSessionManifest]
  * of the current flow.
  */
-@Suppress("TooManyFunctions")
 internal interface FinancialConnectionsManifestRepository {
 
     /**
@@ -135,7 +134,7 @@ internal interface FinancialConnectionsManifestRepository {
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: List<String>
+        selectedAccounts: Set<String>
     ): FinancialConnectionsSessionManifest
 
     /**
@@ -199,7 +198,6 @@ internal interface FinancialConnectionsManifestRepository {
     }
 }
 
-@Suppress("TooManyFunctions")
 private class FinancialConnectionsManifestRepositoryImpl(
     val requestExecutor: FinancialConnectionsRequestExecutor,
     val apiRequestFactory: ApiRequest.Factory,
@@ -223,7 +221,10 @@ private class FinancialConnectionsManifestRepositoryImpl(
         cachedSynchronizeSessionResponse ?: run {
             // fetch manifest and save it locally
             return requestExecutor.execute(
-                synchronizeRequest(applicationId, clientSecret),
+                synchronizeRequest(
+                    applicationId = applicationId,
+                    clientSecret = clientSecret,
+                ),
                 SynchronizeSessionResponse.serializer()
             ).also { updateCachedSynchronizeSessionResponse("get/fetch", it) }
         }
@@ -233,7 +234,11 @@ private class FinancialConnectionsManifestRepositoryImpl(
         clientSecret: String,
         applicationId: String
     ): SynchronizeSessionResponse = mutex.withLock {
-        val financialConnectionsRequest = synchronizeRequest(applicationId, clientSecret)
+        val financialConnectionsRequest =
+            synchronizeRequest(
+                applicationId = applicationId,
+                clientSecret = clientSecret,
+            )
         return requestExecutor.execute(
             financialConnectionsRequest,
             SynchronizeSessionResponse.serializer()
@@ -242,14 +247,17 @@ private class FinancialConnectionsManifestRepositoryImpl(
 
     private fun synchronizeRequest(
         applicationId: String,
-        clientSecret: String
+        clientSecret: String,
     ): ApiRequest = apiRequestFactory.createPost(
         url = synchronizeSessionUrl,
         options = apiOptions,
         params = mapOf(
             "expand" to listOf("manifest.active_auth_session"),
+            "emit_events" to true,
             "locale" to locale.toLanguageTag(),
             "mobile" to mapOf(
+                // TODO REMOVE BEFORE MERGING INTEGRATION BRANCH
+                "forced_authflow_version" to "v3",
                 PARAMS_FULLSCREEN to true,
                 PARAMS_HIDE_CLOSE_BUTTON to true,
                 NetworkConstants.PARAMS_APPLICATION_ID to applicationId
@@ -352,7 +360,8 @@ private class FinancialConnectionsManifestRepositoryImpl(
             options = apiOptions,
             params = mapOf(
                 NetworkConstants.PARAMS_ID to sessionId,
-                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret
+                NetworkConstants.PARAMS_CLIENT_SECRET to clientSecret,
+                "emit_events" to true
             )
         ),
         FinancialConnectionsAuthorizationSession.serializer()
@@ -408,7 +417,7 @@ private class FinancialConnectionsManifestRepositoryImpl(
         locale: String?,
         phoneNumber: String?,
         consumerSessionClientSecret: String?,
-        selectedAccounts: List<String>,
+        selectedAccounts: Set<String>,
     ): FinancialConnectionsSessionManifest {
         val request = apiRequestFactory.createPost(
             url = saveAccountToLinkUrl,
@@ -540,34 +549,34 @@ private class FinancialConnectionsManifestRepositoryImpl(
         internal const val PARAMS_FULLSCREEN = "fullscreen"
         internal const val PARAMS_HIDE_CLOSE_BUTTON = "hide_close_button"
 
-        internal val synchronizeSessionUrl: String =
+        internal const val synchronizeSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/financial_connections/sessions/synchronize"
 
-        internal val cancelAuthSessionUrl: String =
+        internal const val cancelAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/cancel"
 
-        internal val retrieveAuthSessionUrl: String =
+        internal const val retrieveAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/retrieve"
 
-        internal val eventsAuthSessionUrl: String =
+        internal const val eventsAuthSessionUrl: String =
             "${ApiRequest.API_HOST}/v1/connections/auth_sessions/events"
 
-        internal val consentAcquiredUrl: String =
+        internal const val consentAcquiredUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/consent_acquired"
 
-        internal val linkMoreAccountsUrl: String =
+        internal const val linkMoreAccountsUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_more_accounts"
 
-        internal val saveAccountToLinkUrl: String =
+        internal const val saveAccountToLinkUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/save_accounts_to_link"
 
-        internal val linkVerifiedUrl: String =
+        internal const val linkVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_verified"
 
-        internal val linkStepUpVerifiedUrl: String =
+        internal const val linkStepUpVerifiedUrl: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/link_step_up_authentication_verified"
 
-        internal val disableNetworking: String =
+        internal const val disableNetworking: String =
             "${ApiRequest.API_HOST}/v1/link_account_sessions/disable_networking"
     }
 }

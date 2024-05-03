@@ -95,7 +95,10 @@ sealed interface StripeIntent : StripeModel {
         WeChatPayRedirect("wechat_pay_redirect_to_android_app"),
         VerifyWithMicrodeposits("verify_with_microdeposits"),
         UpiAwaitNotification("upi_await_notification"),
-        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code");
+        CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
+        DisplayBoletoDetails("boleto_display_details"),
+        DisplayKonbiniDetails("konbini_display_details"),
+        SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
         @Keep
         override fun toString(): String {
@@ -104,7 +107,7 @@ sealed interface StripeIntent : StripeModel {
 
         internal companion object {
             internal fun fromCode(code: String?): NextActionType? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -132,7 +135,7 @@ sealed interface StripeIntent : StripeModel {
 
         internal companion object {
             internal fun fromCode(code: String?): Status? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -162,7 +165,7 @@ sealed interface StripeIntent : StripeModel {
 
         internal companion object {
             internal fun fromCode(code: String?): Usage? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }
@@ -185,6 +188,24 @@ sealed interface StripeIntent : StripeModel {
              * URL of a webpage containing the voucher for this OXXO payment.
              */
             val hostedVoucherUrl: String? = null
+        ) : NextActionData()
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayBoletoDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            val hostedVoucherUrl: String? = null,
+        ) : NextActionData()
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayKonbiniDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            val hostedVoucherUrl: String? = null,
         ) : NextActionData()
 
         /**
@@ -274,15 +295,7 @@ sealed interface StripeIntent : StripeModel {
         }
 
         @Parcelize
-        object BlikAuthorize : NextActionData() {
-            override fun hashCode(): Int {
-                return this::class.java.hashCode()
-            }
-
-            override fun equals(other: Any?): Boolean {
-                return this === other
-            }
-        }
+        data object BlikAuthorize : NextActionData()
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @Parcelize
@@ -296,21 +309,21 @@ sealed interface StripeIntent : StripeModel {
         ) : NextActionData()
 
         @Parcelize
-        object UpiAwaitNotification : NextActionData() {
-            override fun hashCode(): Int {
-                return this::class.java.hashCode()
-            }
-
-            override fun equals(other: Any?): Boolean {
-                return this === other
-            }
-        }
+        data object UpiAwaitNotification : NextActionData()
 
         /**
          * Contains the authentication URL for redirecting your customer to Cash App.
          */
         @Parcelize
         data class CashAppRedirect(
+            val mobileAuthUrl: String,
+        ) : NextActionData()
+
+        /**
+         * Contains the authentication URL for redirecting your customer to Swish.
+         */
+        @Parcelize
+        data class SwishRedirect(
             val mobileAuthUrl: String,
         ) : NextActionData()
     }

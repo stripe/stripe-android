@@ -2,40 +2,53 @@ package com.stripe.android.utils
 
 import com.stripe.android.model.Customer
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 
-internal class FakeCustomerRepository(
+internal open class FakeCustomerRepository(
     private val paymentMethods: List<PaymentMethod> = emptyList(),
     private val customer: Customer? = null,
+    private val onRetrieveCustomer: () -> Customer? = {
+        customer
+    },
+    private val onGetPaymentMethods: () -> Result<List<PaymentMethod>> = {
+        Result.success(paymentMethods)
+    },
     private val onDetachPaymentMethod: () -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
     },
     private val onAttachPaymentMethod: () -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
     },
+    private val onUpdatePaymentMethod: () -> Result<PaymentMethod> = {
+        Result.failure(NotImplementedError())
+    }
 ) : CustomerRepository {
-    lateinit var savedPaymentMethod: PaymentMethod
     var error: Throwable? = null
 
     override suspend fun retrieveCustomer(
-        customerId: String,
-        ephemeralKeySecret: String
-    ): Customer? = customer
+        customerInfo: CustomerRepository.CustomerInfo
+    ): Customer? = onRetrieveCustomer()
 
     override suspend fun getPaymentMethods(
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerInfo: CustomerRepository.CustomerInfo,
         types: List<PaymentMethod.Type>,
         silentlyFail: Boolean,
-    ): Result<List<PaymentMethod>> = Result.success(paymentMethods)
+    ): Result<List<PaymentMethod>> = onGetPaymentMethods()
 
     override suspend fun detachPaymentMethod(
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String
     ): Result<PaymentMethod> = onDetachPaymentMethod()
 
     override suspend fun attachPaymentMethod(
-        customerConfig: PaymentSheet.CustomerConfiguration,
+        customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String
     ): Result<PaymentMethod> = onAttachPaymentMethod()
+
+    override suspend fun updatePaymentMethod(
+        customerInfo: CustomerRepository.CustomerInfo,
+        paymentMethodId: String,
+        params: PaymentMethodUpdateParams
+    ): Result<PaymentMethod> = onUpdatePaymentMethod()
 }

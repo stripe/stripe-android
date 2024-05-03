@@ -24,4 +24,7 @@ class APIException(
         message = throwable.message,
         cause = throwable
     )
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    override fun analyticsValue(): String = "apiError"
 }

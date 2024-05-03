@@ -2,6 +2,7 @@ package com.stripe.android.googlepaylauncher
 
 import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
+import app.cash.turbine.test
 import com.google.android.gms.tasks.Task
 import com.google.android.gms.wallet.PaymentData
 import com.google.android.gms.wallet.PaymentsClient
@@ -23,9 +24,12 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.SetupIntentFixtures
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.PaymentFlowResult
-import com.stripe.android.payments.core.authentication.AbsPaymentController
 import com.stripe.android.testing.AbsFakeStripeRepository
+import com.stripe.android.testing.AbsPaymentController
+import com.stripe.android.testing.FakeErrorReporter
+import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
@@ -39,7 +43,6 @@ import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class GooglePayLauncherViewModelTest {
-    private val stripeRepository = FakeStripeRepository()
     private val savedStateHandle = SavedStateHandle()
     private val googlePayJsonFactory = GooglePayJsonFactory(
         googlePayConfig = GooglePayConfig(
@@ -49,18 +52,19 @@ class GooglePayLauncherViewModelTest {
     )
 
     private val googlePayRepository = FakeGooglePayRepository(true)
+    private val testDispatcher = StandardTestDispatcher()
 
-    private val task = mock<Task<PaymentData>>()
+    private val task = mock<Task<PaymentData>>().also {
+        whenever(it.isComplete).thenReturn(true)
+    }
     private val paymentsClient = mock<PaymentsClient>().also {
         whenever(it.loadPaymentData(any()))
             .thenReturn(task)
     }
 
-    private val viewModel = createViewModel()
-
     @Test
     fun `isReadyToPay() should return expected value`() = runTest {
-        assertThat(viewModel.isReadyToPay())
+        assertThat(createViewModel().isReadyToPay())
             .isTrue()
     }
 
@@ -68,21 +72,26 @@ class GooglePayLauncherViewModelTest {
     fun `createLoadPaymentDataTask() should throw expected exception when Google Pay is not available`() =
         runTest {
             googlePayRepository.value = false
-
-            val error = viewModel.createLoadPaymentDataTask().exceptionOrNull()
-            assertThat(error).isInstanceOf(IllegalStateException::class.java)
-            assertThat(error?.message).isEqualTo("Google Pay is unavailable.")
+            createViewModel().googlePayResult.test {
+                testDispatcher.scheduler.advanceUntilIdle()
+                val failed = awaitItem() as GooglePayLauncher.Result.Failed
+                val error = failed.error
+                assertThat(error).isInstanceOf(IllegalStateException::class.java)
+                assertThat(error.message).isEqualTo("Google Pay is unavailable.")
+            }
         }
 
     @Test
-    fun `createLoadPaymentDataTask() should return task when Google Pay is available`() =
-        runTest {
-            assertThat(viewModel.createLoadPaymentDataTask().isSuccess).isTrue()
+    fun `googlePayLaunchTask should return task when Google Pay is available`() = runTest {
+        createViewModel().googlePayLaunchTask.test {
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertThat(awaitItem()).isNotNull()
         }
+    }
 
     @Test
     fun `createTransactionInfo() with PaymentIntent should return expected TransactionInfo`() {
-        val transactionInfo = viewModel.createTransactionInfo(
+        val transactionInfo = createViewModel().createTransactionInfo(
             stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD,
             currencyCode = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.currency.orEmpty(),
         )
@@ -102,7 +111,7 @@ class GooglePayLauncherViewModelTest {
 
     @Test
     fun `createTransactionInfo() with SetupIntent should return expected TransactionInfo`() {
-        val transactionInfo = viewModel.createTransactionInfo(
+        val transactionInfo = createViewModel().createTransactionInfo(
             stripeIntent = SetupIntentFixtures.SI_REQUIRES_PAYMENT_METHOD,
             currencyCode = "usd",
         )
@@ -121,20 +130,33 @@ class GooglePayLauncherViewModelTest {
     }
 
     @Test
-    fun `hasLaunched is stored in savedStateHandle`() {
+    fun `hasLaunched is stored in savedStateHandle`() = runTest {
         val viewModel = createViewModel()
 
-        assertThat(viewModel.hasLaunched).isFalse()
+        viewModel.googlePayLaunchTask.test {
+            testDispatcher.scheduler.advanceUntilIdle()
+            assertThat(awaitItem()).isNotNull()
+            assertThat(savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY)).isNull()
+            viewModel.markTaskAsLaunched()
+            assertThat(awaitItem()).isNull()
+            assertThat(savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY)).isTrue()
+        }
+    }
 
-        viewModel.hasLaunched = true
-
-        assertThat(savedStateHandle.get<Boolean>(HAS_LAUNCHED_KEY)).isTrue()
+    @Test
+    fun `hasLaunched=true prevents initial loading of googlePayLaunchTask`() = runTest {
+        savedStateHandle[HAS_LAUNCHED_KEY] = true
+        val viewModel = createViewModel()
+        viewModel.googlePayLaunchTask.test {
+            testDispatcher.scheduler.advanceUntilIdle()
+            expectNoEvents() // We already launched, so we don't expect an emission here.
+        }
     }
 
     @Test
     fun `getResultFromConfirmation() using PaymentIntent should return expected result`() =
         runTest {
-            val result = viewModel.getResultFromConfirmation(
+            val result = createViewModel().getResultFromConfirmation(
                 StripePaymentController.PAYMENT_REQUEST_CODE,
                 Intent()
                     .putExtras(
@@ -150,7 +172,7 @@ class GooglePayLauncherViewModelTest {
     @Test
     fun `getResultFromConfirmation() using SetupIntent should return expected result`() =
         runTest {
-            val result = viewModel.getResultFromConfirmation(
+            val result = createViewModel().getResultFromConfirmation(
                 StripePaymentController.SETUP_REQUEST_CODE,
                 Intent()
                     .putExtras(
@@ -167,7 +189,7 @@ class GooglePayLauncherViewModelTest {
     fun `getResultFromConfirmation() with failed confirmation should return expected result`() =
         runTest {
             val exception = StripeException.create(Exception("Failure"))
-            val result = viewModel.getResultFromConfirmation(
+            val result = createViewModel().getResultFromConfirmation(
                 StripePaymentController.PAYMENT_REQUEST_CODE,
                 Intent()
                     .putExtras(
@@ -187,6 +209,8 @@ class GooglePayLauncherViewModelTest {
             val mockPaymentController: PaymentController = mock()
             createViewModel(paymentController = mockPaymentController)
                 .confirmStripeIntent(mock(), mock())
+
+            testDispatcher.scheduler.advanceUntilIdle()
 
             val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
             verify(mockPaymentController)
@@ -208,6 +232,8 @@ class GooglePayLauncherViewModelTest {
                 paymentController = mockPaymentController
             ).confirmStripeIntent(mock(), mock())
 
+            testDispatcher.scheduler.advanceUntilIdle()
+
             val argumentCaptor: KArgumentCaptor<ConfirmStripeIntentParams> = argumentCaptor()
             verify(mockPaymentController)
                 .startConfirmAndAuth(any(), argumentCaptor.capture(), any())
@@ -217,16 +243,19 @@ class GooglePayLauncherViewModelTest {
 
     private fun createViewModel(
         args: GooglePayLauncherContract.Args = ARGS,
-        paymentController: PaymentController = FakePaymentController()
+        paymentController: PaymentController = FakePaymentController(),
+        stripeRepository: StripeRepository = FakeStripeRepository(),
     ) = GooglePayLauncherViewModel(
-        paymentsClient,
-        REQUEST_OPTIONS,
-        args,
-        stripeRepository,
-        paymentController,
-        googlePayJsonFactory,
-        googlePayRepository,
-        savedStateHandle
+        paymentsClient = paymentsClient,
+        requestOptions = REQUEST_OPTIONS,
+        args = args,
+        stripeRepository = stripeRepository,
+        paymentController = paymentController,
+        googlePayJsonFactory = googlePayJsonFactory,
+        googlePayRepository = googlePayRepository,
+        savedStateHandle = savedStateHandle,
+        errorReporter = FakeErrorReporter(),
+        workContext = testDispatcher,
     )
 
     private class FakePaymentController : AbsPaymentController() {

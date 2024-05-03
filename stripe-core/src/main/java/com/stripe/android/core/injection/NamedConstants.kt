@@ -37,3 +37,15 @@ const val SHIPPING_VALUES = "shippingValues"
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 const val IS_LIVE_MODE = "isLiveMode"
+
+/**
+ * Name for linear delay supplier
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val LINEAR_DELAY = "linearDelaySupplier"
+
+/**
+ * Name for exponential backoff delay supplier
+ */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val EXPONENTIAL_BACKOFF_DELAY = "exponentialBackoffDelaySupplier"

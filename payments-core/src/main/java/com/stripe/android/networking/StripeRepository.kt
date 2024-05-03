@@ -21,11 +21,13 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.FinancialConnectionsSession
 import com.stripe.android.model.ListPaymentMethodsParams
+import com.stripe.android.model.MobileCardElementConfig
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodMessage
-import com.stripe.android.model.RadarSession
+import com.stripe.android.model.PaymentMethodUpdateParams
+import com.stripe.android.model.RadarSessionWithHCaptcha
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.Source
@@ -114,6 +116,13 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createPaymentMethod(
         paymentMethodCreateParams: PaymentMethodCreateParams,
+        options: ApiRequest.Options
+    ): Result<PaymentMethod>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun updatePaymentMethod(
+        paymentMethodId: String,
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
         options: ApiRequest.Options
     ): Result<PaymentMethod>
 
@@ -243,7 +252,15 @@ interface StripeRepository {
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun createRadarSession(
         requestOptions: ApiRequest.Options
-    ): Result<RadarSession>
+    ): Result<RadarSessionWithHCaptcha>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun attachHCaptchaToRadarSession(
+        radarSessionToken: String,
+        hcaptchaToken: String,
+        hcaptchaEKey: String?,
+        requestOptions: ApiRequest.Options
+    ): Result<RadarSessionWithHCaptcha>
 
     // Link endpoints
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -263,8 +280,23 @@ interface StripeRepository {
     suspend fun createPaymentDetails(
         consumerSessionClientSecret: String,
         paymentDetailsCreateParams: ConsumerPaymentDetailsCreateParams,
-        requestOptions: ApiRequest.Options
+        requestOptions: ApiRequest.Options,
+        active: Boolean,
     ): Result<ConsumerPaymentDetails>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun sharePaymentDetails(
+        consumerSessionClientSecret: String,
+        id: String,
+        requestOptions: ApiRequest.Options
+    ): Result<String>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun logOut(
+        consumerSessionClientSecret: String,
+        consumerAccountPublishableKey: String?,
+        requestOptions: ApiRequest.Options,
+    ): Result<ConsumerSession>
 
     // ACHv2 endpoints
 
@@ -358,6 +390,11 @@ interface StripeRepository {
         cardNumber: String,
         requestOptions: ApiRequest.Options
     ): Result<CardMetadata>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrieveCardElementConfig(
+        requestOptions: ApiRequest.Options,
+    ): Result<MobileCardElementConfig>
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     fun buildPaymentUserAgent(attribution: Set<String> = emptySet()): String

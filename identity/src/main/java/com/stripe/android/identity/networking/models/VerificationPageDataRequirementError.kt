@@ -1,5 +1,6 @@
 package com.stripe.android.identity.networking.models
 
+import com.stripe.android.identity.networking.models.Requirement.Companion.supportsForceConfirm
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -15,4 +16,14 @@ internal data class VerificationPageDataRequirementError(
     val requirement: Requirement,
     @SerialName("title")
     val title: String? = null
-)
+) {
+    companion object {
+
+        /**
+         * Checks if the error supports continue button.
+         * [continueButtonText] should but non empty and [requirement] should support force confirm
+         */
+        fun VerificationPageDataRequirementError.supportsContinueButton() =
+            !continueButtonText.isNullOrEmpty() && requirement.supportsForceConfirm()
+    }
+}

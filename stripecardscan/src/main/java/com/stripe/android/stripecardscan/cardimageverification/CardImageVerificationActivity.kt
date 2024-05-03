@@ -20,6 +20,7 @@ import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.camera.scanui.SimpleScanStateful
 import com.stripe.android.camera.scanui.util.startAnimation
 import com.stripe.android.stripecardscan.R
+import com.stripe.android.stripecardscan.camera.getVerifyCameraAdapter
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidCivException
 import com.stripe.android.stripecardscan.cardimageverification.exception.InvalidStripePublishableKeyException
 import com.stripe.android.stripecardscan.cardimageverification.exception.StripeNetworkException
@@ -77,10 +78,10 @@ internal data class CardVerificationFlowParameters(
 private val MINIMUM_RESOLUTION = Size(1067, 600) // minimum size of OCR
 
 internal sealed class CardVerificationScanState(isFinal: Boolean) : ScanState(isFinal) {
-    object NotFound : CardVerificationScanState(isFinal = false)
-    object Found : CardVerificationScanState(isFinal = false)
-    object Correct : CardVerificationScanState(isFinal = true)
-    object Wrong : CardVerificationScanState(isFinal = false)
+    data object NotFound : CardVerificationScanState(isFinal = false)
+    data object Found : CardVerificationScanState(isFinal = false)
+    data object Correct : CardVerificationScanState(isFinal = true)
+    data object Wrong : CardVerificationScanState(isFinal = false)
 }
 
 @Keep
@@ -500,6 +501,8 @@ internal open class CardImageVerificationActivity :
             connect(it.id, ConstraintSet.BOTTOM, cardDescriptionTextView.id, ConstraintSet.TOP)
         }
     }
+
+    override val cameraAdapterBuilder = ::getVerifyCameraAdapter
 
     protected open fun setupCannotScanTextViewConstraints() {
         cannotScanTextView.layoutParams = ConstraintLayout.LayoutParams(

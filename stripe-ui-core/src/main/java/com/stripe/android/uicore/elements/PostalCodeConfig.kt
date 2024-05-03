@@ -7,17 +7,26 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.VisualTransformation
 import com.stripe.android.uicore.R
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlin.math.max
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class PostalCodeConfig(
     @StringRes override val label: Int,
-    override val capitalization: KeyboardCapitalization = KeyboardCapitalization.Words,
-    override val keyboard: KeyboardType = KeyboardType.Text,
     override val trailingIcon: MutableStateFlow<TextFieldIcon?> = MutableStateFlow(null),
     private val country: String
 ) : TextFieldConfig {
     private val format = CountryPostalFormat.forCountry(country)
+
+    override val capitalization: KeyboardCapitalization = when (format) {
+        CountryPostalFormat.US -> KeyboardCapitalization.None
+        CountryPostalFormat.CA,
+        CountryPostalFormat.Other -> KeyboardCapitalization.Characters
+    }
+
+    override val keyboard: KeyboardType = when (format) {
+        CountryPostalFormat.US -> KeyboardType.NumberPassword
+        CountryPostalFormat.CA,
+        CountryPostalFormat.Other -> KeyboardType.Text
+    }
 
     override val debugLabel: String = "postal_code_text"
     override val visualTransformation: VisualTransformation =
@@ -54,14 +63,13 @@ class PostalCodeConfig(
         override fun isBlank(): Boolean = input.isBlank()
     }
 
-    override fun filter(userTyped: String): String =
-        if (
-            setOf(KeyboardType.Number, KeyboardType.NumberPassword).contains(keyboard)
-        ) {
-            userTyped.filter { it.isDigit() }
-        } else {
-            userTyped
-        }.dropLast(max(0, userTyped.length - format.maximumLength))
+    override fun filter(userTyped: String): String {
+        return when (format) {
+            CountryPostalFormat.US -> userTyped.filter { it.isDigit() }
+            CountryPostalFormat.CA -> userTyped.filter { it.isLetterOrDigit() }.uppercase()
+            CountryPostalFormat.Other -> userTyped
+        }.take(format.maximumLength)
+    }
 
     override fun convertToRaw(displayName: String) = displayName
 

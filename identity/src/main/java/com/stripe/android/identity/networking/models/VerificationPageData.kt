@@ -51,9 +51,6 @@ internal data class VerificationPageData(
         fun VerificationPageData.isMissingConsent() =
             requirements.missings?.contains(Requirement.BIOMETRICCONSENT) == true
 
-        fun VerificationPageData.isMissingDocType() =
-            requirements.missings?.contains(Requirement.IDDOCUMENTTYPE) == true
-
         fun VerificationPageData.isMissingFront() =
             requirements.missings?.contains(Requirement.IDDOCUMENTFRONT) == true
 

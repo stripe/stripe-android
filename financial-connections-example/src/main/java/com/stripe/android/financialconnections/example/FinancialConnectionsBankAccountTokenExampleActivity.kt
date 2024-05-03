@@ -1,12 +1,14 @@
 package com.stripe.android.financialconnections.example
 
 import android.os.Bundle
+import android.view.View
+import android.widget.TextView
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.Toolbar
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import com.stripe.android.financialconnections.example.FinancialConnectionsExampleViewEffect.OpenFinancialConnectionsSheetExample
-import com.stripe.android.financialconnections.example.databinding.ActivityFinancialconnectionsExampleBinding
 
 class FinancialConnectionsBankAccountTokenExampleActivity : AppCompatActivity() {
 
@@ -16,32 +18,31 @@ class FinancialConnectionsBankAccountTokenExampleActivity : AppCompatActivity() 
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        with(ActivityFinancialconnectionsExampleBinding.inflate(layoutInflater)) {
-            setContentView(root)
-            setupViews()
-            observeViews()
-            observeState()
-        }
+        setContentView(R.layout.activity_financialconnections_example)
+        setupViews()
+        observeViews()
+        observeState()
     }
 
-    private fun ActivityFinancialconnectionsExampleBinding.setupViews() {
-        toolbar.setTitle(R.string.collect_bank_account_for_bank_account_token_title)
-        setSupportActionBar(toolbar)
+    private fun setupViews() {
+        findViewById<Toolbar>(R.id.toolbar).let {
+            it.title = getString(R.string.collect_bank_account_for_data_title)
+            setSupportActionBar(it)
+        }
         financialConnectionsSheet = FinancialConnectionsSheet.createForBankAccountToken(
             activity = this@FinancialConnectionsBankAccountTokenExampleActivity,
             callback = viewModel::onFinancialConnectionsSheetForBankAccountTokenResult
         )
     }
 
-    private fun ActivityFinancialconnectionsExampleBinding.observeViews() {
-        launchConnectionsSheet.setOnClickListener { viewModel.startFinancialConnectionsSessionForToken() }
+    private fun observeViews() {
+        findViewById<View>(R.id.launch_connections_sheet)
+            .setOnClickListener { viewModel.startFinancialConnectionsSessionForToken() }
     }
 
-    private fun ActivityFinancialconnectionsExampleBinding.observeState() {
+    private fun observeState() {
         lifecycleScope.launchWhenStarted {
-            viewModel.state.collect {
-                bindState(it, this@observeState)
-            }
+            viewModel.state.collect { bindState(it) }
         }
         lifecycleScope.launchWhenStarted {
             viewModel.viewEffect.collect {
@@ -54,10 +55,10 @@ class FinancialConnectionsBankAccountTokenExampleActivity : AppCompatActivity() 
 
     private fun bindState(
         financialConnectionsExampleState: FinancialConnectionsExampleState,
-        viewBinding: ActivityFinancialconnectionsExampleBinding
     ) {
-        viewBinding.status.text = financialConnectionsExampleState.status
-        viewBinding.launchConnectionsSheet.isEnabled =
+        findViewById<TextView>(R.id.status).text =
+            financialConnectionsExampleState.status
+        findViewById<View>(R.id.launch_connections_sheet).isEnabled =
             financialConnectionsExampleState.loading.not()
     }
 }

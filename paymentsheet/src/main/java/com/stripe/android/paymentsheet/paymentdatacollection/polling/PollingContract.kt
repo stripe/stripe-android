@@ -5,6 +5,7 @@ import android.content.Intent
 import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.ColorInt
+import androidx.annotation.StringRes
 import androidx.core.os.bundleOf
 import com.stripe.android.payments.PaymentFlowResult
 import kotlinx.parcelize.Parcelize
@@ -30,6 +31,7 @@ internal class PollingContract :
         val timeLimitInSeconds: Int,
         val initialDelayInSeconds: Int,
         val maxAttempts: Int,
+        @StringRes val ctaText: Int,
     ) : Parcelable {
 
         internal companion object {

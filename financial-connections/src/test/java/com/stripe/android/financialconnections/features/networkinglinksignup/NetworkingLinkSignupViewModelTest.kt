@@ -1,47 +1,51 @@
 package com.stripe.android.financialconnections.features.networkinglinksignup
 
-import com.airbnb.mvrx.test.MavericksTestRule
+import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
+import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetManifest
 import com.stripe.android.financialconnections.domain.LookupAccount
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane.NETWORKING_LINK_SIGNUP_PANE
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupBody
 import com.stripe.android.financialconnections.model.NetworkingLinkSignupPane
 import com.stripe.android.financialconnections.model.TextUpdate
-import com.stripe.android.financialconnections.repository.SaveToLinkWithStripeSucceededRepository
-import com.stripe.android.financialconnections.utils.TestNavigationManager
+import com.stripe.android.financialconnections.navigation.Destination.NetworkingSaveToLinkVerification
+import com.stripe.android.financialconnections.navigation.NavigationIntent
+import com.stripe.android.financialconnections.navigation.NavigationManagerImpl
 import com.stripe.android.financialconnections.utils.UriUtils
+import com.stripe.android.model.ConsumerSessionLookup
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class NetworkingLinkSignupViewModelTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-
     @get:Rule
-    val mavericksTestRule = MavericksTestRule(testDispatcher = testDispatcher)
+    val testRule = CoroutineTestRule()
 
     private val getManifest = mock<GetManifest>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val getAuthorizationSessionAccounts = mock<GetCachedAccounts>()
-    private val navigationManager = TestNavigationManager()
+    private val navigationManager = NavigationManagerImpl()
     private val lookupAccount = mock<LookupAccount>()
     private val saveAccountToLink = mock<SaveAccountToLink>()
     private val sync = mock<SynchronizeFinancialConnectionsSession>()
-    private val saveToLinkWithStripeSucceeded = mock<SaveToLinkWithStripeSucceededRepository>()
+    private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
 
     private fun buildViewModel(
         state: NetworkingLinkSignupState
@@ -55,8 +59,9 @@ class NetworkingLinkSignupViewModelTest {
         lookupAccount = lookupAccount,
         uriUtils = UriUtils(Logger.noop(), eventTracker),
         sync = sync,
-        saveToLinkWithStripeSucceeded = saveToLinkWithStripeSucceeded,
-        saveAccountToLink = saveAccountToLink
+        saveAccountToLink = saveAccountToLink,
+        nativeAuthFlowCoordinator = nativeAuthFlowCoordinator,
+        presentNoticeSheet = mock(),
     )
 
     @Test
@@ -65,6 +70,7 @@ class NetworkingLinkSignupViewModelTest {
             businessName = "Business",
             accountholderCustomerEmailAddress = "test@test.com"
         )
+
         whenever(sync()).thenReturn(
             syncResponse().copy(
                 text = TextUpdate(
@@ -74,11 +80,89 @@ class NetworkingLinkSignupViewModelTest {
             )
         )
         whenever(getManifest()).thenReturn(manifest)
+        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = false))
 
         val viewModel = buildViewModel(NetworkingLinkSignupState())
-        val state = viewModel.awaitState()
+        val state = viewModel.stateFlow.value
         val payload = requireNotNull(state.payload())
-        assertThat(payload.emailController.fieldValue.first()).isEqualTo("test@test.com")
+        assertThat(payload.emailController.fieldValue.value).isEqualTo("test@test.com")
+    }
+
+    @Test
+    fun `Redirects to verification screen if entering returning user email`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest()
+
+        whenever(sync()).thenReturn(
+            syncResponse().copy(
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane()
+                )
+            )
+        )
+        whenever(getManifest()).thenReturn(manifest)
+        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
+
+        val viewModel = buildViewModel(NetworkingLinkSignupState())
+
+        navigationManager.navigationFlow.test {
+            val state = viewModel.stateFlow.value
+            val payload = requireNotNull(state.payload())
+            payload.emailController.onValueChange("email@email.com")
+
+            assertThat(awaitItem()).isEqualTo(
+                NavigationIntent.NavigateTo(
+                    route = NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE),
+                    popUpTo = null,
+                    isSingleTop = true,
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `Enables Save To Link button if we encounter a returning user`() = runTest {
+        val manifest = ApiKeyFixtures.sessionManifest()
+
+        whenever(sync()).thenReturn(
+            syncResponse().copy(
+                text = TextUpdate(
+                    consent = null,
+                    networkingLinkSignupPane = networkingLinkSignupPane()
+                )
+            )
+        )
+        whenever(getManifest()).thenReturn(manifest)
+        whenever(lookupAccount(any())).thenReturn(ConsumerSessionLookup(exists = true))
+
+        val viewModel = buildViewModel(NetworkingLinkSignupState())
+
+        navigationManager.navigationFlow.test {
+            val state = viewModel.stateFlow.value
+            val payload = requireNotNull(state.payload())
+            payload.emailController.onValueChange("email@email.com")
+
+            assertThat(awaitItem()).isEqualTo(
+                NavigationIntent.NavigateTo(
+                    route = NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE),
+                    popUpTo = null,
+                    isSingleTop = true,
+                )
+            )
+
+            // Simulate the user pressing Save To Link after returning from the OTP screen
+            viewModel.onSaveAccount()
+
+            verify(saveAccountToLink, never()).new(any(), any(), any(), any(), any())
+
+            assertThat(awaitItem()).isEqualTo(
+                NavigationIntent.NavigateTo(
+                    route = NetworkingSaveToLinkVerification(referrer = NETWORKING_LINK_SIGNUP_PANE),
+                    popUpTo = null,
+                    isSingleTop = true,
+                )
+            )
+        }
     }
 
     private fun networkingLinkSignupPane() = NetworkingLinkSignupPane(

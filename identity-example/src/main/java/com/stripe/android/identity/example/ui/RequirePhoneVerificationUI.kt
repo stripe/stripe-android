@@ -35,7 +35,7 @@ internal fun RequirePhoneVerificationUI(
     }
 
     val phoneController = remember {
-        PhoneNumberController(
+        PhoneNumberController.createPhoneNumberController(
             overrideCountryCodes = setOf("US")
         )
     }

@@ -45,9 +45,9 @@ class PaymentAnalyticsRequestFactoryTest {
             Token.Type.Pii
         ).params
 
-        // Size is SIZE-1 because tokens don't have a source_type field
+        // Size is SIZE-2 because tokens don't have a token_type, or error_message fields
         assertThat(params)
-            .hasSize(VALID_PARAM_FIELDS.size - 1)
+            .hasSize(VALID_PARAM_FIELDS.size - 2)
 
         assertThat(params[AnalyticsFields.EVENT])
             .isEqualTo(expectedEvent)
@@ -65,9 +65,9 @@ class PaymentAnalyticsRequestFactoryTest {
             Token.Type.CvcUpdate
         ).params
 
-        // Size is SIZE-1 because tokens don't have a source_type field
+        // Size is SIZE-2 because tokens don't have a token_type, or error_message fields
         assertThat(params)
-            .hasSize(VALID_PARAM_FIELDS.size - 1)
+            .hasSize(VALID_PARAM_FIELDS.size - 2)
         assertEquals(expectedEventName, params[AnalyticsFields.EVENT])
         assertEquals(Token.Type.CvcUpdate.code, params[PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE])
     }
@@ -79,9 +79,9 @@ class PaymentAnalyticsRequestFactoryTest {
             ATTRIBUTION
         ).params
 
-        // Size is SIZE-1 because tokens don't have a token_type field
+        // Size is SIZE-2 because tokens don't have a token_type, or error_message fields
         assertThat(loggingParams)
-            .hasSize(VALID_PARAM_FIELDS.size - 1)
+            .hasSize(VALID_PARAM_FIELDS.size - 2)
 
         assertEquals(
             Source.SourceType.SEPA_DEBIT,
@@ -129,10 +129,61 @@ class PaymentAnalyticsRequestFactoryTest {
     }
 
     @Test
+    fun getPaymentMethodUpdateParams() {
+        assertThat(
+            analyticsRequestFactory
+                .createPaymentMethodUpdate(
+                    PaymentMethod.Type.Card.code,
+                    ATTRIBUTION
+                ).params
+        ).isEqualTo(
+            mapOf(
+                "analytics_ua" to "analytics.stripe_android-1.0",
+                "event" to "stripe_android.payment_method_update",
+                "publishable_key" to "pk_abc123",
+                "os_name" to "REL",
+                "os_release" to "11",
+                "os_version" to 30,
+                "device_type" to "robolectric_robolectric_robolectric",
+                "bindings_version" to StripeSdkVersion.VERSION_NAME,
+                "app_name" to "com.stripe.android.test",
+                "app_version" to 0,
+                "product_usage" to ATTRIBUTION.toList(),
+                "source_type" to "card",
+                "is_development" to true,
+                "session_id" to AnalyticsRequestFactory.sessionId,
+                "network_type" to "2G",
+                "locale" to "en_US",
+            )
+        )
+    }
+
+    @Test
     fun createPaymentIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val loggingParams =
             analyticsRequestFactory.createPaymentIntentConfirmation(
-                PaymentMethod.Type.Card.code
+                paymentMethodType = PaymentMethod.Type.Card.code,
+                errorMessage = null,
+            ).params
+
+        assertThat(loggingParams)
+            .hasSize(VALID_PARAM_FIELDS.size - 3)
+        assertThat(loggingParams[AnalyticsFields.PUBLISHABLE_KEY])
+            .isEqualTo(API_KEY)
+        assertThat(loggingParams[AnalyticsFields.EVENT])
+            .isEqualTo(PaymentAnalyticsEvent.PaymentIntentConfirm.toString())
+        assertThat(loggingParams[AnalyticsFields.ANALYTICS_UA])
+            .isEqualTo(AnalyticsRequestFactory.ANALYTICS_UA)
+        assertThat(loggingParams[PaymentAnalyticsRequestFactory.FIELD_ERROR_MESSAGE])
+            .isNull()
+    }
+
+    @Test
+    fun createPaymentIntentConfirmationParams_withErrorMessage_createsCorrectMap() {
+        val loggingParams =
+            analyticsRequestFactory.createPaymentIntentConfirmation(
+                paymentMethodType = PaymentMethod.Type.Card.code,
+                errorMessage = "connectionError",
             ).params
 
         assertThat(loggingParams)
@@ -143,6 +194,8 @@ class PaymentAnalyticsRequestFactoryTest {
             .isEqualTo(PaymentAnalyticsEvent.PaymentIntentConfirm.toString())
         assertThat(loggingParams[AnalyticsFields.ANALYTICS_UA])
             .isEqualTo(AnalyticsRequestFactory.ANALYTICS_UA)
+        assertThat(loggingParams[PaymentAnalyticsRequestFactory.FIELD_ERROR_MESSAGE])
+            .isEqualTo("connectionError")
     }
 
     @Test
@@ -152,7 +205,7 @@ class PaymentAnalyticsRequestFactoryTest {
         ).params
 
         assertThat(loggingParams)
-            .hasSize(VALID_PARAM_FIELDS.size - 2)
+            .hasSize(VALID_PARAM_FIELDS.size - 3)
         assertEquals(API_KEY, loggingParams[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(
             PaymentAnalyticsEvent.PaymentIntentRetrieve.toString(),
@@ -167,11 +220,27 @@ class PaymentAnalyticsRequestFactoryTest {
     @Test
     fun getSetupIntentConfirmationParams_withValidInput_createsCorrectMap() {
         val params = analyticsRequestFactory.createSetupIntentConfirmation(
-            PaymentMethod.Type.Card.code
+            paymentMethodType = PaymentMethod.Type.Card.code,
+            errorMessage = null,
         ).params
 
         assertThat(params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE])
             .isEqualTo("card")
+        assertThat(params[PaymentAnalyticsRequestFactory.FIELD_ERROR_MESSAGE])
+            .isNull()
+    }
+
+    @Test
+    fun getSetupIntentConfirmationParams_withErrorMessage_createsCorrectMap() {
+        val params = analyticsRequestFactory.createSetupIntentConfirmation(
+            paymentMethodType = PaymentMethod.Type.Card.code,
+            errorMessage = "connectionError",
+        ).params
+
+        assertThat(params[PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE])
+            .isEqualTo("card")
+        assertThat(params[PaymentAnalyticsRequestFactory.FIELD_ERROR_MESSAGE])
+            .isEqualTo("connectionError")
     }
 
     @Test
@@ -200,7 +269,7 @@ class PaymentAnalyticsRequestFactoryTest {
         ).params
 
         assertThat(params)
-            .hasSize(VALID_PARAM_FIELDS.size - 1)
+            .hasSize(VALID_PARAM_FIELDS.size - 2)
         assertEquals(API_KEY, params[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(ATTRIBUTION.toList(), params[PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE])
         assertEquals(Token.Type.Card.code, params[PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE])
@@ -232,7 +301,7 @@ class PaymentAnalyticsRequestFactoryTest {
         ).params
 
         assertThat(params)
-            .hasSize(VALID_PARAM_FIELDS.size - 2)
+            .hasSize(VALID_PARAM_FIELDS.size - 3)
         assertEquals(API_KEY, params[AnalyticsFields.PUBLISHABLE_KEY])
         assertEquals(
             Source.SourceType.SEPA_DEBIT,
@@ -379,6 +448,7 @@ class PaymentAnalyticsRequestFactoryTest {
             PaymentAnalyticsRequestFactory.FIELD_PRODUCT_USAGE,
             PaymentAnalyticsRequestFactory.FIELD_SOURCE_TYPE,
             PaymentAnalyticsRequestFactory.FIELD_TOKEN_TYPE,
+            PaymentAnalyticsRequestFactory.FIELD_ERROR_MESSAGE,
             AnalyticsFields.NETWORK_TYPE,
             AnalyticsFields.LOCALE,
         )

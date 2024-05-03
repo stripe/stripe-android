@@ -10,8 +10,8 @@ import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.format.CurrencyFormatter
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class AfterpayClearpayHeaderElement(
@@ -19,8 +19,8 @@ data class AfterpayClearpayHeaderElement(
     private val amount: Amount,
     override val controller: Controller? = null
 ) : FormElement {
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
-        MutableStateFlow(emptyList())
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+        stateFlowOf(emptyList())
 
     val infoUrl: String
         get() = url.format(getLocaleString(Locale.current))
@@ -46,7 +46,7 @@ data class AfterpayClearpayHeaderElement(
             // The no break space will keep the afterpay logo and (i) on the same line.
             .replace(
                 "<img/>",
-                "<img/>$NO_BREAK_SPACE<a href=\"$infoUrl\"><b>ⓘ</b></a>"
+                "<img/>$NO_BREAK_SPACE<b>ⓘ</b>"
             )
     }
 
@@ -54,6 +54,7 @@ data class AfterpayClearpayHeaderElement(
         const val url = "https://static.afterpay.com/modal/%s.html"
         const val NO_BREAK_SPACE = "\u00A0"
 
-        internal fun isClearpay() = setOf("GB", "ES", "FR", "IT").contains(Locale.current.region)
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        fun isClearpay() = setOf("GB", "ES", "FR", "IT").contains(Locale.current.region)
     }
 }

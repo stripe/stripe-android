@@ -4,8 +4,9 @@ import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.annotation.RestrictTo
+import com.stripe.android.link.LinkActivityResult.Completed
+import com.stripe.android.link.account.LinkStore
 import com.stripe.android.link.injection.LinkAnalyticsComponent
-import com.stripe.android.link.ui.paymentmethod.SupportedPaymentMethod
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,6 +18,7 @@ import javax.inject.Singleton
 class LinkPaymentLauncher @Inject internal constructor(
     linkAnalyticsComponentBuilder: LinkAnalyticsComponent.Builder,
     private val linkActivityContract: LinkActivityContract,
+    private val linkStore: LinkStore,
 ) {
     private val analyticsHelper = linkAnalyticsComponentBuilder.build().linkAnalyticsHelper
 
@@ -30,8 +32,13 @@ class LinkPaymentLauncher @Inject internal constructor(
         linkActivityResultLauncher = activityResultRegistry.register(
             "LinkPaymentLauncher",
             linkActivityContract,
-            callback,
-        )
+        ) { linkActivityResult ->
+            analyticsHelper.onLinkResult(linkActivityResult)
+            if (linkActivityResult is Completed) {
+                linkStore.markLinkAsUsed()
+            }
+            callback(linkActivityResult)
+        }
     }
 
     fun register(
@@ -42,6 +49,9 @@ class LinkPaymentLauncher @Inject internal constructor(
             linkActivityContract
         ) { linkActivityResult ->
             analyticsHelper.onLinkResult(linkActivityResult)
+            if (linkActivityResult is Completed) {
+                linkStore.markLinkAsUsed()
+            }
             callback(linkActivityResult)
         }
     }
@@ -64,10 +74,5 @@ class LinkPaymentLauncher @Inject internal constructor(
         )
         linkActivityResultLauncher?.launch(args)
         analyticsHelper.onLinkLaunched()
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    companion object {
-        val supportedFundingSources = SupportedPaymentMethod.allTypes
     }
 }

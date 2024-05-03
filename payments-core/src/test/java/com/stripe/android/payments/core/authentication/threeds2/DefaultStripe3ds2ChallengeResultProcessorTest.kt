@@ -11,7 +11,7 @@ import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.networking.AnalyticsRequest
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.core.networking.RetryDelaySupplier
+import com.stripe.android.core.networking.LinearRetryDelaySupplier
 import com.stripe.android.model.Stripe3ds2AuthResult
 import com.stripe.android.model.Stripe3ds2AuthResultFixtures
 import com.stripe.android.networking.PaymentAnalyticsRequestFactory
@@ -52,7 +52,7 @@ class DefaultStripe3ds2ChallengeResultProcessorTest {
         stripeRepository,
         analyticsRequestExecutor,
         analyticsRequestFactory,
-        RetryDelaySupplier(),
+        LinearRetryDelaySupplier(),
         Logger.noop(),
         testDispatcher
     )

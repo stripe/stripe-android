@@ -1,7 +1,10 @@
 package com.stripe.android.paymentsheet
 
+import android.content.Context
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.ConfirmPaymentIntentParams
-import com.stripe.android.model.ConfirmPaymentIntentParams.SetupFutureUsage
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter.UnexpectedErrorEvent
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave
 
@@ -9,20 +12,16 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
     initializationMode: PaymentSheet.InitializationMode,
     paymentSelection: PaymentSelection?,
     shippingValues: ConfirmPaymentIntentParams.Shipping?,
+    context: Context,
 ): IntentConfirmationInterceptor.NextStep {
     return when (paymentSelection) {
         is PaymentSelection.New -> {
-            val setupFutureUsage = when (paymentSelection.customerRequestedSave) {
-                CustomerRequestedSave.RequestReuse -> SetupFutureUsage.OffSession
-                CustomerRequestedSave.RequestNoReuse -> SetupFutureUsage.Blank
-                CustomerRequestedSave.NoRequest -> null
-            }
-
             intercept(
                 initializationMode = initializationMode,
+                paymentMethodOptionsParams = paymentSelection.paymentMethodOptionsParams,
                 paymentMethodCreateParams = paymentSelection.paymentMethodCreateParams,
                 shippingValues = shippingValues,
-                setupForFutureUsage = setupFutureUsage,
+                customerRequestedSave = paymentSelection.customerRequestedSave == CustomerRequestedSave.RequestReuse,
             )
         }
         is PaymentSelection.Saved -> {
@@ -30,11 +29,27 @@ internal suspend fun IntentConfirmationInterceptor.intercept(
                 initializationMode = initializationMode,
                 paymentMethod = paymentSelection.paymentMethod,
                 shippingValues = shippingValues,
-                setupForFutureUsage = null,
+                requiresSaveOnConfirmation = paymentSelection.requiresSaveOnConfirmation,
+            )
+        }
+        null -> {
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = IllegalStateException("Nothing selected."),
+                message = context.getString(R.string.stripe_something_went_wrong),
             )
         }
         else -> {
-            error("Attempting to confirm intent for invalid payment selection: $paymentSelection")
+            val exception =
+                IllegalStateException("Attempting to confirm intent for invalid payment selection: $paymentSelection")
+            val errorReporter = ErrorReporter.createFallbackInstance(context)
+            errorReporter.report(
+                errorEvent = UnexpectedErrorEvent.INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION,
+                stripeException = StripeException.create(exception),
+            )
+            IntentConfirmationInterceptor.NextStep.Fail(
+                cause = exception,
+                message = context.getString(R.string.stripe_something_went_wrong),
+            )
         }
     }
 }

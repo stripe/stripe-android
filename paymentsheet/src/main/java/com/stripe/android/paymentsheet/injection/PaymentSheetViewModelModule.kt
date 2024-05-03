@@ -24,7 +24,7 @@ internal class PaymentSheetViewModelModule(private val starterArgs: PaymentSheet
     ): PrefsRepository {
         return DefaultPrefsRepository(
             appContext,
-            customerId = starterArgs.config?.customer?.id,
+            customerId = starterArgs.config.customer?.id,
             workContext = workContext
         )
     }

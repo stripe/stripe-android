@@ -186,7 +186,7 @@ class PrimaryButtonUiStateMapperTest {
 
     private fun createMapper(
         isProcessingPayment: Boolean,
-        config: PaymentSheet.Configuration? = null,
+        config: PaymentSheet.Configuration = PaymentSheet.Configuration("Some Name"),
         currentScreenFlow: Flow<PaymentSheetScreen>,
         buttonsEnabledFlow: Flow<Boolean>,
         amountFlow: Flow<Amount?> = flowOf(null),

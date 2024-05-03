@@ -9,6 +9,7 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
 
     // Payment Methods
     PaymentMethodCreate("payment_method_creation"),
+    PaymentMethodUpdate("payment_method_update"),
 
     // Customer
     CustomerRetrieve("retrieve_customer"),
@@ -40,6 +41,12 @@ internal enum class PaymentAnalyticsEvent(val code: String) : AnalyticsEvent {
     SetupIntentRetrieve("setup_intent_retrieval"),
     SetupIntentRetrieveOrdered("setup_intent_retrieval_ordered"),
     SetupIntentCancelSource("setup_intent_cancel_source"),
+
+    // Payment Launcher
+    PaymentLauncherConfirmStarted("paymenthandler.confirm.started"),
+    PaymentLauncherConfirmFinished("paymenthandler.confirm.finished"),
+    PaymentLauncherNextActionStarted("paymenthandler.handle_next_action.started"),
+    PaymentLauncherNextActionFinished("paymenthandler.handle_next_action.finished"),
 
     // File
     FileCreate("create_file"),

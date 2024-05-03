@@ -11,8 +11,9 @@ import kotlin.math.pow
 object CurrencyFormatter {
 
     private const val MAJOR_UNIT_BASE = 10.0
+
     private val SERVER_DECIMAL_DIGITS = mapOf(
-        setOf("UGX", "AFN", "ALL", "AMD", "COP", "IDR", "ISK", "PKR", "LBP", "MMK", "LAK") to 2,
+        setOf("UGX", "AFN", "ALL", "AMD", "COP", "IDR", "ISK", "PKR", "LBP", "MMK", "LAK", "RSD") to 2,
     )
 
     fun format(
@@ -31,8 +32,7 @@ object CurrencyFormatter {
         targetLocale: Locale = Locale.getDefault()
     ): String {
         val amountCurrencyDecimalDigits = getDefaultDecimalDigits(amountCurrency)
-        val majorUnitAmount =
-            amount / MAJOR_UNIT_BASE.pow(amountCurrencyDecimalDigits.toDouble())
+        val majorUnitAmount = amount / MAJOR_UNIT_BASE.pow(amountCurrencyDecimalDigits.toDouble())
 
         /**
          * The currencyFormat for a country and region specifies many things including:

@@ -1,5 +1,3 @@
-@file:Suppress("MatchingDeclarationName")
-
 package com.stripe.android.financialconnections.ui.components
 
 import android.graphics.Typeface
@@ -21,6 +19,7 @@ import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.core.text.getSpans
 import com.stripe.android.financialconnections.ui.TextResource
@@ -33,20 +32,19 @@ internal fun AnnotatedText(
     defaultStyle: TextStyle,
     modifier: Modifier = Modifier,
     annotationStyles: Map<StringAnnotation, SpanStyle> = mapOf(
-        StringAnnotation.CLICKABLE to FinancialConnectionsTheme.typography.bodyEmphasized
+        StringAnnotation.CLICKABLE to defaultStyle
             .toSpanStyle()
-            .copy(color = FinancialConnectionsTheme.colors.textBrand)
+            .copy(textDecoration = TextDecoration.Underline)
     ),
     maxLines: Int = Int.MAX_VALUE,
     overflow: TextOverflow = TextOverflow.Clip
 ) {
-    val pressedColor = FinancialConnectionsTheme.colors.textPrimary
+    val pressedColor = FinancialConnectionsTheme.colors.textDefault
     var pressedAnnotation: String? by remember { mutableStateOf(null) }
     val resource = annotatedStringResource(
         resource = text,
         spanStyleForAnnotation = { annotation ->
-            val matchingAnnotation = StringAnnotation
-                .values()
+            val matchingAnnotation = StringAnnotation.entries
                 .firstOrNull { it.value == annotation.key }
             val spanStyle = annotationStyles[matchingAnnotation]
             if (pressedAnnotation == annotation.value) {
@@ -133,7 +131,9 @@ private fun annotatedStringResource(
                     start = spanStart,
                     end = spanEnd
                 )
-                spanStyleForAnnotation(it)?.let { resultBuilder.addStyle(it, spanStart, spanEnd) }
+                spanStyleForAnnotation(it)?.let { style ->
+                    resultBuilder.addStyle(style, spanStart, spanEnd)
+                }
             }
         }
     return resultBuilder.toAnnotatedString()

@@ -37,6 +37,7 @@ class PaymentOptionsTest {
                 isProcessing = false,
                 onAddCardPressed = { didCallOnAddCardPressed = true },
                 onItemSelected = {},
+                onModifyItem = {},
                 onItemRemoved = {},
             )
         }
@@ -67,6 +68,7 @@ class PaymentOptionsTest {
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = { didCallOnItemSelected = true },
+                onModifyItem = {},
                 onItemRemoved = {},
             )
         }

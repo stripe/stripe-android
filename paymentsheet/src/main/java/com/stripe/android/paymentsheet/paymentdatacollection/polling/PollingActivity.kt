@@ -8,6 +8,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,7 +18,7 @@ import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import kotlin.time.Duration.Companion.seconds
 
 internal class PollingActivity : AppCompatActivity() {
@@ -32,6 +33,7 @@ internal class PollingActivity : AppCompatActivity() {
             timeLimit = args.timeLimitInSeconds.seconds,
             initialDelay = args.initialDelayInSeconds.seconds,
             maxAttempts = args.maxAttempts,
+            ctaText = args.ctaText,
         )
     }
 
@@ -45,8 +47,17 @@ internal class PollingActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val state = rememberBottomSheetState(confirmValueChange = { false })
                 val uiState by viewModel.uiState.collectAsState()
+
+                val state = rememberBottomSheetState(
+                    confirmValueChange = { proposedValue ->
+                        if (proposedValue == ModalBottomSheetValue.Hidden) {
+                            uiState.pollingState != PollingState.Active
+                        } else {
+                            true
+                        }
+                    }
+                )
 
                 BackHandler(enabled = true) {
                     if (uiState.pollingState == PollingState.Failed) {
@@ -80,6 +91,10 @@ internal class PollingActivity : AppCompatActivity() {
             Intent().putExtras(result.toBundle())
         )
         finish()
-        overridePendingTransition(0, AnimationConstants.FADE_OUT)
+    }
+
+    override fun finish() {
+        super.finish()
+        fadeOut()
     }
 }

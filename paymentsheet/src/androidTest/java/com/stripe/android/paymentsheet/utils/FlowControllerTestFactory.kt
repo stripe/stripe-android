@@ -15,11 +15,6 @@ internal class FlowControllerTestFactory(
     private val resultCallback: PaymentSheetResultCallback,
 ) {
 
-    enum class IntegrationType {
-        Activity,
-        Compose,
-    }
-
     fun make(activity: ComponentActivity): PaymentSheet.FlowController {
         return when (integrationType) {
             IntegrationType.Activity -> forActivity(activity)

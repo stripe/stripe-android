@@ -16,7 +16,9 @@ import java.util.regex.Pattern
  * - [SetupIntents API Reference](https://stripe.com/docs/api/setup_intents)
  */
 @Parcelize
-data class SetupIntent internal constructor(
+data class SetupIntent
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+constructor(
     /**
      * Unique identifier for the object.
      */
@@ -125,6 +127,12 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.DisplayOxxoDetails -> {
                 StripeIntent.NextActionType.DisplayOxxoDetails
             }
+            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
+                StripeIntent.NextActionType.DisplayBoletoDetails
+            }
+            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
+                StripeIntent.NextActionType.DisplayKonbiniDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }
@@ -135,6 +143,7 @@ data class SetupIntent internal constructor(
             is StripeIntent.NextActionData.BlikAuthorize,
             is StripeIntent.NextActionData.WeChatPayRedirect,
             is StripeIntent.NextActionData.UpiAwaitNotification,
+            is StripeIntent.NextActionData.SwishRedirect,
             null -> {
                 null
             }
@@ -217,7 +226,7 @@ data class SetupIntent internal constructor(
 
             internal companion object {
                 internal fun fromCode(typeCode: String?): Type? {
-                    return values().firstOrNull { it.code == typeCode }
+                    return entries.firstOrNull { it.code == typeCode }
                 }
             }
         }
@@ -255,7 +264,7 @@ data class SetupIntent internal constructor(
 
         internal companion object {
             internal fun fromCode(code: String?): CancellationReason? {
-                return values().firstOrNull { it.code == code }
+                return entries.firstOrNull { it.code == code }
             }
         }
     }

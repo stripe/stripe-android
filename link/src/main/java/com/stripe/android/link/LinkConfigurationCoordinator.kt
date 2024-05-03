@@ -2,52 +2,76 @@ package com.stripe.android.link
 
 import androidx.annotation.RestrictTo
 import com.stripe.android.link.injection.LinkComponent
+import com.stripe.android.link.model.AccountStatus
 import com.stripe.android.link.ui.inline.UserInput
+import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
-import kotlinx.coroutines.FlowPreview
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-class LinkConfigurationCoordinator @Inject internal constructor(
+interface LinkConfigurationCoordinator {
+
+    val component: LinkComponent?
+    val emailFlow: StateFlow<String?>
+
+    fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus>
+
+    suspend fun signInWithUserInput(
+        configuration: LinkConfiguration,
+        userInput: UserInput
+    ): Result<Boolean>
+
+    suspend fun attachNewCardToAccount(
+        configuration: LinkConfiguration,
+        paymentMethodCreateParams: PaymentMethodCreateParams
+    ): Result<LinkPaymentDetails>
+
+    suspend fun logOut(
+        configuration: LinkConfiguration,
+    ): Result<ConsumerSession>
+}
+
+@Singleton
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+class RealLinkConfigurationCoordinator @Inject internal constructor(
     private val linkComponentBuilder: LinkComponent.Builder,
-) {
+) : LinkConfigurationCoordinator {
     private val componentFlow = MutableStateFlow<LinkComponent?>(null)
 
-    @OptIn(FlowPreview::class)
-    val emailFlow: Flow<String?> = componentFlow
-        .filterNotNull()
-        .flatMapMerge { it.linkAccountManager.linkAccount }
-        .map { it?.email }
+    override val emailFlow: StateFlow<String?> = componentFlow
+        .flatMapLatestAsStateFlow { it?.linkAccountManager?.linkAccount ?: stateFlowOf(null) }
+        .mapAsStateFlow { it?.email }
 
     /**
      * The dependency injector Component for all injectable classes in Link while in an embedded
      * environment.
      */
-    internal val component: LinkComponent?
+    override val component: LinkComponent?
         get() = componentFlow.value
 
     /**
      * Fetch the customer's account status, initializing the dependencies if they haven't been
      * initialized yet.
      */
-    fun getAccountStatusFlow(configuration: LinkConfiguration) =
+    override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> =
         getLinkPaymentLauncherComponent(configuration).linkAccountManager.accountStatus
 
     /**
      * Trigger Link sign in with the input collected from the user inline in PaymentSheet, whether
      * it's a new or existing account.
      */
-    suspend fun signInWithUserInput(
+    override suspend fun signInWithUserInput(
         configuration: LinkConfiguration,
         userInput: UserInput
-    ) = getLinkPaymentLauncherComponent(configuration)
+    ): Result<Boolean> = getLinkPaymentLauncherComponent(configuration)
         .linkAccountManager
         .signInWithUserInput(userInput)
         .map { true }
@@ -58,13 +82,21 @@ class LinkConfigurationCoordinator @Inject internal constructor(
      * @return The parameters needed to confirm the current Stripe Intent using the newly created
      *          PaymentDetails.
      */
-    suspend fun attachNewCardToAccount(
+    override suspend fun attachNewCardToAccount(
         configuration: LinkConfiguration,
         paymentMethodCreateParams: PaymentMethodCreateParams
-    ): Result<LinkPaymentDetails.New> =
+    ): Result<LinkPaymentDetails> =
         getLinkPaymentLauncherComponent(configuration)
             .linkAccountManager
             .createCardPaymentDetails(paymentMethodCreateParams)
+
+    override suspend fun logOut(
+        configuration: LinkConfiguration,
+    ): Result<ConsumerSession> {
+        return getLinkPaymentLauncherComponent(configuration)
+            .linkAccountManager
+            .logOut()
+    }
 
     /**
      * Create or get the existing [LinkComponent], responsible for injecting all

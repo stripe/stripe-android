@@ -5,19 +5,19 @@ import android.content.Intent
 import android.net.Uri
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
-import androidx.lifecycle.MutableLiveData
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.FakeLogger
 import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.view.PaymentAuthWebViewClient.Companion.isCompletionUrl
+import kotlinx.coroutines.flow.MutableStateFlow
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import kotlin.test.Test
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentAuthWebViewClientTest {
-    private val isPageLoaded = MutableLiveData(false)
+    private val isPageLoaded = MutableStateFlow(false)
 
     private val onAuthCompletedErrors = mutableListOf<Throwable>()
     private var activityFinished = false

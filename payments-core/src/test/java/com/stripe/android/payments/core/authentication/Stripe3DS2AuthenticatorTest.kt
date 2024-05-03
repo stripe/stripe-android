@@ -6,7 +6,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleRegistry
 import com.stripe.android.ApiKeyFixtures
 import com.stripe.android.PaymentAuthConfig
-import com.stripe.android.core.injection.DUMMY_INJECTOR_KEY
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.payments.core.authentication.threeds2.Stripe3DS2Authenticator
@@ -41,7 +40,6 @@ class Stripe3DS2AuthenticatorTest {
     private val authenticator = Stripe3DS2Authenticator(
         paymentAuthConfig,
         enableLogging = false,
-        injectorKey = DUMMY_INJECTOR_KEY,
         publishableKeyProvider = { ApiKeyFixtures.FAKE_PUBLISHABLE_KEY },
         productUsage = setOf()
     )

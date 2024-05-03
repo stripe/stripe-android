@@ -1,9 +1,9 @@
 package com.stripe.android.ui.core.elements
 
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.ui.core.R
-import com.stripe.android.uicore.address.AddressRepository
 import com.stripe.android.uicore.elements.AddressElement
 import com.stripe.android.uicore.elements.AddressType
 import com.stripe.android.uicore.elements.CountryConfig
@@ -13,6 +13,7 @@ import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SameAsShippingController
 import com.stripe.android.uicore.elements.SameAsShippingElement
 import com.stripe.android.uicore.elements.SectionElement
+import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
@@ -25,6 +26,7 @@ enum class DisplayField {
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
 @Serializable
+@Parcelize
 data class AddressSpec(
     @SerialName("api_path")
     override val apiPath: IdentifierSpec = IdentifierSpec.Generic("billing_details[address]"),
@@ -50,10 +52,9 @@ data class AddressSpec(
      */
     @Transient
     val hideCountry: Boolean = false,
-) : FormItemSpec() {
+) : FormItemSpec(), Parcelable {
     fun transform(
         initialValues: Map<IdentifierSpec, String?>,
-        addressRepository: AddressRepository,
         shippingValues: Map<IdentifierSpec, String?>?,
     ): SectionElement? {
         val label = if (showLabel) R.string.stripe_billing_details else null
@@ -80,7 +81,6 @@ data class AddressSpec(
                     }
             val addressElement = AddressElement(
                 _identifier = apiPath,
-                addressRepository = addressRepository,
                 rawValuesMap = initialValues,
                 countryCodes = allowedCountryCodes,
                 addressType = type,

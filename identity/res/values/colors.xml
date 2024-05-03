@@ -12,4 +12,7 @@
     <color name="stripe_flash_mask_color">#FFFFFF</color>
 
     <color name="stripe_selfie_warmup_icon_tint">#1A1B25</color>
+    <color name="stripe_doc_warmup_icon_tint">#1A1B25</color>
+
+    <color name="stripe_html_line">#687385</color>
 </resources>

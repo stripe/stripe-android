@@ -1,6 +1,6 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
@@ -34,6 +34,7 @@ android {
 
 dependencies {
     implementation project(":stripe-core")
+    implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.coreKtx
     implementation libs.compose.foundation
@@ -47,15 +48,17 @@ dependencies {
 
     // DI
     implementation libs.dagger
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
 
-    testImplementation libs.androidx.liveDataKtx
+    testImplementation project(':screenshot-testing')
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.core
     testImplementation testLibs.androidx.junitKtx
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.annotations
     testImplementation testLibs.kotlin.coroutines
@@ -64,6 +67,7 @@ dependencies {
     testImplementation testLibs.mockito.kotlin
     testImplementation testLibs.robolectric
     testImplementation testLibs.truth
+    testImplementation testLibs.turbine
 }
 
 apply from: "${rootDir}/deploy/deploy.gradle"

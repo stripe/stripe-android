@@ -13,7 +13,7 @@ import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
     private val context: Context,
-    private val config: PaymentSheet.Configuration?,
+    private val config: PaymentSheet.Configuration,
     private val isProcessingPayment: Boolean,
     private val currentScreenFlow: Flow<PaymentSheetScreen>,
     private val buttonsEnabledFlow: Flow<Boolean>,
@@ -59,7 +59,7 @@ internal class PrimaryButtonUiStateMapper(
     }
 
     private fun buyButtonLabel(amount: Amount?): String {
-        return if (config?.primaryButtonLabel != null) {
+        return if (config.primaryButtonLabel != null) {
             config.primaryButtonLabel
         } else if (isProcessingPayment) {
             val fallback = context.getString(R.string.stripe_paymentsheet_pay_button_label)
@@ -70,7 +70,7 @@ internal class PrimaryButtonUiStateMapper(
     }
 
     private fun continueButtonLabel(): String {
-        val customLabel = config?.primaryButtonLabel
+        val customLabel = config.primaryButtonLabel
         return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
     }
 }

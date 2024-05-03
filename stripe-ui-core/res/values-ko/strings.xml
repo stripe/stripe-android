@@ -58,6 +58,8 @@
   <string name="stripe_email_is_invalid">이메일이 잘못되었습니다.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">MM/YY</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">이것은 필수입니다</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_form_label_optional">%s(선택 사항)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->

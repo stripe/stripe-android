@@ -1,36 +1,36 @@
-@file:Suppress("LongMethod")
-
 package com.stripe.android.financialconnections.features.partnerauth
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
-import com.airbnb.mvrx.Loading
-import com.airbnb.mvrx.Success
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.Body
 import com.stripe.android.financialconnections.model.Cta
 import com.stripe.android.financialconnections.model.Display
 import com.stripe.android.financialconnections.model.Entry
 import com.stripe.android.financialconnections.model.FinancialConnectionsAuthorizationSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
-import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.OauthPrepane
 import com.stripe.android.financialconnections.model.PartnerNotice
 import com.stripe.android.financialconnections.model.TextUpdate
+import com.stripe.android.financialconnections.presentation.Async.Loading
+import com.stripe.android.financialconnections.presentation.Async.Success
+import com.stripe.android.financialconnections.presentation.Async.Uninitialized
 
 internal class PartnerAuthPreviewParameterProvider :
-    PreviewParameterProvider<PartnerAuthState> {
+    PreviewParameterProvider<SharedPartnerAuthState> {
     override val values = sequenceOf(
         canonical(),
+        prepaneLoading(),
         browserLoading()
     )
 
     override val count: Int
         get() = super.count
 
-    private fun canonical() = PartnerAuthState(
+    private fun canonical() = SharedPartnerAuthState(
         payload = Success(
-            PartnerAuthState.Payload(
+            SharedPartnerAuthState.Payload(
+                isStripeDirect = false,
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -42,16 +42,24 @@ internal class PartnerAuthPreviewParameterProvider :
                     mobileHandoffCapable = false
                 ),
                 authSession = session(),
-                isStripeDirect = false
             )
         ),
         authenticationStatus = Uninitialized,
-        viewEffect = null
+        viewEffect = null,
+        pane = Pane.PARTNER_AUTH
     )
 
-    private fun browserLoading() = PartnerAuthState(
+    private fun prepaneLoading() = SharedPartnerAuthState(
+        payload = Loading(),
+        authenticationStatus = Uninitialized,
+        viewEffect = null,
+        pane = Pane.PARTNER_AUTH
+    )
+
+    private fun browserLoading() = SharedPartnerAuthState(
         payload = Success(
-            PartnerAuthState.Payload(
+            SharedPartnerAuthState.Payload(
+                isStripeDirect = false,
                 institution = FinancialConnectionsInstitution(
                     id = "id",
                     name = "name",
@@ -63,20 +71,20 @@ internal class PartnerAuthPreviewParameterProvider :
                     mobileHandoffCapable = false
                 ),
                 authSession = session(),
-                isStripeDirect = false
             )
         ),
         // While browser is showing, this Async is loading.
         authenticationStatus = Loading(),
-        viewEffect = null
+        viewEffect = null,
+        pane = Pane.PARTNER_AUTH
     )
 
     private fun session() =
         FinancialConnectionsAuthorizationSession(
-            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH,
+            flow = FinancialConnectionsAuthorizationSession.Flow.FINICITY_CONNECT_V2_OAUTH.name,
             showPartnerDisclosure = true,
             _isOAuth = true,
-            nextPane = FinancialConnectionsSessionManifest.Pane.PARTNER_AUTH,
+            nextPane = Pane.PARTNER_AUTH,
             id = "1234",
             display = Display(
                 TextUpdate(
@@ -90,23 +98,14 @@ internal class PartnerAuthPreviewParameterProvider :
             "https://b.stripecdn.com/connections-statics-srv/assets/PrepaneAsset--account_numbers-capitalone-2x.gif"
         return OauthPrepane(
             title = "Sign in with Sample bank",
+            subtitle = "Next, you'll be prompted to log in and connect your accounts.",
             body = Body(
                 listOf(
-                    Entry.Text(
-                        "Some very large text will most likely go here!" +
-                            "Some very large text will most likely go here!"
-                    ),
                     Entry.Image(
                         Image(sampleImage)
                     ),
                     Entry.Text(
-                        "Some very large text will most likely go here!"
-                    ),
-                    Entry.Text(
-                        "Some very large text will most likely go here!"
-                    ),
-                    Entry.Text(
-                        "Some very large text will most likely go here!"
+                        "Dynamic content placeholder that will show below image."
                     )
                 )
             ),
@@ -114,7 +113,7 @@ internal class PartnerAuthPreviewParameterProvider :
                 icon = null,
                 text = "Continue!"
             ),
-            institutionIcon = null,
+            institutionIcon = Image("www.image.url"),
             partnerNotice = PartnerNotice(
                 partnerIcon = Image(sampleImage),
                 text = "Stripe works with partners like MX to reliably" +

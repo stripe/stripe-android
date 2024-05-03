@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.ViewGroup
 import androidx.activity.addCallback
 import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.viewpager.widget.ViewPager
 import com.stripe.android.CustomerSession
 import com.stripe.android.PaymentSession.Companion.EXTRA_PAYMENT_SESSION_DATA
@@ -16,6 +17,7 @@ import com.stripe.android.databinding.StripePaymentFlowActivityBinding
 import com.stripe.android.model.ShippingInformation
 import com.stripe.android.model.ShippingMethod
 import com.stripe.android.utils.argsAreInvalid
+import kotlinx.coroutines.launch
 
 /**
  * Activity containing a two-part payment flow that allows users to provide a shipping address
@@ -133,23 +135,19 @@ class PaymentFlowActivity : StripeActivity() {
 
     private fun onShippingInfoValidated(shippingMethods: List<ShippingMethod>) {
         viewModel.paymentSessionData.shippingInformation?.let { shippingInfo ->
-            viewModel.saveCustomerShippingInformation(shippingInfo)
-                .observe(
-                    this,
-                    { result ->
-                        result.fold(
-                            onSuccess = {
-                                onShippingInfoSaved(
-                                    it.shippingInformation,
-                                    shippingMethods
-                                )
-                            },
-                            onFailure = {
-                                showError(it.message.orEmpty())
-                            }
+            lifecycleScope.launch {
+                viewModel.saveCustomerShippingInformation(shippingInfo).fold(
+                    onSuccess = {
+                        onShippingInfoSaved(
+                            it.shippingInformation,
+                            shippingMethods
                         )
+                    },
+                    onFailure = {
+                        showError(it.message.orEmpty())
                     }
                 )
+            }
         }
     }
 
@@ -217,22 +215,19 @@ class PaymentFlowActivity : StripeActivity() {
         shippingMethodsFactory: PaymentSessionConfig.ShippingMethodsFactory?,
         shippingInformation: ShippingInformation
     ) {
-        viewModel.validateShippingInformation(
-            shippingInfoValidator,
-            shippingMethodsFactory,
-            shippingInformation
-        ).observe(
-            this,
-            { result ->
-                result.fold(
-                    // show shipping methods screen
-                    onSuccess = ::onShippingInfoValidated,
+        lifecycleScope.launch {
+            viewModel.validateShippingInformation(
+                shippingInfoValidator,
+                shippingMethodsFactory,
+                shippingInformation
+            ).fold(
+                // show shipping methods screen
+                onSuccess = ::onShippingInfoValidated,
 
-                    // show error on current screen
-                    onFailure = ::onShippingInfoError
-                )
-            }
-        )
+                // show error on current screen
+                onFailure = ::onShippingInfoError
+            )
+        }
     }
 
     private fun onShippingInfoError(error: Throwable) {

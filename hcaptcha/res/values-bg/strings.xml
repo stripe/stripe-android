@@ -1,0 +1,3 @@
+<resources>
+	<string name="stripe_hcaptcha_loading_text">Проверка, че сте човек</string>
+</resources>

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentmethodmessaging
 
-import androidx.lifecycle.viewModelScope
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodMessage
 import com.stripe.android.networking.StripeRepository
@@ -10,7 +9,6 @@ import com.stripe.android.paymentmethodmessaging.view.PaymentMethodMessagingView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.async
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -67,11 +65,11 @@ class PaymentMethodMessagingViewModelTest {
             learnMoreUrl = "some url"
         )
 
-        assertThat(viewModel.messageFlow.stateIn(viewModel.viewModelScope).value).isNull()
+        assertThat(viewModel.messageFlow.value).isNull()
 
         viewModel.loadMessage()
 
-        val result = viewModel.messageFlow.stateIn(viewModel.viewModelScope).value!!
+        val result = viewModel.messageFlow.value!!
 
         assertThat(result.isSuccess).isTrue()
         assertThat(result.getOrNull()?.message?.displayHtml)
@@ -104,11 +102,11 @@ class PaymentMethodMessagingViewModelTest {
             learnMoreUrl = "a"
         )
 
-        assertThat(viewModel.messageFlow.stateIn(viewModel.viewModelScope).value).isNull()
+        assertThat(viewModel.messageFlow.value).isNull()
 
         viewModel.loadMessage()
 
-        val result = viewModel.messageFlow.stateIn(viewModel.viewModelScope).value!!
+        val result = viewModel.messageFlow.value!!
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()?.message)
@@ -139,11 +137,11 @@ class PaymentMethodMessagingViewModelTest {
             learnMoreUrl = ""
         )
 
-        assertThat(viewModel.messageFlow.stateIn(viewModel.viewModelScope).value).isNull()
+        assertThat(viewModel.messageFlow.value).isNull()
 
         viewModel.loadMessage()
 
-        val result = viewModel.messageFlow.stateIn(viewModel.viewModelScope).value!!
+        val result = viewModel.messageFlow.value!!
 
         assertThat(result.isFailure).isTrue()
         assertThat(result.exceptionOrNull()?.message)

@@ -27,7 +27,8 @@ data class AnalyticsRequest(
         query.takeIf { it.isNotEmpty() }
     ).joinToString("?")
 
-    internal companion object {
-        internal const val HOST = "https://q.stripe.com"
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    companion object {
+        const val HOST = "https://q.stripe.com"
     }
 }

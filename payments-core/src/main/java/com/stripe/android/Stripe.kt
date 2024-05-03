@@ -7,6 +7,7 @@ import androidx.activity.ComponentActivity
 import androidx.annotation.Size
 import androidx.annotation.UiThread
 import androidx.annotation.WorkerThread
+import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.stripe.android.core.ApiKeyValidator
@@ -24,6 +25,7 @@ import com.stripe.android.core.model.StripeModel
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.version.StripeSdkVersion
 import com.stripe.android.exception.CardException
+import com.stripe.android.hcaptcha.performPassiveHCaptcha
 import com.stripe.android.model.AccountParams
 import com.stripe.android.model.BankAccount
 import com.stripe.android.model.BankAccountTokenParams
@@ -35,6 +37,7 @@ import com.stripe.android.model.CvcTokenParams
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.PersonTokenParams
 import com.stripe.android.model.PiiTokenParams
 import com.stripe.android.model.PossibleBrands
@@ -253,22 +256,6 @@ class Stripe internal constructor(
     /**
      * Confirm and, if necessary, authenticate a [PaymentIntent].
      * Used for [automatic confirmation](https://stripe.com/docs/payments/payment-intents/quickstart#automatic-confirmation-flow) flow.
-     *
-     * For confirmation attempts that require 3DS1 authentication, if the
-     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
-     * be used:
-     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
-     *   are supported on the device.
-     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
-     * - Otherwise, use a WebView.
-     *
-     * If a custom `return_url` value is set, a WebView will always be used.
-     *
-     * |                   | Custom Tabs available? | Chrome available? | Fallback |
-     * |-------------------|------------------------|-------------------|----------|
-     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
-     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param confirmPaymentIntentParams [ConfirmPaymentIntentParams] used to confirm the [PaymentIntent]
@@ -507,22 +494,6 @@ class Stripe internal constructor(
     /**
      * Confirm and, if necessary, authenticate a [SetupIntent].
      *
-     * For confirmation attempts that require 3DS1 authentication, if the
-     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
-     * be used:
-     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
-     *   are supported on the device.
-     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
-     * - Otherwise, use a WebView.
-     *
-     * If a custom `return_url` value is set, a WebView will always be used.
-     *
-     * |                   | Custom Tabs available? | Chrome available? | Fallback |
-     * |-------------------|------------------------|-------------------|----------|
-     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
-     * | Custom return_url | WebView                | WebView           | WebView  |
-     *
      * @param activity the `Activity` that is launching the payment authentication flow
      * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
      * @param stripeAccountId Optional, the Connect account to associate with this request.
@@ -548,22 +519,6 @@ class Stripe internal constructor(
 
     /**
      * Confirm and, if necessary, authenticate a [SetupIntent].
-     *
-     * For confirmation attempts that require 3DS1 authentication, if the
-     * [return_url](https://stripe.com/docs/api/payment_intents/confirm#confirm_payment_intent-return_url)
-     * in the confirmation request is not set (i.e. set to `null`), then the following logic will
-     * be used:
-     * - Use [Custom Tabs](https://developer.chrome.com/docs/android/custom-tabs/overview/) if they
-     *   are supported on the device.
-     * - If Custom Tabs are not supported, use Chrome if it is available on the device.
-     * - Otherwise, use a WebView.
-     *
-     * If a custom `return_url` value is set, a WebView will always be used.
-     *
-     * |                   | Custom Tabs available? | Chrome available? | Fallback |
-     * |-------------------|------------------------|-------------------|----------|
-     * | No return_url     | Custom Tabs            | Chrome            | WebView  |
-     * | Custom return_url | WebView                | WebView           | WebView  |
      *
      * @param fragment the `Fragment` that is launching the payment authentication flow
      * @param confirmSetupIntentParams a set of params with which to confirm the Setup Intent
@@ -825,6 +780,43 @@ class Stripe internal constructor(
                 paymentMethodCreateParams,
                 ApiRequest.Options(
                     apiKey = publishableKey,
+                    stripeAccount = stripeAccountId,
+                    idempotencyKey = idempotencyKey
+                )
+            )
+        }
+    }
+
+    /**
+     * Update a [PaymentMethod] asynchronously.
+     *
+     * See [Update a PaymentMethod](https://stripe.com/docs/api/payment_methods/update).
+     * `POST /v1/payment_methods/:id`
+     *
+     * @param paymentMethodId the ID of the [PaymentMethod] to be updated
+     * @param paymentMethodUpdateParams the [PaymentMethodUpdateParams] to be used
+     * @param ephemeralKeySecret the Customer Ephemeral Key secret to be used
+     * @param idempotencyKey optional, see [Idempotent Requests](https://stripe.com/docs/api/idempotent_requests)
+     * @param stripeAccountId Optional, the Connect account to associate with this request.
+     * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
+     * @param callback a [ApiResultCallback] to receive the result or error
+     */
+    @UiThread
+    @JvmOverloads
+    fun updatePaymentMethod(
+        paymentMethodId: String,
+        paymentMethodUpdateParams: PaymentMethodUpdateParams,
+        ephemeralKeySecret: String,
+        idempotencyKey: String? = null,
+        stripeAccountId: String? = this.stripeAccountId,
+        callback: ApiResultCallback<PaymentMethod>
+    ) {
+        executeAsyncForResult(callback) {
+            stripeRepository.updatePaymentMethod(
+                paymentMethodId,
+                paymentMethodUpdateParams,
+                ApiRequest.Options(
+                    apiKey = ephemeralKeySecret,
                     stripeAccount = stripeAccountId,
                     idempotencyKey = idempotencyKey
                 )
@@ -1634,12 +1626,14 @@ class Stripe internal constructor(
      * @param stripeAccountId Optional, the Connect account to associate with this request.
      * By default, will use the Connect account that was used to instantiate the `Stripe` object, if specified.
      * @param callback a [ApiResultCallback] to receive the result or error
+     * @param activity the owning activity. This will be used to identify fraud via a passive (invisible) hCaptcha
      */
     @UiThread
     @JvmOverloads
     fun createRadarSession(
         stripeAccountId: String? = this.stripeAccountId,
-        callback: ApiResultCallback<RadarSession>
+        callback: ApiResultCallback<RadarSession>,
+        activity: AppCompatActivity? = null
     ) {
         executeAsyncForResult(callback) {
             stripeRepository.createRadarSession(
@@ -1647,7 +1641,36 @@ class Stripe internal constructor(
                     apiKey = publishableKey,
                     stripeAccount = stripeAccountId
                 )
-            )
+            ).flatMap { radarSession ->
+                val siteKey = radarSession.passiveCaptchaSiteKey
+                if (siteKey.isNullOrEmpty()) {
+                    return@flatMap Result.success(radarSession)
+                } else if (activity == null && BuildConfig.DEBUG) {
+                    throw IllegalStateException(
+                        "An activity was not provided when creating a radar session. Please provide a valid activity."
+                    )
+                } else if (activity == null) {
+                    return@flatMap Result.success(radarSession)
+                }
+
+                val hCaptchaToken = performPassiveHCaptcha(
+                    activity = activity,
+                    siteKey = siteKey,
+                    rqdata = radarSession.passiveCaptchaRqdata
+                )
+
+                return@flatMap stripeRepository.attachHCaptchaToRadarSession(
+                    radarSessionToken = radarSession.id,
+                    hcaptchaToken = hCaptchaToken,
+                    hcaptchaEKey = null, // TODO (awush): we don't yet get this value from hCaptcha
+                    ApiRequest.Options(
+                        apiKey = publishableKey,
+                        stripeAccount = stripeAccountId
+                    )
+                )
+            }.map { radarSession ->
+                RadarSession(id = radarSession.id)
+            }
         }
     }
 
@@ -1830,6 +1853,12 @@ class Stripe internal constructor(
                 callback.onError(StripeException.create(it))
             }
         )
+    }
+
+    internal inline fun <T, R> Result<T>.flatMap(block: (T) -> (Result<R>)): Result<R> {
+        return this.mapCatching {
+            block(it).getOrThrow()
+        }
     }
 
     companion object {

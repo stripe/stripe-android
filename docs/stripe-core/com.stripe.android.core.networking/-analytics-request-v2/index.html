@@ -18,6 +18,7 @@
         }
     }
     </script>
+<script type="text/javascript" src="https://unpkg.com/kotlin-playground@1/dist/playground.min.js" async></script>
 <script type="text/javascript" src="../../../scripts/sourceset_dependencies.js" async></script>
 <link href="../../../styles/style.css" rel="Stylesheet">
 <link href="../../../styles/main.css" rel="Stylesheet">
@@ -61,30 +62,11 @@
   <div class="breadcrumbs"><a href="../../index.html">stripe-core</a><span class="delimiter">/</span><a href="../index.html">com.stripe.android.core.networking</a><span class="delimiter">/</span><span class="current">AnalyticsRequestV2</span></div>
   <div class="cover ">
     <h1 class="cover"><span>Analytics</span><wbr><span>Request</span><wbr><span><span>V2</span></span></h1>
-    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">class </span><a href="index.html">AnalyticsRequestV2</a><span class="token punctuation">(</span><span class="parameters "><span class="parameter "><span class="token keyword">val </span>eventName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">clientId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">origin<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter "><span class="token keyword">val </span>params<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span> : <a href="../-stripe-request/index.html">StripeRequest</a></div><p class="paragraph">Analytics request sent to r.stripe.com, which is the preferred service for analytics. This is a POST request with <a href="../-stripe-request/-mime-type/-form/index.html">MimeType.Form</a> ContentType.</p><p class="paragraph">It sets two headers required by r.stripe.com - <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-h-e-a-d-e-r_-o-r-i-g-i-n.html">HEADER_ORIGIN</a> - Set from analytics server <a href="../-h-e-a-d-e-r_-u-s-e-r_-a-g-e-n-t.html">HEADER_USER_AGENT</a> - Used for parsing client info, needs to conform the format starting with "Stripe/v1"</p><p class="paragraph">It sets four params required r.stripe.com - <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-c-l-i-e-n-t_-i-d.html">PARAM_CLIENT_ID</a> - A string identifying the client making the request, set from analytics server <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-c-r-e-a-t-e-d.html">PARAM_CREATED</a> - Timestamp when the event was created in seconds <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-e-v-e-n-t_-n-a-m-e.html">PARAM_EVENT_NAME</a> - An identifying name for this type of event <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-e-v-e-n-t_-i-d.html">PARAM_EVENT_ID</a> - UUID used to deduplicate events</p><p class="paragraph">Additional params can be passed as constructor parameters.</p></div></div>
+    <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><div class="block"><div class="block"><span class="token annotation builtin">@</span><span data-unresolved-link="kotlinx.serialization/Serializable///PointingToDeclaration/"><span class="token annotation builtin">Serializable</span></span></div></div><span class="token keyword">data </span><span class="token keyword">class </span><a href="index.html">AnalyticsRequestV2</a> : <a href="../-stripe-request/index.html">StripeRequest</a></div><p class="paragraph">Analytics request sent to r.stripe.com, which is the preferred service for analytics. This is a POST request with <a href="../-stripe-request/-mime-type/-form/index.html">MimeType.Form</a> ContentType.</p><p class="paragraph">It sets two headers required by r.stripe.com - <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-h-e-a-d-e-r_-o-r-i-g-i-n.html">HEADER_ORIGIN</a> - Set from analytics server <a href="../-h-e-a-d-e-r_-u-s-e-r_-a-g-e-n-t.html">HEADER_USER_AGENT</a> - Used for parsing client info, needs to conform the format starting with "Stripe/v1"</p><p class="paragraph">It sets four params required r.stripe.com - <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-c-l-i-e-n-t_-i-d.html">PARAM_CLIENT_ID</a> - A string identifying the client making the request, set from analytics server <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-c-r-e-a-t-e-d.html">PARAM_CREATED</a> - Timestamp when the event was created in seconds <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-e-v-e-n-t_-n-a-m-e.html">PARAM_EVENT_NAME</a> - An identifying name for this type of event <a href="../../../stripe-core/com.stripe.android.core.networking/-analytics-request-v2/-companion/-p-a-r-a-m_-e-v-e-n-t_-i-d.html">PARAM_EVENT_ID</a> - UUID used to deduplicate events</p><p class="paragraph">Additional params can be passed as constructor parameters.</p></div></div>
   </div>
   <div class="tabbedcontent">
     <div class="tabs-section" tabs-section="tabs-section"><button class="section-tab" data-active="" data-togglable="CONSTRUCTOR,TYPE,PROPERTY,FUNCTION">Members</button></div>
     <div class="tabs-section-body">
-      <div data-togglable="CONSTRUCTOR">
-        <h2 class="">Constructors</h2>
-        <div class="table"><a data-name="-2005347746%2FConstructors%2F1458831206" anchor-label="AnalyticsRequestV2" id="-2005347746%2FConstructors%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
-          <div class="table-row" data-togglable="CONSTRUCTOR" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
-            <div class="main-subrow keyValue ">
-              <div class=""><span class="inline-flex">
-                  <div><a href="-analytics-request-v2.html"><span>Analytics</span><wbr><span>Request</span><wbr><span><span>V2</span></span></a></div>
-<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="-2005347746%2FConstructors%2F1458831206"></span>
-                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
-                  </span></span></div>
-              <div>
-                <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword">constructor</span><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">eventName<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">clientId<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">origin<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span></span><span class="parameter ">params<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span></span></span><span class="token punctuation">)</span></div></div></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
       <div data-togglable="PROPERTY">
         <h2 class="">Properties</h2>
         <div class="table"><a data-name="1172576899%2FProperties%2F1458831206" anchor-label="eventName" id="1172576899%2FProperties%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
@@ -157,7 +139,7 @@
                   </span></span></div>
               <div>
                 <div class="title">
-                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="params.html">params</a><span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-map/index.html">Map</a><span class="token operator">&lt;</span><span class="token keyword"></span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-string/index.html">String</a><span class="token punctuation">, </span><span class="token operator">*</span><span class="token operator">&gt;</span></div></div></div>
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">val </span><a href="params.html">params</a><span class="token operator">: </span><span data-unresolved-link="kotlinx.serialization.json/JsonElement///PointingToDeclaration/">JsonElement</span></div></div></div>
                 </div>
               </div>
             </div>
@@ -226,7 +208,22 @@
       </div>
       <div data-togglable="FUNCTION">
         <h2 class="">Functions</h2>
-        <div class="table"><a data-name="-1623130678%2FFunctions%2F1458831206" anchor-label="writePostBody" id="-1623130678%2FFunctions%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+        <div class="table"><a data-name="467495146%2FFunctions%2F1458831206" anchor-label="withWorkManagerParams" id="467495146%2FFunctions%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
+          <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
+            <div class="main-subrow keyValue ">
+              <div class=""><span class="inline-flex">
+                  <div><a href="with-work-manager-params.html"><span>with</span><wbr><span>Work</span><wbr><span>Manager</span><wbr><span><span>Params</span></span></a></div>
+<span class="anchor-wrapper"><span class="anchor-icon" pointing-to="467495146%2FFunctions%2F1458831206"></span>
+                    <div class="copy-popup-wrapper "><span class="copy-popup-icon"></span><span>Link copied to clipboard</span></div>
+                  </span></span></div>
+              <div>
+                <div class="title">
+                  <div class="platform-hinted " data-platform-hinted="data-platform-hinted"><div class="content sourceset-dependent-content" data-active="" data-togglable=":stripe-core:dokkaHtmlPartial/release"><div class="symbol monospace"><span class="token keyword"></span><span class="token keyword">fun </span><a href="with-work-manager-params.html"><span class="token function">withWorkManagerParams</span></a><span class="token punctuation">(</span><span class="parameters "><span class="parameter ">runAttemptCount<span class="token operator">: </span><a href="https://kotlinlang.org/api/latest/jvm/stdlib/kotlin/-int/index.html">Int</a></span></span><span class="token punctuation">)</span><span class="token operator">: </span><a href="index.html">AnalyticsRequestV2</a></div></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+<a data-name="-1623130678%2FFunctions%2F1458831206" anchor-label="writePostBody" id="-1623130678%2FFunctions%2F1458831206" data-filterable-set=":stripe-core:dokkaHtmlPartial/release"></a>
           <div class="table-row" data-filterable-current=":stripe-core:dokkaHtmlPartial/release" data-filterable-set=":stripe-core:dokkaHtmlPartial/release">
             <div class="main-subrow keyValue ">
               <div class=""><span class="inline-flex">
@@ -247,7 +244,7 @@
   </div>
 </div>
       <div class="footer">
-        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2023 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
+        <span class="go-to-top-icon"><a href="#content" id="go-to-top-link"></a></span><span>© 2024 Copyright</span><span class="pull-right"><span>Generated by </span><a href="https://github.com/Kotlin/dokka"><span>dokka</span><span class="padded-icon"></span></a></span>
       </div>
             </div>
         </div>

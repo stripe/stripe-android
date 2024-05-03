@@ -9,6 +9,7 @@ import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.paymentsheet.ExperimentalCustomerSessionApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -16,6 +17,7 @@ import org.junit.runner.RunWith
 import org.mockito.kotlin.KArgumentCaptor
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
@@ -35,11 +37,9 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
             Result.success(
-                ElementsSession(
-                    linkSettings = null,
-                    paymentMethodSpecs = null,
+                ElementsSession.createFromFallback(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
-                    merchantCountry = null,
+                    sessionsError = null,
                 )
             )
         )
@@ -50,6 +50,8 @@ internal class ElementsSessionRepositoryTest {
                 initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                     clientSecret = "client_secret",
                 ),
+                customer = null,
+                externalPaymentMethods = null,
             ).getOrThrow()
         }
 
@@ -76,6 +78,8 @@ internal class ElementsSessionRepositoryTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
+                    customer = null,
+                    externalPaymentMethods = null,
                 ).getOrThrow()
             }
 
@@ -99,6 +103,8 @@ internal class ElementsSessionRepositoryTest {
                     initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                         clientSecret = "client_secret",
                     ),
+                    customer = null,
+                    externalPaymentMethods = null,
                 ).getOrThrow()
             }
 
@@ -113,11 +119,9 @@ internal class ElementsSessionRepositoryTest {
             stripeRepository.retrieveElementsSession(any(), any())
         ).thenReturn(
             Result.success(
-                ElementsSession(
-                    linkSettings = null,
-                    paymentMethodSpecs = null,
+                ElementsSession.createFromFallback(
                     stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
-                    merchantCountry = null,
+                    sessionsError = null,
                 )
             )
         )
@@ -130,6 +134,8 @@ internal class ElementsSessionRepositoryTest {
             initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
                 clientSecret = "client_secret",
             ),
+            customer = null,
+            externalPaymentMethods = null,
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -164,10 +170,55 @@ internal class ElementsSessionRepositoryTest {
                     )
                 )
             ),
+            customer = null,
+            externalPaymentMethods = null,
         )
 
         assertThat(session.getOrNull()).isNull()
         assertThat(session.exceptionOrNull()).isEqualTo(endpointException)
+    }
+
+    @OptIn(ExperimentalCustomerSessionApi::class)
+    @Test
+    fun `Verify customer session client secret is passed to 'StripeRepository'`() = runTest {
+        whenever(
+            stripeRepository.retrieveElementsSession(any(), any())
+        ).thenReturn(
+            Result.success(
+                ElementsSession.createFromFallback(
+                    stripeIntent = PaymentIntentFixtures.PI_WITH_SHIPPING,
+                    sessionsError = null,
+                )
+            )
+        )
+
+        val repository = RealElementsSessionRepository(
+            stripeRepository,
+            { PaymentConfiguration(ApiKeyFixtures.DEFAULT_PUBLISHABLE_KEY) },
+            testDispatcher,
+        )
+
+        repository.get(
+            initializationMode = PaymentSheet.InitializationMode.PaymentIntent(
+                clientSecret = "client_secret"
+            ),
+            customer = PaymentSheet.CustomerConfiguration.createWithCustomerSession(
+                id = "cus_1",
+                clientSecret = "customer_session_client_secret"
+            ),
+            externalPaymentMethods = null,
+        )
+
+        verify(stripeRepository).retrieveElementsSession(
+            params = eq(
+                ElementsSessionParams.PaymentIntentType(
+                    clientSecret = "client_secret",
+                    customerSessionClientSecret = "customer_session_client_secret",
+                    externalPaymentMethods = null
+                )
+            ),
+            options = any()
+        )
     }
 
     private fun createRepository() = RealElementsSessionRepository(

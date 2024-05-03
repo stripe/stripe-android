@@ -1,22 +1,29 @@
 package com.stripe.android.financialconnections.ui
 
+import android.os.Parcelable
 import android.text.TextUtils
 import androidx.annotation.DrawableRes
 import androidx.annotation.PluralsRes
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import kotlinx.parcelize.Parcelize
 
 /**
  * TextResource is a domain specific model to represent text.
  */
-internal sealed interface TextResource {
+internal sealed interface TextResource : Parcelable {
+
+    @Parcelize
     data class Text(val value: CharSequence) : TextResource
+
+    @Parcelize
     data class StringId(
         @StringRes val value: Int,
         val args: List<String> = emptyList()
     ) : TextResource
 
+    @Parcelize
     data class PluralId(
         @PluralsRes val value: Int,
         val count: Int,

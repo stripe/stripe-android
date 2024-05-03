@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -31,8 +32,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.InputMode
-import androidx.compose.ui.platform.LocalInputModeManager
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -44,12 +44,21 @@ import com.stripe.android.uicore.stripeColors
 @Preview
 @Composable
 private fun DropDownPreview() {
-    DropDown(
-        controller = DropdownFieldController(
-            CountryConfig(tinyMode = true)
-        ),
-        enabled = true
-    )
+    Column {
+        DropDown(
+            controller = DropdownFieldController(
+                CountryConfig(tinyMode = true)
+            ),
+            enabled = true
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        DropDown(
+            controller = DropdownFieldController(
+                CountryConfig(tinyMode = false)
+            ),
+            enabled = true
+        )
+    }
 }
 
 /**
@@ -65,14 +74,16 @@ private fun DropDownPreview() {
  *   - Scrolls to the selected item in the list
  */
 @Composable
+@Suppress("LongMethod")
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun DropDown(
     controller: DropdownFieldController,
     enabled: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showChevron: Boolean = true
 ) {
-    val label by controller.label.collectAsState(null)
-    val selectedIndex by controller.selectedIndex.collectAsState(0)
+    val label by controller.label.collectAsState()
+    val selectedIndex by controller.selectedIndex.collectAsState()
     val items = controller.displayItems
     val shouldDisableDropdownWithSingleItem =
         items.count() == 1 && controller.disableDropdownWithSingleElement
@@ -91,76 +102,39 @@ fun DropDown(
             .value
     }
 
-    val inputModeManager = LocalInputModeManager.current
     Box(
-        modifier = modifier
+        modifier = Modifier
             .wrapContentSize(Alignment.TopStart)
             .background(MaterialTheme.stripeColors.component)
+            .then(modifier)
     ) {
         // Click handling happens on the box, so that it is a single accessible item
         Box(
             modifier = Modifier
-                .focusProperties {
-                    canFocus = inputModeManager.inputMode != InputMode.Touch
-                }
+                .focusProperties { canFocus = false }
                 .clickable(
                     enabled = shouldEnable,
-                    onClickLabel = stringResource(R.string.stripe_change)
-                ) {
-                    expanded = true
-                }
+                    onClickLabel = stringResource(R.string.stripe_change),
+                    onClick = { expanded = true },
+                )
+                .testTag("DropDown:${if (controller.tinyMode) "tiny" else "normal"}")
         ) {
             if (controller.tinyMode) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        selectedItemLabel,
-                        color = currentTextColor
-                    )
-                    if (!shouldDisableDropdownWithSingleItem) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
-                            contentDescription = null,
-                            modifier = Modifier.height(24.dp),
-                            tint = MaterialTheme.stripeColors.placeholderText
-                        )
-                    }
-                }
+                TinyDropdownLabel(
+                    selectedItemLabel = selectedItemLabel,
+                    currentTextColor = currentTextColor,
+                    shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
+                    showChevron = showChevron
+                )
             } else {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                ) {
-                    Column(
-                        modifier = Modifier.padding(
-                            start = 16.dp,
-                            top = 4.dp,
-                            bottom = 8.dp
-                        )
-                    ) {
-                        label?.let {
-                            FormLabel(stringResource(it), enabled = shouldEnable)
-                        }
-                        Row(
-                            modifier = Modifier.fillMaxWidth(.9f),
-                            verticalAlignment = Alignment.Bottom
-                        ) {
-                            Text(
-                                selectedItemLabel,
-                                color = currentTextColor
-                            )
-                        }
-                    }
-                    if (!shouldDisableDropdownWithSingleItem) {
-                        Column(modifier = Modifier.align(Alignment.CenterVertically)) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
-                                contentDescription = null,
-                                modifier = Modifier.height(24.dp),
-                                tint = currentTextColor
-                            )
-                        }
-                    }
-                }
+                LargeDropdownLabel(
+                    label = label,
+                    shouldEnable = shouldEnable,
+                    selectedItemLabel = selectedItemLabel,
+                    currentTextColor = currentTextColor,
+                    shouldDisableDropdownWithSingleItem = shouldDisableDropdownWithSingleItem,
+                    showChevron = showChevron
+                )
             }
         }
 
@@ -183,6 +157,75 @@ fun DropDown(
                     }
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun LargeDropdownLabel(
+    label: Int?,
+    shouldEnable: Boolean,
+    selectedItemLabel: String,
+    currentTextColor: Color,
+    shouldDisableDropdownWithSingleItem: Boolean,
+    showChevron: Boolean
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier.padding(
+                start = 16.dp,
+                top = 4.dp,
+                bottom = 8.dp
+            )
+        ) {
+            label?.let {
+                FormLabel(stringResource(it), enabled = shouldEnable)
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(.9f),
+                verticalAlignment = Alignment.Bottom
+            ) {
+                Text(
+                    selectedItemLabel,
+                    color = currentTextColor
+                )
+            }
+        }
+        if (!shouldDisableDropdownWithSingleItem && showChevron) {
+            Column(modifier = Modifier.align(Alignment.CenterVertically)) {
+                Icon(
+                    painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
+                    contentDescription = null,
+                    modifier = Modifier.height(24.dp),
+                    tint = currentTextColor
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun TinyDropdownLabel(
+    selectedItemLabel: String,
+    currentTextColor: Color,
+    shouldDisableDropdownWithSingleItem: Boolean,
+    showChevron: Boolean
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(
+            selectedItemLabel,
+            color = currentTextColor
+        )
+        if (!shouldDisableDropdownWithSingleItem && showChevron) {
+            Icon(
+                painter = painterResource(id = R.drawable.stripe_ic_chevron_down),
+                contentDescription = null,
+                modifier = Modifier.height(24.dp),
+                tint = MaterialTheme.stripeColors.placeholderText
+            )
         }
     }
 }

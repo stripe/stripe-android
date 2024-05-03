@@ -107,7 +107,7 @@ internal object PaymentMethodFixtures {
             bankName = "Stripe Bank",
             fingerprint = "UkSG0Hf",
             last4 = "2345",
-            linkedAccount = null,
+            financialConnectionsAccount = null,
             networks = null,
             routingNumber = "110000000"
         ),
@@ -253,6 +253,52 @@ internal object PaymentMethodFixtures {
         """.trimIndent()
     )
 
+    internal val CARD_WITH_DISPLAY_BRAND_JSON = JSONObject(
+        """
+        {
+            "id": "pm_1GDwTNAI5zDH",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": null,
+                    "country": null,
+                    "line1": null,
+                    "line2": null,
+                    "postal_code": null,
+                    "state": null
+                },
+                "email": null,
+                "name": null,
+                "phone": null
+            },
+            "card": {
+                "brand": "visa",
+                "checks": {
+                    "address_line1_check": null,
+                    "address_postal_code_check": null,
+                    "cvc_check": null
+                },
+                "country": "US",
+                "exp_month": 12,
+                "exp_year": 2024,
+                "funding": "credit",
+                "generated_from": null,
+                "last4": "9999",
+                "display_brand": "cartes_bancaires",
+                "three_d_secure_usage": {
+                    "supported": true
+                },
+                "wallet": null
+            },
+            "created": 15821393,
+            "customer": null,
+            "livemode": false,
+            "metadata": {},
+            "type": "card"
+        }
+        """.trimIndent()
+    )
+
     val IDEAL_JSON = JSONObject(
         """
             {
@@ -372,6 +418,46 @@ internal object PaymentMethodFixtures {
             "livemode": false,
             "metadata": null,
             "type": "bacs_debit"
+        }
+        """.trimIndent()
+    )
+
+    val US_BANK_ACCOUNT_WITH_FCA = JSONObject(
+        """
+        {
+            "id": "pm_123456",
+            "object": "payment_method",
+            "billing_details": {
+                "address": {
+                    "city": "Seattle",
+                    "country": "US",
+                    "line1": "123 Main St.",
+                    "line2": null,
+                    "postal_code": "99999",
+                    "state": "AL"
+                },
+                "email": "jenny@example.com",
+                "name": "Jenny Rosen",
+                "phone": null
+            },
+            "created": 1706132691,
+            "customer": null,
+            "livemode": false,
+            "type": "us_bank_account",
+            "us_bank_account": {
+                "account_holder_type": "individual",
+                "account_type": "checking",
+                "bank_name": "STRIPE TEST BANK",
+                "financial_connections_account": "fca_111",
+                "fingerprint": "FFDMA0xfhBjWSZLu",
+                "last4": "6789",
+                "networks":{ 
+                    "preferred": "ach",
+                    "supported": ["ach","us_domestic_wire"]},
+                    "routing_number": "110000000", 
+                    "status_details": null
+                }
+            }
         }
         """.trimIndent()
     )

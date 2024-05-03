@@ -7,13 +7,13 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.annotation.VisibleForTesting
-import androidx.lifecycle.MutableLiveData
 import com.stripe.android.core.Logger
 import com.stripe.android.payments.DefaultReturnUrl
+import kotlinx.coroutines.flow.MutableStateFlow
 
 internal class PaymentAuthWebViewClient(
     private val logger: Logger,
-    private val isPageLoaded: MutableLiveData<Boolean>,
+    private val isPageLoaded: MutableStateFlow<Boolean>,
     private val clientSecret: String,
     returnUrl: String?,
     private val activityStarter: (Intent) -> Unit,

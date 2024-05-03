@@ -3,11 +3,11 @@ package com.stripe.android.paymentsheet.paymentdatacollection.ach
 import android.os.Parcelable
 import androidx.annotation.StringRes
 import com.stripe.android.financialconnections.model.BankAccount
-import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
 import kotlinx.parcelize.Parcelize
 
 internal sealed class USBankAccountFormScreenState(
-    @StringRes open val error: Int? = null
+    @StringRes open val error: Int? = null,
+    open val isProcessing: Boolean = false
 ) : Parcelable {
     abstract val primaryButtonText: String
     abstract val mandateText: String?
@@ -16,6 +16,7 @@ internal sealed class USBankAccountFormScreenState(
     data class BillingDetailsCollection(
         @StringRes override val error: Int? = null,
         override val primaryButtonText: String,
+        override val isProcessing: Boolean,
     ) : USBankAccountFormScreenState() {
 
         override val mandateText: String?
@@ -24,8 +25,9 @@ internal sealed class USBankAccountFormScreenState(
 
     @Parcelize
     data class MandateCollection(
-        val paymentAccount: FinancialConnectionsAccount,
-        val financialConnectionsSessionId: String,
+        val resultIdentifier: ResultIdentifier,
+        val bankName: String?,
+        val last4: String?,
         val intentId: String?,
         override val primaryButtonText: String,
         override val mandateText: String?,
@@ -49,4 +51,12 @@ internal sealed class USBankAccountFormScreenState(
         override val primaryButtonText: String,
         override val mandateText: String?,
     ) : USBankAccountFormScreenState()
+
+    internal sealed interface ResultIdentifier : Parcelable {
+        @Parcelize
+        data class Session(val id: String) : ResultIdentifier
+
+        @Parcelize
+        data class PaymentMethod(val id: String) : ResultIdentifier
+    }
 }

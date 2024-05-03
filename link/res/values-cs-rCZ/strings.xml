@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Přidat způsob platby</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Uložit moje údaje pro bezpečné odbavení 1 kliknutím</string>
+  <string name="stripe_inline_sign_up_header">Uložte své údaje pro pro bezpečné odbavení 1 kliknutím u Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Odhlásit ze služby Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Plaťe rychleji u %s a tisíců obchodníků.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Připojením se ke službám Link vyjadřujete zároveň svůj souhlas s <terms>Podmínkami</terms> a <privacy>Zásadami ochrany osobních údajů</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Poskytnutím svého e-mailu souhlasíte s vytvořením účtu Link a uložením vašich platebních informací v rámci služby Link, a to v souladu s <terms>Podmínkami</terms> a <privacy>zásadami ochrany osobních údajů služby Link</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Poskytnutím svého telefonního čísla souhlasíte s vytvořením účtu Link a uložením vašich platebních informací v rámci služby Link, a to v souladu s <terms>Podmínkami</terms> a <privacy>zásadami ochrany osobních údajů služby Link</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Změnit e-mail</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
@@ -50,8 +54,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Z bezpečnostních důvodů zadejte znovu bezpečnostní kód své karty.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Opravdu chcete tento propojený účet odebrat?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Odebrat kartu</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Opravdu chcete tuto kartu odebrat?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

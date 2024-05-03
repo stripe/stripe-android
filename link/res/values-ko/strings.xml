@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">결제 방식 추가</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">보안 원클릭 체크아웃을 위해 정보 저장</string>
+  <string name="stripe_inline_sign_up_header">Link로 안전한 원클릭 결제를 위해 사용자 정보 저장</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link 로그아웃</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">%s 및 수많은 가맹점에서 더 빠르게 결제하십시오.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link에 참여하면 <terms>약관</terms> 및 <privacy>개인정보정책</privacy>에 동의하는 것입니다.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Link의 <terms>약관</terms> 및 <privacy>개인정보처리방침</privacy>에 따라, 이메일을 제공하면 Link 계정을 생성하고 Link에 결제 정보를 저장하게 됩니다.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Link의 <terms>약관</terms> 및 <privacy>개인정보처리방침</privacy>에 따라, 전화번호를 제공하면 Link 계정을 생성하고 Link에 결제 정보를 저장하게 됩니다.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">이메일 변경</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
@@ -50,8 +54,6 @@
   <string name="stripe_wallet_recollect_cvc_error">보안을 위해 카드의 보안 코드를 다시 입력하십시오.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">연결된 해당 계좌를 삭제하시겠습니까?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">카드 제거</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">이 카드를 삭제하시겠습니까?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

@@ -5,10 +5,10 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
-import com.stripe.android.utils.screenshots.FontSize
-import com.stripe.android.utils.screenshots.PaparazziRule
+import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 
@@ -16,9 +16,9 @@ class PaymentOptionsScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        arrayOf(SystemAppearance.LightTheme),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
-        arrayOf(FontSize.DefaultFont),
+        listOf(SystemAppearance.LightTheme),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
+        listOf(FontSize.DefaultFont),
     )
 
     @Test
@@ -36,6 +36,7 @@ class PaymentOptionsScreenshotTest {
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
+                onModifyItem = {},
                 onItemRemoved = {},
             )
         }
@@ -68,6 +69,7 @@ class PaymentOptionsScreenshotTest {
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
+                onModifyItem = {},
                 onItemRemoved = {},
             )
         }
@@ -100,6 +102,7 @@ class PaymentOptionsScreenshotTest {
                 isProcessing = false,
                 onAddCardPressed = {},
                 onItemSelected = {},
+                onModifyItem = {},
                 onItemRemoved = {},
                 scrollState = LazyListState(firstVisibleItemIndex = 2),
             )

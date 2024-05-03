@@ -6,6 +6,8 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.view.AuthActivityStarterHost
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -27,15 +29,21 @@ class GenericAuthenticatorTest {
         val authenticator = TestAuthenticator()
         lifecycleOwner.currentState = Lifecycle.State.CREATED
 
-        authenticator.authenticate(
-            host = host,
-            authenticatable = mock(),
-            requestOptions = mock(),
-        )
+        val completable = CompletableDeferred<Unit>()
+
+        launch(backgroundScope.coroutineContext) {
+            authenticator.authenticate(
+                host = host,
+                authenticatable = mock(),
+                requestOptions = mock(),
+            )
+            completable.complete(Unit)
+        }
 
         assertThat(authenticator.wasInvoked).isFalse()
 
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
+        completable.await()
 
         assertThat(authenticator.wasInvoked).isTrue()
     }

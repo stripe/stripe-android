@@ -1,8 +1,5 @@
 package com.stripe.android.paymentsheet.state
 
-import com.stripe.android.core.exception.APIConnectionException
-import com.stripe.android.core.exception.APIException
-import com.stripe.android.core.exception.InvalidRequestException
 import com.stripe.android.core.exception.StripeException
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.StripeIntent
@@ -26,15 +23,14 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     }
 
     data class NoPaymentMethodTypesAvailable(
-        private val requested: String,
-        private val supported: String,
+        private val requested: String
     ) : PaymentSheetLoadingException() {
 
         override val type: String = "noPaymentMethodTypesAvailable"
 
         override val message: String
             get() = "None of the requested payment methods ($requested) " +
-                "match the supported payment types ($supported)."
+                "are supported."
     }
 
     data class PaymentIntentInTerminalState(
@@ -73,12 +69,7 @@ internal sealed class PaymentSheetLoadingException : Throwable() {
     ) : PaymentSheetLoadingException() {
 
         override val type: String
-            get() = when (StripeException.create(cause)) {
-                is APIException -> "apiError"
-                is APIConnectionException -> "connectionError"
-                is InvalidRequestException -> "invalidRequestError"
-                else -> "unknown"
-            }
+            get() = StripeException.create(cause).analyticsValue()
 
         override val message: String? = cause.message
     }

@@ -97,7 +97,7 @@ enum class FieldType(
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
-        fun from(value: String) = values().firstOrNull {
+        fun from(value: String) = entries.firstOrNull {
             it.serializedValue == value
         }
     }
@@ -307,8 +307,6 @@ private fun FieldType.toConfig(
     return when (this) {
         FieldType.PostalCode -> PostalCodeConfig(
             label = label,
-            capitalization = capitalization,
-            keyboard = keyboardType,
             country = countryCode
         )
         else -> SimpleTextFieldConfig(

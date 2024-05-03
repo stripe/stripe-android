@@ -59,13 +59,17 @@ class CardImageVerificationSheet private constructor(
         val enableCannotScanButton: Boolean = true
     ) : Parcelable {
         sealed class StrictModeFrameCount(val count: (maxCompletionLoopFrames: Int) -> Int) : Parcelable {
-            @Parcelize object None : StrictModeFrameCount({ 0 })
+            @Parcelize
+            data object None : StrictModeFrameCount({ 0 })
 
-            @Parcelize object Low : StrictModeFrameCount({ 1 })
+            @Parcelize
+            data object Low : StrictModeFrameCount({ 1 })
 
-            @Parcelize object Medium : StrictModeFrameCount({ maxCompletionLoopFrames -> maxCompletionLoopFrames / 2 })
+            @Parcelize
+            data object Medium : StrictModeFrameCount({ maxCompletionLoopFrames -> maxCompletionLoopFrames / 2 })
 
-            @Parcelize object High : StrictModeFrameCount({ maxCompletionLoopFrames -> maxCompletionLoopFrames })
+            @Parcelize
+            data object High : StrictModeFrameCount({ maxCompletionLoopFrames -> maxCompletionLoopFrames })
         }
     }
 

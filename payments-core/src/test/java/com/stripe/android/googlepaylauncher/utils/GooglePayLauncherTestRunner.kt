@@ -37,7 +37,7 @@ private val defaultConfig = GooglePayLauncher.Config(
 internal fun runGooglePayLauncherTest(
     isReady: Boolean = true,
     result: GooglePayLauncher.Result = GooglePayLauncher.Result.Completed,
-    integrationTypes: Array<LauncherIntegrationType> = LauncherIntegrationType.values(),
+    integrationTypes: List<LauncherIntegrationType> = LauncherIntegrationType.entries,
     expectResult: Boolean = true,
     block: (ComponentActivity, GooglePayLauncher) -> Unit,
 ) {

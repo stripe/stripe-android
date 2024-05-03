@@ -58,6 +58,8 @@
   <string name="stripe_email_is_invalid">Sähköposti on virheellinen.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">KK/VV</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">Tämä on pakollinen</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_form_label_optional">%s (valinnainen)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->

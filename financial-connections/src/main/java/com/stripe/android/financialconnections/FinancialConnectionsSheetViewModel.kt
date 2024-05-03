@@ -1,69 +1,83 @@
 package com.stripe.android.financialconnections
 
 import android.app.Activity
+import android.app.Application
 import android.content.Intent
 import android.net.Uri
+import android.os.Bundle
 import androidx.activity.result.ActivityResult
 import androidx.annotation.StringRes
-import com.airbnb.mvrx.MavericksViewModel
-import com.airbnb.mvrx.MavericksViewModelFactory
-import com.airbnb.mvrx.ViewModelContext
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.createSavedStateHandle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.financialconnections.FinancialConnectionsSheetActivity.Companion.getArgs
 import com.stripe.android.financialconnections.FinancialConnectionsSheetState.AuthFlowStatus
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Error
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.ErrorCode
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Metadata
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent.Name
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
+import com.stripe.android.financialconnections.analytics.logError
+import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.di.APPLICATION_ID
 import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsSheetComponent
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
-import com.stripe.android.financialconnections.domain.IsBrowserAvailable
+import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.domain.SynchronizeFinancialConnectionsSession
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
 import com.stripe.android.financialconnections.features.manualentry.isCustomManualEntryError
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForData
-import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForLink
+import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForInstantDebits
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs.ForToken
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Canceled
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Completed
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult.Failed
+import com.stripe.android.financialconnections.launcher.InstantDebitsResult
 import com.stripe.android.financialconnections.model.FinancialConnectionsSession
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarStateUpdate
+import com.stripe.android.financialconnections.presentation.FinancialConnectionsViewModel
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.utils.parcelable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import java.lang.IllegalArgumentException
-import java.lang.IllegalStateException
 import javax.inject.Inject
 import javax.inject.Named
 
-@Suppress("LongParameterList", "TooManyFunctions")
 internal class FinancialConnectionsSheetViewModel @Inject constructor(
     @Named(APPLICATION_ID) private val applicationId: String,
+    savedStateHandle: SavedStateHandle,
     private val synchronizeFinancialConnectionsSession: SynchronizeFinancialConnectionsSession,
     private val fetchFinancialConnectionsSession: FetchFinancialConnectionsSession,
     private val fetchFinancialConnectionsSessionForToken: FetchFinancialConnectionsSessionForToken,
     private val logger: Logger,
+    private val browserManager: BrowserManager,
     private val eventReporter: FinancialConnectionsEventReporter,
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
-    private val isBrowserAvailable: IsBrowserAvailable,
     private val nativeRouter: NativeAuthFlowRouter,
+    nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
     initialState: FinancialConnectionsSheetState
-) : MavericksViewModel<FinancialConnectionsSheetState>(initialState) {
+) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
 
     init {
+        savedStateHandle.registerSavedStateProvider()
         if (initialState.initialArgs.isValid()) {
             eventReporter.onPresented(initialState.initialArgs.configuration)
             // avoid re-fetching manifest if already exists (this will happen on process recreations)
@@ -76,20 +90,27 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
+    private fun SavedStateHandle.registerSavedStateProvider() =
+        setSavedStateProvider(FinancialConnectionsSheetState.KEY_SAVED_STATE) {
+            val state = stateFlow.value
+            Bundle().apply {
+                putParcelable(FinancialConnectionsSheetState.KEY_MANIFEST, state.manifest)
+                putSerializable(FinancialConnectionsSheetState.KEY_WEB_AUTH_FLOW_STATUS, state.webAuthFlowStatus)
+            }
+        }
+
     /**
      * Fetches the [FinancialConnectionsSessionManifest] from the Stripe API to get the hosted auth flow URL
      * as well as the success and cancel callback URLs to verify.
      */
     private fun fetchManifest() {
-        withState { state ->
-            viewModelScope.launch {
-                kotlin.runCatching {
-                    synchronizeFinancialConnectionsSession()
-                }.onFailure {
-                    finishWithResult(state, Failed(it))
-                }.onSuccess {
-                    openAuthFlow(it)
-                }
+        viewModelScope.launch {
+            kotlin.runCatching {
+                synchronizeFinancialConnectionsSession()
+            }.onFailure {
+                finishWithResult(stateFlow.value, Failed(it))
+            }.onSuccess {
+                openAuthFlow(it)
             }
         }
     }
@@ -101,48 +122,67 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
      *
      */
     private fun openAuthFlow(sync: SynchronizeSessionResponse) {
-        if (isBrowserAvailable().not()) {
+        if (browserManager.canOpenHttpsUrl().not()) {
             logNoBrowserAvailableAndFinish()
             return
         }
-        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(sync.manifest)
-        viewModelScope.launch { nativeRouter.logExposure(sync.manifest) }
-        if (sync.manifest.hostedAuthUrl == null) {
-            withState {
-                finishWithResult(
-                    state = it,
-                    result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
-                )
-            }
+        val manifest = sync.manifest
+        val isInstantDebits = stateFlow.value.isInstantDebits
+        val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest, isInstantDebits)
+        viewModelScope.launch { nativeRouter.logExposure(manifest, isInstantDebits) }
+        val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
+        if (hostedAuthUrl == null) {
+            finishWithResult(
+                state = stateFlow.value,
+                result = Failed(IllegalArgumentException("hostedAuthUrl is required!"))
+            )
         } else {
-            val authFlowStatus = if (nativeAuthFlowEnabled) {
-                AuthFlowStatus.NONE
+            FinancialConnections.emitEvent(name = Name.OPEN)
+            if (nativeAuthFlowEnabled) {
+                setState {
+                    copy(
+                        manifest = manifest,
+                        webAuthFlowStatus = AuthFlowStatus.NONE,
+                        viewEffect = OpenNativeAuthFlow(initialArgs.configuration, sync)
+                    )
+                }
             } else {
-                AuthFlowStatus.ON_EXTERNAL_ACTIVITY
-            }
-            setState {
-                copy(
-                    manifest = sync.manifest,
-                    webAuthFlowStatus = authFlowStatus,
-                    viewEffect = if (nativeAuthFlowEnabled) {
-                        OpenNativeAuthFlow(initialArgs.configuration, sync)
-                    } else {
-                        OpenAuthFlowWithUrl(sync.manifest.hostedAuthUrl)
-                    }
-                )
+                FinancialConnections.emitEvent(name = Name.FLOW_LAUNCHED_IN_BROWSER)
+                setState {
+                    copy(
+                        manifest = manifest,
+                        webAuthFlowStatus = AuthFlowStatus.ON_EXTERNAL_ACTIVITY,
+                        viewEffect = OpenAuthFlowWithUrl(hostedAuthUrl)
+                    )
+                }
             }
         }
     }
 
+    private fun buildHostedAuthUrl(
+        hostedAuthUrl: String?,
+        isInstantDebits: Boolean
+    ): String? = when (isInstantDebits) {
+        /**
+         * For Instant Debits, add a query parameter to the hosted auth URL so that payment account creation
+         * takes place on the web side of the flow and the payment method ID is returned to the app.
+         */
+        true -> hostedAuthUrl?.let { "$it&return_payment_method=true" }
+        false -> hostedAuthUrl
+    }
+
     private fun logNoBrowserAvailableAndFinish() {
-        viewModelScope.launch {
-            val error = AppInitializationError("No Web browser available to launch AuthFlow")
-            analyticsTracker.track(Error(Pane.UNEXPECTED_ERROR, error))
-            finishWithResult(
-                state = awaitState(),
-                result = Failed(error)
-            )
-        }
+        val error = AppInitializationError("No Web browser available to launch AuthFlow")
+        analyticsTracker.logError(
+            "error Launching the Auth Flow",
+            logger = logger,
+            pane = Pane.UNEXPECTED_ERROR,
+            error = error
+        )
+        finishWithResult(
+            state = stateFlow.value,
+            result = Failed(error)
+        )
     }
 
     /**
@@ -179,7 +219,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onResume() {
         viewModelScope.launch {
             mutex.withLock {
-                val state = awaitState()
+                val state = stateFlow.value
                 if (state.activityRecreated.not()) {
                     when (state.webAuthFlowStatus) {
                         AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
@@ -208,7 +248,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     internal fun onBrowserActivityResult() {
         viewModelScope.launch {
             mutex.withLock {
-                val state = awaitState()
+                val state = stateFlow.value
                 if (state.activityRecreated) {
                     when (state.webAuthFlowStatus) {
                         AuthFlowStatus.ON_EXTERNAL_ACTIVITY -> finishWithResult(
@@ -233,9 +273,9 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val result: FinancialConnectionsSheetActivityResult? = activityResult.data
             ?.parcelable(FinancialConnectionsSheetNativeActivity.EXTRA_RESULT)
         if (activityResult.resultCode == Activity.RESULT_OK && result != null) {
-            withState { finishWithResult(it, result) }
+            finishWithResult(stateFlow.value, result, fromNative = true)
         } else {
-            withState { finishWithResult(it, Canceled) }
+            finishWithResult(stateFlow.value, Canceled, fromNative = true)
         }
     }
 
@@ -256,7 +296,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     result = Completed(financialConnectionsSession = it)
                 )
             }.onFailure { error ->
-                withState { finishWithResult(it, Failed(error)) }
+                finishWithResult(stateFlow.value, Failed(error))
             }
         }
     }
@@ -278,7 +318,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     result = Completed(financialConnectionsSession = las, token = token)
                 )
             }.onFailure { error ->
-                withState { finishWithResult(it, Failed(error)) }
+                finishWithResult(stateFlow.value, Failed(error))
             }
         }
     }
@@ -303,7 +343,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                     }
                 )
             }.onFailure { error ->
-                withState { finishWithResult(it, Failed(error)) }
+                finishWithResult(stateFlow.value, Failed(error))
             }
         }
     }
@@ -320,7 +360,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         viewModelScope.launch {
             mutex.withLock {
                 val receivedUrl: Uri? = intent?.data?.toString()?.toUriOrNull()
-                val state = awaitState()
+                val state = stateFlow.value
                 when {
                     // stripe-auth://native-redirect
                     receivedUrl?.host == "native-redirect" ->
@@ -393,9 +433,33 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
             when (state.initialArgs) {
                 is ForData -> fetchFinancialConnectionsSession(state)
                 is ForToken -> fetchFinancialConnectionsSessionForToken(state)
-                is ForLink -> onSuccessFromLinkFlow(receivedUrl)
+                is ForInstantDebits -> onSuccessFromInstantDebits(receivedUrl)
             }
         }
+    }
+
+    private fun onSuccessFromInstantDebits(url: Uri) {
+        runCatching { requireNotNull(url.getQueryParameter(QUERY_PARAM_PAYMENT_METHOD_ID)) }
+            .onSuccess { paymentMethodId ->
+                withState {
+                    finishWithResult(
+                        state = it,
+                        result = Completed(
+                            instantDebits = InstantDebitsResult(
+                                paymentMethodId = paymentMethodId,
+                                last4 = url.getQueryParameter(QUERY_PARAM_LAST4),
+                                bankName = url.getQueryParameter(QUERY_BANK_NAME)
+                            ),
+                            financialConnectionsSession = null,
+                            token = null
+                        )
+                    )
+                }
+            }
+            .onFailure { error ->
+                logger.error("Could not retrieve payment method parameters from success url", error)
+                finishWithResult(stateFlow.value, Failed(error))
+            }
     }
 
     private fun onFlowCancelled(state: FinancialConnectionsSheetState) {
@@ -405,26 +469,6 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
 
     internal fun onViewEffectLaunched() {
         setState { copy(viewEffect = null) }
-    }
-
-    /**
-     * Link flows do not need to fetch the FC session, since the linked account id is
-     * appended to the web success url.
-     */
-    private fun onSuccessFromLinkFlow(url: Uri) {
-        kotlin.runCatching {
-            requireNotNull(url.getQueryParameter(QUERY_PARAM_LINKED_ACCOUNT))
-        }.onSuccess { linkedAccountId ->
-            withState {
-                finishWithResult(
-                    state = it,
-                    result = Completed(linkedAccountId = linkedAccountId)
-                )
-            }
-        }.onFailure { error ->
-            logger.error("Could not retrieve linked account from success url", error)
-            withState { state -> finishWithResult(state, Failed(error)) }
-        }
     }
 
     private fun String.toUriOrNull(): Uri? {
@@ -439,28 +483,52 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun finishWithResult(
         state: FinancialConnectionsSheetState,
         result: FinancialConnectionsSheetActivityResult,
+        fromNative: Boolean = false,
         @StringRes finishMessage: Int? = null,
     ) {
         eventReporter.onResult(state.initialArgs.configuration, result)
+        // Native emits its own events before finishing.
+        if (fromNative.not()) {
+            when (result) {
+                is Completed -> FinancialConnections.emitEvent(Name.SUCCESS)
+                is Canceled -> FinancialConnections.emitEvent(Name.CANCEL)
+                is Failed -> FinancialConnections.emitEvent(
+                    name = Name.ERROR,
+                    metadata = Metadata(errorCode = ErrorCode.UNEXPECTED_ERROR)
+                )
+            }
+        }
         setState { copy(viewEffect = FinishWithResult(result, finishMessage)) }
     }
 
-    companion object :
-        MavericksViewModelFactory<FinancialConnectionsSheetViewModel, FinancialConnectionsSheetState> {
+    companion object {
 
-        override fun create(
-            viewModelContext: ViewModelContext,
-            state: FinancialConnectionsSheetState
-        ): FinancialConnectionsSheetViewModel {
-            return DaggerFinancialConnectionsSheetComponent
-                .builder()
-                .application(viewModelContext.app())
-                .initialState(state)
-                .configuration(state.initialArgs.configuration)
-                .build().viewModel
+        val Factory = viewModelFactory {
+            initializer {
+                val savedStateHandle: SavedStateHandle = createSavedStateHandle()
+                // If the ViewModel is recreated, it will be provided with the saved state.
+                val savedState = savedStateHandle.get<Bundle>(FinancialConnectionsSheetState.KEY_SAVED_STATE)
+                val app = this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as Application
+                // Arguments passed to the activity
+                val args: FinancialConnectionsSheetActivityArgs = requireNotNull(getArgs(savedStateHandle))
+                val state = FinancialConnectionsSheetState(args, savedState)
+                DaggerFinancialConnectionsSheetComponent
+                    .builder()
+                    .application(app)
+                    .savedStateHandle(savedStateHandle)
+                    .initialState(state)
+                    .configuration(state.initialArgs.configuration)
+                    .build().viewModel
+            }
         }
 
         internal const val MAX_ACCOUNTS = 100
-        internal const val QUERY_PARAM_LINKED_ACCOUNT = "linked_account"
+        internal const val QUERY_PARAM_PAYMENT_METHOD_ID = "payment_method_id"
+        internal const val QUERY_PARAM_LAST4 = "last4"
+        internal const val QUERY_BANK_NAME = "bank_name"
+    }
+
+    override fun updateTopAppBar(state: FinancialConnectionsSheetState): TopAppBarStateUpdate? {
+        return null
     }
 }

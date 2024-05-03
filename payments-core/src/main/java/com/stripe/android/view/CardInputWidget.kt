@@ -28,6 +28,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
+import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.R
 import com.stripe.android.cards.CardNumber
@@ -73,7 +74,7 @@ class CardInputWidget @JvmOverloads constructor(
     private val cardNumberTextInputLayout = viewBinding.cardNumberTextInputLayout
     private val expiryDateTextInputLayout = viewBinding.expiryDateTextInputLayout
     private val cvcNumberTextInputLayout = viewBinding.cvcTextInputLayout
-    internal val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
+    private val postalCodeTextInputLayout = viewBinding.postalCodeTextInputLayout
 
     @JvmSynthetic
     internal val cardNumberEditText = viewBinding.cardNumberEditText
@@ -174,6 +175,8 @@ class CardInputWidget @JvmOverloads constructor(
                 .filterNotNull()
         }
 
+    internal var viewModelStoreOwner: ViewModelStoreOwner? = null
+
     /**
      * A [PaymentMethodCreateParams.Card] representing the card details if all fields are valid;
      * otherwise `null`. If a field is invalid focus will shift to the invalid field.
@@ -181,13 +184,14 @@ class CardInputWidget @JvmOverloads constructor(
     override val paymentMethodCard: PaymentMethodCreateParams.Card?
         @OptIn(DelicateCardDetailsApi::class)
         get() {
-            return cardParams?.let {
+            return cardParams?.let { params ->
                 PaymentMethodCreateParams.Card(
-                    number = it.number,
-                    cvc = it.cvc,
-                    expiryMonth = it.expMonth,
-                    expiryYear = it.expYear,
-                    attribution = it.attribution
+                    number = params.number,
+                    cvc = params.cvc,
+                    expiryMonth = params.expMonth,
+                    expiryYear = params.expYear,
+                    attribution = params.attribution,
+                    networks = cardBrandView.createNetworksParam(),
                 )
             }
         }
@@ -383,6 +387,16 @@ class CardInputWidget @JvmOverloads constructor(
         initView(attrs)
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+
+        doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+            viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
+                cardBrandView.isCbcEligible = isCbcEligible
+            }
+        }
+    }
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         postalCodeEditText.config = PostalCodeEditText.Config.Global
@@ -458,6 +472,17 @@ class CardInputWidget @JvmOverloads constructor(
     @JvmSynthetic
     internal fun setPostalCode(postalCode: String?) {
         postalCodeEditText.setText(postalCode)
+    }
+
+    /**
+     * A list of preferred networks that should be used to process payments made with a co-branded
+     * card if your user hasn't selected a network themselves.
+     *
+     * The first preferred network that matches any available network will be used. If no preferred
+     * network is applicable, Stripe will select the network.
+     */
+    fun setPreferredNetworks(preferredNetworks: List<CardBrand>) {
+        cardBrandView.merchantPreferredNetworks = preferredNetworks
     }
 
     /**
@@ -773,8 +798,18 @@ class CardInputWidget @JvmOverloads constructor(
         cardNumberEditText.brandChangeCallback = { brand ->
             cardBrandView.brand = brand
             hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
-            updateCvc()
+            updateCvc(brand)
         }
+
+        cardNumberEditText.implicitCardBrandChangeCallback = { brand ->
+            // With co-branded cards, a card number can belong to multiple brands. Since we still
+            // need do validate based on the card's pan length and expected CVC length, we add this
+            // callback to perform the validations, but don't update the current brand.
+            hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+            updateCvc(brand)
+        }
+
+        cardNumberEditText.possibleCardBrandsCallback = this::handlePossibleCardBrandsChanged
 
         expiryDateEditText.completionCallback = {
             cvcEditText.requestFocus()
@@ -807,14 +842,31 @@ class CardInputWidget @JvmOverloads constructor(
      */
     fun setCvcLabel(cvcLabel: String?) {
         customCvcLabel = cvcLabel
-        updateCvc()
+        updateCvc(cardBrandView.brand)
     }
 
-    private fun updateCvc() {
+    private fun updateCvc(brand: CardBrand) {
         cvcEditText.updateBrand(
-            cardBrandView.brand,
+            brand,
             customCvcLabel
         )
+    }
+
+    private fun handlePossibleCardBrandsChanged(brands: List<CardBrand>) {
+        val currentBrand = cardBrandView.brand
+        cardBrandView.possibleBrands = brands
+
+        if (currentBrand !in brands) {
+            // The brand is no longer available, so we reset to an unknown brand
+            cardBrandView.brand = CardBrand.Unknown
+        }
+
+        hiddenCardText = createHiddenCardText(cardNumberEditText.panLength)
+
+        // We need to use a known card brand to set the correct expected CVC length. Since both
+        // brands of a co-branded card have the same CVC length, we can just choose the first one.
+        val brandForCvcLength = brands.firstOrNull() ?: CardBrand.Unknown
+        updateCvc(brand = brandForCvcLength)
     }
 
     /**

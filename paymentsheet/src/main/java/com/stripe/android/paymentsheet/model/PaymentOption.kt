@@ -15,6 +15,9 @@ import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.painter.Painter
+import com.stripe.android.uicore.image.rememberDrawablePainter
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -64,6 +67,13 @@ constructor(
         this.darkThemeIconUrl = darkThemeIconUrl
         this.imageLoader = imageLoader
     }
+
+    /**
+     * A [Painter] to draw the icon associated with this [PaymentOption].
+     */
+    val iconPainter: Painter
+        @Composable
+        get() = rememberDrawablePainter(icon())
 
     /**
      * Fetches the icon associated with this [PaymentOption].
@@ -119,7 +129,7 @@ private class DelegateDrawable(
     }
 
     override fun getAlpha(): Int {
-        return delegate.getAlpha()
+        return delegate.alpha
     }
 
     override fun setTint(tintColor: Int) {
@@ -140,7 +150,7 @@ private class DelegateDrawable(
     }
 
     override fun getColorFilter(): ColorFilter? {
-        return delegate.getColorFilter()
+        return delegate.colorFilter
     }
 
     override fun clearColorFilter() {
@@ -152,7 +162,7 @@ private class DelegateDrawable(
     }
 
     override fun getState(): IntArray {
-        return delegate.getState()
+        return delegate.state
     }
 
     override fun jumpToCurrentState() {
@@ -172,7 +182,7 @@ private class DelegateDrawable(
     }
 
     override fun getTransparentRegion(): Region? {
-        return delegate.getTransparentRegion()
+        return delegate.transparentRegion
     }
 
     override fun onBoundsChange(bounds: Rect) {
@@ -180,11 +190,11 @@ private class DelegateDrawable(
     }
 
     override fun getMinimumWidth(): Int {
-        return delegate.getMinimumWidth()
+        return delegate.minimumWidth
     }
 
     override fun getMinimumHeight(): Int {
-        return delegate.getMinimumHeight()
+        return delegate.minimumHeight
     }
 
     override fun getPadding(padding: Rect): Boolean {

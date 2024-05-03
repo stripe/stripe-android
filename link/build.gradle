@@ -1,25 +1,23 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: "org.jetbrains.kotlin.plugin.parcelize"
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'app.cash.paparazzi'
 
 dependencies {
     implementation project(':payments-core')
     implementation project(':stripe-core')
     implementation project(':payments-ui-core')
-    implementation project(':financial-connections')
     implementation project(':stripe-ui-core')
 
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
-    implementation libs.androidx.liveDataKtx
-    implementation libs.androidx.security
     implementation libs.androidx.viewModel
     implementation libs.dagger
     implementation libs.material
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     implementation libs.compose.activity
     implementation libs.compose.foundation
@@ -39,6 +37,8 @@ dependencies {
     testImplementation project(':payments-core')
     testImplementation project(':payments-core-testing')
     testImplementation project(':payments-ui-core')
+    testImplementation project(':screenshot-testing')
+    testImplementation testLibs.hamcrest
     testImplementation testLibs.junit
     testImplementation testLibs.kotlin.junit
     testImplementation testLibs.truth
@@ -50,13 +50,8 @@ dependencies {
     testImplementation testLibs.kotlin.coroutines
     testImplementation testLibs.turbine
     testImplementation testLibs.espresso.intents
-
-    androidTestImplementation testLibs.truth
-    androidTestImplementation testLibs.androidx.junit
-
-    // Test rules and transitive dependencies:
-    androidTestImplementation testLibs.androidx.composeUi
-    androidTestImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
+    testImplementation testLibs.androidx.archCore
 }
 
 android {

@@ -1,14 +1,14 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
+import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentMethodsUI
+import com.stripe.android.screenshottesting.FontSize
+import com.stripe.android.screenshottesting.PaparazziRule
+import com.stripe.android.screenshottesting.SystemAppearance
 import com.stripe.android.ui.core.R
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.MockPaymentMethodsFactory
-import com.stripe.android.utils.screenshots.FontSize
-import com.stripe.android.utils.screenshots.PaparazziRule
 import com.stripe.android.utils.screenshots.PaymentSheetAppearance
-import com.stripe.android.utils.screenshots.SystemAppearance
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
@@ -17,12 +17,12 @@ class PaymentMethodsUIScreenshotTest {
 
     @get:Rule
     val paparazziRule = PaparazziRule(
-        arrayOf(SystemAppearance.LightTheme),
-        arrayOf(PaymentSheetAppearance.DefaultAppearance),
-        arrayOf(FontSize.LargeFont),
+        listOf(SystemAppearance.LightTheme),
+        listOf(PaymentSheetAppearance.DefaultAppearance),
+        listOf(FontSize.LargeFont),
     )
 
-    private val paymentMethods: List<LpmRepository.SupportedPaymentMethod> by lazy {
+    private val paymentMethods: List<SupportedPaymentMethod> by lazy {
         MockPaymentMethodsFactory.create()
     }
 

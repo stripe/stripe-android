@@ -7,8 +7,6 @@ internal sealed class AddressElementScreen(
     open val route: String
 ) {
 
-    object Loading : AddressElementScreen("Loading")
-
     object InputAddress : AddressElementScreen("InputAddress")
 
     class Autocomplete(

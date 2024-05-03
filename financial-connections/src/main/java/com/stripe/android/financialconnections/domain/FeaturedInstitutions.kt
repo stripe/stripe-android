@@ -16,11 +16,6 @@ internal class FeaturedInstitutions @Inject constructor(
     ): InstitutionResponse {
         return repository.featuredInstitutions(
             clientSecret = clientSecret,
-            limit = SEARCH_INSTITUTIONS_LIMIT
         )
-    }
-
-    private companion object {
-        private const val SEARCH_INSTITUTIONS_LIMIT = 10
     }
 }

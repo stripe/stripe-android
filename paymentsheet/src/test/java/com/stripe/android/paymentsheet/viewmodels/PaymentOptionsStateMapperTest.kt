@@ -6,6 +6,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentOptionsItem
+import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.state.GooglePayState
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,22 +33,25 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
+            isCbcEligible = { false }
         )
 
         mapper().test {
-            assertThat(awaitItem()).isNull()
+            assertThat(awaitItem()).isEqualTo(PaymentOptionsState())
 
             paymentMethodsFlow.value = PaymentMethodFixtures.createCards(2)
-            assertThat(awaitItem()).isNull()
-
             currentSelectionFlow.value = PaymentSelection.GooglePay
-            assertThat(awaitItem()).isNull()
-
             googlePayStateFlow.value = GooglePayState.Available
-            assertThat(awaitItem()).isNull()
-
             isLinkEnabledFlow.value = true
-            assertThat(awaitItem()).isNotNull()
+
+            val state = awaitItem()
+            assertThat(state.selectedIndex).isEqualTo(1)
+            assertThat(state.items).hasSize(5)
+            assertThat(state.items[0].viewType).isEqualTo(PaymentOptionsItem.ViewType.AddCard)
+            assertThat(state.items[1].viewType).isEqualTo(PaymentOptionsItem.ViewType.GooglePay)
+            assertThat(state.items[2].viewType).isEqualTo(PaymentOptionsItem.ViewType.Link)
+            assertThat(state.items[3].viewType).isEqualTo(PaymentOptionsItem.ViewType.SavedPaymentMethod)
+            assertThat(state.items[4].viewType).isEqualTo(PaymentOptionsItem.ViewType.SavedPaymentMethod)
         }
     }
 
@@ -60,16 +64,19 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
             nameProvider = { it!! },
+            isCbcEligible = { false }
         )
 
         mapper().test {
+            assertThat(awaitItem()).isEqualTo(PaymentOptionsState())
+
             val cards = PaymentMethodFixtures.createCards(2)
             paymentMethodsFlow.value = cards
             currentSelectionFlow.value = PaymentSelection.Saved(cards.first())
             googlePayStateFlow.value = GooglePayState.Available
             isLinkEnabledFlow.value = true
 
-            assertThat(expectMostRecentItem()?.items).containsNoneOf(
+            assertThat(awaitItem().items).containsNoneOf(
                 PaymentOptionsItem.GooglePay,
                 PaymentOptionsItem.Link,
             )
@@ -85,9 +92,12 @@ class PaymentOptionsStateMapperTest {
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
             nameProvider = { it!! },
+            isCbcEligible = { false }
         )
 
         mapper().test {
+            assertThat(awaitItem()).isEqualTo(PaymentOptionsState())
+
             val cards = PaymentMethodFixtures.createCards(2)
             val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
             paymentMethodsFlow.value = cards
@@ -95,7 +105,7 @@ class PaymentOptionsStateMapperTest {
             googlePayStateFlow.value = GooglePayState.Available
             isLinkEnabledFlow.value = true
 
-            assertThat(expectMostRecentItem()?.selectedItem).isEqualTo(
+            assertThat(awaitItem().selectedItem).isEqualTo(
                 PaymentOptionsItem.SavedPaymentMethod(
                     displayName = "card",
                     paymentMethod = selectedPaymentMethod.paymentMethod,
@@ -106,7 +116,7 @@ class PaymentOptionsStateMapperTest {
             paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod
             currentSelectionFlow.value = null
 
-            assertThat(expectMostRecentItem()?.selectedItem).isNull()
+            assertThat(awaitItem().selectedItem).isNull()
         }
     }
 }

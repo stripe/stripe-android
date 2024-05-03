@@ -1,93 +1,90 @@
-@file:Suppress("MatchingDeclarationName", "ktlint:filename")
-
 package com.stripe.android.financialconnections.ui.theme
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.financialconnections.ui.FinancialConnectionsPreview
+import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 @Immutable
 internal data class FinancialConnectionsTypography(
-    val subtitle: TextStyle,
-    val subtitleEmphasized: TextStyle,
-    val heading: TextStyle,
-    val subheading: TextStyle,
-    val kicker: TextStyle,
-    val body: TextStyle,
-    val bodyEmphasized: TextStyle,
-    val detail: TextStyle,
-    val detailEmphasized: TextStyle,
-    val caption: TextStyle,
-    val captionEmphasized: TextStyle,
-    val captionTight: TextStyle,
-    val captionTightEmphasized: TextStyle,
-    val bodyCode: TextStyle,
-    val bodyCodeEmphasized: TextStyle,
-    val captionCode: TextStyle,
-    val captionCodeEmphasized: TextStyle,
-
+    val headingXLarge: TextStyle,
+    val headingXLargeSubdued: TextStyle,
+    val headingLarge: TextStyle,
+    val headingMedium: TextStyle,
+    val bodyMediumEmphasized: TextStyle,
+    val bodyMedium: TextStyle,
+    val bodySmall: TextStyle,
+    val labelLargeEmphasized: TextStyle,
+    val labelLarge: TextStyle,
+    val labelMediumEmphasized: TextStyle,
+    val labelMedium: TextStyle,
+    val labelSmall: TextStyle
 )
 
 @Preview(group = "Components", name = "Type")
 @Composable
 internal fun TypePreview() {
     FinancialConnectionsPreview {
-        Column {
+        Column(
+            modifier = Modifier.background(Color.White)
+        ) {
             Text(
-                text = "subtitle",
-                style = FinancialConnectionsTheme.typography.subtitle
+                text = "Heading XLarge",
+                style = typography.headingXLarge
             )
             Text(
-                text = "subtitleEmphasized",
-                style = FinancialConnectionsTheme.typography.subtitleEmphasized
+                text = "Heading XLarge Subdued",
+                style = typography.headingXLargeSubdued
             )
             Text(
-                text = "heading",
-                style = FinancialConnectionsTheme.typography.heading
+                text = "Heading Large",
+                style = typography.headingLarge
             )
             Text(
-                text = "subheading",
-                style = FinancialConnectionsTheme.typography.subheading
+                text = "Heading Medium",
+                style = typography.headingMedium
+            )
+            Divider()
+            Text(
+                text = "Body Medium Emphasized",
+                style = typography.bodyMediumEmphasized
             )
             Text(
-                text = "KICKER",
-                style = FinancialConnectionsTheme.typography.kicker
+                text = "Body Medium",
+                style = typography.bodyMedium
             )
             Text(
-                text = "body",
-                style = FinancialConnectionsTheme.typography.body
+                text = "Body Small",
+                style = typography.bodySmall
+            )
+            Divider()
+            Text(
+                text = "Label Large Emphasized",
+                style = typography.labelLargeEmphasized
             )
             Text(
-                text = "bodyEmphasized",
-                style = FinancialConnectionsTheme.typography.bodyEmphasized
+                text = "Label Large",
+                style = typography.labelLarge
             )
             Text(
-                text = "detail",
-                style = FinancialConnectionsTheme.typography.detail
+                text = "Label Medium Emphasized",
+                style = typography.labelMediumEmphasized
             )
             Text(
-                text = "detailEmphasized",
-                style = FinancialConnectionsTheme.typography.detailEmphasized
+                text = "Label Medium",
+                style = typography.labelMedium
             )
             Text(
-                text = "caption",
-                style = FinancialConnectionsTheme.typography.caption
-            )
-            Text(
-                text = "captionEmphasized",
-                style = FinancialConnectionsTheme.typography.captionEmphasized
-            )
-            Text(
-                text = "captionTight",
-                style = FinancialConnectionsTheme.typography.captionTight
-            )
-            Text(
-                text = "captionTightEmphasized",
-                style = FinancialConnectionsTheme.typography.captionTightEmphasized
+                text = "Label Small",
+                style = typography.labelSmall
             )
         }
     }

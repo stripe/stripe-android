@@ -2,6 +2,8 @@ package com.stripe.android.financialconnections.example.data
 
 import com.stripe.android.financialconnections.example.BuildConfig
 import com.stripe.android.financialconnections.example.data.model.CreateIntentResponse
+import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
+import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 class BackendRepository(
     settings: Settings
@@ -9,53 +11,24 @@ class BackendRepository(
     private val backendService: BackendApiService = BackendApiFactory(settings).create()
 
     suspend fun createLinkAccountSession(
-        flow: String? = null,
-        keys: Pair<String, String>? = null,
-        customerEmail: String? = null,
-        testEnvironment: String = BuildConfig.TEST_ENVIRONMENT
-    ) = backendService.createLinkAccountSession(
-        LinkAccountSessionBody(
-            flow = flow,
-            publishableKey = keys?.first,
-            secretKey = keys?.second,
-            customerEmail = customerEmail,
-            testEnvironment = testEnvironment
+        linkAccountSessionBody: LinkAccountSessionBody = LinkAccountSessionBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
         )
-    )
+    ) = backendService.createLinkAccountSession(linkAccountSessionBody)
 
     suspend fun createLinkAccountSessionForToken(
-        flow: String? = null,
-        keys: Pair<String, String>? = null,
-        customerEmail: String? = null,
-        testEnvironment: String = BuildConfig.TEST_ENVIRONMENT
-    ) = backendService.createLinkAccountSessionForToken(
-        LinkAccountSessionBody(
-            flow = flow,
-            publishableKey = keys?.first,
-            secretKey = keys?.second,
-            customerEmail = customerEmail,
-            testEnvironment = testEnvironment,
+        linkAccountSessionBody: LinkAccountSessionBody = LinkAccountSessionBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
         )
+    ) = backendService.createLinkAccountSessionForToken(
+        linkAccountSessionBody
     )
 
     suspend fun createPaymentIntent(
-        country: String,
-        flow: String? = null,
-        customerId: String? = null,
-        supportedPaymentMethods: String? = null,
-        keys: Pair<String, String>? = null,
-        customerEmail: String? = null,
-        testEnvironment: String = BuildConfig.TEST_ENVIRONMENT
-    ): CreateIntentResponse = backendService.createPaymentIntent(
-        PaymentIntentBody(
-            flow = flow,
-            country = country,
-            customerId = customerId,
-            supportedPaymentMethods = supportedPaymentMethods,
-            publishableKey = keys?.first,
-            secretKey = keys?.second,
-            customerEmail = customerEmail,
-            testEnvironment = testEnvironment
+        paymentIntentBody: PaymentIntentBody = PaymentIntentBody(
+            testEnvironment = BuildConfig.TEST_ENVIRONMENT
         )
+    ): CreateIntentResponse = backendService.createPaymentIntent(
+        paymentIntentBody
     )
 }

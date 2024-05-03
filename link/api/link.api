@@ -37,6 +37,14 @@ public final class com/stripe/android/link/LinkConfiguration$Creator : android/o
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/link/LinkConfiguration$CustomerInfo$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkConfiguration$CustomerInfo;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/link/LinkConfiguration$CustomerInfo;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/link/LinkPaymentDetails$New$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/link/LinkPaymentDetails$New;
@@ -58,21 +66,19 @@ public final class com/stripe/android/link/ui/ComposableSingletons$LinkButtonKt 
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public static field lambda-3 Lkotlin/jvm/functions/Function2;
-	public static field lambda-4 Lkotlin/jvm/functions/Function2;
-	public static field lambda-5 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-3$link_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-4$link_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-5$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/link/ui/ComposableSingletons$PrimaryButtonKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$PrimaryButtonKt;
+public final class com/stripe/android/link/ui/ComposableSingletons$LinkTermsKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/ComposableSingletons$LinkTermsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/ui/ErrorMessage$FromResources$Creator : android/os/Parcelable$Creator {
@@ -91,13 +97,41 @@ public final class com/stripe/android/link/ui/ErrorMessage$Raw$Creator : android
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt {
-	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt;
+public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupFieldsKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public static field lambda-2 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkInlineSignupKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function3;
+	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$link_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/link/ui/inline/ComposableSingletons$LinkOptionalInlineSignupKt {
+	public static final field INSTANCE Lcom/stripe/android/link/ui/inline/ComposableSingletons$LinkOptionalInlineSignupKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public static field lambda-4 Lkotlin/jvm/functions/Function2;
+	public static field lambda-5 Lkotlin/jvm/functions/Function2;
+	public static field lambda-6 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-4$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-5$link_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-6$link_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/link/utils/ComposableSingletons$InlineContentTemplateBuilderKt {

@@ -4,8 +4,8 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import com.stripe.android.uicore.utils.mapAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * This is an element that will make elements (as specified by identifier) hidden
@@ -13,12 +13,17 @@ import kotlinx.coroutines.flow.map
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 data class SaveForFutureUseElement(
-    override val identifier: IdentifierSpec,
-    override val controller: SaveForFutureUseController,
+    val initialValue: Boolean,
     val merchantName: String?
 ) : FormElement {
-    override fun getFormFieldValueFlow(): Flow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
-        controller.formFieldValue.map {
+    override val controller: SaveForFutureUseController = SaveForFutureUseController(
+        initialValue
+    )
+
+    override val identifier: IdentifierSpec = IdentifierSpec.SaveForFutureUse
+
+    override fun getFormFieldValueFlow(): StateFlow<List<Pair<IdentifierSpec, FormFieldEntry>>> =
+        controller.formFieldValue.mapAsStateFlow {
             listOf(
                 identifier to it
             )

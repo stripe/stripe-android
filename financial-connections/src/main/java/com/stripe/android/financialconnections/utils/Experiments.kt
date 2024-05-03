@@ -1,7 +1,7 @@
 package com.stripe.android.financialconnections.utils
 
+import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.Exposure
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
-import com.stripe.android.financialconnections.analytics.FinancialConnectionsEvent
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
 
 internal fun FinancialConnectionsSessionManifest.experimentPresent(
@@ -24,7 +24,7 @@ internal suspend fun FinancialConnectionsAnalyticsTracker.trackExposure(
         accountHolderId != null
     ) {
         track(
-            FinancialConnectionsEvent.Exposure(
+            Exposure(
                 experimentName = experiment.key,
                 assignmentEventId = assignmentEventId,
                 accountHolderId = accountHolderId

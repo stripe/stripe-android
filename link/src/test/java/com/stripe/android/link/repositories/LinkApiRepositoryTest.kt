@@ -2,7 +2,9 @@ package com.stripe.android.link.repositories
 
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.model.PaymentDetailsFixtures
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.ConsumerSessionLookup
@@ -10,12 +12,15 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.forms.FormFieldEntry
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -33,6 +38,7 @@ import java.util.Locale
 class LinkApiRepositoryTest {
     private val stripeRepository = mock<StripeRepository>()
     private val consumersApiService = mock<ConsumersApiService>()
+    private val errorReporter = FakeErrorReporter()
 
     private val paymentIntent = mock<PaymentIntent>().apply {
         whenever(clientSecret).thenReturn("secret")
@@ -44,8 +50,14 @@ class LinkApiRepositoryTest {
         stripeRepository = stripeRepository,
         consumersApiService = consumersApiService,
         workContext = Dispatchers.IO,
-        locale = Locale.US
+        locale = Locale.US,
+        errorReporter = errorReporter
     )
+
+    @Before
+    fun clearErrorReporter() {
+        errorReporter.clear()
+    }
 
     @Test
     fun `lookupConsumer sends correct parameters`() = runTest {
@@ -175,7 +187,7 @@ class LinkApiRepositoryTest {
             "country",
             "name",
             "cookie",
-            ConsumerSignUpConsentAction.Button
+            ConsumerSignUpConsentAction.Implied
         )
 
         assertThat(result.isFailure).isTrue()
@@ -192,7 +204,8 @@ class LinkApiRepositoryTest {
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = secret,
-            consumerPublishableKey = consumerKey
+            consumerPublishableKey = consumerKey,
+            active = false,
         )
 
         verify(stripeRepository).createPaymentDetails(
@@ -212,7 +225,8 @@ class LinkApiRepositoryTest {
                     )
                 )
             },
-            eq(ApiRequest.Options(consumerKey))
+            eq(ApiRequest.Options(consumerKey)),
+            eq(false),
         )
     }
 
@@ -227,7 +241,8 @@ class LinkApiRepositoryTest {
                 userEmail = email,
                 stripeIntent = paymentIntent,
                 consumerSessionClientSecret = secret,
-                consumerPublishableKey = null
+                consumerPublishableKey = null,
+                active = false,
             )
 
             verify(stripeRepository).createPaymentDetails(
@@ -247,7 +262,8 @@ class LinkApiRepositoryTest {
                         )
                     )
                 },
-                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID))
+                eq(ApiRequest.Options(PUBLISHABLE_KEY, STRIPE_ACCOUNT_ID)),
+                eq(false),
             )
         }
 
@@ -261,6 +277,7 @@ class LinkApiRepositoryTest {
                 consumerSessionClientSecret = any(),
                 paymentDetailsCreateParams = any(),
                 requestOptions = any(),
+                active = any(),
             )
         ).thenReturn(Result.success(paymentDetails))
 
@@ -269,7 +286,8 @@ class LinkApiRepositoryTest {
             userEmail = email,
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = consumerSessionSecret,
-            consumerPublishableKey = null
+            consumerPublishableKey = null,
+            active = false,
         )
 
         assertThat(result.isSuccess).isTrue()
@@ -306,6 +324,7 @@ class LinkApiRepositoryTest {
                 consumerSessionClientSecret = any(),
                 paymentDetailsCreateParams = any(),
                 requestOptions = any(),
+                active = any(),
             )
         ).thenReturn(Result.failure(RuntimeException("error")))
 
@@ -314,10 +333,73 @@ class LinkApiRepositoryTest {
             userEmail = "email@stripe.com",
             stripeIntent = paymentIntent,
             consumerSessionClientSecret = "secret",
-            consumerPublishableKey = null
+            consumerPublishableKey = null,
+            active = false,
         )
+        val loggedErrors = errorReporter.getLoggedErrors()
 
         assertThat(result.isFailure).isTrue()
+        assertThat(loggedErrors.size).isEqualTo(1)
+        assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE.eventName)
+    }
+
+    @Test
+    fun `shareCardPaymentDetails returns LinkPaymentDetails_Saved`() = runTest {
+        val consumerSessionSecret = "consumer_session_secret"
+
+        whenever(
+            stripeRepository.sharePaymentDetails(
+                consumerSessionClientSecret = any(),
+                id = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.success("pm_123"))
+
+        val result = linkRepository.shareCardPaymentDetails(
+            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            consumerSessionClientSecret = consumerSessionSecret,
+            id = "csmrpd*AYq4D_sXdAAAAOQ0",
+            last4 = "4242",
+        )
+
+        assertThat(result.isSuccess).isTrue()
+        val savedLinkPaymentDetails = result.getOrThrow() as LinkPaymentDetails.Saved
+
+        assertThat(savedLinkPaymentDetails.paymentDetails)
+            .isEqualTo(ConsumerPaymentDetails.Passthrough(id = "pm_123", last4 = "4242"))
+        assertThat(savedLinkPaymentDetails.paymentMethodCreateParams)
+            .isEqualTo(
+                PaymentMethodCreateParams.createLink(
+                    "pm_123",
+                    consumerSessionSecret,
+                    mapOf("card" to mapOf("cvc" to "123"))
+                )
+            )
+    }
+
+    @Test
+    fun `when shareCardPaymentDetails fails, an error is reported`() = runTest {
+        val consumerSessionSecret = "consumer_session_secret"
+
+        whenever(
+            stripeRepository.sharePaymentDetails(
+                consumerSessionClientSecret = any(),
+                id = any(),
+                requestOptions = any(),
+            )
+        ).thenReturn(Result.failure(RuntimeException("error")))
+
+        val result = linkRepository.shareCardPaymentDetails(
+            paymentMethodCreateParams = cardPaymentMethodCreateParams,
+            consumerSessionClientSecret = consumerSessionSecret,
+            id = "csmrpd*AYq4D_sXdAAAAOQ0",
+            last4 = "4242",
+        )
+        val loggedErrors = errorReporter.getLoggedErrors()
+
+        assertThat(result.isFailure).isTrue()
+        assertThat(loggedErrors.size).isEqualTo(1)
+        assertThat(loggedErrors.first()).isEqualTo(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE.eventName)
     }
 
     private val cardPaymentMethodCreateParams =

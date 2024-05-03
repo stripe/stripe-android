@@ -12,12 +12,11 @@ import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -53,7 +52,6 @@ internal fun PaymentSheetTopBar(
     )
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun PaymentSheetTopBar(
     state: PaymentSheetTopBarState,
@@ -61,7 +59,7 @@ internal fun PaymentSheetTopBar(
     onNavigationIconPressed: () -> Unit,
     onEditIconPressed: () -> Unit,
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
+    val keyboardController = LocalTextInputService.current
     val tintColor = MaterialTheme.stripeColors.appBarIcon
 
     TopAppBar(
@@ -74,7 +72,8 @@ internal fun PaymentSheetTopBar(
             IconButton(
                 enabled = state.isEnabled,
                 onClick = {
-                    keyboardController?.hide()
+                    @Suppress("DEPRECATION")
+                    keyboardController?.hideSoftwareKeyboard()
                     onNavigationIconPressed()
                 },
                 modifier = Modifier.testTag(SHEET_NAVIGATION_BUTTON_TAG)

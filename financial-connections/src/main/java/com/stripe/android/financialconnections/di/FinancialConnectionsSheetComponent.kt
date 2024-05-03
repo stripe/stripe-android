@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.injection.CoreCommonModule
 import com.stripe.android.core.injection.CoroutineContextModule
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
@@ -26,6 +27,9 @@ internal interface FinancialConnectionsSheetComponent {
     interface Builder {
         @BindsInstance
         fun application(application: Application): Builder
+
+        @BindsInstance
+        fun savedStateHandle(savedStateHandle: SavedStateHandle): Builder
 
         @BindsInstance
         fun initialState(initialState: FinancialConnectionsSheetState): Builder

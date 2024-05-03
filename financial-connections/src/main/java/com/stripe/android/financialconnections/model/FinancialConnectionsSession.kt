@@ -100,7 +100,7 @@ data class FinancialConnectionsSession internal constructor(
 
         internal object Serializer :
             EnumIgnoreUnknownSerializer<Status>(
-                Status.values(),
+                entries.toTypedArray(),
                 UNKNOWN
             )
     }
@@ -132,7 +132,7 @@ data class FinancialConnectionsSession internal constructor(
 
                 internal object Serializer :
                     EnumIgnoreUnknownSerializer<Reason>(
-                        Reason.values(),
+                        entries.toTypedArray(),
                         UNKNOWN
                     )
             }

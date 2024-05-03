@@ -7,7 +7,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
@@ -15,18 +14,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -45,7 +42,6 @@ internal class AddressElementActivity : ComponentActivity() {
         requireNotNull(AddressElementActivityContract.Args.fromIntent(intent))
     }
 
-    @OptIn(ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -54,15 +50,10 @@ internal class AddressElementActivity : ComponentActivity() {
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
-            val navController = rememberAnimatedNavController()
+            val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberBottomSheetState(
-                confirmValueChange = {
-                    val route = navController.currentDestination?.route
-                    route != AddressElementScreen.Autocomplete.route
-                },
-            )
+            val bottomSheetState = rememberBottomSheetState()
 
             BackHandler {
                 viewModel.navigator.onBack()
@@ -79,17 +70,13 @@ internal class AddressElementActivity : ComponentActivity() {
             StripeTheme {
                 BottomSheet(
                     state = bottomSheetState,
-                    onShow = navController::navigateToContent,
                     onDismissed = viewModel.navigator::dismiss,
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {
-                        AnimatedNavHost(
+                        NavHost(
                             navController = navController,
-                            startDestination = AddressElementScreen.Loading.route,
+                            startDestination = AddressElementScreen.InputAddress.route,
                         ) {
-                            composable(AddressElementScreen.Loading.route) {
-                                LoadingIndicator(modifier = Modifier.fillMaxSize())
-                            }
                             composable(AddressElementScreen.InputAddress.route) {
                                 InputAddressScreen(viewModel.inputAddressViewModelSubcomponentBuilderProvider)
                             }
@@ -129,14 +116,6 @@ internal class AddressElementActivity : ComponentActivity() {
 
     override fun finish() {
         super.finish()
-        overridePendingTransition(AnimationConstants.FADE_IN, AnimationConstants.FADE_OUT)
-    }
-}
-
-private fun NavHostController.navigateToContent() {
-    return navigate(AddressElementScreen.InputAddress.route) {
-        popUpTo(AddressElementScreen.Loading.route) {
-            inclusive = true
-        }
+        fadeOut()
     }
 }

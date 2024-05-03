@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.polling
 
 import android.os.SystemClock
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,11 +9,11 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.StripeIntentResult
+import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.paymentsheet.paymentdatacollection.polling.di.DaggerPollingComponent
 import com.stripe.android.polling.IntentStatusPoller
-import com.stripe.android.utils.requireApplication
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -76,6 +77,7 @@ internal fun PollingState.toFlowResult(
 
 internal data class PollingUiState(
     val durationRemaining: Duration,
+    @StringRes val ctaText: Int,
     val pollingState: PollingState = PollingState.Active,
 )
 
@@ -87,7 +89,7 @@ internal class PollingViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow(PollingUiState(durationRemaining = args.timeLimit))
+    private val _uiState = MutableStateFlow(PollingUiState(durationRemaining = args.timeLimit, ctaText = args.ctaText))
     val uiState: StateFlow<PollingUiState> = _uiState
 
     init {
@@ -226,6 +228,7 @@ internal class PollingViewModel @Inject constructor(
         val timeLimit: Duration,
         val initialDelay: Duration,
         val maxAttempts: Int,
+        @StringRes val ctaText: Int,
     )
 }
 

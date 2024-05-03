@@ -49,7 +49,7 @@ class CreateCardTokenActivityTest {
 
         // launch create a card token activity
         onView(withId(R.id.examples)).perform(
-            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click())
+            RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(2, click())
         )
 
         // fill out card details

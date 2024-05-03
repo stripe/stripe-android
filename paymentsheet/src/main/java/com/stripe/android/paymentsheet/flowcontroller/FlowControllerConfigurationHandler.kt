@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.flowcontroller
 
 import com.stripe.android.core.injection.UIContext
-import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheet.InitializationMode.DeferredIntent
 import com.stripe.android.paymentsheet.analytics.EventReporter
@@ -12,7 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.security.InvalidParameterException
+import java.lang.IllegalArgumentException
 import java.util.concurrent.atomic.AtomicReference
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,7 +39,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
     fun configure(
         scope: CoroutineScope,
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         val oldJob = job.getAndSet(
@@ -57,7 +56,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     private suspend fun configureInternal(
         initializationMode: PaymentSheet.InitializationMode,
-        configuration: PaymentSheet.Configuration?,
+        configuration: PaymentSheet.Configuration,
         callback: PaymentSheet.FlowController.ConfigCallback,
     ) {
         suspend fun onConfigured(error: Throwable? = null) {
@@ -70,8 +69,8 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         try {
             initializationMode.validate()
-            configuration?.validate()
-        } catch (e: InvalidParameterException) {
+            configuration.validate()
+        } catch (e: IllegalArgumentException) {
             onConfigured(error = e)
             return
         }
@@ -84,13 +83,17 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             return
         }
 
-        AnalyticsRequestFactory.regenerateSessionId()
+        viewModel.resetSession()
 
         paymentSheetLoader.load(initializationMode, configuration).fold(
             onSuccess = { state ->
-                viewModel.previousConfigureRequest = configureRequest
-                onInitSuccess(state, configureRequest)
-                onConfigured()
+                if (state.validationError != null) {
+                    onConfigured(state.validationError)
+                } else {
+                    viewModel.previousConfigureRequest = configureRequest
+                    onInitSuccess(state, configureRequest)
+                    onConfigured()
+                }
             },
             onFailure = { error ->
                 onConfigured(error = error)
@@ -98,7 +101,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
         )
     }
 
-    private fun onInitSuccess(
+    private suspend fun onInitSuccess(
         state: PaymentSheetState.Full,
         configureRequest: ConfigureRequest,
     ) {
@@ -106,7 +109,7 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
         eventReporter.onInit(
             configuration = state.config,
-            isDecoupling = isDecoupling,
+            isDeferred = isDecoupling,
         )
 
         viewModel.paymentSelection = paymentSelectionUpdater(
@@ -115,7 +118,9 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
             newState = state,
         )
 
-        viewModel.state = state
+        withContext(uiContext) {
+            viewModel.state = state
+        }
     }
 
     private fun resetJob() {
@@ -124,6 +129,6 @@ internal class FlowControllerConfigurationHandler @Inject constructor(
 
     data class ConfigureRequest(
         val initializationMode: PaymentSheet.InitializationMode,
-        val configuration: PaymentSheet.Configuration?,
+        val configuration: PaymentSheet.Configuration,
     )
 }

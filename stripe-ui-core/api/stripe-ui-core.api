@@ -13,10 +13,6 @@ public final class com/stripe/android/uicore/StripeThemeKt {
 	public static final fun getStripeShapes (Landroidx/compose/material/MaterialTheme;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/uicore/StripeShapes;
 }
 
-public final class com/stripe/android/uicore/address/AutocompleteCapableAddressType$DefaultImpls {
-	public static fun supportsAutoComplete (Lcom/stripe/android/uicore/address/AutocompleteCapableAddressType;Ljava/lang/String;Lcom/stripe/android/uicore/elements/IsPlacesAvailable;)Z
-}
-
 public final class com/stripe/android/uicore/address/CountryAddressSchema$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/uicore/address/CountryAddressSchema$$serializer;
@@ -69,16 +65,28 @@ public final class com/stripe/android/uicore/address/StateSchema$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/uicore/address/TransformAddressToElementKt {
+public final class com/stripe/android/uicore/elements/AddressType$Normal$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/AddressType$Normal;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/AddressType$Normal;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/uicore/elements/AddressElementUIKt {
+public final class com/stripe/android/uicore/elements/AddressType$ShippingCondensed$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/AddressType$ShippingCondensed;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/AddressType$ShippingCondensed;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
-public final class com/stripe/android/uicore/elements/AddressTextFieldUIKt {
-}
-
-public final class com/stripe/android/uicore/elements/CheckboxElementUIKt {
+public final class com/stripe/android/uicore/elements/AddressType$ShippingExpanded$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/AddressType$ShippingExpanded;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/AddressType$ShippingExpanded;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
 public final class com/stripe/android/uicore/elements/ComposableSingletons$OTPElementUIKt {
@@ -97,19 +105,11 @@ public final class com/stripe/android/uicore/elements/ComposableSingletons$Secti
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/uicore/elements/DropdownConfig$DefaultImpls {
-	public static fun getDisableDropdownWithSingleElement (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
-	public static fun getTinyMode (Lcom/stripe/android/uicore/elements/DropdownConfig;)Z
-}
-
-public final class com/stripe/android/uicore/elements/DropdownFieldUIKt {
-}
-
-public final class com/stripe/android/uicore/elements/FormElement$DefaultImpls {
-	public static fun getTextFieldIdentifiers (Lcom/stripe/android/uicore/elements/FormElement;)Lkotlinx/coroutines/flow/Flow;
-}
-
-public final class com/stripe/android/uicore/elements/H6TextKt {
+public final class com/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt {
+	public static final field INSTANCE Lcom/stripe/android/uicore/elements/ComposableSingletons$TextFieldUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$$serializer : kotlinx/serialization/internal/GeneratedSerializer {
@@ -126,6 +126,9 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$$serializer
 
 public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun Generic (Ljava/lang/String;)Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBillingAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlik ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getBlikCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardCvc ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getCardExpMonth ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -141,6 +144,7 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Companion {
 	public final fun getOneLineAddress ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPhone ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getPostalCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
+	public final fun getPreferredCardBrand ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSameAsShipping ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSaveForFutureUse ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
 	public final fun getSortingCode ()Lcom/stripe/android/uicore/elements/IdentifierSpec;
@@ -158,35 +162,28 @@ public final class com/stripe/android/uicore/elements/IdentifierSpec$Creator : a
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/uicore/elements/ParameterDestination$Api$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/ParameterDestination$Api;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/ParameterDestination$Api;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/uicore/elements/ParameterDestination$Local$Creator : android/os/Parcelable$Creator {
+	public fun <init> ()V
+	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/uicore/elements/ParameterDestination$Local;
+	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
+	public final fun newArray (I)[Lcom/stripe/android/uicore/elements/ParameterDestination$Local;
+	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
 public final class com/stripe/android/uicore/elements/PhoneNumberState$Companion {
 	public final fun serializer ()Lkotlinx/serialization/KSerializer;
 }
 
-public final class com/stripe/android/uicore/elements/RowElementUIKt {
-}
-
 public final class com/stripe/android/uicore/elements/SameAsShippingElementUIKt {
 	public static final field SAME_AS_SHIPPING_CHECKBOX_TEST_TAG Ljava/lang/String;
-}
-
-public final class com/stripe/android/uicore/elements/SectionFieldElement$DefaultImpls {
-	public static fun getShouldRenderOutsideCard (Lcom/stripe/android/uicore/elements/SectionFieldElement;)Z
-}
-
-public final class com/stripe/android/uicore/elements/SectionFieldElementUIKt {
-}
-
-public final class com/stripe/android/uicore/elements/SectionUIKt {
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldConfig$DefaultImpls {
-	public static fun getPlaceHolder (Lcom/stripe/android/uicore/elements/TextFieldConfig;)Ljava/lang/String;
-}
-
-public final class com/stripe/android/uicore/elements/TextFieldController$DefaultImpls {
-	public static fun ComposeUI-MxjM1cc (Lcom/stripe/android/uicore/elements/TextFieldController;ZLcom/stripe/android/uicore/elements/SectionFieldElement;Landroidx/compose/ui/Modifier;Ljava/util/Set;Lcom/stripe/android/uicore/elements/IdentifierSpec;IILandroidx/compose/runtime/Composer;I)V
-	public static fun getEnabled (Lcom/stripe/android/uicore/elements/TextFieldController;)Z
-	public static fun getPlaceHolder (Lcom/stripe/android/uicore/elements/TextFieldController;)Lkotlinx/coroutines/flow/Flow;
 }
 
 public abstract class com/stripe/android/uicore/elements/TextFieldStateConstants$Error : com/stripe/android/uicore/elements/TextFieldState {
@@ -216,9 +213,10 @@ public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Er
 
 public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Error$Invalid : com/stripe/android/uicore/elements/TextFieldStateConstants$Error {
 	public static final field $stable I
-	public fun <init> (I[Ljava/lang/Object;)V
-	public synthetic fun <init> (I[Ljava/lang/Object;ILkotlin/jvm/internal/DefaultConstructorMarker;)V
+	public fun <init> (I[Ljava/lang/Object;Z)V
+	public synthetic fun <init> (I[Ljava/lang/Object;ZILkotlin/jvm/internal/DefaultConstructorMarker;)V
 	public fun isBlank ()Z
+	public fun isFull ()Z
 	public fun shouldShowError (Z)Z
 }
 
@@ -242,16 +240,10 @@ public final class com/stripe/android/uicore/elements/TextFieldStateConstants$Va
 	public fun isFull ()Z
 }
 
-public final class com/stripe/android/uicore/elements/TextFieldStateKt {
-}
-
 public final class com/stripe/android/uicore/elements/TextFieldUIKt {
 	public static final fun AnimatedIcons (Ljava/util/List;ZLandroidx/compose/runtime/Composer;I)V
-	public static final fun TextField-ndPIYpw (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/runtime/Composer;II)V
-	public static final fun TextFieldSection-uGujYS0 (Lcom/stripe/android/uicore/elements/TextFieldController;IZLandroidx/compose/ui/Modifier;Ljava/lang/Integer;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
-}
-
-public final class com/stripe/android/uicore/elements/menu/CheckboxKt {
+	public static final fun TextField-qRf7idA (Lcom/stripe/android/uicore/elements/TextFieldController;ZILandroidx/compose/ui/Modifier;Lkotlin/jvm/functions/Function1;IILandroidx/compose/ui/focus/FocusRequester;Landroidx/compose/runtime/Composer;II)V
+	public static final fun TextFieldSection-vbMXUkU (Landroidx/compose/ui/Modifier;Lcom/stripe/android/uicore/elements/TextFieldController;IZZLjava/lang/Integer;Lkotlin/jvm/functions/Function1;Landroidx/compose/runtime/Composer;II)V
 }
 
 public final class com/stripe/android/uicore/image/ComposableSingletons$StripeImageKt {
@@ -261,19 +253,6 @@ public final class com/stripe/android/uicore/image/ComposableSingletons$StripeIm
 	public fun <init> ()V
 	public final fun getLambda-1$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$stripe_ui_core_release ()Lkotlin/jvm/functions/Function3;
-}
-
-public final class com/stripe/android/uicore/image/DrawablePainterKt {
-	public static final fun rememberDrawablePainter (Landroid/graphics/drawable/Drawable;Landroidx/compose/runtime/Composer;I)Landroidx/compose/ui/graphics/painter/Painter;
-}
-
-public final class com/stripe/android/uicore/image/StripeImageKt {
-}
-
-public final class com/stripe/android/uicore/image/UiUtilsKt {
-}
-
-public final class com/stripe/android/uicore/text/DimentionResourceSpKt {
 }
 
 public final class com/stripe/android/uicore/text/EmbeddableImage$Bitmap : com/stripe/android/uicore/text/EmbeddableImage {
@@ -303,11 +282,5 @@ public final class com/stripe/android/uicore/text/EmbeddableImage$Drawable : com
 	public final fun getId ()I
 	public fun hashCode ()I
 	public fun toString ()Ljava/lang/String;
-}
-
-public final class com/stripe/android/uicore/text/HtmlKt {
-}
-
-public final class com/stripe/android/uicore/text/MiddleEllipsisTextKt {
 }
 

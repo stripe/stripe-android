@@ -21,7 +21,9 @@ internal data class DocumentUploadParam(
     @SerialName("passport_score")
     val passportScore: Float? = null,
     @SerialName("upload_method")
-    val uploadMethod: UploadMethod
+    val uploadMethod: UploadMethod,
+    @SerialName("force_confirm")
+    val forceConfirm: Boolean? = null
 ) : Parcelable {
     @Serializable
     internal enum class UploadMethod {

@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Legg til ein betalingsmetode</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Lagre min info for trygg betaling med 1-klikk</string>
+  <string name="stripe_inline_sign_up_header">Lagre informasjonen din for sikker betaling med 1 klikk med Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Logg ut av Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Betal raskare på %s og tusenvis av forhandlarar.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Ved å bli med i Link godtek du <terms>Vilkåra</terms> og <privacy>Personvernerklæringa</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Ved å oppgi e-postadressa di godtek du å opprette ein Link-konto og lagre betaingsinformasjonen din til Link, i samsvar med <terms>Link sine vilkår</terms> og <privacy>personvernerklæring</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Ved å oppgi telefonnummeret ditt godtek du å opprette ein Link-konto og lagre betaingsinformasjonen din til Link, i samsvar med <terms>Link sine vilkår</terms> og <privacy>personvernerklæring</privacy>.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Endre e-post</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
@@ -50,8 +54,6 @@
   <string name="stripe_wallet_recollect_cvc_error">For sikkerhet, vær venleg å leggje inn sikkerhetskoden til kortet ditt.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Er du sikker på at du vil slette kontoen som er tilknytt?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Fjern kort</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Er du sikker på at du vil slette dette kortet?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

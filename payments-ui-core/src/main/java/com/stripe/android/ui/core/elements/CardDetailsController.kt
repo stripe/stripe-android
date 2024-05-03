@@ -1,11 +1,13 @@
 package com.stripe.android.ui.core.elements
 
-import android.content.Context
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import com.stripe.android.cards.CardAccountRangeRepository
+import com.stripe.android.model.CardBrand
 import com.stripe.android.ui.core.R
+import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.DateConfig
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.RowController
@@ -16,14 +18,19 @@ import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.UUID
+import kotlin.coroutines.CoroutineContext
 
-internal class CardDetailsController constructor(
-    context: Context,
+internal class CardDetailsController(
+    cardAccountRangeRepositoryFactory: CardAccountRangeRepository.Factory,
     initialValues: Map<IdentifierSpec, String?>,
-    cardNumberReadOnly: Boolean = false,
     collectName: Boolean = false,
+    cbcEligibility: CardBrandChoiceEligibility = CardBrandChoiceEligibility.Ineligible,
+    uiContext: CoroutineContext = Dispatchers.Main,
+    workContext: CoroutineContext = Dispatchers.IO,
 ) : SectionFieldErrorController, SectionFieldComposable {
 
     val nameElement = if (collectName) {
@@ -45,18 +52,24 @@ internal class CardDetailsController constructor(
     val label: Int? = null
     val numberElement = CardNumberElement(
         IdentifierSpec.CardNumber,
-        if (cardNumberReadOnly) {
-            CardNumberViewOnlyController(
-                CardNumberConfig(),
-                initialValues
-            )
-        } else {
-            CardNumberEditableController(
-                CardNumberConfig(),
-                context,
-                initialValues[IdentifierSpec.CardNumber]
-            )
-        }
+        DefaultCardNumberController(
+            cardTextFieldConfig = CardNumberConfig(),
+            cardAccountRangeRepository = cardAccountRangeRepositoryFactory.create(),
+            uiContext = uiContext,
+            workContext = workContext,
+            initialValue = initialValues[IdentifierSpec.CardNumber],
+            cardBrandChoiceConfig = when (cbcEligibility) {
+                is CardBrandChoiceEligibility.Eligible -> CardBrandChoiceConfig.Eligible(
+                    preferredBrands = cbcEligibility.preferredNetworks,
+                    initialBrand = initialValues[
+                        IdentifierSpec.PreferredCardBrand
+                    ]?.let { value ->
+                        CardBrand.fromCode(value)
+                    }
+                )
+                is CardBrandChoiceEligibility.Ineligible -> CardBrandChoiceConfig.Ineligible
+            },
+        )
     )
 
     val cvcElement = CvcElement(
@@ -99,7 +112,7 @@ internal class CardDetailsController constructor(
             .map { it.error }
     ) {
         it.filterNotNull().firstOrNull()
-    }
+    }.distinctUntilChanged()
 
     @Composable
     override fun ComposeUI(

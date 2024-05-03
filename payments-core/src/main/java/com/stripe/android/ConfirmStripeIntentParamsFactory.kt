@@ -17,19 +17,34 @@ import com.stripe.android.model.SetupIntent
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams> {
 
-    abstract fun create(paymentMethod: PaymentMethod): T
+    abstract fun create(
+        paymentMethodId: String,
+        paymentMethodType: PaymentMethod.Type?,
+        requiresSaveOnConfirmation: Boolean = false,
+    ): T
 
     abstract fun create(
         createParams: PaymentMethodCreateParams,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage? = null,
+        optionsParams: PaymentMethodOptionsParams? = null,
     ): T
+
+    fun create(
+        paymentMethod: PaymentMethod,
+        requiresSaveOnConfirmation: Boolean = false,
+    ): T {
+        return create(
+            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodType = paymentMethod.type,
+            requiresSaveOnConfirmation = requiresSaveOnConfirmation,
+        )
+    }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         fun createFactory(
             clientSecret: String,
-            shipping: ConfirmPaymentIntentParams.Shipping?
+            shipping: ConfirmPaymentIntentParams.Shipping?,
         ) = when {
             PaymentIntent.ClientSecret.isMatch(clientSecret) -> {
                 ConfirmPaymentIntentParamsFactory(clientSecret, shipping)
@@ -49,14 +64,20 @@ internal class ConfirmPaymentIntentParamsFactory(
     private val shipping: ConfirmPaymentIntentParams.Shipping?
 ) : ConfirmStripeIntentParamsFactory<ConfirmPaymentIntentParams>() {
 
-    override fun create(paymentMethod: PaymentMethod): ConfirmPaymentIntentParams {
+    override fun create(
+        paymentMethodId: String,
+        paymentMethodType: PaymentMethod.Type?,
+        requiresSaveOnConfirmation: Boolean,
+    ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
-            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            paymentMethodOptions = when (paymentMethod.type) {
+            paymentMethodOptions = when (paymentMethodType) {
                 PaymentMethod.Type.Card -> {
                     PaymentMethodOptionsParams.Card(
-                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.Blank
+                        setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
+                            requiresSaveOnConfirmation
+                        } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
                     )
                 }
                 PaymentMethod.Type.USBankAccount -> {
@@ -69,41 +90,19 @@ internal class ConfirmPaymentIntentParamsFactory(
                 }
             },
             mandateData = MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
-                .takeIf { paymentMethod.type?.requiresMandate == true },
+                .takeIf { paymentMethodType?.requiresMandate == true },
             shipping = shipping
         )
     }
 
     override fun create(
         createParams: PaymentMethodCreateParams,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        optionsParams: PaymentMethodOptionsParams?,
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodCreateParams(
             paymentMethodCreateParams = createParams,
             clientSecret = clientSecret,
-
-            /**
-             Sets `payment_method_options[card][setup_future_usage]`
-             - Note: PaymentSheet uses this `setup_future_usage` (SFU) value very differently from the top-level one:
-             We read the top-level SFU to know the merchant’s desired save behavior
-             We write payment method options SFU to set the customer’s desired save behavior
-             */
-            // At this time, paymentMethodOptions card and us_bank_account is the only PM that
-            // supports setup future usage
-            paymentMethodOptions = when (createParams.typeCode) {
-                PaymentMethod.Type.Card.code -> {
-                    PaymentMethodOptionsParams.Card(setupFutureUsage = setupFutureUsage)
-                }
-                PaymentMethod.Type.USBankAccount.code -> {
-                    PaymentMethodOptionsParams.USBankAccount(setupFutureUsage = setupFutureUsage)
-                }
-                PaymentMethod.Type.Link.code -> {
-                    null
-                }
-                else -> {
-                    PaymentMethodOptionsParams.Card(setupFutureUsage = null)
-                }
-            },
+            paymentMethodOptions = optionsParams,
             shipping = shipping,
         )
     }
@@ -113,11 +112,15 @@ internal class ConfirmSetupIntentParamsFactory(
     private val clientSecret: String,
 ) : ConfirmStripeIntentParamsFactory<ConfirmSetupIntentParams>() {
 
-    override fun create(paymentMethod: PaymentMethod): ConfirmSetupIntentParams {
+    override fun create(
+        paymentMethodId: String,
+        paymentMethodType: PaymentMethod.Type?,
+        requiresSaveOnConfirmation: Boolean,
+    ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
-            paymentMethodId = paymentMethod.id.orEmpty(),
+            paymentMethodId = paymentMethodId,
             clientSecret = clientSecret,
-            mandateData = paymentMethod.type?.requiresMandate?.let {
+            mandateData = paymentMethodType?.requiresMandate?.let {
                 MandateDataParams(MandateDataParams.Type.Online.DEFAULT)
             }
         )
@@ -125,7 +128,7 @@ internal class ConfirmSetupIntentParamsFactory(
 
     override fun create(
         createParams: PaymentMethodCreateParams,
-        setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?,
+        optionsParams: PaymentMethodOptionsParams?,
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodCreateParams = createParams,

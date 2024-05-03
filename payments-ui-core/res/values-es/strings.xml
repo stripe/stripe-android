@@ -2,18 +2,38 @@
 <resources>
   <!-- This shows the message on Buy Now Pay Later LPM, afterpay.  After the word "with" an Afterpay logo is displayed.  can be moved to move the logo in the string. -->
   <string name="stripe_afterpay_clearpay_message"><![CDATA[Pagar en <num_installments/> cuotas sin intereses de <installment_price/> con <img/>]]></string>
+  <!-- Amazon Pay mandate text -->
+  <string name="stripe_amazon_pay_mandate">Al confirmar tu pago con AmazonPay, permitirás que %s efectúe cargos de futuros pagos en tu cuenta de AmazonPay conforme a las condiciones estipuladas.</string>
   <!-- Text for back button -->
   <string name="stripe_back">Atrás</string>
+  <!-- Label for Bacs account number field -->
+  <string name="stripe_bacs_account_number">Número de cuenta</string>
+  <!-- BECS Debit Widget - account number field - incomplete error message -->
+  <string name="stripe_bacs_account_number_incomplete">Tu número de cuenta está incompleto.</string>
+  <!-- Title for collected bank account information -->
+  <string name="stripe_bacs_bank_account_title">Cuenta bancaria</string>
+  <!-- Label for confirmation checkbox for bacs mandate. -->
+  <string name="stripe_bacs_confirm_mandate_label">Entiendo que Stripe cobrará adeudos directos en nombre de %s y confirmo que soy el titular de la cuenta y la única persona que se requiere que autorice los adeudos a esta cuenta.</string>
+  <!-- Label for Bacs sort code field -->
+  <string name="stripe_bacs_sort_code">Código Sort</string>
+  <!-- An error message displayed when the customer's Bacs sort code is incomplete. -->
+  <string name="stripe_bacs_sort_code_incomplete">Tu código Sort está incompleto.</string>
   <!-- Billing address section title for card form entry. -->
   <string name="stripe_billing_details">Dirección de facturación</string>
   <!-- Label for BLIK code number field on form -->
   <string name="stripe_blik_code">Código BLIK</string>
+  <!-- Label for Boleto Payment method Tax ID -->
+  <string name="stripe_boleto_tax_id_label">CPF/CNPJ</string>
+  <!-- Cash App mandate text -->
+  <string name="stripe_cash_app_pay_mandate">Si continúas, autorizas a %1$s a que cargue en tu cuenta de Cash App este pago y futuros pagos conforme a las condiciones de %2$s hasta que se revoque esta autorización. Puedes cambiarla en cualquier momento en la configuración de Cash App.</string>
   <!-- Title for the contact information section -->
   <string name="stripe_contact_information">Datos de contacto</string>
   <!-- Text for continue button -->
   <string name="stripe_continue_button_label">Continuar</string>
   <!-- Label for the field containing the dropdown of EPS Banks -->
   <string name="stripe_eps_bank">Banco que opera con EPS</string>
+  <!-- Label for the field containing the dropdown of FPX Banks -->
+  <string name="stripe_fpx_bank">Banco para FPX</string>
   <!-- An error message displayed when the customer's IBAN is incomplete. -->
   <string name="stripe_iban_incomplete">El IBAN introducido está incompleto.</string>
   <!-- An error message displayed when the IBAN country code is not supported. -->
@@ -31,8 +51,12 @@
   <string name="stripe_invalid_upi_id">ID de UPI no válida</string>
   <!-- Klarna buy now or pay later copy -->
   <string name="stripe_klarna_buy_now_pay_later">Compra ahora y paga después con Klarna.</string>
+  <!-- Klarna mandate text -->
+  <string name="stripe_klarna_mandate">Al acceder a Klarna, permitirás que %1$s efectúe cargos de futuros pagos en tu cuenta de Klarna conforme a sus condiciones y a las condiciones de Klarna. Puedes cambiar esta configuración en cualquier momento en tu aplicación de Klarna o poniéndote en contacto con %2$s.</string>
   <!-- Klarna pay later copy -->
   <string name="stripe_klarna_pay_later">Paga después con Klarna.</string>
+  <!-- Caption for Phone field on address form -->
+  <string name="stripe_konbini_confirmation_number_label">Teléfono</string>
   <!-- Label for name on card field -->
   <string name="stripe_name_on_card">Nombre del titular de la tarjeta</string>
   <!-- Label on the dropdown to select the Przelewy24 Bank -->
@@ -47,12 +71,18 @@
   <string name="stripe_paymentsheet_buy_using_upi_id">Comprar con un ID de UPI</string>
   <!-- Payment Method type brand name. -->
   <string name="stripe_paymentsheet_payment_method_au_becs_debit">Adeudo directo BECS (Australia)</string>
+  <!-- Payment Method type brand name -->
+  <string name="stripe_paymentsheet_payment_method_bacs_debit">Adeudo directo Bacs</string>
   <!-- Title for credit card number entry field -->
   <string name="stripe_paymentsheet_payment_method_card">Tarjeta</string>
+  <!-- Label for Konbini Payment Method -->
+  <string name="stripe_paymentsheet_payment_method_konbini">Konbini</string>
   <!-- Payment method brand name -->
   <string name="stripe_paymentsheet_payment_method_sepa_debit">Adeudo SEPA</string>
   <!-- PayPal mandate text -->
   <string name="stripe_paypal_mandate">Al confirmar tu pago con PayPal, permites que %s realice cargos de pagos futuros en tu cuenta de PayPal conforme a sus condiciones.</string>
+  <!-- Revolut mandate text -->
+  <string name="stripe_revolut_mandate">Al confirmar tu pago con RevolutPay, permitirás que %s efectúe cargos de futuros pagos en tu cuenta de RevolutPay conforme a las condiciones estipuladas.</string>
   <!-- Next to the save payment method users will see the merchant name: "Save for future Example.inc Payments" -->
   <string name="stripe_save_for_future_payments_with_merchant_name">Guardar para futuros %s pagos</string>
   <!-- Button title to open camera to scan credit/debit card -->

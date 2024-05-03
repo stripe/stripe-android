@@ -8,6 +8,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -25,8 +26,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.common.ui.BottomSheetContentTestTag
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.WeakMapInjectorRegistry
-import com.stripe.android.link.LinkConfigurationCoordinator
-import com.stripe.android.link.model.AccountStatus
+import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.model.PaymentIntentFixtures
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
@@ -35,29 +35,25 @@ import com.stripe.android.paymentsheet.PaymentSheetFixtures.updateState
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.ui.getLabel
-import com.stripe.android.ui.core.forms.resources.LpmRepository
 import com.stripe.android.utils.FakeCustomerRepository
+import com.stripe.android.utils.FakeLinkConfigurationCoordinator
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils.idleLooper
 import com.stripe.android.utils.TestUtils.viewModelFactoryFor
-import com.stripe.android.utils.formViewModelSubcomponentBuilder
 import com.stripe.android.utils.injectableActivityScenario
 import com.stripe.android.view.ActivityStarter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
-import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
-import org.mockito.kotlin.stub
 import org.mockito.kotlin.verify
 import org.robolectric.annotation.Config
 import kotlin.test.AfterTest
@@ -176,8 +172,15 @@ internal class PaymentOptionsActivityTest {
 
     @Test
     fun `ContinueButton should be hidden when returning to payment options`() {
+        val paymentMethodMetadata = PaymentMethodMetadataFactory.create(
+            stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD.copy(
+                paymentMethodTypes = listOf("card"),
+            )
+        )
+
         val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
-            paymentMethods = PaymentMethodFixtures.createCards(5)
+            paymentMethods = PaymentMethodFixtures.createCards(5),
+            stripeIntent = paymentMethodMetadata.stripeIntent,
         )
 
         runActivityScenario(args) {
@@ -331,7 +334,7 @@ internal class PaymentOptionsActivityTest {
         runActivityScenario(args) {
             it.onActivity {
                 composeTestRule
-                    .onNodeWithTag(TEST_TAG_LIST + "Cash App Pay")
+                    .onNodeWithTag(TEST_TAG_LIST + PaymentMethod.Type.CashAppPay.code)
                     .performClick()
 
                 composeTestRule.waitForIdle()
@@ -341,15 +344,63 @@ internal class PaymentOptionsActivityTest {
         // We don't want the initial selection to be reported, as it's not a user selection
         verify(eventReporter, never()).onSelectPaymentMethod(
             code = eq(PaymentMethod.Type.Card.code),
-            currency = anyOrNull(),
-            isDecoupling = any(),
         )
 
         verify(eventReporter).onSelectPaymentMethod(
             code = eq(PaymentMethod.Type.CashAppPay.code),
-            currency = anyOrNull(),
-            isDecoupling = any(),
         )
+    }
+
+    @Test
+    fun `mandate text is shown below primary button when showAbove is false`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        runActivityScenario(args) { scenario ->
+            scenario.onActivity { activity ->
+                val viewModel = activity.viewModel
+                val text = "some text"
+                val mandateNode = composeTestRule.onNode(hasText(text))
+                val primaryButtonNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+                viewModel.updateMandateText(text, false)
+                mandateNode.assertIsDisplayed()
+
+                val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isGreaterThan(primaryButtonPosition)
+
+                viewModel.updateMandateText(null, false)
+                mandateNode.assertDoesNotExist()
+            }
+        }
+    }
+
+    @Test
+    fun `mandate text is shown above primary button when showAbove is true`() {
+        val args = PAYMENT_OPTIONS_CONTRACT_ARGS.updateState(
+            paymentMethods = listOf(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
+        )
+        runActivityScenario(args) { scenario ->
+            scenario.onActivity { activity ->
+                val viewModel = activity.viewModel
+                val text = "some text"
+                val mandateNode = composeTestRule.onNode(hasText(text))
+                val primaryButtonNode = composeTestRule
+                    .onNodeWithTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
+
+                viewModel.updateMandateText(text, true)
+                mandateNode.assertIsDisplayed()
+
+                val mandatePosition = mandateNode.fetchSemanticsNode().positionInRoot.y
+                val primaryButtonPosition = primaryButtonNode.fetchSemanticsNode().positionInRoot.y
+                assertThat(mandatePosition).isLessThan(primaryButtonPosition)
+
+                viewModel.updateMandateText(null, true)
+                mandateNode.assertDoesNotExist()
+            }
+        }
     }
 
     private fun runActivityScenario(
@@ -363,22 +414,8 @@ internal class PaymentOptionsActivityTest {
             bundleOf(ActivityStarter.Args.EXTRA to args)
         )
 
-        val lpmRepository = LpmRepository(
-            arguments = LpmRepository.LpmRepositoryArguments(
-                resources = ApplicationProvider.getApplicationContext<Context>().resources,
-            ),
-            lpmInitialFormData = LpmRepository.LpmInitialFormData(),
-        ).apply {
-            update(
-                stripeIntent = args.state.stripeIntent,
-                serverLpmSpecs = null,
-            )
-        }
-
         val viewModel = TestViewModelFactory.create(
-            linkConfigurationCoordinator = mock<LinkConfigurationCoordinator>().stub {
-                onBlocking { getAccountStatusFlow(any()) }.thenReturn(flowOf(AccountStatus.SignedOut))
-            },
+            linkConfigurationCoordinator = FakeLinkConfigurationCoordinator(),
         ) { linkHandler, linkInteractor, savedStateHandle ->
             PaymentOptionsViewModel(
                 args = args,
@@ -388,14 +425,10 @@ internal class PaymentOptionsActivityTest {
                 workContext = testDispatcher,
                 application = ApplicationProvider.getApplicationContext(),
                 logger = Logger.noop(),
-                lpmRepository = lpmRepository,
                 savedStateHandle = savedStateHandle,
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
-                formViewModelSubComponentBuilderProvider = formViewModelSubcomponentBuilder(
-                    context = ApplicationProvider.getApplicationContext(),
-                    lpmRepository = lpmRepository,
-                ),
+                editInteractorFactory = mock()
             )
         }
 

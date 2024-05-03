@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Żid metodu tal-pagament</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Erfa\' l-informazzjoni tiegħek għal ħlas sigur b\'mossa waħda</string>
+  <string name="stripe_inline_sign_up_header">Erfa\' l-informazzjoni tiegħek biex tkun tista\' tħallas f\'pass wieħed grazzi għal Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Oħroġ minn Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Ħallas lil %s u lil eluf ta\' negozjanti oħra iktar malajr.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Meta tingħaqad ma\' Link tkun qed taqbel mat-<terms>Termini</terms> u l-<privacy>Politika tal-Privatezza</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Meta tagħti l-indirizz tal-email tiegħek, tkun qed taqbel li toħloq kont Link u li terfa\' l-informazzjoni tal-pagament tiegħek ma\' Link, skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Meta tagħti n-numru tal-mowbajl tiegħek, tkun qed taqbel li toħloq kont Link u li terfa\' l-informazzjoni tal-pagament tiegħek ma\' Link, skont ir-<terms>Regoli</terms> u l-<privacy>Politika tal-Privatezza</privacy> ta\' Link.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Ibdel l-indirizz tal-email</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
@@ -50,8 +54,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Għal raġunijiet ta\' sigurtà, jekk jogħġbok erġa\' daħħal il-kodiċi tas-sigurtà tal-karta tiegħek.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">Żgur li tixtieq tneħħi dal-kont marbut?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Neħħi l-karta</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">Żgur li tixtieq tneħħi dil-karta?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

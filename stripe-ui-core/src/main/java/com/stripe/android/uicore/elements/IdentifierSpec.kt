@@ -5,6 +5,22 @@ import androidx.annotation.RestrictTo
 import kotlinx.parcelize.Parcelize
 import kotlinx.serialization.Serializable
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+sealed interface ParameterDestination : Parcelable {
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Api : ParameterDestination {
+        Params,
+        Options
+    }
+
+    @Parcelize
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class Local : ParameterDestination {
+        Extras
+    }
+}
+
 /**
  * This uniquely identifies a element in the form.  The vals here are for identifier
  * specs that need to be found when pre-populating fields, or when extracting data.
@@ -16,7 +32,8 @@ import kotlinx.serialization.Serializable
 @Parcelize
 data class IdentifierSpec(
     val v1: String,
-    val ignoreField: Boolean = false
+    val ignoreField: Boolean = false,
+    val destination: ParameterDestination = ParameterDestination.Api.Params,
 ) : Parcelable {
     constructor() : this("")
 
@@ -28,6 +45,8 @@ data class IdentifierSpec(
 
         val CardBrand = IdentifierSpec("card[brand]")
 
+        val PreferredCardBrand = IdentifierSpec("card[networks][preferred]")
+
         val CardNumber = IdentifierSpec("card[number]")
 
         val CardCvc = IdentifierSpec("card[cvc]")
@@ -35,6 +54,8 @@ data class IdentifierSpec(
         val CardExpMonth = IdentifierSpec("card[exp_month]")
 
         val CardExpYear = IdentifierSpec("card[exp_year]")
+
+        val BillingAddress = IdentifierSpec("billing_details[address]")
 
         val Email = IdentifierSpec("billing_details[email]")
 
@@ -64,6 +85,24 @@ data class IdentifierSpec(
 
         val Upi = IdentifierSpec("upi")
         val Vpa = IdentifierSpec("upi[vpa]")
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val Blik = IdentifierSpec("blik", destination = ParameterDestination.Api.Options)
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val BlikCode = IdentifierSpec("blik[code]", destination = ParameterDestination.Api.Options)
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val KonbiniConfirmationNumber = IdentifierSpec(
+            v1 = "konbini[confirmation_number]",
+            destination = ParameterDestination.Api.Options
+        )
+
+        @get:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        val BacsDebitConfirmed = IdentifierSpec(
+            "bacs_debit[confirmed]",
+            destination = ParameterDestination.Local.Extras
+        )
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
         fun get(value: String) = when (value) {

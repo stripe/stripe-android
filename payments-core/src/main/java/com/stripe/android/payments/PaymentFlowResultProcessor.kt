@@ -12,6 +12,7 @@ import com.stripe.android.core.exception.MaxRetryReachedException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.networking.ApiRequest
+import com.stripe.android.core.networking.LinearRetryDelaySupplier
 import com.stripe.android.core.networking.RetryDelaySupplier
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
@@ -36,7 +37,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
     protected val stripeRepository: StripeRepository,
     private val logger: Logger,
     private val workContext: CoroutineContext,
-    private val retryDelaySupplier: RetryDelaySupplier = RetryDelaySupplier()
+    private val retryDelaySupplier: RetryDelaySupplier = LinearRetryDelaySupplier()
 ) {
     private val failureMessageFactory = PaymentFlowFailureMessageFactory(context)
 
@@ -150,13 +151,12 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             stripeIntent.paymentMethod?.type == PaymentMethod.Type.Card &&
             stripeIntent.nextActionType == StripeIntent.NextActionType.UseStripeSdk
 
-        // For Cash App Pay, the intent status can still be `requires_action` by the time the user
+        // For some payment method types, the intent status can still be `requires_action` by the time the user
         // gets back to the merchant app. We poll until it's succeeded.
-        val shouldRefreshForCashApp = stripeIntent.requiresAction() &&
-            stripeIntent.paymentMethod?.type == PaymentMethod.Type.CashAppPay
+        val shouldRefresh = stripeIntent.requiresAction() &&
+            stripeIntent.paymentMethod?.type?.shouldRefreshIfIntentRequiresAction == true
 
-        return succeededMaybeRefresh || cancelledMaybeRefresh ||
-            actionNotProcessedMaybeRefresh || shouldRefreshForCashApp
+        return succeededMaybeRefresh || cancelledMaybeRefresh || actionNotProcessedMaybeRefresh || shouldRefresh
     }
 
     private fun determineFlowOutcome(intent: StripeIntent, originalFlowOutcome: Int): Int {
@@ -224,11 +224,11 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
         }
 
         while (shouldRetry(stripeIntentResult) && remainingRetries > 1) {
-            val delayMs = retryDelaySupplier.getDelayMillis(
+            val delayDuration = retryDelaySupplier.getDelay(
                 MAX_RETRIES,
                 remainingRetries
             )
-            delay(delayMs)
+            delay(delayDuration)
             stripeIntentResult = if (shouldCallRefreshIntent(originalIntent)) {
                 refreshStripeIntent(
                     clientSecret = clientSecret,
@@ -245,10 +245,10 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
             remainingRetries--
         }
 
-        if (shouldThrowException(stripeIntentResult)) {
-            return Result.failure(MaxRetryReachedException())
+        return if (shouldThrowException(stripeIntentResult)) {
+            Result.failure(MaxRetryReachedException())
         } else {
-            return stripeIntentResult
+            stripeIntentResult
         }
     }
 
@@ -285,7 +285,7 @@ internal sealed class PaymentFlowResultProcessor<T : StripeIntent, out S : Strip
 
     internal companion object {
         val EXPAND_PAYMENT_METHOD = listOf("payment_method")
-        const val MAX_RETRIES = 3
+        const val MAX_RETRIES = 5
     }
 }
 

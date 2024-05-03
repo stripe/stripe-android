@@ -20,7 +20,7 @@ data class ServerSideConfirmationCustomFlowViewState(
     val paymentSheetConfig: PaymentSheet.Configuration
         get() = PaymentSheet.Configuration(
             merchantDisplayName = "Example, Inc.",
-            customer = null,
+            customer = cartState.makeCustomerConfig(),
             googlePay = PaymentSheet.GooglePayConfiguration(
                 environment = PaymentSheet.GooglePayConfiguration.Environment.Test,
                 countryCode = "US",

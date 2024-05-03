@@ -81,6 +81,9 @@ internal class LinkAnalyticsHelperTest {
 
 private open class FakeLinkEventsReporter : LinkEventsReporter {
     var calledCount = 0
+    override fun onInvalidSessionState(state: LinkEventsReporter.SessionState) {
+        throw NotImplementedError()
+    }
 
     override fun onInlineSignupCheckboxChecked() {
         throw NotImplementedError()
@@ -94,11 +97,11 @@ private open class FakeLinkEventsReporter : LinkEventsReporter {
         throw NotImplementedError()
     }
 
-    override fun onSignupFailure(isInline: Boolean) {
+    override fun onSignupFailure(isInline: Boolean, error: Throwable) {
         throw NotImplementedError()
     }
 
-    override fun onAccountLookupFailure() {
+    override fun onAccountLookupFailure(error: Throwable) {
         throw NotImplementedError()
     }
 

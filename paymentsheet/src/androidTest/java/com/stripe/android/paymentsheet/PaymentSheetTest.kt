@@ -1,37 +1,54 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createAndroidComposeRule
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.compose.ui.test.junit4.createEmptyComposeRule
+import com.google.testing.junit.testparameterinjector.TestParameter
+import com.google.testing.junit.testparameterinjector.TestParameterInjector
+import com.stripe.android.core.utils.urlEncode
 import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
+import com.stripe.android.networktesting.RequestMatchers.host
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
+import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.expectNoResult
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import com.stripe.android.testing.RetryRule
 import okhttp3.mockwebserver.SocketPolicy
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 
-@RunWith(AndroidJUnit4::class)
+@RunWith(TestParameterInjector::class)
 internal class PaymentSheetTest {
+    private val composeTestRule = createEmptyComposeRule()
+    private val retryRule = RetryRule(5)
+    private val networkRule = NetworkRule()
+
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
+    val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(composeTestRule)
+        .around(retryRule)
+        .around(networkRule)
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
-    @get:Rule
-    val networkRule = NetworkRule()
+    @TestParameter(valuesProvider = IntegrationTypeProvider::class)
+    lateinit var integrationType: IntegrationType
 
     @Test
     fun testSuccessfulCardPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
+            host("api.stripe.com"),
             method("GET"),
             path("/v1/elements/sessions"),
         ) { response ->
@@ -59,6 +76,8 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSocketErrorCardPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
         networkRule.enqueue(
@@ -85,13 +104,15 @@ internal class PaymentSheetTest {
         }
 
         page.clickPrimaryButton()
-        page.waitForText("Something went wrong")
+        page.waitForText("An error occurred. Check your connection and try again.")
         page.assertNoText("IOException", substring = true)
         testContext.markTestSucceeded()
     }
 
     @Test
     fun testInsufficientFundsCardPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         resultCallback = ::expectNoResult,
     ) { testContext ->
         networkRule.enqueue(
@@ -126,6 +147,8 @@ internal class PaymentSheetTest {
 
     @Test
     fun testSuccessfulDelayedSuccessPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         resultCallback = ::assertCompleted,
     ) { testContext ->
         networkRule.enqueue(
@@ -163,6 +186,8 @@ internal class PaymentSheetTest {
 
     @Test
     fun testFailureWhenSetupRequestsFail() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         resultCallback = ::assertFailed,
     ) { testContext ->
         networkRule.enqueue(
@@ -189,6 +214,8 @@ internal class PaymentSheetTest {
 
     @Test
     fun testDeferredIntentCardPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         createIntentCallback = { _, _ -> CreateIntentResult.Success("pi_example_secret_example") },
         resultCallback = ::assertCompleted,
     ) { testContext ->
@@ -218,7 +245,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -236,8 +263,8 @@ internal class PaymentSheetTest {
             path("/v1/payment_intents/pi_example/confirm"),
             not(
                 bodyPart(
-                    "payment_method_data%5Bpayment_user_agent%5D",
-                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                    urlEncode("payment_method_data[payment_user_agent]"),
+                    Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
                 )
             ),
         ) { response ->
@@ -249,6 +276,8 @@ internal class PaymentSheetTest {
 
     @Test
     fun testDeferredIntentFailedCardPayment() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Failure(
                 cause = Exception("We don't accept visa"),
@@ -283,7 +312,7 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
@@ -298,6 +327,8 @@ internal class PaymentSheetTest {
     @OptIn(DelicatePaymentSheetApi::class)
     @Test
     fun testDeferredIntentCardPaymentWithForcedSuccess() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
         createIntentCallback = { _, _ ->
             CreateIntentResult.Success(PaymentSheet.IntentConfiguration.COMPLETE_WITHOUT_CONFIRMING_INTENT)
         },
@@ -329,12 +360,71 @@ internal class PaymentSheetTest {
             path("/v1/payment_methods"),
             bodyPart(
                 "payment_user_agent",
-                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent")
+                Regex("stripe-android%2F\\d*.\\d*.\\d*%3BPaymentSheet%3Bdeferred-intent%3Bautopm")
             ),
         ) { response ->
             response.testBodyFromFile("payment-methods-create.json")
         }
 
         page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testPaymentIntentWithCardBrandChoiceSuccess() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertCompleted,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-requires_payment_method_with_cbc.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
+
+        page.fillOutCardDetailsWithCardBrandChoice()
+
+        networkRule.enqueue(
+            method("POST"),
+            path("/v1/payment_intents/pi_example/confirm"),
+            bodyPart(
+                urlEncode("payment_method_data[card][networks][preferred]"),
+                "cartes_bancaires"
+            ),
+        ) { response ->
+            response.testBodyFromFile("payment-intent-confirm.json")
+        }
+
+        page.clickPrimaryButton()
+    }
+
+    @Test
+    fun testPaymentIntentReturnsFailureWhenAlreadySucceeded() = runPaymentSheetTest(
+        networkRule = networkRule,
+        integrationType = integrationType,
+        resultCallback = ::assertFailed,
+    ) { testContext ->
+        networkRule.enqueue(
+            host("api.stripe.com"),
+            method("GET"),
+            path("/v1/elements/sessions"),
+        ) { response ->
+            response.testBodyFromFile("elements-sessions-payment_intent_success.json")
+        }
+
+        testContext.presentPaymentSheet {
+            presentWithPaymentIntent(
+                paymentIntentClientSecret = "pi_example_secret_example",
+                configuration = null,
+            )
+        }
     }
 }

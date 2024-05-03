@@ -94,16 +94,6 @@ internal class PaymentMethodEndToEndTest {
     }
 
     @Test
-    fun createPaymentMethod_withNetBanking_shouldCreateObject() {
-        val params = PaymentMethodCreateParamsFixtures.NETBANKING
-        val paymentMethod =
-            Stripe(context, ApiKeyFixtures.NETBANKING_PUBLISHABLE_KEY)
-                .createPaymentMethodSynchronous(params)
-        assertThat(paymentMethod.type)
-            .isEqualTo(PaymentMethod.Type.Netbanking)
-    }
-
-    @Test
     fun createPaymentMethod_withUSBankAccount_shouldCreateObject() {
         val params = PaymentMethodCreateParamsFixtures.US_BANK_ACCOUNT
         val paymentMethod =
@@ -119,10 +109,10 @@ internal class PaymentMethodEndToEndTest {
                 bankName = "STRIPE TEST BANK",
                 fingerprint = "FFDMA0xfhBjWSZLu",
                 last4 = "6789",
-                linkedAccount = null,
+                financialConnectionsAccount = null,
                 networks = PaymentMethod.USBankAccount.USBankNetworks(
                     preferred = "ach",
-                    supported = listOf("ach", "us_domestic_wire")
+                    supported = listOf("ach")
                 ),
                 routingNumber = "110000000"
             )
@@ -446,5 +436,50 @@ internal class PaymentMethodEndToEndTest {
 
         val paymentMethod = stripe.createPaymentMethodSynchronous(params)
         assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.CashAppPay)
+    }
+
+    @Test
+    fun createPaymentMethod_withRevolutPay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.REVOLUT_PAY
+        val stripe = Stripe(context, ApiKeyFixtures.REVOLUT_PAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.RevolutPay)
+    }
+
+    @Test
+    fun createPaymentMethod_withSwish_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.SWISH
+        val stripe = Stripe(context, ApiKeyFixtures.SWISH_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Swish)
+    }
+
+    @Test
+    fun createPaymentMethod_withMobilePay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.MOBILE_PAY
+        val stripe = Stripe(context, ApiKeyFixtures.MOBILE_PAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.MobilePay)
+    }
+
+    @Test
+    fun createPaymentMethod_withAmazonPay_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.AMAZON_PAY
+        val stripe = Stripe(context, ApiKeyFixtures.AMAZON_PAY_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.AmazonPay)
+    }
+
+    @Test
+    fun createPaymentMethod_withAlma_shouldCreateObject() {
+        val params = PaymentMethodCreateParamsFixtures.ALMA
+        val stripe = Stripe(context, ApiKeyFixtures.ALMA_PUBLISHABLE_KEY)
+
+        val paymentMethod = stripe.createPaymentMethodSynchronous(params)
+        assertThat(paymentMethod.type).isEqualTo(PaymentMethod.Type.Alma)
     }
 }

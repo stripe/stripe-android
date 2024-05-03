@@ -6,17 +6,23 @@ import androidx.annotation.DrawableRes
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
+import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.ACHText
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormScreenState
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountTextBuilder
 import kotlinx.parcelize.IgnoredOnParcel
 import kotlinx.parcelize.Parcelize
+import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal sealed class PaymentSelection : Parcelable {
+
+    var hasAcknowledgedSepaMandate: Boolean = false
 
     abstract val requiresConfirmation: Boolean
 
@@ -24,10 +30,11 @@ internal sealed class PaymentSelection : Parcelable {
         context: Context,
         merchantName: String,
         isSaveForFutureUseSelected: Boolean,
+        isSetupFlow: Boolean,
     ): String?
 
     @Parcelize
-    object GooglePay : PaymentSelection() {
+    data object GooglePay : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
@@ -36,13 +43,14 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
     }
 
     @Parcelize
-    object Link : PaymentSelection() {
+    data object Link : PaymentSelection() {
 
         override val requiresConfirmation: Boolean
             get() = false
@@ -51,6 +59,31 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
+        ): String? {
+            return null
+        }
+    }
+
+    @Parcelize
+    data class ExternalPaymentMethod(
+        val type: String,
+        val billingDetails: PaymentMethod.BillingDetails?,
+        val label: String,
+        // In practice, we don't have an iconResource for external payment methods.
+        @DrawableRes val iconResource: Int,
+        // In practice, we always have a lightThemeIconUrl for external payment methods.
+        val lightThemeIconUrl: String?,
+        val darkThemeIconUrl: String?,
+    ) : PaymentSelection() {
+        override val requiresConfirmation: Boolean
+            get() = false
+
+        override fun mandateText(
+            context: Context,
+            merchantName: String,
+            isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean
         ): String? {
             return null
         }
@@ -60,37 +93,59 @@ internal sealed class PaymentSelection : Parcelable {
     data class Saved(
         val paymentMethod: PaymentMethod,
         val walletType: WalletType? = null,
+        val requiresSaveOnConfirmation: Boolean = false,
     ) : PaymentSelection() {
 
         enum class WalletType(val paymentSelection: PaymentSelection) {
             GooglePay(PaymentSelection.GooglePay), Link(PaymentSelection.Link)
         }
 
+        val showMandateAbovePrimaryButton: Boolean
+            get() {
+                return paymentMethod.type == PaymentMethod.Type.SepaDebit
+            }
+
         override val requiresConfirmation: Boolean
-            get() = paymentMethod.type == USBankAccount
+            get() = paymentMethod.type == USBankAccount ||
+                paymentMethod.type == PaymentMethod.Type.SepaDebit
 
         override fun mandateText(
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
-            return if (paymentMethod.type == USBankAccount) {
-                ACHText.getContinueMandateText(context, merchantName, isSaveForFutureUseSelected)
-            } else {
-                null
+            return when (paymentMethod.type) {
+                USBankAccount -> {
+                    USBankAccountTextBuilder.getContinueMandateText(
+                        context = context,
+                        merchantName = merchantName,
+                        isSaveForFutureUseSelected = isSaveForFutureUseSelected,
+                        isInstantDebits = false,
+                        isSetupFlow = isSetupFlow,
+                    )
+                }
+                PaymentMethod.Type.SepaDebit -> {
+                    context.getString(StripeUiCoreR.string.stripe_sepa_mandate, merchantName)
+                }
+                else -> {
+                    null
+                }
             }
         }
     }
 
-    enum class CustomerRequestedSave {
-        RequestReuse,
-        RequestNoReuse,
-        NoRequest
+    enum class CustomerRequestedSave(val setupFutureUsage: ConfirmPaymentIntentParams.SetupFutureUsage?) {
+        RequestReuse(ConfirmPaymentIntentParams.SetupFutureUsage.OffSession),
+        RequestNoReuse(ConfirmPaymentIntentParams.SetupFutureUsage.Blank),
+        NoRequest(null)
     }
 
     sealed class New : PaymentSelection() {
 
         abstract val paymentMethodCreateParams: PaymentMethodCreateParams
+        abstract val paymentMethodOptionsParams: PaymentMethodOptionsParams?
+        abstract val paymentMethodExtraParams: PaymentMethodExtraParams?
         abstract val customerRequestedSave: CustomerRequestedSave
 
         override val requiresConfirmation: Boolean
@@ -100,6 +155,7 @@ internal sealed class PaymentSelection : Parcelable {
             context: Context,
             merchantName: String,
             isSaveForFutureUseSelected: Boolean,
+            isSetupFlow: Boolean,
         ): String? {
             return null
         }
@@ -108,14 +164,12 @@ internal sealed class PaymentSelection : Parcelable {
         data class Card(
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
             val brand: CardBrand,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New() {
             @IgnoredOnParcel
-            val last4: String = (
-                (paymentMethodCreateParams.toParamMap()["card"] as? Map<*, *>)!!
-                ["number"] as String
-                )
-                .takeLast(4)
+            val last4: String = paymentMethodCreateParams.cardLast4().orEmpty()
         }
 
         @Parcelize
@@ -124,9 +178,26 @@ internal sealed class PaymentSelection : Parcelable {
             @DrawableRes val iconResource: Int,
             val input: Input,
             val screenState: USBankAccountFormScreenState,
+            val instantDebits: InstantDebitsInfo?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New() {
+
+            override fun mandateText(
+                context: Context,
+                merchantName: String,
+                isSaveForFutureUseSelected: Boolean,
+                isSetupFlow: Boolean,
+            ): String? {
+                return screenState.mandateText
+            }
+
+            @Parcelize
+            data class InstantDebitsInfo(
+                val paymentMethodId: String,
+            ) : Parcelable
 
             @Parcelize
             data class Input(
@@ -139,15 +210,23 @@ internal sealed class PaymentSelection : Parcelable {
         }
 
         @Parcelize
-        data class LinkInline(val linkPaymentDetails: LinkPaymentDetails.New) : New() {
-            @IgnoredOnParcel
-            override val customerRequestedSave = CustomerRequestedSave.NoRequest
-
+        data class LinkInline(
+            val linkPaymentDetails: LinkPaymentDetails,
+            override val customerRequestedSave: CustomerRequestedSave,
+        ) : New() {
             @IgnoredOnParcel
             private val paymentDetails = linkPaymentDetails.paymentDetails
 
             @IgnoredOnParcel
             override val paymentMethodCreateParams = linkPaymentDetails.paymentMethodCreateParams
+
+            @IgnoredOnParcel
+            override val paymentMethodOptionsParams = PaymentMethodOptionsParams.Card(
+                setupFutureUsage = customerRequestedSave.setupFutureUsage
+            )
+
+            @IgnoredOnParcel
+            override val paymentMethodExtraParams = null
 
             @IgnoredOnParcel
             @DrawableRes
@@ -157,7 +236,11 @@ internal sealed class PaymentSelection : Parcelable {
             val label = when (paymentDetails) {
                 is ConsumerPaymentDetails.Card ->
                     "····${paymentDetails.last4}"
+
                 is ConsumerPaymentDetails.BankAccount ->
+                    "····${paymentDetails.last4}"
+
+                is ConsumerPaymentDetails.Passthrough ->
                     "····${paymentDetails.last4}"
             }
         }
@@ -169,7 +252,19 @@ internal sealed class PaymentSelection : Parcelable {
             val lightThemeIconUrl: String?,
             val darkThemeIconUrl: String?,
             override val paymentMethodCreateParams: PaymentMethodCreateParams,
-            override val customerRequestedSave: CustomerRequestedSave
+            override val customerRequestedSave: CustomerRequestedSave,
+            override val paymentMethodOptionsParams: PaymentMethodOptionsParams? = null,
+            override val paymentMethodExtraParams: PaymentMethodExtraParams? = null,
         ) : New()
     }
 }
+
+internal val PaymentSelection.isLink: Boolean
+    get() = when (this) {
+        is PaymentSelection.GooglePay -> false
+        is PaymentSelection.Link -> true
+        is PaymentSelection.New.LinkInline -> true
+        is PaymentSelection.New -> false
+        is PaymentSelection.Saved -> walletType == PaymentSelection.Saved.WalletType.Link
+        is PaymentSelection.ExternalPaymentMethod -> false
+    }

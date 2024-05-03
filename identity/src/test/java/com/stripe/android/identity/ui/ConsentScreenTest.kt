@@ -1,10 +1,12 @@
 package com.stripe.android.identity.ui
 
 import android.os.Build
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onChildAt
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -16,9 +18,13 @@ import com.stripe.android.identity.navigation.ConsentDestination
 import com.stripe.android.identity.networking.Resource
 import com.stripe.android.identity.networking.models.Requirement
 import com.stripe.android.identity.networking.models.VerificationPage
+import com.stripe.android.identity.networking.models.VerificationPageIconType
 import com.stripe.android.identity.networking.models.VerificationPageRequirements
+import com.stripe.android.identity.networking.models.VerificationPageStaticConsentLineContent
 import com.stripe.android.identity.networking.models.VerificationPageStaticContentConsentPage
 import com.stripe.android.identity.viewmodel.IdentityViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
@@ -46,42 +52,35 @@ class ConsentScreenTest {
     private val mockVerificationArgs = mock<IdentityVerificationSheetContract.Args> {
         on { brandLogo } doReturn mock()
     }
+
+    private val visitedIndividualWelcome = MutableStateFlow(false)
+
     private val mockIdentityViewModel = mock<IdentityViewModel> {
         on { verificationPage } doReturn verificationPageLiveData
         on { verificationArgs } doReturn mockVerificationArgs
+        on { visitedIndividualWelcomeScreen } doReturn visitedIndividualWelcome
     }
 
     private val mockNavController = mock<NavController>()
 
-    private val verificationPageWithTitleTimeAndPolicy = mock<VerificationPage>().also {
+    private val verificationPage = mock<VerificationPage>().also {
         whenever(it.biometricConsent).thenReturn(
             VerificationPageStaticContentConsentPage(
                 acceptButtonText = CONSENT_ACCEPT_TEXT,
                 title = CONSENT_TITLE,
                 privacyPolicy = CONSENT_PRIVACY_POLICY,
-                timeEstimate = CONSENT_TIME_ESTIMATE,
-                body = CONSENT_BODY,
                 declineButtonText = CONSENT_DECLINE_TEXT,
-                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT
-            )
-        )
-        whenever(it.requirements).thenReturn(
-            VerificationPageRequirements(
-                missing = listOf(Requirement.BIOMETRICCONSENT)
-            )
-        )
-    }
-
-    private val verificationPageWithOutTitleTimeAndPolicy = mock<VerificationPage>().also {
-        whenever(it.biometricConsent).thenReturn(
-            VerificationPageStaticContentConsentPage(
-                acceptButtonText = CONSENT_ACCEPT_TEXT,
-                title = null,
-                privacyPolicy = null,
-                timeEstimate = null,
-                body = CONSENT_BODY,
-                declineButtonText = CONSENT_DECLINE_TEXT,
-                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT
+                scrollToContinueButtonText = SCROLL_TO_CONTINUE_TEXT,
+                lines = listOf(
+                    VerificationPageStaticConsentLineContent(
+                        icon = VerificationPageIconType.CAMERA,
+                        content = CONTENT_CAMERA_LINE
+                    ),
+                    VerificationPageStaticConsentLineContent(
+                        icon = VerificationPageIconType.CLOUD,
+                        content = CONTENT_CLOUD_LINE
+                    )
+                )
             )
         )
         whenever(it.requirements).thenReturn(
@@ -92,16 +91,12 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when VerificationPage with title time and policy UI is bound correctly`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithTitleTimeAndPolicy)) {
+    fun `when not visitedIndividualWelcomePage UI is bound correctly`() {
+        setComposeTestRuleWith(Resource.success(verificationPage)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
-
             onNodeWithTag(TITLE_TAG).assertTextEquals(CONSENT_TITLE)
-            onNodeWithTag(TIME_ESTIMATE_TAG).assertTextEquals(CONSENT_TIME_ESTIMATE)
             onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
-            onNodeWithTag(DIVIDER_TAG).assertExists()
-            onNodeWithTag(BODY_TAG).assertTextEquals(CONSENT_BODY)
-
+            onAllNodesWithTag(CONSENT_LINE_TAG).assertCountEquals(2)
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0).assertIsNotEnabled()
@@ -113,17 +108,13 @@ class ConsentScreenTest {
     }
 
     @Test
-    fun `when VerificationPage without title time and policy UI is bound correctly`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithOutTitleTimeAndPolicy)) {
+    fun `when visitedIndividualWelcomePage UI is bound correctly`() {
+        visitedIndividualWelcome.update { true }
+        setComposeTestRuleWith(Resource.success(verificationPage)) {
             onNodeWithTag(LOADING_SCREEN_TAG).assertDoesNotExist()
-
             onNodeWithTag(CONSENT_HEADER_TAG).assertDoesNotExist()
-            onNodeWithTag(TIME_ESTIMATE_TAG).assertDoesNotExist()
-            onNodeWithTag(PRIVACY_POLICY_TAG).assertDoesNotExist()
-            onNodeWithTag(DIVIDER_TAG).assertDoesNotExist()
-
-            onNodeWithTag(BODY_TAG).assertTextEquals(CONSENT_BODY)
-
+            onNodeWithTag(PRIVACY_POLICY_TAG).assertTextEquals(CONSENT_PRIVACY_POLICY)
+            onAllNodesWithTag(CONSENT_LINE_TAG).assertCountEquals(2)
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(0)
                 .assertTextEquals(SCROLL_TO_CONTINUE_TEXT.uppercase())
             onNodeWithTag(ACCEPT_BUTTON_TAG).onChildAt(1).assertDoesNotExist()
@@ -136,7 +127,7 @@ class ConsentScreenTest {
 
     @Test
     fun `when agreed button is clicked correctly navigates`() {
-        setComposeTestRuleWith(Resource.success(verificationPageWithTitleTimeAndPolicy)) {
+        setComposeTestRuleWith(Resource.success(verificationPage)) {
             onNodeWithTag(DECLINE_BUTTON_TAG).onChildAt(0).performClick()
             runBlocking {
                 verify(mockIdentityViewModel).postVerificationPageDataAndMaybeNavigate(
@@ -145,7 +136,6 @@ class ConsentScreenTest {
                         biometricConsent == false
                     },
                     eq(ConsentDestination.ROUTE.route),
-                    any(),
                     any(),
                     any(),
                     any()
@@ -185,10 +175,10 @@ class ConsentScreenTest {
     private companion object {
         const val CONSENT_TITLE = "title"
         const val CONSENT_PRIVACY_POLICY = "privacy policy"
-        const val CONSENT_TIME_ESTIMATE = "time estimate"
-        const val CONSENT_BODY = "this is the consent body"
         const val CONSENT_ACCEPT_TEXT = "yes"
         const val CONSENT_DECLINE_TEXT = "no"
         const val SCROLL_TO_CONTINUE_TEXT = "scroll to continue"
+        const val CONTENT_CAMERA_LINE = "content for camera line"
+        const val CONTENT_CLOUD_LINE = "content for cloud line"
     }
 }

@@ -13,14 +13,28 @@ import com.stripe.android.core.injection.IS_LIVE_MODE
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.injection.UIContext
+import com.stripe.android.core.networking.AnalyticsRequestExecutor
+import com.stripe.android.core.networking.AnalyticsRequestFactory
+import com.stripe.android.core.networking.NetworkTypeDetector
+import com.stripe.android.core.utils.ContextUtils.packageInfo
+import com.stripe.android.customersheet.CustomerSheetLoader
 import com.stripe.android.customersheet.CustomerSheetViewState
+import com.stripe.android.customersheet.DefaultCustomerSheetLoader
+import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
+import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
+import com.stripe.android.payments.core.analytics.ErrorReporter
+import com.stripe.android.payments.core.analytics.RealErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
+import com.stripe.android.payments.financialconnections.DefaultIsFinancialConnectionsAvailable
+import com.stripe.android.payments.financialconnections.IsFinancialConnectionsAvailable
 import com.stripe.android.paymentsheet.DefaultIntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
-import com.stripe.android.paymentsheet.injection.FormViewModelSubcomponent
 import com.stripe.android.paymentsheet.injection.IS_FLOW_CONTROLLER
 import com.stripe.android.paymentsheet.model.PaymentSelection
-import com.stripe.android.ui.core.forms.resources.LpmRepository
+import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
+import com.stripe.android.paymentsheet.repositories.RealElementsSessionRepository
+import com.stripe.android.paymentsheet.ui.DefaultEditPaymentMethodViewInteractor
+import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -29,17 +43,28 @@ import javax.inject.Named
 import javax.inject.Provider
 import kotlin.coroutines.CoroutineContext
 
-@Module(
-    subcomponents = [
-        FormViewModelSubcomponent::class,
-    ]
-)
+@Module
 internal interface CustomerSheetViewModelModule {
 
     @Binds
     fun bindsIntentConfirmationInterceptor(
         impl: DefaultIntentConfirmationInterceptor,
     ): IntentConfirmationInterceptor
+
+    @Binds
+    fun bindsCustomerSheetEventReporter(
+        impl: DefaultCustomerSheetEventReporter
+    ): CustomerSheetEventReporter
+
+    @Binds
+    fun bindsCustomerSheetLoader(
+        impl: DefaultCustomerSheetLoader
+    ): CustomerSheetLoader
+
+    @Binds
+    fun bindsStripeIntentRepository(
+        impl: RealElementsSessionRepository,
+    ): ElementsSessionRepository
 
     @Suppress("TooManyFunctions")
     companion object {
@@ -54,6 +79,16 @@ internal interface CustomerSheetViewModelModule {
         @Provides
         fun paymentConfiguration(application: Application): PaymentConfiguration {
             return PaymentConfiguration.getInstance(application)
+        }
+
+        @Provides
+        fun provideCoroutineContext(): CoroutineContext {
+            return Dispatchers.IO
+        }
+
+        @Provides
+        fun providesIsFinancialConnectionsAvailable(): IsFinancialConnectionsAvailable {
+            return DefaultIsFinancialConnectionsAvailable
         }
 
         @Provides
@@ -75,6 +110,27 @@ internal interface CustomerSheetViewModelModule {
         ): () -> Boolean = { paymentConfiguration.get().publishableKey.startsWith("pk_live") }
 
         @Provides
+        internal fun provideAnalyticsRequestFactory(
+            application: Application,
+            paymentConfiguration: Provider<PaymentConfiguration>
+        ): AnalyticsRequestFactory = AnalyticsRequestFactory(
+            packageManager = application.packageManager,
+            packageName = application.packageName.orEmpty(),
+            packageInfo = application.packageInfo,
+            publishableKeyProvider = { paymentConfiguration.get().publishableKey },
+            networkTypeProvider = NetworkTypeDetector(application)::invoke,
+        )
+
+        @Provides
+        internal fun providesErrorReporter(
+            analyticsRequestFactory: AnalyticsRequestFactory,
+            analyticsRequestExecutor: AnalyticsRequestExecutor
+        ): ErrorReporter = RealErrorReporter(
+            analyticsRequestFactory = analyticsRequestFactory,
+            analyticsRequestExecutor = analyticsRequestExecutor,
+        )
+
+        @Provides
         fun resources(application: Application): Resources {
             return application.resources
         }
@@ -94,13 +150,6 @@ internal interface CustomerSheetViewModelModule {
         @UIContext
         fun uiContext(): CoroutineContext {
             return Dispatchers.Main
-        }
-
-        @Provides
-        fun provideLpmRepository(resources: Resources): LpmRepository {
-            return LpmRepository.getInstance(
-                LpmRepository.LpmRepositoryArguments(resources)
-            )
         }
 
         @Provides
@@ -134,6 +183,11 @@ internal interface CustomerSheetViewModelModule {
 
         @Provides
         fun savedPaymentSelection(): PaymentSelection? = savedPaymentSelection
+
+        @Provides
+        fun providesEditPaymentMethodViewInteractorFactory(): ModifiableEditPaymentMethodViewInteractor.Factory {
+            return DefaultEditPaymentMethodViewInteractor.Factory
+        }
 
         private val savedPaymentSelection: PaymentSelection? = null
     }

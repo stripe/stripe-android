@@ -24,7 +24,8 @@ internal class FinancialConnectionsSheetNativeStateTest {
                         reducedManualEntryProminenceInErrors = false,
                         merchantLogos = emptyList()
                     )
-                )
+                ),
+                savedState = null
             ).reducedBranding,
         ).isTrue()
     }
@@ -39,7 +40,8 @@ internal class FinancialConnectionsSheetNativeStateTest {
                         reducedManualEntryProminenceInErrors = false,
                         merchantLogos = emptyList()
                     )
-                )
+                ),
+                savedState = null
             ).reducedBranding,
         ).isFalse()
     }

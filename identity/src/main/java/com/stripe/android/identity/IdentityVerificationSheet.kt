@@ -31,10 +31,10 @@ interface IdentityVerificationSheet {
      */
     sealed class VerificationFlowResult : Parcelable {
         @Parcelize
-        object Completed : VerificationFlowResult()
+        data object Completed : VerificationFlowResult()
 
         @Parcelize
-        object Canceled : VerificationFlowResult()
+        data object Canceled : VerificationFlowResult()
 
         @Parcelize
         class Failed(val throwable: Throwable) : VerificationFlowResult()

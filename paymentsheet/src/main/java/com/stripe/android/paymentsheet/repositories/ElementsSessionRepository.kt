@@ -3,15 +3,15 @@ package com.stripe.android.paymentsheet.repositories
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.networking.ApiRequest
-import com.stripe.android.model.DeferredIntentParams
-import com.stripe.android.model.DeferredIntentParams.Mode
 import com.stripe.android.model.ElementsSession
 import com.stripe.android.model.ElementsSessionParams
-import com.stripe.android.model.PaymentIntent.CaptureMethod
+import com.stripe.android.model.PaymentIntent
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
-import com.stripe.android.model.StripeIntent.Usage
 import com.stripe.android.networking.StripeRepository
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.toDeferredIntentParams
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Provider
@@ -20,6 +20,8 @@ import kotlin.coroutines.CoroutineContext
 internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
+        externalPaymentMethods: List<String>?,
     ): Result<ElementsSession>
 }
 
@@ -42,8 +44,13 @@ internal class RealElementsSessionRepository @Inject constructor(
 
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
+        customer: PaymentSheet.CustomerConfiguration?,
+        externalPaymentMethods: List<String>?,
     ): Result<ElementsSession> {
-        val params = initializationMode.toElementsSessionParams()
+        val params = initializationMode.toElementsSessionParams(
+            customer = customer,
+            externalPaymentMethods = externalPaymentMethods
+        )
 
         val elementsSession = stripeRepository.retrieveElementsSession(
             params = params,
@@ -65,12 +72,10 @@ internal class RealElementsSessionRepository @Inject constructor(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
                     expandFields = listOf("payment_method")
-                ).map {
-                    ElementsSession(
-                        linkSettings = null,
-                        paymentMethodSpecs = null,
-                        stripeIntent = it,
-                        merchantCountry = null,
+                ).map { intent ->
+                    ElementsSession.createFromFallback(
+                        stripeIntent = intent.withoutWeChatPay(),
+                        sessionsError = elementsSessionFailure,
                     )
                 }
             }
@@ -79,12 +84,10 @@ internal class RealElementsSessionRepository @Inject constructor(
                     clientSecret = params.clientSecret,
                     options = requestOptions,
                     expandFields = listOf("payment_method")
-                ).map {
-                    ElementsSession(
-                        linkSettings = null,
-                        paymentMethodSpecs = null,
-                        stripeIntent = it,
-                        merchantCountry = null,
+                ).map { intent ->
+                    ElementsSession.createFromFallback(
+                        stripeIntent = intent.withoutWeChatPay(),
+                        sessionsError = elementsSessionFailure,
                     )
                 }
             }
@@ -96,57 +99,52 @@ internal class RealElementsSessionRepository @Inject constructor(
     }
 }
 
-internal fun PaymentSheet.InitializationMode.toElementsSessionParams(): ElementsSessionParams {
+private fun StripeIntent.withoutWeChatPay(): StripeIntent {
+    // We don't know if the merchant is eligible for H5 payments, so we filter out WeChat Pay.
+    val filteredPaymentMethodTypes = paymentMethodTypes.filter { it != PaymentMethod.Type.WeChatPay.code }
+    return when (this) {
+        is PaymentIntent -> copy(paymentMethodTypes = filteredPaymentMethodTypes)
+        is SetupIntent -> copy(paymentMethodTypes = filteredPaymentMethodTypes)
+    }
+}
+
+internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
+    customer: PaymentSheet.CustomerConfiguration?,
+    externalPaymentMethods: List<String>?,
+): ElementsSessionParams {
+    val customerSessionClientSecret = customer?.toElementSessionParam()
+
     return when (this) {
         is PaymentSheet.InitializationMode.PaymentIntent -> {
-            ElementsSessionParams.PaymentIntentType(clientSecret = clientSecret)
+            ElementsSessionParams.PaymentIntentType(
+                clientSecret = clientSecret,
+                customerSessionClientSecret = customerSessionClientSecret,
+                externalPaymentMethods = externalPaymentMethods,
+            )
         }
+
         is PaymentSheet.InitializationMode.SetupIntent -> {
-            ElementsSessionParams.SetupIntentType(clientSecret = clientSecret)
+            ElementsSessionParams.SetupIntentType(
+                clientSecret = clientSecret,
+                customerSessionClientSecret = customerSessionClientSecret,
+                externalPaymentMethods = externalPaymentMethods,
+            )
         }
+
         is PaymentSheet.InitializationMode.DeferredIntent -> {
             ElementsSessionParams.DeferredIntentType(
-                deferredIntentParams = DeferredIntentParams(
-                    mode = intentConfiguration.mode.toElementsSessionParam(),
-                    paymentMethodTypes = intentConfiguration.paymentMethodTypes,
-                    onBehalfOf = intentConfiguration.onBehalfOf,
-                ),
+                deferredIntentParams = intentConfiguration.toDeferredIntentParams(),
+                externalPaymentMethods = externalPaymentMethods,
+                customerSessionClientSecret = customerSessionClientSecret,
             )
         }
     }
 }
 
-private fun PaymentSheet.IntentConfiguration.Mode.toElementsSessionParam(): Mode {
-    return when (this) {
-        is PaymentSheet.IntentConfiguration.Mode.Payment -> {
-            Mode.Payment(
-                amount = amount,
-                currency = currency,
-                setupFutureUsage = setupFutureUse?.toElementsSessionParam(),
-                captureMethod = captureMethod.toElementsSessionParam(),
-            )
-        }
-        is PaymentSheet.IntentConfiguration.Mode.Setup -> {
-            Mode.Setup(
-                currency = currency,
-                setupFutureUsage = setupFutureUse.toElementsSessionParam(),
-            )
-        }
-    }
-}
-
-private fun PaymentSheet.IntentConfiguration.SetupFutureUse.toElementsSessionParam(): Usage {
-    return when (this) {
-        PaymentSheet.IntentConfiguration.SetupFutureUse.OnSession -> Usage.OnSession
-        PaymentSheet.IntentConfiguration.SetupFutureUse.OffSession -> Usage.OffSession
-    }
-}
-
-private fun PaymentSheet.IntentConfiguration.CaptureMethod.toElementsSessionParam(): CaptureMethod {
-    return when (this) {
-        PaymentSheet.IntentConfiguration.CaptureMethod.Automatic -> CaptureMethod.Automatic
-        PaymentSheet.IntentConfiguration.CaptureMethod.AutomaticAsync -> CaptureMethod.AutomaticAsync
-        PaymentSheet.IntentConfiguration.CaptureMethod.Manual -> CaptureMethod.Manual
+private fun PaymentSheet.CustomerConfiguration.toElementSessionParam(): String? {
+    return when (accessType) {
+        is PaymentSheet.CustomerAccessType.CustomerSession -> accessType.customerSessionClientSecret
+        is PaymentSheet.CustomerAccessType.LegacyCustomerEphemeralKey -> null
     }
 }
 

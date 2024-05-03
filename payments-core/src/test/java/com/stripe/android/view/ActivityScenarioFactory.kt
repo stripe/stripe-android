@@ -47,7 +47,8 @@ internal class ActivityScenarioFactory(
      * Return a view created with an `Activity` context.
      */
     fun <ViewType : View> createView(
-        viewFactory: (Activity) -> ViewType
+        beforeAttach: (ViewType) -> Unit = {},
+        viewFactory: (Activity) -> ViewType,
     ): ViewType {
         var view: ViewType? = null
 
@@ -60,6 +61,7 @@ internal class ActivityScenarioFactory(
                         root.removeAllViews()
 
                         view = viewFactory(activity).also {
+                            beforeAttach(it)
                             root.addView(it)
                         }
                     }
@@ -67,5 +69,28 @@ internal class ActivityScenarioFactory(
             }
 
         return requireNotNull(view)
+    }
+
+    fun <ViewType : View> createViewAndScenario(
+        beforeAttach: (ViewType) -> Unit = {},
+        viewFactory: (Activity) -> ViewType,
+    ): Pair<ViewType, ActivityScenario<AddPaymentMethodActivity>> {
+        var view: ViewType? = null
+        val activityScenario = createAddPaymentMethodActivity()
+
+        activityScenario.onActivity { activity ->
+            activity.setTheme(R.style.StripePaymentSheetDefaultTheme)
+
+            activity.findViewById<ViewGroup>(R.id.add_payment_method_card).let { root ->
+                root.removeAllViews()
+
+                view = viewFactory(activity).also {
+                    beforeAttach(it)
+                    root.addView(it)
+                }
+            }
+        }
+
+        return requireNotNull(view) to activityScenario
     }
 }

@@ -6,6 +6,12 @@
   <string name="stripe_bank_account_ending_in">%s(으)로 끝나는 은행 계좌 제거</string>
   <!-- Text for alert message when user needs to confirm payment in their banking app -->
   <string name="stripe_blik_confirm_payment">%s 이내에 은행 앱에서 결제를 확인하여 구매를 완료하십시오.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_body">귀하의 결제 정보가 저장되지 않습니다.</string>
+  <!-- Used as the title for prompting the user if they want to close the sheet -->
+  <string name="stripe_confirm_close_form_title">이 양식을 닫으시겠습니까?</string>
+  <!-- Text that is displayed when a network error occurs -->
+  <string name="stripe_network_error_message">오류가 발생했습니다. 연결을 확인하고 다시 시도하십시오.</string>
   <!-- Text providing link to terms for ACH payments -->
   <string name="stripe_paymentsheet_ach_continue_mandate"><![CDATA[계속하면 <terms>해당 약관</terms>에 따라 결제를 승인하는 데 동의하는 것입니다.]]></string>
   <!-- Mandate text with link to terms when saving a bank account payment method to a merchant (merchant name replaces %@). -->
@@ -20,6 +26,16 @@
   <string name="stripe_paymentsheet_address_element_primary_button">주소 저장</string>
   <!-- Title for shipping address entry section -->
   <string name="stripe_paymentsheet_address_element_shipping_address">배송 주소</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when an email will be sent within three days after confirming payment -->
+  <string name="stripe_paymentsheet_bacs_email_mandate">영업일 기준 3일 이내에 %s(으)로 이 인출 지침 설정을 확인하는 이메일이 전송됩니다.</string>
+  <!-- Title shown in Bacs mandate at the top of a screen to indicate the user should confirm their debit details -->
+  <string name="stripe_paymentsheet_bacs_mandate_title">자동 이체 세부사항 확인</string>
+  <!-- Button label shown indicating that the user can go back and modify their Bacs bank details -->
+  <string name="stripe_paymentsheet_bacs_modify_details_button_label">세부사항 수정</string>
+  <!-- Message shown as part of overall Bacs mandate indicating when a notice email will be sent as part of the payment process and how payments will show up on bank statements -->
+  <string name="stripe_paymentsheet_bacs_notice_mandate">또한, 본 지침에 따라 인출해야 할 금액에 대해 2일 전 사전 통지를 이메일로 받으실 수 있습니다. 결제는 은행 계좌에 \'%s\'(으)로 표시됩니다.</string>
+  <!-- Message shown as part of overall Bacs Mandate indicating that their payments are protected by a defined guarantee -->
+  <string name="stripe_paymentsheet_bacs_protection_mandate">결제는 %s에 의해 보호됩니다.</string>
   <!-- Title shown above a carousel containing available payment methods -->
   <string name="stripe_paymentsheet_choose_payment_method">결제 방식 선택</string>
   <string name="stripe_paymentsheet_close">닫기</string>
@@ -31,10 +47,16 @@
   <string name="stripe_paymentsheet_manage_your_payment_methods">내 결제 방식 관리</string>
   <!-- Prompt for microdeposit verification before completing purchase with merchant. %@ will be replaced by merchant business name -->
   <string name="stripe_paymentsheet_microdeposit">Stripe에서 영업일 기준 1~2일 후에 계좌로 0.01$를 입금할 예정입니다. 그런 다음 %s에 대한 결제를 완료하기 위한 지침이 포함된 이메일을 전송할 것입니다.</string>
+  <!-- Content for alert popup prompting to confirm modifying saved payment method. -->
+  <string name="stripe_paymentsheet_modify_pm">%s 수정</string>
   <!-- Title of a section containing multiple payment methods that can selected and will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_using">또는 다음 결제 방식 사용</string>
   <!-- Title of a section containing a card form that will collect the payment information from the user. -->
   <string name="stripe_paymentsheet_or_pay_with_card">또는 카드 결제</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains alternative ways to set up. -->
+  <string name="stripe_paymentsheet_or_use">또는 다음 결제 방식을 사용하기</string>
+  <!-- Title of a section displayed below an Apple Pay button. The section contains a credit card form as an alternative way to set up. -->
+  <string name="stripe_paymentsheet_or_use_a_card">또는 카드를 사용하기</string>
   <!-- Label for a button that starts processing the payment. -->
   <string name="stripe_paymentsheet_pay_button_label">결제</string>
   <!-- Title shown above a section containing various payment options -->
@@ -45,12 +67,16 @@
   <string name="stripe_paymentsheet_primary_button_processing">처리 중...</string>
   <!-- Title for confirmation alert to remove a saved bank account payment method -->
   <string name="stripe_paymentsheet_remove_bank_account_title">은행 계좌 삭제</string>
+  <!-- Title for a button that when tapped removes a saved card. -->
+  <string name="stripe_paymentsheet_remove_card">카드 제거</string>
   <!-- Content for alert popup prompting to confirm removing saved payment method. -->
   <string name="stripe_paymentsheet_remove_pm">%s 제거</string>
   <!-- A button used for saving a new payment method -->
   <string name="stripe_paymentsheet_save">저장</string>
   <!-- Title shown above a form where the customer can enter payment information like credit card details, email, billing address, etc. -->
   <string name="stripe_paymentsheet_save_a_new_payment_method">새 결제 방식 저장</string>
+  <!-- US Bank Account copy title for Mobile payment element form -->
+  <string name="stripe_paymentsheet_save_bank_title">몇 단계의 간단한 절차를 통해 은행 계좌를 저장하십시오.</string>
   <!-- The label of a switch indicating whether to save the payment method for future payments. -->
   <string name="stripe_paymentsheet_save_for_future_payments">향후 결제에 사용하도록 저장</string>
   <!-- The label of a switch indicating whether to save the user&apos;s card for future payments to this merchant -->
@@ -59,6 +85,8 @@
   <string name="stripe_paymentsheet_select_payment_method">결제 수단을 선택하세요.</string>
   <!-- Label indicating the total amount that the user is authorizing (e.g. "Total: $25.00") -->
   <string name="stripe_paymentsheet_total_amount">합계 : %s</string>
+  <!-- Generic failure message -->
+  <string name="stripe_something_went_wrong">문제가 발생했습니다.</string>
   <!-- Button text on a screen asking the user to approve a payment -->
   <string name="stripe_upi_polling_cancel">취소 및 다른 방법으로 결제</string>
   <!-- Text on a screen asking the user to approve a payment -->

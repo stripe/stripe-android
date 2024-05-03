@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -42,6 +43,7 @@ fun rememberPaymentSheet(
             activity = activity,
             application = context.applicationContext as Application,
             lifecycleOwner = lifecycleOwner,
+            callback = paymentResultCallback,
         )
         PaymentSheet(launcher)
     }
@@ -66,11 +68,31 @@ fun rememberPaymentSheet(
     return rememberPaymentSheet(paymentResultCallback)
 }
 
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Composable
+fun rememberPaymentSheet(
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+    createIntentCallback: CreateIntentCallback,
+    paymentResultCallback: PaymentSheetResultCallback,
+): PaymentSheet {
+    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+    return rememberPaymentSheet(createIntentCallback, paymentResultCallback)
+}
+
 @Composable
 private fun UpdateIntentConfirmationInterceptor(
     createIntentCallback: CreateIntentCallback,
 ) {
     LaunchedEffect(createIntentCallback) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+}
+
+@Composable
+private fun UpdateExternalPaymentMethodConfirmHandler(
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+) {
+    LaunchedEffect(externalPaymentMethodConfirmHandler) {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     }
 }

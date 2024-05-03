@@ -1,15 +1,17 @@
 package com.stripe.android.financialconnections.ui
 
 import android.app.Activity
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.activity.addCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -17,57 +19,58 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavHostController
+import androidx.navigation.NavOptionsBuilder
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.airbnb.mvrx.MavericksView
-import com.airbnb.mvrx.compose.collectAsState
-import com.airbnb.mvrx.withState
 import com.stripe.android.core.Logger
-import com.stripe.android.financialconnections.features.accountpicker.AccountPickerScreen
-import com.stripe.android.financialconnections.features.attachpayment.AttachPaymentScreen
-import com.stripe.android.financialconnections.features.common.CloseDialog
-import com.stripe.android.financialconnections.features.consent.ConsentScreen
-import com.stripe.android.financialconnections.features.institutionpicker.InstitutionPickerScreen
-import com.stripe.android.financialconnections.features.linkaccountpicker.LinkAccountPickerScreen
-import com.stripe.android.financialconnections.features.linkstepupverification.LinkStepUpVerificationScreen
-import com.stripe.android.financialconnections.features.manualentry.ManualEntryScreen
-import com.stripe.android.financialconnections.features.manualentrysuccess.ManualEntrySuccessScreen
-import com.stripe.android.financialconnections.features.networkinglinkloginwarmup.NetworkingLinkLoginWarmupScreen
-import com.stripe.android.financialconnections.features.networkinglinksignup.NetworkingLinkSignupScreen
-import com.stripe.android.financialconnections.features.networkinglinkverification.NetworkingLinkVerificationScreen
-import com.stripe.android.financialconnections.features.networkingsavetolinkverification.NetworkingSaveToLinkVerificationScreen
-import com.stripe.android.financialconnections.features.partnerauth.PartnerAuthScreen
-import com.stripe.android.financialconnections.features.reset.ResetScreen
-import com.stripe.android.financialconnections.features.success.SuccessScreen
+import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
-import com.stripe.android.financialconnections.navigation.NavigationDirections
-import com.stripe.android.financialconnections.navigation.NavigationManager
-import com.stripe.android.financialconnections.navigation.NavigationState
-import com.stripe.android.financialconnections.navigation.toNavigationCommand
-import com.stripe.android.financialconnections.presentation.CreateBrowserIntentForUrl
+import com.stripe.android.financialconnections.navigation.Destination
+import com.stripe.android.financialconnections.navigation.NavigationIntent
+import com.stripe.android.financialconnections.navigation.PopUpToBehavior
+import com.stripe.android.financialconnections.navigation.bottomSheet
+import com.stripe.android.financialconnections.navigation.bottomsheet.BottomSheetNavigator
+import com.stripe.android.financialconnections.navigation.composable
+import com.stripe.android.financialconnections.navigation.destination
+import com.stripe.android.financialconnections.navigation.pane
+import com.stripe.android.financialconnections.navigation.topappbar.TopAppBarHost
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.Finish
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewEffect.OpenUrl
 import com.stripe.android.financialconnections.presentation.FinancialConnectionsSheetNativeViewModel
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsModalBottomSheetLayout
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
+import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.financialconnections.utils.argsOrNull
-import com.stripe.android.financialconnections.utils.viewModelLazy
+import com.stripe.android.financialconnections.utils.KeyboardController
+import com.stripe.android.financialconnections.utils.rememberKeyboardController
 import com.stripe.android.uicore.image.StripeImageLoader
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), MavericksView {
+internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
-    val args by argsOrNull<FinancialConnectionsSheetNativeActivityArgs>()
+    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModels(
+        factoryProducer = { FinancialConnectionsSheetNativeViewModel.Factory }
+    )
 
-    val viewModel: FinancialConnectionsSheetNativeViewModel by viewModelLazy()
-
-    @Inject
-    lateinit var navigationManager: NavigationManager
+    private var visibilityObserver: ActivityVisibilityObserver? = null
 
     @Inject
     lateinit var logger: Logger
@@ -75,187 +78,144 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
     @Inject
     lateinit var imageLoader: StripeImageLoader
 
+    @Inject
+    lateinit var browserManager: BrowserManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        if (args == null) {
+
+        if (getArgs(intent) == null) {
             finish()
-        } else {
-            viewModel.activityRetainedComponent.inject(this)
-            viewModel.onEach { postInvalidate() }
-            onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
-            setContent {
-                FinancialConnectionsTheme {
-                    Column {
-                        Box(modifier = Modifier.weight(1f)) {
-                            val closeDialog = viewModel.collectAsState { it.closeDialog }
-                            val firstPane =
-                                viewModel.collectAsState { it.initialPane }
-                            val reducedBranding =
-                                viewModel.collectAsState { it.reducedBranding }
-                            closeDialog.value?.let {
-                                CloseDialog(
-                                    description = it.description,
-                                    onConfirmClick = viewModel::onCloseConfirm,
-                                    onDismissClick = viewModel::onCloseDismiss
-                                )
-                            }
-                            NavHost(
-                                firstPane.value,
-                                reducedBranding.value
+            return
+        }
+
+        viewModel.activityRetainedComponent.inject(this)
+
+        observeBackPress()
+        observeBackgroundEvents()
+        observeViewEffects()
+
+        setContent {
+            FinancialConnectionsTheme {
+                val state by viewModel.stateFlow.collectAsState()
+                NavHost(
+                    initialPane = state.initialPane,
+                    testMode = state.testMode,
+                )
+            }
+        }
+    }
+
+    private fun observeBackPress() {
+        onBackPressedDispatcher.addCallback { viewModel.onBackPressed() }
+    }
+
+    private fun observeBackgroundEvents() {
+        visibilityObserver = ActivityVisibilityObserver(
+            onBackgrounded = viewModel::onBackgrounded,
+            onForegrounded = viewModel::onForegrounded,
+        ).also {
+            lifecycle.addObserver(it)
+        }
+    }
+
+    private fun observeViewEffects() = lifecycleScope.launch {
+        repeatOnLifecycle(Lifecycle.State.STARTED) {
+            viewModel.stateFlow
+                .map { it.viewEffect }
+                .distinctUntilChanged()
+                .filterNotNull()
+                .collect { viewEffect ->
+                    when (viewEffect) {
+                        is OpenUrl -> startActivity(
+                            browserManager.createBrowserIntentForUrl(uri = Uri.parse(viewEffect.url))
+                        )
+
+                        is Finish -> {
+                            setResult(
+                                Activity.RESULT_OK,
+                                Intent().putExtra(EXTRA_RESULT, viewEffect.result)
                             )
+                            finish()
                         }
                     }
+                    viewModel.onViewEffectLaunched()
                 }
-            }
         }
     }
 
-    /**
-     * handle state changes here.
-     */
-    override fun invalidate() {
-        withState(viewModel) { state ->
-            state.viewEffect?.let { viewEffect ->
-                when (viewEffect) {
-                    is OpenUrl -> startActivity(
-                        CreateBrowserIntentForUrl(
-                            context = this,
-                            uri = Uri.parse(viewEffect.url)
-                        )
-                    )
-
-                    is Finish -> {
-                        setResult(
-                            Activity.RESULT_OK,
-                            Intent().putExtra(EXTRA_RESULT, viewEffect.result)
-                        )
-                        finish()
-                    }
-                }
-                viewModel.onViewEffectLaunched()
-            }
-        }
-    }
-
-    @OptIn(ExperimentalMaterialApi::class)
-    @Suppress("LongMethod")
     @Composable
     fun NavHost(
         initialPane: Pane,
-        reducedBranding: Boolean
+        testMode: Boolean,
     ) {
         val context = LocalContext.current
-        val navController = rememberNavController()
-        val uriHandler = remember { CustomTabUriHandler(context) }
-        val initialDestination =
-            remember(initialPane) {
-                initialPane.toNavigationCommand(
-                    emptyMap()
-                ).destination
-            }
-        NavigationEffect(navController)
+        val uriHandler = remember { CustomTabUriHandler(context, browserManager) }
+        val initialDestination = remember(initialPane) { initialPane.destination }
+        val topAppBarState by viewModel.topAppBarState.collectAsState()
+
+        val sheetState = rememberModalBottomSheetState(
+            ModalBottomSheetValue.Hidden,
+            skipHalfExpanded = true
+        )
+
+        val bottomSheetNavigator = remember { BottomSheetNavigator(sheetState) }
+        val navController = rememberNavController(bottomSheetNavigator)
+        val keyboardController = rememberKeyboardController()
+
+        NavigationEffects(viewModel.navigationFlow, navController, keyboardController)
+
         CompositionLocalProvider(
-            LocalReducedBranding provides reducedBranding,
+            LocalTestMode provides testMode,
             LocalNavHostController provides navController,
             LocalImageLoader provides imageLoader,
-            LocalUriHandler provides uriHandler
+            LocalUriHandler provides uriHandler,
+            LocalTopAppBarHost provides viewModel,
         ) {
-            NavHost(navController, startDestination = initialDestination) {
-                composable(NavigationDirections.consent.destination) {
-                    LaunchedPane(Pane.CONSENT)
-                    BackHandler(navController, Pane.CONSENT)
-                    ConsentScreen()
-                }
-                composable(NavigationDirections.manualEntry.destination) {
-                    LaunchedPane(Pane.MANUAL_ENTRY)
-                    BackHandler(navController, Pane.MANUAL_ENTRY)
-                    ManualEntryScreen()
-                }
-                composable(
-                    route = NavigationDirections.ManualEntrySuccess.route,
-                    arguments = NavigationDirections.ManualEntrySuccess.arguments
+            BackHandler(true) {
+                viewModel.onBackClick(navController.currentDestination?.pane)
+                if (navController.popBackStack().not()) viewModel.onBackPressed()
+            }
+            FinancialConnectionsModalBottomSheetLayout(
+                bottomSheetNavigator = bottomSheetNavigator,
+            ) {
+                FinancialConnectionsScaffold(
+                    topBar = {
+                        FinancialConnectionsTopAppBar(
+                            state = topAppBarState,
+                            onCloseClick = viewModel::handleOnCloseClick,
+                        )
+                    },
                 ) {
-                    LaunchedPane(Pane.MANUAL_ENTRY_SUCCESS)
-                    BackHandler(navController, Pane.MANUAL_ENTRY_SUCCESS)
-                    ManualEntrySuccessScreen(it)
-                }
-                composable(NavigationDirections.institutionPicker.destination) {
-                    LaunchedPane(Pane.INSTITUTION_PICKER)
-                    BackHandler(navController, Pane.INSTITUTION_PICKER)
-                    InstitutionPickerScreen()
-                }
-                composable(NavigationDirections.partnerAuth.destination) {
-                    LaunchedPane(Pane.PARTNER_AUTH)
-                    BackHandler(navController, Pane.PARTNER_AUTH)
-                    PartnerAuthScreen()
-                }
-                composable(NavigationDirections.accountPicker.destination) {
-                    LaunchedPane(Pane.ACCOUNT_PICKER)
-                    BackHandler(navController, Pane.ACCOUNT_PICKER)
-                    AccountPickerScreen()
-                }
-                composable(NavigationDirections.success.destination) {
-                    LaunchedPane(Pane.SUCCESS)
-                    BackHandler(navController, Pane.SUCCESS)
-                    SuccessScreen()
-                }
-                composable(NavigationDirections.reset.destination) {
-                    LaunchedPane(Pane.RESET)
-                    BackHandler(navController, Pane.RESET)
-                    ResetScreen()
-                }
-                composable(NavigationDirections.attachLinkedPaymentAccount.destination) {
-                    LaunchedPane(Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
-                    BackHandler(navController, Pane.ATTACH_LINKED_PAYMENT_ACCOUNT)
-                    AttachPaymentScreen()
-                }
-                composable(NavigationDirections.networkingLinkSignup.destination) {
-                    LaunchedPane(Pane.NETWORKING_LINK_SIGNUP_PANE)
-                    BackHandler(navController, Pane.NETWORKING_LINK_SIGNUP_PANE)
-                    NetworkingLinkSignupScreen()
-                }
-                composable(NavigationDirections.networkingLinkLoginWarmup.destination) {
-                    LaunchedPane(Pane.NETWORKING_LINK_LOGIN_WARMUP)
-                    BackHandler(navController, Pane.NETWORKING_LINK_LOGIN_WARMUP)
-                    NetworkingLinkLoginWarmupScreen()
-                }
-                composable(NavigationDirections.networkingLinkVerification.destination) {
-                    LaunchedPane(Pane.NETWORKING_LINK_VERIFICATION)
-                    BackHandler(navController, Pane.NETWORKING_LINK_VERIFICATION)
-                    NetworkingLinkVerificationScreen()
-                }
-                composable(NavigationDirections.networkingSaveToLinkVerification.destination) {
-                    LaunchedPane(Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
-                    BackHandler(navController, Pane.NETWORKING_SAVE_TO_LINK_VERIFICATION)
-                    NetworkingSaveToLinkVerificationScreen()
-                }
-                composable(NavigationDirections.linkAccountPicker.destination) {
-                    LaunchedPane(Pane.LINK_ACCOUNT_PICKER)
-                    BackHandler(navController, Pane.LINK_ACCOUNT_PICKER)
-                    LinkAccountPickerScreen()
-                }
-                composable(NavigationDirections.linkStepUpVerification.destination) {
-                    LaunchedPane(Pane.LINK_STEP_UP_VERIFICATION)
-                    BackHandler(navController, Pane.LINK_STEP_UP_VERIFICATION)
-                    LinkStepUpVerificationScreen()
+                    NavHost(
+                        navController = navController,
+                        startDestination = initialDestination.fullRoute,
+                    ) {
+                        composable(Destination.Consent)
+                        composable(Destination.ManualEntry)
+                        composable(Destination.PartnerAuth)
+                        bottomSheet(Destination.PartnerAuthDrawer)
+                        bottomSheet(Destination.Exit)
+                        composable(Destination.InstitutionPicker)
+                        composable(Destination.AccountPicker)
+                        composable(Destination.Success)
+                        composable(Destination.Reset)
+                        composable(Destination.Error)
+                        composable(Destination.AttachLinkedPaymentAccount)
+                        composable(Destination.NetworkingLinkSignup)
+                        bottomSheet(Destination.NetworkingLinkLoginWarmup)
+                        composable(Destination.NetworkingLinkVerification)
+                        composable(Destination.NetworkingSaveToLinkVerification)
+                        composable(Destination.LinkAccountPicker)
+                        composable(Destination.BankAuthRepair)
+                        composable(Destination.LinkStepUpVerification)
+                        composable(Destination.ManualEntrySuccess)
+                        bottomSheet(Destination.Notice)
+                        bottomSheet(Destination.AccountUpdateRequired)
+                    }
                 }
             }
         }
-    }
-
-    @Composable
-    private fun BackHandler(navController: NavHostController, pane: Pane) {
-        androidx.activity.compose.BackHandler(true) {
-            viewModel.onBackClick(pane)
-            if (navController.popBackStack().not()) onBackPressedDispatcher.onBackPressed()
-        }
-    }
-
-    @Composable
-    private fun LaunchedPane(
-        pane: Pane
-    ) {
-        LaunchedEffect(Unit) { viewModel.onPaneLaunched(pane) }
     }
 
     /**
@@ -271,46 +231,76 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity(), Ma
         viewModel.onResume()
     }
 
-    @Composable
-    private fun NavigationEffect(
-        navController: NavHostController
-    ) {
-        val navigationState by navigationManager.navigationState.collectAsState()
-
-        LaunchedEffect(navigationState) {
-            logger.debug("updateNavigationState to $navigationState")
-            val from = navController.currentDestination?.route
-            when (val viewState = navigationState) {
-                is NavigationState.NavigateToRoute -> {
-                    navigateToRoute(viewState, from, navController)
-                    navigationManager.onNavigated(navigationState)
-                }
-
-                is NavigationState.Idle -> {}
-            }
+    override fun onDestroy() {
+        visibilityObserver?.let {
+            lifecycle.removeObserver(it)
         }
+        super.onDestroy()
     }
 
-    private fun navigateToRoute(
-        viewState: NavigationState.NavigateToRoute,
-        from: String?,
-        navController: NavHostController
+    @Composable
+    fun NavigationEffects(
+        navigationChannel: SharedFlow<NavigationIntent>,
+        navHostController: NavHostController,
+        keyboardController: KeyboardController,
     ) {
-        val destination = viewState.command.destination
-        if (destination.isNotEmpty() && destination != from) {
-            logger.debug("Navigating from $from to $destination")
-            navController.navigate(destination) {
-                launchSingleTop = true
-                val currentScreen: String? = navController.currentBackStackEntry?.destination?.route
-                if (currentScreen != null && viewState.popCurrentFromBackStack) {
-                    popUpTo(currentScreen) { inclusive = true }
+        val activity = (LocalContext.current as? Activity)
+        val backStackEntry by navHostController.currentBackStackEntryAsState()
+
+        LaunchedEffect(backStackEntry) {
+            val pane = backStackEntry?.destination?.pane ?: return@LaunchedEffect
+            viewModel.handlePaneChanged(pane)
+        }
+
+        LaunchedEffect(activity, navHostController, navigationChannel) {
+            navigationChannel.onEach { intent ->
+                if (activity?.isFinishing == true) {
+                    return@onEach
                 }
-            }
+
+                keyboardController.dismiss()
+
+                when (intent) {
+                    is NavigationIntent.NavigateTo -> {
+                        val from: String? = navHostController.currentDestination?.route
+                        val destination: String = intent.route
+
+                        if (destination.isNotEmpty() && destination != from) {
+                            logger.debug("Navigating from $from to $destination")
+                            navHostController.navigate(destination) {
+                                launchSingleTop = intent.isSingleTop
+
+                                if (intent.popUpTo != null) {
+                                    apply(from, intent.popUpTo)
+                                }
+                            }
+                        }
+                    }
+
+                    NavigationIntent.NavigateBack -> {
+                        navHostController.popBackStack()
+                    }
+                }
+            }.launchIn(this)
         }
     }
 
     internal companion object {
         internal const val EXTRA_RESULT = "result"
+
+        private const val EXTRA_ARGS = "FinancialConnectionsSheetNativeActivityArgs"
+        fun intent(context: Context, args: FinancialConnectionsSheetNativeActivityArgs): Intent {
+            return Intent(context, FinancialConnectionsSheetNativeActivity::class.java).apply {
+                putExtra(EXTRA_ARGS, args)
+            }
+        }
+
+        fun getArgs(savedStateHandle: SavedStateHandle) =
+            savedStateHandle.get<FinancialConnectionsSheetNativeActivityArgs>(EXTRA_ARGS)
+
+        fun getArgs(intent: Intent): FinancialConnectionsSheetNativeActivityArgs? {
+            return intent.getParcelableExtra(EXTRA_ARGS)
+        }
     }
 }
 
@@ -318,10 +308,63 @@ internal val LocalNavHostController = staticCompositionLocalOf<NavHostController
     error("No NavHostController provided")
 }
 
-internal val LocalReducedBranding = staticCompositionLocalOf<Boolean> {
-    error("No ReducedBranding provided")
+internal val LocalTestMode = staticCompositionLocalOf<Boolean> {
+    error("No TestMode provided")
 }
 
 internal val LocalImageLoader = staticCompositionLocalOf<StripeImageLoader> {
     error("No ImageLoader provided")
+}
+
+internal val LocalTopAppBarHost = staticCompositionLocalOf<TopAppBarHost> {
+    error("No TopAppBarHost provided")
+}
+
+/**
+ * Observer that will notify the view model when the activity is moved to the background or
+ * brought back to the foreground.
+ */
+private class ActivityVisibilityObserver(
+    val onBackgrounded: () -> Unit,
+    val onForegrounded: () -> Unit
+) : DefaultLifecycleObserver {
+
+    private var isFirstStart = true
+    private var isInBackground = false
+
+    override fun onStart(owner: LifecycleOwner) {
+        super.onStart(owner)
+        if (!isFirstStart && isInBackground) {
+            onForegrounded()
+        }
+        isFirstStart = false
+        isInBackground = false
+    }
+
+    override fun onStop(owner: LifecycleOwner) {
+        super.onStop(owner)
+        // If the activity is being rotated, we don't want to notify a backgrounded state
+        val changingConfigurations =
+            (owner as? AppCompatActivity)?.isChangingConfigurations ?: false
+        if (!changingConfigurations) {
+            isInBackground = true
+            onBackgrounded()
+        }
+    }
+}
+
+private fun NavOptionsBuilder.apply(
+    currentRoute: String?,
+    popUpTo: PopUpToBehavior,
+) {
+    val popUpToRoute = when (popUpTo) {
+        is PopUpToBehavior.Current -> currentRoute
+        is PopUpToBehavior.Route -> popUpTo.route
+    }
+
+    if (popUpToRoute != null) {
+        popUpTo(popUpToRoute) {
+            inclusive = popUpTo.inclusive
+        }
+    }
 }

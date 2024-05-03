@@ -2,7 +2,7 @@ apply from: configs.androidLibrary
 
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 
 dependencies {
     implementation project(":camera-core")
@@ -10,7 +10,7 @@ dependencies {
     implementation project(":stripe-ui-core")
     implementation project(":ml-core:default")
 
-    implementation libs.accompanist.themeAdapter
+    implementation libs.accompanist.materialThemeAdapter
     implementation libs.androidx.activity
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
@@ -29,14 +29,16 @@ dependencies {
     implementation libs.compose.navigation
     implementation libs.compose.runtime
     implementation libs.compose.viewModels
+    implementation libs.compose.uiToolingPreview
     implementation libs.dagger
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.serialization
     implementation libs.material
+    implementation libs.microblinkCapture
 
     debugImplementation libs.compose.uiTestManifest
 
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     testImplementation testLibs.androidx.archCore
     testImplementation testLibs.androidx.composeUi

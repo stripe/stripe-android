@@ -6,7 +6,6 @@ import android.os.Parcelable
 import androidx.activity.result.contract.ActivityResultContract
 import androidx.annotation.RestrictTo
 import androidx.core.os.bundleOf
-import com.stripe.android.core.injection.InjectorKey
 import com.stripe.android.model.PaymentMethod
 import kotlinx.parcelize.Parcelize
 
@@ -46,17 +45,9 @@ class GooglePayPaymentMethodLauncherContractV2 :
         internal val config: GooglePayPaymentMethodLauncher.Config,
         internal val currencyCode: String,
         internal val amount: Long,
+        internal val label: String? = null,
         internal val transactionId: String? = null,
-        internal val injectionParams: InjectionParams? = null
     ) : Parcelable {
-        @JvmOverloads
-        constructor(
-            config: GooglePayPaymentMethodLauncher.Config,
-            currencyCode: String,
-            amount: Long,
-            transactionId: String? = null
-        ) : this(config, currencyCode, amount, transactionId, null)
-
         internal fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
         internal companion object {
@@ -66,15 +57,6 @@ class GooglePayPaymentMethodLauncherContractV2 :
                 return intent.getParcelableExtra(EXTRA_ARGS)
             }
         }
-
-        @Parcelize
-        internal data class InjectionParams(
-            @InjectorKey val injectorKey: String,
-            val productUsage: Set<String>,
-            val enableLogging: Boolean,
-            val publishableKey: String,
-            val stripeAccountId: String?
-        ) : Parcelable
     }
 
     internal companion object {

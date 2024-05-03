@@ -18,10 +18,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,6 +36,7 @@ internal const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
 internal class BottomSheetState(
     val modalBottomSheetState: ModalBottomSheetState,
     val keyboardHandler: BottomSheetKeyboardHandler,
+    val sheetGesturesEnabled: Boolean,
 ) {
 
     private var dismissalType: DismissalType? = null
@@ -69,7 +67,11 @@ internal class BottomSheetState(
         // a CancellationException.
         keyboardHandler.dismiss()
         if (modalBottomSheetState.isVisible) {
-            modalBottomSheetState.hide()
+            repeatUntilSucceededOrLimit(10) {
+                // Hiding the bottom sheet can be interrupted.
+                // We keep trying until it's fully hidden.
+                modalBottomSheetState.hide()
+            }
         }
     }
 
@@ -97,6 +99,7 @@ internal fun rememberBottomSheetState(
         BottomSheetState(
             modalBottomSheetState = modalBottomSheetState,
             keyboardHandler = keyboardHandler,
+            sheetGesturesEnabled = false,
         )
     }
 }
@@ -105,7 +108,6 @@ internal fun rememberBottomSheetState(
  * Renders the provided [sheetContent] in a modal bottom sheet.
  *
  * @param state The [BottomSheetState] that controls the visibility of the bottom sheet.
- * @param onShow Called when the bottom sheet is displayed for the first time. This might be used to
  * navigate to a specific screen.
  * @param onDismissed Called when the user dismisses the bottom sheet by swiping down. You should
  * inform your view model about this change.
@@ -116,7 +118,6 @@ internal fun BottomSheet(
     state: BottomSheetState,
     modifier: Modifier = Modifier,
     onDismissed: () -> Unit,
-    onShow: () -> Unit = {},
     sheetContent: @Composable () -> Unit,
 ) {
     val systemUiController = rememberSystemUiController()
@@ -130,14 +131,8 @@ internal fun BottomSheet(
         label = "StatusBarColorAlpha",
     )
 
-    var isFirstLaunch by rememberSaveable { mutableStateOf(true) }
-
     LaunchedEffect(Unit) {
         state.show()
-        if (isFirstLaunch) {
-            isFirstLaunch = false
-            onShow()
-        }
 
         val dismissalType = state.awaitDismissal()
         if (dismissalType == BottomSheetState.DismissalType.SwipedDownByUser) {
@@ -168,6 +163,8 @@ internal fun BottomSheet(
             topStart = MaterialTheme.stripeShapes.cornerRadius.dp,
             topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
         ),
+        sheetGesturesEnabled = state.sheetGesturesEnabled,
+        sheetElevation = 0.dp,
         sheetContent = {
             Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
                 sheetContent()

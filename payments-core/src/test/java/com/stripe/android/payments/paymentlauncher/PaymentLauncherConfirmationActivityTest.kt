@@ -6,25 +6,25 @@ import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.ApiKeyFixtures
-import com.stripe.android.core.injection.WeakMapInjectorRegistry
 import com.stripe.android.model.ConfirmStripeIntentParams
 import com.stripe.android.utils.InjectableActivityScenario
 import com.stripe.android.utils.TestUtils
 import com.stripe.android.utils.injectableActivityScenario
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
 class PaymentLauncherConfirmationActivityTest {
-    private val viewModel = mock<PaymentLauncherViewModel>().also {
-        whenever(it.paymentLauncherResult).thenReturn(mock())
+    private val viewModel = mock<PaymentLauncherViewModel> {
+        on { it.internalPaymentResult } doReturn MutableStateFlow(null)
     }
     private val testFactory = TestUtils.viewModelFactoryFor(viewModel)
 
@@ -36,13 +36,13 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    mock(),
-                    Color.CYAN
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    confirmStripeIntentParams = mock(),
+                    statusBarColor = Color.CYAN
                 ).toBundle()
             )
         ).use {
@@ -61,12 +61,12 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    confirmStripeIntentParams,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    confirmStripeIntentParams = confirmStripeIntentParams,
                     statusBarColor = Color.RED,
                 ).toBundle()
             )
@@ -88,12 +88,12 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.IntentConfirmationArgs(
-                    INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    confirmStripeIntentParams,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    confirmStripeIntentParams = confirmStripeIntentParams,
                     statusBarColor = Color.RED,
                 ).toBundle()
             )
@@ -132,12 +132,12 @@ class PaymentLauncherConfirmationActivityTest {
                 PaymentLauncherConfirmationActivity::class.java
             ).putExtras(
                 PaymentLauncherContract.Args.SetupIntentNextActionArgs(
-                    INJECTOR_KEY,
-                    ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                    TEST_STRIPE_ACCOUNT_ID,
-                    false,
-                    PRODUCT_USAGE,
-                    CLIENT_SECRET,
+                    publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                    stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                    enableLogging = false,
+                    productUsage = PRODUCT_USAGE,
+                    includePaymentSheetAuthenticators = false,
+                    setupIntentClientSecret = CLIENT_SECRET,
                     statusBarColor = Color.RED,
                 ).toBundle()
             )
@@ -162,7 +162,9 @@ class PaymentLauncherConfirmationActivityTest {
             assertThat(activityScenario.state)
                 .isEqualTo(Lifecycle.State.DESTROYED)
             val result =
-                PaymentResult.fromIntent(activityScenario.getResult().resultData) as PaymentResult.Failed
+                InternalPaymentResult.fromIntent(
+                    activityScenario.getResult().resultData
+                ) as InternalPaymentResult.Failed
             assertThat(result.throwable.message)
                 .isEqualTo(
                     PaymentLauncherConfirmationActivity.EMPTY_ARG_ERROR
@@ -180,18 +182,17 @@ class PaymentLauncherConfirmationActivityTest {
     }
 
     private companion object {
-        val INJECTOR_KEY = WeakMapInjectorRegistry.nextKey("testKey")
         const val CLIENT_SECRET = "clientSecret"
         const val TEST_STRIPE_ACCOUNT_ID = "accountId"
         val PRODUCT_USAGE = setOf("TestProductUsage")
         val PAYMENT_INTENT_NEXT_ACTION_ARGS =
             PaymentLauncherContract.Args.PaymentIntentNextActionArgs(
-                INJECTOR_KEY,
-                ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
-                TEST_STRIPE_ACCOUNT_ID,
-                false,
-                PRODUCT_USAGE,
-                CLIENT_SECRET,
+                publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,
+                stripeAccountId = TEST_STRIPE_ACCOUNT_ID,
+                enableLogging = false,
+                productUsage = PRODUCT_USAGE,
+                includePaymentSheetAuthenticators = false,
+                paymentIntentClientSecret = CLIENT_SECRET,
                 statusBarColor = Color.RED,
             )
     }

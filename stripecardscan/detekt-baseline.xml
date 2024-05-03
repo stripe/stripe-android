@@ -9,7 +9,6 @@
     <ID>EmptyFunctionBlock:CardScanFragment.kt$CardScanFragment${}</ID>
     <ID>ForbiddenComment:ClientStats.kt$StatsPayload$// TODO: these should probably be reported as part of scanstats</ID>
     <ID>ForbiddenComment:MainLoopAggregator.kt$MainLoopAggregator$// TODO: when we want to collect this in scan stats, give this a name</ID>
-    <ID>ForbiddenComment:MemoizeTest.kt$MemoizeTest$// TODO: this should ideally use `runBlockingTest`, but that does not actually advance the</ID>
     <ID>ForbiddenComment:PaymentCardUtils.kt$* Determine if a PAN is valid. * * TODO: this should use a contract like the following once contracts are no longer experimental: * ``` * contract { returns(true) implies (pan != null) } * ```</ID>
     <ID>ForbiddenComment:RequiresMatchingCard.kt$RequiresMatchingCard$/* * TODO: Use contracts once they're supported. [CardMatch.Match], [CardMatch.Mismatch], and * [CardMatch.NoRequiredCard] guarantees that pan != null */</ID>
     <ID>ForbiddenComment:SSD.kt$* The model outputs a particular location or a particular class of each prior before moving on to * the next prior. For instance, the model will output probabilities for background class * corresponding to all priors before outputting the probability of next class for the first prior. * This method serves to rearrange the output if you are using outputs from multiple layers If you * use outputs from single layer use the method defined above * * TODO: simplify this</ID>
@@ -18,14 +17,13 @@
     <ID>ForbiddenComment:ScanFragment.kt$ScanFragment$// TODO: this should be reported as part of scanstats, but is not yet supported</ID>
     <ID>ForbiddenComment:ScanFragment.kt$ScanFragment$// TODO: this should probably be reported as part of scanstats, but is not yet supported</ID>
     <ID>ForbiddenComment:StripeApi.kt$// TODO: this should probably be reported as part of scanstats, but is not yet supported</ID>
+    <ID>ForbiddenComment:Timer.kt$* Measure the amount of time a process takes. * * TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Timer.kt$LoggingTimer$// TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Timer.kt$NoOpTimer$// TODO: use contracts when they are no longer experimental</ID>
     <ID>ForbiddenComment:Timer.kt$Timer$* Log the duration of a single task and return the result from that task. * * TODO: use contracts when they are no longer experimental</ID>
     <ID>FunctionOnlyReturningConstant:AppDetails.kt$private fun getApplicationId(): String</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$@SuppressLint("HardwareIds") private fun getAndroidId()</ID>
     <ID>FunctionOnlyReturningConstant:Device.kt$internal fun getPlatform()</ID>
-    <ID>LargeClass:MemoizeTest.kt$MemoizeTest</ID>
-    <ID>LongMethod:DurationTest.kt$DurationTest$@Test @SmallTest fun reflective()</ID>
     <ID>LongMethod:Fetcher.kt$WebFetcher$override suspend fun fetchData(forImmediateUse: Boolean, isOptional: Boolean): FetchedData</ID>
     <ID>MagicNumber:BitmapExtensions.kt$100.0</ID>
     <ID>MagicNumber:CardExpiry.kt$100</ID>
@@ -63,9 +61,6 @@
     <ID>NestedBlockDepth:Network.kt$@Throws(IOException::class) private fun downloadFile( url: URL, outputFile: File )</ID>
     <ID>NestedBlockDepth:SSD.kt$internal fun rearrangeOCRArray( locations: Array&lt;FloatArray>, featureMapSizes: OcrFeatureMapSizes, numberOfPriors: Int, locationsPerPrior: Int ): Array&lt;FloatArray></ID>
     <ID>NestedBlockDepth:Yolo.kt$internal fun processYoloLayer( layer: Array&lt;Array&lt;FloatArray>>, anchors: Array&lt;Pair&lt;Int, Int>>, imageSize: Size, numClasses: Int, confidenceThreshold: Float ): List&lt;DetectionBox></ID>
-    <ID>ReturnCount:CardExpiry.kt$internal fun isValidExpiry(day: String?, month: String, year: String): Boolean</ID>
-    <ID>ReturnCount:RequiresMatchingCard.kt$RequiresMatchingCard$fun compareToRequiredCard(pan: String?): CardMatchResult</ID>
-    <ID>ReturnCount:SSD.kt$internal fun determineLayoutAndFilter( detectedBoxes: List&lt;DetectionBox>, verticalOffset: Float ): List&lt;DetectionBox></ID>
     <ID>SwallowedException:Device.kt$t: Throwable</ID>
     <ID>SwallowedException:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
     <ID>SwallowedException:File.kt$t: Throwable</ID>
@@ -77,7 +72,7 @@
     <ID>TooGenericExceptionCaught:Fetcher.kt$FetchedData.Companion$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Fetcher.kt$WebFetcher$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:File.kt$t: Throwable</ID>
-    <ID>TooGenericExceptionCaught:GetCameraAdapter.kt$t: Throwable</ID>
+    <ID>TooGenericExceptionCaught:GetVerifyCameraAdapter.kt$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Loader.kt$Loader$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Network.kt$LegacyStripeNetwork$t: Throwable</ID>
     <ID>TooGenericExceptionCaught:Network.kt$et: Throwable</ID>

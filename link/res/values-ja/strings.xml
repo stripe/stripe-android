@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">決済手段を追加</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">安全なワンクリックでの購入に使用する情報を保存する</string>
+  <string name="stripe_inline_sign_up_header">Link を使用して安全なワンクリック決済の情報を保存する</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Link からログアウト</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">%s やその他多数の加盟店で支払いをスピードアップします。</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Link に登録することで、お客様は<terms>利用規約</terms>および<privacy>プライバシーポリシー</privacy>に同意したことになります。]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[メールアドレスを入力することにより、お客様は <terms>Link の規約</terms>と<privacy>プライバシーポリシー</privacy>に従って Link アカウントを作成し、お支払い情報を Link に保存することに同意したとみなされます。]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[電話番号を入力することにより、お客様は <terms>Link の規約</terms>と<privacy>プライバシーポリシー</privacy>に従って Link アカウントを作成し、お支払い情報を Link に保存することに同意したとみなされます。]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">メールアドレスを変更</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
@@ -50,8 +54,6 @@
   <string name="stripe_wallet_recollect_cvc_error">セキュリティー保持のため、お客様のクレジットカードのセキュリティーコードをもう一度入力してください。</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">この関連付けられた口座を削除しますか？</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">カードを削除</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">このカードを削除しますか？</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

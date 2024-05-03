@@ -9,8 +9,10 @@ import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
@@ -27,14 +29,22 @@ import com.stripe.android.uicore.stripeColors
 fun Section(
     @StringRes title: Int?,
     error: String?,
+    modifier: Modifier = Modifier,
+    isSelected: Boolean = false,
+    addVerticalPadding: Boolean = true,
     contentOutsideCard: @Composable () -> Unit = {},
     contentInCard: @Composable () -> Unit
 ) {
-    Column(modifier = Modifier.padding(top = 8.dp)) {
+    val verticalPadding = remember(addVerticalPadding) {
+        if (addVerticalPadding) 8.dp else 0.dp
+    }
+
+    Column(modifier = modifier.padding(top = verticalPadding)) {
         SectionTitle(title)
         SectionCard(
+            isSelected = isSelected,
             content = contentInCard,
-            modifier = Modifier.padding(bottom = 8.dp)
+            modifier = Modifier.padding(bottom = verticalPadding)
         )
         if (error != null) {
             SectionError(error)
@@ -67,6 +77,7 @@ internal fun SectionTitle(@StringRes titleText: Int?) {
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 fun SectionCard(
     modifier: Modifier = Modifier,
+    shape: Shape = MaterialTheme.shapes.medium,
     isSelected: Boolean = false,
     backgroundColor: Color = MaterialTheme.stripeColors.component,
     border: BorderStroke = MaterialTheme.getBorderStroke(isSelected),
@@ -77,7 +88,7 @@ fun SectionCard(
         // TODO(skyler-stripe): this will change when we add shadow configurations.
         elevation = if (isSelected) 1.5.dp else 0.dp,
         backgroundColor = backgroundColor,
-        shape = MaterialTheme.shapes.medium,
+        shape = shape,
         modifier = modifier
     ) {
         Column {
@@ -89,8 +100,9 @@ fun SectionCard(
 /**
  * This is how error string for the section are displayed.
  */
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 @Composable
-internal fun SectionError(error: String) {
+fun SectionError(error: String) {
     Text(
         text = error,
         color = MaterialTheme.colors.error,

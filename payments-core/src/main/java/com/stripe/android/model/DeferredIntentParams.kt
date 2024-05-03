@@ -10,6 +10,7 @@ import kotlinx.parcelize.Parcelize
 data class DeferredIntentParams(
     val mode: Mode,
     val paymentMethodTypes: List<String>,
+    val paymentMethodConfigurationId: String?,
     val onBehalfOf: String?,
 ) : StripeModel {
 
@@ -48,6 +49,7 @@ data class DeferredIntentParams(
             "deferred_intent[currency]" to mode.currency,
             "deferred_intent[setup_future_usage]" to mode.setupFutureUsage?.code,
             "deferred_intent[capture_method]" to (mode as? Mode.Payment)?.captureMethod?.code,
+            "deferred_intent[payment_method_configuration][id]" to paymentMethodConfigurationId,
             "deferred_intent[on_behalf_of]" to onBehalfOf,
         ) + paymentMethodTypes.mapIndexed { index, paymentMethodType ->
             "deferred_intent[payment_method_types][$index]" to paymentMethodType

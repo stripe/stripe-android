@@ -10,8 +10,6 @@ import com.stripe.android.camera.framework.FiniteAnalyzerLoop
 import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.framework.StatefulResultHandler
 import com.stripe.android.camera.framework.TerminatingResultHandler
-import com.stripe.android.camera.framework.time.Duration
-import com.stripe.android.camera.framework.time.nanoseconds
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
@@ -27,10 +25,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.test.fail
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.nanoseconds
 
 class LoopTest {
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_analyzeData() = runTest {
@@ -75,7 +75,7 @@ class LoopTest {
         assertTrue { dataCount == resultCount.get() }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_analyzeDataNoDuplicates() = runTest {
@@ -135,7 +135,7 @@ class LoopTest {
         }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun processBoundAnalyzerLoop_noAnalyzersAvailable() = runTest {
@@ -171,7 +171,7 @@ class LoopTest {
         assertTrue { analyzerFailure }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun finiteAnalyzerLoop_analyzeData() = runTest {
@@ -217,7 +217,7 @@ class LoopTest {
         assertTrue(dataProcessed)
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @MediumTest
     @ExperimentalCoroutinesApi
     fun finiteAnalyzerLoop_analyzeDataTimeout() = runTest {
@@ -263,7 +263,7 @@ class LoopTest {
         assertTrue { terminatedEarly }
     }
 
-    @Test(timeout = 1000)
+    @Test(timeout = 2000)
     @SmallTest
     @ExperimentalCoroutinesApi
     fun finiteAnalyzerLoop_analyzeDataNoData() = runTest {

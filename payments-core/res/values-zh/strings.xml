@@ -80,8 +80,8 @@
   <string name="stripe_becs_mandate_acceptance">\n    通过提供您的银行账户信息并确认该笔付款，\n    表示您同意本“直接借记请求”及其服务条款，并授权\n    Stripe Payments Australia Pty Ltd ACN 160 180 343 Direct Debit User ID\n    number 507156 (“Stripe”) 通过批量电子清算系统 (BECS)\n    代 %1$s（“商家”）向您的账户扣取商家单独告知您的金额。\n    您确认您是账户持有人或上述账户的授权签署人。\n    \n    </string>
   <!-- Placeholder text for Account number entry field for BECS Debit. -->
   <string name="stripe_becs_widget_account_number">账号</string>
-  <!-- BECS Debit Widget - account number field - incomplete error message -->
-  <string name="stripe_becs_widget_account_number_incomplete">您的账号不完整。</string>
+  <!-- Error description for incomplete account number -->
+  <string name="stripe_becs_widget_account_number_incomplete">您输入的账号不完整。</string>
   <!-- BECS Debit Widget - account number field - required error message -->
   <string name="stripe_becs_widget_account_number_required">您需要填写账号。</string>
   <!-- Placeholder text for BSB Number entry field for BECS Debit. -->
@@ -102,6 +102,10 @@
   <string name="stripe_becs_widget_name_required">您需要填写姓名。</string>
   <!-- Button title to cancel action in an alert -->
   <string name="stripe_cancel">取消</string>
+  <!-- Title for a dropdown option when selecting a card brand -->
+  <string name="stripe_card_brand_choice_no_selection">未选择</string>
+  <!-- Title for a dropdown where the customer can select a card brand -->
+  <string name="stripe_card_brand_choice_selection_header">选择银行卡品牌（可选）</string>
   <!-- Error when the card was declined by the credit card networks -->
   <string name="stripe_card_declined">您的卡已被拒绝</string>
   <!-- Details of a saved card. &apos;{card brand} ending in {last 4}&apos; e.g. &apos;VISA ending in 4242&apos; -->
@@ -121,7 +125,7 @@
   <string name="stripe_expiry_date_hint">月份/年份</string>
   <string name="stripe_expiry_label_short">有效期</string>
   <!-- Generic error message shown when payment cannot be processed. -->
-  <string name="stripe_failure_connection_error">连接我们的支付提供商时出现了问题。请检查网络连接，然后重试。</string>
+  <string name="stripe_failure_connection_error">连接我们的支付服务商时出现了问题。请检查网络连接，然后重试。</string>
   <!-- Error when 3DS2 authentication failed (e.g. customer entered the wrong code) -->
   <string name="stripe_failure_reason_authentication">我们未能验证您的支付方式。请选择另一支付方式并重试。</string>
   <!-- Error when 3DS2 authentication timed out. -->
@@ -164,6 +168,8 @@
   <string name="stripe_title_payment_method">支付方式</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">选择送货方式</string>
+  <!-- Title of screen to update a card -->
+  <string name="stripe_title_update_card">更新卡</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">验证您的付款</string>
 </resources>

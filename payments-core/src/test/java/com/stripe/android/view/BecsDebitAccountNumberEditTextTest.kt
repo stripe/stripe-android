@@ -33,7 +33,7 @@ class BecsDebitAccountNumberEditTextTest {
         assertThat(accountNumberEditText.accountNumber)
             .isNull()
         assertThat(accountNumberEditText.errorMessage)
-            .isEqualTo("Your account number is incomplete.")
+            .isEqualTo("The account number you entered is incomplete.")
     }
 
     @Test

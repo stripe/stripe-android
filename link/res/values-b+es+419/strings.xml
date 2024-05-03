@@ -5,7 +5,7 @@
   <!-- Text for a button that, when tapped, displays another screen where the customer can add a new payment method -->
   <string name="stripe_add_payment_method">Agregar un método de pago</string>
   <!-- Label for a checkbox that when checked allows the payment information to be saved and used in future checkout sessions. -->
-  <string name="stripe_inline_sign_up_header">Guardar mis datos para hacer el pago en 1 click en modo seguro</string>
+  <string name="stripe_inline_sign_up_header">Guardar mis datos para una confirmación de compra segura en un clic con Link</string>
   <!-- Title of the logout action. -->
   <string name="stripe_log_out">Cerrar sesión de Link</string>
   <!-- Label of a checkbox that when checked makes a payment method as the default one. -->
@@ -20,6 +20,10 @@
   <string name="stripe_sign_up_message">Paga más rápido en %s y en miles de comercios.</string>
   <!-- Legal text shown when creating a Link account. -->
   <string name="stripe_sign_up_terms"><![CDATA[Al unirte a Link, aceptas las <terms>Condiciones de servicio</terms> y la <privacy>Política de privacidad</privacy>.]]></string>
+  <!-- Legal text shown when creating a Link account in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative"><![CDATA[Al proporcionar tu correo electrónico, aceptas crear una cuenta de Link y guardar tus datos de pago en Link, conforme a las <terms>Condiciones</terms> y la <privacy>Política de privacidad</privacy> de Link.]]></string>
+  <!-- Legal text shown when creating a Link account with a phone number in the alternative flow. -->
+  <string name="stripe_sign_up_terms_alternative_with_phone_number"><![CDATA[Al proporcionar tu número de teléfono, aceptas crear una cuenta de Link y guardar tus datos de pago en Link, conforme a las <terms>Condiciones</terms> y la <privacy>Política de privacidad</privacy> de Link.]]></string>
   <!-- Title for a button that allows the user to use a different email in the signup flow. -->
   <string name="stripe_verification_change_email">Cambiar correo electrónico</string>
   <!-- Text of a notification shown to the user when a login code is successfully sent via SMS. -->
@@ -50,8 +54,6 @@
   <string name="stripe_wallet_recollect_cvc_error">Por razones de seguridad, vuelve a ingresar el código de seguridad de tu tarjeta.</string>
   <!-- Title of confirmation prompt when removing a linked bank account. -->
   <string name="stripe_wallet_remove_account_confirmation">¿Deseas quitar esta cuenta vinculada?</string>
-  <!-- Title for a button that when tapped removes a saved card. -->
-  <string name="stripe_wallet_remove_card">Quitar tarjeta</string>
   <!-- Title of confirmation prompt when removing a saved card. -->
   <string name="stripe_wallet_remove_card_confirmation">¿Deseas quitar esta tarjeta?</string>
   <!-- Title for a button that when tapped removes a linked bank account. -->

@@ -20,7 +20,6 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 @Parcelize
-@Suppress("ConstructorParameterNaming")
 internal data class FinancialConnectionsAuthorizationSession(
 
     @SerialName(value = "id")
@@ -30,7 +29,7 @@ internal data class FinancialConnectionsAuthorizationSession(
     val nextPane: FinancialConnectionsSessionManifest.Pane,
 
     @SerialName(value = "flow")
-    val flow: Flow? = null,
+    val flow: String? = null,
 
     @SerialName(value = "institution_skip_account_selection")
     val institutionSkipAccountSelection: Boolean? = null,
@@ -58,7 +57,7 @@ internal data class FinancialConnectionsAuthorizationSession(
         get() = _isOAuth ?: false
 
     @Serializable(with = Flow.Serializer::class)
-    enum class Flow(val value: String?) {
+    enum class Flow(val value: String) {
         @SerialName("direct")
         DIRECT("direct"),
 
@@ -123,7 +122,7 @@ internal data class FinancialConnectionsAuthorizationSession(
         UNKNOWN("unknown");
 
         internal object Serializer :
-            EnumIgnoreUnknownSerializer<Flow>(Flow.values(), UNKNOWN)
+            EnumIgnoreUnknownSerializer<Flow>(entries.toTypedArray(), UNKNOWN)
     }
 }
 

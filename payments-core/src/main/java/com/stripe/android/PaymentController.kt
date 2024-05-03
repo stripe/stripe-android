@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultCaller
 import androidx.activity.result.ActivityResultLauncher
+import androidx.annotation.RestrictTo
 import androidx.fragment.app.Fragment
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.model.ConfirmPaymentIntentParams
@@ -17,7 +18,8 @@ import com.stripe.android.model.WeChatPayNextAction
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.view.AuthActivityStarterHost
 
-internal interface PaymentController {
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+interface PaymentController {
     /**
      * Confirm the Stripe Intent and resolve any next actions
      */
@@ -139,6 +141,7 @@ internal interface PaymentController {
      */
     fun unregisterLaunchers()
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     enum class StripeIntentType {
         PaymentIntent,
         SetupIntent

@@ -6,7 +6,11 @@ import android.os.Bundle
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.InstantDebits
+import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration.USBankAccount
 import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountContract
+import com.stripe.android.payments.bankaccount.navigation.CollectBankAccountResultInternal.Failed
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.FinishWithResult
 import com.stripe.android.payments.bankaccount.ui.CollectBankAccountViewEffect.OpenConnectionsFlow
 import com.stripe.android.payments.financialconnections.FinancialConnectionsPaymentsProxy
@@ -30,22 +34,34 @@ internal class CollectBankAccountActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        initConnectionsPaymentsProxy()
-        lifecycleScope.launchWhenStarted {
-            viewModel.viewEffect.collect { viewEffect ->
-                when (viewEffect) {
-                    is OpenConnectionsFlow -> viewEffect.launch()
-                    is FinishWithResult -> viewEffect.launch()
+        if (starterArgs?.configuration == null) {
+            val failure = Failed(IllegalStateException("Configuration not provided"))
+            FinishWithResult(failure).launch()
+        } else {
+            initConnectionsPaymentsProxy(requireNotNull(starterArgs).configuration)
+            lifecycleScope.launchWhenStarted {
+                viewModel.viewEffect.collect { viewEffect ->
+                    when (viewEffect) {
+                        is OpenConnectionsFlow -> viewEffect.launch()
+                        is FinishWithResult -> viewEffect.launch()
+                    }
                 }
             }
         }
     }
 
-    private fun initConnectionsPaymentsProxy() {
-        financialConnectionsPaymentsProxy = FinancialConnectionsPaymentsProxy.create(
-            activity = this,
-            onComplete = viewModel::onConnectionsResult
-        )
+    private fun initConnectionsPaymentsProxy(configuration: CollectBankAccountConfiguration) {
+        financialConnectionsPaymentsProxy = when (configuration) {
+            is InstantDebits -> FinancialConnectionsPaymentsProxy.createForInstantDebits(
+                activity = this,
+                onComplete = viewModel::onConnectionsForInstantDebitsResult
+            )
+
+            is USBankAccount -> FinancialConnectionsPaymentsProxy.createForACH(
+                activity = this,
+                onComplete = viewModel::onConnectionsForACHResult
+            )
+        }
     }
 
     private fun OpenConnectionsFlow.launch() {

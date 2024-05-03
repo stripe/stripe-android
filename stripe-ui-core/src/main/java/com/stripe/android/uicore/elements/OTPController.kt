@@ -2,22 +2,26 @@ package com.stripe.android.uicore.elements
 
 import androidx.annotation.RestrictTo
 import androidx.compose.ui.text.input.KeyboardType
-import kotlinx.coroutines.flow.Flow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.StateFlow
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class OTPController(val otpLength: Int = 6) : Controller {
+
+    // SMS autofill delivers us one character at a time. We store them here until
+    // we have received all.
+    private var autofillAccumulator = ""
+
     internal val keyboardType = KeyboardType.NumberPassword
 
     internal val fieldValues: List<MutableStateFlow<String>> = (0 until otpLength).map {
         MutableStateFlow("")
     }
 
-    val fieldValue: Flow<String> = combine(fieldValues) {
+    val fieldValue: StateFlow<String> = combineAsStateFlow(fieldValues) {
         it.joinToString("")
-    }.distinctUntilChanged()
+    }
 
     /**
      * Filter invalid values and set the value of the fields to the entered text, one character per
@@ -49,6 +53,15 @@ class OTPController(val otpLength: Int = 6) : Controller {
         }
 
         return inputLength
+    }
+
+    fun onAutofillDigit(digit: String) {
+        autofillAccumulator += digit
+
+        if (autofillAccumulator.length == otpLength) {
+            onValueChanged(0, autofillAccumulator)
+            autofillAccumulator = ""
+        }
     }
 
     fun reset() {

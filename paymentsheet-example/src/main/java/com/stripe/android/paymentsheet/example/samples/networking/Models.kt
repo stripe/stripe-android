@@ -111,6 +111,8 @@ data class ExampleCreateAndConfirmIntentRequest(
     val isSubscribing: Boolean,
     @SerialName("return_url")
     val returnUrl: String,
+    @SerialName("customer_id")
+    val customerId: String?,
 )
 
 fun CartState.toCreateIntentRequest(
@@ -126,6 +128,7 @@ fun CartState.toCreateIntentRequest(
         saladCount = countOf(CartProduct.Id.Salad),
         isSubscribing = isSubscription,
         returnUrl = returnUrl,
+        customerId = customerId,
     )
 }
 
@@ -182,6 +185,10 @@ data class PlaygroundCustomerSheetRequest(
     val customerId: String,
     @SerialName("mode")
     val mode: String,
+    @SerialName("merchant_country_code")
+    val merchantCountryCode: String,
+    @SerialName("currency")
+    val currency: String,
 )
 
 @Serializable

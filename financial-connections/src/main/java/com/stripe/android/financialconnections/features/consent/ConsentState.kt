@@ -1,17 +1,15 @@
 package com.stripe.android.financialconnections.features.consent
 
-import com.airbnb.mvrx.Async
-import com.airbnb.mvrx.MavericksState
-import com.airbnb.mvrx.Uninitialized
 import com.stripe.android.financialconnections.model.ConsentPane
+import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest
+import com.stripe.android.financialconnections.presentation.Async
 
 internal data class ConsentState(
-    val consent: Async<Payload> = Uninitialized,
+    val consent: Async<Payload> = Async.Uninitialized,
     val merchantLogos: List<String> = emptyList(),
-    val currentBottomSheet: BottomSheetContent = BottomSheetContent.DATA,
-    val acceptConsent: Async<Unit> = Uninitialized,
+    val acceptConsent: Async<FinancialConnectionsSessionManifest> = Async.Uninitialized,
     val viewEffect: ViewEffect? = null
-) : MavericksState {
+) {
 
     data class Payload(
         val consent: ConsentPane,
@@ -19,18 +17,9 @@ internal data class ConsentState(
         val shouldShowMerchantLogos: Boolean
     )
 
-    enum class BottomSheetContent {
-        LEGAL,
-        DATA
-    }
-
     sealed class ViewEffect {
         data class OpenUrl(
             val url: String,
-            val id: Long
-        ) : ViewEffect()
-
-        data class OpenBottomSheet(
             val id: Long
         ) : ViewEffect()
     }

@@ -4,24 +4,40 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
-    <com.stripe.android.view.CardNumberTextInputLayout
-        android:id="@+id/tl_card_number"
-        style="@style/Stripe.CardMultilineWidget.TextInputLayout"
+    <FrameLayout
+        android:id="@+id/card_number_input_container"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="@string/stripe_acc_label_card_number"
-        android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin">
+        android:layout_height="wrap_content">
 
-        <com.stripe.android.view.CardNumberEditText
-            android:id="@+id/et_card_number"
+        <com.stripe.android.view.CardNumberTextInputLayout
+            android:id="@+id/tl_card_number"
+            style="@style/Stripe.CardMultilineWidget.TextInputLayout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:drawablePadding="@dimen/stripe_card_icon_multiline_padding"
-            android:imeOptions="actionNext"
-            android:nextFocusDown="@+id/et_expiry"
-            android:nextFocusForward="@+id/et_expiry" />
+            android:hint="@string/stripe_acc_label_card_number"
+            android:layout_marginTop="@dimen/stripe_add_card_element_vertical_margin">
 
-    </com.stripe.android.view.CardNumberTextInputLayout>
+            <com.stripe.android.view.CardNumberEditText
+                android:id="@+id/et_card_number"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:drawablePadding="@dimen/stripe_card_icon_multiline_padding"
+                android:imeOptions="actionNext"
+                android:nextFocusDown="@+id/et_expiry"
+                android:nextFocusForward="@+id/et_expiry" />
+
+        </com.stripe.android.view.CardNumberTextInputLayout>
+
+        <com.stripe.android.view.CardBrandView
+            android:id="@+id/card_brand_view"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/stripe_card_brand_view_height"
+            android:layout_marginTop="@dimen/stripe_card_icon_padding"
+            android:layout_marginBottom="@dimen/stripe_card_icon_padding"
+            android:layout_marginEnd="@dimen/stripe_card_icon_padding"
+            android:layout_gravity="center_vertical|end" />
+
+    </FrameLayout>
 
     <LinearLayout
         android:id="@+id/second_row_layout"

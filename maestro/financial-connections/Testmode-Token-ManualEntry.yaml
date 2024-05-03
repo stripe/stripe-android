@@ -1,24 +1,22 @@
 appId: com.stripe.android.financialconnections.example
+tags:
+  - all
+  - edge
+  - testmode-data
 ---
-- launchApp
-# Android specific: Navigate to example
-- startRecording: /tmp/test_results/testmode-token_manualentry
-- tapOn: "Playground"
+- startRecording: ${'/tmp/test_results/testmode-token_manualentry-' + new Date().getTime()}
+- clearState
+- openLink: stripeconnectionsexample://playground?flow=Token&financial_connections_override_native=native&merchant=testmode&permissions=balances,payment_method
 - tapOn:
-    id: "Native_checkbox"
-- tapOn: "Mode_Dropdown_Icon"
-- tapOn:
-    id: "Test_checkbox"
-- tapOn:
-    id: "Token_checkbox"
-- tapOn: "Connect Accounts!"
-# Common: web AuthFlow - connect OAuth institution
+    id: "connect_accounts"
+# Wait until the consent button is visible
 - extendedWaitUntil:
     visible:
       id: "consent_cta"
     timeout: 30000
-- tapOn: "Enter account details manually instead"
-- assertVisible: "Enter bank account details"
+- tapOn: "Manually verify instead"
+# MANUALLY ENTER BANK ACCOUNT
+- assertVisible: "Enter bank details"
 - tapOn:
     id: "RoutingInput"
 - inputText: "110000000"
@@ -33,8 +31,10 @@ appId: com.stripe.android.financialconnections.example
     id: "ConfirmAccountInput"
 - inputText: "000123456789"
 - tapOn:
-    text: "Continue"
+    text: "Submit"
     retryTapIfNoChange: false
-- tapOn: "Done"
+# CONFIRM AND COMPLETE
+- tapOn:
+    id: "done_button"
 - assertVisible: ".*Completed!.*"
 - stopRecording

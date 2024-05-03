@@ -1,5 +1,3 @@
-@file:Suppress("ktlint:filename")
-
 package com.stripe.android.financialconnections.ui.components
 
 import androidx.compose.foundation.layout.PaddingValues
@@ -14,7 +12,7 @@ internal fun FinancialConnectionsScaffold(
 ) {
     Scaffold(
         backgroundColor = FinancialConnectionsTheme.colors.backgroundSurface,
-        contentColor = FinancialConnectionsTheme.colors.textPrimary,
+        contentColor = FinancialConnectionsTheme.colors.textDefault,
         topBar = topBar,
         content = content
     )

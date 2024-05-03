@@ -16,10 +16,11 @@ import com.stripe.android.common.ui.BottomSheet
 import com.stripe.android.common.ui.rememberBottomSheetState
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
+import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
+import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
 import kotlinx.coroutines.flow.filterNotNull
-import java.security.InvalidParameterException
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
@@ -58,6 +59,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             )
         )
 
+        if (!applicationIsTaskOwner()) {
+            viewModel.cannotProperlyReturnFromLinkAndOtherLPMs()
+        }
+
         setContent {
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()
@@ -78,7 +83,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     state = bottomSheetState,
                     onDismissed = viewModel::onUserCancel,
                 ) {
-                    PaymentSheetScreen(viewModel)
+                    PaymentSheetScreen(viewModel, type = Complete)
                 }
             }
         }
@@ -92,10 +97,10 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
         } else {
             try {
                 starterArgs.initializationMode.validate()
-                starterArgs.config?.validate()
-                starterArgs.config?.appearance?.parseAppearance()
+                starterArgs.config.validate()
+                starterArgs.config.appearance.parseAppearance()
                 Result.success(starterArgs)
-            } catch (e: InvalidParameterException) {
+            } catch (e: IllegalArgumentException) {
                 Result.failure(e)
             }
         }

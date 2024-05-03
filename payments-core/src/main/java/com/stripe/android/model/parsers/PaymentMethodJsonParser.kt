@@ -138,7 +138,8 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
                 },
                 networks = json.optJSONObject(FIELD_NETWORKS)?.let {
                     NetworksJsonParser().parse(it)
-                }
+                },
+                displayBrand = StripeJsonUtils.optString(json, FIELD_DISPLAY_BRAND)
             )
         }
 
@@ -208,6 +209,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_LAST4 = "last4"
             private const val FIELD_THREE_D_SECURE_USAGE = "three_d_secure_usage"
             private const val FIELD_WALLET = "wallet"
+            private const val FIELD_DISPLAY_BRAND = "display_brand"
             private const val FIELD_NETWORKS = "networks"
         }
     }
@@ -255,16 +257,16 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
     internal class USBankAccountJsonParser : ModelJsonParser<PaymentMethod.USBankAccount> {
         override fun parse(json: JSONObject): PaymentMethod.USBankAccount {
             return PaymentMethod.USBankAccount(
-                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.values().find {
+                accountHolderType = PaymentMethod.USBankAccount.USBankAccountHolderType.entries.find {
                     StripeJsonUtils.optString(json, FIELD_ACCOUNT_HOLDER_TYPE) == it.value
                 } ?: PaymentMethod.USBankAccount.USBankAccountHolderType.UNKNOWN,
-                accountType = PaymentMethod.USBankAccount.USBankAccountType.values().find {
+                accountType = PaymentMethod.USBankAccount.USBankAccountType.entries.find {
                     StripeJsonUtils.optString(json, FIELD_ACCOUNT_TYPE) == it.value
                 } ?: PaymentMethod.USBankAccount.USBankAccountType.UNKNOWN,
                 bankName = StripeJsonUtils.optString(json, FIELD_BANK_NAME),
                 fingerprint = StripeJsonUtils.optString(json, FIELD_FINGERPRINT),
                 last4 = StripeJsonUtils.optString(json, FIELD_LAST4),
-                linkedAccount = StripeJsonUtils.optString(json, FIELD_LINKED_ACCOUNT),
+                financialConnectionsAccount = StripeJsonUtils.optString(json, FIELD_FINANCIAL_CONNECTIONS_ACCOUNT),
                 networks = if (json.has(FIELD_NETWORKS)) {
                     PaymentMethod.USBankAccount.USBankNetworks(
                         StripeJsonUtils.optString(json.optJSONObject(FIELD_NETWORKS), FIELD_NETWORKS_PREFERRED),
@@ -285,7 +287,7 @@ class PaymentMethodJsonParser : ModelJsonParser<PaymentMethod> {
             private const val FIELD_BANK_NAME = "bank_name"
             private const val FIELD_FINGERPRINT = "fingerprint"
             private const val FIELD_LAST4 = "last4"
-            private const val FIELD_LINKED_ACCOUNT = "linked_account"
+            private const val FIELD_FINANCIAL_CONNECTIONS_ACCOUNT = "financial_connections_account"
             private const val FIELD_NETWORKS = "networks"
             private const val FIELD_NETWORKS_PREFERRED = "preferred"
             private const val FIELD_NETWORKS_SUPPORTED = "supported"

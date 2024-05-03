@@ -62,7 +62,7 @@ class PaymentMethodCreateParamsTest {
             mapOf(
                 "number" to "4242424242424242",
                 "exp_month" to 1,
-                "exp_year" to 2024,
+                "exp_year" to 2054,
                 "cvc" to "111"
             )
         )
@@ -261,6 +261,108 @@ class PaymentMethodCreateParamsTest {
                 )
             )
         )
+    }
+
+    @Test
+    fun `createBacsFromParams should return a 'BacsDebit' instance correctly`() {
+        val params = PaymentMethodCreateParams.create(
+            bacsDebit = PaymentMethodCreateParams.BacsDebit(
+                accountNumber = "00012345",
+                sortCode = "108800"
+            ),
+            billingDetails = PaymentMethod.BillingDetails()
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.createBacsFromParams(params)
+        ).isEqualTo(
+            PaymentMethodCreateParams.BacsDebit(
+                accountNumber = "00012345",
+                sortCode = "108800"
+            )
+        )
+
+        val overrideParams = PaymentMethodCreateParams.createWithOverride(
+            code = "bacs_debit",
+            overrideParamMap = mapOf(
+                "bacs_debit" to mapOf(
+                    "account_number" to "00012345",
+                    "sort_code" to "108800"
+                )
+            ),
+            productUsage = setOf(),
+            billingDetails = null,
+            requiresMandate = false
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.createBacsFromParams(overrideParams)
+        ).isEqualTo(
+            PaymentMethodCreateParams.BacsDebit(
+                accountNumber = "00012345",
+                sortCode = "108800"
+            )
+        )
+    }
+
+    @Test
+    fun `getNameFromOverrideParams should return name from billing details if available`() {
+        val params = PaymentMethodCreateParams.create(
+            card = PaymentMethodCreateParams.Card(),
+            billingDetails = PaymentMethod.BillingDetails(
+                name = "John Doe"
+            )
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.getNameFromParams(params)
+        ).isEqualTo("John Doe")
+
+        val overrideParams = PaymentMethodCreateParams.createWithOverride(
+            code = "bacs_debit",
+            overrideParamMap = mapOf(
+                "billing_details" to mapOf(
+                    "name" to "John Doe"
+                )
+            ),
+            productUsage = setOf(),
+            billingDetails = null,
+            requiresMandate = false
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.getNameFromParams(overrideParams)
+        ).isEqualTo("John Doe")
+    }
+
+    @Test
+    fun `getEmailFromOverrideParams should return email from billing details if available`() {
+        val params = PaymentMethodCreateParams.create(
+            card = PaymentMethodCreateParams.Card(),
+            billingDetails = PaymentMethod.BillingDetails(
+                email = "johndoe@email.com"
+            )
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.getEmailFromParams(params)
+        ).isEqualTo("johndoe@email.com")
+
+        val overrideParams = PaymentMethodCreateParams.createWithOverride(
+            code = "card",
+            overrideParamMap = mapOf(
+                "billing_details" to mapOf(
+                    "email" to "johndoe@email.com"
+                )
+            ),
+            productUsage = setOf(),
+            billingDetails = null,
+            requiresMandate = false
+        )
+
+        assertThat(
+            PaymentMethodCreateParams.getEmailFromParams(overrideParams)
+        ).isEqualTo("johndoe@email.com")
     }
 
     private fun createFpx(): PaymentMethodCreateParams {

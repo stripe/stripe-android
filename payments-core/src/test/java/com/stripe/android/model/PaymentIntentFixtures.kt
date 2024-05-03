@@ -1248,6 +1248,79 @@ internal object PaymentIntentFixtures {
         requireNotNull(PARSER.parse(OXXO_REQUIRES_ACTION_JSON))
     }
 
+    val BOLETO_REQUIRES_ACTION by lazy {
+        requireNotNull(
+            PARSER.parse(
+                JSONObject(
+                    """
+        {
+            "id": "pi_3NoBHzAAYNo78uxt1Gg1mWUH",
+            "object": "payment_intent",
+            "amount": 5099,
+            "amount_details": {
+                "tip": {}
+            },
+            "automatic_payment_methods": null,
+            "canceled_at": null,
+            "cancellation_reason": null,
+            "capture_method": "automatic",
+            "client_secret": "pi_3NoBHzAAYNo78uxt1Gg1mWUH_secret_Hp6QnPyBIu95tGpRXmpCZXiQT",
+            "confirmation_method": "automatic",
+            "created": 1694204907,
+            "currency": "brl",
+            "description": null,
+            "last_payment_error": null,
+            "livemode": false,
+            "next_action": {
+                "boleto_display_details": {
+                    "expires_at": 1694205186,
+                    "hosted_voucher_url": "https://payments.stripe.com/boleto/voucher/test_YWNjdF8xTm5pZllBQVlObzc4dXh0LF9PYk81bUhVTGNSZGNIeHlyckJ4djBFQ3lkNkswS1lt0100qH3SxPW7",
+                    "number": "01010101010101010101010101010101010101010101010",
+                    "pdf": "https://payments.stripe.com/boleto/voucher/test_YWNjdF8xTm5pZllBQVlObzc4dXh0LF9PYk81bUhVTGNSZGNIeHlyckJ4djBFQ3lkNkswS1lt0100qH3SxPW7/pdf"
+                },
+                "type": "boleto_display_details"
+            },
+            "payment_method": {
+                "id": "pm_1NoBJaAAYNo78uxtjHwdrfvg",
+                "object": "payment_method",
+                "billing_details": {
+                    "address": {
+                        "city": "go",
+                        "country": "BR",
+                        "line1": "153",
+                        "line2": "",
+                        "postal_code": "76600-000",
+                        "state": "go"
+                    },
+                    "email": "hi@gmail.com",
+                    "name": "hi mom",
+                    "phone": null
+                },
+                "boleto": {
+                    "fingerprint": "dXONEmJnaLq73tXw",
+                    "tax_id": "00000000000"
+                },
+                "created": 1694205006,
+                "customer": null,
+                "livemode": false,
+                "type": "boleto"
+            },
+            "payment_method_types": [
+                "card",
+                "boleto"],
+            "processing": null,
+            "receipt_email": null,
+            "setup_future_usage": null,
+            "shipping": null,
+            "source": null,
+            "status": "requires_action"
+        }
+                    """.trimIndent()
+                )
+            )
+        )
+    }
+
     private val CASH_APP_PAY_REQUIRES_ACTION_JSON by lazy {
         JSONObject(
             """
@@ -1299,6 +1372,69 @@ internal object PaymentIntentFixtures {
 
     val CASH_APP_PAY_REQUIRES_ACTION by lazy {
         requireNotNull(PARSER.parse(CASH_APP_PAY_REQUIRES_ACTION_JSON))
+    }
+
+    val WECHAT_PAY_REQUIRES_ACTION by lazy {
+        requireNotNull(PARSER.parse(WECHAT_PAY_REQUIRES_ACTION_JSON))
+    }
+
+    private val WECHAT_PAY_REQUIRES_ACTION_JSON by lazy {
+        JSONObject(
+            """
+            {
+                "id": "pi_1EZlvVCRMbs6FrXfKpq2xMmy",
+                "object": "payment_intent",
+                "amount": 1000,
+                "amount_capturable": 0,
+                "amount_received": 0,
+                "application": null,
+                "application_fee_amount": null,
+                "canceled_at": null,
+                "cancellation_reason": null,
+                "capture_method": "automatic",
+                "charges": {
+                    "object": "list",
+                    "data": [],
+                    "has_more": false,
+                    "total_count": 0,
+                    "url": "/v1/charges?payment_intent=pi_1EZlvVCRMbs6FrXfKpq2xMmy"
+                },
+                "client_secret": "pi_1EZlvVCRMbs6FrXfKpq2xMmy_secret_cmhLfbSA54n4",
+                "confirmation_method": "automatic",
+                "created": 1557783797,
+                "currency": "usd",
+                "customer": null,
+                "description": null,
+                "invoice": null,
+                "last_payment_error": null,
+                "livemode": false,
+                "metadata": {},
+                "next_action": {
+                    "redirect_to_url": {
+                        "return_url": "stripesdk://payment_return_url/some_package_name",
+                        "url": "pm-redirects.stripe.com/wechat_payment"
+                    },
+                    "type": "redirect_to_url"
+                },
+                "on_behalf_of": null,
+                "payment_method": {
+                    "id": "pm_1234567890",
+                    "type": "wechat_pay"
+                },
+                "payment_method_types": [
+                    "card"
+                ],
+                "receipt_email": null,
+                "review": null,
+                "shipping": null,
+                "source": null,
+                "statement_descriptor": null,
+                "status": "requires_action",
+                "transfer_data": null,
+                "transfer_group": null
+            }
+            """.trimIndent()
+        )
     }
 
     val LLAMAPAY_REQUIRES_ACTION_JSON by lazy {

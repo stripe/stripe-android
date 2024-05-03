@@ -21,13 +21,13 @@ sealed class PaymentSheetResult : Parcelable {
      * See [Stripe's documentation](https://stripe.com/docs/payments/handling-payment-events)
      */
     @Parcelize
-    object Completed : PaymentSheetResult()
+    data object Completed : PaymentSheetResult()
 
     /**
      * The customer canceled the payment or setup attempt.
      */
     @Parcelize
-    object Canceled : PaymentSheetResult()
+    data object Canceled : PaymentSheetResult()
 
     /**
      * The payment or setup attempt failed.

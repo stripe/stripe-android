@@ -51,12 +51,12 @@ class ConfirmationScreenTest {
     @Test
     fun verifyUIIsBoundAndButtonInteracts() {
         testConfirmationScreen {
-            onNodeWithTag(confirmationTitleTag).assertTextEquals(CONFIRMATION_TITLE)
-            onNodeWithTag(BODY_TAG).assertTextEquals(CONFIRMATION_BODY)
-            onNodeWithTag(confirmationConfirmButtonTag).assertTextEquals(
+            onNodeWithTag(CONFIRMATION_TITLE_TAG).assertTextEquals(CONFIRMATION_TITLE)
+            onNodeWithTag(CONFIRMATION_BODY_TAG).assertTextEquals(CONFIRMATION_BODY)
+            onNodeWithTag(CONFIRMATION_BUTTON_TAG).assertTextEquals(
                 CONFIRMATION_BUTTON_TEXT.uppercase()
             )
-            onNodeWithTag(confirmationConfirmButtonTag).performClick()
+            onNodeWithTag(CONFIRMATION_BUTTON_TAG).performClick()
             verify(mockIdentityViewModel).sendSucceededAnalyticsRequestForNative()
             verify(mockVerificationFlowFinishable).finishWithResult(
                 eq(IdentityVerificationSheet.VerificationFlowResult.Completed)

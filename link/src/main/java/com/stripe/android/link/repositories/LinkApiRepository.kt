@@ -1,11 +1,13 @@
 package com.stripe.android.link.repositories
 
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.PUBLISHABLE_KEY
 import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.link.LinkPaymentDetails
 import com.stripe.android.link.injection.LinkScope
+import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams
 import com.stripe.android.model.ConsumerPaymentDetailsCreateParams.Card.Companion.extraConfirmationParams
 import com.stripe.android.model.ConsumerSession
@@ -14,6 +16,7 @@ import com.stripe.android.model.ConsumerSignUpConsentAction
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.networking.StripeRepository
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.repository.ConsumersApiService
 import kotlinx.coroutines.withContext
 import java.util.Locale
@@ -31,7 +34,8 @@ internal class LinkApiRepository @Inject constructor(
     private val stripeRepository: StripeRepository,
     private val consumersApiService: ConsumersApiService,
     @IOContext private val workContext: CoroutineContext,
-    private val locale: Locale?
+    private val locale: Locale?,
+    private val errorReporter: ErrorReporter,
 ) : LinkRepository {
 
     override suspend fun lookupConsumer(
@@ -44,10 +48,7 @@ internal class LinkApiRepository @Inject constructor(
                     email = email,
                     authSessionCookie = authSessionCookie,
                     requestSurface = REQUEST_SURFACE,
-                    requestOptions = ApiRequest.Options(
-                        publishableKeyProvider(),
-                        stripeAccountIdProvider()
-                    )
+                    requestOptions = buildRequestOptions(),
                 )
             )
         }
@@ -62,17 +63,14 @@ internal class LinkApiRepository @Inject constructor(
         consentAction: ConsumerSignUpConsentAction
     ): Result<ConsumerSession> = withContext(workContext) {
         stripeRepository.consumerSignUp(
-            email,
-            phone,
-            country,
-            name,
-            locale,
-            authSessionCookie,
-            consentAction,
-            ApiRequest.Options(
-                publishableKeyProvider(),
-                stripeAccountIdProvider()
-            )
+            email = email,
+            phoneNumber = phone,
+            country = country,
+            name = name,
+            locale = locale,
+            authSessionCookie = authSessionCookie,
+            consentAction = consentAction,
+            requestOptions = buildRequestOptions(),
         )
     }
 
@@ -81,7 +79,8 @@ internal class LinkApiRepository @Inject constructor(
         userEmail: String,
         stripeIntent: StripeIntent,
         consumerSessionClientSecret: String,
-        consumerPublishableKey: String?
+        consumerPublishableKey: String?,
+        active: Boolean,
     ): Result<LinkPaymentDetails.New> = withContext(workContext) {
         stripeRepository.createPaymentDetails(
             consumerSessionClientSecret = consumerSessionClientSecret,
@@ -89,12 +88,8 @@ internal class LinkApiRepository @Inject constructor(
                 cardPaymentMethodCreateParamsMap = paymentMethodCreateParams.toParamMap(),
                 email = userEmail,
             ),
-            requestOptions = consumerPublishableKey?.let {
-                ApiRequest.Options(it)
-            } ?: ApiRequest.Options(
-                apiKey = publishableKeyProvider(),
-                stripeAccount = stripeAccountIdProvider(),
-            ),
+            active = active,
+            requestOptions = buildRequestOptions(consumerPublishableKey),
         ).mapCatching {
             val paymentDetails = it.paymentDetails.first()
             val extraParams = extraConfirmationParams(paymentMethodCreateParams)
@@ -110,7 +105,56 @@ internal class LinkApiRepository @Inject constructor(
                 paymentMethodCreateParams = createParams,
                 originalParams = paymentMethodCreateParams,
             )
+        }.onFailure {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_CREATE_CARD_FAILURE, StripeException.create(it))
         }
+    }
+
+    override suspend fun shareCardPaymentDetails(
+        paymentMethodCreateParams: PaymentMethodCreateParams,
+        id: String,
+        last4: String,
+        consumerSessionClientSecret: String,
+    ): Result<LinkPaymentDetails> = withContext(workContext) {
+        stripeRepository.sharePaymentDetails(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            id = id,
+            requestOptions = buildRequestOptions(),
+        ).onFailure {
+            errorReporter.report(ErrorReporter.ExpectedErrorEvent.LINK_SHARE_CARD_FAILURE, StripeException.create(it))
+        }.map { passthroughModePaymentMethodId ->
+            LinkPaymentDetails.Saved(
+                paymentDetails = ConsumerPaymentDetails.Passthrough(
+                    id = passthroughModePaymentMethodId,
+                    last4 = last4,
+                ),
+                paymentMethodCreateParams = PaymentMethodCreateParams.createLink(
+                    paymentDetailsId = passthroughModePaymentMethodId,
+                    consumerSessionClientSecret = consumerSessionClientSecret,
+                    extraParams = extraConfirmationParams(paymentMethodCreateParams)
+                ),
+            )
+        }
+    }
+
+    override suspend fun logOut(
+        consumerSessionClientSecret: String,
+        consumerAccountPublishableKey: String?,
+    ): Result<ConsumerSession> = withContext(workContext) {
+        stripeRepository.logOut(
+            consumerSessionClientSecret = consumerSessionClientSecret,
+            consumerAccountPublishableKey = consumerAccountPublishableKey,
+            requestOptions = buildRequestOptions(consumerAccountPublishableKey),
+        )
+    }
+
+    private fun buildRequestOptions(
+        consumerAccountPublishableKey: String? = null,
+    ): ApiRequest.Options {
+        return ApiRequest.Options(
+            apiKey = consumerAccountPublishableKey ?: publishableKeyProvider(),
+            stripeAccount = stripeAccountIdProvider().takeUnless { consumerAccountPublishableKey != null },
+        )
     }
 
     private companion object {

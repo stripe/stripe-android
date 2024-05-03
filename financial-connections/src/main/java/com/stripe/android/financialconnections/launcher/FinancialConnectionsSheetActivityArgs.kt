@@ -1,9 +1,7 @@
 package com.stripe.android.financialconnections.launcher
 
-import android.content.Intent
 import android.os.Parcelable
 import androidx.annotation.RestrictTo
-import com.airbnb.mvrx.Mavericks
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
 import kotlinx.parcelize.Parcelize
 import java.security.InvalidParameterException
@@ -15,7 +13,7 @@ import java.security.InvalidParameterException
  */
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed class FinancialConnectionsSheetActivityArgs constructor(
+sealed class FinancialConnectionsSheetActivityArgs(
     open val configuration: FinancialConnectionsSheet.Configuration
 ) : Parcelable {
 
@@ -33,7 +31,7 @@ sealed class FinancialConnectionsSheetActivityArgs constructor(
 
     @Parcelize
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data class ForLink(
+    data class ForInstantDebits(
         override val configuration: FinancialConnectionsSheet.Configuration
     ) : FinancialConnectionsSheetActivityArgs(configuration)
 
@@ -51,10 +49,4 @@ sealed class FinancialConnectionsSheetActivityArgs constructor(
     }
 
     internal fun isValid(): Boolean = kotlin.runCatching { validate() }.isSuccess
-
-    companion object {
-        internal fun fromIntent(intent: Intent): FinancialConnectionsSheetActivityArgs? {
-            return intent.getParcelableExtra(Mavericks.KEY_ARG)
-        }
-    }
 }

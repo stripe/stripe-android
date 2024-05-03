@@ -6,9 +6,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
-import androidx.compose.ui.unit.dp
-
-internal val PrimaryButtonHeight = 56.dp
 
 private val LocalColors = staticCompositionLocalOf { LinkThemeConfig.colors(false) }
 
@@ -29,12 +26,8 @@ internal fun DefaultLinkTheme(
     }
 }
 
+@Suppress("UnusedReceiverParameter")
 internal val MaterialTheme.linkColors: LinkColors
     @Composable
     @ReadOnlyComposable
     get() = LocalColors.current
-
-internal val MaterialTheme.linkShapes: LinkShapes
-    @Composable
-    @ReadOnlyComposable
-    get() = LinkShapes

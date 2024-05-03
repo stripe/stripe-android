@@ -31,7 +31,7 @@ internal class GooglePayLauncherTest {
     @Test
     fun `init should fire expected event`() {
         runGooglePayLauncherTest(
-            integrationTypes = arrayOf(LauncherIntegrationType.Activity),
+            integrationTypes = listOf(LauncherIntegrationType.Activity),
             expectResult = false,
         ) { activity, _ ->
             val firedEvents = mutableListOf<String>()
@@ -43,7 +43,9 @@ internal class GooglePayLauncherTest {
                 config = CONFIG,
                 readyCallback = mock(),
                 activityResultLauncher = mock(),
-                googlePayRepositoryFactory = mock(),
+                googlePayRepositoryFactory = {
+                    FakeGooglePayRepository(value = true)
+                },
                 paymentAnalyticsRequestFactory = PaymentAnalyticsRequestFactory(
                     context = activity,
                     publishableKey = ApiKeyFixtures.FAKE_PUBLISHABLE_KEY,

@@ -1,36 +1,45 @@
 apply from: configs.androidLibrary
 
-apply plugin: 'kotlin-kapt'
+apply plugin: 'com.google.devtools.ksp'
 apply plugin: 'checkstyle'
 apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 
 dependencies {
     api project(":stripe-core")
     api project(":payments-model")
+    implementation project(":hcaptcha")
+    implementation project(":stripe-ui-core")
     compileOnly project(':financial-connections')
 
+    implementation libs.accompanist.appCompatThemeAdapter
+    implementation libs.accompanist.materialThemeAdapter
+    implementation libs.accompanist.material3ThemeAdapter
     implementation libs.androidx.activity
     implementation libs.androidx.annotation
     implementation libs.androidx.appCompat
     implementation libs.androidx.browser
     implementation libs.androidx.constraintLayout
     implementation libs.androidx.fragment
-    implementation libs.androidx.liveDataKtx
     implementation libs.androidx.recyclerView
     implementation libs.androidx.savedState
     implementation libs.androidx.viewModel
     implementation libs.compose.activity
+    implementation libs.compose.foundation
+    implementation libs.compose.material
+    implementation libs.compose.materialIcons
+    implementation libs.compose.ui
     implementation libs.dagger
+    implementation libs.kotlin.coroutines
+    implementation libs.kotlin.coroutinesAndroid
+    implementation libs.kotlin.coroutinesPlayServices
     implementation libs.material
     implementation libs.playServicesWallet
     implementation libs.instantApps
-    implementation libs.kotlin.coroutines
-    implementation libs.kotlin.coroutinesAndroid
     // For instructions on replacing the BouncyCastle dependency used by the 3DS2 SDK, see
     // https://github.com/stripe/stripe-android/issues/3173#issuecomment-785176608
     implementation libs.stripe3ds2
 
-    kapt libs.daggerCompiler
+    ksp libs.daggerCompiler
 
     javadocDeps libs.androidx.annotation
     javadocDeps libs.androidx.appCompat
@@ -40,10 +49,13 @@ dependencies {
     testImplementation project(':network-testing')
     testImplementation project(':payments-core-testing')
     testImplementation testLibs.androidx.archCore
+    testImplementation testLibs.androidx.composeUi
     testImplementation testLibs.androidx.core
+    testImplementation testLibs.androidx.coreKtx
     testImplementation testLibs.androidx.fragment
     testImplementation testLibs.androidx.junit
     testImplementation testLibs.androidx.lifecycle
+    testImplementation testLibs.espresso.contrib
     testImplementation testLibs.espresso.intents
     testImplementation testLibs.json
     testImplementation testLibs.junit
@@ -57,9 +69,13 @@ dependencies {
     testImplementation testLibs.turbine
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
-    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation project(':payments-core-testing')
+    androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.testRunner
+    androidTestImplementation testLibs.espresso.core
+    androidTestImplementation testLibs.kotlin.coroutines
+    androidTestImplementation testLibs.kotlin.junit
 
     androidTestUtil testLibs.testOrchestrator
 }
@@ -82,13 +98,17 @@ android {
         unitTests {
             // Note: without this, all Robolectric tests using BuildConfig will fail.
             includeAndroidResources = true
+            returnDefaultValues = true
             all {
                 maxHeapSize = "1024m"
             }
         }
 
         kotlinOptions {
-            freeCompilerArgs += ["-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"]
+            freeCompilerArgs += [
+                    "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                    "-Xcontext-receivers",
+            ]
         }
     }
 
@@ -99,6 +119,15 @@ android {
 
     composeOptions {
         kotlinCompilerExtensionVersion "${versions.androidxComposeCompiler}"
+    }
+
+    packagingOptions {
+        resources {
+            pickFirsts += [
+                "mockito-extensions/org.mockito.plugins.MemberAccessor",
+                "mockito-extensions/org.mockito.plugins.MockMaker"
+            ]
+        }
     }
 }
 

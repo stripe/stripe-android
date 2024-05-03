@@ -102,7 +102,7 @@ internal fun ConfirmationScreen(
                             vertical = dimensionResource(id = R.dimen.stripe_item_vertical_margin)
                         )
                         .semantics {
-                            testTag = confirmationTitleTag
+                            testTag = CONFIRMATION_TITLE_TAG
                         },
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold
@@ -113,7 +113,7 @@ internal fun ConfirmationScreen(
                     modifier = Modifier
                         .padding(bottom = dimensionResource(id = R.dimen.stripe_item_vertical_margin))
                         .semantics {
-                            testTag = BODY_TAG
+                            testTag = CONFIRMATION_BODY_TAG
                         },
                     color = MaterialTheme.colors.onBackground,
                     urlSpanStyle = SpanStyle(
@@ -132,7 +132,7 @@ internal fun ConfirmationScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .semantics {
-                        testTag = confirmationConfirmButtonTag
+                        testTag = CONFIRMATION_BUTTON_TAG
                     }
             ) {
                 Text(text = successPage.buttonText.uppercase())
@@ -141,5 +141,6 @@ internal fun ConfirmationScreen(
     }
 }
 
-internal const val confirmationTitleTag = "ConfirmationTitle"
-internal const val confirmationConfirmButtonTag = "ConfirmButton"
+internal const val CONFIRMATION_TITLE_TAG = "ConfirmationTitle"
+internal const val CONFIRMATION_BUTTON_TAG = "ConfirmButton"
+internal const val CONFIRMATION_BODY_TAG = "Body"

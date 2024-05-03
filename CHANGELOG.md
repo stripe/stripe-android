@@ -2,8 +2,283 @@
 
 ## XX.XX.XX - 2023-XX-XX
 
+## 20.42.0 - 2024-05-01
+
+Dependencies updated in [8381](https://github.com/stripe/stripe-android/pull/8381):
+* Bumped Play Services Wallet from 19.2.1 to 19.3.0.
+
+## 20.41.1 - 2024-04-22
+
+### PaymentSheet
+* [FIXED][8297](https://github.com/stripe/stripe-android/pull/8297) Improve `PaymentSheet` and `CustomerSheet` loading user experience.
+
+## 20.41.0 - 2024-04-15
+
+### PaymentSheet
+* [CHANGED][8231](https://github.com/stripe/stripe-android/pull/8231) Separator text under Link/Google Pay button from "Or pay using"/"Or pay with a card" to "Or use"/"Or use a card" when using SetupIntent.
+
+### Payments
+* [FIXED][8243](https://github.com/stripe/stripe-android/pull/8243) Fixed an issue with R8 when depending directly on `payments-core`.
+* [FIXED][8259](https://github.com/stripe/stripe-android/pull/8258) Fixed an issue with retrievePossibleBrands returning incorrect brands for Cartes Bancaires test cards.
+* [ADDED][8257](https://github.com/stripe/stripe-android/pull/8257) Added support for Alma to API bindings.
+
+## 20.40.4 - 2024-04-04
+
+### Financial Connections
+[Fixed][8223](https://github.com/stripe/stripe-android/pull/8223) Fixed a crash that occurred when using Compose 1.6.
+
+## 20.40.3 - 2024-04-01
+
+### CustomerSheet
+* [Added][8176](https://github.com/stripe/stripe-android/pull/8176) Enabled ACH Direct Debit in CustomerSheet
+
+### Financial Connections
+* [CHANGED][8157](https://github.com/stripe/stripe-android/pull/8157) Financial Connections no longer depends on the Mavericks library.
+
+## 20.40.2 - 2024-03-25
+
+### PaymentSheet
+* [Fixed][8147](https://github.com/stripe/stripe-android/pull/8147) Use device locale in Link popup request rather than merchant locale for customer billing country.
+* [Added][8118](https://github.com/stripe/stripe-android/pull/8118) Show `Link` wallet payment methods in saved payment methods screen.
+* [Fixed][8117](https://github.com/stripe/stripe-android/pull/8117) Fix `Link` payment methods not being saved properly in payment method and passthrough mode.
+
+## 20.40.1 - 2024-03-21
+
+### PaymentSheet
+* [Added][8132](https://github.com/stripe/stripe-android/pull/8132) Support for Klarna with SetupIntents and PaymentIntents with `setup_future_usage`.
+* [Fixed][8142](https://github.com/stripe/stripe-android/pull/8142) Fixed an issue with `CustomerSheet` where the form fields were not displayed when adding a payment method.
+
+## 20.40.0 - 2024-03-18
+
+### PaymentSheet
+* [Added][7719](https://github.com/stripe/stripe-android/pull/7719) Added `PaymentOption.iconPainter` to simplify `FlowController` usage in Compose.
+
+### Payments
+* [Added][8028](https://github.com/stripe/stripe-android/pull/8028) Added support for Amazon Pay to API bindings.
+
+### Financial Connections
+* [Changed] Updated the design of the Financial Connections authentication flow.
+
+## 20.39.0 - 2024-03-04
+
+### PaymentSheet
+* [Added] Added support for [Link](https://docs.stripe.com/payments/link/mobile-payment-element-link) in PaymentSheet. Enabling Link in your [payment method settings](https://dashboard.stripe.com/settings/payment_methods) will enable Link in PaymentSheet. To choose different Link availability settings on web and mobile, use a custom [payment method configuration](https://docs.stripe.com/payments/multiple-payment-method-configs).
+* [Changed][7999](https://github.com/stripe/stripe-android/pull/7999) In test mode, PaymentSheet now fails to load when getting saved payment methods fails.
+* [Added][8015](https://github.com/stripe/stripe-android/pull/8015) Added support for `paymentMethodTypes` in `CustomerAdapter`, which filters payment methods to the provided list.
+* [Added][8011](https://github.com/stripe/stripe-android/pull/8011) Added support for `paymentMethodOrder` in `PaymentSheet` and `CustomerSheet`, which provides client side sorting of payment methods.
+
+## 20.38.0 - 2024-02-26
+
+### PaymentSheet
+* [Added] Added support for [payment method configurations](https://docs.stripe.com/payments/multiple-payment-method-configs) when using the deferred intent integration path.
+
+## 20.37.4 - 2024-02-20
+* [FIXED][7953](https://github.com/stripe/stripe-android/pull/7953) Improved font rendering in `PaymentSheet`, `CustomerSheet`, and `FinancialConnectionsSheet` when used in Compose 1.6 and above.
+
+## 20.37.3 - 2024-02-12
+
+### PaymentSheet
+* [FIXED][7917](https://github.com/stripe/stripe-android/pull/7917) Fixed an issue where `Google Pay` & `Link` were not saved as default payment methods in `FlowController`.
+
+### Identity
+* [FIXED][7903](https://github.com/stripe/stripe-android/pull/7903) Fixed an issue where camera fails to start on some devices.
+
+## 20.37.2 - 2024-02-05
+
+* [FIXED][7832](https://github.com/stripe/stripe-android/pull/7832) Fixed an issue with `FlowController` when a custom `ViewModelProvider.Factory` is specified.
+
+Dependencies updated in [7718](https://github.com/stripe/stripe-android/pull/7718) and [7851](https://github.com/stripe/stripe-android/pull/7851) and [7858](https://github.com/stripe/stripe-android/pull/7858):
+* Bumped AndroidX Activity from 1.7.2 to 1.8.2.
+* Bumped AndroidX Fragment from 1.5.5 to 1.6.2.
+* Bumped AndroidX Lifecycle from 2.6.1 to 1.7.0.
+* Bumped AndroidX Navigation from 2.5.3 to 2.7.6.
+* Bumped AndroidX Preference from 1.2.0 to 1.2.1.
+* Bumped AndroidX RecyclerView from 1.2.1 to 1.3.1.
+* Bumped Coroutines from 1.6.4 to 1.7.3.
+* Bumped Google Places from 3.0.0 to 3.3.0.
+* Bumped Kotlin from 1.8.22 to 1.9.22.
+* Bumped Material from 1.8.0 to 1.11.0.
+* Bumped Mavericks from 3.0.7 to 3.0.9.
+
+## 20.37.1 - 2024-01-25
+
+### PaymentSheet
+* [FIXED][7822](https://github.com/stripe/stripe-android/pull/7822) Fixed an issue where the SDK was unable to follow URL redirects in some cases.
+
+### Payments
+* [FIXED][7822](https://github.com/stripe/stripe-android/pull/7822) Fixed an issue where the SDK was unable to follow URL redirects in some cases.
+
+## 20.37.0 - 2024-01-22
+
+### Payments
+* [CHANGED][7722](https://github.com/stripe/stripe-android/pull/7722) Added passive hCaptcha on Radar session creation endpoint. In order to enable hCaptcha on this endpoint, you must provide an activity to this method call (see the new optional activity parameter).
+* [FIXED][7777](https://github.com/stripe/stripe-android/pull/7777) Fixed an issue in `PaymentSession` where tapping the `Add card` button stopped working after it was clicked once.
+
+Dependencies updated:
+* [7603](https://github.com/stripe/stripe-android/pull/7603) Bumped compile SDK from 33 to 34.
+
+## 20.36.1 - 2024-01-08
+
+### Identity
+* [FIXED][7757](https://github.com/stripe/stripe-android/pull/7757) Fixed a crash when retrying the selfie scan.
+
+## 20.36.0 - 2023-12-18
+
+### PaymentSheet
+* [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) PaymentSheet now supports [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants and transactions. To provide a list of preferred networks, use `PaymentSheet.Configuration.preferredNetworks`.
+* [ADDED][7447](https://github.com/stripe/stripe-android/pull/7447) PaymentSheet now supports [Bacs Direct Debit](https://stripe.com/docs/payments/payment-methods/bacs-debit) for PaymentIntents.
+
+### CustomerSheet
+* [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) CustomerSheet now supports [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants and transactions. To provide a list of preferred networks, use `PaymentSheet.Configuration.preferredNetworks`.
+
+### Payments
+* [ADDED][7713](https://github.com/stripe/stripe-android/pull/7713) `CardInputWidget`, `CardMultilineWidget`, and `CardFormView` now support [card brand choice](https://stripe.com/docs/card-brand-choice) for eligible merchants. To provide a list of preferred networks, use `setPreferredNetworks()`.
+
+* [DEPRECATED][7723](https://github.com/stripe/stripe-android/pull/7723) `IssuingCardPinService` is deprecated and will be removed in a future release. [Please use Issuing Elements instead](https://stripe.com/docs/issuing/elements)
+
+## 20.35.2 - 2023-12-11
+
+### PaymentSheet
+* [FIXED][7683](https://github.com/stripe/stripe-android/pull/7683) Fixed an issue where PaymentSheet didn't correctly consider `BillingDetailsCollectionConfiguration` when transacting with Google Pay.
+
+## 20.35.1 - 2023-12-04
+
+### Identity
+* [CHANGED][7407](https://github.com/stripe/stripe-android/pull/7407) Updated the UX for Consent and DocSelection page.
+
+## 20.35.0 - 2023-11-28
+
+### PaymentSheet
+* [ADDED][7249](https://github.com/stripe/stripe-android/pull/7249) PaymentSheet now supports configuring the Google Pay button type in the `GooglePayConfiguration`.
+* [FIXED][7623](https://github.com/stripe/stripe-android/pull/7623) Fixed an issue where FlowController did not save a newly added payment method as the default method.
+* [FIXED][7496](https://github.com/stripe/stripe-android/pull/7496) Fixed an issue where PaymentSheet did not save a newly added payment method as the default method.
+* [FIXED][7584](https://github.com/stripe/stripe-android/pull/7584) Fixed an issue where PaymentSheet would render with a lightened surface color in dark mode.
+* [FIXED][7635](https://github.com/stripe/stripe-android/pull/7635) Fixed an issue where PaymentSheet wouldn't accept valid Mexican phone numbers.
+
+### CustomerSheet
+* [ADDED][7644](https://github.com/stripe/stripe-android/pull/7644) Added support for updating a payment method in the experimental `CustomerAdapter` interface.
+* [CHANGED][7627](https://github.com/stripe/stripe-android/pull/7627) Updated the experimental CustomerSheet.Configuration to require a merchant name.
+
+## 20.34.4 - 2023-11-02
+
+### PaymentSheet
+* [FIXED][7570](https://github.com/stripe/stripe-android/pull/7570) Fixed an issue where compiling PaymentSheet with R8 would cause an irrelevant warning for missing classes from Financial Connections if the module wasn't included.
+* [FIXED][7571](https://github.com/stripe/stripe-android/pull/7571) Fixed an issue where CustomerSheet would throw an error related to invalid payment_method_types.
+
+### Financial Connections
+* [FIXED][7575](https://github.com/stripe/stripe-android/pull/7575) Don't show microdeposits screen if microdeposits are not required.
+
+## 20.34.3 - 2023-10-31
+
+### PaymentSheet
+* [FIXED][7530](https://github.com/stripe/stripe-android/pull/7530) Fixed an issue which caused PaymentSheet to transitively include the Financial Connections SDK even if not requested.
+* [FIXED][7545](https://github.com/stripe/stripe-android/pull/7545) Fixed an issue where the US Bank Account collection flow would not launch when using FlowController with Payment Intents.
+
+## 20.34.2 - 2023-10-30
+
+### PaymentSheet
+* [FIXED][7499](https://github.com/stripe/stripe-android/pull/7499) Fixed an issue with incorrect error messages when encountering a failure after 3D Secure authentication.
+* [FIXED][7464](https://github.com/stripe/stripe-android/pull/7464) Fixed an issue where canceling the US Bank Account selection flow prevents the user from launching it again.
+* [FIXED][7529](https://github.com/stripe/stripe-android/pull/7529) PaymentSheet no longer displays saved cards that originated from Apple Pay or Google Pay.
+
+## 20.34.1 - 2023-10-24
+
+### Payments
+* [FIXED][7485](https://github.com/stripe/stripe-android/pull/7485) Fixed a crash when using `CardInputWidget` in an AppCompat theme.
+
+## 20.34.0 - 2023-10-23
+
+### Payments
+* [ADDED][7449](https://github.com/stripe/stripe-android/pull/7449) Added saved payment method support for SEPA family payment methods.
+
+## 20.33.0 - 2023-10-16
+
+### Payments
+* [ADDED][7431](https://github.com/stripe/stripe-android/pull/7431) Added bindings support for MobilePay. See [private beta information](https://stripe.com/docs/payments/mobilepay).
+
+## 20.32.1 - 2023-10-09
+
+### PaymentSheet
+* [FIXED][7387](https://github.com/stripe/stripe-android/pull/7387) Fixed a bug where `AddressLauncher.present` would crash.
+
+Dependencies updated:
+* [7409](https://github.com/stripe/stripe-android/pull/7409) Bumped Kotlin to 1.8.22 and Compose Compiler to 1.4.8.
+
+## 20.32.0 - 2023-09-25
+
+### PaymentSheet
+* [ADDED][7337](https://github.com/stripe/stripe-android/pull/7337) PaymentSheet now supports Swish for PaymentIntents in private beta.
+
+### Payments
+* [ADDED][7337](https://github.com/stripe/stripe-android/pull/7337) Added support for Swish for PaymentIntents in private beta.
+
+### Financial Connections
+* [FIXED][7331](https://github.com/stripe/stripe-android/pull/7331) When cancelling out of a auth session, going back to the consent screen required two back taps.
+
+Dependencies updated:
+* [7297](https://github.com/stripe/stripe-android/pull/7297) Bumped Compose Foundation, Compose Material, Compose Runtime, and Compose UI from 1.4.3 to 1.5.1.
+
+## 20.31.0 - 2023-09-18
+
+### PaymentSheet
+* [ADDED][7314](https://github.com/stripe/stripe-android/pull/7314) PaymentSheet now supports Revolut Pay for SetupIntents, and PaymentIntents with setup for future usage.
+* [ADDED][7308](https://github.com/stripe/stripe-android/pull/7308) PaymentSheet now supports Konbini for PaymentIntents.
+* [ADDED][7302](https://github.com/stripe/stripe-android/pull/7302) PaymentSheet now supports Alma for PaymentIntents in private beta.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `PaymentSheet.GooglePayConfiguration` now takes an optional `amount` and `label`. The `amount` will be displayed in Google Pay for SetupIntents, while `label` will be displayed for both PaymentIntents and SetupIntents.
+* [FIXED][7316](https://github.com/stripe/stripe-android/pull/7316) Fixed an issue where amounts in Serbian Dinar were displayed incorrectly.
+
+### Payments
+* [ADDED][7315](https://github.com/stripe/stripe-android/pull/7315) Added support for Revolut Pay.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayLauncher` now takes an optional `label` when presenting Google Pay for PaymentIntents, and an optional `amount` and `label` when presenting for SetupIntents.
+* [ADDED][7191](https://github.com/stripe/stripe-android/pull/7191) `GooglePayPaymentMethodLauncher` now takes an optional `label` when presenting Google Pay.
+
+## 20.30.2 - 2023-09-13
+
+### PaymentSheet
+* [ADDED][7281](https://github.com/stripe/stripe-android/pull/7281) PaymentSheet now supports OXXO for PaymentIntents.
+* [ADDED][7282](https://github.com/stripe/stripe-android/pull/7282) PaymentSheet now supports Boleto for PaymentIntents, SetupIntents, and PaymentIntents with setup for future usage.
+* [FIXED][7303](https://github.com/stripe/stripe-android/pull/7303) Fixed an issue where SEPA mandate texts were being displayed for payment methods when they shouldn't be.
+
+## 20.30.1 - 2023-09-11
+
+⚠️ Note: This release contains a bug where SEPA mandate texts were being displayed for payment methods when they shouldn't be. Please use version 20.30.2 or newer instead.
+
+### Financial Connections
+* [FIXED][7290](https://github.com/stripe/stripe-android/pull/7290) Fixed an issue where attempting to go back on the first screen caused a crash since there is no other screen in the back stack.
+
+## 20.30.0 - 2023-09-11
+
+⚠️ Note: This release contains a bug where SEPA mandate texts were being displayed for payment methods when they shouldn't be. Please use version 20.30.2 or newer instead.
+
+### PaymentSheet
+* [ADDED] PaymentSheet now supports the following payment methods for SetupIntents and PaymentIntents with setup for future usage:
+  * [7274](https://github.com/stripe/stripe-android/pull/7274) Alipay
+  * [7273](https://github.com/stripe/stripe-android/pull/7273) BECS Direct Debit
+  * [7264](https://github.com/stripe/stripe-android/pull/7264) Cash App Pay
+  * [7269](https://github.com/stripe/stripe-android/pull/7269) iDEAL
+  * [7270](https://github.com/stripe/stripe-android/pull/7270) SEPA
+  * [7272](https://github.com/stripe/stripe-android/pull/7272) Sofort
+* [FIXED][7283](https://github.com/stripe/stripe-android/pull/7283) Fixed an issue where Bancontact SetupIntent or PaymentIntent with setup for future usage would show the mandate text in the middle of the form. 
+
+## 20.29.2 - 2023-09-05
+
+### PaymentSheet
+* [ADDED][7263](https://github.com/stripe/stripe-android/pull/7263) PaymentSheet now supports Bancontact SetupIntent and PaymentIntent with setup for future usage.
+
+## 20.29.1 - 2023-08-31
+
+### PaymentSheet
+
+* [FIXED][7239](https://github.com/stripe/stripe-android/pull/7239) Fix bottom sheet for APIs below 30.
+* [ADDED][7062](https://github.com/stripe/stripe-android/pull/7062) PaymentSheet now supports BLIK for PaymentIntents.
+
+## 20.29.0 - 2023-08-28
+
+⚠️ Note: This release contains a bug on devices running API 29 and below where PaymentSheet doesn't dismiss. Customers can't cancel out of PaymentSheet and it doesn't dismiss when payment completes. Please use version 20.29.1 or newer instead.
+
 ### PaymentSheet
 * [ADDED][7198](https://github.com/stripe/stripe-android/pull/7198) PaymentSheet now supports GrabPay for PaymentIntents.
+* [ADDED][7214](https://github.com/stripe/stripe-android/pull/7214) PaymentSheet now supports FPX for PaymentIntents.
 * [ADDED][7199](https://github.com/stripe/stripe-android/pull/7199) PaymentSheet now supports AmazonPay for PaymentIntents in private beta.
 * [CHANGED][7144](https://github.com/stripe/stripe-android/pull/7144) PaymentSheet now features rounded corners with the radius provided in `PaymentSheet.Shapes.cornerRadiusDp`.
 * [FIXED][7190](https://github.com/stripe/stripe-android/pull/7190) Fixed an issue where amounts in Laotian Kip were displayed incorrectly.

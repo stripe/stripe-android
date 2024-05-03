@@ -58,6 +58,8 @@
   <string name="stripe_email_is_invalid">L-indirizz tal-email li daħħalt mhux tajjeb.</string>
   <!-- label for text field to enter card expiry -->
   <string name="stripe_expiration_date_hint">XX / SS</string>
+  <!-- String to describe that a form field is required to be completed. -->
+  <string name="stripe_field_required">Din hija meħtieġa</string>
   <!-- The label of a text field that is optional. For example, 'Email (optional)' or 'Name (optional) -->
   <string name="stripe_form_label_optional">%s (mhux obbligatorja)</string>
   <!-- Error message for card details form when expiration date isn&apos;t entered completely -->

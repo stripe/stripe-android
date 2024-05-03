@@ -6,9 +6,13 @@ import com.stripe.android.PaymentRelayStarter
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.model.StripeIntent.NextActionData
 import com.stripe.android.payments.DefaultReturnUrl
+import com.stripe.android.payments.core.authentication.BoletoAuthenticator
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
+import com.stripe.android.payments.core.authentication.KonbiniAuthenticator
 import com.stripe.android.payments.core.authentication.OxxoAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
+import com.stripe.android.payments.core.authentication.RealRedirectResolver
+import com.stripe.android.payments.core.authentication.RedirectResolver
 import com.stripe.android.payments.core.authentication.WebIntentAuthenticator
 import com.stripe.android.view.AuthActivityStarterHost
 import dagger.Binds
@@ -59,10 +63,37 @@ internal abstract class AuthenticationModule {
     @IntentAuthenticatorMap
     @Binds
     @IntoMap
+    @IntentAuthenticatorKey(NextActionData.DisplayKonbiniDetails::class)
+    abstract fun bindsKonbiniAuthenticator(
+        konbiniAuthenticator: KonbiniAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.DisplayBoletoDetails::class)
+    abstract fun bindsBoletoAuthenticator(
+        boletoAuthenticator: BoletoAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
     @IntentAuthenticatorKey(NextActionData.CashAppRedirect::class)
     abstract fun bindsCashAppRedirectAuthenticator(
         webIntentAuthenticator: WebIntentAuthenticator
     ): PaymentAuthenticator<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.SwishRedirect::class)
+    abstract fun bindsSwishRedirectAuthenticator(
+        webIntentAuthenticator: WebIntentAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
+
+    @Binds
+    abstract fun bindsRedirectResolver(impl: RealRedirectResolver): RedirectResolver
 
     companion object {
         @Provides

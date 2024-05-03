@@ -25,6 +25,16 @@ class PaymentMethodJsonParserTest {
     }
 
     @Test
+    fun parse_withCardWithDisplayBrand_shouldCreateExpectedObject() {
+        val actualDisplayBrand =
+            PaymentMethodJsonParser().parse(PaymentMethodFixtures.CARD_WITH_DISPLAY_BRAND_JSON)
+                .card?.displayBrand
+
+        assertThat(actualDisplayBrand)
+            .isEqualTo("cartes_bancaires")
+    }
+
+    @Test
     fun parse_withIdeal_shouldCreateExpectedObject() {
         val expectedPaymentMethod = PaymentMethod(
             id = "pm_123456789",
@@ -98,5 +108,19 @@ class PaymentMethodJsonParserTest {
     fun parse_withIdeal_returnsExpectedObject() {
         assertThat(PaymentMethodJsonParser().parse(PaymentMethodFixtures.IDEAL_JSON).type)
             .isEqualTo(PaymentMethod.Type.Ideal)
+    }
+
+    @Test
+    fun parse_withUsBankAccount_returnsExpectedObject() {
+        val usBankAccount = PaymentMethodJsonParser().parse(
+            PaymentMethodFixtures.US_BANK_ACCOUNT_WITH_FCA
+        )
+
+        assertThat(usBankAccount.type)
+            .isEqualTo(PaymentMethod.Type.USBankAccount)
+        assertThat(usBankAccount.usBankAccount?.linkedAccount)
+            .isEqualTo("fca_111")
+        assertThat(usBankAccount.usBankAccount?.financialConnectionsAccount)
+            .isEqualTo("fca_111")
     }
 }

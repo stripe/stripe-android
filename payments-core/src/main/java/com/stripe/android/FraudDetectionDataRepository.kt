@@ -1,6 +1,7 @@
 package com.stripe.android
 
 import android.content.Context
+import com.stripe.android.core.exception.StripeException
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.networking.StripeResponse
@@ -9,6 +10,7 @@ import com.stripe.android.model.parsers.FraudDetectionDataJsonParser
 import com.stripe.android.networking.DefaultFraudDetectionDataRequestFactory
 import com.stripe.android.networking.FraudDetectionData
 import com.stripe.android.networking.FraudDetectionDataRequestFactory
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -43,7 +45,8 @@ internal class DefaultFraudDetectionDataRepository(
     private val localStore: FraudDetectionDataStore,
     private val fraudDetectionDataRequestFactory: FraudDetectionDataRequestFactory,
     private val stripeNetworkClient: StripeNetworkClient,
-    private val workContext: CoroutineContext
+    private val errorReporter: ErrorReporter,
+    private val workContext: CoroutineContext,
 ) : FraudDetectionDataRepository {
     private var cachedFraudDetectionData: FraudDetectionData? = null
 
@@ -55,6 +58,7 @@ internal class DefaultFraudDetectionDataRepository(
         localStore = DefaultFraudDetectionDataStore(context, workContext),
         fraudDetectionDataRequestFactory = DefaultFraudDetectionDataRequestFactory(context),
         stripeNetworkClient = DefaultStripeNetworkClient(workContext = workContext),
+        errorReporter = ErrorReporter.createFallbackInstance(context, emptySet()),
         workContext = workContext
     )
 
@@ -78,6 +82,11 @@ internal class DefaultFraudDetectionDataRepository(
                             localFraudDetectionData
                         )
                     ).fraudDetectionData()
+                }.onFailure {
+                    errorReporter.report(
+                        ErrorReporter.ExpectedErrorEvent.FRAUD_DETECTION_API_FAILURE,
+                        StripeException.create(it)
+                    )
                 }.getOrNull()
             } else {
                 localFraudDetectionData
