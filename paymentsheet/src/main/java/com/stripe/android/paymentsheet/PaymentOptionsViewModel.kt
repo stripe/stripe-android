@@ -37,8 +37,10 @@ import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
@@ -127,7 +129,11 @@ internal class PaymentOptionsViewModel @Inject constructor(
     override var newPaymentSelection: PaymentSelection.New? =
         args.state.paymentSelection as? PaymentSelection.New
 
-    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow()
+    override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(),
+        initialValue = null,
+    )
 
     init {
         SessionSavedStateHandler.attachTo(this, savedStateHandle)
