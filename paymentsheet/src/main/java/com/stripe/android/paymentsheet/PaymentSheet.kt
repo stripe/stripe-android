@@ -728,7 +728,7 @@ class PaymentSheet internal constructor(
 
         internal val layoutMode: LayoutMode,
     ) : Parcelable {
-        constructor(): this(
+        constructor() : this(
             colorsLight = Colors.defaultLight,
             colorsDark = Colors.defaultDark,
             shapes = Shapes.default,
@@ -762,7 +762,7 @@ class PaymentSheet internal constructor(
              * Describes the appearance of the primary button (e.g., the "Pay" button).
              */
             primaryButton: PrimaryButton = PrimaryButton(),
-        ): this(
+        ) : this(
             colorsLight = colorsLight,
             colorsDark = colorsDark,
             shapes = shapes,
