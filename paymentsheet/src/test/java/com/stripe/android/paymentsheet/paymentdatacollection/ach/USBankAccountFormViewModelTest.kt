@@ -647,7 +647,6 @@ class USBankAccountFormViewModelTest {
 
         viewModel.lastTextFieldIdentifier.test {
             assertThat(awaitItem()).isEqualTo(IdentifierSpec.Email)
-            awaitComplete()
         }
     }
 
@@ -671,7 +670,6 @@ class USBankAccountFormViewModelTest {
 
         viewModel.lastTextFieldIdentifier.test {
             assertThat(awaitItem()).isEqualTo(IdentifierSpec.Phone)
-            awaitComplete()
         }
     }
 
@@ -756,7 +754,6 @@ class USBankAccountFormViewModelTest {
 
         viewModel.lastTextFieldIdentifier.test {
             assertThat(awaitItem()).isNull()
-            awaitComplete()
         }
     }
 
