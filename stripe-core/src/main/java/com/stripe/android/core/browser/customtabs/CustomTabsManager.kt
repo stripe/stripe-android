@@ -1,8 +1,12 @@
 package com.stripe.android.core.browser.customtabs
 
 import android.app.Activity
+import android.content.ActivityNotFoundException
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
+import android.os.Build
+import android.os.Build.VERSION_CODES
 import androidx.annotation.RestrictTo
 import androidx.browser.customtabs.CustomTabsCallback
 import androidx.browser.customtabs.CustomTabsClient
@@ -130,13 +134,17 @@ class CustomTabsManagerImpl @Inject constructor(
         fallback: () -> Unit
     ) {
         runCatching {
-            val packageName: String? = getCustomTabsPackage(activity)
+            val packageName: String? = getCustomTabsPackage(uri, activity)
             val customTabsIntent = buildCustomTabsIntent()
 
             // If we cant find a package name no browser that supports Custom Tabs is installed.
             if (packageName == null) {
-                log("Custom tabs unsupported, using fallback")
-                fallback.invoke()
+                if (attemptToLaunchInNativeApp(activity, uri)) {
+                    log("uri launched on native app")
+                } else {
+                    log("Custom tabs unsupported, using fallback")
+                    fallback.invoke()
+                }
             } else {
                 log("Opening Custom Tab with package: $packageName")
                 customTabsIntent.intent.setPackage(packageName)
@@ -148,7 +156,31 @@ class CustomTabsManagerImpl @Inject constructor(
         }
     }
 
+    @Suppress("SwallowedException")
+    private fun attemptToLaunchInNativeApp(activity: Activity, uri: Uri) = when {
+        /**
+         * Android 11 introduces a new Intent flag, FLAG_ACTIVITY_REQUIRE_NON_BROWSER, which is the recommended way
+         * to try opening a native app, as it does not require the app to declare any package manager queries.
+         */
+        Build.VERSION.SDK_INT >= VERSION_CODES.R -> try {
+            activity.startActivity(
+                Intent(Intent.ACTION_VIEW, uri)
+                    .addCategory(Intent.CATEGORY_BROWSABLE)
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REQUIRE_NON_BROWSER)
+            )
+            true
+        } catch (ex: ActivityNotFoundException) {
+            false
+        }
+        /**
+         * Pre-Android 11, we need to query the package manager to see if the app is installed,
+         * which we can't do as we'd need to register all bank apps supporting app2app.
+         */
+        else -> false
+    }
+
     private fun buildCustomTabsIntent() = CustomTabsIntent.Builder(getSession())
+        .setSendToExternalDefaultHandlerEnabled(true)
         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
         .build()
 
@@ -168,7 +200,7 @@ class CustomTabsManagerImpl @Inject constructor(
             return
         }
 
-        val packageName = getCustomTabsPackage(context)
+        val packageName = getCustomTabsPackage(Uri.parse("http://"), context)
         if (packageName == null) {
             log("Unable to bind: No Custom Tabs compatible browser found")
             return

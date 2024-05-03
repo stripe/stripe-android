@@ -24,12 +24,15 @@ class GetCustomTabsPackage @Inject constructor(
      * @param context to use for accessing [PackageManager].
      * @return The package name recommended to use for connecting to custom tabs related components.
      */
-    operator fun invoke(context: Context): String? = runCatching {
+    operator fun invoke(url: Uri, context: Context): String? = runCatching {
         val pm = context.packageManager
+        val activityIntent = Intent(Intent.ACTION_VIEW, url)
+
         // Get default VIEW intent handler.
-        val activityIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
-        val defaultViewHandlerInfo = pm.resolveActivity(activityIntent, 0)
-        val defaultBrowserPackage = defaultViewHandlerInfo?.activityInfo?.packageName
+        val defaultPackage = pm
+            .resolveActivity(activityIntent, PackageManager.MATCH_DEFAULT_ONLY)
+            ?.activityInfo
+            ?.packageName
 
         // Get all apps that can handle VIEW intents.
         val packagesSupportingHttp = queryIntentActivities(pm, activityIntent)
@@ -41,12 +44,14 @@ class GetCustomTabsPackage @Inject constructor(
         }.map { it.activityInfo.packageName }
 
         return when {
-            // If it is empty, device does not have a browser that supports Custom Tabs.
+            // We cannot resolve the default package. Although there might be a custom tabs browser installed,
+            // this can be an app2app link (we cannot resolve the exact package without registering it on the manifest).
+            // in this cases, let's not force using custom tabs.
+            defaultPackage.isNullOrEmpty() -> null
+            // Device does not have a browser that supports Custom Tabs.
             packagesSupportingCustomTabs.isEmpty() -> null
             // Prefer the default browser if it supports Custom Tabs.
-            defaultBrowserPackage?.isNotEmpty() == true &&
-                !hasSpecializedHandlerIntents(context, activityIntent) &&
-                packagesSupportingCustomTabs.contains(defaultBrowserPackage) -> defaultBrowserPackage
+            defaultPackage.isNotEmpty() && packagesSupportingCustomTabs.contains(defaultPackage) -> defaultPackage
             // pick the next favorite Custom Tabs provider.
             else -> packagesSupportingCustomTabs[0]
         }
@@ -54,32 +59,6 @@ class GetCustomTabsPackage @Inject constructor(
         logger.error("Exception while retrieving Custom Tabs package", it)
         null
     }
-
-    /**
-     * Used to check whether there is a specialized handler for a given intent.
-     * @param intent The intent to check with.
-     * @return Whether there is a specialized handler for the given intent.
-     */
-    private fun hasSpecializedHandlerIntents(
-        context: Context,
-        intent: Intent
-    ): Boolean =
-        runCatching {
-            val handlers = context.packageManager.queryIntentActivities(
-                intent,
-                PackageManager.GET_RESOLVED_FILTER
-            )
-            return handlers.any { resolveInfo ->
-                val filter = resolveInfo.filter
-                filter != null &&
-                    filter.countDataAuthorities() != 0 &&
-                    filter.countDataPaths() != 0 &&
-                    resolveInfo.activityInfo != null
-            }
-        }.getOrElse {
-            logger.error("Runtime exception while getting specialized handlers", it)
-            false
-        }
 
     private fun queryIntentActivities(
         pm: PackageManager,
