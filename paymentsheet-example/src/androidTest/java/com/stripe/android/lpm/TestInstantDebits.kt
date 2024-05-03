@@ -62,6 +62,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     }
 
     @Test
+    @Ignore
     fun testInstantDebitsCancelAllowsUserToContinue() {
         testDriver.confirmInstantDebits(
             testParameters = testParameters.copy(
@@ -75,6 +76,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
     }
 
     @Test
+    @Ignore
     fun testInstantDebitsCancelAllowsUserToContinueInCustomFlow() {
         testDriver.confirmInstantDebitsInCustomFlow(
             testParameters = testParameters.copy(

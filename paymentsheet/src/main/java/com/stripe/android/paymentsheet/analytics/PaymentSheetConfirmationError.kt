@@ -18,6 +18,11 @@ internal sealed class PaymentSheetConfirmationError : Throwable() {
             get() = "googlePay_$errorCode"
     }
 
+    data object ExternalPaymentMethod : PaymentSheetConfirmationError() {
+        override val analyticsValue: String
+            get() = "externalPaymentMethodError"
+    }
+
     object InvalidState : PaymentSheetConfirmationError() {
 
         override val analyticsValue: String

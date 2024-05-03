@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.analytics
 
+import com.stripe.android.common.analytics.getExternalPaymentMethodsAnalyticsValue
 import com.stripe.android.common.analytics.toAnalyticsMap
 import com.stripe.android.common.analytics.toAnalyticsValue
 import com.stripe.android.core.networking.AnalyticsEvent
@@ -99,6 +100,7 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
 
         override val additionalParams: Map<String, Any?>
             get() {
+
                 @Suppress("DEPRECATION")
                 val configurationMap = mapOf(
                     FIELD_CUSTOMER to (configuration.customer != null),
@@ -115,7 +117,8 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
                     FIELD_BILLING_DETAILS_COLLECTION_CONFIGURATION to (
                         configuration.billingDetailsCollectionConfiguration.toAnalyticsMap()
                         ),
-                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue()
+                    FIELD_PREFERRED_NETWORKS to configuration.preferredNetworks.toAnalyticsValue(),
+                    FIELD_EXTERNAL_PAYMENT_METHODS to configuration.getExternalPaymentMethodsAnalyticsValue(),
                 )
                 return mapOf(
                     FIELD_MOBILE_PAYMENT_ELEMENT_CONFIGURATION to configurationMap,
@@ -459,9 +462,12 @@ internal sealed class PaymentSheetEvent : AnalyticsEvent {
         const val FIELD_CBC_EVENT_SOURCE = "cbc_event_source"
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_LINK_CONTEXT = "link_context"
+        const val FIELD_EXTERNAL_PAYMENT_METHODS = "external_payment_methods"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
+
+        const val MAX_EXTERNAL_PAYMENT_METHODS = 10
     }
 }
 

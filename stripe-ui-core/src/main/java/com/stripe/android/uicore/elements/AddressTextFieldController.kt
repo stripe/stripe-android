@@ -16,7 +16,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressTextFieldController(
@@ -65,7 +64,7 @@ class AddressTextFieldController(
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: Flow<FieldError?> = visibleError.map { visibleError ->
+    override val error: Flow<FieldError?> = visibleError.mapAsStateFlow { visibleError ->
         _fieldState.value.getError()?.takeIf { visibleError }
     }
 

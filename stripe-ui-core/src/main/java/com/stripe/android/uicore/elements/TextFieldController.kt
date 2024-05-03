@@ -22,7 +22,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 
 @OptIn(ExperimentalComposeUiApi::class)
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP_PREFIX)
@@ -170,7 +169,7 @@ class SimpleTextFieldController(
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: Flow<FieldError?> = visibleError.map { visibleError ->
+    override val error: Flow<FieldError?> = visibleError.mapAsStateFlow { visibleError ->
         _fieldState.value.getError()?.takeIf { visibleError }
     }
 

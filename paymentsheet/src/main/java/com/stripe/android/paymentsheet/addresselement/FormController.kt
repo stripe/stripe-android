@@ -10,7 +10,6 @@ import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 /**
@@ -60,7 +59,7 @@ internal class FormController @Inject constructor(
         elementsList.filter { mapEntry ->
             !hiddenIdentifiers.contains(mapEntry.key)
         }
-    }.map { map ->
+    }.mapAsStateFlow { map ->
         map.takeIf { it.values.all { entry -> entry.isComplete } }
     }
 

@@ -1733,6 +1733,27 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `On payment method selection, should report event`() = runTest(testDispatcher) {
+        val eventReporter = mock<CustomerSheetEventReporter>()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                LpmRepositoryTestHelpers.usBankAccount
+            )
+        )
+
+        verify(eventReporter).onPaymentMethodSelected(PaymentMethod.Type.USBankAccount.code)
+    }
+
+    @Test
     fun `Payment method form elements are populated when switching payment method types`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,

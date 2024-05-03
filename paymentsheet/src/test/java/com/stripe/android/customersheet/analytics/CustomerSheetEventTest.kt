@@ -140,4 +140,18 @@ class CustomerSheetEventTest {
             )
         )
     }
+
+    @Test
+    fun `SelectPaymentMethod event should return expected toString()`() {
+        val event = CustomerSheetEvent.SelectPaymentMethod(code = "card")
+
+        assertThat(event.eventName).isEqualTo("cs_carousel_payment_method_selected")
+
+        assertThat(event.additionalParams)
+            .isEqualTo(
+                mapOf(
+                    "selected_lpm" to "card",
+                )
+            )
+    }
 }

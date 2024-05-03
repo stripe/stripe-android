@@ -63,6 +63,15 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         }
     }
 
+    class SelectPaymentMethod(
+        code: String,
+    ) : CustomerSheetEvent() {
+        override val eventName: String = CS_PAYMENT_METHOD_SELECTED
+        override val additionalParams: Map<String, Any?> = mapOf(
+            FIELD_SELECTED_LPM to code,
+        )
+    }
+
     class ConfirmPaymentMethodSucceeded(
         type: String,
     ) : CustomerSheetEvent() {
@@ -203,6 +212,9 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED =
             "cs_select_payment_method_screen_confirmed_savedpm_failure"
 
+        const val CS_PAYMENT_METHOD_SELECTED =
+            "cs_carousel_payment_method_selected"
+
         const val CS_CARD_NUMBER_COMPLETED =
             "cs_card_number_completed"
 
@@ -249,6 +261,7 @@ internal sealed class CustomerSheetEvent : AnalyticsEvent {
         const val FIELD_SELECTED_CARD_BRAND = "selected_card_brand"
         const val FIELD_ERROR_MESSAGE = "error_message"
         const val FIELD_PAYMENT_METHOD_TYPE = "payment_method_type"
+        const val FIELD_SELECTED_LPM = "selected_lpm"
 
         const val VALUE_EDIT_CBC_EVENT_SOURCE = "edit"
         const val VALUE_ADD_CBC_EVENT_SOURCE = "add"
