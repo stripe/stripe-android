@@ -19,9 +19,10 @@ import javax.inject.Inject
  *
  * Usage:
  *
- * 1. Register the CustomTabsManager as a lifecycle observer in your activity.
- * 2. (Optional) Call [CustomTabsManager.mayLaunchUrl] to pre-fetch the url.
- * 3. Call [CustomTabsManager.openCustomTab] to open URLs.
+ * 1. Ensure you register the CustomTabsService in your SDK's AndroidManifest.
+ * 2. Register the CustomTabsManager as a lifecycle observer in your activity.
+ * 3. (Optional) Call [CustomTabsManager.mayLaunchUrl] to pre-fetch the url.
+ * 4. Call [CustomTabsManager.openCustomTab] to open URLs.
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface CustomTabsManager : DefaultLifecycleObserver {

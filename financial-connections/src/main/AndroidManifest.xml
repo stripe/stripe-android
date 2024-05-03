@@ -3,6 +3,25 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <!--
+    See https://developer.android.com/training/package-visibility/declaring for more details.
+    -->
+    <queries>
+        <!--
+        Added to check the browsers that support Custom Tabs Service.
+        -->
+        <intent>
+            <action android:name="android.support.customtabs.action.CustomTabsService" />
+        </intent>
+        <!--
+        Added to check the browsers that can be used to open a URL.
+        -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+    </queries>
+
     <application>
         <activity
             android:name=".FinancialConnectionsSheetRedirectActivity"
