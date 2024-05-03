@@ -700,35 +700,88 @@ class PaymentSheet internal constructor(
     }
 
     @Parcelize
-    data class Appearance(
+    data class Appearance internal constructor(
         /**
          * Describes the colors used while the system is in light mode.
          */
-        val colorsLight: Colors = Colors.defaultLight,
+        val colorsLight: Colors,
 
         /**
          * Describes the colors used while the system is in dark mode.
          */
-        val colorsDark: Colors = Colors.defaultDark,
+        val colorsDark: Colors,
 
         /**
          * Describes the appearance of shapes.
          */
-        val shapes: Shapes = Shapes.default,
+        val shapes: Shapes,
 
         /**
          * Describes the typography used for text.
          */
-        val typography: Typography = Typography.default,
+        val typography: Typography,
 
         /**
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
-        val primaryButton: PrimaryButton = PrimaryButton()
+        val primaryButton: PrimaryButton,
+
+        internal val layoutMode: LayoutMode,
     ) : Parcelable {
+        constructor(): this(
+            colorsLight = Colors.defaultLight,
+            colorsDark = Colors.defaultDark,
+            shapes = Shapes.default,
+            typography = Typography.default,
+            primaryButton = PrimaryButton(),
+            layoutMode = LayoutMode.default,
+        )
+
+        constructor(
+            /**
+             * Describes the colors used while the system is in light mode.
+             */
+            colorsLight: Colors = Colors.defaultLight,
+
+            /**
+             * Describes the colors used while the system is in dark mode.
+             */
+            colorsDark: Colors = Colors.defaultDark,
+
+            /**
+             * Describes the appearance of shapes.
+             */
+            shapes: Shapes = Shapes.default,
+
+            /**
+             * Describes the typography used for text.
+             */
+            typography: Typography = Typography.default,
+
+            /**
+             * Describes the appearance of the primary button (e.g., the "Pay" button).
+             */
+            primaryButton: PrimaryButton = PrimaryButton(),
+        ): this(
+            colorsLight = colorsLight,
+            colorsDark = colorsDark,
+            shapes = shapes,
+            typography = typography,
+            primaryButton = primaryButton,
+            layoutMode = LayoutMode.default,
+        )
 
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
+        }
+
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        enum class LayoutMode {
+            Horizontal, Vertical;
+
+            internal companion object {
+                internal val default: LayoutMode = Horizontal
+            }
         }
 
         class Builder {
@@ -737,6 +790,7 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
+            private var layoutMode: LayoutMode = LayoutMode.default
 
             fun colorsLight(colors: Colors) = apply {
                 this.colorsLight = colors
@@ -758,8 +812,14 @@ class PaymentSheet internal constructor(
                 this.primaryButton = primaryButton
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalLayoutModeApi
+            fun layoutMode(layoutMode: LayoutMode) = apply {
+                this.layoutMode = layoutMode
+            }
+
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton)
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, layoutMode)
             }
         }
     }
