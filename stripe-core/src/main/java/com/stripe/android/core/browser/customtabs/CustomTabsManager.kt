@@ -104,7 +104,7 @@ class CustomTabsManagerImpl @Inject constructor(
                 }
             }
                 .onFailure { log("OnStop: couldn't unbind, ${it.stackTraceToString()}") }
-                .onSuccess { }
+                .onSuccess { log("OnStop: service unbound") }
         }
         client = null
         connection = null
@@ -135,12 +135,15 @@ class CustomTabsManagerImpl @Inject constructor(
 
             // If we cant find a package name no browser that supports Custom Tabs is installed.
             if (packageName == null) {
+                log("Custom tabs unsupported, using fallback")
                 fallback.invoke()
             } else {
+                log("Opening Custom Tab with package: $packageName")
                 customTabsIntent.intent.setPackage(packageName)
                 customTabsIntent.launchUrl(activity, uri)
             }
         }.onFailure {
+            log("Failed to open Custom Tab, using fallback: ${it.stackTraceToString()}")
             fallback.invoke()
         }
     }
