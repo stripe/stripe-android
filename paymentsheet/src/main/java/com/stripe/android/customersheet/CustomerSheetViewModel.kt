@@ -154,6 +154,8 @@ internal class CustomerSheetViewModel(
     init {
         configuration.appearance.parseAppearance()
 
+        eventReporter.onInit(configuration)
+
         if (viewState.value is CustomerSheetViewState.Loading) {
             viewModelScope.launch(workContext) {
                 loadCustomerSheetState()
