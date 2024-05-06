@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
@@ -85,14 +86,8 @@ internal class PollingActivity : AppCompatActivity() {
                     }
                 }
 
-                StripeBottomSheetLayout(
+                ElementsBottomSheetLayout(
                     state = state,
-                    onUpdateStatusBarColor = { color ->
-                        systemUiController.setStatusBarColor(
-                            color = color,
-                            darkIcons = false,
-                        )
-                    },
                     onDismissed = { /* Not applicable here */ },
                 ) {
                     PollingScreen(viewModel)

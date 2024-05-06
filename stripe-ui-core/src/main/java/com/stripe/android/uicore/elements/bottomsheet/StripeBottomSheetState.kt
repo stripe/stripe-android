@@ -1,6 +1,5 @@
 package com.stripe.android.uicore.elements.bottomsheet
 
-import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.compose.animation.core.tween
 import androidx.compose.material.ExperimentalMaterialApi
@@ -10,7 +9,6 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
-import com.stripe.android.uicore.BuildConfig
 import kotlinx.coroutines.flow.first
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -28,12 +26,9 @@ fun rememberStripeBottomSheetState(
         animationSpec = tween(),
     )
 
-    val keyboardHandler = rememberBottomSheetKeyboardHandler()
-
     return remember {
         StripeBottomSheetState(
             modalBottomSheetState = modalBottomSheetState,
-            keyboardHandler = keyboardHandler,
         )
     }
 }
@@ -42,10 +37,19 @@ fun rememberStripeBottomSheetState(
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class StripeBottomSheetState internal constructor(
     val modalBottomSheetState: ModalBottomSheetState,
-    private val keyboardHandler: BottomSheetKeyboardHandler,
 ) {
 
+    interface DismissalInterceptor {
+        suspend fun onBottomSheetDismissal()
+    }
+
     private var dismissalType: DismissalType? = null
+
+    private val dismissalInterceptors = mutableListOf<DismissalInterceptor>()
+
+    fun addInterceptor(interceptor: DismissalInterceptor) {
+        dismissalInterceptors += interceptor
+    }
 
     suspend fun show() {
         repeatUntilSucceededOrLimit(10) {
@@ -64,14 +68,12 @@ class StripeBottomSheetState internal constructor(
     }
 
     suspend fun hide() {
-        if (skipHideAnimation) {
-            return
+        dismissalType = DismissalType.Programmatically
+
+        for (interceptor in dismissalInterceptors) {
+            interceptor.onBottomSheetDismissal()
         }
 
-        dismissalType = DismissalType.Programmatically
-        // We dismiss the keyboard before we dismiss the sheet. This looks cleaner and prevents
-        // a CancellationException.
-        keyboardHandler.dismiss()
         if (modalBottomSheetState.isVisible) {
             repeatUntilSucceededOrLimit(10) {
                 // Hiding the bottom sheet can be interrupted.
@@ -87,23 +89,6 @@ class StripeBottomSheetState internal constructor(
         SwipedDownByUser,
     }
 }
-
-private val skipHideAnimation: Boolean
-    get() = BuildConfig.DEBUG && (isRunningUnitTest || isRunningUiTest)
-
-private val isRunningUnitTest: Boolean
-    get() {
-        return runCatching {
-            Build.FINGERPRINT.lowercase() == "robolectric"
-        }.getOrDefault(false)
-    }
-
-private val isRunningUiTest: Boolean
-    get() {
-        return runCatching {
-            Class.forName("androidx.test.InstrumentationRegistry")
-        }.isSuccess
-    }
 
 private suspend fun repeatUntilSucceededOrLimit(
     limit: Int,

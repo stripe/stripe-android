@@ -16,9 +16,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.customersheet.CustomerSheetViewAction.OnDismissed
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.utils.fadeOut
 
@@ -100,15 +101,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
                 }
 
-                StripeBottomSheetLayout(
+                ElementsBottomSheetLayout(
                     state = bottomSheetState,
-                    onUpdateStatusBarColor = { color ->
-                        systemUiController.setStatusBarColor(
-                            color = color,
-                            darkIcons = false,
-                        )
-                    },
-                    onDismissed = { viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed) },
+                    onDismissed = { viewModel.handleViewAction(OnDismissed) },
                 ) {
                     CustomerSheetScreen(
                         viewState = viewState,

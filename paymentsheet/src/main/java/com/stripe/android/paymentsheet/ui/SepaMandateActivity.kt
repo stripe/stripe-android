@@ -25,10 +25,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -63,14 +63,8 @@ internal class SepaMandateActivity : AppCompatActivity() {
                     )
                 }
 
-                StripeBottomSheetLayout(
+                ElementsBottomSheetLayout(
                     state = bottomSheetState,
-                    onUpdateStatusBarColor = { color ->
-                        systemUiController.setStatusBarColor(
-                            color = color,
-                            darkIcons = false,
-                        )
-                    },
                     onDismissed = this::finish,
                 ) {
                     SepaMandateScreen(

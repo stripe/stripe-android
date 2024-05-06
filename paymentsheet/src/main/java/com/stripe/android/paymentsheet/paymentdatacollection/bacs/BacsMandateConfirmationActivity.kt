@@ -12,13 +12,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
+import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationViewAction.OnBackPressed
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
@@ -43,7 +44,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
         renderEdgeToEdge()
 
         onBackPressedDispatcher.addCallback {
-            viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
+            viewModel.handleViewAction(OnBackPressed)
         }
 
         starterArgs.appearance.parseAppearance()
@@ -71,17 +72,9 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                     }
                 }
 
-                StripeBottomSheetLayout(
+                ElementsBottomSheetLayout(
                     state = bottomSheetState,
-                    onUpdateStatusBarColor = { color ->
-                        systemUiController.setStatusBarColor(
-                            color = color,
-                            darkIcons = false,
-                        )
-                    },
-                    onDismissed = {
-                        viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
-                    }
+                    onDismissed = { viewModel.handleViewAction(OnBackPressed) },
                 ) {
                     PaymentSheetScaffold(
                         topBar = {
@@ -95,7 +88,7 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                                     editMenuLabel = StripeR.string.stripe_edit
                                 ),
                                 handleBackPressed = {
-                                    viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
+                                    viewModel.handleViewAction(OnBackPressed)
                                 },
                                 toggleEditing = {},
                             )

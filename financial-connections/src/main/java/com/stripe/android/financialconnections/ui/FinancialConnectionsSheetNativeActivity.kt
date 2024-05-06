@@ -54,7 +54,6 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
-import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
@@ -104,7 +103,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
                     initialValue = ModalBottomSheetValue.Expanded,
                 )
 
-                StripeBottomSheetLayout(
+                FinancialConnectionsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = viewModel::onBackPressed,
                 ) {

@@ -6,9 +6,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.statusBarsPadding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetDefaults
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue.Expanded
@@ -20,7 +18,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState.DismissalType
-import com.stripe.android.uicore.stripeShapes
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
@@ -41,6 +38,7 @@ const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
 @Composable
 fun StripeBottomSheetLayout(
     state: StripeBottomSheetState,
+    layoutInfo: StripeBottomSheetLayoutInfo,
     modifier: Modifier = Modifier,
     onUpdateStatusBarColor: (Color) -> Unit = {},
     onDismissed: () -> Unit,
@@ -72,13 +70,12 @@ fun StripeBottomSheetLayout(
         modifier = modifier
             .statusBarsPadding()
             .imePadding(),
-        sheetState = state.modalBottomSheetState,
-        sheetShape = RoundedCornerShape(
-            topStart = MaterialTheme.stripeShapes.cornerRadius.dp,
-            topEnd = MaterialTheme.stripeShapes.cornerRadius.dp,
-        ),
-        sheetGesturesEnabled = false,
+        scrimColor = layoutInfo.scrimColor,
+        sheetBackgroundColor = layoutInfo.sheetBackgroundColor,
         sheetElevation = 0.dp,
+        sheetGesturesEnabled = false,
+        sheetShape = layoutInfo.sheetShape,
+        sheetState = state.modalBottomSheetState,
         sheetContent = {
             Box(modifier = Modifier.testTag(BottomSheetContentTestTag)) {
                 sheetContent()

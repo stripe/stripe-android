@@ -29,9 +29,9 @@ import com.stripe.android.financialconnections.features.common.LoadingSpinner
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityArgs
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetActivityResult
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
+import com.stripe.android.financialconnections.ui.FinancialConnectionsBottomSheetLayout
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
 import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.utils.fadeOut
@@ -84,11 +84,13 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
                 viewModel.onDismissed()
             }
 
-            StripeBottomSheetLayout(
-                state = bottomSheetState,
-                onDismissed = viewModel::onDismissed,
-            ) {
-                Loading(instantDebits = state.isInstantDebits)
+            FinancialConnectionsTheme {
+                FinancialConnectionsBottomSheetLayout(
+                    state = bottomSheetState,
+                    onDismissed = viewModel::onDismissed,
+                ) {
+                    Loading(instantDebits = state.isInstantDebits)
+                }
             }
         }
     }
