@@ -3,7 +3,6 @@ package com.stripe.android.uicore.elements
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
 import com.stripe.android.uicore.utils.combineAsStateFlow
-import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
 
 /**
@@ -14,15 +13,11 @@ class SectionController(
     @StringRes val label: Int?,
     sectionFieldErrorControllers: List<SectionFieldErrorController>
 ) : Controller {
-    val error: StateFlow<FieldError?> = if (sectionFieldErrorControllers.isEmpty()) {
-        stateFlowOf(null)
-    } else {
-        combineAsStateFlow(
-            sectionFieldErrorControllers.map {
-                it.error
-            }
-        ) { errorArray ->
-            errorArray.firstNotNullOfOrNull { it }
+    val error: StateFlow<FieldError?> = combineAsStateFlow(
+        sectionFieldErrorControllers.map {
+            it.error
         }
+    ) { errorArray ->
+        errorArray.firstNotNullOfOrNull { it }
     }
 }
