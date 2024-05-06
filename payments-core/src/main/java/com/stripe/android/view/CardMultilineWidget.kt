@@ -212,6 +212,23 @@ class CardMultilineWidget @JvmOverloads constructor(
         }
 
     /**
+     * The Stripe account ID (if any) which is the business of record.
+     * See [use cases](https://docs.stripe.com/connect/charges#on_behalf_of) to determine if this option is relevant
+     * for your integration. This should match the
+     * [on_behalf_of](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-on_behalf_of)
+     * provided on the Intent used when confirming payment.
+     */
+    var onBehalfOf: String? = null
+        set(value) {
+            if (isAttachedToWindow) {
+                doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
+                    viewModel.onBehalfOf = value
+                }
+            }
+            field = value
+        }
+
+    /**
      * A [CardParams] representing the card details and postal code if all fields are valid;
      * otherwise `null`
      */
@@ -456,22 +473,6 @@ class CardMultilineWidget @JvmOverloads constructor(
         doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
             viewModel.isCbcEligible.launchAndCollect { isCbcEligible ->
                 cardBrandView.isCbcEligible = isCbcEligible
-            }
-        }
-    }
-
-    /**
-     * The account (if any) for which the funds of the intent are intended.
-     * The Stripe account ID (if any) which is the business of record.
-     * See [use cases](https://docs.stripe.com/connect/charges#on_behalf_of) to determine if this option is relevant
-     * for your integration. This should match the
-     * [on_behalf_of](https://docs.stripe.com/api/payment_intents/create#create_payment_intent-on_behalf_of)
-     * provided on the Intent used when confirming payment.
-     */
-    fun setOnBehalfOf(onBehalfOf: String) {
-        if (isAttachedToWindow) {
-            doWithCardWidgetViewModel(viewModelStoreOwner) { viewModel ->
-                viewModel.onBehalfOf = onBehalfOf
             }
         }
     }
