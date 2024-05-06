@@ -13,8 +13,8 @@ import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GetCustomTabsPackage @Inject constructor(
-    val logger: Logger,
-    val application: Application
+    private val logger: Logger,
+    private val application: Application
 ) {
 
     /**
@@ -22,7 +22,6 @@ class GetCustomTabsPackage @Inject constructor(
      * the one chosen by the user if there is one, otherwise makes a best effort to return a
      * valid package name.
      *
-     * @param context to use for accessing [PackageManager].
      * @return The package name recommended to use for connecting to custom tabs related components.
      */
     operator fun invoke(url: Uri): String? = runCatching {

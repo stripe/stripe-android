@@ -121,7 +121,10 @@ class CustomTabsManagerImpl @Inject constructor(
      * @return a CustomTabsSession, or null if a connection to the service could not be established.
      */
     private fun getOrRetrieveSession(): CustomTabsSession? {
-        session = client?.newSession(null)
+        when {
+            client == null -> session = null
+            session == null -> session = client?.newSession(null)
+        }
         return session
     }
 
