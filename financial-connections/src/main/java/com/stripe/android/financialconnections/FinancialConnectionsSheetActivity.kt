@@ -5,7 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
-import androidx.activity.addCallback
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
@@ -14,15 +14,13 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.SavedStateHandle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.FinishWithResult
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenAuthFlowWithUrl
 import com.stripe.android.financialconnections.FinancialConnectionsSheetViewEffect.OpenNativeAuthFlow
@@ -33,10 +31,10 @@ import com.stripe.android.financialconnections.launcher.FinancialConnectionsShee
 import com.stripe.android.financialconnections.launcher.FinancialConnectionsSheetNativeActivityArgs
 import com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetState
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.fadeOut
 
 internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
@@ -56,20 +54,42 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         if (getArgs(intent) == null) {
             finish()
-        } else {
-            observeViewEffects()
-            browserManager = BrowserManager(application)
-            if (savedInstanceState != null) viewModel.onActivityRecreated()
+            return
         }
 
-        onBackPressedDispatcher.addCallback {
-            finishWithResult(FinancialConnectionsSheetActivityResult.Canceled)
+        browserManager = BrowserManager(application)
+
+        if (savedInstanceState != null) {
+            viewModel.onActivityRecreated()
         }
+
         setContent {
+            val bottomSheetState = rememberStripeBottomSheetState()
             val state by viewModel.stateFlow.collectAsState()
-            Loading(state.isInstantDebits)
+
+            state.viewEffect?.let { viewEffect ->
+                LaunchedEffect(viewEffect) {
+                    handleViewEffect(
+                        viewEffect = viewEffect,
+                        bottomSheetState = bottomSheetState,
+                        onHandled = viewModel::onViewEffectLaunched,
+                    )
+                }
+            }
+
+            BackHandler {
+                viewModel.onDismissed()
+            }
+
+            StripeBottomSheetLayout(
+                state = bottomSheetState,
+                onDismissed = viewModel::onDismissed,
+            ) {
+                Loading(instantDebits = state.isInstantDebits)
+            }
         }
     }
 
@@ -98,40 +118,38 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
         viewModel.handleOnNewIntent(intent)
     }
 
-    /**
-     * handle state changes here.
-     */
+    private suspend fun handleViewEffect(
+        viewEffect: FinancialConnectionsSheetViewEffect,
+        bottomSheetState: StripeBottomSheetState,
+        onHandled: () -> Unit,
+    ) {
+        when (viewEffect) {
+            is OpenAuthFlowWithUrl -> {
+                startBrowserForResult.launch(
+                    browserManager.createBrowserIntentForUrl(
+                        uri = Uri.parse(viewEffect.url)
+                    )
+                )
+            }
 
-    private fun observeViewEffects() = lifecycleScope.launch {
-        repeatOnLifecycle(Lifecycle.State.STARTED) {
-            viewModel.stateFlow
-                .map { it.viewEffect }
-                .distinctUntilChanged()
-                .filterNotNull()
-                .collect { viewEffect ->
-                    when (viewEffect) {
-                        is OpenAuthFlowWithUrl -> startBrowserForResult.launch(
-                            browserManager.createBrowserIntentForUrl(
-                                uri = Uri.parse(viewEffect.url)
-                            )
-                        )
-
-                        is FinishWithResult -> {
-                            viewEffect.finishToast?.let { resId ->
-                                Toast.makeText(
-                                    this@FinancialConnectionsSheetActivity,
-                                    resId,
-                                    Toast.LENGTH_LONG
-                                ).show()
-                            }
-                            finishWithResult(viewEffect.result)
-                        }
-
-                        is OpenNativeAuthFlow -> openNativeAuthFlow(viewEffect)
-                    }
-                    viewModel.onViewEffectLaunched()
+            is FinishWithResult -> {
+                viewEffect.finishToast?.let { resId ->
+                    Toast.makeText(
+                        this@FinancialConnectionsSheetActivity,
+                        resId,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
+                bottomSheetState.hide()
+                finishWithResult(viewEffect.result)
+            }
+
+            is OpenNativeAuthFlow -> {
+                openNativeAuthFlow(viewEffect)
+            }
         }
+
+        onHandled()
     }
 
     private fun openNativeAuthFlow(viewEffect: OpenNativeAuthFlow) {
@@ -149,6 +167,7 @@ internal class FinancialConnectionsSheetActivity : AppCompatActivity() {
     private fun finishWithResult(result: FinancialConnectionsSheetActivityResult) {
         setResult(RESULT_OK, Intent().putExtras(result.toBundle()))
         finish()
+        fadeOut()
     }
 
     companion object {

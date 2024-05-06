@@ -240,6 +240,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         }
     }
 
+    fun onDismissed() {
+        finishWithResult(
+            state = stateFlow.value,
+            result = Canceled
+        )
+    }
+
     /**
      * If activity receives result and we did not receive a callback from the custom tabs,
      * if activity got recreated and the auth flow is still active then the user hit
