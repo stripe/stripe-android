@@ -179,6 +179,8 @@ class CustomTabsManagerImpl @Inject constructor(
     private fun buildCustomTabsIntent() = CustomTabsIntent.Builder(getSession())
         .setSendToExternalDefaultHandlerEnabled(true)
         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
+        .setDownloadButtonEnabled(false)
+        .setBookmarksButtonEnabled(false)
         .build()
 
     override fun mayLaunchUrl(url: String): Boolean = client
