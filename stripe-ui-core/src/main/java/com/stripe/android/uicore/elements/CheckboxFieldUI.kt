@@ -41,7 +41,7 @@ fun CheckboxFieldUI(
     enabled: Boolean = true
 ) {
     val isChecked by controller.isChecked.collectAsState()
-    val error by controller.error.collectAsState(initial = null)
+    val error by controller.error.collectAsState()
 
     CheckboxFieldUIView(
         modifier = modifier,
