@@ -5,11 +5,11 @@ import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
-data class ConfirmIntentSetting(
+data class TestModeSetting(
     override val selectedOption: Boolean = false,
-    override val key: String = "financial_connections_confirm_intent",
+    override val key: String = "financial_connections_test_mode",
 ) : Saveable<Boolean>, SingleChoiceSetting<Boolean>(
-    displayName = "Confirm Intent",
+    displayName = "Enable Test Mode",
     options = listOf(
         Option("On", true),
         Option("Off", false),
@@ -18,18 +18,18 @@ data class ConfirmIntentSetting(
 ) {
     override fun lasRequest(
         body: LinkAccountSessionBody,
-    ): LinkAccountSessionBody = body
+    ): LinkAccountSessionBody = body.copy(testMode = selectedOption)
 
     override fun paymentIntentRequest(
         body: PaymentIntentBody,
-    ): PaymentIntentBody = body
+    ): PaymentIntentBody = body.copy(testMode = selectedOption)
 
     override fun valueUpdated(currentSettings: List<Setting<*>>, value: Boolean): List<Setting<*>> {
         return replace(currentSettings, this.copy(selectedOption = value))
     }
 
     override fun shouldDisplay(merchant: Merchant, flow: Flow): Boolean {
-        return flow == Flow.PaymentIntent
+        return merchant != Merchant.Custom && merchant.canSwitchBetweenTestAndLive
     }
 
     override fun convertToValue(value: String): Boolean = value.toBoolean()

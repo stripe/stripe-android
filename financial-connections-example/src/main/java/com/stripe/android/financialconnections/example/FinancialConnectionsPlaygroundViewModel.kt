@@ -311,21 +311,22 @@ internal class FinancialConnectionsPlaygroundViewModel(
     }
 }
 
-@Suppress("Unused")
-enum class Merchant(val apiValue: String) {
-    Test("testmode"),
-    PartnerM("partner_m"),
-    PartnerF("partner_f"),
-    PartnerD("partner_d"),
+enum class Merchant(
+    val apiValue: String,
+    val canSwitchBetweenTestAndLive: Boolean = true,
+) {
+    Default("default"),
+    PartnerD("partner_d", canSwitchBetweenTestAndLive = false),
+    PartnerF("partner_f", canSwitchBetweenTestAndLive = false),
+    PartnerM("partner_m", canSwitchBetweenTestAndLive = false),
     PlatformC("strash"),
-    App2App("app2app"),
     Networking("networking"),
-    NetworkingTestMode("networking_testmode"),
-    Livetesting("live_testing"),
-    Other("other");
+    Custom("other");
 
     companion object {
-        fun fromApiValue(apiValue: String): Merchant = entries.first { it.apiValue == apiValue }
+        fun fromApiValue(apiValue: String): Merchant {
+            return entries.firstOrNull { it.apiValue == apiValue } ?: Default
+        }
     }
 }
 

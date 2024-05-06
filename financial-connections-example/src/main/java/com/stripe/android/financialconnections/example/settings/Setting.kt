@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.example.settings
 
+import com.stripe.android.financialconnections.example.Flow
+import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
@@ -18,6 +20,8 @@ sealed class Setting<T> {
         @Suppress("UNCHECKED_CAST")
         return this as? Saveable<T>?
     }
+
+    open fun shouldDisplay(merchant: Merchant, flow: Flow): Boolean = true
 
     abstract val displayName: String
     abstract val selectedOption: T
