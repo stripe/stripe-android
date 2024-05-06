@@ -7,7 +7,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.utils.mapAsStateFlow
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -30,7 +29,7 @@ class CheckboxFieldController constructor(
     val isChecked: StateFlow<Boolean>
         get() = _isChecked
 
-    override val error: Flow<FieldError?> = _isChecked.mapAsStateFlow { value ->
+    override val error: StateFlow<FieldError?> = _isChecked.mapAsStateFlow { value ->
         when {
             !value && hasBeenEdited -> FieldError(errorMessage = R.string.stripe_field_required)
             else -> null
