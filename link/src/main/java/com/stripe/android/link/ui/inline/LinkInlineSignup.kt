@@ -240,7 +240,7 @@ internal fun LinkFields(
 ) {
     var didShowAllFields by rememberSaveable { mutableStateOf(false) }
 
-    val sectionError by sectionController.error.collectAsState(null)
+    val sectionError by sectionController.error.collectAsState()
 
     AnimatedVisibility(visible = expanded) {
         Column(
