@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
+import com.stripe.android.paymentsheet.ExternalPaymentMethodResultHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
@@ -23,7 +23,7 @@ class FawryActivity : AppCompatActivity() {
 
         if (intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE) != "external_fawry") {
             finishWithResult(
-                ExternalPaymentMethodResult.Failed,
+                ExternalPaymentMethodResultHandler.Failed,
                 errorMessage = "Received invalid external payment method type. Expected external_fawry."
             )
         }
@@ -37,26 +37,26 @@ class FawryActivity : AppCompatActivity() {
                     if (billingDetails != null) {
                         BillingDetails(billingDetails = billingDetails)
                     }
-                    ResultButton(result = ExternalPaymentMethodResult.Completed)
-                    ResultButton(result = ExternalPaymentMethodResult.Canceled)
-                    ResultButton(result = ExternalPaymentMethodResult.Failed)
+                    ResultButton(result = ExternalPaymentMethodResultHandler.Completed)
+                    ResultButton(result = ExternalPaymentMethodResultHandler.Canceled)
+                    ResultButton(result = ExternalPaymentMethodResultHandler.Failed)
                 }
             }
         }
     }
 
-    private fun finishWithResult(result: ExternalPaymentMethodResult, errorMessage: String?) {
+    private fun finishWithResult(result: ExternalPaymentMethodResultHandler, errorMessage: String?) {
         val resultCode = result.resultCode
         var data: Intent? = null
-        if (result is ExternalPaymentMethodResult.Failed) {
-            data = Intent().putExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA, errorMessage)
+        if (result is ExternalPaymentMethodResultHandler.Failed) {
+            data = Intent().putExtra(ExternalPaymentMethodResultHandler.Failed.ERROR_MESSAGE_EXTRA, errorMessage)
         }
         setResult(resultCode, data)
         finish()
     }
 
     @Composable
-    fun ResultButton(result: ExternalPaymentMethodResult) {
+    fun ResultButton(result: ExternalPaymentMethodResultHandler) {
         Button(onClick = { finishWithResult(result, errorMessage = "Payment Failed!") }) {
             Text(text = result.toString())
         }

@@ -27,7 +27,7 @@ internal class ExternalPaymentMethodContractTest {
     @Test
     fun failedResultParsedCorrectly() {
         val expectedErrorMessage = "external payment method payment failed"
-        val intent = Intent().putExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA, expectedErrorMessage)
+        val intent = Intent().putExtra(ExternalPaymentMethodResultHandler.Failed.ERROR_MESSAGE_EXTRA, expectedErrorMessage)
 
         val actualResult = externalPaymentMethodContract.parseResult(Activity.RESULT_FIRST_USER, intent = intent)
 
@@ -38,7 +38,7 @@ internal class ExternalPaymentMethodContractTest {
     @Test
     fun invalidResultCodeParsedCorrectly() {
         val expectedErrorMessage = "Invalid result code returned by external payment method activity"
-        val intent = Intent().putExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA, expectedErrorMessage)
+        val intent = Intent().putExtra(ExternalPaymentMethodResultHandler.Failed.ERROR_MESSAGE_EXTRA, expectedErrorMessage)
 
         val actualResult = externalPaymentMethodContract.parseResult(resultCode = 100, intent = intent)
 

@@ -154,6 +154,17 @@ class PaymentSheet internal constructor(
         )
     }
 
+    /**
+     * Handles an [ExternalPaymentMethodResultHandler].
+     *
+     * @param externalPaymentMethodResult The result of the external payment method's confirm.
+     */
+    fun onExternalPaymentMethodResult(
+        externalPaymentMethodResult: ExternalPaymentMethodResultHandler
+    ) {
+        // TODO: implement
+    }
+
     internal sealed class InitializationMode : Parcelable {
 
         internal abstract fun validate()

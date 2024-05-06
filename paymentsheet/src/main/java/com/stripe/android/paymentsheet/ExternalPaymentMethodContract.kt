@@ -18,13 +18,13 @@ internal class ExternalPaymentMethodContract : ActivityResultContract<ExternalPa
 
     override fun parseResult(resultCode: Int, intent: Intent?): PaymentResult {
         return when (resultCode) {
-            ExternalPaymentMethodResult.Completed.resultCode -> PaymentResult.Completed
-            ExternalPaymentMethodResult.Canceled.resultCode -> PaymentResult.Canceled
-            ExternalPaymentMethodResult.Failed.resultCode ->
+            ExternalPaymentMethodResultHandler.Completed.resultCode -> PaymentResult.Completed
+            ExternalPaymentMethodResultHandler.Canceled.resultCode -> PaymentResult.Canceled
+            ExternalPaymentMethodResultHandler.Failed.resultCode ->
                 PaymentResult.Failed(
                     throwable = Throwable(
                         cause = null,
-                        message = intent?.getStringExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA)
+                        message = intent?.getStringExtra(ExternalPaymentMethodResultHandler.Failed.ERROR_MESSAGE_EXTRA)
                     )
                 )
 
