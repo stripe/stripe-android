@@ -96,7 +96,7 @@ class PaymentMethodsUIScreenshotTest {
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
             ).createSupportedPaymentMethod()
-        )
+        ).plus(paymentMethods)
         paparazziRule.snapshot {
             PaymentMethodsUI(
                 paymentMethods = paymentMethods,
@@ -119,7 +119,7 @@ class PaymentMethodsUIScreenshotTest {
                 darkThemeIconUrl = null,
                 tintIconOnSelection = false,
             )
-        )
+        ).plus(paymentMethods)
         paparazziRule.snapshot {
             PaymentMethodsUI(
                 paymentMethods = paymentMethods,
