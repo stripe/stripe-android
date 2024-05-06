@@ -54,6 +54,8 @@ import com.stripe.android.financialconnections.ui.components.FinancialConnection
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme
 import com.stripe.android.financialconnections.utils.KeyboardController
 import com.stripe.android.financialconnections.utils.rememberKeyboardController
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.uicore.image.StripeImageLoader
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -98,10 +100,19 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         setContent {
             FinancialConnectionsTheme {
                 val state by viewModel.stateFlow.collectAsState()
-                NavHost(
-                    initialPane = state.initialPane,
-                    testMode = state.testMode,
+                val bottomSheetState = rememberStripeBottomSheetState(
+                    initialValue = ModalBottomSheetValue.Expanded,
                 )
+
+                StripeBottomSheetLayout(
+                    state = bottomSheetState,
+                    onDismissed = viewModel::onBackPressed,
+                ) {
+                    NavHost(
+                        initialPane = state.initialPane,
+                        testMode = state.testMode,
+                    )
+                }
             }
         }
     }

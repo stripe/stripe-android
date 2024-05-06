@@ -83,10 +83,11 @@ class StripeBottomSheetState(
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 @Composable
 fun rememberStripeBottomSheetState(
+    initialValue: ModalBottomSheetValue = ModalBottomSheetValue.Hidden,
     confirmValueChange: (ModalBottomSheetValue) -> Boolean = { true },
 ): StripeBottomSheetState {
     val modalBottomSheetState = rememberModalBottomSheetState(
-        initialValue = ModalBottomSheetValue.Hidden,
+        initialValue = initialValue,
         confirmValueChange = confirmValueChange,
         skipHalfExpanded = true,
         animationSpec = tween(),
