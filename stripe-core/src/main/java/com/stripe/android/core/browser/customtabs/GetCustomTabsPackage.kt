@@ -1,6 +1,6 @@
 package com.stripe.android.core.browser.customtabs
 
-import android.content.Context
+import android.app.Application
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
@@ -13,7 +13,8 @@ import javax.inject.Inject
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class GetCustomTabsPackage @Inject constructor(
-    val logger: Logger
+    val logger: Logger,
+    val application: Application
 ) {
 
     /**
@@ -24,8 +25,8 @@ class GetCustomTabsPackage @Inject constructor(
      * @param context to use for accessing [PackageManager].
      * @return The package name recommended to use for connecting to custom tabs related components.
      */
-    operator fun invoke(url: Uri, context: Context): String? = runCatching {
-        val pm = context.packageManager
+    operator fun invoke(url: Uri): String? = runCatching {
+        val pm = application.packageManager
         val activityIntent = Intent(Intent.ACTION_VIEW, url)
 
         // Get default VIEW intent handler.

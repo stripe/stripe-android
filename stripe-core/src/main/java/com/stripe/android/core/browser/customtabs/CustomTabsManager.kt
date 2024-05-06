@@ -131,7 +131,7 @@ class CustomTabsManagerImpl @Inject constructor(
         fallback: () -> Unit
     ) {
         runCatching {
-            val packageName: String? = getCustomTabsPackage(uri, activity)
+            val packageName: String? = getCustomTabsPackage(uri)
             val customTabsIntent = buildCustomTabsIntent()
 
             // If we cant find a package name no browser that supports Custom Tabs is installed.
@@ -202,7 +202,7 @@ class CustomTabsManagerImpl @Inject constructor(
             return
         }
 
-        val packageName = getCustomTabsPackage(Uri.parse("http://"), context)
+        val packageName = getCustomTabsPackage(Uri.parse("http://"))
         if (packageName == null) {
             log("Unable to bind: No Custom Tabs compatible browser found")
             return
