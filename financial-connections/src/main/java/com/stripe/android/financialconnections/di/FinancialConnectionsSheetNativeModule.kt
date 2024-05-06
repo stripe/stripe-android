@@ -1,6 +1,7 @@
 package com.stripe.android.financialconnections.di
 
 import android.app.Application
+import androidx.lifecycle.SavedStateHandle
 import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
@@ -115,12 +116,14 @@ internal interface FinancialConnectionsSheetNativeModule {
             requestExecutor: FinancialConnectionsRequestExecutor,
             apiOptions: ApiRequest.Options,
             apiRequestFactory: ApiRequest.Factory,
-            logger: Logger
+            logger: Logger,
+            savedStateHandle: SavedStateHandle,
         ) = FinancialConnectionsAccountsRepository(
             requestExecutor = requestExecutor,
             apiRequestFactory = apiRequestFactory,
             apiOptions = apiOptions,
-            logger = logger
+            logger = logger,
+            savedStateHandle = savedStateHandle,
         )
 
         @Singleton

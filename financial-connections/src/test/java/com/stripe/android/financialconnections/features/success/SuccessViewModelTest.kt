@@ -48,7 +48,7 @@ internal class SuccessViewModelTest {
 
     @Test
     fun `init - when skipSuccessPane is true, complete session and emit Finish`() = runTest {
-        val accounts = ApiKeyFixtures.partnerAccountList().data
+        val accounts = ApiKeyFixtures.cachedPartnerAccounts()
         val manifest = ApiKeyFixtures.sessionManifest().copy(
             skipSuccessPane = true,
             activeAuthSession = ApiKeyFixtures.authorizationSession(),
@@ -67,13 +67,13 @@ internal class SuccessViewModelTest {
 
     @Test
     fun `init - when skipSuccessPane is false, session is not auto completed`() = runTest {
-        val accounts = ApiKeyFixtures.partnerAccountList()
+        val accounts = ApiKeyFixtures.cachedPartnerAccounts()
         val manifest = ApiKeyFixtures.sessionManifest().copy(
             skipSuccessPane = false,
             activeAuthSession = ApiKeyFixtures.authorizationSession(),
             activeInstitution = ApiKeyFixtures.institution()
         )
-        whenever(getCachedAccounts()).thenReturn(accounts.data)
+        whenever(getCachedAccounts()).thenReturn(accounts)
         whenever(getManifest()).thenReturn(manifest)
 
         nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {

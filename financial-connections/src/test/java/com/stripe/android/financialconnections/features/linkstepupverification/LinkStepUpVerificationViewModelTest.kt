@@ -4,7 +4,6 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
@@ -146,7 +145,7 @@ class LinkStepUpVerificationViewModelTest {
             val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
             val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = Pane.INSTITUTION_PICKER)
-            val selectedAccount = partnerAccount()
+            val selectedAccount = ApiKeyFixtures.cachedPartnerAccount()
 
             // verify succeeds
             whenever(getManifest()).thenReturn(

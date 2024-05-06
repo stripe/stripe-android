@@ -185,7 +185,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
             val payload = requireNotNull(state.payload())
 
             val accounts = payload.selectedPartnerAccounts(state.selectedAccountIds)
-            updateCachedAccounts { accounts }
+            updateCachedAccounts(accounts)
 
             // We assume that at this point, all selected accounts have the same next pane.
             // Otherwise, the user would have been presented with an update-required bottom
