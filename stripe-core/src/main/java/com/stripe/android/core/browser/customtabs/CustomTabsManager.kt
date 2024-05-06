@@ -166,7 +166,7 @@ class CustomTabsManagerImpl @Inject constructor(
             )
             true
         } catch (ex: ActivityNotFoundException) {
-            log("No native app found to launch $uri")
+            log("No native app found to launch $uri. ${ex.stackTraceToString()}")
             false
         }
         /**
