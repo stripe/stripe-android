@@ -12,12 +12,14 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.utils.fadeOut
 
 internal class CustomerSheetActivity : AppCompatActivity() {
@@ -66,9 +68,10 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberBottomSheetState(
-                    confirmValueChange = {
-                        if (it == ModalBottomSheetValue.Hidden) {
+                val systemUiController = rememberSystemUiController()
+                val bottomSheetState = rememberStripeBottomSheetState(
+                    confirmValueChange = { target ->
+                        if (target == ModalBottomSheetValue.Hidden) {
                             viewModel.bottomSheetConfirmStateChange()
                         } else {
                             true
@@ -78,6 +81,13 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
                 val viewState by viewModel.viewState.collectAsState()
                 val result by viewModel.result.collectAsState()
+
+                LaunchedEffect(systemUiController) {
+                    systemUiController.setNavigationBarColor(
+                        color = Color.Transparent,
+                        darkIcons = false,
+                    )
+                }
 
                 LaunchedEffect(result) {
                     result?.let { result ->
@@ -90,8 +100,14 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
                 }
 
-                BottomSheet(
+                StripeBottomSheetLayout(
                     state = bottomSheetState,
+                    onUpdateStatusBarColor = { color ->
+                        systemUiController.setStatusBarColor(
+                            color = color,
+                            darkIcons = false,
+                        )
+                    },
                     onDismissed = { viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed) },
                 ) {
                     CustomerSheetScreen(

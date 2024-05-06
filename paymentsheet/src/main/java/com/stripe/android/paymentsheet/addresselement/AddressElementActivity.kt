@@ -10,8 +10,10 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Surface
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavType
@@ -19,10 +21,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.launch
 
@@ -50,13 +53,22 @@ internal class AddressElementActivity : ComponentActivity() {
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
+            val systemUiController = rememberSystemUiController()
+
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState()
 
             BackHandler {
                 viewModel.navigator.onBack()
+            }
+
+            LaunchedEffect(systemUiController) {
+                systemUiController.setNavigationBarColor(
+                    color = Color.Transparent,
+                    darkIcons = false,
+                )
             }
 
             viewModel.navigator.onDismiss = { result ->
@@ -68,8 +80,14 @@ internal class AddressElementActivity : ComponentActivity() {
             }
 
             StripeTheme {
-                BottomSheet(
+                StripeBottomSheetLayout(
                     state = bottomSheetState,
+                    onUpdateStatusBarColor = { color ->
+                        systemUiController.setStatusBarColor(
+                            color = color,
+                            darkIcons = false,
+                        )
+                    },
                     onDismissed = viewModel.navigator::dismiss,
                 ) {
                     Surface(modifier = Modifier.fillMaxSize()) {

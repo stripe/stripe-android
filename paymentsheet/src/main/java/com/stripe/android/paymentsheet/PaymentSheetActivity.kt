@@ -10,16 +10,18 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.flow.filterNotNull
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
@@ -65,11 +67,19 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         setContent {
             StripeTheme {
+                val systemUiController = rememberSystemUiController()
                 val isProcessing by viewModel.processing.collectAsState()
 
-                val bottomSheetState = rememberBottomSheetState(
+                val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { !isProcessing },
                 )
+
+                LaunchedEffect(systemUiController) {
+                    systemUiController.setNavigationBarColor(
+                        color = Color.Transparent,
+                        darkIcons = false,
+                    )
+                }
 
                 LaunchedEffect(Unit) {
                     viewModel.paymentSheetResult.filterNotNull().collect { sheetResult ->
@@ -79,8 +89,14 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     }
                 }
 
-                BottomSheet(
+                StripeBottomSheetLayout(
                     state = bottomSheetState,
+                    onUpdateStatusBarColor = { color ->
+                        systemUiController.setStatusBarColor(
+                            color = color,
+                            darkIcons = false,
+                        )
+                    },
                     onDismissed = viewModel::onUserCancel,
                 ) {
                     PaymentSheetScreen(viewModel, type = Complete)

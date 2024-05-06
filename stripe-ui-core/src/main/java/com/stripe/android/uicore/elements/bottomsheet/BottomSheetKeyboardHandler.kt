@@ -1,4 +1,4 @@
-package com.stripe.android.common.ui
+package com.stripe.android.uicore.elements.bottomsheet
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
@@ -11,7 +11,7 @@ import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.text.input.TextInputService
 import kotlinx.coroutines.flow.first
 
-internal class BottomSheetKeyboardHandler(
+internal class BottomSheetKeyboardHandler internal constructor(
     private val textInputService: TextInputService?,
     private val isKeyboardVisible: State<Boolean>,
 ) {

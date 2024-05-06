@@ -12,12 +12,14 @@ import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.utils.fadeOut
 import kotlin.time.Duration.Companion.seconds
 
@@ -47,9 +49,10 @@ internal class PollingActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
+                val systemUiController = rememberSystemUiController()
                 val uiState by viewModel.uiState.collectAsState()
 
-                val state = rememberBottomSheetState(
+                val state = rememberStripeBottomSheetState(
                     confirmValueChange = { proposedValue ->
                         if (proposedValue == ModalBottomSheetValue.Hidden) {
                             uiState.pollingState != PollingState.Active
@@ -58,6 +61,13 @@ internal class PollingActivity : AppCompatActivity() {
                         }
                     }
                 )
+
+                LaunchedEffect(systemUiController) {
+                    systemUiController.setNavigationBarColor(
+                        color = Color.Transparent,
+                        darkIcons = false,
+                    )
+                }
 
                 BackHandler(enabled = true) {
                     if (uiState.pollingState == PollingState.Failed) {
@@ -75,8 +85,14 @@ internal class PollingActivity : AppCompatActivity() {
                     }
                 }
 
-                BottomSheet(
+                StripeBottomSheetLayout(
                     state = state,
+                    onUpdateStatusBarColor = { color ->
+                        systemUiController.setStatusBarColor(
+                            color = color,
+                            darkIcons = false,
+                        )
+                    },
                     onDismissed = { /* Not applicable here */ },
                 ) {
                     PollingScreen(viewModel)

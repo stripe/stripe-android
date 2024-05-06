@@ -9,15 +9,17 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.graphics.Color
 import androidx.core.view.WindowCompat
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.StripeBottomSheetLayout
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import com.stripe.android.utils.fadeOut
 import kotlinx.coroutines.flow.collectLatest
 import com.stripe.android.R as StripeR
@@ -48,7 +50,15 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberBottomSheetState()
+                val systemUiController = rememberSystemUiController()
+                val bottomSheetState = rememberStripeBottomSheetState()
+
+                LaunchedEffect(systemUiController) {
+                    systemUiController.setNavigationBarColor(
+                        color = Color.Transparent,
+                        darkIcons = false,
+                    )
+                }
 
                 LaunchedEffect(bottomSheetState) {
                     viewModel.result.collectLatest { result ->
@@ -61,8 +71,14 @@ internal class BacsMandateConfirmationActivity : AppCompatActivity() {
                     }
                 }
 
-                BottomSheet(
+                StripeBottomSheetLayout(
                     state = bottomSheetState,
+                    onUpdateStatusBarColor = { color ->
+                        systemUiController.setStatusBarColor(
+                            color = color,
+                            darkIcons = false,
+                        )
+                    },
                     onDismissed = {
                         viewModel.handleViewAction(BacsMandateConfirmationViewAction.OnBackPressed)
                     }
