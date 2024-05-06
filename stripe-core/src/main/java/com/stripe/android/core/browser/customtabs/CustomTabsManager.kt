@@ -153,7 +153,6 @@ class CustomTabsManagerImpl @Inject constructor(
         }
     }
 
-    @Suppress("SwallowedException")
     private fun attemptToLaunchInNativeApp(activity: Activity, uri: Uri) = when {
         /**
          * Android 11 introduces a new Intent flag, FLAG_ACTIVITY_REQUIRE_NON_BROWSER, which is the recommended way
@@ -167,6 +166,7 @@ class CustomTabsManagerImpl @Inject constructor(
             )
             true
         } catch (ex: ActivityNotFoundException) {
+            log("No native app found to launch $uri")
             false
         }
         /**
