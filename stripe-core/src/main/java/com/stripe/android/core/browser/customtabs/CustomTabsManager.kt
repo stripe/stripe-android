@@ -120,7 +120,7 @@ class CustomTabsManagerImpl @Inject constructor(
      *
      * @return a CustomTabsSession, or null if a connection to the service could not be established.
      */
-    private fun getSession(): CustomTabsSession? {
+    private fun getOrRetrieveSession(): CustomTabsSession? {
         session = client?.newSession(null)
         return session
     }
@@ -176,20 +176,23 @@ class CustomTabsManagerImpl @Inject constructor(
         else -> false
     }
 
-    private fun buildCustomTabsIntent() = CustomTabsIntent.Builder(getSession())
+    private fun buildCustomTabsIntent() = CustomTabsIntent.Builder(getOrRetrieveSession())
         .setSendToExternalDefaultHandlerEnabled(true)
         .setShareState(CustomTabsIntent.SHARE_STATE_OFF)
         .setDownloadButtonEnabled(false)
         .setBookmarksButtonEnabled(false)
         .build()
 
-    override fun mayLaunchUrl(url: String): Boolean = client
-        ?.let { getSession() }
-        ?.mayLaunchUrl(Uri.parse(url), null, null)?.also {
-            log("URL prefetch: $url, Result: $it")
-        } ?: run {
-        log("URL not prefetched, ${if (client == null) "null client" else "null session"}")
-        false
+    override fun mayLaunchUrl(url: String): Boolean = when (val session = getOrRetrieveSession()) {
+        null -> {
+            log("Client or session is null, unable to prefetch")
+            false
+        }
+        else -> {
+            val prefetchResult = session.mayLaunchUrl(Uri.parse(url), null, null)
+            log("URL prefetch: $url, Result: $prefetchResult")
+            prefetchResult
+        }
     }
 
     private fun bindCustomTabService(context: Context) {
