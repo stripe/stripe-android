@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.lazy.LazyListState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
+import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -77,6 +79,47 @@ class PaymentMethodsUIScreenshotTest {
     @Test
     fun testTwoPaymentMethodsExpandToFit() {
         val paymentMethods = paymentMethods.take(2)
+        paparazziRule.snapshot {
+            PaymentMethodsUI(
+                paymentMethods = paymentMethods,
+                selectedIndex = 0,
+                isEnabled = true,
+                onItemSelectedListener = {},
+                imageLoader = mock(),
+            )
+        }
+    }
+
+    @Test
+    fun testExternalPaymentMethod_iconUrlFailsToLoad() {
+        val paymentMethods = listOf(
+            ExternalPaymentMethodUiDefinitionFactory(
+                PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
+            ).createSupportedPaymentMethod()
+        )
+        paparazziRule.snapshot {
+            PaymentMethodsUI(
+                paymentMethods = paymentMethods,
+                selectedIndex = 0,
+                isEnabled = true,
+                onItemSelectedListener = {},
+                imageLoader = mock(),
+            )
+        }
+    }
+
+    @Test
+    fun testInvalidIconUrlAndInvalidResource() {
+        val paymentMethods = listOf(
+            SupportedPaymentMethod(
+                code = "example_pm",
+                displayNameResource = R.string.stripe_paymentsheet_payment_method_affirm,
+                iconResource = 0,
+                lightThemeIconUrl = null,
+                darkThemeIconUrl = null,
+                tintIconOnSelection = false,
+            )
+        )
         paparazziRule.snapshot {
             PaymentMethodsUI(
                 paymentMethods = paymentMethods,

@@ -261,7 +261,7 @@ private fun PaymentMethodIconUi(
             contentDescription = null,
             contentScale = ContentScale.Fit,
         )
-    } else {
+    } else if (iconRes != 0) {
         Image(
             painter = painterResource(iconRes),
             contentDescription = null,
