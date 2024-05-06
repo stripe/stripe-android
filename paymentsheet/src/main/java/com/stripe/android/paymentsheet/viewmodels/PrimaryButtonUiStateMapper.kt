@@ -7,9 +7,8 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
-import kotlinx.coroutines.flow.Flow
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
 internal class PrimaryButtonUiStateMapper(
@@ -24,8 +23,8 @@ internal class PrimaryButtonUiStateMapper(
     private val onClick: () -> Unit,
 ) {
 
-    fun forCompleteFlow(): Flow<PrimaryButton.UIState?> {
-        return combine(
+    fun forCompleteFlow(): StateFlow<PrimaryButton.UIState?> {
+        return combineAsStateFlow(
             currentScreenFlow,
             buttonsEnabledFlow,
             amountFlow,
@@ -41,8 +40,8 @@ internal class PrimaryButtonUiStateMapper(
         }
     }
 
-    fun forCustomFlow(): Flow<PrimaryButton.UIState?> {
-        return combine(
+    fun forCustomFlow(): StateFlow<PrimaryButton.UIState?> {
+        return combineAsStateFlow(
             currentScreenFlow,
             buttonsEnabledFlow,
             selectionFlow,
