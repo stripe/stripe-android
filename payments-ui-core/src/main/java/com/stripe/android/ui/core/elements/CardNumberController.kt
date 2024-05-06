@@ -32,7 +32,6 @@ import com.stripe.android.uicore.forms.FormFieldEntry
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import com.stripe.android.uicore.utils.stateFlowOf
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -262,7 +261,7 @@ internal class DefaultCardNumberController(
     /**
      * An error must be emitted if it is visible or not visible.
      **/
-    override val error: Flow<FieldError?> =
+    override val error: StateFlow<FieldError?> =
         combineAsStateFlow(visibleError, _fieldState) { visibleError, fieldState ->
             fieldState.getError()?.takeIf { visibleError }
         }

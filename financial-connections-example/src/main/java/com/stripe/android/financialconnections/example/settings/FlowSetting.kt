@@ -25,23 +25,6 @@ data class FlowSetting(
     }
 
     override fun valueUpdated(currentSettings: List<Setting<*>>, value: Flow): List<Setting<*>> {
-        val flowSettings = listOfNotNull(
-            copy(selectedOption = value),
-            ConfirmIntentSetting().takeIf { value == Flow.PaymentIntent },
-        )
-        val updatedSettings = currentSettings
-            .filter { it !is ConfirmIntentSetting }
-            .flatMap { setting ->
-                when (setting) {
-                    is FlowSetting -> flowSettings
-                    else -> listOf(setting)
-                }
-            }
-
-        return if (currentSettings.none { it is FlowSetting }) {
-            updatedSettings + flowSettings
-        } else {
-            updatedSettings
-        }
+        return replace(currentSettings, this.copy(selectedOption = value))
     }
 }

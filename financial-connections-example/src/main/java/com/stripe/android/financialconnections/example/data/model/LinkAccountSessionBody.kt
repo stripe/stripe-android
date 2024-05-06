@@ -18,5 +18,7 @@ data class LinkAccountSessionBody(
     @SerialName("customer_email")
     val customerEmail: String? = null,
     @SerialName("test_environment")
-    val testEnvironment: String? = null
+    val testEnvironment: String? = null,
+    @SerialName("test_mode")
+    val testMode: Boolean? = null,
 )
