@@ -13,7 +13,6 @@ import androidx.compose.ui.graphics.Color
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 class FawryActivity : AppCompatActivity() {
@@ -28,7 +27,7 @@ class FawryActivity : AppCompatActivity() {
             )
         }
 
-        val billingDetails: PaymentSheet.BillingDetails? =
+        val billingDetails: PaymentMethod.BillingDetails? =
             intent.getParcelableExtra(EXTRA_BILLING_DETAILS)
 
         setContent {
@@ -57,13 +56,13 @@ class FawryActivity : AppCompatActivity() {
 
     @Composable
     fun ResultButton(result: ExternalPaymentMethodResult) {
-        Button(onClick = { finishWithResult(result, errorMessage = "Payment Failed!") }) {
+        Button(onClick = { finishWithResult(result, errorMessage = "Payment failed!") }) {
             Text(text = result.toString())
         }
     }
 
     @Composable
-    fun BillingDetails(billingDetails: PaymentSheet.BillingDetails) {
+    fun BillingDetails(billingDetails: PaymentMethod.BillingDetails) {
         Text("Billing details: $billingDetails", color = Color.White)
     }
 
