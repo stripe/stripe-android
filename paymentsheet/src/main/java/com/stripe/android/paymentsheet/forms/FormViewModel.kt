@@ -143,8 +143,12 @@ internal class FormViewModel @Inject internal constructor(
             return defaults
         }
 
-    private val textFieldControllerIdsFlow = combineAsStateFlow(elements.map { it.getTextFieldIdentifiers() }) {
-        it.toList().flatten()
+    private val textFieldControllerIdsFlow = if (elements.isEmpty()) {
+        stateFlowOf(emptyList())
+    } else {
+        combineAsStateFlow(elements.map { it.getTextFieldIdentifiers() }) {
+            it.toList().flatten()
+        }
     }
 
     val lastTextFieldIdentifier = combineAsStateFlow(
