@@ -336,7 +336,6 @@ internal class CustomerSheetActivityTest {
                 merchantName = ""
             ),
             usBankAccountFormArguments = mock(),
-            selectedPaymentMethod = card,
             enabled = enabled,
             isLiveMode = isLiveMode,
             isProcessing = isProcessing,

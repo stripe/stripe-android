@@ -1523,7 +1523,7 @@ internal class PaymentSheetViewModelTest {
         )
 
         val observedArgs = viewModel.createFormArguments(
-            selectedItem = LpmRepositoryTestHelpers.card,
+            paymentMethodCode = LpmRepositoryTestHelpers.card.code,
         )
 
         assertThat(observedArgs).isEqualTo(

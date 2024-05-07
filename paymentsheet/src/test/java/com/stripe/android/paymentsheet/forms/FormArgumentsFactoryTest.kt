@@ -30,7 +30,7 @@ class FormArgumentsFactoryTest {
         config: PaymentSheet.Configuration = PaymentSheetFixtures.CONFIG_MINIMUM,
     ): FormArguments {
         return FormArgumentsFactory.create(
-            paymentMethod = LpmRepositoryTestHelpers.card,
+            paymentMethodCode = LpmRepositoryTestHelpers.card.code,
             metadata = PaymentMethodMetadataFactory.create(
                 billingDetailsCollectionConfiguration = config.billingDetailsCollectionConfiguration,
             ),
