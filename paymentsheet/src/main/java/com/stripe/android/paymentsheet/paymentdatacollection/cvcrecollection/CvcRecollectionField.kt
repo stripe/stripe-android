@@ -38,6 +38,7 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.stateFlowOf
 
+@Suppress("MagicNumber")
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, lastFour: String) {
