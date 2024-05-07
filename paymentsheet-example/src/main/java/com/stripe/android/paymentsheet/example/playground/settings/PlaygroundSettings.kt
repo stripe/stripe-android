@@ -193,6 +193,7 @@ internal class PlaygroundSettings private constructor(
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
             DefaultBillingAddressSettingsDefinition,
+            AttachBillingDetailsToPaymentMethodSettingsDefinition,
             CollectNameSettingsDefinition,
             CollectEmailSettingsDefinition,
             CollectPhoneSettingsDefinition,
