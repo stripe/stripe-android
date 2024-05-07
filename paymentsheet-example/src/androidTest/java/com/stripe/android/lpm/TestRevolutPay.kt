@@ -19,7 +19,7 @@ internal class TestRevolutPay : BasePlaygroundTest() {
         paymentMethodCode = "revolut_pay",
     ) { settings ->
         settings[CurrencySettingsDefinition] = Currency.GBP
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "revolut_pay")
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card,revolut_pay"
     }
 
     @Ignore("Requires complex auth handling")

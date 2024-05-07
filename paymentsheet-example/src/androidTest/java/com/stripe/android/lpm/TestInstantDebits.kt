@@ -38,7 +38,7 @@ internal class TestInstantDebits : BasePlaygroundTest() {
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         settings[LinkSettingsDefinition] = true
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "link")
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card,link"
         settings[EnableInstantDebitsSettingsDefinition] = true
     }
 

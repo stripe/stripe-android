@@ -22,7 +22,7 @@ internal class TestCashApp : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.USD
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "cashapp")
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card,cashapp"
     }
 
     @Test

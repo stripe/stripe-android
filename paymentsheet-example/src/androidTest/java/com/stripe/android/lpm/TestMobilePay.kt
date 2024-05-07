@@ -18,7 +18,7 @@ internal class TestMobilePay : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.FR
         settings[CurrencySettingsDefinition] = Currency.EUR
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "mobilepay")
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card,mobilepay"
     }
 
     @Test

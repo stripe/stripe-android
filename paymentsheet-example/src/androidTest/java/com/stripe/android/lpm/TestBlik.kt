@@ -21,7 +21,7 @@ internal class TestBlik : BasePlaygroundTest() {
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.FR
         settings[CurrencySettingsDefinition] = Currency.PLN
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "blik")
+        settings[SupportedPaymentMethodsSettingsDefinition] = "card,blik"
     }.copy(
         authorizationAction = AuthorizeAction.PollingSucceedsAfterDelay,
     )
