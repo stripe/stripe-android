@@ -201,6 +201,7 @@ internal class PlaygroundSettings private constructor(
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
+            SupportedPaymentMethodsSettingsDefinition,
             PrimaryButtonLabelSettingsDefinition,
             PaymentMethodConfigurationSettingsDefinition,
             PreferredNetworkSettingsDefinition,
@@ -211,7 +212,6 @@ internal class PlaygroundSettings private constructor(
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
-            SupportedPaymentMethodsSettingsDefinition,
             AppearanceSettingsDefinition,
             ShippingAddressSettingsDefinition,
         )
