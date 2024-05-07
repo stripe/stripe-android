@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -12,11 +13,16 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -24,6 +30,7 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,9 +39,11 @@ import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
+import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
+import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.stateFlowOf
 
@@ -102,6 +111,42 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 }
 
 @Composable
+private fun CvcRecollectionHeader(modifier: Modifier) {
+    IconButton(
+        onClick = { /*TODO*/ },
+        modifier = modifier
+    ) {
+        Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
+    }
+    H4Text(
+        text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
+        modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 16.dp)
+    )
+}
+
+@Composable
+private fun CvcRecollectionButton() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(1f)
+            .padding(0.dp, 8.dp, 0.dp, 0.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        TextButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { /*TODO*/ },
+            colors = ButtonDefaults.buttonColors(
+                backgroundColor = Color(
+                    StripeTheme.primaryButtonStyle.getBackgroundColor(LocalContext.current)
+                )
+            )
+        ) {
+            Text(text = stringResource(R.string.stripe_paymentsheet_confirm))
+        }
+    }
+}
+
+@Composable
 @Preview
 private fun CvcRecollectionFieldPreview() {
     val element = remember {
@@ -114,7 +159,14 @@ private fun CvcRecollectionFieldPreview() {
                 .background(Color.White)
                 .padding(20.dp)
         ) {
+            CvcRecollectionHeader(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .offset(16.dp)
+            )
             CvcRecollectionField(element = element, cardBrand = CardBrand.Visa, lastFour = "4242")
+            CvcRecollectionButton()
+
         }
     }
 }
