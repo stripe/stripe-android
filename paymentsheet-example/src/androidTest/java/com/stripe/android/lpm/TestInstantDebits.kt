@@ -7,6 +7,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -38,7 +39,10 @@ internal class TestInstantDebits : BasePlaygroundTest() {
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         settings[LinkSettingsDefinition] = true
-        settings[SupportedPaymentMethodsSettingsDefinition] = "card,link"
+        settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
+            PaymentMethod.Type.Card,
+            PaymentMethod.Type.Link
+        ).joinToString(",")
         settings[EnableInstantDebitsSettingsDefinition] = true
     }
 
