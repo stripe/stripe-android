@@ -26,7 +26,7 @@ internal class TestAlipay : BasePlaygroundTest() {
             PaymentMethod.Type.Klarna.code,
             PaymentMethod.Type.Affirm.code,
             PaymentMethod.Type.Alipay.code,
-        )
+        ).joinToString(",")
     }
 
     @Test
