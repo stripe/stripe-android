@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.combine
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -166,6 +167,7 @@ internal abstract class BaseSheetViewModel(
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
 
+    private val linkInlineSignUpState = MutableStateFlow<InlineSignupViewState?>(null)
     protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow
 
     private var previouslySentDeepLinkEvent: Boolean
@@ -291,6 +293,38 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            var inLinkSignUpMode = false
+
+            combine(
+                linkHandler.linkInlineSelection,
+                selection,
+                linkInlineSignUpState
+            ).collectLatest { (linkInlineSelection, paymentSelection, linkInlineSignUpState) ->
+                // Only reset custom primary button state if we haven't already
+                if (paymentSelection !is PaymentSelection.New.Card) {
+                    if (inLinkSignUpMode) {
+                        // US bank account will update the custom primary state on its own
+                        if (paymentSelection !is PaymentSelection.New.USBankAccount) {
+                            updateLinkPrimaryButtonUiState(null)
+                        }
+
+                        inLinkSignUpMode = false
+                    }
+
+                    return@collectLatest
+                }
+
+                inLinkSignUpMode = true
+
+                if (linkInlineSignUpState != null) {
+                    updatePrimaryButtonForLinkSignup(linkInlineSignUpState)
+                } else if (linkInlineSelection != null) {
+                    updatePrimaryButtonForLinkInline()
                 }
             }
         }
@@ -662,6 +696,10 @@ internal abstract class BaseSheetViewModel(
                 shouldCompleteLinkInlineFlow = shouldCompleteLinkFlowInline,
             )
         }
+    }
+
+    fun onLinkSignUpStateUpdated(state: InlineSignupViewState) {
+        linkInlineSignUpState.value = state
     }
 
     fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
