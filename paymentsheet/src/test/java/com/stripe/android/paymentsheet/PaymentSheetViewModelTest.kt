@@ -2412,7 +2412,7 @@ internal class PaymentSheetViewModelTest {
             )
 
             viewModel.primaryButtonUiState.test {
-                skipItems(1)
+                assertThat(awaitItem()?.enabled).isFalse()
 
                 viewModel.updateSelection(
                     PaymentSelection.New.Card(
@@ -2429,7 +2429,7 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
 
-                skipItems(1)
+                assertThat(awaitItem()?.enabled).isTrue()
 
                 viewModel.onLinkSignUpStateUpdated(
                     InlineSignupViewState.create(config = LINK_CONFIG).copy(
@@ -2444,7 +2444,7 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
 
-                skipItems(1)
+                assertThat(awaitItem()?.enabled).isTrue()
 
                 viewModel.updateSelection(
                     PaymentSelection.New.GenericPaymentMethod(
@@ -2457,9 +2457,13 @@ internal class PaymentSheetViewModelTest {
                     )
                 )
 
-                awaitItem()?.onClick?.invoke()
+                val buyButton = awaitItem()
 
-                cancelAndIgnoreRemainingEvents()
+                assertThat(buyButton?.enabled).isTrue()
+
+                buyButton?.onClick?.invoke()
+
+                assertThat(awaitItem()?.enabled).isFalse()
             }
 
             verify(interceptor).intercept(any(), any(), isNull(), isNull(), eq(false))
