@@ -13,8 +13,6 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImageLoader
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -242,7 +240,7 @@ class PaymentOptionFactoryTest {
         assertThat(paymentOptionIcon.current).isEqualTo(PaymentOptionFactory.emptyDrawable)
     }
 
-   private suspend fun createPaymentOptionForIconTesting(iconUrl: String?, iconRes: Int?): PaymentOption {
+    private suspend fun createPaymentOptionForIconTesting(iconUrl: String?, iconRes: Int?): PaymentOption {
         val factory = PaymentOptionFactory(
             ApplicationProvider.getApplicationContext<Context>().resources,
             imageLoader = mock<StripeImageLoader>().also {
