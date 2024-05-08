@@ -255,7 +255,12 @@ class PaymentOptionFactoryTest {
         assertThat(paymentOptionIcon.current).isEqualTo(PaymentOptionFactory.emptyDrawable)
     }
 
-    private suspend fun createPaymentOptionForIconTesting(iconUrl: String?, iconRes: Int?, scope: CoroutineScope, dispatcher: TestDispatcher): PaymentOption {
+    private suspend fun createPaymentOptionForIconTesting(
+        iconUrl: String?,
+        iconRes: Int?,
+        scope: CoroutineScope,
+        dispatcher: TestDispatcher,
+    ): PaymentOption {
         val factory = PaymentOptionFactory(
             ApplicationProvider.getApplicationContext<Context>().resources,
             imageLoader = mock<StripeImageLoader>().also {
