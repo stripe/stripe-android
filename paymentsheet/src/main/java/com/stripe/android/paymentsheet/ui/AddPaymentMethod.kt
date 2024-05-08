@@ -122,7 +122,9 @@ internal fun AddPaymentMethod(
                 },
                 formArguments = arguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(
-                    showCheckbox = isSaveForFutureUseValueChangeable,
+                    showCheckbox = isSaveForFutureUseValueChangeable
+                        // Instant Debits does not support saving for future use
+                        && instantDebits.not(),
                     instantDebits = instantDebits,
                     onBehalfOf = onBehalfOf,
                     isCompleteFlow = sheetViewModel is PaymentSheetViewModel,
