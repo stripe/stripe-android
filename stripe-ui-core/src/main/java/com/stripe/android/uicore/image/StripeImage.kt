@@ -1,6 +1,7 @@
 package com.stripe.android.uicore.image
 
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -17,6 +18,7 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp.Companion.Infinity
 import androidx.compose.ui.unit.IntSize.Companion.Zero
 import com.stripe.android.uicore.image.StripeImageState.Error
@@ -82,7 +84,7 @@ fun StripeImage(
                 Error -> errorContent()
                 Loading -> loadingContent()
                 is Success -> Image(
-                    modifier = modifier,
+                    modifier = modifier.testTag(TEST_TAG_IMAGE_FROM_URL),
                     colorFilter = colorFilter,
                     contentDescription = contentDescription,
                     contentScale = contentScale,
@@ -123,3 +125,7 @@ private sealed class StripeImageState {
     data class Success(val painter: Painter) : StripeImageState()
     object Error : StripeImageState()
 }
+
+@VisibleForTesting
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_IMAGE_FROM_URL = "StripeImageFromUrl"
