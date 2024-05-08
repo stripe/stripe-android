@@ -13,6 +13,10 @@ import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.image.StripeImageLoader
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.TestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
 import org.mockito.Mockito.mock
@@ -28,6 +32,7 @@ class PaymentOptionFactoryTest {
     private val workingUrl = "working url"
     private val brokenUrl = "broken url"
     private val simpleBitmap = Bitmap.createBitmap(10, 10, Bitmap.Config.ARGB_8888)
+    private val testDispatcher = StandardTestDispatcher()
 
     private val factory = PaymentOptionFactory(
         ApplicationProvider.getApplicationContext<Context>().resources,
@@ -178,69 +183,79 @@ class PaymentOptionFactoryTest {
     }
 
     @Test
-    fun loadPaymentOptionWithIconUrl_usesIconFromUrl() = runTest {
+    fun loadPaymentOptionWithIconUrl_usesIconFromUrl() = runTest(testDispatcher) {
         val paymentOptionIcon = createPaymentOptionForIconTesting(
             iconUrl = workingUrl,
             iconRes = R.drawable.stripe_ic_paymentsheet_link,
+            scope = this,
+            dispatcher = testDispatcher,
         ).icon()
 
-        Thread.sleep(200)
+        advanceUntilIdle()
 
         assertThat(paymentOptionIcon.current).isInstanceOf(BitmapDrawable::class.java)
         assertThat((paymentOptionIcon.current as BitmapDrawable).bitmap).isEqualTo(simpleBitmap)
     }
 
     @Test
-    fun loadPaymentOptionWithIconUrl_failsToLoad_usesIconFromRes() = runTest {
+    fun loadPaymentOptionWithIconUrl_failsToLoad_usesIconFromRes() = runTest(testDispatcher) {
         val paymentOptionIcon = createPaymentOptionForIconTesting(
             iconUrl = brokenUrl,
             iconRes = R.drawable.stripe_ic_paymentsheet_link,
+            scope = this,
+            dispatcher = testDispatcher,
         ).icon()
 
-        Thread.sleep(200)
+        advanceUntilIdle()
 
         assertThat(paymentOptionIcon.current).isInstanceOf(VectorDrawable::class.java)
     }
 
     @Test
-    fun loadPaymentOptionWithIconUrl_failsToLoad_missingIconRes_usesEmptyDrawable() = runTest {
+    fun loadPaymentOptionWithIconUrl_failsToLoad_missingIconRes_usesEmptyDrawable() = runTest(testDispatcher) {
         val paymentOptionIcon = createPaymentOptionForIconTesting(
             iconUrl = brokenUrl,
             iconRes = null,
+            scope = this,
+            dispatcher = testDispatcher,
         ).icon()
 
-        Thread.sleep(200)
+        advanceUntilIdle()
 
         assertThat(paymentOptionIcon.current).isInstanceOf(ShapeDrawable::class.java)
         assertThat(paymentOptionIcon.current).isEqualTo(PaymentOptionFactory.emptyDrawable)
     }
 
     @Test
-    fun loadPaymentOptionWithoutIconUrl_usesIconFromRes() = runTest {
+    fun loadPaymentOptionWithoutIconUrl_usesIconFromRes() = runTest(testDispatcher) {
         val paymentOptionIcon = createPaymentOptionForIconTesting(
             iconUrl = null,
             iconRes = R.drawable.stripe_ic_paymentsheet_link,
+            scope = this,
+            dispatcher = testDispatcher,
         ).icon()
 
-        Thread.sleep(200)
+        advanceUntilIdle()
 
         assertThat(paymentOptionIcon.current).isInstanceOf(VectorDrawable::class.java)
     }
 
     @Test
-    fun loadPaymentOptionWithoutIconUrl_missingIconRes_usesEmptyDrawable() = runTest {
+    fun loadPaymentOptionWithoutIconUrl_missingIconRes_usesEmptyDrawable() = runTest(testDispatcher) {
         val paymentOptionIcon = createPaymentOptionForIconTesting(
             iconUrl = null,
             iconRes = null,
+            scope = this,
+            dispatcher = testDispatcher,
         ).icon()
 
-        Thread.sleep(200)
+        advanceUntilIdle()
 
         assertThat(paymentOptionIcon.current).isInstanceOf(ShapeDrawable::class.java)
         assertThat(paymentOptionIcon.current).isEqualTo(PaymentOptionFactory.emptyDrawable)
     }
 
-    private suspend fun createPaymentOptionForIconTesting(iconUrl: String?, iconRes: Int?): PaymentOption {
+    private suspend fun createPaymentOptionForIconTesting(iconUrl: String?, iconRes: Int?, scope: CoroutineScope, dispatcher: TestDispatcher): PaymentOption {
         val factory = PaymentOptionFactory(
             ApplicationProvider.getApplicationContext<Context>().resources,
             imageLoader = mock<StripeImageLoader>().also {
@@ -255,6 +270,8 @@ class PaymentOptionFactoryTest {
             darkThemeIconUrl = null,
             label = "unused",
             imageLoader = factory::loadPaymentOption,
+            delegateDrawableScope = scope,
+            delegateDrawableDispatcher = dispatcher,
         )
     }
 }
