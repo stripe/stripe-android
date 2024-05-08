@@ -27,8 +27,7 @@ internal class PaymentOptionFactory @Inject constructor(
     }
 
     @VisibleForTesting
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
+    internal suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
         fun loadResource(): Drawable {
             @Suppress("DEPRECATION")
             return runCatching {
