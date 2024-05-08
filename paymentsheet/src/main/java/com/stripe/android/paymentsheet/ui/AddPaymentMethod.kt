@@ -14,7 +14,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
@@ -57,22 +56,8 @@ internal fun AddPaymentMethod(
     val linkInlineSignupMode = remember(linkSignupMode, selectedPaymentMethodCode) {
         linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
     }
-    val linkInlineSelection by sheetViewModel.linkHandler.linkInlineSelection.collectAsState()
-    var linkSignupState by remember {
-        mutableStateOf<InlineSignupViewState?>(null)
-    }
 
-    LaunchedEffect(paymentSelection, linkSignupState, linkInlineSelection) {
-        val state = linkSignupState
-        val isUsingLinkInline = linkInlineSelection != null &&
-            paymentSelection is PaymentSelection.New.Card
-
-        if (state != null) {
-            sheetViewModel.updatePrimaryButtonForLinkSignup(state)
-        } else if (isUsingLinkInline) {
-            sheetViewModel.updatePrimaryButtonForLinkInline()
-        }
-
+    LaunchedEffect(paymentSelection) {
         sheetViewModel.clearErrorMessages()
     }
 
@@ -120,7 +105,7 @@ internal fun AddPaymentMethod(
                     }
                 },
                 onLinkSignupStateChanged = { _, inlineSignupViewState ->
-                    linkSignupState = inlineSignupViewState
+                    sheetViewModel.onLinkSignUpStateUpdated(inlineSignupViewState)
                 },
                 formArguments = arguments,
                 usBankAccountFormArguments = USBankAccountFormArguments(

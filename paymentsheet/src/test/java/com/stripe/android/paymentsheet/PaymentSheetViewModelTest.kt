@@ -33,6 +33,7 @@ import com.stripe.android.lpmfoundations.luxe.LpmRepositoryTestHelpers
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.Address
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.CardParams
 import com.stripe.android.model.ConfirmPaymentIntentParams
 import com.stripe.android.model.ConfirmSetupIntentParams
 import com.stripe.android.model.MandateDataParams
@@ -42,6 +43,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodCreateParamsFixtures
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.CARD_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodFixtures.SEPA_DEBIT_PAYMENT_METHOD
 import com.stripe.android.model.PaymentMethodOptionsParams
@@ -103,6 +105,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.mockito.MockitoAnnotations
@@ -2391,6 +2394,78 @@ internal class PaymentSheetViewModelTest {
     }
 
     @Test
+    fun `Can complete payment after switching to another LPM from card selection with inline Link signup state`() =
+        runTest {
+            Dispatchers.setMain(testDispatcher)
+
+            val interceptor = spy(FakeIntentConfirmationInterceptor())
+
+            val viewModel = spy(
+                createViewModel(
+                    customer = EMPTY_CUSTOMER_STATE,
+                    intentConfirmationInterceptor = interceptor,
+                    linkState = LinkState(
+                        configuration = LINK_CONFIG,
+                        loginState = LinkState.LoginState.LoggedOut
+                    )
+                )
+            )
+
+            viewModel.primaryButtonUiState.test {
+                skipItems(1)
+
+                viewModel.updateSelection(
+                    PaymentSelection.New.Card(
+                        paymentMethodCreateParams = PaymentMethodCreateParams.createCard(
+                            CardParams(
+                                number = "4242424242424242",
+                                expMonth = 4,
+                                expYear = 2025,
+                                cvc = "501"
+                            )
+                        ),
+                        brand = CardBrand.Visa,
+                        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                    )
+                )
+
+                skipItems(1)
+
+                viewModel.onLinkSignUpStateUpdated(
+                    InlineSignupViewState.create(config = LINK_CONFIG).copy(
+                        isExpanded = true,
+                        userInput = UserInput.SignUp(
+                            name = "John Doe",
+                            email = "johndoe@email.com",
+                            phone = "+15555555555",
+                            consentAction = SignUpConsentAction.CheckboxWithPrefilledEmailAndPhone,
+                            country = "US",
+                        )
+                    )
+                )
+
+                skipItems(1)
+
+                viewModel.updateSelection(
+                    PaymentSelection.New.GenericPaymentMethod(
+                        iconResource = R.drawable.stripe_ic_paymentsheet_card_visa,
+                        labelResource = "Bancontact",
+                        paymentMethodCreateParams = PaymentMethodCreateParamsFixtures.BANCONTACT,
+                        customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
+                        lightThemeIconUrl = null,
+                        darkThemeIconUrl = null,
+                    )
+                )
+
+                awaitItem()?.onClick?.invoke()
+
+                cancelAndIgnoreRemainingEvents()
+            }
+
+            verify(interceptor).intercept(any(), any(), isNull(), isNull(), eq(false))
+        }
+
+    @Test
     fun `On complete payment launcher result in PI mode & should reuse, should save payment selection`() = runTest {
         selectionSavedTest(
             initializationMode = InitializationMode.PaymentIntent(
@@ -2915,5 +2990,21 @@ internal class PaymentSheetViewModelTest {
         private const val BACS_SORT_CODE = "108800"
         private const val BACS_NAME = "John Doe"
         private const val BACS_EMAIL = "johndoe@email.com"
+
+        private val LINK_CONFIG = LinkConfiguration(
+            stripeIntent = PAYMENT_INTENT,
+            signupMode = LinkSignupMode.InsteadOfSaveForFutureUse,
+            merchantName = "Merchant, Inc.",
+            merchantCountryCode = "US",
+            customerInfo = LinkConfiguration.CustomerInfo(
+                name = null,
+                email = null,
+                phone = null,
+                billingCountryCode = "US",
+            ),
+            shippingValues = null,
+            passthroughModeEnabled = false,
+            flags = emptyMap()
+        )
     }
 }
