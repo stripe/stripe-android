@@ -15,6 +15,7 @@ import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
+import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -56,7 +57,8 @@ constructor(
     }
 
     @Suppress("DEPRECATION")
-    internal constructor(
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    constructor(
         @DrawableRes drawableResourceId: Int,
         label: String,
         lightThemeIconUrl: String?,
