@@ -7,6 +7,10 @@
 
 ### PaymentSheet
 * [ADDED][8430](https://github.com/stripe/stripe-android/pull/8430) Added support for using `Maestro` cards with `Google Pay`
+* [ADDED][8433](https://github.com/stripe/stripe-android/pull/8433) Added support for Multibanco to PaymentSheet.
+
+### Payments
+* [ADDED][8433](https://github.com/stripe/stripe-android/pull/8433) Added support for Multibanco to API bindings.
 
 ## 20.42.0 - 2024-05-01
 
