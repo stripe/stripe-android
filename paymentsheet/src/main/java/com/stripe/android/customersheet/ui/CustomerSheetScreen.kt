@@ -211,7 +211,7 @@ internal fun AddPaymentMethod(
             PaymentElement(
                 enabled = viewState.enabled,
                 supportedPaymentMethods = viewState.supportedPaymentMethods,
-                selectedItem = viewState.selectedPaymentMethod,
+                selectedItemCode = viewState.paymentMethodCode,
                 formElements = viewState.formElements,
                 linkSignupMode = null,
                 linkConfigurationCoordinator = null,

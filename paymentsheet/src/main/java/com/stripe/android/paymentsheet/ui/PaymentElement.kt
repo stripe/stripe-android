@@ -25,6 +25,7 @@ import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
@@ -39,7 +40,7 @@ import java.util.UUID
 internal fun PaymentElement(
     enabled: Boolean,
     supportedPaymentMethods: List<SupportedPaymentMethod>,
-    selectedItem: SupportedPaymentMethod,
+    selectedItemCode: PaymentMethodCode,
     formElements: List<FormElement>,
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
@@ -59,8 +60,11 @@ internal fun PaymentElement(
         id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
     )
 
-    val selectedIndex = remember(selectedItem, supportedPaymentMethods) {
-        supportedPaymentMethods.map { it.code }.indexOf(selectedItem.code)
+    val selectedIndex = remember(selectedItemCode, supportedPaymentMethods) {
+        supportedPaymentMethods.map { it.code }.indexOf(selectedItemCode)
+    }
+    val selectedItem = remember(selectedIndex, supportedPaymentMethods) {
+        supportedPaymentMethods[selectedIndex]
     }
 
     Column(modifier = Modifier.fillMaxWidth()) {

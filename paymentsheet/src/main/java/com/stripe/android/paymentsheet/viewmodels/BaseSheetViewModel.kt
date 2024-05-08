@@ -686,11 +686,11 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun createFormArguments(
-        selectedItem: SupportedPaymentMethod,
+        paymentMethodCode: PaymentMethodCode,
     ): FormArguments {
         val metadata = requireNotNull(paymentMethodMetadata.value)
         return FormArgumentsFactory.create(
-            paymentMethod = selectedItem,
+            paymentMethodCode = paymentMethodCode,
             metadata = metadata,
         )
     }
