@@ -15,7 +15,6 @@ import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
@@ -77,9 +76,8 @@ constructor(
         this.imageLoader = imageLoader
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     @VisibleForTesting
-    constructor(
+    internal constructor(
         @DrawableRes drawableResourceId: Int,
         label: String,
         lightThemeIconUrl: String?,
