@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -46,6 +45,29 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.getBackgroundColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.stateFlowOf
+
+@Composable
+internal fun CvcRecollectionScreen(cardBrand: CardBrand, lastFour: String) {
+    val element = remember {
+        CvcElement(IdentifierSpec(), CvcController(cardBrandFlow = stateFlowOf(CardBrand.Unknown)))
+    }
+
+    StripeTheme {
+        Column(
+            Modifier
+                .background(Color.White)
+                .padding(20.dp)
+        ) {
+            CvcRecollectionHeader(
+                modifier = Modifier
+                    .align(Alignment.End)
+                    .offset(16.dp)
+            )
+            CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
+            CvcRecollectionButton()
+        }
+    }
+}
 
 @Suppress("MagicNumber")
 @OptIn(ExperimentalComposeUiApi::class)
@@ -149,24 +171,7 @@ private fun CvcRecollectionButton() {
 @Composable
 @Preview
 private fun CvcRecollectionFieldPreview() {
-    val element = remember {
-        CvcElement(IdentifierSpec(), CvcController(cardBrandFlow = stateFlowOf(CardBrand.Unknown)))
-    }
-
     StripeTheme {
-        Column(
-            Modifier
-                .background(Color.White)
-                .padding(20.dp)
-        ) {
-            CvcRecollectionHeader(
-                modifier = Modifier
-                    .align(Alignment.End)
-                    .offset(16.dp)
-            )
-            CvcRecollectionField(element = element, cardBrand = CardBrand.Visa, lastFour = "4242")
-            CvcRecollectionButton()
-
-        }
+        CvcRecollectionScreen(cardBrand = CardBrand.Visa, lastFour = "4242")
     }
 }
