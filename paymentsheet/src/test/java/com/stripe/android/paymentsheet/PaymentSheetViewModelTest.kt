@@ -2404,10 +2404,7 @@ internal class PaymentSheetViewModelTest {
                 createViewModel(
                     customer = EMPTY_CUSTOMER_STATE,
                     intentConfirmationInterceptor = interceptor,
-                    linkState = LinkState(
-                        configuration = LINK_CONFIG,
-                        loginState = LinkState.LoginState.LoggedOut
-                    )
+                    linkState = LinkState(LINK_CONFIG, LinkState.LoginState.LoggedOut)
                 )
             )
 
