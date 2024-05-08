@@ -16,9 +16,12 @@ import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
 import androidx.annotation.RestrictTo
+import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.uicore.image.rememberDrawablePainter
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -56,9 +59,13 @@ constructor(
         throw IllegalStateException("Must pass in an image loader to use iconDrawable.")
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
+    private var delegateDrawableScope: CoroutineScope = GlobalScope
+
+    private var delegateDrawableDispatcher: CoroutineDispatcher = Dispatchers.Main
+
     @Suppress("DEPRECATION")
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    constructor(
+    internal constructor(
         @DrawableRes drawableResourceId: Int,
         label: String,
         lightThemeIconUrl: String?,
@@ -68,6 +75,21 @@ constructor(
         this.lightThemeIconUrl = lightThemeIconUrl
         this.darkThemeIconUrl = darkThemeIconUrl
         this.imageLoader = imageLoader
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    @VisibleForTesting
+    constructor(
+        @DrawableRes drawableResourceId: Int,
+        label: String,
+        lightThemeIconUrl: String?,
+        darkThemeIconUrl: String?,
+        imageLoader: suspend (PaymentOption) -> Drawable,
+        delegateDrawableScope: CoroutineScope,
+        delegateDrawableDispatcher: CoroutineDispatcher,
+    ) : this(drawableResourceId, label, lightThemeIconUrl, darkThemeIconUrl, imageLoader) {
+        this.delegateDrawableScope = delegateDrawableScope
+        this.delegateDrawableDispatcher = delegateDrawableDispatcher
     }
 
     /**
@@ -81,7 +103,13 @@ constructor(
      * Fetches the icon associated with this [PaymentOption].
      */
     fun icon(): Drawable {
-        return DelegateDrawable(ShapeDrawable(), imageLoader, this)
+        return DelegateDrawable(
+            ShapeDrawable(),
+            imageLoader,
+            this,
+            delegateDrawableScope,
+            delegateDrawableDispatcher
+        )
     }
 }
 
@@ -89,12 +117,13 @@ private class DelegateDrawable(
     @Volatile private var delegate: Drawable,
     private val imageLoader: suspend (PaymentOption) -> Drawable,
     private val paymentOption: PaymentOption,
+    scope: CoroutineScope,
+    dispatcher: CoroutineDispatcher,
 ) : Drawable() {
     init {
-        @OptIn(DelicateCoroutinesApi::class)
-        GlobalScope.launch {
+        scope.launch {
             delegate = imageLoader(paymentOption)
-            withContext(Dispatchers.Main) {
+            withContext(dispatcher) {
                 super.setBounds(0, 0, delegate.intrinsicWidth, delegate.intrinsicHeight)
                 invalidateSelf()
             }
