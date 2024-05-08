@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
@@ -26,7 +27,8 @@ internal class PaymentOptionFactory @Inject constructor(
     }
 
     @VisibleForTesting
-    internal suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
         fun loadResource(): Drawable {
             @Suppress("DEPRECATION")
             return runCatching {
@@ -162,7 +164,8 @@ internal class PaymentOptionFactory @Inject constructor(
     }
 
     companion object {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @VisibleForTesting
-        internal val emptyDrawable = ShapeDrawable()
+        val emptyDrawable = ShapeDrawable()
     }
 }
