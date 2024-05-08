@@ -98,6 +98,7 @@ sealed interface StripeIntent : StripeModel {
         CashAppRedirect("cashapp_handle_redirect_or_display_qr_code"),
         DisplayBoletoDetails("boleto_display_details"),
         DisplayKonbiniDetails("konbini_display_details"),
+        DisplayMultibancoDetails("multibanco_display_details"),
         SwishRedirect("swish_handle_redirect_or_display_qr_code");
 
         @Keep
@@ -203,6 +204,15 @@ sealed interface StripeIntent : StripeModel {
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayKonbiniDetails(
+            /**
+             * URL of a webpage containing the voucher for this payment.
+             */
+            val hostedVoucherUrl: String? = null,
+        ) : NextActionData()
+
+        @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        data class DisplayMultibancoDetails(
             /**
              * URL of a webpage containing the voucher for this payment.
              */

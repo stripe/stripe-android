@@ -133,6 +133,9 @@ constructor(
             is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
                 StripeIntent.NextActionType.DisplayKonbiniDetails
             }
+            is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
+                StripeIntent.NextActionType.DisplayMultibancoDetails
+            }
             is StripeIntent.NextActionData.VerifyWithMicrodeposits -> {
                 StripeIntent.NextActionType.VerifyWithMicrodeposits
             }

@@ -9,6 +9,7 @@ import com.stripe.android.payments.DefaultReturnUrl
 import com.stripe.android.payments.core.authentication.BoletoAuthenticator
 import com.stripe.android.payments.core.authentication.DefaultPaymentAuthenticatorRegistry
 import com.stripe.android.payments.core.authentication.KonbiniAuthenticator
+import com.stripe.android.payments.core.authentication.MultibancoAuthenticator
 import com.stripe.android.payments.core.authentication.OxxoAuthenticator
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.payments.core.authentication.RealRedirectResolver
@@ -50,6 +51,14 @@ internal abstract class AuthenticationModule {
     @IntentAuthenticatorKey(NextActionData.AlipayRedirect::class)
     abstract fun bindsAlipayRedirectAuthenticator(
         webIntentAuthenticator: WebIntentAuthenticator
+    ): PaymentAuthenticator<StripeIntent>
+
+    @IntentAuthenticatorMap
+    @Binds
+    @IntoMap
+    @IntentAuthenticatorKey(NextActionData.DisplayMultibancoDetails::class)
+    abstract fun bindsMultibancoAuthenticator(
+        multibancoAuthenticator: MultibancoAuthenticator
     ): PaymentAuthenticator<StripeIntent>
 
     @IntentAuthenticatorMap

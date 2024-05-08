@@ -21,6 +21,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.definitions.InstantDebits
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KlarnaDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.KonbiniDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.MobilePayDefinition
+import com.stripe.android.lpmfoundations.paymentmethod.definitions.MultibancoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.OxxoDefinition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.P24Definition
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.PayPalDefinition
@@ -58,6 +59,7 @@ internal object PaymentMethodRegistry {
         KlarnaDefinition,
         KonbiniDefinition,
         MobilePayDefinition,
+        MultibancoDefinition,
         OxxoDefinition,
         P24Definition,
         PayPalDefinition,

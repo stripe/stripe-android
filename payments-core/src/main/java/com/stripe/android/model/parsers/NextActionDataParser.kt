@@ -20,6 +20,7 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             StripeIntent.NextActionType.DisplayOxxoDetails -> DisplayOxxoDetailsJsonParser()
             StripeIntent.NextActionType.DisplayBoletoDetails -> DisplayBoletoDetailsJsonParser()
             StripeIntent.NextActionType.DisplayKonbiniDetails -> DisplayKonbiniDetailsJsonParser()
+            StripeIntent.NextActionType.DisplayMultibancoDetails -> DisplayMultibancoDetailsJsonParser()
             StripeIntent.NextActionType.RedirectToUrl -> RedirectToUrlParser()
             StripeIntent.NextActionType.UseStripeSdk -> SdkDataJsonParser()
             StripeIntent.NextActionType.AlipayRedirect -> AlipayRedirectParser()
@@ -74,6 +75,21 @@ internal class NextActionDataParser : ModelJsonParser<StripeIntent.NextActionDat
             json: JSONObject
         ): StripeIntent.NextActionData.DisplayKonbiniDetails {
             return StripeIntent.NextActionData.DisplayKonbiniDetails(
+                hostedVoucherUrl = optString(json, FIELD_HOSTED_VOUCHER_URL)
+            )
+        }
+
+        private companion object {
+            private const val FIELD_HOSTED_VOUCHER_URL = "hosted_voucher_url"
+        }
+    }
+
+    private class DisplayMultibancoDetailsJsonParser :
+        ModelJsonParser<StripeIntent.NextActionData.DisplayMultibancoDetails> {
+        override fun parse(
+            json: JSONObject
+        ): StripeIntent.NextActionData.DisplayMultibancoDetails {
+            return StripeIntent.NextActionData.DisplayMultibancoDetails(
                 hostedVoucherUrl = optString(json, FIELD_HOSTED_VOUCHER_URL)
             )
         }
