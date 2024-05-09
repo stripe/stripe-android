@@ -61,10 +61,12 @@ class MultibancoActivity : StripeIntentActivity() {
     ) {
         when (flow) {
             MultibancoFlow.Payment -> {
-                val params = PaymentMethodCreateParams.createMultibanco()
+                val params = PaymentMethodCreateParams.createMultibanco(
+                    billingDetails = PaymentMethod.BillingDetails(email = "email@email.com")
+                )
 
                 createAndConfirmPaymentIntent(
-                    country = "US",
+                    country = "PT",
                     paymentMethodCreateParams = params,
                     supportedPaymentMethods = PaymentMethod.Type.Multibanco.code,
                     currency = "EUR"

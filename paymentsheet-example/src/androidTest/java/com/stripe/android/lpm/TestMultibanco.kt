@@ -6,6 +6,8 @@ import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.DelayedPaymentMethodsSettingsDefinition
+import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import org.junit.Ignore
 import org.junit.Test
@@ -15,12 +17,13 @@ import org.junit.runner.RunWith
 internal class TestMultibanco : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "multibanco",
+        authorizationAction = AuthorizeAction.DisplayQrCode
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.US
         settings[CurrencySettingsDefinition] = Currency.EUR
+        settings[DelayedPaymentMethodsSettingsDefinition] = true
     }
 
-    @Ignore("Complex authorization handling required")
     @Test
     fun testMultibanco() {
         testDriver.confirmNewOrGuestComplete(
