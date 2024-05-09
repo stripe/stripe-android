@@ -321,6 +321,8 @@ enum class Merchant(
     PartnerM("partner_m", canSwitchBetweenTestAndLive = false),
     PlatformC("strash"),
     Networking("networking"),
+    LiveTesting("live_testing", canSwitchBetweenTestAndLive = false),
+    TestMode("testmode", canSwitchBetweenTestAndLive = false),
     Custom("other");
 
     companion object {
