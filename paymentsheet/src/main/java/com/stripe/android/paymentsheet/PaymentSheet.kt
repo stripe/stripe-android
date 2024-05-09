@@ -726,7 +726,7 @@ class PaymentSheet internal constructor(
          */
         val primaryButton: PrimaryButton,
 
-        internal val layoutMode: LayoutMode,
+        internal val layout: Layout,
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -734,7 +734,7 @@ class PaymentSheet internal constructor(
             shapes = Shapes.default,
             typography = Typography.default,
             primaryButton = PrimaryButton(),
-            layoutMode = LayoutMode.default,
+            layout = Layout.default,
         )
 
         constructor(
@@ -768,7 +768,7 @@ class PaymentSheet internal constructor(
             shapes = shapes,
             typography = typography,
             primaryButton = primaryButton,
-            layoutMode = LayoutMode.default,
+            layout = Layout.default,
         )
 
         fun getColors(isDark: Boolean): Colors {
@@ -776,11 +776,11 @@ class PaymentSheet internal constructor(
         }
 
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        enum class LayoutMode {
+        enum class Layout {
             Horizontal, Vertical;
 
             internal companion object {
-                internal val default: LayoutMode = Horizontal
+                internal val default: Layout = Horizontal
             }
         }
 
@@ -790,7 +790,7 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
-            private var layoutMode: LayoutMode = LayoutMode.default
+            private var layout: Layout = Layout.default
 
             fun colorsLight(colors: Colors) = apply {
                 this.colorsLight = colors
@@ -813,13 +813,13 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @ExperimentalLayoutModeApi
-            fun layoutMode(layoutMode: LayoutMode) = apply {
-                this.layoutMode = layoutMode
+            @ExperimentalLayoutApi
+            fun layout(layout: Layout) = apply {
+                this.layout = layout
             }
 
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, layoutMode)
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, layout)
             }
         }
     }

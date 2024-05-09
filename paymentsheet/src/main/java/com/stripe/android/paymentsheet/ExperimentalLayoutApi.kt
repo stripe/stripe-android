@@ -2,7 +2,7 @@ package com.stripe.android.paymentsheet
 
 import androidx.annotation.RestrictTo
 
-@RequiresOptIn(message = "LayoutMode support is beta. It may be changed in the future without notice.")
+@RequiresOptIn(message = "Layout support is beta. It may be changed in the future without notice.")
 @Retention(AnnotationRetention.BINARY)
 @Target(
     AnnotationTarget.CLASS,
@@ -10,4 +10,4 @@ import androidx.annotation.RestrictTo
     AnnotationTarget.PROPERTY
 )
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-annotation class ExperimentalLayoutModeApi
+annotation class ExperimentalLayoutApi

@@ -4,8 +4,8 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 
-internal object LayoutModeSettingsDefinition : BooleanSettingsDefinition(
-    key = "layoutMode",
+internal object LayoutSettingsDefinition : BooleanSettingsDefinition(
+    key = "layout",
     displayName = "Vertical Mode",
     defaultValue = false,
 ) {
@@ -17,10 +17,10 @@ internal object LayoutModeSettingsDefinition : BooleanSettingsDefinition(
     ) {
         configurationBuilder.appearance(
             AppearanceStore.state.copy(
-                layoutMode = if (value) {
-                    PaymentSheet.Appearance.LayoutMode.Vertical
+                layout = if (value) {
+                    PaymentSheet.Appearance.Layout.Vertical
                 } else {
-                    PaymentSheet.Appearance.LayoutMode.Horizontal
+                    PaymentSheet.Appearance.Layout.Horizontal
                 }
             )
         )
