@@ -21,7 +21,6 @@ import com.stripe.android.financialconnections.model.Image
 import com.stripe.android.financialconnections.model.InstitutionResponse
 import com.stripe.android.financialconnections.model.NetworkedAccount
 import com.stripe.android.financialconnections.model.NetworkedAccountsList
-import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.ReturningNetworkingUserAccountPicker
 import com.stripe.android.financialconnections.model.TextUpdate
 import com.stripe.android.financialconnections.navigation.Destination.LinkStepUpVerification
@@ -32,7 +31,6 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.verifyNoInteractions
@@ -157,10 +155,7 @@ class LinkAccountPickerViewModelTest {
         viewModel.onAccountClick(selectedAccount)
         viewModel.onSelectAccountsClick()
 
-        with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
-            verify(updateCachedAccounts).invoke(capture())
-            assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
-        }
+        verify(updateCachedAccounts).invoke(listOf(selectedAccount))
         val destination = accounts.data.first().nextPaneOnSelection!!.destination
         navigationManager.assertNavigatedTo(destination, Pane.LINK_ACCOUNT_PICKER)
     }
@@ -200,10 +195,7 @@ class LinkAccountPickerViewModelTest {
             viewModel.onAccountClick(selectedAccount)
             viewModel.onSelectAccountsClick()
 
-            with(argumentCaptor<(List<PartnerAccount>?) -> List<PartnerAccount>?>()) {
-                verify(updateCachedAccounts).invoke(capture())
-                assertThat(firstValue(null)).isEqualTo(listOf(selectedAccount))
-            }
+            verify(updateCachedAccounts).invoke(listOf(selectedAccount))
             verifyNoInteractions(selectNetworkedAccounts)
             navigationManager.assertNavigatedTo(LinkStepUpVerification, Pane.LINK_ACCOUNT_PICKER)
         }

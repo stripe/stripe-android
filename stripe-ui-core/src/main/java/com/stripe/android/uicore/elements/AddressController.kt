@@ -5,9 +5,9 @@ import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusDirection
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.flatMapLatest
+import com.stripe.android.uicore.utils.combineAsStateFlow
+import com.stripe.android.uicore.utils.flatMapLatestAsStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /**
  * This is the controller for a section with a changing number and set of fields.
@@ -16,13 +16,13 @@ import kotlinx.coroutines.flow.flatMapLatest
  */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 class AddressController(
-    val fieldsFlowable: Flow<List<SectionFieldElement>>
+    val fieldsFlowable: StateFlow<List<SectionFieldElement>>
 ) : SectionFieldErrorController, SectionFieldComposable {
     @StringRes
     val label: Int? = null
 
-    override val error = fieldsFlowable.flatMapLatest { sectionFieldElements ->
-        combine(
+    override val error = fieldsFlowable.flatMapLatestAsStateFlow { sectionFieldElements ->
+        combineAsStateFlow(
             sectionFieldElements.map { it.sectionFieldErrorController().error }
         ) { fieldErrors ->
             fieldErrors.filterNotNull().firstOrNull()

@@ -55,8 +55,7 @@ internal class AttachPaymentViewModel @AssistedInject constructor(
             val authSession = requireNotNull(manifest.activeAuthSession)
             val activeInstitution = requireNotNull(manifest.activeInstitution)
             val accounts = getCachedAccounts()
-            require(accounts.size == 1)
-            val id = accounts.first().linkedAccountId
+            val id = accounts.single().linkedAccountId
             val (result, millis) = measureTimeMillis {
                 pollAttachPaymentAccount(
                     sync = sync,

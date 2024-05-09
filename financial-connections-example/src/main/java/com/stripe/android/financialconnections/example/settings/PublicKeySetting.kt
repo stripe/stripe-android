@@ -1,12 +1,14 @@
 package com.stripe.android.financialconnections.example.settings
 
+import com.stripe.android.financialconnections.example.Flow
+import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
 internal data class PublicKeySetting(
-    override val selectedOption: String? = null,
+    override val selectedOption: String = "",
     override val key: String = "pk"
-) : Saveable<String?>, SingleChoiceSetting<String?>(
+) : Saveable<String>, SingleChoiceSetting<String>(
     displayName = "Publishable Key",
     options = emptyList(),
     selectedOption = selectedOption
@@ -22,12 +24,16 @@ internal data class PublicKeySetting(
 
     override fun valueUpdated(
         currentSettings: List<Setting<*>>,
-        value: String?
+        value: String
     ): List<Setting<*>> {
         return replace(currentSettings, this.copy(selectedOption = value))
     }
 
-    override fun convertToString(value: String?): String? = value
+    override fun shouldDisplay(merchant: Merchant, flow: Flow): Boolean {
+        return merchant == Merchant.Custom
+    }
+
+    override fun convertToString(value: String): String = value
 
     override fun convertToValue(value: String): String = value
 }

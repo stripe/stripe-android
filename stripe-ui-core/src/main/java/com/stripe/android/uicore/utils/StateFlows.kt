@@ -201,8 +201,12 @@ inline fun <reified T, R> combineAsStateFlow(
 ): StateFlow<R> {
     @Suppress("DEPRECATION")
     return FlowToStateFlow(
-        flow = combine(flows) { values ->
-            transform(values.toList())
+        flow = if (flows.isEmpty()) {
+            stateFlowOf(transform(emptyList()))
+        } else {
+            combine(flows) { values ->
+                transform(values.toList())
+            }
         },
         produceValue = { transform(flows.map { it.value }) },
     )

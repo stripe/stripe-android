@@ -17,6 +17,17 @@ internal data class PlaygroundSettings(
     val settings: List<Setting<*>>
 ) {
 
+    val displayableSettings: List<Setting<*>> by lazy {
+        val merchant = get<MerchantSetting>()
+        val flow = get<FlowSetting>()
+        settings.filter {
+            it.shouldDisplay(
+                merchant = merchant.selectedOption,
+                flow = flow.selectedOption,
+            )
+        }
+    }
+
     fun <T> withValue(
         setting: Setting<T>,
         value: T
@@ -28,11 +39,11 @@ internal data class PlaygroundSettings(
 
     fun lasRequest(): LinkAccountSessionBody = settings.toList().fold(
         LinkAccountSessionBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, setting: Setting<*> -> (setting as Setting<Any?>).lasRequest(acc) }
+    ) { acc, setting: Setting<*> -> setting.lasRequest(acc) }
 
     fun paymentIntentRequest(): PaymentIntentBody = settings.toList().fold(
         PaymentIntentBody(testEnvironment = BuildConfig.TEST_ENVIRONMENT)
-    ) { acc, setting: Setting<*> -> (setting as Setting<Any?>).paymentIntentRequest(acc) }
+    ) { acc, setting: Setting<*> -> setting.paymentIntentRequest(acc) }
 
     fun asJsonString(): String {
         val json = settings
@@ -95,32 +106,31 @@ internal data class PlaygroundSettings(
         }
 
         fun createFromDefaults(): PlaygroundSettings {
-            return PlaygroundSettings(
-                allSettings
-                    .filter { it.selectedOption != null }
-                    .toList()
-            )
+            return PlaygroundSettings(allSettings)
         }
 
-        private fun createFromJsonString(jsonString: String): PlaygroundSettings {
+        private fun createFromJsonString(jsonString: String): PlaygroundSettings? {
             var settings = PlaygroundSettings(emptyList())
-            val jsonObject: JsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
 
-            allSettings.map {
-                @Suppress("UNCHECKED_CAST")
-                it as Setting<Any?>
-            }.forEach { setting ->
-                val saveable = setting.saveable()
-                val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
-                if (savedValue?.isString == true) {
-                    // add item to mutable list
-                    settings = settings.withValue(setting, saveable.convertToValue(savedValue.content))
-                } else if (setting.selectedOption != null) {
-                    settings = settings.withValue(setting, setting.selectedOption)
+            return runCatching {
+                val jsonObject: JsonObject = Json.decodeFromString(JsonObject.serializer(), jsonString)
+
+                allSettings.map {
+                    @Suppress("UNCHECKED_CAST")
+                    it as Setting<Any?>
+                }.forEach { setting ->
+                    val saveable = setting.saveable()
+                    val savedValue = saveable?.key?.let { jsonObject[it] as? JsonPrimitive }
+                    settings = if (savedValue?.isString == true) {
+                        // add item to mutable list
+                        settings.withValue(setting, saveable.convertToValue(savedValue.content))
+                    } else {
+                        settings.withValue(setting, setting.selectedOption)
+                    }
                 }
-            }
 
-            return settings
+                settings
+            }.getOrNull()
         }
 
         fun createFromDeeplinkUri(uri: Uri): PlaygroundSettings {
@@ -146,10 +156,11 @@ internal data class PlaygroundSettings(
             MerchantSetting(),
             PublicKeySetting(),
             PrivateKeySetting(),
+            TestModeSetting(),
             FlowSetting(),
+            ConfirmIntentSetting(),
             NativeSetting(),
             PermissionsSetting(),
-            ConfirmIntentSetting(),
             EmailSetting(),
         )
     }

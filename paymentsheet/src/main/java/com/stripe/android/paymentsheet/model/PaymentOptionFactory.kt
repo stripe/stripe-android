@@ -5,6 +5,7 @@ import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
+import androidx.annotation.VisibleForTesting
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.createCardLabel
@@ -24,14 +25,17 @@ internal class PaymentOptionFactory @Inject constructor(
             Configuration.UI_MODE_NIGHT_YES
     }
 
-    private suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
+    @VisibleForTesting
+    internal suspend fun loadPaymentOption(paymentOption: PaymentOption): Drawable {
         fun loadResource(): Drawable {
             @Suppress("DEPRECATION")
-            return ResourcesCompat.getDrawable(
-                resources,
-                paymentOption.drawableResourceId,
-                null
-            ) ?: ShapeDrawable()
+            return runCatching {
+                ResourcesCompat.getDrawable(
+                    resources,
+                    paymentOption.drawableResourceId,
+                    null
+                )
+            }.getOrNull() ?: emptyDrawable
         }
 
         suspend fun loadIcon(url: String): Drawable {
@@ -155,5 +159,10 @@ internal class PaymentOptionFactory @Inject constructor(
             }
             else -> resourceId
         }
+    }
+
+    companion object {
+        @VisibleForTesting
+        internal val emptyDrawable = ShapeDrawable()
     }
 }

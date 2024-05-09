@@ -18,9 +18,8 @@ import com.stripe.android.uicore.elements.SectionFieldErrorController
 import com.stripe.android.uicore.elements.SimpleTextElement
 import com.stripe.android.uicore.elements.SimpleTextFieldConfig
 import com.stripe.android.uicore.elements.SimpleTextFieldController
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.distinctUntilChanged
 import java.util.UUID
 import kotlin.coroutines.CoroutineContext
 
@@ -101,7 +100,7 @@ internal class CardDetailsController(
         )
     )
 
-    override val error = combine(
+    override val error = combineAsStateFlow(
         listOfNotNull(
             nameElement,
             numberElement,
@@ -112,7 +111,7 @@ internal class CardDetailsController(
             .map { it.error }
     ) {
         it.filterNotNull().firstOrNull()
-    }.distinctUntilChanged()
+    }
 
     @Composable
     override fun ComposeUI(

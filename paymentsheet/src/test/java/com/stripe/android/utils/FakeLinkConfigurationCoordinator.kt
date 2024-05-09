@@ -9,7 +9,9 @@ import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.model.ConsumerPaymentDetails
 import com.stripe.android.model.ConsumerSession
 import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import org.mockito.kotlin.mock
 
@@ -30,8 +32,8 @@ class FakeLinkConfigurationCoordinator(
     override val component: LinkComponent?
         get() = mock()
 
-    override val emailFlow: Flow<String?>
-        get() = flowOf(null)
+    override val emailFlow: StateFlow<String?>
+        get() = stateFlowOf(null)
 
     override fun getAccountStatusFlow(configuration: LinkConfiguration): Flow<AccountStatus> {
         return flowOf(accountStatus)

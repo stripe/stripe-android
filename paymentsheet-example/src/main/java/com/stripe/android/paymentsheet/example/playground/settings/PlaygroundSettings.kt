@@ -188,7 +188,6 @@ internal class PlaygroundSettings private constructor(
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,
             LinkSettingsDefinition,
-            EnableInstantDebitsSettingsDefinition,
             CountrySettingsDefinition,
             CurrencySettingsDefinition,
             GooglePaySettingsDefinition,
@@ -201,17 +200,18 @@ internal class PlaygroundSettings private constructor(
             DefaultShippingAddressSettingsDefinition,
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
+            SupportedPaymentMethodsSettingsDefinition,
             PrimaryButtonLabelSettingsDefinition,
             PaymentMethodConfigurationSettingsDefinition,
             PreferredNetworkSettingsDefinition,
             AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition,
             PaymentMethodOrderSettingsDefinition,
             ExternalPaymentMethodSettingsDefinition,
+            LayoutSettingsDefinition,
             IntegrationTypeSettingsDefinition,
         )
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
-            SupportedPaymentMethodsSettingsDefinition,
             AppearanceSettingsDefinition,
             ShippingAddressSettingsDefinition,
         )

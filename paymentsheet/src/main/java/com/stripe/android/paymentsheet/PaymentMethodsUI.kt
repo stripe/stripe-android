@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -48,6 +49,10 @@ private object Spacing {
 
 @VisibleForTesting
 const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
+
+@VisibleForTesting
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val TEST_TAG_ICON_FROM_RES = "PaymentMethodsUIIconFomRes"
 
 @Composable
 internal fun PaymentMethodsUI(
@@ -260,12 +265,29 @@ private fun PaymentMethodIconUi(
             imageLoader = imageLoader,
             contentDescription = null,
             contentScale = ContentScale.Fit,
+            errorContent = {
+                PaymentMethodIconFromResource(
+                    iconRes = iconRes,
+                    colorFilter = colorFilter
+                )
+            },
         )
     } else {
+        PaymentMethodIconFromResource(iconRes = iconRes, colorFilter = colorFilter)
+    }
+}
+
+@Composable
+private fun PaymentMethodIconFromResource(
+    iconRes: Int,
+    colorFilter: ColorFilter?,
+) {
+    if (iconRes != 0) {
         Image(
             painter = painterResource(iconRes),
             contentDescription = null,
             colorFilter = colorFilter,
+            modifier = Modifier.testTag(TEST_TAG_ICON_FROM_RES)
         )
     }
 }

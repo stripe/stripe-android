@@ -15,6 +15,8 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_CARD_NUMBER_COMPLETED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_EDITABLE_PAYMENT_OPTION
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_HIDE_PAYMENT_OPTION_BRANDS
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_INIT
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_PAYMENT_METHOD_SELECTED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_CONFIRMED_SAVED_PM_SUCCEEDED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_SELECT_PAYMENT_METHOD_DONE_TAPPED
@@ -27,6 +29,7 @@ import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.C
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.CS_UPDATE_PAYMENT_METHOD_FAILED
 import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_PAYMENT_METHOD_TYPE
+import com.stripe.android.customersheet.analytics.CustomerSheetEvent.Companion.FIELD_SELECTED_LPM
 import com.stripe.android.customersheet.analytics.CustomerSheetEventReporter
 import com.stripe.android.customersheet.analytics.DefaultCustomerSheetEventReporter
 import com.stripe.android.model.CardBrand
@@ -61,6 +64,17 @@ class CustomerSheetEventReporterTest {
         workContext = testDispatcher,
     )
 
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Test
+    fun `onInit should fire analytics request with expected event value`() {
+        eventReporter.onInit(configuration = CustomerSheetFixtures.MINIMUM_CONFIG)
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_INIT
+            }
+        )
+    }
+
     @Test
     fun `onScreenPresented should fire analytics request with expected event value`() {
         eventReporter.onScreenPresented(screen = CustomerSheetEventReporter.Screen.AddPaymentMethod)
@@ -91,6 +105,17 @@ class CustomerSheetEventReporterTest {
         verify(analyticsRequestExecutor).executeAsync(
             argWhere { req ->
                 req.params["event"] == CS_HIDE_EDITABLE_PAYMENT_OPTION
+            }
+        )
+    }
+
+    @Test
+    fun `onSelectPaymentMethod should fire analytics request with expected event value`() {
+        eventReporter.onPaymentMethodSelected(PaymentMethod.Type.Card.code)
+        verify(analyticsRequestExecutor).executeAsync(
+            argWhere { req ->
+                req.params["event"] == CS_PAYMENT_METHOD_SELECTED &&
+                    req.params[FIELD_SELECTED_LPM] == PaymentMethod.Type.Card.code
             }
         )
     }

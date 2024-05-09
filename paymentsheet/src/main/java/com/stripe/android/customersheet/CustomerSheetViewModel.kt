@@ -154,6 +154,8 @@ internal class CustomerSheetViewModel(
     init {
         configuration.appearance.parseAppearance()
 
+        eventReporter.onInit(configuration)
+
         if (viewState.value is CustomerSheetViewState.Loading) {
             viewModelScope.launch(workContext) {
                 loadCustomerSheetState()
@@ -406,6 +408,8 @@ internal class CustomerSheetViewModel(
             }
         }
 
+        eventReporter.onPaymentMethodSelected(paymentMethod.code)
+
         previouslySelectedPaymentMethod = paymentMethod
 
         updateViewState<CustomerSheetViewState.AddPaymentMethod> {
@@ -423,7 +427,6 @@ internal class CustomerSheetViewModel(
                         cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
                     ),
                 ) ?: listOf(),
-                selectedPaymentMethod = paymentMethod,
                 primaryButtonLabel = if (
                     paymentMethod.code == PaymentMethod.Type.USBankAccount.code &&
                     it.bankAccountResult !is CollectBankAccountResultInternal.Completed
@@ -455,7 +458,7 @@ internal class CustomerSheetViewModel(
                     primaryButtonEnabled = formFieldValues != null && !it.isProcessing,
                     draftPaymentSelection = formFieldValues?.transformToPaymentSelection(
                         context = application,
-                        paymentMethod = it.selectedPaymentMethod,
+                        paymentMethod = it.supportedPaymentMethods.first { spm -> spm.code == it.paymentMethodCode },
                         paymentMethodMetadata = paymentMethodMetadata
                     )
                 )
@@ -699,17 +702,13 @@ internal class CustomerSheetViewModel(
                         enabled = false,
                     )
                 }
-                paymentMethodMetadata?.supportedPaymentMethodForCode(
-                    code = currentViewState.paymentMethodCode,
-                )?.let { paymentMethodSpec ->
-                    val formFieldValues = currentViewState.formFieldValues ?: error("completeFormValues cannot be null")
-                    val params = formFieldValues
-                        .transformToPaymentMethodCreateParams(
-                            paymentMethod = paymentMethodSpec,
-                            paymentMethodMetadata = requireNotNull(paymentMethodMetadata)
-                        )
-                    createAndAttach(params)
-                } ?: error("${currentViewState.paymentMethodCode} is not supported")
+                val formFieldValues = currentViewState.formFieldValues ?: error("completeFormValues cannot be null")
+                val params = formFieldValues
+                    .transformToPaymentMethodCreateParams(
+                        paymentMethodCode = currentViewState.paymentMethodCode,
+                        paymentMethodMetadata = requireNotNull(paymentMethodMetadata)
+                    )
+                createAndAttach(params)
             }
             is CustomerSheetViewState.SelectPaymentMethod -> {
                 updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
@@ -816,7 +815,6 @@ internal class CustomerSheetViewModel(
                         handleViewAction(CustomerSheetViewAction.OnFormError(error))
                     }
                 ),
-                selectedPaymentMethod = selectedPaymentMethod,
                 draftPaymentSelection = null,
                 enabled = true,
                 isLiveMode = isLiveModeProvider(),

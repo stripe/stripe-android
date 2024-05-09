@@ -1,5 +1,7 @@
 package com.stripe.android.financialconnections.example.settings
 
+import com.stripe.android.financialconnections.example.Flow
+import com.stripe.android.financialconnections.example.Merchant
 import com.stripe.android.financialconnections.example.data.model.LinkAccountSessionBody
 import com.stripe.android.financialconnections.example.data.model.PaymentIntentBody
 
@@ -24,6 +26,10 @@ data class ConfirmIntentSetting(
 
     override fun valueUpdated(currentSettings: List<Setting<*>>, value: Boolean): List<Setting<*>> {
         return replace(currentSettings, this.copy(selectedOption = value))
+    }
+
+    override fun shouldDisplay(merchant: Merchant, flow: Flow): Boolean {
+        return flow == Flow.PaymentIntent
     }
 
     override fun convertToValue(value: String): Boolean = value.toBoolean()

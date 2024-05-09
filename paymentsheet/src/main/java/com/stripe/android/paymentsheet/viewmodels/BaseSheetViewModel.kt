@@ -51,6 +51,7 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
+import com.stripe.android.uicore.utils.combine
 import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.Dispatchers
@@ -60,7 +61,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -167,11 +167,8 @@ internal abstract class BaseSheetViewModel(
     private val _mandateText = MutableStateFlow<MandateText?>(null)
     internal val mandateText: StateFlow<MandateText?> = _mandateText
 
-    protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(),
-        initialValue = null,
-    )
+    private val linkInlineSignUpState = MutableStateFlow<InlineSignupViewState?>(null)
+    protected val linkEmailFlow: StateFlow<String?> = linkConfigurationCoordinator.emailFlow
 
     private var previouslySentDeepLinkEvent: Boolean
         get() = savedStateHandle[PREVIOUSLY_SENT_DEEP_LINK_EVENT] ?: false
@@ -228,12 +225,6 @@ internal abstract class BaseSheetViewModel(
     }
 
     val paymentOptionsState: StateFlow<PaymentOptionsState> = paymentOptionsStateMapper()
-        .filterNotNull()
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(),
-            initialValue = PaymentOptionsState(),
-        )
 
     private val canEdit: StateFlow<Boolean> = paymentOptionsState.mapAsStateFlow { state ->
         val paymentMethods = state.items.filterIsInstance<PaymentOptionsItem.SavedPaymentMethod>()
@@ -302,6 +293,38 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
+                }
+            }
+        }
+
+        viewModelScope.launch {
+            var inLinkSignUpMode = false
+
+            combine(
+                linkHandler.linkInlineSelection,
+                selection,
+                linkInlineSignUpState
+            ).collectLatest { (linkInlineSelection, paymentSelection, linkInlineSignUpState) ->
+                // Only reset custom primary button state if we haven't already
+                if (paymentSelection !is PaymentSelection.New.Card) {
+                    if (inLinkSignUpMode) {
+                        // US bank account will update the custom primary state on its own
+                        if (paymentSelection !is PaymentSelection.New.USBankAccount) {
+                            updateLinkPrimaryButtonUiState(null)
+                        }
+
+                        inLinkSignUpMode = false
+                    }
+
+                    return@collectLatest
+                }
+
+                inLinkSignUpMode = true
+
+                if (linkInlineSignUpState != null) {
+                    updatePrimaryButtonForLinkSignup(linkInlineSignUpState)
+                } else if (linkInlineSelection != null) {
+                    updatePrimaryButtonForLinkInline()
                 }
             }
         }
@@ -675,6 +698,10 @@ internal abstract class BaseSheetViewModel(
         }
     }
 
+    fun onLinkSignUpStateUpdated(state: InlineSignupViewState) {
+        linkInlineSignUpState.value = state
+    }
+
     fun supportedPaymentMethodForCode(code: String): SupportedPaymentMethod {
         return requireNotNull(
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(
@@ -697,11 +724,11 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun createFormArguments(
-        selectedItem: SupportedPaymentMethod,
+        paymentMethodCode: PaymentMethodCode,
     ): FormArguments {
         val metadata = requireNotNull(paymentMethodMetadata.value)
         return FormArgumentsFactory.create(
-            paymentMethod = selectedItem,
+            paymentMethodCode = paymentMethodCode,
             metadata = metadata,
         )
     }

@@ -74,7 +74,7 @@ internal fun USBankAccountForm(
     )
 
     val currentScreenState by viewModel.currentScreenState.collectAsState()
-    val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState(null)
+    val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
 
     USBankAccountEmitters(
         viewModel = viewModel,
@@ -320,7 +320,7 @@ private fun PhoneSection(
     phoneController: PhoneNumberController,
     imeAction: ImeAction,
 ) {
-    val error by phoneController.error.collectAsState(null)
+    val error by phoneController.error.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
@@ -355,7 +355,7 @@ private fun AddressSection(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
 ) {
-    val error by addressController.error.collectAsState(null)
+    val error by addressController.error.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->

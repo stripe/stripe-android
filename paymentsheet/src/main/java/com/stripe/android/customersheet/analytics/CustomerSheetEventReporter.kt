@@ -1,8 +1,16 @@
 package com.stripe.android.customersheet.analytics
 
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.CardBrand
 
 internal interface CustomerSheetEventReporter {
+
+    /**
+     * User entered the [CustomerSheet] flow
+     */
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    fun onInit(configuration: CustomerSheet.Configuration)
 
     /**
      * [Screen] was presented to user
@@ -13,6 +21,11 @@ internal interface CustomerSheetEventReporter {
      * [Screen] was hidden to user
      */
     fun onScreenHidden(screen: Screen)
+
+    /**
+     * User has selected one of the available payment methods in the payment method form.
+     */
+    fun onPaymentMethodSelected(code: String)
 
     /**
      * User attempted to confirm their saved payment method selection and succeeded

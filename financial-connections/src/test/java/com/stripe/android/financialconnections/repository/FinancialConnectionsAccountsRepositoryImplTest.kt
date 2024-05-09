@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.repository
 
+import androidx.lifecycle.SavedStateHandle
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
@@ -7,6 +8,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccount
 import com.stripe.android.financialconnections.ApiKeyFixtures.partnerAccountList
 import com.stripe.android.financialconnections.FinancialConnectionsSheet
+import com.stripe.android.financialconnections.domain.CachedPartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import kotlinx.coroutines.test.runTest
@@ -36,14 +38,15 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
         ),
         requestExecutor = mockRequestExecutor,
         apiRequestFactory = apiRequestFactory,
-        logger = Logger.noop()
+        logger = Logger.noop(),
+        savedStateHandle = SavedStateHandle(),
     )
 
     @Test
     fun `getCachedAccounts - When called twice, second call returns from cache`() = runTest {
         val repository = buildRepository()
         val expectedAccounts = partnerAccountList().copy(
-            data = listOf(partnerAccount())
+            data = listOf(partnerAccount().copy(id = "id_1", linkedAccountId = "linked_id_1"))
         )
         givenRequestReturnsAccounts(expectedAccounts)
 
@@ -61,7 +64,9 @@ internal class FinancialConnectionsAccountsRepositoryImplTest {
             any(),
             eq(PartnerAccountsList.serializer())
         )
-        assertThat(accounts).isEqualTo(expectedAccounts.data)
+        assertThat(accounts).containsExactly(
+            CachedPartnerAccount(id = "id_1", linkedAccountId = "linked_id_1")
+        )
     }
 
     /**

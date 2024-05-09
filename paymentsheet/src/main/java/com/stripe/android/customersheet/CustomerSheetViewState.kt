@@ -96,7 +96,6 @@ internal sealed class CustomerSheetViewState(
         val formElements: List<FormElement>,
         val formArguments: FormArguments,
         val usBankAccountFormArguments: USBankAccountFormArguments,
-        val selectedPaymentMethod: SupportedPaymentMethod,
         val draftPaymentSelection: PaymentSelection?,
         val enabled: Boolean,
         override val isLiveMode: Boolean,

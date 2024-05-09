@@ -8,6 +8,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.Amount
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
@@ -15,11 +16,11 @@ internal class PrimaryButtonUiStateMapper(
     private val context: Context,
     private val config: PaymentSheet.Configuration,
     private val isProcessingPayment: Boolean,
-    private val currentScreenFlow: Flow<PaymentSheetScreen>,
-    private val buttonsEnabledFlow: Flow<Boolean>,
-    private val amountFlow: Flow<Amount?>,
-    private val selectionFlow: Flow<PaymentSelection?>,
-    private val customPrimaryButtonUiStateFlow: Flow<PrimaryButton.UIState?>,
+    private val currentScreenFlow: StateFlow<PaymentSheetScreen>,
+    private val buttonsEnabledFlow: StateFlow<Boolean>,
+    private val amountFlow: StateFlow<Amount?>,
+    private val selectionFlow: StateFlow<PaymentSelection?>,
+    private val customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
     private val onClick: () -> Unit,
 ) {
 

@@ -95,7 +95,7 @@ internal fun InputAddressScreen(
         )
     } else {
         formController?.let {
-            val completeValues by it.completeFormValues.collectAsState(null)
+            val completeValues by it.completeFormValues.collectAsState()
             val buttonText = viewModel.args.config?.buttonTitle ?: stringResource(
                 R.string.stripe_paymentsheet_address_element_primary_button
             )

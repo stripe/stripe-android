@@ -6,7 +6,7 @@ import androidx.compose.ui.test.isEnabled
 import androidx.compose.ui.test.onNodeWithText
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
-import com.stripe.android.core.utils.FeatureFlags
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -14,16 +14,13 @@ import com.stripe.android.paymentsheet.example.playground.settings.Currency
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
-import com.stripe.android.paymentsheet.example.playground.settings.EnableInstantDebitsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.LinkSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.TestParameters
 import com.stripe.android.test.core.ui.ComposeButton
-import com.stripe.android.testing.FeatureFlagTestRule
 import org.junit.Ignore
-import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -38,15 +35,11 @@ internal class TestInstantDebits : BasePlaygroundTest() {
         settings[AutomaticPaymentMethodsSettingsDefinition] = false
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
         settings[LinkSettingsDefinition] = true
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "link")
-        settings[EnableInstantDebitsSettingsDefinition] = true
+        settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
+            PaymentMethod.Type.Card,
+            PaymentMethod.Type.Link
+        ).joinToString(",")
     }
-
-    @get:Rule
-    val instantDebitsFeatureRule = FeatureFlagTestRule(
-        featureFlag = FeatureFlags.instantDebits,
-        isEnabled = true,
-    )
 
     @Test
     @Ignore

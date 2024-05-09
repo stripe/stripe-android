@@ -143,6 +143,19 @@ class CustomerSheetViewModelTest {
     }
 
     @Test
+    fun `on init, sends 'onInit' event to event reporter`() = runTest(testDispatcher) {
+        val eventReporter: CustomerSheetEventReporter = mock()
+
+        createViewModel(
+            workContext = testDispatcher,
+            eventReporter = eventReporter,
+            configuration = CustomerSheetFixtures.MINIMUM_CONFIG,
+        )
+
+        verify(eventReporter).onInit(CustomerSheetFixtures.MINIMUM_CONFIG)
+    }
+
+    @Test
     fun `CustomerSheetViewAction#OnBackPressed emits canceled result`() = runTest(testDispatcher) {
         val viewModel = createViewModel(
             workContext = testDispatcher,
@@ -1704,7 +1717,7 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.selectedPaymentMethod.code)
+            assertThat(viewState.paymentMethodCode)
                 .isEqualTo("card")
 
             viewModel.handleViewAction(
@@ -1714,9 +1727,30 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitViewState()
-            assertThat(viewState.selectedPaymentMethod.code)
+            assertThat(viewState.paymentMethodCode)
                 .isEqualTo("us_bank_account")
         }
+    }
+
+    @Test
+    fun `On payment method selection, should report event`() = runTest(testDispatcher) {
+        val eventReporter = mock<CustomerSheetEventReporter>()
+
+        val viewModel = createViewModel(
+            workContext = testDispatcher,
+            initialBackStack = listOf(
+                addPaymentMethodViewState,
+            ),
+            eventReporter = eventReporter,
+        )
+
+        viewModel.handleViewAction(
+            CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
+                LpmRepositoryTestHelpers.usBankAccount
+            )
+        )
+
+        verify(eventReporter).onPaymentMethodSelected(PaymentMethod.Type.USBankAccount.code)
     }
 
     @Test
@@ -1735,7 +1769,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
             var viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.selectedPaymentMethod.code)
+            assertThat(viewState.paymentMethodCode)
                 .isEqualTo("card")
 
             viewModel.handleViewAction(
@@ -1745,7 +1779,7 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitViewState()
-            assertThat(viewState.selectedPaymentMethod.code)
+            assertThat(viewState.paymentMethodCode)
                 .isEqualTo("us_bank_account")
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
@@ -1755,7 +1789,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
             viewState = awaitViewState()
-            assertThat(viewState.selectedPaymentMethod.code)
+            assertThat(viewState.paymentMethodCode)
                 .isEqualTo("us_bank_account")
 
             viewModel.handleViewAction(
@@ -1765,7 +1799,7 @@ class CustomerSheetViewModelTest {
             )
 
             viewState = awaitViewState()
-            assertThat(viewState.selectedPaymentMethod.code)
+            assertThat(viewState.paymentMethodCode)
                 .isEqualTo("card")
             assertThat(viewState.formElements).isNotEmpty()
         }
@@ -1783,7 +1817,7 @@ class CustomerSheetViewModelTest {
 
         viewModel.viewState.test {
             assertThat(
-                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+                awaitViewState<AddPaymentMethod>().paymentMethodCode
             ).isEqualTo("card")
 
             viewModel.handleViewAction(
@@ -1793,7 +1827,7 @@ class CustomerSheetViewModelTest {
             )
 
             assertThat(
-                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+                awaitViewState<AddPaymentMethod>().paymentMethodCode
             ).isEqualTo("us_bank_account")
 
             viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
@@ -1805,7 +1839,7 @@ class CustomerSheetViewModelTest {
             viewModel.handleViewAction(CustomerSheetViewAction.OnAddCardPressed)
 
             assertThat(
-                awaitViewState<AddPaymentMethod>().selectedPaymentMethod.code
+                awaitViewState<AddPaymentMethod>().paymentMethodCode
             ).isEqualTo("us_bank_account")
         }
     }
@@ -2246,15 +2280,14 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                 ),
             ),
         )
 
         viewModel.viewState.test {
             val viewState = awaitViewState<AddPaymentMethod>()
-            assertThat(viewState.selectedPaymentMethod)
-                .isEqualTo(LpmRepositoryTestHelpers.usBankAccount)
+            assertThat(viewState.paymentMethodCode)
+                .isEqualTo(LpmRepositoryTestHelpers.usBankAccount.code)
 
             viewModel.handleViewAction(
                 CustomerSheetViewAction.OnAddPaymentMethodItemChanged(
@@ -2274,7 +2307,6 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
                         response = mock(),
                     ),
@@ -2297,7 +2329,6 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = null,
                 ),
             ),
@@ -2328,7 +2359,6 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.USBankAccount.code,
-                    selectedPaymentMethod = LpmRepositoryTestHelpers.usBankAccount,
                     bankAccountResult = CollectBankAccountResultInternal.Completed(
                         response = mock(),
                     ),
@@ -2371,7 +2401,6 @@ class CustomerSheetViewModelTest {
             initialBackStack = listOf(
                 addPaymentMethodViewState.copy(
                     paymentMethodCode = PaymentMethod.Type.Card.code,
-                    selectedPaymentMethod = LpmRepositoryTestHelpers.card,
                 ),
             ),
         )

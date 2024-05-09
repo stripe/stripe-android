@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet
 import android.content.Context
 import android.content.Intent
 import androidx.activity.result.contract.ActivityResultContract
+import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import java.lang.IllegalArgumentException
@@ -22,9 +23,9 @@ internal class ExternalPaymentMethodContract : ActivityResultContract<ExternalPa
             ExternalPaymentMethodResult.Canceled.resultCode -> PaymentResult.Canceled
             ExternalPaymentMethodResult.Failed.resultCode ->
                 PaymentResult.Failed(
-                    throwable = Throwable(
-                        cause = null,
-                        message = intent?.getStringExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA)
+                    throwable = LocalStripeException(
+                        displayMessage = intent?.getStringExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA),
+                        analyticsValue = "externalPaymentMethodFailure"
                     )
                 )
 

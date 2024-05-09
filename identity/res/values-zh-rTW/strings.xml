@@ -59,7 +59,7 @@
   <!-- Content description for exclamation icon -->
   <string name="stripe_description_exclamation">驚嘆號圖示</string>
   <!-- Content description for back button -->
-  <string name="stripe_description_go_back">返回上一介面</string>
+  <string name="stripe_description_go_back">返回上一螢幕</string>
   <!-- Content description for lock icon -->
   <string name="stripe_description_lock">鎖圖示</string>
   <!-- Content description for merchant logo -->
