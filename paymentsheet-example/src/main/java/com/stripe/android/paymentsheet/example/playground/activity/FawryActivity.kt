@@ -51,8 +51,8 @@ class FawryActivity : AppCompatActivity() {
         context: Context,
         externalPaymentMethodResult: ExternalPaymentMethodResult
     ) {
-        ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(context, externalPaymentMethodResult)
         finish()
+        ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(context, externalPaymentMethodResult)
     }
 
     @Composable
@@ -68,25 +68,7 @@ class FawryActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
-        private const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
-    }
-
-    class FawryConfirmHandler(private val context: Context) : ExternalPaymentMethodConfirmHandler {
-
-        override fun confirmExternalPaymentMethod(
-            externalPaymentMethodType: String,
-            billingDetails: PaymentMethod.BillingDetails
-        ) {
-            context.startActivity(
-                Intent().setClass(
-                    context,
-                    FawryActivity::class.java
-                )
-                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    .putExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
-                    .putExtra(EXTRA_BILLING_DETAILS, billingDetails)
-            )
-        }
+        const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
+        const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
     }
 }
