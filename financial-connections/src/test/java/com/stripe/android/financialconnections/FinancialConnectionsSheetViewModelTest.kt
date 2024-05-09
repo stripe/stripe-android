@@ -17,7 +17,7 @@ import com.stripe.android.financialconnections.browser.BrowserManager
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.GetOrFetchSync.FetchCondition.Always
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.exception.AppInitializationError
 import com.stripe.android.financialconnections.exception.CustomManualEntryRequiredError
@@ -88,7 +88,7 @@ class FinancialConnectionsSheetViewModelTest {
             whenever(getOrFetchSync(any())).thenReturn(syncResponse)
             createViewModel(defaultInitialState)
 
-            verify(getOrFetchSync).invoke(fetchCondition = Always)
+            verify(getOrFetchSync).invoke(refetchCondition = Always)
         }
 
     @Test

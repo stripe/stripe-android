@@ -27,7 +27,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.GetOrFetchSync.FetchCondition.MissingActiveAuthSession
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.IfMissingActiveAuthSession
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
@@ -113,7 +113,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         // if coming from a process kill, we'll fetch the current manifest from network,
         // that should contain the active auth session.
         val sync: SynchronizeSessionResponse = getOrFetchSync(
-            fetchCondition = MissingActiveAuthSession
+            refetchCondition = IfMissingActiveAuthSession
         )
         val manifest = sync.manifest
         val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
@@ -309,7 +309,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             logger.debug("Auth cancelled, cancelling AuthSession")
             setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
             val manifest = getOrFetchSync(
-                fetchCondition = MissingActiveAuthSession
+                refetchCondition = IfMissingActiveAuthSession
             ).manifest
             val authSession = manifest.activeAuthSession
             eventTracker.track(
@@ -384,7 +384,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         kotlin.runCatching {
             setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
             val authSession = getOrFetchSync(
-                fetchCondition = MissingActiveAuthSession
+                refetchCondition = IfMissingActiveAuthSession
             ).manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
@@ -465,7 +465,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         setState { copy(authenticationStatus = Loading(value = Status(Action.CANCELLING))) }
         runCatching {
             val authSession = requireNotNull(
-                getOrFetchSync(fetchCondition = MissingActiveAuthSession).manifest.activeAuthSession
+                getOrFetchSync(refetchCondition = IfMissingActiveAuthSession).manifest.activeAuthSession
             )
             cancelAuthorizationSession(authSession.id)
         }

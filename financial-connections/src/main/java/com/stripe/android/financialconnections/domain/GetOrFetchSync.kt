@@ -18,23 +18,23 @@ internal class GetOrFetchSync @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        fetchCondition: FetchCondition = FetchCondition.IfMissing
+        refetchCondition: RefetchCondition = RefetchCondition.None
     ): SynchronizeSessionResponse {
         return repository.getOrSynchronizeFinancialConnectionsSession(
             clientSecret = configuration.financialConnectionsSessionClientSecret,
             applicationId = applicationId,
-            fetchCondition = fetchCondition::check,
+            reFetchCondition = refetchCondition::shouldReFetch,
         )
     }
 
-    sealed interface FetchCondition {
-        fun check(response: SynchronizeSessionResponse): Boolean
+    sealed interface RefetchCondition {
+        fun shouldReFetch(response: SynchronizeSessionResponse): Boolean
 
         /**
-         * Session won't be fetched if it's already cached.
+         * Session won't be re-fetched if it's already cached.
          */
-        data object IfMissing : FetchCondition {
-            override fun check(response: SynchronizeSessionResponse): Boolean {
+        data object None : RefetchCondition {
+            override fun shouldReFetch(response: SynchronizeSessionResponse): Boolean {
                 return false
             }
         }
@@ -42,8 +42,8 @@ internal class GetOrFetchSync @Inject constructor(
         /**
          * Session will always be fetched, even if a cached version exists.
          */
-        data object Always : FetchCondition {
-            override fun check(response: SynchronizeSessionResponse): Boolean {
+        data object Always : RefetchCondition {
+            override fun shouldReFetch(response: SynchronizeSessionResponse): Boolean {
                 return true
             }
         }
@@ -51,8 +51,8 @@ internal class GetOrFetchSync @Inject constructor(
         /**
          * Session will be fetched only if there's no active auth session on the cached manifest.
          */
-        data object MissingActiveAuthSession : FetchCondition {
-            override fun check(response: SynchronizeSessionResponse): Boolean {
+        data object IfMissingActiveAuthSession : RefetchCondition {
+            override fun shouldReFetch(response: SynchronizeSessionResponse): Boolean {
                 return response.manifest.activeAuthSession == null
             }
         }

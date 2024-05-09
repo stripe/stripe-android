@@ -4,7 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
-import com.stripe.android.financialconnections.domain.GetOrFetchSync.FetchCondition.IfMissing
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -51,8 +51,8 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
 
             // simulates to concurrent accesses to manifest.
             awaitAll(
-                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", IfMissing::check) },
-                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", IfMissing::check) }
+                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch) },
+                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch) }
             )
 
             verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
@@ -65,7 +65,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
             val repository = buildRepository(initialSync = initialSync)
 
             val returnedManifest =
-                repository.getOrSynchronizeFinancialConnectionsSession("", "", IfMissing::check)
+                repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch)
 
             assertThat(returnedManifest).isEqualTo(initialSync)
             verifyNoInteractions(mockRequestExecutor)

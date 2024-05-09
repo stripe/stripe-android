@@ -31,7 +31,7 @@ import com.stripe.android.financialconnections.di.DaggerFinancialConnectionsShee
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSession
 import com.stripe.android.financialconnections.domain.FetchFinancialConnectionsSessionForToken
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.GetOrFetchSync.FetchCondition.Always
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.Always
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowRouter
 import com.stripe.android.financialconnections.exception.AppInitializationError
@@ -107,7 +107,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private fun fetchManifest() {
         viewModelScope.launch {
             kotlin.runCatching {
-                getOrFetchSync(fetchCondition = Always)
+                getOrFetchSync(refetchCondition = Always)
             }.onFailure {
                 finishWithResult(stateFlow.value, Failed(it))
             }.onSuccess {

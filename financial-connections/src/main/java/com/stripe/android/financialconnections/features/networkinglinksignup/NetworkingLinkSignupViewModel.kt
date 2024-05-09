@@ -16,7 +16,7 @@ import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
-import com.stripe.android.financialconnections.domain.GetOrFetchSync.FetchCondition
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition
 import com.stripe.android.financialconnections.domain.LookupAccount
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.SaveAccountToLink
@@ -76,7 +76,7 @@ internal class NetworkingLinkSignupViewModel @AssistedInject constructor(
         suspend {
             val sync = getOrFetchSync(
                 // Force synchronize to retrieve the networking signup pane content.
-                fetchCondition = FetchCondition.Always
+                refetchCondition = RefetchCondition.Always
             )
             val content = requireNotNull(sync.text?.networkingLinkSignupPane)
             eventTracker.track(PaneLoaded(PANE))

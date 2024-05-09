@@ -38,7 +38,7 @@ internal interface FinancialConnectionsManifestRepository {
     suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
-        fetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse
 
     /**
@@ -203,20 +203,10 @@ private class FinancialConnectionsManifestRepositoryImpl(
     override suspend fun getOrSynchronizeFinancialConnectionsSession(
         clientSecret: String,
         applicationId: String,
-        fetchCondition: (SynchronizeSessionResponse) -> Boolean
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
     ): SynchronizeSessionResponse = mutex.withLock {
-        return when (val cachedSync = cachedSynchronizeSessionResponse) {
-            // no cached session, fetch from backend
-            null -> synchronize(
-                applicationId = applicationId,
-                clientSecret = clientSecret
-            )
-            // cached session available, check if we need to fetch from backend
-            else -> cachedSync.takeUnless { fetchCondition(it) } ?: synchronize(
-                applicationId = applicationId,
-                clientSecret = clientSecret
-            )
-        }
+        val cachedSync = cachedSynchronizeSessionResponse?.takeUnless(reFetchCondition)
+        return cachedSync ?: synchronize(applicationId, clientSecret)
     }
 
     private suspend fun synchronize(
