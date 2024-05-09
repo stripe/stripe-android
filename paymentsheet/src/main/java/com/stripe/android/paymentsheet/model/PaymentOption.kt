@@ -59,9 +59,7 @@ data class PaymentOption internal constructor(
         label = label,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
-        imageLoader = {
-            throw IllegalStateException("Must pass in an image loader to use iconDrawable.")
-        },
+        imageLoader = errorImageLoader,
     )
 
     /**
@@ -83,6 +81,10 @@ data class PaymentOption internal constructor(
             delegateDrawableDispatcher
         )
     }
+}
+
+private val errorImageLoader: suspend (PaymentOption) -> Drawable = {
+    throw IllegalStateException("Must pass in an image loader to use icon() or iconPainter.")
 }
 
 private class DelegateDrawable(

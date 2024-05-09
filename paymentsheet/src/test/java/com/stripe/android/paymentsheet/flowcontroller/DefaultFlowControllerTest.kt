@@ -92,6 +92,7 @@ import org.mockito.Mockito.never
 import org.mockito.Mockito.verifyNoInteractions
 import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
+import org.mockito.kotlin.argThat
 import org.mockito.kotlin.argWhere
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.doAnswer
@@ -353,13 +354,9 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        assertThat(flowController.getPaymentOption())
-            .isEqualTo(
-                PaymentOption(
-                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-                    label = "····$last4"
-                )
-            )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.label).isEqualTo("····$last4")
     }
 
     @Test
@@ -379,13 +376,9 @@ internal class DefaultFlowControllerTest {
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY
         )
 
-        assertThat(flowController.getPaymentOption())
-            .isEqualTo(
-                PaymentOption(
-                    drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-                    label = "····$last4"
-                )
-            )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.label).isEqualTo("····$last4")
 
         // Simulate a real FlowControllerInitializer that fetches the payment methods for the new
         // customer, who doesn't have any saved payment methods
@@ -479,9 +472,15 @@ internal class DefaultFlowControllerTest {
             )
         )
 
-        verify(paymentOptionCallback).onPaymentOption(VISA_PAYMENT_OPTION)
-        assertThat(flowController.getPaymentOption())
-            .isEqualTo(VISA_PAYMENT_OPTION)
+        verify(paymentOptionCallback).onPaymentOption(
+            argThat {
+                drawableResourceId == R.drawable.stripe_ic_paymentsheet_card_visa &&
+                    label == "····4242"
+            }
+        )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption?.label).isEqualTo("····4242")
     }
 
     @Test
@@ -499,11 +498,14 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionCallback).onPaymentOption(
-            PaymentOption(
-                R.drawable.stripe_google_pay_mark,
-                "Google Pay"
-            )
+            argThat {
+                drawableResourceId == R.drawable.stripe_google_pay_mark &&
+                    label == "Google Pay"
+            }
         )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+        assertThat(paymentOption?.label).isEqualTo("Google Pay")
     }
 
     @Test
@@ -577,8 +579,14 @@ internal class DefaultFlowControllerTest {
         )
 
         verify(paymentOptionCallback).onPaymentOption(
-            PaymentOption(R.drawable.stripe_google_pay_mark, "Google Pay")
+            argThat {
+                drawableResourceId == R.drawable.stripe_google_pay_mark &&
+                    label == "Google Pay"
+            }
         )
+        val paymentOption = flowController.getPaymentOption()
+        assertThat(paymentOption?.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+        assertThat(paymentOption?.label).isEqualTo("Google Pay")
     }
 
     @Test
