@@ -1,39 +1,28 @@
 package com.stripe.android.paymentsheet
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
 import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 
+/**
+ * Handler to be used to confirm payment with an external payment method.
+ *
+ * To learn more about external payment methods, see
+ * https://docs.stripe.com/payments/external-payment-methods?platform=android.
+ */
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface ExternalPaymentMethodConfirmHandler {
 
-    fun createIntent(
-        context: Context,
+    /**
+     * Called when a user confirms payment or setup with an external payment method.
+     *
+     * On completion, this should call [ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult] with the
+     * result of the external payment method's confirmation.
+     *
+     * @param externalPaymentMethodType The external payment method to confirm payment with
+     * @param billingDetails Any billing details you've configured PaymentSheet to collect
+     */
+    fun confirmExternalPaymentMethod(
         externalPaymentMethodType: String,
-        billingDetails: PaymentMethod.BillingDetails?,
-    ): Intent
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-sealed interface ExternalPaymentMethodResult {
-
-    val resultCode: Int
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Completed : ExternalPaymentMethodResult {
-        override val resultCode: Int = Activity.RESULT_OK
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Canceled : ExternalPaymentMethodResult {
-        override val resultCode: Int = Activity.RESULT_CANCELED
-    }
-
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-    data object Failed : ExternalPaymentMethodResult {
-        override val resultCode: Int = Activity.RESULT_FIRST_USER
-        const val ERROR_MESSAGE_EXTRA: String = "external_payment_method_error_message"
-    }
+        billingDetails: PaymentMethod.BillingDetails,
+    )
 }

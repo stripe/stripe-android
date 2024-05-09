@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.activity.result.ActivityResultLauncher
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import java.lang.IllegalStateException
@@ -13,8 +12,9 @@ internal object ExternalPaymentMethodInterceptor {
         externalPaymentMethodType: String,
         billingDetails: PaymentMethod.BillingDetails?,
         onPaymentResult: (PaymentResult) -> Unit,
-        externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>?
+        integrationType: ExternalPaymentMethodResultHandler.IntegrationType,
     ) {
+        ExternalPaymentMethodResultHandler.integrationType = integrationType
         val externalPaymentMethodConfirmHandler = this.externalPaymentMethodConfirmHandler
         if (externalPaymentMethodConfirmHandler == null) {
             onPaymentResult(
@@ -25,22 +25,10 @@ internal object ExternalPaymentMethodInterceptor {
                     )
                 )
             )
-        } else if (externalPaymentMethodLauncher == null) {
-            onPaymentResult(
-                PaymentResult.Failed(
-                    throwable = IllegalStateException(
-                        "externalPaymentMethodLauncher is null." +
-                            " Cannot process payment for payment selection: $externalPaymentMethodType"
-                    )
-                )
-            )
         } else {
-            externalPaymentMethodLauncher.launch(
-                ExternalPaymentMethodInput(
-                    type = externalPaymentMethodType,
-                    billingDetails = billingDetails,
-                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-                )
+            externalPaymentMethodConfirmHandler.confirmExternalPaymentMethod(
+                externalPaymentMethodType = externalPaymentMethodType,
+                billingDetails = billingDetails ?: PaymentMethod.BillingDetails()
             )
         }
     }

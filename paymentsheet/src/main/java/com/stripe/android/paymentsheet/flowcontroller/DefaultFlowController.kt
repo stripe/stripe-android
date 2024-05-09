@@ -35,9 +35,8 @@ import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
-import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
+import com.stripe.android.paymentsheet.ExternalPaymentMethodResultHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -118,8 +117,6 @@ internal class DefaultFlowController @Inject internal constructor(
 
     private var paymentLauncher: StripePaymentLauncher? = null
 
-    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
-
     private val initializationMode: PaymentSheet.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
 
@@ -166,19 +163,12 @@ internal class DefaultFlowController @Inject internal constructor(
             bacsMandateConfirmationActivityLauncher
         )
 
-        val externalPaymentMethodLauncher = activityResultRegistryOwner.register(
-            ExternalPaymentMethodContract(),
-            ::onExternalPaymentMethodResult
-        )
-        this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
-
         val activityResultLaunchers = setOf(
             paymentLauncherActivityResultLauncher,
             paymentOptionActivityLauncher,
             googlePayActivityLauncher,
             sepaMandateActivityLauncher,
             bacsMandateConfirmationActivityLauncher,
-            externalPaymentMethodLauncher,
         )
 
         linkLauncher.register(
@@ -342,7 +332,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 externalPaymentMethodType = paymentSelection.type,
                 billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
-                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+                integrationType = ExternalPaymentMethodResultHandler.IntegrationType.FLOW_CONTROLLER,
             )
             is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
             is PaymentSelection.New, null -> confirmPaymentSelection(paymentSelection, state)
@@ -665,7 +655,7 @@ internal class DefaultFlowController @Inject internal constructor(
         onPaymentResult(paymentResult)
     }
 
-    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
+    override fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
         val selection = viewModel.paymentSelection
         when (paymentResult) {
             is PaymentResult.Completed -> eventReporter.onPaymentSuccess(
@@ -852,6 +842,7 @@ internal class DefaultFlowController @Inject internal constructor(
                     .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
+            PaymentSheet.FlowController.instance = flowController
             return flowController
         }
     }

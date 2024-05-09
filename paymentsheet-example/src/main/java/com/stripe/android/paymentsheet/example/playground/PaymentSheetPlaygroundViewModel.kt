@@ -19,6 +19,7 @@ import com.stripe.android.paymentsheet.PaymentSheetResult
 import com.stripe.android.paymentsheet.addresselement.AddressLauncherResult
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState.Companion.asPlaygroundState
+import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.model.ConfirmIntentRequest
@@ -49,6 +50,9 @@ internal class PaymentSheetPlaygroundViewModel(
     val status = MutableStateFlow<StatusMessage?>(null)
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
+
+    val fawryConfirmHandler: FawryActivity.FawryConfirmHandler =
+        FawryActivity.FawryConfirmHandler(application.applicationContext)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {

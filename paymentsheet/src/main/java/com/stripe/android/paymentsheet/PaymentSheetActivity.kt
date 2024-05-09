@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -86,6 +87,22 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     PaymentSheetScreen(viewModel, type = Complete)
                 }
             }
+        }
+    }
+
+    @SuppressLint("MissingSuperCall")
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+
+        val externalPaymentMethodResult: ExternalPaymentMethodResult? =
+            intent.getParcelableExtra(ExternalPaymentMethodResultHandler.EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT)
+        externalPaymentMethodResult?.let {
+            viewModel.onExternalPaymentMethodResult(it.toPaymentResult())
         }
     }
 

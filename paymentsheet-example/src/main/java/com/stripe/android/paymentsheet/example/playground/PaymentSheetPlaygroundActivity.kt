@@ -41,7 +41,6 @@ import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
 import com.stripe.android.paymentsheet.example.Settings
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceBottomSheetDialogFragment
 import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
-import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
@@ -80,13 +79,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val paymentSheet = rememberPaymentSheet(
                 paymentResultCallback = viewModel::onPaymentSheetResult,
                 createIntentCallback = viewModel::createIntentCallback,
-                externalPaymentMethodConfirmHandler = FawryActivity.FawryConfirmHandler,
+                externalPaymentMethodConfirmHandler = viewModel.fawryConfirmHandler,
             )
             val flowController = rememberPaymentSheetFlowController(
                 paymentOptionCallback = viewModel::onPaymentOptionSelected,
                 paymentResultCallback = viewModel::onPaymentSheetResult,
                 createIntentCallback = viewModel::createIntentCallback,
-                externalPaymentMethodConfirmHandler = FawryActivity.FawryConfirmHandler,
+                externalPaymentMethodConfirmHandler = viewModel.fawryConfirmHandler,
             )
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult

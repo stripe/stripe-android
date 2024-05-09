@@ -157,8 +157,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
 
-    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
-
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
 
     private val googlePayButtonType: GooglePayButtonType =
@@ -453,7 +451,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 externalPaymentMethodType = paymentSelection.type,
                 billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
-                externalPaymentMethodLauncher,
+                integrationType = ExternalPaymentMethodResultHandler.IntegrationType.PAYMENT_SHEET,
             )
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
@@ -575,11 +573,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             includePaymentSheetAuthenticators = true,
         )
 
-        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
-            ExternalPaymentMethodContract(),
-            ::onExternalPaymentMethodResult
-        )
-
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
@@ -626,7 +619,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
+    internal fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
         val selection = selection.value
         when (paymentResult) {
             is PaymentResult.Completed -> eventReporter.onPaymentSuccess(

@@ -178,6 +178,9 @@ interface ErrorReporter {
         INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
             partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
         ),
+        EXTERNAL_PAYMENT_METHOD_FLOW_CONTROLLER_INSTANCE_MISSING(
+            partialEventName = "flow_controller.external_payment_method.confirm.missing_instance"
+        )
         ;
 
         override val eventName: String
