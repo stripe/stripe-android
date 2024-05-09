@@ -24,5 +24,7 @@ tags:
 - tapOn: "Down Bank (unscheduled)"
 # Close flow from error page
 - tapOn: "Close icon"
-- assertVisible: "Failed! Request-id: .*"
+- scrollUntilVisible:
+    element:
+      text: "Failed! Request-id: .*"
 - stopRecording
