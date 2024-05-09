@@ -12,7 +12,7 @@ internal fun FinancialConnectionsSessionManifest.experimentAssignment(
     experiment: Experiment
 ): String? = experimentAssignments?.get(experiment.key)
 
-internal suspend fun FinancialConnectionsAnalyticsTracker.trackExposure(
+internal fun FinancialConnectionsAnalyticsTracker.trackExposure(
     experiment: Experiment,
     manifest: FinancialConnectionsSessionManifest
 ) {
