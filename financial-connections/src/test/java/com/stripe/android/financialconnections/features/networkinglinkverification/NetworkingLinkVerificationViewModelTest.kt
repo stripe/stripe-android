@@ -5,10 +5,11 @@ import com.stripe.android.core.Logger
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.financialconnections.ApiKeyFixtures.consumerSession
 import com.stripe.android.financialconnections.ApiKeyFixtures.sessionManifest
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.ConfirmVerification
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.LookupConsumerAndStartVerification
 import com.stripe.android.financialconnections.domain.MarkLinkVerified
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
@@ -37,7 +38,7 @@ class NetworkingLinkVerificationViewModelTest {
     @get:Rule
     val testRule = CoroutineTestRule()
 
-    private val getManifest = mock<GetManifest>()
+    private val getOrFetchSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
     private val confirmVerification = mock<ConfirmVerification>()
     private val lookupConsumerAndStartVerification = mock<LookupConsumerAndStartVerification>()
@@ -49,7 +50,7 @@ class NetworkingLinkVerificationViewModelTest {
         state: NetworkingLinkVerificationState = NetworkingLinkVerificationState()
     ) = NetworkingLinkVerificationViewModel(
         navigationManager = navigationManager,
-        getManifest = getManifest,
+        getOrFetchSync = getOrFetchSync,
         lookupConsumerAndStartVerification = lookupConsumerAndStartVerification,
         confirmVerification = confirmVerification,
         markLinkVerified = markLinkVerified,
@@ -63,8 +64,8 @@ class NetworkingLinkVerificationViewModelTest {
     fun `init - starts SMS verification with consumer session secret`() = runTest {
         val email = "test@test.com"
         val consumerSession = consumerSession()
-        whenever(getManifest()).thenReturn(
-            sessionManifest().copy(accountholderCustomerEmailAddress = email)
+        whenever(getOrFetchSync()).thenReturn(
+            syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = email))
         )
 
         val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
@@ -98,8 +99,8 @@ class NetworkingLinkVerificationViewModelTest {
         val email = "test@test.com"
         val onConsumerNotFoundCaptor = argumentCaptor<suspend () -> Unit>()
 
-        whenever(getManifest()).thenReturn(
-            sessionManifest().copy(accountholderCustomerEmailAddress = email)
+        whenever(getOrFetchSync()).thenReturn(
+            syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = email))
         )
 
         val viewModel = buildViewModel()
@@ -142,8 +143,8 @@ class NetworkingLinkVerificationViewModelTest {
             val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
             val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
             val linkVerifiedManifest = sessionManifest().copy(nextPane = INSTITUTION_PICKER)
-            whenever(getManifest()).thenReturn(
-                sessionManifest().copy(accountholderCustomerEmailAddress = email)
+            whenever(getOrFetchSync()).thenReturn(
+                syncResponse(sessionManifest().copy(accountholderCustomerEmailAddress = email))
             )
 
             // polling returns some networked accounts
@@ -186,10 +187,13 @@ class NetworkingLinkVerificationViewModelTest {
             val consumerSession = consumerSession()
             val onStartVerificationCaptor = argumentCaptor<suspend () -> Unit>()
             val onVerificationStartedCaptor = argumentCaptor<suspend (ConsumerSession) -> Unit>()
-            whenever(getManifest()).thenReturn(
-                sessionManifest().copy(
-                    accountholderCustomerEmailAddress = email,
-                    initialInstitution = null
+
+            whenever(getOrFetchSync()).thenReturn(
+                syncResponse(
+                    sessionManifest().copy(
+                        accountholderCustomerEmailAddress = email,
+                        initialInstitution = null
+                    )
                 )
             )
 

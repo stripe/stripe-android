@@ -5,11 +5,12 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.ApiKeyFixtures.syncResponse
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsEvent.PaneLoaded
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -29,7 +30,7 @@ internal class SuccessViewModelTest {
     @get:Rule
     val testRule = CoroutineTestRule()
 
-    private val getManifest = mock<GetManifest>()
+    private val getOrFetchSync = mock<GetOrFetchSync>()
     private val eventTracker = TestFinancialConnectionsAnalyticsTracker()
     private val nativeAuthFlowCoordinator = NativeAuthFlowCoordinator()
     private val getCachedAccounts = mock<GetCachedAccounts>()
@@ -37,7 +38,7 @@ internal class SuccessViewModelTest {
     private fun buildViewModel(
         state: SuccessState
     ) = SuccessViewModel(
-        getManifest = getManifest,
+        getOrFetchSync = getOrFetchSync,
         logger = Logger.noop(),
         eventTracker = eventTracker,
         initialState = state,
@@ -55,7 +56,7 @@ internal class SuccessViewModelTest {
             activeInstitution = ApiKeyFixtures.institution()
         )
         whenever(getCachedAccounts()).thenReturn(accounts)
-        whenever(getManifest()).thenReturn(manifest)
+        whenever(getOrFetchSync()).thenReturn(syncResponse(manifest))
 
         nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {
             buildViewModel(SuccessState())
@@ -74,7 +75,7 @@ internal class SuccessViewModelTest {
             activeInstitution = ApiKeyFixtures.institution()
         )
         whenever(getCachedAccounts()).thenReturn(accounts)
-        whenever(getManifest()).thenReturn(manifest)
+        whenever(getOrFetchSync()).thenReturn(syncResponse(manifest))
 
         nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {
             buildViewModel(SuccessState())

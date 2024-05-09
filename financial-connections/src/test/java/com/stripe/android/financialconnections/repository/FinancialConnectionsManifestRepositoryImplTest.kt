@@ -4,6 +4,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.Logger
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.financialconnections.ApiKeyFixtures
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.None
 import com.stripe.android.financialconnections.model.SynchronizeSessionResponse
 import com.stripe.android.financialconnections.network.FinancialConnectionsRequestExecutor
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -42,7 +43,7 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
     )
 
     @Test
-    fun `getOrFetchManifest - when manifest retrieved twice concurrently, API call runs once`() =
+    fun `getOrFetchSession - when manifest retrieved twice concurrently, API call runs once`() =
         runTest {
             givenSyncSessionRequestReturnsAfterDelay(ApiKeyFixtures.syncResponse())
 
@@ -50,21 +51,21 @@ internal class FinancialConnectionsManifestRepositoryImplTest {
 
             // simulates to concurrent accesses to manifest.
             awaitAll(
-                async { repository.getOrFetchSynchronizeFinancialConnectionsSession("", "") },
-                async { repository.getOrFetchSynchronizeFinancialConnectionsSession("", "") }
+                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch) },
+                async { repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch) }
             )
 
             verify(mockRequestExecutor, times(1)).execute(any(), any<KSerializer<*>>())
         }
 
     @Test
-    fun `getOrFetchManifest - when initial manifest passed in constructor, returns it and no network interaction`() =
+    fun `getOrFetchSession - when initial manifest passed in constructor, returns it and no network interaction`() =
         runTest {
             val initialSync = ApiKeyFixtures.syncResponse()
             val repository = buildRepository(initialSync = initialSync)
 
             val returnedManifest =
-                repository.getOrFetchSynchronizeFinancialConnectionsSession("", "")
+                repository.getOrSynchronizeFinancialConnectionsSession("", "", None::shouldReFetch)
 
             assertThat(returnedManifest).isEqualTo(initialSync)
             verifyNoInteractions(mockRequestExecutor)

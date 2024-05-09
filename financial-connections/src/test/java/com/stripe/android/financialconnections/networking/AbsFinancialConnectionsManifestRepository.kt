@@ -10,20 +10,6 @@ import java.util.Date
 
 internal abstract class AbsFinancialConnectionsManifestRepository : FinancialConnectionsManifestRepository {
 
-    override suspend fun getOrFetchSynchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun synchronizeFinancialConnectionsSession(
-        clientSecret: String,
-        applicationId: String
-    ): SynchronizeSessionResponse {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun markConsentAcquired(clientSecret: String): FinancialConnectionsSessionManifest {
         TODO("Not yet implemented")
     }
@@ -101,6 +87,14 @@ internal abstract class AbsFinancialConnectionsManifestRepository : FinancialCon
     override fun updateLocalManifest(
         block: (FinancialConnectionsSessionManifest) -> FinancialConnectionsSessionManifest
     ) {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getOrSynchronizeFinancialConnectionsSession(
+        clientSecret: String,
+        applicationId: String,
+        reFetchCondition: (SynchronizeSessionResponse) -> Boolean
+    ): SynchronizeSessionResponse {
         TODO("Not yet implemented")
     }
 }
