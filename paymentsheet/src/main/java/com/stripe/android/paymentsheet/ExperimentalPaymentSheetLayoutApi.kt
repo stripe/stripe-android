@@ -10,4 +10,4 @@ import androidx.annotation.RestrictTo
     AnnotationTarget.PROPERTY
 )
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-annotation class ExperimentalLayoutApi
+annotation class ExperimentalPaymentSheetLayoutApi

@@ -813,7 +813,7 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @ExperimentalLayoutApi
+            @ExperimentalPaymentSheetLayoutApi
             fun layout(layout: Layout) = apply {
                 this.layout = layout
             }
