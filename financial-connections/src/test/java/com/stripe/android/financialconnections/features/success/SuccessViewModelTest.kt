@@ -74,7 +74,7 @@ internal class SuccessViewModelTest {
             activeAuthSession = ApiKeyFixtures.authorizationSession(),
             activeInstitution = ApiKeyFixtures.institution()
         )
-        whenever(getCachedAccounts()).thenReturn(accounts.data)
+        whenever(getCachedAccounts()).thenReturn(accounts)
         whenever(getOrFetchSync()).thenReturn(syncResponse(manifest))
 
         nativeAuthFlowCoordinator().filterIsInstance<Complete>().test {
