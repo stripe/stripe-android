@@ -5,7 +5,6 @@ import android.content.res.Resources
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.ShapeDrawable
-import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.core.content.res.ResourcesCompat
 import com.stripe.android.paymentsheet.R
