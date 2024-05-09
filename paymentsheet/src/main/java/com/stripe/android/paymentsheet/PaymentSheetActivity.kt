@@ -99,6 +99,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
     override fun onResume() {
         super.onResume()
 
+        @Suppress("DEPRECATION")
         val externalPaymentMethodResult: ExternalPaymentMethodResult? =
             intent.getParcelableExtra(ExternalPaymentMethodResultHandler.EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT)
         externalPaymentMethodResult?.let {
