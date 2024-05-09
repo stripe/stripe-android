@@ -15,7 +15,6 @@ import android.graphics.drawable.ShapeDrawable
 import android.os.Build
 import androidx.annotation.DrawableRes
 import androidx.annotation.RequiresApi
-import androidx.annotation.VisibleForTesting
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.painter.Painter
 import com.stripe.android.uicore.image.rememberDrawablePainter
@@ -30,65 +29,40 @@ import kotlinx.coroutines.withContext
 /**
  * The customer's selected payment option.
  */
-data class PaymentOption
-@Deprecated("Not intended for public use.")
-constructor(
-    /**
-     * The drawable resource id of the icon that represents the payment option.
-     */
+@OptIn(DelicateCoroutinesApi::class)
+data class PaymentOption internal constructor(
     @Deprecated("Please use icon() instead.")
-    @DrawableRes
     val drawableResourceId: Int,
-
-    /**
-     * A label that describes the payment option.
-     *
-     * For example, "····4242" for a Visa ending in 4242.
-     */
-    val label: String
+    val label: String,
+    internal val lightThemeIconUrl: String?,
+    internal val darkThemeIconUrl: String?,
+    internal val imageLoader: suspend (PaymentOption) -> Drawable,
+    private val delegateDrawableScope: CoroutineScope = GlobalScope,
+    private val delegateDrawableDispatcher: CoroutineDispatcher = Dispatchers.Main,
 ) {
-    // These aren't part of the primary constructor in order to maintain binary compatibility.
-    internal var lightThemeIconUrl: String? = null
-        private set
+    @Deprecated("Not intended for public use.")
+    constructor(
+        /**
+        * The drawable resource id of the icon that represents the payment option.
+        */
+        @DrawableRes
+        drawableResourceId: Int,
 
-    internal var darkThemeIconUrl: String? = null
-        private set
-
-    private var imageLoader: suspend (PaymentOption) -> Drawable = {
-        throw IllegalStateException("Must pass in an image loader to use iconDrawable.")
-    }
-
-    @OptIn(DelicateCoroutinesApi::class)
-    private var delegateDrawableScope: CoroutineScope = GlobalScope
-
-    private var delegateDrawableDispatcher: CoroutineDispatcher = Dispatchers.Main
-
-    @Suppress("DEPRECATION")
-    internal constructor(
-        @DrawableRes drawableResourceId: Int,
-        label: String,
-        lightThemeIconUrl: String?,
-        darkThemeIconUrl: String?,
-        imageLoader: suspend (PaymentOption) -> Drawable
-    ) : this(drawableResourceId, label) {
-        this.lightThemeIconUrl = lightThemeIconUrl
-        this.darkThemeIconUrl = darkThemeIconUrl
-        this.imageLoader = imageLoader
-    }
-
-    @VisibleForTesting
-    internal constructor(
-        @DrawableRes drawableResourceId: Int,
-        label: String,
-        lightThemeIconUrl: String?,
-        darkThemeIconUrl: String?,
-        imageLoader: suspend (PaymentOption) -> Drawable,
-        delegateDrawableScope: CoroutineScope,
-        delegateDrawableDispatcher: CoroutineDispatcher,
-    ) : this(drawableResourceId, label, lightThemeIconUrl, darkThemeIconUrl, imageLoader) {
-        this.delegateDrawableScope = delegateDrawableScope
-        this.delegateDrawableDispatcher = delegateDrawableDispatcher
-    }
+        /**
+        * A label that describes the payment option.
+        *
+        * For example, "····4242" for a Visa ending in 4242.
+        */
+        label: String
+    ) : this(
+        drawableResourceId = drawableResourceId,
+        label = label,
+        lightThemeIconUrl = null,
+        darkThemeIconUrl = null,
+        imageLoader = {
+            throw IllegalStateException("Must pass in an image loader to use iconDrawable.")
+        },
+    )
 
     /**
      * A [Painter] to draw the icon associated with this [PaymentOption].
