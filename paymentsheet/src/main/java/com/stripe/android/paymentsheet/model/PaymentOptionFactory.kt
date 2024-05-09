@@ -163,8 +163,7 @@ internal class PaymentOptionFactory @Inject constructor(
     }
 
     companion object {
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         @VisibleForTesting
-        val emptyDrawable = ShapeDrawable()
+        internal val emptyDrawable = ShapeDrawable()
     }
 }
