@@ -90,6 +90,7 @@ sealed class ExternalPaymentMethodResult : Parcelable {
         )
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         /**
