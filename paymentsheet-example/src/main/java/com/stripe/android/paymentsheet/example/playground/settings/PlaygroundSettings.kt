@@ -207,6 +207,7 @@ internal class PlaygroundSettings private constructor(
             AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition,
             PaymentMethodOrderSettingsDefinition,
             ExternalPaymentMethodSettingsDefinition,
+            LayoutSettingsDefinition,
             IntegrationTypeSettingsDefinition,
         )
 
