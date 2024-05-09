@@ -14,11 +14,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.fadeOut
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.fadeOut
 import kotlin.time.Duration.Companion.seconds
 
 internal class PollingActivity : AppCompatActivity() {
@@ -49,7 +49,7 @@ internal class PollingActivity : AppCompatActivity() {
             StripeTheme {
                 val uiState by viewModel.uiState.collectAsState()
 
-                val state = rememberBottomSheetState(
+                val state = rememberStripeBottomSheetState(
                     confirmValueChange = { proposedValue ->
                         if (proposedValue == ModalBottomSheetValue.Hidden) {
                             uiState.pollingState != PollingState.Active
@@ -75,7 +75,7 @@ internal class PollingActivity : AppCompatActivity() {
                     }
                 }
 
-                BottomSheet(
+                ElementsBottomSheetLayout(
                     state = state,
                     onDismissed = { /* Not applicable here */ },
                 ) {

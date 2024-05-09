@@ -12,14 +12,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
 import com.stripe.android.paymentsheet.ui.BaseSheetActivity
 import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Complete
 import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
 import kotlinx.coroutines.flow.filterNotNull
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
@@ -67,7 +67,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
             StripeTheme {
                 val isProcessing by viewModel.processing.collectAsState()
 
-                val bottomSheetState = rememberBottomSheetState(
+                val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { !isProcessing },
                 )
 
@@ -79,7 +79,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
                     }
                 }
 
-                BottomSheet(
+                ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = viewModel::onUserCancel,
                 ) {

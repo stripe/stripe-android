@@ -14,11 +14,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
+import com.stripe.android.customersheet.CustomerSheetViewAction.OnDismissed
 import com.stripe.android.customersheet.ui.CustomerSheetScreen
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.fadeOut
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.fadeOut
 
 internal class CustomerSheetActivity : AppCompatActivity() {
 
@@ -66,7 +67,7 @@ internal class CustomerSheetActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val bottomSheetState = rememberBottomSheetState(
+                val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = {
                         if (it == ModalBottomSheetValue.Hidden) {
                             viewModel.bottomSheetConfirmStateChange()
@@ -90,9 +91,9 @@ internal class CustomerSheetActivity : AppCompatActivity() {
                     viewModel.handleViewAction(CustomerSheetViewAction.OnBackPressed)
                 }
 
-                BottomSheet(
+                ElementsBottomSheetLayout(
                     state = bottomSheetState,
-                    onDismissed = { viewModel.handleViewAction(CustomerSheetViewAction.OnDismissed) },
+                    onDismissed = { viewModel.handleViewAction(OnDismissed) },
                 ) {
                     CustomerSheetScreen(
                         viewState = viewState,

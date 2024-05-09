@@ -18,7 +18,7 @@ import com.stripe.android.StripePaymentController.Companion.SETUP_REQUEST_CODE
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.StripeIntent
 import com.stripe.android.payments.core.analytics.ErrorReporter
-import com.stripe.android.utils.fadeOut
+import com.stripe.android.uicore.utils.fadeOut
 import com.stripe.android.view.AuthActivityStarterHost
 import kotlinx.coroutines.launch
 import org.json.JSONObject

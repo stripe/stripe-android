@@ -12,7 +12,7 @@ import androidx.core.app.ActivityOptionsCompat
 import androidx.fragment.app.Fragment
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher.AdditionalFieldsConfiguration.FieldConfiguration
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.uicore.utils.AnimationConstants
 import kotlinx.parcelize.Parcelize
 
 /**
