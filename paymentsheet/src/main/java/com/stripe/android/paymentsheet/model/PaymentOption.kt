@@ -31,8 +31,16 @@ import kotlinx.coroutines.withContext
  */
 @OptIn(DelicateCoroutinesApi::class)
 data class PaymentOption internal constructor(
+    /**
+     * The drawable resource id of the icon that represents the payment option.
+     */
     @Deprecated("Please use icon() instead.")
     val drawableResourceId: Int,
+    /**
+     * A label that describes the payment option.
+     *
+     * For example, "····4242" for a Visa ending in 4242.
+     */
     val label: String,
     internal val lightThemeIconUrl: String?,
     internal val darkThemeIconUrl: String?,
@@ -42,17 +50,8 @@ data class PaymentOption internal constructor(
 ) {
     @Deprecated("Not intended for public use.")
     constructor(
-        /**
-        * The drawable resource id of the icon that represents the payment option.
-        */
         @DrawableRes
         drawableResourceId: Int,
-
-        /**
-        * A label that describes the payment option.
-        *
-        * For example, "····4242" for a Visa ending in 4242.
-        */
         label: String
     ) : this(
         drawableResourceId = drawableResourceId,

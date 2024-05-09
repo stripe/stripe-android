@@ -59,7 +59,6 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.addresselement.AddressElementActivityContract
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.analytics.PaymentSheetConfirmationError
-import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
@@ -2001,10 +2000,6 @@ internal class DefaultFlowControllerTest {
             customerRequestedSave = PaymentSelection.CustomerRequestedSave.NoRequest,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
-        )
-        private val VISA_PAYMENT_OPTION = PaymentOption(
-            drawableResourceId = R.drawable.stripe_ic_paymentsheet_card_visa,
-            label = "····4242"
         )
 
         private val SAVE_NEW_CARD_SELECTION = PaymentSelection.New.Card(
