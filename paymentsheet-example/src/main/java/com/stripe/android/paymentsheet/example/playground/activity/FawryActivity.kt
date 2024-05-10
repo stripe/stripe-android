@@ -23,7 +23,7 @@ class FawryActivity : AppCompatActivity() {
             ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(
                 this,
                 externalPaymentMethodResult = ExternalPaymentMethodResult.failed(
-                    errorMessage = "Received invalid external payment method type. Expected external_fawry."
+                    displayMessage = "Received invalid external payment method type. Expected external_fawry."
                 ),
             )
         }
@@ -39,7 +39,7 @@ class FawryActivity : AppCompatActivity() {
                     }
                     ResultButton(result = ExternalPaymentMethodResult.completed())
                     ResultButton(result = ExternalPaymentMethodResult.canceled())
-                    ResultButton(result = ExternalPaymentMethodResult.failed(errorMessage = "Payment failed!"))
+                    ResultButton(result = ExternalPaymentMethodResult.failed(displayMessage = "Payment failed!"))
                 }
             }
         }

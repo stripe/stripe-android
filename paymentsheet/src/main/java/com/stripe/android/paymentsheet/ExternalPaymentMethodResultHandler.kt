@@ -103,14 +103,14 @@ sealed class ExternalPaymentMethodResult : Parcelable {
         /**
          * The payment or setup attempt failed.
          *
-         * @param errorMessage Error message to display to the user on failure. If null, will display Stripe's default
+         * @param displayMessage Message to display to the user on failure. If null, will display Stripe's default
          * error message.
          */
         @JvmStatic
         @JvmOverloads
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun failed(errorMessage: String? = null): ExternalPaymentMethodResult {
-            return Failed(errorMessage)
+        fun failed(displayMessage: String? = null): ExternalPaymentMethodResult {
+            return Failed(displayMessage)
         }
     }
 }
