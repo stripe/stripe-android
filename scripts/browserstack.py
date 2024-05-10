@@ -478,6 +478,8 @@ if __name__ == "__main__":
     )
     parser.add_argument("-n", "--num-retries", help="Retry failed tests")
 
+    parser.add_argument("-c", "--classes", help="Filter test runs to specified class")
+
     args = parser.parse_args()
     print("\n")
 
@@ -523,7 +525,7 @@ if __name__ == "__main__":
             numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
             exitStatus = 1
-            testClassesToRun = getAllTestClassNames()
+            testClassesToRun = args.classes.split(",") if args.classes else getAllTestClassNames()
             while numRetries >= 0:
                 testResults = runTests(
                     appUrl, testUrl, args.is_nightly, testClassesToRun

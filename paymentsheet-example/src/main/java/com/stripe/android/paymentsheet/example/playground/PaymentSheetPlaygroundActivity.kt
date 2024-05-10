@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
+import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
+import com.stripe.android.paymentsheet.ExternalPaymentMethodResultHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
@@ -378,14 +380,25 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         externalPaymentMethodType: String,
         billingDetails: PaymentMethod.BillingDetails
     ) {
-        this.startActivity(
-            Intent().setClass(
-                this,
-                FawryActivity::class.java
+        fun startFawryActivity() {
+            this.startActivity(
+                Intent().setClass(
+                    this,
+                    FawryActivity::class.java
+                )
+                    .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
+                    .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
             )
-                .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
-                .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
-        )
+        }
+        when (externalPaymentMethodType) {
+            "external_fawry" -> startFawryActivity()
+            "external_venmo" -> ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(
+                this, ExternalPaymentMethodResult.completed()
+            )
+            else -> ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(
+                this, ExternalPaymentMethodResult.failed(displayMessage = "Unexpected external payment method type")
+            )
+        }
     }
 }
 

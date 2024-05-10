@@ -73,6 +73,21 @@ internal class Selectors(
         }
     )
 
+    val externalPaymentMethodSucceedButton = ComposeButton(
+        composeTestRule,
+        hasTestTag("external_fawry_complete")
+    )
+
+    val externalPaymentMethodCancelButton = ComposeButton(
+        composeTestRule,
+        hasTestTag("external_fawry_cancel")
+    )
+
+    val externalPaymentMethodFailButton = ComposeButton(
+        composeTestRule,
+        hasTestTag("external_fawry_fail")
+    )
+
     val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
 
     val addPaymentMethodButton = AddPaymentMethodButton(device)

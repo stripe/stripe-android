@@ -27,6 +27,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
+import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
@@ -37,6 +38,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
 import com.stripe.android.test.core.ui.BrowserUI
+import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import com.stripe.android.test.core.ui.clickTextInWebView
@@ -45,6 +47,7 @@ import org.junit.Assert.fail
 import org.junit.Assume
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
+import kotlin.math.exp
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -442,6 +445,60 @@ internal class PlaygroundTestDriver(
         teardown()
 
         return result
+    }
+
+    fun confirmExternalPaymentMethodSuccess(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalPaymentMethod(
+            selectors.externalPaymentMethodSucceedButton,
+        )
+
+        // TODO: this isn't the right thing to check
+        assertThat(resultValue).isEqualTo("Success")
+
+        teardown()
+    }
+
+    fun confirmExternalPaymentMethodCanceled(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalPaymentMethod(
+            selectors.externalPaymentMethodCancelButton,
+        )
+
+        assertThat(resultValue).isEmpty()
+
+        teardown()
+    }
+
+    fun confirmExternalPaymentMethodFailed(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalPaymentMethod(
+            selectors.externalPaymentMethodFailButton,
+        )
+
+        teardown()
+    }
+
+    private fun confirmExternalPaymentMethod(
+        button: ComposeButton,
+    ) {
+        selectors.paymentSelection.click()
+
+        pressBuy()
+
+        button.click()
     }
 
     fun confirmUSBankAccount(
