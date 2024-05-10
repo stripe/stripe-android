@@ -173,6 +173,7 @@ sealed interface StripeIntent : StripeModel {
     sealed class NextActionData : StripeModel {
 
         @Parcelize
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         data class DisplayOxxoDetails(
             /**
              * The timestamp after which the OXXO expires.
