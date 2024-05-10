@@ -10,12 +10,12 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * [PaymentAuthenticator] for [NextActionData.DisplayMultibancoDetails], redirects to
+ * [PaymentAuthenticator] for [NextActionData.DisplayVoucherDetails], redirects to
  * [WebIntentAuthenticator] or [NoOpIntentAuthenticator] based on whether if there is a
  * hostedVoucherUrl set.
  */
 @Singleton
-internal class MultibancoAuthenticator @Inject constructor(
+internal class VoucherAuthenticator @Inject constructor(
     private val webIntentAuthenticator: WebIntentAuthenticator,
     private val noOpIntentAuthenticator: NoOpIntentAuthenticator,
     private val context: Context,
@@ -25,11 +25,10 @@ internal class MultibancoAuthenticator @Inject constructor(
         authenticatable: StripeIntent,
         requestOptions: ApiRequest.Options
     ) {
-        val detailsData = authenticatable.nextActionData as NextActionData.DisplayMultibancoDetails
+        val detailsData = authenticatable.nextActionData as NextActionData.DisplayVoucherDetails
         if (detailsData.hostedVoucherUrl == null) {
             ErrorReporter.createFallbackInstance(context).report(
-                ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
-                additionalNonPiiParams = mapOf("lpm" to "multibanco")
+                ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL
             )
             noOpIntentAuthenticator.authenticate(
                 host,
