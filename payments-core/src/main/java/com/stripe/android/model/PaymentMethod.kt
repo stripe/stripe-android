@@ -393,6 +393,14 @@ constructor(
             hasDelayedSettlement = false,
             shouldRefreshIfIntentRequiresAction = false,
         ),
+        Multibanco(
+            "multibanco",
+            isReusable = false,
+            isVoucher = true,
+            requiresMandate = false,
+            hasDelayedSettlement = true,
+            shouldRefreshIfIntentRequiresAction = false,
+        ),
         Zip(
             "zip",
             isReusable = false,

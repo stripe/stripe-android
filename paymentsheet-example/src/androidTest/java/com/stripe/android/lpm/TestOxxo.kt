@@ -20,15 +20,14 @@ import org.junit.runner.RunWith
 internal class TestOxxo : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "oxxo",
+        authorizationAction = AuthorizeAction.DisplayQrCode
     ) { settings ->
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
         settings[CountrySettingsDefinition] = Country.MX
         settings[CurrencySettingsDefinition] = Currency.MXN
         settings[DelayedPaymentMethodsSettingsDefinition] = true
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
-    }.copy(
-        authorizationAction = AuthorizeAction.DisplayQrCode,
-    )
+    }
 
     @Test
     fun testOxxo() {

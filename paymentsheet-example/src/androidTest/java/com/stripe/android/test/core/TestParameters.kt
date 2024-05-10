@@ -34,13 +34,14 @@ internal data class TestParameters(
         fun create(
             paymentMethodCode: String,
             requiresBrowser: Boolean = true,
-            playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
+            authorizationAction: AuthorizeAction = AuthorizeAction.AuthorizePayment(requiresBrowser),
+            playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {}
         ): TestParameters {
             return TestParameters(
                 paymentMethodCode = paymentMethodCode,
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = false,
-                authorizationAction = AuthorizeAction.AuthorizePayment(requiresBrowser),
+                authorizationAction = authorizationAction,
                 playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
             )
         }
