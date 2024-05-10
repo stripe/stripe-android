@@ -68,7 +68,7 @@ internal class ErrorViewModel @AssistedInject constructor(
             ErrorState::payload,
             onFail = { error ->
                 eventTracker.logError(
-                    extraMessage = "Error linking more accounts",
+                    extraMessage = "Error loading the error screen payload",
                     error = error,
                     logger = logger,
                     pane = PANE

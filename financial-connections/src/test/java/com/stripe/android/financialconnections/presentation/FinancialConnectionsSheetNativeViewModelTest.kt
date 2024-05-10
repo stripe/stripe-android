@@ -40,7 +40,6 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TestRule
 import org.junit.runner.RunWith
-import org.mockito.kotlin.any
 import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
@@ -79,10 +78,15 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                     )
                 )
             )
-            whenever(nativeAuthFlowCoordinator())
-                .thenReturn(messagesFlow)
-            whenever(completeFinancialConnectionsSession(any()))
-                .thenReturn(sessionWithCustomManualEntry)
+
+            whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
+
+            whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+                CompleteFinancialConnectionsSession.Result(
+                    session = sessionWithCustomManualEntry,
+                    status = "canceled",
+                )
+            )
 
             val viewModel = createViewModel()
 
@@ -99,7 +103,13 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     fun `onCloseClick - when closing but linked accounts, finish with success`() = runTest {
         val sessionWithAccounts = financialConnectionsSessionWithNoMoreAccounts
         whenever(nativeAuthFlowCoordinator()).thenReturn(MutableSharedFlow())
-        whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithAccounts)
+
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = sessionWithAccounts,
+                status = "completed",
+            )
+        )
 
         val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
         whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
@@ -125,7 +135,12 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
     @Test
     fun `onCloseClick - when closing, no accounts, no errors, finish with cancel`() = runTest {
         val sessionWithNoAccounts = financialConnectionsSessionNoAccounts()
-        whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithNoAccounts)
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = sessionWithNoAccounts,
+                status = "canceled",
+            )
+        )
 
         val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
         whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)
@@ -157,7 +172,12 @@ internal class FinancialConnectionsSheetNativeViewModelTest {
                 )
             )
         )
-        whenever(completeFinancialConnectionsSession(anyOrNull())).thenReturn(sessionWithNoAccounts)
+        whenever(completeFinancialConnectionsSession(anyOrNull(), anyOrNull())).thenReturn(
+            CompleteFinancialConnectionsSession.Result(
+                session = sessionWithNoAccounts,
+                status = "custom_manual_entry",
+            )
+        )
 
         val messagesFlow = MutableSharedFlow<NativeAuthFlowCoordinator.Message>()
         whenever(nativeAuthFlowCoordinator()).thenReturn(messagesFlow)

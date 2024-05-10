@@ -67,14 +67,18 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     )
 
     class Complete(
+        pane: Pane,
         exception: Throwable?,
         exceptionExtraMessage: String?,
-        connectedAccounts: Int?
+        connectedAccounts: Int?,
+        status: String,
     ) : FinancialConnectionsAnalyticsEvent(
         name = "complete",
         mapOf(
+            "pane" to pane.analyticsValue,
             "num_linked_accounts" to connectedAccounts?.toString(),
-            "type" to if (exception == null) "object" else "error"
+            "type" to if (exception == null) "object" else "error",
+            "status" to status,
         )
             .plus(exception?.toEventParams(exceptionExtraMessage) ?: emptyMap())
             .filterNotNullValues()
@@ -84,15 +88,6 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         pane: Pane
     ) : FinancialConnectionsAnalyticsEvent(
         name = "click.data_access.learn_more",
-        mapOf(
-            "pane" to pane.analyticsValue,
-        ).filterNotNullValues()
-    )
-
-    class ClickDisconnectLink(
-        pane: Pane
-    ) : FinancialConnectionsAnalyticsEvent(
-        name = "click.disconnect_link",
         mapOf(
             "pane" to pane.analyticsValue,
         ).filterNotNullValues()
@@ -171,17 +166,20 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     )
 
     class PollAccountsSucceeded(
+        pane: Pane,
         authSessionId: String,
         duration: Long
     ) : FinancialConnectionsAnalyticsEvent(
         name = "polling.accounts.success",
         mapOf(
+            "pane" to pane.analyticsValue,
             "authSessionId" to authSessionId,
             "duration" to duration.toString(),
         ).filterNotNullValues()
     )
 
     class AccountSelected(
+        pane: Pane,
         selected: Boolean,
         isSingleAccount: Boolean,
         accountId: String,
@@ -192,6 +190,7 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             "click.account_picker.account_unselected"
         },
         mapOf(
+            "pane" to pane.analyticsValue,
             "is_single_account" to isSingleAccount.toString(),
             "account" to accountId,
         ).filterNotNullValues()
@@ -211,22 +210,26 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
     )
 
     class AccountsAutoSelected(
+        pane: Pane,
         accountIds: Set<String>,
         isSingleAccount: Boolean
     ) : FinancialConnectionsAnalyticsEvent(
         name = "account_picker.accounts_auto_selected",
         mapOf(
+            "pane" to pane.analyticsValue,
             "account_ids" to accountIds.joinToString(" "),
             "is_single_account" to isSingleAccount.toString(),
         ).filterNotNullValues()
     )
 
     class PollAttachPaymentsSucceeded(
+        pane: Pane,
         authSessionId: String,
         duration: Long
     ) : FinancialConnectionsAnalyticsEvent(
         name = "polling.attachPayment.success",
         mapOf(
+            "pane" to pane.analyticsValue,
             "authSessionId" to authSessionId,
             "duration" to duration.toString(),
         ).filterNotNullValues()
@@ -268,15 +271,6 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         ).filterNotNullValues()
     )
 
-    class VerificationSuccessNoAccounts(
-        pane: Pane,
-    ) : FinancialConnectionsAnalyticsEvent(
-        name = "networking.verification.success_no_accounts",
-        mapOf(
-            "pane" to pane.analyticsValue,
-        ).filterNotNullValues()
-    )
-
     class VerificationError(
         pane: Pane,
         error: Error
@@ -292,7 +286,6 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
             LookupConsumerSession("LookupConsumerSession"),
             StartVerificationSessionError("StartVerificationSessionError"),
             ConfirmVerificationSessionError("ConfirmVerificationSessionError"),
-            NetworkedAccountsRetrieveMethodError("NetworkedAccountsRetrieveMethodError"),
             MarkLinkVerifiedError("MarkLinkVerifiedError"),
         }
     }
@@ -366,15 +359,20 @@ internal sealed class FinancialConnectionsAnalyticsEvent(
         includePrefix = false,
     )
 
-    class AuthSessionUrlReceived(url: String, status: String, authSessionId: String?) :
-        FinancialConnectionsAnalyticsEvent(
-            name = "auth_session.url_received",
-            params = mapOf(
-                "status" to status,
-                "url" to url,
-                "auth_session_id" to (authSessionId ?: "")
-            ).filterNotNullValues(),
-        )
+    class AuthSessionUrlReceived(
+        pane: Pane,
+        url: String,
+        status: String,
+        authSessionId: String?
+    ) : FinancialConnectionsAnalyticsEvent(
+        name = "auth_session.url_received",
+        params = mapOf(
+            "pane" to pane.analyticsValue,
+            "status" to status,
+            "url" to url,
+            "auth_session_id" to (authSessionId ?: "")
+        ).filterNotNullValues(),
+    )
 
     class AuthSessionRetrieved(nextPane: Pane, authSessionId: String) :
         FinancialConnectionsAnalyticsEvent(
