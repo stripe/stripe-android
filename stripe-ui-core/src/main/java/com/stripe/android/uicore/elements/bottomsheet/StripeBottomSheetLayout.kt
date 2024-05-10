@@ -21,8 +21,7 @@ const val BottomSheetContentTestTag = "BottomSheetContentTestTag"
  *
  * @param state The [StripeBottomSheetState] that controls the visibility of the bottom sheet.
  * navigate to a specific screen.
- * @param onUpdateStatusBarColor Called when the status bar color needs to be updated. This is based
- * on the expansion state of the sheet.
+ * @param layoutInfo The [StripeBottomSheetLayoutInfo] that controls how the bottom sheet is styled
  * @param onDismissed Called when the user dismisses the bottom sheet by swiping down. You should
  * inform your view model about this change.
  * @param sheetContent The content to render in the sheet
