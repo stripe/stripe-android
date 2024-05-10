@@ -19,7 +19,8 @@ internal class CollectBankAccountForACHLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
-                attachToIntent = true
+                attachToIntent = true,
+                initialInstitution = (configuration as? CollectBankAccountConfiguration.USBankAccount)?.initialInstitution,
             )
         )
     }
@@ -36,7 +37,8 @@ internal class CollectBankAccountForACHLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
-                attachToIntent = true
+                attachToIntent = true,
+                initialInstitution = null,
             )
         )
     }

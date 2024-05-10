@@ -17,6 +17,7 @@ internal sealed class USBankAccountFormScreenState(
         @StringRes override val error: Int? = null,
         override val primaryButtonText: String,
         override val isProcessing: Boolean,
+        val featuredInstitutions: List<BankViewState>,
     ) : USBankAccountFormScreenState() {
 
         override val mandateText: String?

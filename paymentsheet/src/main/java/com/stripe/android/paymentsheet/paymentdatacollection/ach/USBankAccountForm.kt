@@ -1,14 +1,24 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
+import android.os.Parcelable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -22,11 +32,15 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.stripe.android.networking.Bank
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode
 import com.stripe.android.paymentsheet.R
@@ -35,6 +49,7 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
+import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElementUI
 import com.stripe.android.uicore.elements.H6Text
@@ -47,13 +62,17 @@ import com.stripe.android.uicore.elements.Section
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
+import com.stripe.android.uicore.image.StripeImage
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.utils.collectAsState
+import kotlinx.parcelize.Parcelize
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
 @Composable
 internal fun USBankAccountForm(
+    imageLoader: StripeImageLoader,
     formArgs: FormArguments,
     usBankAccountFormArgs: USBankAccountFormArguments,
     modifier: Modifier = Modifier,
@@ -87,6 +106,7 @@ internal fun USBankAccountForm(
         when (val screenState = currentScreenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
                 BillingDetailsCollectionScreen(
+                    imageLoader = imageLoader,
                     instantDebits = usBankAccountFormArgs.instantDebits,
                     formArgs = formArgs,
                     isPaymentFlow = usBankAccountFormArgs.isPaymentFlow,
@@ -97,10 +117,13 @@ internal fun USBankAccountForm(
                     addressController = viewModel.addressElement.controller,
                     lastTextFieldIdentifier = lastTextFieldIdentifier,
                     sameAsShippingElement = viewModel.sameAsShippingElement,
+                    featuredInstitutions = screenState.featuredInstitutions,
+                    onBankSelected = viewModel::handleBankSelected,
                 )
             }
             is USBankAccountFormScreenState.MandateCollection -> {
                 AccountPreviewScreen(
+                    imageLoader = imageLoader,
                     formArgs = formArgs,
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
@@ -120,6 +143,7 @@ internal fun USBankAccountForm(
             }
             is USBankAccountFormScreenState.VerifyWithMicrodeposits -> {
                 AccountPreviewScreen(
+                    imageLoader = imageLoader,
                     formArgs = formArgs,
                     bankName = screenState.paymentAccount.bankName,
                     last4 = screenState.paymentAccount.last4,
@@ -139,6 +163,7 @@ internal fun USBankAccountForm(
             }
             is USBankAccountFormScreenState.SavedAccount -> {
                 AccountPreviewScreen(
+                    imageLoader = imageLoader,
                     formArgs = formArgs,
                     bankName = screenState.bankName,
                     last4 = screenState.last4,
@@ -162,6 +187,7 @@ internal fun USBankAccountForm(
 
 @Composable
 internal fun BillingDetailsCollectionScreen(
+    imageLoader: StripeImageLoader,
     formArgs: FormArguments,
     instantDebits: Boolean,
     isProcessing: Boolean,
@@ -172,9 +198,12 @@ internal fun BillingDetailsCollectionScreen(
     addressController: AddressController,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
+    featuredInstitutions: List<BankViewState>,
+    onBankSelected: (String) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
+            imageLoader = imageLoader,
             instantDebits = instantDebits,
             formArgs = formArgs,
             isProcessing = isProcessing,
@@ -185,12 +214,15 @@ internal fun BillingDetailsCollectionScreen(
             addressController = addressController,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
+            featuredInstitutions = featuredInstitutions,
+            onBankSelected = onBankSelected,
         )
     }
 }
 
 @Composable
 internal fun AccountPreviewScreen(
+    imageLoader: StripeImageLoader,
     formArgs: FormArguments,
     bankName: String?,
     last4: String?,
@@ -209,6 +241,7 @@ internal fun AccountPreviewScreen(
 ) {
     Column(Modifier.fillMaxWidth()) {
         BillingDetailsForm(
+            imageLoader = imageLoader,
             formArgs = formArgs,
             instantDebits = instantDebits,
             isProcessing = isProcessing,
@@ -219,6 +252,8 @@ internal fun AccountPreviewScreen(
             addressController = addressController,
             lastTextFieldIdentifier = lastTextFieldIdentifier,
             sameAsShippingElement = sameAsShippingElement,
+            featuredInstitutions = emptyList(),
+            onBankSelected = {},
         )
         AccountDetailsForm(
             showCheckbox = showCheckbox,
@@ -233,6 +268,7 @@ internal fun AccountPreviewScreen(
 
 @Composable
 internal fun BillingDetailsForm(
+    imageLoader: StripeImageLoader,
     instantDebits: Boolean,
     formArgs: FormArguments,
     isProcessing: Boolean,
@@ -243,6 +279,8 @@ internal fun BillingDetailsForm(
     addressController: AddressController,
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
+    featuredInstitutions: List<BankViewState>,
+    onBankSelected: (String) -> Unit,
 ) {
     Column(Modifier.fillMaxWidth()) {
         H6Text(
@@ -312,7 +350,267 @@ internal fun BillingDetailsForm(
                 sameAsShippingElement = sameAsShippingElement,
             )
         }
+        
+        Spacer(modifier = Modifier.height(10.dp))
+
+        EmbeddedBankPicker(
+            imageLoader = imageLoader,
+            featuredInstitutions = featuredInstitutions,
+            onBankSelected = onBankSelected,
+        )
     }
+}
+
+@Preview
+@Composable
+private fun EmbeddedBankPickerPreview() {
+    StripeTheme {
+        EmbeddedBankPicker(
+            imageLoader = StripeImageLoader(LocalContext.current),
+            featuredInstitutions = listOf(
+                BankViewState(
+                    Bank(
+                        id = "1",
+                        name = "Bank 1",
+                        icon = "",
+                        url = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
+                        featuredOrder = 1,
+                    )
+                ),
+                BankViewState(
+                    Bank(
+                        id = "2",
+                        name = "Bank 2 with a really long name",
+                        icon = "",
+                        url = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
+                        featuredOrder = 2,
+                    )
+                ),
+                BankViewState(
+                    Bank(
+                        id = "3",
+                        name = "Bank 3",
+                        icon = "",
+                        url = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
+                        featuredOrder = 3,
+                    )
+                ),
+                BankViewState(
+                    Bank(
+                        id = "4",
+                        name = "Bank 4 with a really long name",
+                        icon = "",
+                        url = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
+                        featuredOrder = 4,
+                    )
+                ),
+            ),
+            onBankSelected = {},
+        )
+    }
+}
+
+@Preview
+@Composable
+private fun EmbeddedBankPickerPreview_Loading() {
+    StripeTheme {
+        EmbeddedBankPicker(
+            imageLoader = StripeImageLoader(LocalContext.current),
+            featuredInstitutions = listOf(
+                BankViewState(bank = null),
+                BankViewState(bank = null),
+                BankViewState(bank = null),
+                BankViewState(bank = null),
+                BankViewState(bank = null),
+                BankViewState(bank = null),
+            ),
+            onBankSelected = {},
+        )
+    }
+}
+
+@Parcelize
+internal data class BankViewState(
+    val bank: Bank?,
+) : Parcelable
+
+@Composable
+internal fun RowScope.EmbeddedBankPickerCard(
+    bankViewState: BankViewState,
+    imageLoader: StripeImageLoader,
+    onBankSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Card(
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f),
+        ),
+        modifier = Modifier
+            .weight(1f)
+            .height(56.dp),
+    ) {
+        if (bankViewState.bank != null) {
+            EmbeddedBankPickerCardContent(
+                institution = bankViewState.bank,
+                imageLoader = imageLoader,
+                onBankSelected = onBankSelected,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmbeddedBankPickerCardContent(
+    institution: Bank,
+    imageLoader: StripeImageLoader,
+    onBankSelected: (String) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable { onBankSelected(institution.id) }
+            .padding(10.dp),
+    ) {
+        StripeImage(
+            url = institution.icon.orEmpty(),
+            imageLoader = imageLoader,
+            contentDescription = null,
+            debugPainter = painterResource(R.drawable.stripe_ic_paymentsheet_bank),
+            modifier = Modifier.size(20.dp),
+            loadingContent = {
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .background(Color.LightGray),
+                )
+            }
+        )
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        Text(text = institution.name)
+    }
+}
+
+@Composable
+private fun EmbeddedBankPicker(
+    imageLoader: StripeImageLoader,
+    featuredInstitutions: List<BankViewState>,
+    modifier: Modifier = Modifier,
+    onBankSelected: (String) -> Unit,
+) {
+//    val numberOfRows = remember(featuredInstitutions) {
+//        ceil(featuredInstitutions.size / 2f).roundToInt()
+//    }
+//
+    val rows = remember(featuredInstitutions) {
+        featuredInstitutions.chunked(2)
+    }
+
+    val spacing = remember { Arrangement.spacedBy(8.dp) }
+
+    Column(
+        verticalArrangement = spacing,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        for (row in rows) {
+            Row(horizontalArrangement = spacing) {
+                for (item in row) {
+                    EmbeddedBankPickerCard(
+                        bankViewState = item,
+                        imageLoader = imageLoader,
+                        onBankSelected = onBankSelected,
+                    )
+                }
+            }
+        }
+    }
+
+//    if (featuredInstitutions == null) {
+//        Column(
+//            verticalArrangement = Arrangement.spacedBy(8.dp),
+//            modifier = Modifier.fillMaxWidth(),
+//        ) {
+//            repeat(3) {
+//                Row(
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                ) {
+//                    repeat(2) {
+//                        Card(
+//                            border = BorderStroke(
+//                                width = 1.dp,
+//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f),
+//                            ),
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .height(56.dp),
+//                        ) {
+//                            // Nothing
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    } else if (featuredInstitutions.isNotEmpty()) {
+//        Column(
+//            verticalArrangement = Arrangement.spacedBy(8.dp),
+//            modifier = Modifier.fillMaxWidth(),
+//        ) {
+//            val chunks = remember(featuredInstitutions) {
+//                featuredInstitutions.chunked(2)
+//            }
+//
+//            for (chunk in chunks) {
+//                Row(
+//                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                ) {
+//                    for (institution in chunk) {
+//                        Card(
+//                            border = BorderStroke(
+//                                width = 1.dp,
+//                                color = MaterialTheme.colors.onSurface.copy(alpha = 0.32f),
+//                            ),
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .height(56.dp),
+//                        ) {
+//                            Row(
+//                                verticalAlignment = Alignment.CenterVertically,
+//                                modifier = Modifier
+//                                    .fillMaxSize()
+//                                    .clickable { onBankSelected(institution.id) }
+//                                    .padding(10.dp),
+//                            ) {
+//                                StripeImage(
+//                                    url = institution.icon.orEmpty(),
+//                                    imageLoader = imageLoader,
+//                                    contentDescription = null,
+//                                    debugPainter = painterResource(R.drawable.stripe_ic_paymentsheet_bank),
+//                                    modifier = Modifier.size(20.dp),
+//                                    loadingContent = {
+//                                        Box(
+//                                            modifier = Modifier
+//                                                .size(20.dp)
+//                                                .background(Color.LightGray),
+//                                        )
+//                                    }
+//                                )
+//
+//                                Spacer(modifier = Modifier.width(10.dp))
+//
+//                                Text(
+//                                    text = institution.name,
+//                                )
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }
+//    }
 }
 
 @Suppress("SpreadOperator")

@@ -1,6 +1,7 @@
 package com.stripe.android.model
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.utils.filterNotNullValues
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed interface CreateFinancialConnectionsSessionParams {
@@ -33,7 +34,8 @@ sealed interface CreateFinancialConnectionsSessionParams {
     data class USBankAccount(
         val clientSecret: String,
         val customerName: String,
-        val customerEmailAddress: String?
+        val customerEmailAddress: String?,
+        val initialInstitution: String?,
     ) : CreateFinancialConnectionsSessionParams {
         override fun toMap(): Map<String, Any> {
             val paymentMethod = PaymentMethodCreateParams.createUSBankAccount(
@@ -44,8 +46,9 @@ sealed interface CreateFinancialConnectionsSessionParams {
             )
             return mapOf(
                 PARAM_CLIENT_SECRET to clientSecret,
-                PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap()
-            )
+                PARAM_PAYMENT_METHOD_DATA to paymentMethod.toParamMap(),
+                "initial_institution" to initialInstitution,
+            ).filterNotNullValues()
         }
     }
 

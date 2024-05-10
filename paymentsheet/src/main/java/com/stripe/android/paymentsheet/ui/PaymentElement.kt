@@ -115,6 +115,11 @@ internal fun FormElement(
     // The PaymentMethodForm has a reference to a FormViewModel, which is scoped to a key. This is to ensure that
     // the FormViewModel is recreated when the PaymentElement is recomposed.
     val uuid = rememberSaveable { UUID.randomUUID().toString() }
+    val context = LocalContext.current
+
+    val imageLoader = remember {
+        StripeImageLoader(context = context.applicationContext)
+    }
 
     Box(
         modifier = Modifier
@@ -137,6 +142,7 @@ internal fun FormElement(
     ) {
         if (selectedPaymentMethodCode == USBankAccount.code || selectedPaymentMethodCode == Link.code) {
             USBankAccountForm(
+                imageLoader = imageLoader,
                 formArgs = formArguments,
                 usBankAccountFormArgs = usBankAccountFormArguments,
                 modifier = Modifier.padding(horizontal = horizontalPadding),

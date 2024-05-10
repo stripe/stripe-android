@@ -107,7 +107,8 @@ internal class CreateFinancialConnectionsSession @Inject constructor(
                 CreateFinancialConnectionsSessionParams.USBankAccount(
                     clientSecret = clientSecret,
                     customerName = name,
-                    customerEmailAddress = email
+                    customerEmailAddress = email,
+                    initialInstitution = initialInstitution,
                 )
             }
 

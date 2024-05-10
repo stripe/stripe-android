@@ -119,7 +119,8 @@ sealed interface CollectBankAccountConfiguration : Parcelable {
     @Parcelize
     data class USBankAccount(
         val name: String,
-        val email: String?
+        val email: String?,
+        val initialInstitution: String?,
     ) : Parcelable, CollectBankAccountConfiguration
 
     @Parcelize

@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.ach
 
 import android.app.Application
+import android.util.Log
 import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
@@ -11,6 +12,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.PaymentConfiguration
+import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.financialconnections.model.BankAccount
 import com.stripe.android.financialconnections.model.FinancialConnectionsAccount
@@ -18,6 +20,7 @@ import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCreateParams
 import com.stripe.android.model.PaymentMethodOptionsParams
+import com.stripe.android.networking.StripeRepository
 import com.stripe.android.payments.bankaccount.CollectBankAccountConfiguration
 import com.stripe.android.payments.bankaccount.CollectBankAccountForInstantDebitsLauncher
 import com.stripe.android.payments.bankaccount.CollectBankAccountLauncher
@@ -56,11 +59,14 @@ import javax.inject.Inject
 import javax.inject.Provider
 import com.stripe.android.ui.core.R as StripeUiCoreR
 
+private const val FeaturedBanks = 6
+
 internal class USBankAccountFormViewModel @Inject internal constructor(
     private val args: Args,
     private val application: Application,
     private val lazyPaymentConfig: Provider<PaymentConfiguration>,
     private val savedStateHandle: SavedStateHandle,
+    private val stripeRepository: StripeRepository,
 ) : ViewModel() {
     private val defaultBillingDetails = args.formArgs.billingDetails
     private val collectionConfiguration = args.formArgs.billingDetailsCollectionConfiguration
@@ -233,6 +239,29 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             }
         }
 
+        viewModelScope.launch {
+            val response = stripeRepository.retrieveFeaturedInstitutions(
+                options = ApiRequest.Options(
+                    apiKey = lazyPaymentConfig.get().publishableKey,
+                    stripeAccount = lazyPaymentConfig.get().stripeAccountId,
+                ),
+            )
+
+            val featuredInstitutions = response.getOrNull()?.banks.orEmpty().map {
+                BankViewState(it)
+            }
+
+            _currentScreenState.update { screenState ->
+                if (screenState is USBankAccountFormScreenState.BillingDetailsCollection) {
+                    screenState.copy(
+                        featuredInstitutions = featuredInstitutions,
+                    )
+                } else {
+                    screenState
+                }
+            }
+        }
+
         val hasDefaultName = args.formArgs.billingDetails?.name != null &&
             args.formArgs.billingDetailsCollectionConfiguration.attachDefaultsToPaymentMethod
         val hasDefaultEmail = args.formArgs.billingDetails?.email != null &&
@@ -366,6 +395,14 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         }
     }
 
+    fun handleBankSelected(id: String) {
+        Log.d("TILL123", "Bank selected: $id")
+//        _currentScreenState.update {
+//            it.copy(isProcessing = true)
+//        }
+        collectBankAccount(args.clientSecret, initialInstitution = id)
+    }
+
     fun handlePrimaryButtonClick(screenState: USBankAccountFormScreenState) {
         when (screenState) {
             is USBankAccountFormScreenState.BillingDetailsCollection -> {
@@ -411,12 +448,17 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
         saveForFutureUseElement.controller.onValueChange(true)
         _collectBankAccountResult.tryEmit(null)
         _currentScreenState.update {
+            val featuredInstitutions = (it as? USBankAccountFormScreenState.BillingDetailsCollection)
+                ?.featuredInstitutions
+                .orEmpty()
+
             USBankAccountFormScreenState.BillingDetailsCollection(
                 error = error,
                 primaryButtonText = application.getString(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
                 isProcessing = false,
+                featuredInstitutions = featuredInstitutions,
             )
         }
     }
@@ -444,22 +486,31 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                     StripeUiCoreR.string.stripe_continue_button_label
                 ),
                 isProcessing = false,
+                featuredInstitutions = buildList(FeaturedBanks) {
+                    BankViewState(bank = null)
+                },
             )
         }
     }
 
-    private fun collectBankAccount(clientSecret: String?) {
+    private fun collectBankAccount(
+        clientSecret: String?,
+        initialInstitution: String? = null,
+    ) {
         if (hasLaunched) return
         hasLaunched = true
 
         if (clientSecret != null) {
-            collectBankAccountForIntent(clientSecret)
+            collectBankAccountForIntent(clientSecret, initialInstitution)
         } else {
             collectBankAccountForDeferredIntent()
         }
     }
 
-    private fun collectBankAccountForIntent(clientSecret: String) {
+    private fun collectBankAccountForIntent(
+        clientSecret: String,
+        initialInstitution: String?,
+    ) {
         val configuration = if (args.instantDebits) {
             CollectBankAccountConfiguration.InstantDebits(
                 email = email.value,
@@ -468,6 +519,7 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             CollectBankAccountConfiguration.USBankAccount(
                 name = name.value,
                 email = email.value,
+                initialInstitution = initialInstitution,
             )
         }
 
@@ -497,7 +549,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                 configuration = CollectBankAccountConfiguration.USBankAccount(
                     name.value,
-                    email.value
+                    email.value,
+                    initialInstitution = null,
                 ),
                 elementsSessionId = elementsSessionId,
                 customerId = null,
@@ -511,7 +564,8 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
                 stripeAccountId = lazyPaymentConfig.get().stripeAccountId,
                 configuration = CollectBankAccountConfiguration.USBankAccount(
                     name.value,
-                    email.value
+                    email.value,
+                    initialInstitution = null,
                 ),
                 elementsSessionId = elementsSessionId,
                 customerId = null,

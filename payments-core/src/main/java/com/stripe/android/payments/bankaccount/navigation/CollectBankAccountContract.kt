@@ -45,7 +45,8 @@ class CollectBankAccountContract :
         open val stripeAccountId: String?,
         open val clientSecret: String?,
         open val configuration: CollectBankAccountConfiguration,
-        open val attachToIntent: Boolean
+        open val attachToIntent: Boolean,
+        open val initialInstitution: String?,
     ) : Parcelable {
         fun toBundle() = bundleOf(EXTRA_ARGS to this)
 
@@ -56,13 +57,15 @@ class CollectBankAccountContract :
             override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
-            override val attachToIntent: Boolean
+            override val attachToIntent: Boolean,
+            override val initialInstitution: String?,
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = configuration,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            initialInstitution = initialInstitution,
         )
 
         @Parcelize
@@ -72,13 +75,15 @@ class CollectBankAccountContract :
             override val stripeAccountId: String?,
             override val clientSecret: String,
             override val configuration: CollectBankAccountConfiguration,
-            override val attachToIntent: Boolean
+            override val attachToIntent: Boolean,
+            override val initialInstitution: String?,
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = clientSecret,
             configuration = configuration,
-            attachToIntent = attachToIntent
+            attachToIntent = attachToIntent,
+            initialInstitution = initialInstitution,
         )
 
         @Parcelize
@@ -91,13 +96,14 @@ class CollectBankAccountContract :
             val customerId: String?,
             val onBehalfOf: String?,
             val amount: Int?,
-            val currency: String?
+            val currency: String?,
         ) : Args(
             publishableKey = publishableKey,
             stripeAccountId = stripeAccountId,
             clientSecret = null,
             configuration = configuration,
-            attachToIntent = false
+            attachToIntent = false,
+            initialInstitution = null,
         )
 
         @Parcelize
@@ -114,7 +120,8 @@ class CollectBankAccountContract :
             stripeAccountId = stripeAccountId,
             clientSecret = null,
             configuration = configuration,
-            attachToIntent = false
+            attachToIntent = false,
+            initialInstitution = null,
         )
 
         companion object {

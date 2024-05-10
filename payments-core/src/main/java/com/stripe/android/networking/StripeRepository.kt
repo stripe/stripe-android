@@ -46,6 +46,12 @@ import java.util.Locale
 interface StripeRepository {
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    suspend fun retrieveFeaturedInstitutions(
+        options: ApiRequest.Options,
+        expandFields: List<String> = emptyList()
+    ): Result<FeaturedInstitutions>
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     suspend fun retrieveStripeIntent(
         clientSecret: String,
         options: ApiRequest.Options,

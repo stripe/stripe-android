@@ -24,7 +24,8 @@ class CollectBankAccountForInstantDebitsLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
-                attachToIntent = true
+                attachToIntent = true,
+                initialInstitution = null,
             )
         )
     }
@@ -41,7 +42,8 @@ class CollectBankAccountForInstantDebitsLauncher(
                 stripeAccountId = stripeAccountId,
                 clientSecret = clientSecret,
                 configuration = configuration,
-                attachToIntent = true
+                attachToIntent = true,
+                initialInstitution = null,
             )
         )
     }

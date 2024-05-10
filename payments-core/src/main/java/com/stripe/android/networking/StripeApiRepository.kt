@@ -2,6 +2,7 @@ package com.stripe.android.networking
 
 import android.content.Context
 import android.net.http.HttpResponseCache
+import android.os.Parcelable
 import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import com.stripe.android.DefaultFraudDetectionDataRepository
@@ -102,6 +103,8 @@ import com.stripe.android.utils.mapResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.parcelize.Parcelize
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -110,6 +113,60 @@ import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Named
 import kotlin.coroutines.CoroutineContext
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Parcelize
+data class FeaturedInstitutions(
+    val banks: List<Bank>,
+) : StripeModel
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Parcelize
+data class Bank(
+    val id: String,
+    val name: String,
+    val icon: String?,
+    val featuredOrder: Int?,
+    val url: String?,
+) : Parcelable
+
+internal object FeaturedInstitutionsJsonParser : ModelJsonParser<FeaturedInstitutions> {
+
+    override fun parse(json: JSONObject): FeaturedInstitutions {
+        val data = json.getJSONArray("data")
+
+        val banks = (0 until data.length()).map { index ->
+            val obj = data.getJSONObject(index)
+
+            Bank(
+                id = obj.getString("id"),
+                name = obj.getString("name"),
+                icon = obj.getJSONObject("icon").getString("default"),
+                featuredOrder = obj.getInt("featured_order"),
+                url = obj.getString("url"),
+            )
+        }
+
+//        val banks = listOf(
+//            Bank(
+//                id = "bcinst_Jg18xEfPHevfHP",
+//                name = "Test Institution",
+//                icon = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
+//                featuredOrder = 1,
+//                url = "https://stripe.com",
+//            ),
+//            Bank(
+//                id = "bcinst_LLQZzmKZMjl0j0",
+//                name = "Test OAuth Institution",
+//                icon = "https://b.stripecdn.com/connections-statics-srv/assets/BrandIcon--stripe-4x.png",
+//                featuredOrder = 2,
+//                url = "https://stripe.com",
+//            ),
+//        )
+
+        return FeaturedInstitutions(banks)
+    }
+}
 
 /**
  * An implementation of [StripeRepository] that makes network requests to the Stripe API.
@@ -176,6 +233,25 @@ class StripeApiRepository @JvmOverloads internal constructor(
             val httpCacheSize = (10 * 1024 * 1024).toLong() // 10 MiB
             HttpResponseCache.install(httpCacheDir, httpCacheSize)
         }
+    }
+
+    override suspend fun retrieveFeaturedInstitutions(
+        options: ApiRequest.Options,
+        expandFields: List<String>
+    ): Result<FeaturedInstitutions> {
+        val params = mapOf(
+            "limit" to 6,
+            "product" to "payment_flows",
+        )
+
+        return fetchStripeModelResult(
+            apiRequest = apiRequestFactory.createGet(
+                url = financialConnectionsFeaturedInstitutionsUrl,
+                options = options,
+                params = params,
+            ),
+            jsonParser = FeaturedInstitutionsJsonParser,
+        )
     }
 
     override suspend fun retrieveStripeIntent(
@@ -1835,6 +1911,13 @@ class StripeApiRepository @JvmOverloads internal constructor(
         internal val linkFinancialConnectionsSessionUrl: String
             @JvmSynthetic
             get() = getApiUrl("consumers/link_account_sessions")
+
+        /**
+         * @return `https://api.stripe.com/v1/consumers/link_account_sessions`
+         */
+        internal val financialConnectionsFeaturedInstitutionsUrl: String
+            @JvmSynthetic
+            get() = getApiUrl("connections/featured_institutions")
 
         /**
          * @return `https://api.stripe.com/v1/connections/link_account_sessions_for_deferred_payment`
