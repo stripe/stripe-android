@@ -809,7 +809,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onError(error: String?) = resetViewState(error)
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
-        if (config.appearance.layout == PaymentSheet.Appearance.Layout.Vertical) {
+        if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
             return listOf(PaymentSheetScreen.VerticalMode)
         }
         val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
