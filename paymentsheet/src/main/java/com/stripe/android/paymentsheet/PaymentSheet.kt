@@ -445,6 +445,8 @@ class PaymentSheet internal constructor(
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
         internal val externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods,
+
+        internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
     ) : Parcelable {
 
         @JvmOverloads
@@ -593,6 +595,7 @@ class PaymentSheet internal constructor(
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
             private var externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods
+            private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -672,6 +675,12 @@ class PaymentSheet internal constructor(
                 this.externalPaymentMethods = externalPaymentMethods
             }
 
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalPaymentMethodLayoutApi
+            fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
+                this.paymentMethodLayout = paymentMethodLayout
+            }
+
             fun build() = Configuration(
                 merchantDisplayName = merchantDisplayName,
                 customer = customer,
@@ -688,6 +697,7 @@ class PaymentSheet internal constructor(
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
+                paymentMethodLayout = paymentMethodLayout,
             )
         }
 
@@ -699,34 +709,41 @@ class PaymentSheet internal constructor(
         }
     }
 
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class PaymentMethodLayout {
+        Horizontal, Vertical;
+
+        internal companion object {
+            internal val default: PaymentMethodLayout = Horizontal
+        }
+    }
+
     @Parcelize
-    data class Appearance internal constructor(
+    data class Appearance(
         /**
          * Describes the colors used while the system is in light mode.
          */
-        val colorsLight: Colors,
+        val colorsLight: Colors = Colors.defaultLight,
 
         /**
          * Describes the colors used while the system is in dark mode.
          */
-        val colorsDark: Colors,
+        val colorsDark: Colors = Colors.defaultDark,
 
         /**
          * Describes the appearance of shapes.
          */
-        val shapes: Shapes,
+        val shapes: Shapes = Shapes.default,
 
         /**
          * Describes the typography used for text.
          */
-        val typography: Typography,
+        val typography: Typography = Typography.default,
 
         /**
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
-        val primaryButton: PrimaryButton,
-
-        internal val layout: Layout,
+        val primaryButton: PrimaryButton = PrimaryButton(),
     ) : Parcelable {
         constructor() : this(
             colorsLight = Colors.defaultLight,
@@ -734,54 +751,10 @@ class PaymentSheet internal constructor(
             shapes = Shapes.default,
             typography = Typography.default,
             primaryButton = PrimaryButton(),
-            layout = Layout.default,
-        )
-
-        constructor(
-            /**
-             * Describes the colors used while the system is in light mode.
-             */
-            colorsLight: Colors = Colors.defaultLight,
-
-            /**
-             * Describes the colors used while the system is in dark mode.
-             */
-            colorsDark: Colors = Colors.defaultDark,
-
-            /**
-             * Describes the appearance of shapes.
-             */
-            shapes: Shapes = Shapes.default,
-
-            /**
-             * Describes the typography used for text.
-             */
-            typography: Typography = Typography.default,
-
-            /**
-             * Describes the appearance of the primary button (e.g., the "Pay" button).
-             */
-            primaryButton: PrimaryButton = PrimaryButton(),
-        ) : this(
-            colorsLight = colorsLight,
-            colorsDark = colorsDark,
-            shapes = shapes,
-            typography = typography,
-            primaryButton = primaryButton,
-            layout = Layout.default,
         )
 
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight
-        }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        enum class Layout {
-            Horizontal, Vertical;
-
-            internal companion object {
-                internal val default: Layout = Horizontal
-            }
         }
 
         class Builder {
@@ -790,7 +763,6 @@ class PaymentSheet internal constructor(
             private var shapes = Shapes.default
             private var typography = Typography.default
             private var primaryButton: PrimaryButton = PrimaryButton()
-            private var layout: Layout = Layout.default
 
             fun colorsLight(colors: Colors) = apply {
                 this.colorsLight = colors
@@ -812,14 +784,8 @@ class PaymentSheet internal constructor(
                 this.primaryButton = primaryButton
             }
 
-            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            @ExperimentalPaymentSheetLayoutApi
-            fun layout(layout: Layout) = apply {
-                this.layout = layout
-            }
-
             fun build(): Appearance {
-                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton, layout)
+                return Appearance(colorsLight, colorsDark, shapes, typography, primaryButton)
             }
         }
     }

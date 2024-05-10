@@ -1,27 +1,27 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.paymentsheet.ExperimentalPaymentMethodLayoutApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
-import com.stripe.android.paymentsheet.example.playground.activity.AppearanceStore
 
 internal object LayoutSettingsDefinition : BooleanSettingsDefinition(
     key = "layout",
     displayName = "Vertical Mode",
     defaultValue = false,
 ) {
+    @OptIn(ExperimentalPaymentMethodLayoutApi::class)
     override fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
         playgroundState: PlaygroundState,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        AppearanceStore.state = AppearanceStore.state.copy(
-            layout = if (value) {
-                PaymentSheet.Appearance.Layout.Vertical
+        configurationBuilder.paymentMethodLayout(
+            if (value) {
+                PaymentSheet.PaymentMethodLayout.Vertical
             } else {
-                PaymentSheet.Appearance.Layout.Horizontal
+                PaymentSheet.PaymentMethodLayout.Horizontal
             }
         )
-        configurationBuilder.appearance(AppearanceStore.state)
     }
 }
