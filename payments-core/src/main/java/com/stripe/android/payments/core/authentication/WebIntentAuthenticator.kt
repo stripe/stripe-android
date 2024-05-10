@@ -99,7 +99,9 @@ internal class WebIntentAuthenticator @Inject constructor(
             is StripeIntent.NextActionData.DisplayVoucherDetails -> {
                 // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
                 authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
-                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayVoucherDetails")
+                    ?: throw IllegalArgumentException(
+                        "null hostedVoucherUrl for ${authenticatable.nextActionType?.code}"
+                    )
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
             }

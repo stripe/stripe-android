@@ -26,9 +26,11 @@ internal class VoucherAuthenticator @Inject constructor(
         requestOptions: ApiRequest.Options
     ) {
         val detailsData = authenticatable.nextActionData as NextActionData.DisplayVoucherDetails
+        println(authenticatable.nextActionType)
         if (detailsData.hostedVoucherUrl == null) {
             ErrorReporter.createFallbackInstance(context).report(
-                ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL
+                ErrorReporter.UnexpectedErrorEvent.MISSING_HOSTED_VOUCHER_URL,
+                additionalNonPiiParams = mapOf("next_action_type" to (authenticatable.nextActionType?.code ?: ""))
             )
             noOpIntentAuthenticator.authenticate(
                 host,
