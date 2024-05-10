@@ -58,7 +58,7 @@ internal class ExternalPaymentMethodActivity : AppCompatActivity() {
         }
     }
 
-   internal companion object {
+    internal companion object {
         const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
         const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
     }
