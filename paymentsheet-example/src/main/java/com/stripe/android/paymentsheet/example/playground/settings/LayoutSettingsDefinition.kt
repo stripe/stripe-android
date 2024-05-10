@@ -15,14 +15,13 @@ internal object LayoutSettingsDefinition : BooleanSettingsDefinition(
         playgroundState: PlaygroundState,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
-        configurationBuilder.appearance(
-            AppearanceStore.state.copy(
-                layout = if (value) {
-                    PaymentSheet.Appearance.Layout.Vertical
-                } else {
-                    PaymentSheet.Appearance.Layout.Horizontal
-                }
-            )
+        AppearanceStore.state = AppearanceStore.state.copy(
+            layout = if (value) {
+                PaymentSheet.Appearance.Layout.Vertical
+            } else {
+                PaymentSheet.Appearance.Layout.Horizontal
+            }
         )
+        configurationBuilder.appearance(AppearanceStore.state)
     }
 }

@@ -809,6 +809,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     override fun onError(error: String?) = resetViewState(error)
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+        if (config.appearance.layout == PaymentSheet.Appearance.Layout.Vertical) {
+            return listOf(PaymentSheetScreen.VerticalMode)
+        }
         val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
         val target = if (hasPaymentMethods) {
             PaymentSheetScreen.SelectSavedPaymentMethods

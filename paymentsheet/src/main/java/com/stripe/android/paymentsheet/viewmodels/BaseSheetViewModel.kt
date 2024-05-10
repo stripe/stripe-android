@@ -284,7 +284,7 @@ internal abstract class BaseSheetViewModel(
         viewModelScope.launch {
             currentScreen.collectLatest { screen ->
                 when (screen) {
-                    is AddFirstPaymentMethod, AddAnotherPaymentMethod -> {
+                    is AddFirstPaymentMethod, AddAnotherPaymentMethod, PaymentSheetScreen.VerticalMode -> {
                         reportFormShown(initiallySelectedPaymentMethodType)
                     }
                     is PaymentSheetScreen.EditPaymentMethod,
@@ -368,7 +368,7 @@ internal abstract class BaseSheetViewModel(
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
                 eventReporter.onShowExistingPaymentOptions()
             }
-            is AddFirstPaymentMethod, is AddAnotherPaymentMethod -> {
+            is AddFirstPaymentMethod, AddAnotherPaymentMethod, PaymentSheetScreen.VerticalMode -> {
                 eventReporter.onShowNewPaymentOptionForm()
             }
         }

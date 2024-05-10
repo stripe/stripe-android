@@ -321,6 +321,9 @@ internal class PaymentOptionsViewModel @Inject constructor(
     }
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
+        if (config.appearance.layout == PaymentSheet.Appearance.Layout.Vertical) {
+            return listOf(PaymentSheetScreen.VerticalMode)
+        }
         val target = if (args.state.showSavedPaymentMethods) {
             SelectSavedPaymentMethods
         } else {
