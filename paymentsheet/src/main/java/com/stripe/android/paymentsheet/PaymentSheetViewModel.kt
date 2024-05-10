@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -105,7 +106,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    private val errorReporter: ErrorReporter,
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -158,6 +160,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
 
     private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
+
+    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {
@@ -451,7 +455,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 externalPaymentMethodType = paymentSelection.type,
                 billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
-                integrationType = ExternalPaymentMethodResultHandler.IntegrationType.PAYMENT_SHEET,
+                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+                errorReporter = errorReporter,
             )
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
@@ -573,6 +578,11 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             includePaymentSheetAuthenticators = true,
         )
 
+        externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
+            ExternalPaymentMethodContract(errorReporter),
+            ::onExternalPaymentMethodResult
+        )
+
         lifecycleOwner.lifecycle.addObserver(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
@@ -619,7 +629,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
     }
 
-    internal fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
+    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
         val selection = selection.value
         when (paymentResult) {
             is PaymentResult.Completed -> eventReporter.onPaymentSuccess(

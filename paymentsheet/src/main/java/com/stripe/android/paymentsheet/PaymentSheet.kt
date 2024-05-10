@@ -17,7 +17,6 @@ import com.stripe.android.link.account.LinkStore
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.SetupIntent
-import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.paymentsheet.addresselement.AddressDetails
 import com.stripe.android.paymentsheet.flowcontroller.FlowControllerFactory
 import com.stripe.android.paymentsheet.model.PaymentIntentClientSecret
@@ -1519,9 +1518,6 @@ class PaymentSheet internal constructor(
                 error: Throwable?
             )
         }
-
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-        fun onExternalPaymentMethodResult(paymentResult: PaymentResult)
 
         companion object {
 

@@ -29,14 +29,16 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncher
 import com.stripe.android.payments.paymentlauncher.StripePaymentLauncherAssistedFactory
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInput
 import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
-import com.stripe.android.paymentsheet.ExternalPaymentMethodResultHandler
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentOptionContract
@@ -102,6 +104,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
+    private val errorReporter: ErrorReporter,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
@@ -116,6 +119,8 @@ internal class DefaultFlowController @Inject internal constructor(
     lateinit var flowControllerComponent: FlowControllerComponent
 
     private var paymentLauncher: StripePaymentLauncher? = null
+
+    private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
 
     private val initializationMode: PaymentSheet.InitializationMode?
         get() = viewModel.previousConfigureRequest?.initializationMode
@@ -163,12 +168,19 @@ internal class DefaultFlowController @Inject internal constructor(
             bacsMandateConfirmationActivityLauncher
         )
 
+        val externalPaymentMethodLauncher = activityResultRegistryOwner.register(
+            ExternalPaymentMethodContract(errorReporter),
+            ::onExternalPaymentMethodResult
+        )
+        this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
+
         val activityResultLaunchers = setOf(
             paymentLauncherActivityResultLauncher,
             paymentOptionActivityLauncher,
             googlePayActivityLauncher,
             sepaMandateActivityLauncher,
             bacsMandateConfirmationActivityLauncher,
+            externalPaymentMethodLauncher,
         )
 
         linkLauncher.register(
@@ -332,7 +344,8 @@ internal class DefaultFlowController @Inject internal constructor(
                 externalPaymentMethodType = paymentSelection.type,
                 billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
-                integrationType = ExternalPaymentMethodResultHandler.IntegrationType.FLOW_CONTROLLER,
+                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+                errorReporter = errorReporter,
             )
             is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
             is PaymentSelection.New, null -> confirmPaymentSelection(paymentSelection, state)
@@ -655,7 +668,7 @@ internal class DefaultFlowController @Inject internal constructor(
         onPaymentResult(paymentResult)
     }
 
-    override fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
+    private fun onExternalPaymentMethodResult(paymentResult: PaymentResult) {
         val selection = viewModel.paymentSelection
         when (paymentResult) {
             is PaymentResult.Completed -> eventReporter.onPaymentSuccess(

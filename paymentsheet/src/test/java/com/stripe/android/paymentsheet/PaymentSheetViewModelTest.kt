@@ -90,6 +90,7 @@ import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFact
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.testing.PaymentIntentFactory
 import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.testing.SessionTestRule
@@ -2868,7 +2869,8 @@ internal class PaymentSheetViewModelTest {
                 linkHandler = linkHandler,
                 linkConfigurationCoordinator = linkInteractor,
                 intentConfirmationInterceptor = intentConfirmationInterceptor,
-                editInteractorFactory = fakeEditPaymentMethodInteractorFactory
+                editInteractorFactory = fakeEditPaymentMethodInteractorFactory,
+                errorReporter = FakeErrorReporter(),
             )
         }
     }

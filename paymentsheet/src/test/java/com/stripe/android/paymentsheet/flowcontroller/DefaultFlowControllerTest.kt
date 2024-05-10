@@ -45,6 +45,7 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -74,6 +75,7 @@ import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
 import com.stripe.android.paymentsheet.utils.RecordingGooglePayPaymentMethodLauncherFactory
+import com.stripe.android.testing.FakeErrorReporter
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.utils.FakeIntentConfirmationInterceptor
 import com.stripe.android.utils.FakePaymentSheetLoader
@@ -225,6 +227,14 @@ internal class DefaultFlowControllerTest {
 
         whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<ExternalPaymentMethodContract>(),
+                any()
+            )
+        ).thenReturn(mock())
 
         lifeCycleOwner.currentState = Lifecycle.State.RESUMED
     }
@@ -1942,6 +1952,7 @@ internal class DefaultFlowControllerTest {
             paymentSelectionUpdater = { _, _, newState -> newState.paymentSelection },
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
+        errorReporter = FakeErrorReporter(),
     )
 
     private fun createViewModel(): FlowControllerViewModel {
