@@ -18,7 +18,7 @@ internal class FakeElementsSessionRepository(
     data class Params(
         val initializationMode: PaymentSheet.InitializationMode,
         val customer: PaymentSheet.CustomerConfiguration?,
-        val externalPaymentMethods: List<String>?,
+        val externalPaymentMethods: List<String>,
     )
 
     var lastParams: Params? = null
@@ -26,7 +26,7 @@ internal class FakeElementsSessionRepository(
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
-        externalPaymentMethods: List<String>?,
+        externalPaymentMethods: List<String>,
     ): Result<ElementsSession> {
         lastParams = Params(
             initializationMode = initializationMode,

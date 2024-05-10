@@ -51,7 +51,7 @@ internal class ElementsSessionRepositoryTest {
                     clientSecret = "client_secret",
                 ),
                 customer = null,
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ).getOrThrow()
         }
 
@@ -79,7 +79,7 @@ internal class ElementsSessionRepositoryTest {
                         clientSecret = "client_secret",
                     ),
                     customer = null,
-                    externalPaymentMethods = null,
+                    externalPaymentMethods = emptyList(),
                 ).getOrThrow()
             }
 
@@ -104,7 +104,7 @@ internal class ElementsSessionRepositoryTest {
                         clientSecret = "client_secret",
                     ),
                     customer = null,
-                    externalPaymentMethods = null,
+                    externalPaymentMethods = emptyList(),
                 ).getOrThrow()
             }
 
@@ -135,7 +135,7 @@ internal class ElementsSessionRepositoryTest {
                 clientSecret = "client_secret",
             ),
             customer = null,
-            externalPaymentMethods = null,
+            externalPaymentMethods = emptyList(),
         ).getOrThrow()
 
         val argumentCaptor: KArgumentCaptor<ElementsSessionParams> = argumentCaptor()
@@ -171,7 +171,7 @@ internal class ElementsSessionRepositoryTest {
                 )
             ),
             customer = null,
-            externalPaymentMethods = null,
+            externalPaymentMethods = emptyList(),
         )
 
         assertThat(session.getOrNull()).isNull()
@@ -206,7 +206,7 @@ internal class ElementsSessionRepositoryTest {
                 id = "cus_1",
                 clientSecret = "customer_session_client_secret"
             ),
-            externalPaymentMethods = null,
+            externalPaymentMethods = emptyList(),
         )
 
         verify(stripeRepository).retrieveElementsSession(
@@ -214,7 +214,7 @@ internal class ElementsSessionRepositoryTest {
                 ElementsSessionParams.PaymentIntentType(
                     clientSecret = "client_secret",
                     customerSessionClientSecret = "customer_session_client_secret",
-                    externalPaymentMethods = null
+                    externalPaymentMethods = emptyList(),
                 )
             ),
             options = any()
