@@ -41,133 +41,93 @@ class PaymentOptionFactoryTest {
 
     @Test
     fun `create() with GooglePay should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.GooglePay
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_google_pay_mark,
-                "Google Pay"
-            )
+        val paymentOption = factory.create(
+            PaymentSelection.GooglePay
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+        assertThat(paymentOption.label).isEqualTo("Google Pay")
     }
 
     @Test
     fun `create() with card PaymentMethod should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_ic_paymentsheet_card_visa,
-                "····4242"
-            )
+        val paymentOption = factory.create(
+            PaymentSelection.Saved(PaymentMethodFixtures.CARD_PAYMENT_METHOD)
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption.label).isEqualTo("····4242")
     }
 
     @Test
     fun `create() with card params should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.New.Card(
-                    PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
-                    brand = CardBrand.Visa,
-                    customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
-                )
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_ic_paymentsheet_card_visa,
-                "····4242"
+        val paymentOption = factory.create(
+            PaymentSelection.New.Card(
+                PaymentMethodCreateParamsFixtures.DEFAULT_CARD,
+                brand = CardBrand.Visa,
+                customerRequestedSave = PaymentSelection.CustomerRequestedSave.RequestReuse
             )
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption.label).isEqualTo("····4242")
     }
 
     @Test
     fun `create() with saved card params with known brand from wallet should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.Saved(
-                    paymentMethod = card(CardBrand.Visa),
-                    walletType = PaymentSelection.Saved.WalletType.GooglePay
-                )
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_ic_paymentsheet_card_visa,
-                "····4242"
+        val paymentOption = factory.create(
+            PaymentSelection.Saved(
+                paymentMethod = card(CardBrand.Visa),
+                walletType = PaymentSelection.Saved.WalletType.GooglePay
             )
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_card_visa)
+        assertThat(paymentOption.label).isEqualTo("····4242")
     }
 
     @Test
     fun `create() with saved card params with unknown brand from Link wallet should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.Saved(
-                    paymentMethod = card(),
-                    walletType = PaymentSelection.Saved.WalletType.Link
-                )
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_ic_paymentsheet_link,
-                "····4242"
+        val paymentOption = factory.create(
+            PaymentSelection.Saved(
+                paymentMethod = card(),
+                walletType = PaymentSelection.Saved.WalletType.Link
             )
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+        assertThat(paymentOption.label).isEqualTo("····4242")
     }
 
     @Test
     fun `create() with saved card params without last 4 digits from Link wallet should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.Saved(
-                    paymentMethod = card(last4 = null),
-                    walletType = PaymentSelection.Saved.WalletType.Link
-                )
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_ic_paymentsheet_link,
-                "Link"
+        val paymentOption = factory.create(
+            PaymentSelection.Saved(
+                paymentMethod = card(last4 = null),
+                walletType = PaymentSelection.Saved.WalletType.Link
             )
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_ic_paymentsheet_link)
+        assertThat(paymentOption.label).isEqualTo("Link")
     }
 
     @Test
     fun `create() with saved card params with unknown brand from Google wallet should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.Saved(
-                    paymentMethod = card(),
-                    walletType = PaymentSelection.Saved.WalletType.GooglePay
-                )
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_google_pay_mark,
-                "····4242"
+        val paymentOption = factory.create(
+            PaymentSelection.Saved(
+                paymentMethod = card(),
+                walletType = PaymentSelection.Saved.WalletType.GooglePay
             )
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+        assertThat(paymentOption.label).isEqualTo("····4242")
     }
 
     @Test
     fun `create() with saved card params without last 4 digits from Google wallet should return expected object`() {
-        assertThat(
-            factory.create(
-                PaymentSelection.Saved(
-                    paymentMethod = card(last4 = null),
-                    walletType = PaymentSelection.Saved.WalletType.GooglePay
-                )
-            )
-        ).isEqualTo(
-            PaymentOption(
-                R.drawable.stripe_google_pay_mark,
-                "Google Pay"
+        val paymentOption = factory.create(
+            PaymentSelection.Saved(
+                paymentMethod = card(last4 = null),
+                walletType = PaymentSelection.Saved.WalletType.GooglePay
             )
         )
+        assertThat(paymentOption.drawableResourceId).isEqualTo(R.drawable.stripe_google_pay_mark)
+        assertThat(paymentOption.label).isEqualTo("Google Pay")
     }
 
     private fun card(
