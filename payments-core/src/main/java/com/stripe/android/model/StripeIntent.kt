@@ -172,6 +172,7 @@ sealed interface StripeIntent : StripeModel {
     }
 
     sealed class NextActionData : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         interface DisplayVoucherDetails {
             val hostedVoucherUrl: String?
         }
