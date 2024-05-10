@@ -93,5 +93,4 @@
   <string name="stripe_setup_button_label">Set up</string>
   <!-- Label for UPI ID number field on form -->
   <string name="stripe_upi_id_label">UPI ID</string>
-    <string name="stripe_paymentsheet_payment_method_multibanco">Multibanco</string>
 </resources>
