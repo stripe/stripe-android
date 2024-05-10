@@ -14,7 +14,7 @@ import com.stripe.android.model.PaymentMethod
  * it will re-start this activity with the result. This class then finishes and the class that launched this activity
  * is responsible for responding to that result.
  */
-internal class ExternalPaymentMethodActivity : AppCompatActivity() {
+internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

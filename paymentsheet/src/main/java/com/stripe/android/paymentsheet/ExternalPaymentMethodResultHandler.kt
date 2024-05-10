@@ -23,7 +23,7 @@ object ExternalPaymentMethodResultHandler {
      */
     fun onExternalPaymentMethodResult(context: Context, externalPaymentMethodResult: ExternalPaymentMethodResult) {
         context.startActivity(
-            Intent().setClass(context, ExternalPaymentMethodActivity::class.java)
+            Intent().setClass(context, ExternalPaymentMethodProxyActivity::class.java)
                 // Needed so that we can start the activity even if the context provided is an application context.
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 // Needed so that we can return to ExternalPaymentMethodActivity even if a merchant external payment

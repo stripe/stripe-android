@@ -14,10 +14,10 @@ internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
     override fun createIntent(context: Context, input: ExternalPaymentMethodInput): Intent {
         return Intent().setClass(
             context,
-            ExternalPaymentMethodActivity::class.java
+            ExternalPaymentMethodProxyActivity::class.java
         )
-            .putExtra(ExternalPaymentMethodActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, input.type)
-            .putExtra(ExternalPaymentMethodActivity.EXTRA_BILLING_DETAILS, input.billingDetails)
+            .putExtra(ExternalPaymentMethodProxyActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, input.type)
+            .putExtra(ExternalPaymentMethodProxyActivity.EXTRA_BILLING_DETAILS, input.billingDetails)
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): PaymentResult {

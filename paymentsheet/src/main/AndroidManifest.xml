@@ -33,7 +33,7 @@
             android:name=".ui.SepaMandateActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
             android:exported="false" />
-        <activity android:name=".ExternalPaymentMethodActivity"
+        <activity android:name=".ExternalPaymentMethodProxyActivity"
             android:theme="@style/StripePayLauncherDefaultTheme"
             android:exported="false" />
     </application>
