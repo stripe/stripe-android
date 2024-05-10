@@ -1,13 +1,6 @@
 public abstract interface annotation class com/stripe/android/ExperimentalAllowsRemovalOfLastSavedPaymentMethodApi : java/lang/annotation/Annotation {
 }
 
-public final class com/stripe/android/common/ui/ComposableSingletons$BottomSheetKt {
-	public static final field INSTANCE Lcom/stripe/android/common/ui/ComposableSingletons$BottomSheetKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public abstract interface class com/stripe/android/customersheet/CustomerAdapter {
 	public static final field Companion Lcom/stripe/android/customersheet/CustomerAdapter$Companion;
 	public abstract fun attachPaymentMethod (Ljava/lang/String;Lkotlin/coroutines/Continuation;)Ljava/lang/Object;

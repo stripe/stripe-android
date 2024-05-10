@@ -19,11 +19,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.stripe.android.common.ui.BottomSheet
-import com.stripe.android.common.ui.rememberBottomSheetState
+import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.paymentsheet.parseAppearance
 import com.stripe.android.uicore.StripeTheme
-import com.stripe.android.utils.fadeOut
+import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.fadeOut
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -50,10 +50,11 @@ internal class AddressElementActivity : ComponentActivity() {
 
         setContent {
             val coroutineScope = rememberCoroutineScope()
+
             val navController = rememberNavController()
             viewModel.navigator.navigationController = navController
 
-            val bottomSheetState = rememberBottomSheetState()
+            val bottomSheetState = rememberStripeBottomSheetState()
 
             BackHandler {
                 viewModel.navigator.onBack()
@@ -68,7 +69,7 @@ internal class AddressElementActivity : ComponentActivity() {
             }
 
             StripeTheme {
-                BottomSheet(
+                ElementsBottomSheetLayout(
                     state = bottomSheetState,
                     onDismissed = viewModel.navigator::dismiss,
                 ) {

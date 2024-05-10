@@ -1,9 +1,10 @@
-package com.stripe.android.common.ui
+package com.stripe.android.uicore.elements.bottomsheet
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.platform.LocalDensity
@@ -11,7 +12,7 @@ import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.text.input.TextInputService
 import kotlinx.coroutines.flow.first
 
-internal class BottomSheetKeyboardHandler(
+internal class StripeBottomSheetKeyboardHandler(
     private val textInputService: TextInputService?,
     private val isKeyboardVisible: State<Boolean>,
 ) {
@@ -30,9 +31,11 @@ internal class BottomSheetKeyboardHandler(
 }
 
 @Composable
-internal fun rememberBottomSheetKeyboardHandler(): BottomSheetKeyboardHandler {
+internal fun rememberStripeBottomSheetKeyboardHandler(): StripeBottomSheetKeyboardHandler {
     val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)
     val isImeVisibleState = rememberUpdatedState(newValue = imeHeight > 0)
     val textInputService = LocalTextInputService.current
-    return BottomSheetKeyboardHandler(textInputService, isImeVisibleState)
+    return remember {
+        StripeBottomSheetKeyboardHandler(textInputService, isImeVisibleState)
+    }
 }

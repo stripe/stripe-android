@@ -11,7 +11,7 @@ import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.authentication.PaymentAuthenticator
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.uicore.utils.AnimationConstants
 import com.stripe.android.view.AuthActivityStarterHost
 
 private const val UPI_TIME_LIMIT_IN_SECONDS = 5 * 60

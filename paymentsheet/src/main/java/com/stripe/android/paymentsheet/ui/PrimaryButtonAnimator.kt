@@ -8,8 +8,7 @@ import android.view.animation.AnimationUtils
 import androidx.core.animation.doOnEnd
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.R as StripeR
+import com.stripe.android.uicore.R as StripeUiCoreR
 
 internal class PrimaryButtonAnimator(
     private val context: Context
@@ -26,7 +25,7 @@ internal class PrimaryButtonAnimator(
         view.startAnimation(
             AnimationUtils.loadAnimation(
                 context,
-                StripeR.anim.stripe_paymentsheet_transition_fade_in
+                StripeUiCoreR.anim.stripe_transition_fade_in
             ).also { animation ->
                 animation.setAnimationListener(
                     object : Animation.AnimationListener {
@@ -92,7 +91,7 @@ internal class PrimaryButtonAnimator(
         view.startAnimation(
             AnimationUtils.loadAnimation(
                 context,
-                StripeR.anim.stripe_paymentsheet_transition_fade_out
+                StripeUiCoreR.anim.stripe_transition_fade_out
             ).also { animation ->
                 animation.setAnimationListener(
                     object : Animation.AnimationListener {

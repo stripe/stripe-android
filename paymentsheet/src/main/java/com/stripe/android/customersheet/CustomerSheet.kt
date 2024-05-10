@@ -16,7 +16,7 @@ import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.model.PaymentOptionFactory
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.utils.AnimationConstants
+import com.stripe.android.uicore.utils.AnimationConstants
 import dev.drewhamilton.poko.Poko
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
