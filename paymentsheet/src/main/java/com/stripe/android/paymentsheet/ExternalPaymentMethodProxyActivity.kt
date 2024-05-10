@@ -41,9 +41,19 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
+        val type = intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE)
+
         @Suppress("DEPRECATION")
         val externalPaymentMethodResult: ExternalPaymentMethodResult? =
             intent.getParcelableExtra(ExternalPaymentMethodResultHandler.EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT)
+
+        if (type == null && externalPaymentMethodResult == null) {
+            // We expect to start this activity with either a type or a result. If that's not true, it is in an
+            // unexpected state and should finish.
+            finish()
+            return
+        }
+
         externalPaymentMethodResult?.let {
             when (it) {
                 is ExternalPaymentMethodResult.Completed -> setResult(ExternalPaymentMethodResult.Completed.RESULT_CODE)
