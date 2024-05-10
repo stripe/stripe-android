@@ -159,9 +159,9 @@ internal class PaymentSheetViewModel @Inject internal constructor(
 
     private var bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher? = null
 
-    private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
-
     private var externalPaymentMethodLauncher: ActivityResultLauncher<ExternalPaymentMethodInput>? = null
+
+    private var deferredIntentConfirmationType: DeferredIntentConfirmationType? = null
 
     private val googlePayButtonType: GooglePayButtonType =
         when (args.config.googlePay?.buttonType) {

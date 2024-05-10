@@ -1522,7 +1522,6 @@ class PaymentSheet internal constructor(
         companion object {
 
             internal var linkHandler: LinkHandler? = null
-            internal var instance: FlowController? = null
 
             /**
              * Create a [FlowController] that you configure with a client secret by calling

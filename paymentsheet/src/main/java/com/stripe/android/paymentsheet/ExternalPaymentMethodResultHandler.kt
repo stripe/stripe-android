@@ -26,10 +26,10 @@ object ExternalPaymentMethodResultHandler {
             Intent().setClass(context, ExternalPaymentMethodActivity::class.java)
                 // Needed so that we can start the activity even if the context provided is an application context.
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // Needed so that we can return to PaymentSheet even if a merchant external payment activity hasn't
-                // yet called finish()
+                // Needed so that we can return to ExternalPaymentMethodActivity even if a merchant external payment
+                // activity hasn't yet called finish()
                 .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                // Needed so that PaymentSheetActivity#onNewIntent is called
+                // Needed so that ExternalPaymentMethodActivity#onNewIntent is called
                 .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 .putExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT, externalPaymentMethodResult)
         )

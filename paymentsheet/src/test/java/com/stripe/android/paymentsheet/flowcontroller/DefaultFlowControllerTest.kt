@@ -225,9 +225,6 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(mock())
 
-        whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
-            .thenReturn(paymentLauncher)
-
         whenever(
             activityResultRegistry.register(
                 any(),
@@ -235,6 +232,9 @@ internal class DefaultFlowControllerTest {
                 any()
             )
         ).thenReturn(mock())
+
+        whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
+            .thenReturn(paymentLauncher)
 
         lifeCycleOwner.currentState = Lifecycle.State.RESUMED
     }

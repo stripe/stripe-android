@@ -855,7 +855,6 @@ internal class DefaultFlowController @Inject internal constructor(
                     .build()
             val flowController = flowControllerComponent.flowController
             flowController.flowControllerComponent = flowControllerComponent
-            PaymentSheet.FlowController.instance = flowController
             return flowController
         }
     }

@@ -49,8 +49,8 @@ class FawryActivity : AppCompatActivity() {
         context: Context,
         externalPaymentMethodResult: ExternalPaymentMethodResult
     ) {
-        finish()
         ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(context, externalPaymentMethodResult)
+        finish()
     }
 
     @Composable
