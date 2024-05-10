@@ -75,7 +75,7 @@ sealed class ExternalPaymentMethodResult : Parcelable {
 
         companion object {
             const val RESULT_CODE = Activity.RESULT_FIRST_USER
-            const val ERROR_MESSAGE_EXTRA = "external_payment_method_error_message"
+            const val DISPLAY_MESSAGE_EXTRA = "external_payment_method_error_message"
         }
     }
 

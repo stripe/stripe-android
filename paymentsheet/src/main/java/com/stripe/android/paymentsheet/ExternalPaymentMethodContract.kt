@@ -27,7 +27,7 @@ internal class ExternalPaymentMethodContract(val errorReporter: ErrorReporter) :
             ExternalPaymentMethodResult.Failed.RESULT_CODE ->
                 PaymentResult.Failed(
                     throwable = LocalStripeException(
-                        displayMessage = intent?.getStringExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA),
+                        displayMessage = intent?.getStringExtra(ExternalPaymentMethodResult.Failed.DISPLAY_MESSAGE_EXTRA),
                         analyticsValue = "externalPaymentMethodFailure"
                     )
                 )
