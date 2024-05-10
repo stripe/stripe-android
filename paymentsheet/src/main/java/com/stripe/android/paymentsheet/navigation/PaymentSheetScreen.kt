@@ -21,6 +21,7 @@ internal val PaymentSheetScreen.topContentPadding: Dp
             SavedPaymentMethodsTopContentPadding
         }
         is PaymentSheetScreen.Loading,
+        is PaymentSheetScreen.VerticalMode,
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.EditPaymentMethod -> {
@@ -135,6 +136,21 @@ internal sealed interface PaymentSheetScreen {
 
         override fun close() {
             interactor.close()
+        }
+    }
+
+    object VerticalMode : PaymentSheetScreen {
+
+        override val showsBuyButton: Boolean = true
+        override val showsContinueButton: Boolean = true
+        override val canNavigateBack: Boolean = false
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
+            return true
+        }
+
+        @Composable
+        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
         }
     }
 }
