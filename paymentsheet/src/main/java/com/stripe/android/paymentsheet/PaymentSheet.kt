@@ -444,7 +444,7 @@ class PaymentSheet internal constructor(
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
-        internal val externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods,
+        internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
 
         internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
     ) : Parcelable {
@@ -594,7 +594,7 @@ class PaymentSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
-            private var externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods
+            private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
             private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
 
             fun merchantDisplayName(merchantDisplayName: String) =
@@ -671,7 +671,7 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun externalPaymentMethods(externalPaymentMethods: List<String>?): Builder = apply {
+            fun externalPaymentMethods(externalPaymentMethods: List<String>): Builder = apply {
                 this.externalPaymentMethods = externalPaymentMethods
             }
 

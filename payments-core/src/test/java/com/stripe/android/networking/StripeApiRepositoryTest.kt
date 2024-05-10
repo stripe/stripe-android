@@ -2409,7 +2409,7 @@ internal class StripeApiRepositoryTest {
         create().retrieveElementsSession(
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2510,7 +2510,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
                 customerSessionClientSecret = null,
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2543,7 +2543,7 @@ internal class StripeApiRepositoryTest {
             params = ElementsSessionParams.PaymentIntentType(
                 clientSecret = "client_secret",
                 customerSessionClientSecret = "customer_session_client_secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2575,7 +2575,7 @@ internal class StripeApiRepositoryTest {
         create().retrieveElementsSession(
             params = ElementsSessionParams.SetupIntentType(
                 clientSecret = "client_secret",
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             options = DEFAULT_OPTIONS,
         )
@@ -2618,7 +2618,7 @@ internal class StripeApiRepositoryTest {
                     paymentMethodConfigurationId = "pmc_234",
                     onBehalfOf = null,
                 ),
-                externalPaymentMethods = null,
+                externalPaymentMethods = emptyList(),
             ),
             options = DEFAULT_OPTIONS,
         )

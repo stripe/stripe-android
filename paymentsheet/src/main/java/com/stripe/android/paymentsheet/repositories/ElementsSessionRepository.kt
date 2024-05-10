@@ -21,7 +21,7 @@ internal interface ElementsSessionRepository {
     suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
-        externalPaymentMethods: List<String>?,
+        externalPaymentMethods: List<String>,
     ): Result<ElementsSession>
 }
 
@@ -45,7 +45,7 @@ internal class RealElementsSessionRepository @Inject constructor(
     override suspend fun get(
         initializationMode: PaymentSheet.InitializationMode,
         customer: PaymentSheet.CustomerConfiguration?,
-        externalPaymentMethods: List<String>?,
+        externalPaymentMethods: List<String>,
     ): Result<ElementsSession> {
         val params = initializationMode.toElementsSessionParams(
             customer = customer,
@@ -110,7 +110,7 @@ private fun StripeIntent.withoutWeChatPay(): StripeIntent {
 
 internal fun PaymentSheet.InitializationMode.toElementsSessionParams(
     customer: PaymentSheet.CustomerConfiguration?,
-    externalPaymentMethods: List<String>?,
+    externalPaymentMethods: List<String>,
 ): ElementsSessionParams {
     val customerSessionClientSecret = customer?.toElementSessionParam()
 
