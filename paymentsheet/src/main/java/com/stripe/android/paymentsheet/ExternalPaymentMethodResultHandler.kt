@@ -64,11 +64,11 @@ sealed class ExternalPaymentMethodResult : Parcelable {
 
     @Parcelize
     internal data class Failed(
-        val errorMessage: String?,
+        val displayMessage: String?,
     ) : ExternalPaymentMethodResult() {
         override fun toPaymentResult(): PaymentResult = PaymentResult.Failed(
             LocalStripeException(
-                displayMessage = errorMessage,
+                displayMessage = displayMessage,
                 analyticsValue = "externalPaymentMethodFailure"
             )
         )

@@ -50,7 +50,7 @@ internal class ExternalPaymentMethodActivity : AppCompatActivity() {
                 is ExternalPaymentMethodResult.Canceled -> setResult(ExternalPaymentMethodResult.Canceled.RESULT_CODE)
                 is ExternalPaymentMethodResult.Failed -> {
                     val data =
-                        Intent().putExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA, it.errorMessage)
+                        Intent().putExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA, it.displayMessage)
                     setResult(ExternalPaymentMethodResult.Failed.RESULT_CODE, data)
                 }
             }
