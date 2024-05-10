@@ -295,15 +295,15 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             if (stateFlow.value.completed) return@launch
             setState { copy(completed = true) }
             runCatching {
-                val session = completeFinancialConnectionsSession(earlyTerminationCause?.value)
-                val status = computeSessionCompletionStatus(session, earlyTerminationCause, closeAuthFlowError)
+                val completionResult = completeFinancialConnectionsSession(earlyTerminationCause, closeAuthFlowError)
+                val session = completionResult.session
                 eventTracker.track(
                     Complete(
                         pane = currentPane.value,
                         exception = null,
                         exceptionExtraMessage = null,
                         connectedAccounts = session.accounts.data.count(),
-                        status = status,
+                        status = completionResult.status,
                     )
                 )
                 when {
@@ -353,14 +353,6 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))
             }
         }
-    }
-
-    private fun computeSessionCompletionStatus(
-        session: FinancialConnectionsSession,
-        earlyTerminationCause: EarlyTerminationCause?,
-        closeAuthFlowError: Throwable?,
-    ): String {
-        return earlyTerminationCause?.analyticsValue ?: session.completionStatus(closeAuthFlowError)
     }
 
     private fun finishWithResult(
@@ -579,17 +571,4 @@ private fun FinancialConnectionsSheetNativeState.toTopAppBarState(
         forceHideStripeLogo = forceHideStripeLogo,
         isTestMode = testMode,
     )
-}
-
-private fun FinancialConnectionsSession.completionStatus(
-    closeAuthFlowError: Throwable?,
-): String {
-    val completed = accounts.data.isNotEmpty() || paymentAccount != null || bankAccountToken != null
-    return if (completed) {
-        "completed"
-    } else if (closeAuthFlowError != null) {
-        "failed"
-    } else {
-        "canceled"
-    }
 }
