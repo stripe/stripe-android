@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.activity
 
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -11,8 +10,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
+import com.stripe.android.paymentsheet.ExternalPaymentMethodResultHandler
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentSheetExampleTheme
 
 class FawryActivity : AppCompatActivity() {
@@ -21,9 +20,11 @@ class FawryActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if (intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE) != "external_fawry") {
-            finishWithResult(
-                ExternalPaymentMethodResult.Failed,
-                errorMessage = "Received invalid external payment method type. Expected external_fawry."
+            ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(
+                this,
+                externalPaymentMethodResult = ExternalPaymentMethodResult.failed(
+                    displayMessage = "Received invalid external payment method type. Expected external_fawry."
+                ),
             )
         }
 
@@ -36,27 +37,25 @@ class FawryActivity : AppCompatActivity() {
                     if (billingDetails != null) {
                         BillingDetails(billingDetails = billingDetails)
                     }
-                    ResultButton(result = ExternalPaymentMethodResult.Completed)
-                    ResultButton(result = ExternalPaymentMethodResult.Canceled)
-                    ResultButton(result = ExternalPaymentMethodResult.Failed)
+                    ResultButton(result = ExternalPaymentMethodResult.completed())
+                    ResultButton(result = ExternalPaymentMethodResult.canceled())
+                    ResultButton(result = ExternalPaymentMethodResult.failed(displayMessage = "Payment failed!"))
                 }
             }
         }
     }
 
-    private fun finishWithResult(result: ExternalPaymentMethodResult, errorMessage: String?) {
-        val resultCode = result.resultCode
-        var data: Intent? = null
-        if (result is ExternalPaymentMethodResult.Failed) {
-            data = Intent().putExtra(ExternalPaymentMethodResult.Failed.ERROR_MESSAGE_EXTRA, errorMessage)
-        }
-        setResult(resultCode, data)
+    private fun onExternalPaymentMethodResult(
+        context: Context,
+        externalPaymentMethodResult: ExternalPaymentMethodResult
+    ) {
+        ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(context, externalPaymentMethodResult)
         finish()
     }
 
     @Composable
     fun ResultButton(result: ExternalPaymentMethodResult) {
-        Button(onClick = { finishWithResult(result, errorMessage = "Payment failed!") }) {
+        Button(onClick = { onExternalPaymentMethodResult(this, result) }) {
             Text(text = result.toString())
         }
     }
@@ -67,22 +66,7 @@ class FawryActivity : AppCompatActivity() {
     }
 
     companion object {
-        private const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
-        private const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
-    }
-
-    object FawryConfirmHandler : ExternalPaymentMethodConfirmHandler {
-        override fun createIntent(
-            context: Context,
-            externalPaymentMethodType: String,
-            billingDetails: PaymentMethod.BillingDetails?,
-        ): Intent {
-            return Intent().setClass(
-                context,
-                FawryActivity::class.java
-            )
-                .putExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
-                .putExtra(EXTRA_BILLING_DETAILS, billingDetails)
-        }
+        const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
+        const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
     }
 }

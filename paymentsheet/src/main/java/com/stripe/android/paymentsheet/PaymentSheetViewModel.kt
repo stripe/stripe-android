@@ -32,6 +32,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -105,7 +106,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     linkHandler: LinkHandler,
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
-    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory
+    editInteractorFactory: ModifiableEditPaymentMethodViewInteractor.Factory,
+    private val errorReporter: ErrorReporter,
 ) : BaseSheetViewModel(
     application = application,
     config = args.config,
@@ -453,7 +455,8 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 externalPaymentMethodType = paymentSelection.type,
                 billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
-                externalPaymentMethodLauncher,
+                externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+                errorReporter = errorReporter,
             )
         } else if (
             paymentSelection is PaymentSelection.New.GenericPaymentMethod &&
@@ -576,7 +579,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         )
 
         externalPaymentMethodLauncher = activityResultCaller.registerForActivityResult(
-            ExternalPaymentMethodContract(),
+            ExternalPaymentMethodContract(errorReporter),
             ::onExternalPaymentMethodResult
         )
 

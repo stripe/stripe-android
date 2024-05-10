@@ -35,6 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.addresselement.AddressLauncher
 import com.stripe.android.paymentsheet.addresselement.rememberAddressLauncher
@@ -55,7 +57,7 @@ import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
 import kotlinx.coroutines.flow.update
 
-internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
+internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPaymentMethodConfirmHandler {
     companion object {
         fun createTestIntent(settingsJson: String): Intent {
             return Intent(
@@ -80,13 +82,13 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
             val paymentSheet = rememberPaymentSheet(
                 paymentResultCallback = viewModel::onPaymentSheetResult,
                 createIntentCallback = viewModel::createIntentCallback,
-                externalPaymentMethodConfirmHandler = FawryActivity.FawryConfirmHandler,
+                externalPaymentMethodConfirmHandler = this,
             )
             val flowController = rememberPaymentSheetFlowController(
                 paymentOptionCallback = viewModel::onPaymentOptionSelected,
                 paymentResultCallback = viewModel::onPaymentSheetResult,
                 createIntentCallback = viewModel::createIntentCallback,
-                externalPaymentMethodConfirmHandler = FawryActivity.FawryConfirmHandler,
+                externalPaymentMethodConfirmHandler = this,
             )
             val addressLauncher = rememberAddressLauncher(
                 callback = viewModel::onAddressLauncherResult
@@ -370,6 +372,20 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity() {
                 callback = viewModel::onFlowControllerConfigured,
             )
         }
+    }
+
+    override fun confirmExternalPaymentMethod(
+        externalPaymentMethodType: String,
+        billingDetails: PaymentMethod.BillingDetails
+    ) {
+        this.startActivity(
+            Intent().setClass(
+                this,
+                FawryActivity::class.java
+            )
+                .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
+                .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
     }
 }
 

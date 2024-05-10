@@ -29,6 +29,7 @@ import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.model.StripeIntent
+import com.stripe.android.payments.core.analytics.ErrorReporter
 import com.stripe.android.payments.core.injection.PRODUCT_USAGE
 import com.stripe.android.payments.paymentlauncher.InternalPaymentResult
 import com.stripe.android.payments.paymentlauncher.PaymentLauncherContract
@@ -103,6 +104,7 @@ internal class DefaultFlowController @Inject internal constructor(
     private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
+    private val errorReporter: ErrorReporter,
 ) : PaymentSheet.FlowController {
     private val paymentOptionActivityLauncher: ActivityResultLauncher<PaymentOptionContract.Args>
     private val googlePayActivityLauncher:
@@ -167,7 +169,7 @@ internal class DefaultFlowController @Inject internal constructor(
         )
 
         val externalPaymentMethodLauncher = activityResultRegistryOwner.register(
-            ExternalPaymentMethodContract(),
+            ExternalPaymentMethodContract(errorReporter),
             ::onExternalPaymentMethodResult
         )
         this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
@@ -343,6 +345,7 @@ internal class DefaultFlowController @Inject internal constructor(
                 billingDetails = paymentSelection.billingDetails,
                 onPaymentResult = ::onExternalPaymentMethodResult,
                 externalPaymentMethodLauncher = externalPaymentMethodLauncher,
+                errorReporter = errorReporter,
             )
             is PaymentSelection.New.GenericPaymentMethod -> confirmGenericPaymentMethod(paymentSelection, state)
             is PaymentSelection.New, null -> confirmPaymentSelection(paymentSelection, state)

@@ -129,6 +129,12 @@ interface ErrorReporter {
         FRAUD_DETECTION_API_FAILURE(
             eventName = "fraud_detection_data_repository.api_failure"
         ),
+        EXTERNAL_PAYMENT_METHOD_CONFIRM_HANDLER_NULL(
+            eventName = "paymentsheet.external_payment_method.confirm_handler_is_null"
+        ),
+        EXTERNAL_PAYMENT_METHOD_LAUNCHER_NULL(
+            eventName = "paymentsheet.external_payment_method.launcher_is_null"
+        ),
     }
 
     @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -178,6 +184,9 @@ interface ErrorReporter {
         INTENT_CONFIRMATION_INTERCEPTOR_INVALID_PAYMENT_SELECTION(
             partialEventName = "intent_confirmation_interceptor.intercept.invalid_payment_selection"
         ),
+        EXTERNAL_PAYMENT_METHOD_UNEXPECTED_RESULT_CODE(
+            partialEventName = "paymentsheet.external_payment_method.unexpected_result_code"
+        )
         ;
 
         override val eventName: String
@@ -205,6 +214,9 @@ interface ErrorReporter {
         ),
         LINK_LOG_OUT_SUCCESS(
             eventName = "link.log_out.success"
+        ),
+        EXTERNAL_PAYMENT_METHODS_LAUNCH_SUCCESS(
+            eventName = "paymentsheet.external_payment_method.launch_success"
         ),
     }
 }
