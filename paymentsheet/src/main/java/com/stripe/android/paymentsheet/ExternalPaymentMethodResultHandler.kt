@@ -22,17 +22,22 @@ object ExternalPaymentMethodResultHandler {
      * Should be called when [ExternalPaymentMethodConfirmHandler.confirmExternalPaymentMethod] completes.
      */
     fun onExternalPaymentMethodResult(context: Context, externalPaymentMethodResult: ExternalPaymentMethodResult) {
-        context.startActivity(
-            Intent().setClass(context, ExternalPaymentMethodProxyActivity::class.java)
-                // Needed so that we can start the activity even if the context provided is an application context.
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                // Needed so that we can return to ExternalPaymentMethodActivity even if a merchant external payment
-                // activity hasn't yet called finish()
-                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                // Needed so that ExternalPaymentMethodActivity#onNewIntent is called
-                .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                .putExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT, externalPaymentMethodResult)
-        )
+        context.startActivity(createResultIntent(context, externalPaymentMethodResult))
+    }
+
+    internal fun createResultIntent(
+        context: Context,
+        externalPaymentMethodResult: ExternalPaymentMethodResult
+    ): Intent {
+        return Intent().setClass(context, ExternalPaymentMethodProxyActivity::class.java)
+            // Needed so that we can start the activity even if the context provided is an application context.
+            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            // Needed so that we can return to ExternalPaymentMethodActivity even if a merchant external payment
+            // activity hasn't yet called finish()
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            // Needed so that ExternalPaymentMethodActivity#onNewIntent is called
+            .addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            .putExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT, externalPaymentMethodResult)
     }
 
     internal const val EXTRA_EXTERNAL_PAYMENT_METHOD_RESULT = "external_payment_method_result"
