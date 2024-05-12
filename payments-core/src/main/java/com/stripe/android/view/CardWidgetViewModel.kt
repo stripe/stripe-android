@@ -78,10 +78,6 @@ internal fun View.doWithCardWidgetViewModel(
     viewModelStoreOwner: ViewModelStoreOwner? = null,
     action: LifecycleOwner.(CardWidgetViewModel) -> Unit,
 ) {
-    if (!isAttachedToWindow && DEBUG) {
-        error("Bla")
-    }
-
     val lifecycleOwner = findViewTreeLifecycleOwner()
     val storeOwner = viewModelStoreOwner ?: findViewTreeViewModelStoreOwner()
 
