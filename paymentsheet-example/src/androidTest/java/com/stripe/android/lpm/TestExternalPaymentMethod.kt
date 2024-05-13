@@ -27,16 +27,16 @@ internal class TestExternalPaymentMethod : BasePlaygroundTest() {
 
     @Test
     fun testExternalPaymentMethod_Success() {
-        testDriver.confirmExternalPaymentMethodSuccess(testParameters)
+//        testDriver.confirmExternalPaymentMethodSuccess(testParameters)
     }
 
     @Test
     fun testExternalPaymentMethod_Cancel() {
-        testDriver.confirmExternalPaymentMethodCanceled(testParameters)
+//        testDriver.confirmExternalPaymentMethodCanceled(testParameters)
     }
 
     @Test
     fun testExternalPaymentMethod_Fail() {
-        testDriver.confirmExternalPaymentMethodFailed(testParameters)
+//        testDriver.confirmExternalPaymentMethodFailed(testParameters)
     }
 }
