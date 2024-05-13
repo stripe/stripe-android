@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.43.0 - 2024-05-13
+
 ### Financial Connections
 * [Changed][8377](https://github.com/stripe/stripe-android/pull/8377) The `FinancialConnectionsEvent.Name.CONSENT_ACQUIRED` event is now emitted when the consent has been acquired _and_ successfully confirmed with the Stripe backend. Previously, the event was emitted before the confirmation, making it possible to receive multiple `CONSENT_ACQUIRED` events in a single session.
 
