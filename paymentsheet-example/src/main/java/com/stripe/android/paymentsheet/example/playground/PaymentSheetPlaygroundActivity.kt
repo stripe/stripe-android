@@ -380,25 +380,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         externalPaymentMethodType: String,
         billingDetails: PaymentMethod.BillingDetails
     ) {
-        fun startFawryActivity() {
-            this.startActivity(
-                Intent().setClass(
-                    this,
-                    FawryActivity::class.java
-                )
-                    .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
-                    .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        this.startActivity(
+            Intent().setClass(
+                this,
+                FawryActivity::class.java
             )
-        }
-        when (externalPaymentMethodType) {
-            "external_fawry" -> startFawryActivity()
-            "external_venmo" -> ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(
-                this, ExternalPaymentMethodResult.completed()
-            )
-            else -> ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(
-                this, ExternalPaymentMethodResult.failed(displayMessage = "Unexpected external payment method type")
-            )
-        }
+                .putExtra(FawryActivity.EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE, externalPaymentMethodType)
+                .putExtra(FawryActivity.EXTRA_BILLING_DETAILS, billingDetails)
+        )
     }
 }
 
