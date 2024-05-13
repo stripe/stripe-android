@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -27,16 +28,18 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
-import com.stripe.android.paymentsheet.ExternalPaymentMethodResult
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
+import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
@@ -47,7 +50,6 @@ import org.junit.Assert.fail
 import org.junit.Assume
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
-import kotlin.math.exp
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 
@@ -457,8 +459,9 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodSucceedButton,
         )
 
-        // TODO: this isn't the right thing to check
-        assertThat(resultValue).isEqualTo("Success")
+        waitForPlaygroundActivity()
+
+        assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
 
         teardown()
     }
@@ -473,7 +476,8 @@ internal class PlaygroundTestDriver(
             selectors.externalPaymentMethodCancelButton,
         )
 
-        assertThat(resultValue).isEmpty()
+        isSelectPaymentMethodScreen()
+        selectors.buyButton.isEnabled()
 
         teardown()
     }
@@ -487,6 +491,10 @@ internal class PlaygroundTestDriver(
         confirmExternalPaymentMethod(
             selectors.externalPaymentMethodFailButton,
         )
+
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
+            .assertIsDisplayed()
+            .assertTextEquals(FawryActivity.FAILED_DISPLAY_MESSAGE)
 
         teardown()
     }
@@ -923,7 +931,7 @@ internal class PlaygroundTestDriver(
 
         if (isDone) {
             waitForPlaygroundActivity()
-            assertThat(resultValue).isEqualTo("Success")
+            assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
         }
     }
 

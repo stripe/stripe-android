@@ -39,10 +39,12 @@ class FawryActivity : AppCompatActivity() {
                     if (billingDetails != null) {
                         BillingDetails(billingDetails = billingDetails)
                     }
-                    // TODO: move these to static vars
-                    ResultButton(result = ExternalPaymentMethodResult.completed(), testTag = "external_fawry_complete")
-                    ResultButton(result = ExternalPaymentMethodResult.canceled(), testTag = "external_fawry_cancel")
-                    ResultButton(result = ExternalPaymentMethodResult.failed(displayMessage = "Payment failed!"), "external_fawry_fail")
+                    ResultButton(result = ExternalPaymentMethodResult.completed(), testTag = COMPLETED_BUTTON_TEST_TAG)
+                    ResultButton(result = ExternalPaymentMethodResult.canceled(), testTag = CANCELED_BUTTON_TEST_TAG)
+                    ResultButton(
+                        result = ExternalPaymentMethodResult.failed(displayMessage = FAILED_DISPLAY_MESSAGE),
+                        testTag = FAILED_BUTTON_TEST_TAG
+                    )
                 }
             }
         }
@@ -71,5 +73,10 @@ class FawryActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
         const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
+
+        const val COMPLETED_BUTTON_TEST_TAG = "external_fawry_complete"
+        const val CANCELED_BUTTON_TEST_TAG = "external_fawry_canceled"
+        const val FAILED_BUTTON_TEST_TAG = "external_fawry_failed"
+        const val FAILED_DISPLAY_MESSAGE = "Payment failed!"
     }
 }

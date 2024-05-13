@@ -1,7 +1,6 @@
 package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.google.common.truth.Truth.assertThat
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.ExternalPaymentMethodSettingsDefinition
@@ -14,11 +13,13 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 internal class TestExternalPaymentMethod : BasePlaygroundTest() {
 
+    private val externalFawryCode = "external_fawry"
+
     private val testParameters = TestParameters.create(
-        paymentMethodCode = "external_fawry",
+        paymentMethodCode = externalFawryCode,
     ) { settings ->
-        settings[ExternalPaymentMethodSettingsDefinition] = "external_fawry, external_venmo"
-        settings[PaymentMethodOrderSettingsDefinition] = "card, external_venmo, external_fawry"
+        settings[ExternalPaymentMethodSettingsDefinition] = externalFawryCode
+        settings[PaymentMethodOrderSettingsDefinition] = externalFawryCode
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
         ).joinToString(",")
