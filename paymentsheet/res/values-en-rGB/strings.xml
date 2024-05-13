@@ -41,6 +41,8 @@
   <string name="stripe_paymentsheet_close">Close</string>
   <!-- A button used to confirm selecting a saved payment method -->
   <string name="stripe_paymentsheet_confirm">Confirm</string>
+  <!-- Title for prompting for a card's CVC on confirming the payment -->
+  <string name="stripe_paymentsheet_confirm_your_cvc">Confirm your CVC</string>
   <!-- Text for a button that allows manual entry of an address -->
   <string name="stripe_paymentsheet_enter_address_manually">Enter address manually</string>
   <!-- Title shown above a carousel containing the customer's payment methods -->
