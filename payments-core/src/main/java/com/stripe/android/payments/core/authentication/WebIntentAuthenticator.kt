@@ -96,31 +96,12 @@ internal class WebIntentAuthenticator @Inject constructor(
                 authUrl = nextActionData.webViewUrl.toString()
                 returnUrl = nextActionData.returnUrl
             }
-            is StripeIntent.NextActionData.DisplayOxxoDetails -> {
+            is StripeIntent.NextActionData.DisplayVoucherDetails -> {
                 // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
                 authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
-                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayOxxoDetails")
-                returnUrl = null
-                shouldCancelIntentOnUserNavigation = false
-            }
-            is StripeIntent.NextActionData.DisplayBoletoDetails -> {
-                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
-                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
-                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayBoletoDetails")
-                returnUrl = null
-                shouldCancelIntentOnUserNavigation = false
-            }
-            is StripeIntent.NextActionData.DisplayKonbiniDetails -> {
-                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
-                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
-                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayKonbiniDetails")
-                returnUrl = null
-                shouldCancelIntentOnUserNavigation = false
-            }
-            is StripeIntent.NextActionData.DisplayMultibancoDetails -> {
-                // nextActionData.hostedVoucherUrl will never be null as AuthenticatorRegistry won't direct it here
-                authUrl = nextActionData.hostedVoucherUrl.takeIf { it!!.isNotEmpty() }
-                    ?: throw IllegalArgumentException("null hostedVoucherUrl for DisplayMultibancoDetails")
+                    ?: throw IllegalArgumentException(
+                        "null hostedVoucherUrl for ${authenticatable.nextActionType?.code}"
+                    )
                 returnUrl = null
                 shouldCancelIntentOnUserNavigation = false
             }

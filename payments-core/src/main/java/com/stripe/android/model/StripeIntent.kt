@@ -172,6 +172,10 @@ sealed interface StripeIntent : StripeModel {
     }
 
     sealed class NextActionData : StripeModel {
+        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+        interface DisplayVoucherDetails {
+            val hostedVoucherUrl: String?
+        }
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -189,8 +193,8 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this OXXO payment.
              */
-            val hostedVoucherUrl: String? = null
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null
+        ) : NextActionData(), DisplayVoucherDetails
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -198,8 +202,8 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this payment.
              */
-            val hostedVoucherUrl: String? = null,
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -207,8 +211,8 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this payment.
              */
-            val hostedVoucherUrl: String? = null,
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
 
         @Parcelize
         @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -216,8 +220,8 @@ sealed interface StripeIntent : StripeModel {
             /**
              * URL of a webpage containing the voucher for this payment.
              */
-            val hostedVoucherUrl: String? = null,
-        ) : NextActionData()
+            override val hostedVoucherUrl: String? = null,
+        ) : NextActionData(), DisplayVoucherDetails
 
         /**
          * Contains instructions for authenticating by redirecting your customer to another
