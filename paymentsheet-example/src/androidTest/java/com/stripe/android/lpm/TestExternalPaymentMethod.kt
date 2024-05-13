@@ -39,5 +39,4 @@ internal class TestExternalPaymentMethod : BasePlaygroundTest() {
     fun testExternalPaymentMethod_Fail() {
         testDriver.confirmExternalPaymentMethodFailed(testParameters)
     }
-
 }
