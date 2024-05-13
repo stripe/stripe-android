@@ -144,7 +144,7 @@ internal class PaymentSheetPlaygroundViewModel(
             }
 
             is PaymentSheetResult.Completed -> {
-                "Success"
+                SUCCESS_RESULT
             }
 
             is PaymentSheetResult.Failed -> {
@@ -296,6 +296,8 @@ class ConfirmIntentNetworkException : Exception()
 
 private const val RETURN_URL = "stripesdk://payment_return_url/" +
     "com.stripe.android.paymentsheet.example"
+
+const val SUCCESS_RESULT = "Success"
 
 data class StatusMessage(
     val message: String?,
