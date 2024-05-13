@@ -107,6 +107,7 @@ module:stripe-ui-core
 com.stripe.android.uicore
 com.stripe.android.uicore.address
 com.stripe.android.uicore.elements
+com.stripe.android.uicore.elements.bottomsheet
 com.stripe.android.uicore.elements.menu
 com.stripe.android.uicore.format
 com.stripe.android.uicore.forms
