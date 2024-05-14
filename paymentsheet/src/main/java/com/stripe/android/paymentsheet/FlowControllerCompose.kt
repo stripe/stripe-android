@@ -19,6 +19,7 @@ import com.stripe.android.utils.rememberActivity
  *
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
+ * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheetFlowController(
@@ -66,6 +67,7 @@ fun rememberPaymentSheetFlowController(
  * @param createIntentCallback Called when the customer confirms the payment or setup.
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
+ * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheetFlowController(
