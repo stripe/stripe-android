@@ -56,7 +56,7 @@ internal fun CvcRecollectionScreen(cardBrand: CardBrand, lastFour: String) {
         Column(
             Modifier
                 .background(Color.White)
-                .padding(20.dp)
+                .padding(horizontal = 20.dp)
         ) {
             CvcRecollectionHeader(
                 modifier = Modifier
@@ -105,7 +105,7 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
                     Text(
                         text = stringResource(
                             R.string.stripe_paymentsheet_payment_method_item_card_number,
-                            lastFour
+                            " $lastFour"
                         ),
                         style = MaterialTheme.typography.body1
                     )
@@ -151,7 +151,7 @@ private fun CvcRecollectionButton() {
     Box(
         modifier = Modifier
             .fillMaxWidth(1f)
-            .padding(0.dp, 8.dp, 0.dp, 0.dp),
+            .padding(0.dp, 32.dp, 0.dp, 20.dp),
         contentAlignment = Alignment.Center
     ) {
         TextButton(
