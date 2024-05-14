@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.annotation.RestrictTo
 import com.stripe.android.model.PaymentMethod
 
 /**
@@ -9,7 +8,6 @@ import com.stripe.android.model.PaymentMethod
  * To learn more about external payment methods, see
  * https://docs.stripe.com/payments/external-payment-methods?platform=android.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 interface ExternalPaymentMethodConfirmHandler {
 
     /**

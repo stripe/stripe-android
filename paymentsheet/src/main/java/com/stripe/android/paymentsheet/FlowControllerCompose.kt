@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet
 
 import androidx.activity.compose.LocalActivityResultRegistryOwner
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
@@ -15,6 +14,9 @@ import com.stripe.android.utils.rememberActivity
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
+ * If you implement any external payment methods, as specified in your [PaymentSheet.Configuration], include an
+ * [ExternalPaymentMethodConfirmHandler].
+ *
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
@@ -22,6 +24,7 @@ import com.stripe.android.utils.rememberActivity
 fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
 ): PaymentSheet.FlowController {
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
@@ -45,6 +48,7 @@ fun rememberPaymentSheetFlowController(
             statusBarColor = { activity.window?.statusBarColor },
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
+            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
         ).create()
     }
 }
@@ -56,6 +60,9 @@ fun rememberPaymentSheetFlowController(
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
+ * If you implement any external payment methods, as specified in your [PaymentSheet.Configuration], include an
+ * [ExternalPaymentMethodConfirmHandler].
+ *
  * @param createIntentCallback Called when the customer confirms the payment or setup.
  * @param paymentOptionCallback Called when the customer's desired payment method changes.
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
@@ -65,28 +72,13 @@ fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
 ): PaymentSheet.FlowController {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
     return rememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-    )
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Composable
-fun rememberPaymentSheetFlowController(
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
-    createIntentCallback: CreateIntentCallback,
-    paymentOptionCallback: PaymentOptionCallback,
-    paymentResultCallback: PaymentSheetResultCallback,
-): PaymentSheet.FlowController {
-    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
-
-    return rememberPaymentSheetFlowController(
-        createIntentCallback = createIntentCallback,
-        paymentOptionCallback = paymentOptionCallback,
-        paymentResultCallback = paymentResultCallback,
+        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
     )
 }
 
@@ -96,14 +88,5 @@ private fun UpdateIntentConfirmationInterceptor(
 ) {
     LaunchedEffect(createIntentCallback) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-    }
-}
-
-@Composable
-private fun UpdateExternalPaymentMethodConfirmHandler(
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
-) {
-    LaunchedEffect(externalPaymentMethodConfirmHandler) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     }
 }

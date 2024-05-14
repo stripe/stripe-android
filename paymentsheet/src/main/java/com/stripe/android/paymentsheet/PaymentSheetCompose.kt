@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -17,12 +16,19 @@ import com.stripe.android.utils.rememberActivity
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
+ * If you implement any external payment methods, as specified in your [PaymentSheet.Configuration], include an
+ * [ExternalPaymentMethodConfirmHandler].
+ *
  * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+ * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheet(
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
 ): PaymentSheet {
+    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
+
     val onResult by rememberUpdatedState(newValue = paymentResultCallback::onPaymentSheetResult)
 
     val activityResultLauncher = rememberLauncherForActivityResult(
@@ -56,27 +62,21 @@ fun rememberPaymentSheet(
  *
  * This *must* be called unconditionally, as part of the initialization path.
  *
+ * If you implement any external payment methods, as specified in your [PaymentSheet.Configuration], include an
+ * [ExternalPaymentMethodConfirmHandler].
+ *
  * @param createIntentCallback Called when the customer confirms the payment or setup.
  * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+ * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
  */
 @Composable
 fun rememberPaymentSheet(
     createIntentCallback: CreateIntentCallback,
     paymentResultCallback: PaymentSheetResultCallback,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
 ): PaymentSheet {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
-    return rememberPaymentSheet(paymentResultCallback)
-}
-
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-@Composable
-fun rememberPaymentSheet(
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
-    createIntentCallback: CreateIntentCallback,
-    paymentResultCallback: PaymentSheetResultCallback,
-): PaymentSheet {
-    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
-    return rememberPaymentSheet(createIntentCallback, paymentResultCallback)
+    return rememberPaymentSheet(paymentResultCallback, externalPaymentMethodConfirmHandler)
 }
 
 @Composable
@@ -90,8 +90,12 @@ private fun UpdateIntentConfirmationInterceptor(
 
 @Composable
 private fun UpdateExternalPaymentMethodConfirmHandler(
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
 ) {
+    if (externalPaymentMethodConfirmHandler == null) {
+        return
+    }
+
     LaunchedEffect(externalPaymentMethodConfirmHandler) {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     }
