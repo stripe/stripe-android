@@ -10,7 +10,7 @@ import com.stripe.android.financialconnections.analytics.FinancialConnectionsAna
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
 import com.stripe.android.financialconnections.domain.GetCachedAccounts
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message.Complete
 import com.stripe.android.financialconnections.features.common.useContinueWithMerchantText
@@ -32,7 +32,7 @@ import kotlinx.coroutines.launch
 internal class SuccessViewModel @AssistedInject constructor(
     @Assisted initialState: SuccessState,
     getCachedAccounts: GetCachedAccounts,
-    getManifest: GetManifest,
+    getOrFetchSync: GetOrFetchSync,
     private val successContentRepository: SuccessContentRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val logger: Logger,
@@ -42,7 +42,7 @@ internal class SuccessViewModel @AssistedInject constructor(
     init {
         observeAsyncs()
         suspend {
-            val manifest = getManifest()
+            val manifest = getOrFetchSync().manifest
             val accounts = getCachedAccounts()
             val successContent = successContentRepository.get()
             SuccessState.Payload(

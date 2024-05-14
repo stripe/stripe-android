@@ -8,7 +8,7 @@ import com.stripe.android.core.Logger
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 internal class ErrorViewModel @AssistedInject constructor(
     @Assisted initialState: ErrorState,
     private val coordinator: NativeAuthFlowCoordinator,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val errorRepository: FinancialConnectionsErrorRepository,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
@@ -42,10 +42,11 @@ internal class ErrorViewModel @AssistedInject constructor(
             // Clear the partner web auth state if it exists, so that if the user lands back in the partner_auth
             // pane after an error, they will be able to start over.
             coordinator().emit(Message.ClearPartnerWebAuth)
+            val manifest = getOrFetchSync().manifest
             ErrorState.Payload(
                 error = requireNotNull(errorRepository.get()?.error),
-                disableLinkMoreAccounts = getManifest().disableLinkMoreAccounts,
-                allowManualEntry = getManifest().allowManualEntry
+                disableLinkMoreAccounts = manifest.disableLinkMoreAccounts,
+                allowManualEntry = manifest.allowManualEntry
             )
         }.execute { copy(payload = it) }
     }
@@ -67,7 +68,7 @@ internal class ErrorViewModel @AssistedInject constructor(
             ErrorState::payload,
             onFail = { error ->
                 eventTracker.logError(
-                    extraMessage = "Error linking more accounts",
+                    extraMessage = "Error loading the error screen payload",
                     error = error,
                     logger = logger,
                     pane = PANE

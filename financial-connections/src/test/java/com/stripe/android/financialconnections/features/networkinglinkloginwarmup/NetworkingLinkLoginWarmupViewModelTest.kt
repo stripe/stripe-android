@@ -4,7 +4,7 @@ import com.stripe.android.financialconnections.ApiKeyFixtures
 import com.stripe.android.financialconnections.CoroutineTestRule
 import com.stripe.android.financialconnections.TestFinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.domain.DisableNetworking
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.navigation.Destination
@@ -16,6 +16,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runTest
 import org.junit.Rule
 import org.junit.Test
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -26,7 +27,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     @get:Rule
     val testRule = CoroutineTestRule()
 
-    private val getManifest = mock<GetManifest>()
+    private val getOrFetchSync = mock<GetOrFetchSync>()
     private val navigationManager = TestNavigationManager()
     private val handleError = TestHandleError()
     private val disableNetworking = mock<DisableNetworking>()
@@ -37,7 +38,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
         state: NetworkingLinkLoginWarmupState
     ) = NetworkingLinkLoginWarmupViewModel(
         navigationManager = navigationManager,
-        getManifest = getManifest,
+        getOrFetchSync = getOrFetchSync,
         handleError = handleError,
         disableNetworking = disableNetworking,
         eventTracker = eventTracker,
@@ -48,7 +49,7 @@ class NetworkingLinkLoginWarmupViewModelTest {
     @Test
     fun `init - payload error navigates to error screen`() = runTest {
         val error = RuntimeException("Failed to fetch manifest")
-        whenever(getManifest()).thenAnswer { throw error }
+        whenever(getOrFetchSync(any())).thenAnswer { throw error }
 
         buildViewModel(NetworkingLinkLoginWarmupState())
 

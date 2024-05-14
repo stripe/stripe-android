@@ -130,6 +130,10 @@ class LauncherActivity : AppCompatActivity() {
                 BacsDebitPaymentMethodActivity::class.java
             ),
             Item(
+                activity.getString(R.string.multibanco_example),
+                MultibancoActivity::class.java
+            ),
+            Item(
                 activity.getString(R.string.sofort_example),
                 SofortPaymentMethodActivity::class.java
             ),

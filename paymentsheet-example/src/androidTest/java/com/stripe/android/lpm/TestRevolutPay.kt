@@ -2,6 +2,7 @@ package com.stripe.android.lpm
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Currency
@@ -19,7 +20,10 @@ internal class TestRevolutPay : BasePlaygroundTest() {
         paymentMethodCode = "revolut_pay",
     ) { settings ->
         settings[CurrencySettingsDefinition] = Currency.GBP
-        settings[SupportedPaymentMethodsSettingsDefinition] = listOf("card", "revolut_pay")
+        settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
+            PaymentMethod.Type.Card,
+            PaymentMethod.Type.RevolutPay
+        ).joinToString(",")
     }
 
     @Ignore("Requires complex auth handling")

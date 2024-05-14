@@ -295,12 +295,15 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
             if (stateFlow.value.completed) return@launch
             setState { copy(completed = true) }
             runCatching {
-                val session = completeFinancialConnectionsSession(earlyTerminationCause?.value)
+                val completionResult = completeFinancialConnectionsSession(earlyTerminationCause, closeAuthFlowError)
+                val session = completionResult.session
                 eventTracker.track(
                     Complete(
+                        pane = currentPane.value,
                         exception = null,
                         exceptionExtraMessage = null,
-                        connectedAccounts = session.accounts.data.count()
+                        connectedAccounts = session.accounts.data.count(),
+                        status = completionResult.status,
                     )
                 )
                 when {
@@ -340,9 +343,11 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
                 logger.error(errorMessage, completeSessionError)
                 eventTracker.track(
                     Complete(
+                        pane = currentPane.value,
                         exception = completeSessionError,
                         exceptionExtraMessage = errorMessage,
-                        connectedAccounts = null
+                        connectedAccounts = null,
+                        status = "failed",
                     )
                 )
                 finishWithResult(Failed(closeAuthFlowError ?: completeSessionError))

@@ -4,8 +4,9 @@ import androidx.annotation.RestrictTo
 import com.stripe.android.core.BuildConfig
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+@Suppress("unused")
 object FeatureFlags {
-    val instantDebits = FeatureFlag()
+    // Add any feature flags here
 }
 
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)

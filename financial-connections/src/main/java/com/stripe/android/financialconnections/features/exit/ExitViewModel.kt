@@ -9,7 +9,7 @@ import com.stripe.android.financialconnections.R
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.logError
 import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativeComponent
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator.Message
 import com.stripe.android.financialconnections.features.common.getBusinessName
@@ -29,7 +29,7 @@ import kotlinx.coroutines.launch
 internal class ExitViewModel @AssistedInject constructor(
     @Assisted initialState: ExitState,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    private val getManifest: GetManifest,
+    private val getOrFetchSync: GetOrFetchSync,
     private val coordinator: NativeAuthFlowCoordinator,
     private val eventTracker: FinancialConnectionsAnalyticsTracker,
     private val navigationManager: NavigationManager,
@@ -39,7 +39,7 @@ internal class ExitViewModel @AssistedInject constructor(
     init {
         logErrors()
         suspend {
-            val manifest = kotlin.runCatching { getManifest() }.getOrNull()
+            val manifest = kotlin.runCatching { getOrFetchSync().manifest }.getOrNull()
             val businessName = manifest?.getBusinessName()
             val isNetworkingSignupPane =
                 manifest?.isNetworkingUserFlow == true && stateFlow.value.referrer == Pane.NETWORKING_LINK_SIGNUP_PANE

@@ -20,15 +20,14 @@ import org.junit.runner.RunWith
 internal class TestKonbini : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = "konbini",
+        authorizationAction = AuthorizeAction.DisplayQrCode
     ) { settings ->
         settings[CountrySettingsDefinition] = Country.JP
         settings[CurrencySettingsDefinition] = Currency.JPY
         settings[CustomerSettingsDefinition] = CustomerType.GUEST
         settings[DelayedPaymentMethodsSettingsDefinition] = true
         settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
-    }.copy(
-        authorizationAction = AuthorizeAction.DisplayQrCode,
-    )
+    }
 
     @Test
     fun testKonbini() {

@@ -68,7 +68,5 @@ internal fun List<CardBrand>.toAnalyticsValue(): String? {
 }
 
 internal fun PaymentSheet.Configuration.getExternalPaymentMethodsAnalyticsValue(): List<String>? {
-    return this.externalPaymentMethods.takeIf {
-        it?.isNotEmpty() ?: false
-    }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
+    return this.externalPaymentMethods.takeIf { it.isNotEmpty() }?.take(PaymentSheetEvent.MAX_EXTERNAL_PAYMENT_METHODS)
 }

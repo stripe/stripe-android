@@ -235,7 +235,9 @@ private fun PaymentSheetContent(
         error?.let {
             ErrorMessage(
                 error = it,
-                modifier = Modifier.padding(vertical = 2.dp, horizontal = horizontalPadding),
+                modifier = Modifier
+                    .padding(vertical = 2.dp, horizontal = horizontalPadding)
+                    .testTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG),
             )
         }
     }
@@ -338,4 +340,5 @@ private fun PrimaryButton(viewModel: BaseSheetViewModel, type: PaymentSheetFlowT
 }
 
 const val PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG = "PRIMARY_BUTTON"
+const val PAYMENT_SHEET_ERROR_TEXT_TEST_TAG = "PAYMENT_SHEET_ERROR"
 private const val POST_SUCCESS_ANIMATION_DELAY = 1500L

@@ -27,6 +27,7 @@ import com.stripe.android.financialconnections.di.FinancialConnectionsSheetNativ
 import com.stripe.android.financialconnections.domain.CancelAuthorizationSession
 import com.stripe.android.financialconnections.domain.CompleteAuthorizationSession
 import com.stripe.android.financialconnections.domain.GetOrFetchSync
+import com.stripe.android.financialconnections.domain.GetOrFetchSync.RefetchCondition.IfMissingActiveAuthSession
 import com.stripe.android.financialconnections.domain.HandleError
 import com.stripe.android.financialconnections.domain.NativeAuthFlowCoordinator
 import com.stripe.android.financialconnections.domain.PollAuthorizationSessionOAuthResults
@@ -111,8 +112,10 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         // auth session in the manifest.
         // if coming from a process kill, we'll fetch the current manifest from network,
         // that should contain the active auth session.
-        val sync: SynchronizeSessionResponse = getOrFetchSync()
-        val manifest: FinancialConnectionsSessionManifest = sync.manifest
+        val sync: SynchronizeSessionResponse = getOrFetchSync(
+            refetchCondition = IfMissingActiveAuthSession
+        )
+        val manifest = sync.manifest
         val authSession = manifest.activeAuthSession ?: createAuthorizationSession(
             institution = requireNotNull(manifest.activeInstitution),
             sync = sync
@@ -271,6 +274,7 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
             val authSession = getOrFetchSync().manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
+                    pane = PANE,
                     url = url,
                     authSessionId = authSession?.id,
                     status = "failed"
@@ -305,10 +309,13 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         kotlin.runCatching {
             logger.debug("Auth cancelled, cancelling AuthSession")
             setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
-            val manifest = getOrFetchSync().manifest
+            val manifest = getOrFetchSync(
+                refetchCondition = IfMissingActiveAuthSession
+            ).manifest
             val authSession = manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
+                    pane = PANE,
                     url = url ?: "none",
                     authSessionId = authSession?.id,
                     status = "cancelled"
@@ -378,9 +385,12 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
     private suspend fun completeAuthorizationSession(url: String) {
         kotlin.runCatching {
             setState { copy(authenticationStatus = Loading(value = Status(Action.AUTHENTICATING))) }
-            val authSession = getOrFetchSync().manifest.activeAuthSession
+            val authSession = getOrFetchSync(
+                refetchCondition = IfMissingActiveAuthSession
+            ).manifest.activeAuthSession
             eventTracker.track(
                 AuthSessionUrlReceived(
+                    pane = PANE,
                     url = url,
                     authSessionId = authSession?.id,
                     status = "success"
@@ -457,7 +467,9 @@ internal class PartnerAuthViewModel @AssistedInject constructor(
         // set loading state while cancelling the active auth session, and navigate back
         setState { copy(authenticationStatus = Loading(value = Status(Action.CANCELLING))) }
         runCatching {
-            val authSession = requireNotNull(getOrFetchSync().manifest.activeAuthSession)
+            val authSession = requireNotNull(
+                getOrFetchSync(refetchCondition = IfMissingActiveAuthSession).manifest.activeAuthSession
+            )
             cancelAuthorizationSession(authSession.id)
         }
         navigationManager.tryNavigateBack()

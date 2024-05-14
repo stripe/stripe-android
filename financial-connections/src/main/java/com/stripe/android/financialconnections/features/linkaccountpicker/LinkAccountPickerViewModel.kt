@@ -268,6 +268,7 @@ internal class LinkAccountPickerViewModel @AssistedInject constructor(
         val isNewSelection = partnerAccount.id !in state.selectedAccountIds
 
         val event = FinancialConnectionsAnalyticsEvent.AccountSelected(
+            pane = PANE,
             selected = isNewSelection,
             isSingleAccount = payload.singleAccount,
             accountId = partnerAccount.id,

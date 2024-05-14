@@ -12,12 +12,45 @@ internal class CompleteFinancialConnectionsSession @Inject constructor(
 ) {
 
     suspend operator fun invoke(
-        terminalError: String? = null
-    ): FinancialConnectionsSession {
+        earlyTerminationCause: NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause?,
+        closeAuthFlowError: Throwable?,
+    ): Result {
         val session = repository.postCompleteFinancialConnectionsSessions(
-            terminalError = terminalError,
-            clientSecret = configuration.financialConnectionsSessionClientSecret
+            terminalError = earlyTerminationCause?.value,
+            clientSecret = configuration.financialConnectionsSessionClientSecret,
         )
-        return fetchPaginatedAccountsForSession(session)
+
+        val fullSession = fetchPaginatedAccountsForSession(session)
+
+        return Result(
+            session = fullSession,
+            status = computeSessionCompletionStatus(fullSession, earlyTerminationCause, closeAuthFlowError),
+        )
+    }
+
+    private fun computeSessionCompletionStatus(
+        session: FinancialConnectionsSession,
+        earlyTerminationCause: NativeAuthFlowCoordinator.Message.Complete.EarlyTerminationCause?,
+        closeAuthFlowError: Throwable?,
+    ): String {
+        return earlyTerminationCause?.analyticsValue ?: session.completionStatus(closeAuthFlowError)
+    }
+
+    data class Result(
+        val session: FinancialConnectionsSession,
+        val status: String,
+    )
+}
+
+private fun FinancialConnectionsSession.completionStatus(
+    closeAuthFlowError: Throwable?,
+): String {
+    val completed = accounts.data.isNotEmpty() || paymentAccount != null || bankAccountToken != null
+    return if (completed) {
+        "completed"
+    } else if (closeAuthFlowError != null) {
+        "failed"
+    } else {
+        "canceled"
     }
 }

@@ -1065,6 +1065,23 @@ data class PaymentMethodCreateParams internal constructor(
         }
 
         /**
+         * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Multibanco] as the payment
+         * method type.
+         */
+        @JvmStatic
+        @JvmOverloads
+        fun createMultibanco(
+            billingDetails: PaymentMethod.BillingDetails? = null,
+            metadata: Map<String, String>? = null
+        ): PaymentMethodCreateParams {
+            return PaymentMethodCreateParams(
+                type = PaymentMethod.Type.Multibanco,
+                billingDetails = billingDetails,
+                metadata = metadata
+            )
+        }
+
+        /**
          * Helper method to create [PaymentMethodCreateParams] with [PaymentMethod.Type.Alma] as the payment
          * method type
          */

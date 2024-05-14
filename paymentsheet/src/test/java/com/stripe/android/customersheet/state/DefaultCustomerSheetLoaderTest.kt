@@ -226,7 +226,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(loader.load(config).getOrThrow()).isNotNull()
         val params = elementsSessionRepository.lastParams?.initializationMode?.toElementsSessionParams(
             customer = null,
-            externalPaymentMethods = null
+            externalPaymentMethods = emptyList(),
         ) as ElementsSessionParams.DeferredIntentType
         assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
     }
@@ -259,7 +259,7 @@ class DefaultCustomerSheetLoaderTest {
         assertThat(loader.load(config).getOrThrow()).isNotNull()
         val params = elementsSessionRepository.lastParams?.initializationMode?.toElementsSessionParams(
             customer = null,
-            externalPaymentMethods = null
+            externalPaymentMethods = emptyList(),
         ) as ElementsSessionParams.DeferredIntentType
         assertThat(params.deferredIntentParams.paymentMethodTypes).containsExactly("card")
     }

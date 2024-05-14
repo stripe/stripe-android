@@ -8,6 +8,7 @@ import android.util.Log
 import androidx.compose.ui.test.ExperimentalTestApi
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -30,13 +31,17 @@ import com.karumi.shot.ScreenshotTest
 import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
+import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
+import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
 import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.test.core.ui.BrowserUI
+import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
 import com.stripe.android.test.core.ui.UiAutomatorText
 import com.stripe.android.test.core.ui.clickTextInWebView
@@ -442,6 +447,66 @@ internal class PlaygroundTestDriver(
         teardown()
 
         return result
+    }
+
+    fun confirmExternalPaymentMethodSuccess(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalPaymentMethod(
+            selectors.externalPaymentMethodSucceedButton,
+        )
+
+        waitForPlaygroundActivity()
+
+        assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
+
+        teardown()
+    }
+
+    fun confirmExternalPaymentMethodCanceled(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalPaymentMethod(
+            selectors.externalPaymentMethodCancelButton,
+        )
+
+        isSelectPaymentMethodScreen()
+        selectors.buyButton.isEnabled()
+
+        teardown()
+    }
+
+    fun confirmExternalPaymentMethodFailed(
+        testParameters: TestParameters,
+    ) {
+        setup(testParameters)
+        launchComplete()
+
+        confirmExternalPaymentMethod(
+            selectors.externalPaymentMethodFailButton,
+        )
+
+        composeTestRule.onNode(hasTestTag(PAYMENT_SHEET_ERROR_TEXT_TEST_TAG))
+            .assertIsDisplayed()
+            .assertTextEquals(FawryActivity.FAILED_DISPLAY_MESSAGE)
+
+        teardown()
+    }
+
+    private fun confirmExternalPaymentMethod(
+        button: ComposeButton,
+    ) {
+        selectors.paymentSelection.click()
+
+        pressBuy()
+
+        button.click()
     }
 
     fun confirmUSBankAccount(
@@ -866,7 +931,7 @@ internal class PlaygroundTestDriver(
 
         if (isDone) {
             waitForPlaygroundActivity()
-            assertThat(resultValue).isEqualTo("Success")
+            assertThat(resultValue).isEqualTo(SUCCESS_RESULT)
         }
     }
 

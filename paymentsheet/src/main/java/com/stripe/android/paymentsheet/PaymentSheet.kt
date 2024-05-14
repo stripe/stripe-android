@@ -444,7 +444,9 @@ class PaymentSheet internal constructor(
 
         internal val paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder,
 
-        internal val externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods,
+        internal val externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods,
+
+        internal val paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default,
     ) : Parcelable {
 
         @JvmOverloads
@@ -592,7 +594,8 @@ class PaymentSheet internal constructor(
             private var allowsRemovalOfLastSavedPaymentMethod: Boolean =
                 ConfigurationDefaults.allowsRemovalOfLastSavedPaymentMethod
             private var paymentMethodOrder: List<String> = ConfigurationDefaults.paymentMethodOrder
-            private var externalPaymentMethods: List<String>? = ConfigurationDefaults.externalPaymentMethods
+            private var externalPaymentMethods: List<String> = ConfigurationDefaults.externalPaymentMethods
+            private var paymentMethodLayout: PaymentMethodLayout = PaymentMethodLayout.default
 
             fun merchantDisplayName(merchantDisplayName: String) =
                 apply { this.merchantDisplayName = merchantDisplayName }
@@ -668,8 +671,14 @@ class PaymentSheet internal constructor(
             }
 
             @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-            fun externalPaymentMethods(externalPaymentMethods: List<String>?): Builder = apply {
+            fun externalPaymentMethods(externalPaymentMethods: List<String>): Builder = apply {
                 this.externalPaymentMethods = externalPaymentMethods
+            }
+
+            @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+            @ExperimentalPaymentMethodLayoutApi
+            fun paymentMethodLayout(paymentMethodLayout: PaymentMethodLayout): Builder = apply {
+                this.paymentMethodLayout = paymentMethodLayout
             }
 
             fun build() = Configuration(
@@ -688,6 +697,7 @@ class PaymentSheet internal constructor(
                 allowsRemovalOfLastSavedPaymentMethod = allowsRemovalOfLastSavedPaymentMethod,
                 paymentMethodOrder = paymentMethodOrder,
                 externalPaymentMethods = externalPaymentMethods,
+                paymentMethodLayout = paymentMethodLayout,
             )
         }
 
@@ -696,6 +706,15 @@ class PaymentSheet internal constructor(
                 val appName = context.applicationInfo.loadLabel(context.packageManager).toString()
                 return Configuration(appName)
             }
+        }
+    }
+
+    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+    enum class PaymentMethodLayout {
+        Horizontal, Vertical;
+
+        internal companion object {
+            internal val default: PaymentMethodLayout = Horizontal
         }
     }
 
@@ -724,8 +743,15 @@ class PaymentSheet internal constructor(
         /**
          * Describes the appearance of the primary button (e.g., the "Pay" button).
          */
-        val primaryButton: PrimaryButton = PrimaryButton()
+        val primaryButton: PrimaryButton = PrimaryButton(),
     ) : Parcelable {
+        constructor() : this(
+            colorsLight = Colors.defaultLight,
+            colorsDark = Colors.defaultDark,
+            shapes = Shapes.default,
+            typography = Typography.default,
+            primaryButton = PrimaryButton(),
+        )
 
         fun getColors(isDark: Boolean): Colors {
             return if (isDark) colorsDark else colorsLight

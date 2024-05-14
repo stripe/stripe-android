@@ -30,7 +30,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"]
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"]
                     },
                     "tokenizationSpecification": {
                         "type": "PAYMENT_GATEWAY",
@@ -66,7 +66,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -102,7 +102,7 @@ class GooglePayJsonFactoryTest {
                     "type": "CARD",
                     "parameters": {
                         "allowedAuthMethods": ["PAN_ONLY", "CRYPTOGRAM_3DS"],
-                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA"],
+                        "allowedCardNetworks": ["AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"],
                         "billingAddressRequired": true,
                         "billingAddressParameters": {
                             "phoneNumberRequired": true,
@@ -238,7 +238,7 @@ class GooglePayJsonFactoryTest {
             }
 
         assertThat(allowedCardNetworks)
-            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA"))
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO"))
     }
 
     @Test
@@ -255,7 +255,7 @@ class GooglePayJsonFactoryTest {
                 }
 
         assertThat(allowedCardNetworks)
-            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "JCB"))
+            .isEqualTo(listOf("AMEX", "DISCOVER", "MASTERCARD", "VISA", "MAESTRO", "JCB"))
     }
 
     @Test

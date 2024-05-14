@@ -117,7 +117,7 @@ internal class DefaultCustomerSheetLoader(
         return elementsSessionRepository.get(
             initializationMode,
             customer = null,
-            externalPaymentMethods = null,
+            externalPaymentMethods = emptyList(),
         ).map { elementsSession ->
             val billingDetailsCollectionConfig = configuration.billingDetailsCollectionConfiguration
             val sharedDataSpecs = lpmRepository.getSharedDataSpecs(

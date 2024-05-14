@@ -22,7 +22,7 @@ import com.stripe.android.financialconnections.analytics.DefaultFinancialConnect
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTracker
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsAnalyticsTrackerImpl
 import com.stripe.android.financialconnections.analytics.FinancialConnectionsEventReporter
-import com.stripe.android.financialconnections.domain.GetManifest
+import com.stripe.android.financialconnections.domain.GetOrFetchSync
 import com.stripe.android.financialconnections.features.common.enableWorkManager
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepository
 import com.stripe.android.financialconnections.repository.FinancialConnectionsRepositoryImpl
@@ -95,14 +95,14 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         fun providesAnalyticsTracker(
             context: Application,
-            getManifest: GetManifest,
+            getOrFetchSync: GetOrFetchSync,
             locale: Locale?,
             configuration: FinancialConnectionsSheet.Configuration,
             requestExecutor: AnalyticsRequestV2Executor,
         ): FinancialConnectionsAnalyticsTracker = FinancialConnectionsAnalyticsTrackerImpl(
             context = context,
             configuration = configuration,
-            getManifest = getManifest,
+            getOrFetchSync = getOrFetchSync,
             locale = locale ?: Locale.getDefault(),
             requestExecutor = requestExecutor,
         )
@@ -149,10 +149,10 @@ internal interface FinancialConnectionsSheetSharedModule {
         @Provides
         @Singleton
         internal fun providesIsWorkManagerAvailable(
-            getManifest: GetManifest,
+            getOrFetchSync: GetOrFetchSync,
         ): IsWorkManagerAvailable {
             return RealIsWorkManagerAvailable(
-                isEnabledForMerchant = { getManifest().enableWorkManager() },
+                isEnabledForMerchant = { getOrFetchSync().manifest.enableWorkManager() },
             )
         }
 
