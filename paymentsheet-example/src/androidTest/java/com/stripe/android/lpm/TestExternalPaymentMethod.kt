@@ -4,6 +4,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.example.playground.settings.ExternalPaymentMethodSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.ExternalPaymentMethodType
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodOrderSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.SupportedPaymentMethodsSettingsDefinition
 import com.stripe.android.test.core.TestParameters
@@ -18,7 +19,7 @@ internal class TestExternalPaymentMethod : BasePlaygroundTest() {
     private val testParameters = TestParameters.create(
         paymentMethodCode = externalFawryCode,
     ) { settings ->
-        settings[ExternalPaymentMethodSettingsDefinition] = externalFawryCode
+        settings[ExternalPaymentMethodSettingsDefinition] = ExternalPaymentMethodType.Fawry
         settings[PaymentMethodOrderSettingsDefinition] = externalFawryCode
         settings[SupportedPaymentMethodsSettingsDefinition] = listOf(
             PaymentMethod.Type.Card,
