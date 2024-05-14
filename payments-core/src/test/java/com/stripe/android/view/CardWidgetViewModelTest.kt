@@ -7,6 +7,7 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
+import okhttp3.internal.wait
 import org.junit.Test
 
 private val paymentConfig = PaymentConfiguration(
@@ -89,5 +90,46 @@ class CardWidgetViewModelTest {
         viewModel.onBehalfOf = "test"
         val obo: String? = handle["on_behalf_of"]
         assertThat(obo).isEqualTo("test")
+    }
+
+    @Test
+    fun `Setting valid OBO re-fetches correct eligibility`() = runTest(testDispatcher) {
+        val stripeRepository = FakeCardElementConfigRepository()
+
+        val viewModel = CardWidgetViewModel(
+            paymentConfigProvider = { paymentConfig },
+            stripeRepository = stripeRepository,
+            dispatcher = testDispatcher,
+            handle = SavedStateHandle()
+        )
+
+        viewModel.isCbcEligible.test {
+            assertThat(awaitItem()).isFalse()
+            stripeRepository.enqueueEligible()
+            viewModel.onBehalfOf = "valid_obo"
+            assertThat(awaitItem()).isTrue()
+        }
+    }
+
+    @Test
+    fun `Setting invalid OBO re-fetches correct eligibility`() = runTest(testDispatcher) {
+        val stripeRepository = FakeCardElementConfigRepository()
+
+        val viewModel = CardWidgetViewModel(
+            paymentConfigProvider = { paymentConfig },
+            stripeRepository = stripeRepository,
+            dispatcher = testDispatcher,
+            handle = SavedStateHandle()
+        )
+
+        stripeRepository.enqueueEligible()
+
+        viewModel.isCbcEligible.test {
+            viewModel.onBehalfOf = "valid_obo"
+            assertThat(awaitItem()).isTrue()
+            stripeRepository.enqueueNotEligible()
+            viewModel.onBehalfOf = "invalid_obo"
+            assertThat(awaitItem()).isFalse()
+        }
     }
 }
