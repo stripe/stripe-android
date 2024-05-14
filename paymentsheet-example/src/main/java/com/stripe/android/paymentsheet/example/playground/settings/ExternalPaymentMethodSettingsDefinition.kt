@@ -56,7 +56,7 @@ enum class ExternalPaymentMethodType(val externalPaymentMethods: List<String>, v
         get() = this.externalPaymentMethods.joinToString(",")
 }
 
-val allExternalPaymentMethods = listOf(
+private val allExternalPaymentMethods = listOf(
     "external_aplazame",
     "external_atone",
     "external_au_easy_payment",
