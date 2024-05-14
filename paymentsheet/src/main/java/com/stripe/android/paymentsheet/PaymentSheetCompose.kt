@@ -92,10 +92,6 @@ private fun UpdateIntentConfirmationInterceptor(
 private fun UpdateExternalPaymentMethodConfirmHandler(
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
 ) {
-    if (externalPaymentMethodConfirmHandler == null) {
-        return
-    }
-
     LaunchedEffect(externalPaymentMethodConfirmHandler) {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     }

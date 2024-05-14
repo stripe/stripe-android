@@ -701,7 +701,8 @@ class PaymentSheet internal constructor(
                 this.paymentMethodOrder = paymentMethodOrder
             }
 
-            /** External payment methods to display in PaymentSheet.
+            /**
+             * External payment methods to display in PaymentSheet.
              *
              * If you specify any external payment methods here, you must also pass an
              * [ExternalPaymentMethodConfirmHandler] to the FlowController or PaymentSheet constructor.
@@ -1595,7 +1596,6 @@ class PaymentSheet internal constructor(
              *
              * If you implement any external payment methods, as specified in your [Configuration],
              * include an [ExternalPaymentMethodConfirmHandler].
-             *
              *
              * @param activity The Activity that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
