@@ -46,8 +46,8 @@ class PaymentSheet internal constructor(
     @JvmOverloads
     constructor(
         activity: ComponentActivity,
-        callback: PaymentSheetResultCallback,
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        callback: PaymentSheetResultCallback,
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     ) {
@@ -71,8 +71,8 @@ class PaymentSheet internal constructor(
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
-        paymentResultCallback: PaymentSheetResultCallback,
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
@@ -93,8 +93,8 @@ class PaymentSheet internal constructor(
     @JvmOverloads
     constructor(
         fragment: Fragment,
-        callback: PaymentSheetResultCallback,
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        callback: PaymentSheetResultCallback,
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     ) {
@@ -118,8 +118,8 @@ class PaymentSheet internal constructor(
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
-        paymentResultCallback: PaymentSheetResultCallback,
         externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+        paymentResultCallback: PaymentSheetResultCallback,
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
@@ -1610,8 +1610,8 @@ class PaymentSheet internal constructor(
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+                paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
                 return FlowControllerFactory(
                     activity,
@@ -1643,8 +1643,8 @@ class PaymentSheet internal constructor(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
                 createIntentCallback: CreateIntentCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+                paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
                 IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
                 return FlowControllerFactory(
@@ -1673,8 +1673,8 @@ class PaymentSheet internal constructor(
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+                paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
                 return FlowControllerFactory(
                     fragment,
@@ -1706,8 +1706,8 @@ class PaymentSheet internal constructor(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
                 createIntentCallback: CreateIntentCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
                 externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+                paymentResultCallback: PaymentSheetResultCallback,
             ): FlowController {
                 IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
                 return FlowControllerFactory(

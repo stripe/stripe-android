@@ -67,6 +67,7 @@ fun rememberPaymentSheetFlowController(
  * @param paymentResultCallback Called when a [PaymentSheetResult] is available.
  */
 @Composable
+@JvmOverloads
 fun rememberPaymentSheetFlowController(
     createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
@@ -85,8 +86,8 @@ fun rememberPaymentSheetFlowController(
 private fun internalRememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
-    createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
+    createIntentCallback: CreateIntentCallback? = null,
 ): PaymentSheet.FlowController {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
 
