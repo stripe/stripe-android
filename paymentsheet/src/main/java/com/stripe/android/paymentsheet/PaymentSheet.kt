@@ -1627,12 +1627,12 @@ class PaymentSheet internal constructor(
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
+                paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
-                    paymentResultCallback,
+                    paymentResultCallback
                 ).create()
             }
 
@@ -1705,7 +1705,7 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
-                    paymentResultCallback,
+                    paymentResultCallback
                 ).create()
             }
 
