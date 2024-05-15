@@ -14,7 +14,7 @@ internal open class FakeCustomerRepository(
     private val onGetPaymentMethods: () -> Result<List<PaymentMethod>> = {
         Result.success(paymentMethods)
     },
-    private val onDetachPaymentMethod: () -> Result<PaymentMethod> = {
+    private val onDetachPaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
     },
     private val onAttachPaymentMethod: () -> Result<PaymentMethod> = {
@@ -24,6 +24,9 @@ internal open class FakeCustomerRepository(
         Result.failure(NotImplementedError())
     }
 ) : CustomerRepository {
+    private val _detachRequests = mutableListOf<DetachRequest>()
+    val detachRequests: List<DetachRequest> = _detachRequests
+
     var error: Throwable? = null
 
     override suspend fun retrieveCustomer(
@@ -39,7 +42,16 @@ internal open class FakeCustomerRepository(
     override suspend fun detachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String
-    ): Result<PaymentMethod> = onDetachPaymentMethod()
+    ): Result<PaymentMethod> {
+        _detachRequests.add(
+            DetachRequest(
+                paymentMethodId = paymentMethodId,
+                customerInfo = customerInfo
+            )
+        )
+
+        return onDetachPaymentMethod(paymentMethodId)
+    }
 
     override suspend fun attachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
@@ -51,4 +63,9 @@ internal open class FakeCustomerRepository(
         paymentMethodId: String,
         params: PaymentMethodUpdateParams
     ): Result<PaymentMethod> = onUpdatePaymentMethod()
+
+    data class DetachRequest(
+        val paymentMethodId: String,
+        val customerInfo: CustomerRepository.CustomerInfo,
+    )
 }
