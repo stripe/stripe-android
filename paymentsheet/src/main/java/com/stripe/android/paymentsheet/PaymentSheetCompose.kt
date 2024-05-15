@@ -105,7 +105,7 @@ private fun UpdateIntentConfirmationInterceptor(
 
 @Composable
 private fun UpdateExternalPaymentMethodConfirmHandler(
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
 ) {
     LaunchedEffect(externalPaymentMethodConfirmHandler) {
         ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
