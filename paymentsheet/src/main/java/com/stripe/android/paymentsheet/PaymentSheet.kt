@@ -36,95 +36,119 @@ class PaymentSheet internal constructor(
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity].
      *
-     * If you implement any external payment methods, as specified in your [Configuration], include an
-     * [ExternalPaymentMethodConfirmHandler].
-     *
      * @param activity The Activity that is presenting [PaymentSheet].
      * @param callback Called with the result of the payment after [PaymentSheet] is dismissed.
-     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
      */
-    @JvmOverloads
     constructor(
         activity: ComponentActivity,
         callback: PaymentSheetResultCallback,
-        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
-    ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-    }
+    )
 
     /**
      * Constructor to be used when launching [PaymentSheet] from a [ComponentActivity] and intending
      * to create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server.
      *
-     * If you implement any external payment methods, as specified in your [Configuration], include an
-     * [ExternalPaymentMethodConfirmHandler].
-     *
      * @param activity The Activity that is presenting [PaymentSheet].
      * @param createIntentCallback Called when the customer confirms the payment or setup.
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
-     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
      */
-    @JvmOverloads
     constructor(
         activity: ComponentActivity,
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
-        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(activity, paymentResultCallback)
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     }
 
     /**
      * Constructor to be used when launching the payment sheet from a [Fragment].
      *
-     * If you implement any external payment methods, as specified in your [Configuration], include an
-     * [ExternalPaymentMethodConfirmHandler].
-     *
      * @param fragment the Fragment that is presenting the payment sheet.
      * @param callback called with the result of the payment after the payment sheet is dismissed.
-     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
      */
-    @JvmOverloads
     constructor(
         fragment: Fragment,
         callback: PaymentSheetResultCallback,
-        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
-    ) {
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
-    }
+    )
 
     /**
      * Constructor to be used when launching [PaymentSheet] from a [Fragment] and intending to
      * create and optionally confirm the [PaymentIntent] or [SetupIntent] on your server.
      *
-     * If you implement any external payment methods, as specified in your [Configuration], include an
-     * [ExternalPaymentMethodConfirmHandler].
-     *
      * @param fragment The Fragment that is presenting [PaymentSheet].
      * @param createIntentCallback Called when the customer confirms the payment or setup.
      * @param paymentResultCallback Called with the result of the payment or setup after
      * [PaymentSheet] is dismissed.
-     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
      */
-    @JvmOverloads
     constructor(
         fragment: Fragment,
         createIntentCallback: CreateIntentCallback,
         paymentResultCallback: PaymentSheetResultCallback,
-        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
     ) : this(
         DefaultPaymentSheetLauncher(fragment, paymentResultCallback)
     ) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+    }
+
+    /**
+     * [PaymentSheet] builder for cleaner object creation.
+     */
+    class Builder (
+        private val paymentResultCallback: PaymentSheetResultCallback,
+    ) {
+        private var createIntentCallback: CreateIntentCallback? = null
+        private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+
+        /**
+         * Callback to create the [PaymentIntent] or [SetupIntent] on your server.
+         *
+         * Provide this when you are intended to create and optionally confirm the [PaymentIntent] or [SetupIntent] on
+         * your server.
+         */
+        fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
+            this.createIntentCallback = createIntentCallback
+        }
+
+        /**
+         * Confirms payment for external payment methods.
+         *
+         * Provide this if you specify any external payment methods in your [PaymentSheet.Configuration].
+         */
+        fun externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?) =
+            apply {
+                this.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+            }
+
+        /**
+         * Constructs a [PaymentSheet] for launching from a [Fragment].
+         *
+         * @param fragment The Fragment that is presenting [PaymentSheet].
+         */
+        fun build(fragment: Fragment): PaymentSheet {
+            IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+            ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+
+            return PaymentSheet(fragment, paymentResultCallback)
+        }
+
+        /**
+         * Constructs a [PaymentSheet] for launching from a [ComponentActivity].
+         *
+         * @param activity The Activity that is presenting [PaymentSheet].
+         */
+        fun build(activity: ComponentActivity): PaymentSheet {
+            IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+            ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+
+            return PaymentSheet(activity, paymentResultCallback)
+        }
     }
 
     /**
@@ -135,7 +159,6 @@ class PaymentSheet internal constructor(
      *
      * @param paymentIntentClientSecret The client secret of the [PaymentIntent].
      * @param configuration An optional [PaymentSheet] configuration.
-     * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment method.
      */
     @JvmOverloads
     fun presentWithPaymentIntent(
@@ -1594,16 +1617,11 @@ class PaymentSheet internal constructor(
              * Create a [FlowController] that you configure with a client secret by calling
              * [configureWithPaymentIntent] or [configureWithSetupIntent].
              *
-             * If you implement any external payment methods, as specified in your [Configuration],
-             * include an [ExternalPaymentMethodConfirmHandler].
-             *
              * @param activity The Activity that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
              * changes.
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
-             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
-             * method.
              */
             @JvmStatic
             @JvmOverloads
@@ -1625,33 +1643,25 @@ class PaymentSheet internal constructor(
              * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
              * [configureWithIntentConfiguration].
              *
-             * If you implement any external payment methods, as specified in your [Configuration],
-             * include an [ExternalPaymentMethodConfirmHandler].
-             *
              * @param activity The Activity that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
              * changes.
              * @param createIntentCallback Called when the customer confirms the payment or setup.
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
-             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
-             * method.
              */
             @JvmStatic
-            @JvmOverloads
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
-                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
             ): FlowController {
                 IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
                     paymentResultCallback,
-                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 ).create()
             }
 
@@ -1659,28 +1669,20 @@ class PaymentSheet internal constructor(
              * Create a [FlowController] that you configure with a client secret by calling
              * [configureWithPaymentIntent] or [configureWithSetupIntent].
              *
-             * If you implement any external payment methods, as specified in your [Configuration],
-             * include an [ExternalPaymentMethodConfirmHandler].
-             *
              * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback called when the customer's [PaymentOption] selection changes.
              * @param paymentResultCallback called when a [PaymentSheetResult] is available.
-             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
-             * method.
              */
             @JvmStatic
-            @JvmOverloads
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
-                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
             ): FlowController {
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
                     paymentResultCallback,
-                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 ).create()
             }
 
@@ -1688,17 +1690,12 @@ class PaymentSheet internal constructor(
              * Create a [FlowController] that you configure with an [IntentConfiguration] by calling
              * [configureWithIntentConfiguration].
              *
-             * If you implement any external payment methods, as specified in your [Configuration],
-             * include an [ExternalPaymentMethodConfirmHandler].
-             *
              * @param fragment The Fragment that is presenting [PaymentSheet].
              * @param paymentOptionCallback Called when the customer's selected payment method
              * changes.
              * @param createIntentCallback Called when the customer confirms the payment or setup.
              * @param paymentResultCallback Called with the result of the payment after
              * [PaymentSheet] is dismissed.
-             * @param externalPaymentMethodConfirmHandler Called when a user confirms payment with an external payment
-             * method.
              */
             @JvmStatic
             @JvmOverloads
@@ -1707,15 +1704,74 @@ class PaymentSheet internal constructor(
                 paymentOptionCallback: PaymentOptionCallback,
                 createIntentCallback: CreateIntentCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
-                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
             ): FlowController {
                 IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
                     paymentResultCallback,
-                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 ).create()
+            }
+
+            /**
+             * [PaymentSheet.FlowController] builder for cleaner object creation.
+             */
+            class Builder (
+                private val paymentOptionCallback: PaymentOptionCallback,
+                private val paymentResultCallback: PaymentSheetResultCallback,
+            ) {
+                private var createIntentCallback: CreateIntentCallback? = null
+                private var externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null
+
+                /**
+                 * Callback to create the [PaymentIntent] or [SetupIntent] on your server.
+                 *
+                 * Provide this when you are intended to create and optionally confirm the [PaymentIntent] or [SetupIntent] on
+                 * your server.
+                 */
+                fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
+                    this.createIntentCallback = createIntentCallback
+                }
+
+                /**
+                 * Confirms payment for external payment methods.
+                 *
+                 * Provide this if you specify any external payment methods in your [PaymentSheet.Configuration].
+                 */
+                fun externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?) =
+                    apply {
+                        this.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
+                    }
+
+                /**
+                 * Constructs a [PaymentSheet.FlowController] for launching from a [Fragment].
+                 *
+                 * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
+                 */
+                fun build(fragment: Fragment): FlowController {
+                    return FlowControllerFactory(
+                        fragment = fragment,
+                        paymentOptionCallback = paymentOptionCallback,
+                        paymentResultCallback = paymentResultCallback,
+                        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                        createIntentCallback = createIntentCallback,
+                    ).create()
+                }
+
+                /**
+                 * Constructs a [PaymentSheet.FlowController] for launching from a [ComponentActivity].
+                 *
+                 * @param activity The Activity that is presenting [PaymentSheet.FlowController].
+                 */
+                fun build(activity: ComponentActivity): FlowController {
+                    return FlowControllerFactory(
+                        activity = activity,
+                        paymentOptionCallback = paymentOptionCallback,
+                        paymentResultCallback = paymentResultCallback,
+                        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+                        createIntentCallback = createIntentCallback,
+                    ).create()
+                }
             }
         }
     }

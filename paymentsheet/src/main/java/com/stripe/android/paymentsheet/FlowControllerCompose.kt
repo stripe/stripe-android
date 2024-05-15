@@ -116,6 +116,7 @@ private fun internalRememberPaymentSheetFlowController(
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
             externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
+            createIntentCallback = createIntentCallback,
         ).create()
     }
 }
