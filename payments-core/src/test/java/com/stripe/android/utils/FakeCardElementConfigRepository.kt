@@ -33,6 +33,7 @@ class FakeCardElementConfigRepository : AbsFakeStripeRepository() {
 
     override suspend fun retrieveCardElementConfig(
         requestOptions: ApiRequest.Options,
+        params: Map<String, String>?
     ): Result<MobileCardElementConfig> {
         return channel.receive()
     }

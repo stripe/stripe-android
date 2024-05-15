@@ -19,6 +19,9 @@
 Dependencies updated in [8381](https://github.com/stripe/stripe-android/pull/8381):
 * Bumped Play Services Wallet from 19.2.1 to 19.3.0.
 
+### Payments
+* [ADDED][8344](https://github.com/stripe/stripe-android/pull/8344) Added support for `onBehalfOf` to `CardInputWidget`, `CardMultilineWidget`, and `CardFormView`. This parameter may be required when setting a connected account as the merchant of record for a payment. For more information, see the [Connect docs](https://docs.stripe.com/connect/charges#on_behalf_of).
+
 ## 20.41.1 - 2024-04-22
 
 ### PaymentSheet
