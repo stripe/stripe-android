@@ -41,7 +41,7 @@ class PaymentSheet internal constructor(
      */
     constructor(
         activity: ComponentActivity,
-        callback: PaymentSheetResultCallback,
+        callback: PaymentSheetResultCallback
     ) : this(
         DefaultPaymentSheetLauncher(activity, callback)
     )
@@ -73,7 +73,7 @@ class PaymentSheet internal constructor(
      */
     constructor(
         fragment: Fragment,
-        callback: PaymentSheetResultCallback,
+        callback: PaymentSheetResultCallback
     ) : this(
         DefaultPaymentSheetLauncher(fragment, callback)
     )
@@ -1624,18 +1624,15 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
-            @JvmOverloads
             fun create(
                 activity: ComponentActivity,
                 paymentOptionCallback: PaymentOptionCallback,
                 paymentResultCallback: PaymentSheetResultCallback,
-                externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
             ): FlowController {
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
                     paymentResultCallback,
-                    externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
                 ).create()
             }
 
@@ -1661,7 +1658,7 @@ class PaymentSheet internal constructor(
                 return FlowControllerFactory(
                     activity,
                     paymentOptionCallback,
-                    paymentResultCallback,
+                    paymentResultCallback
                 ).create()
             }
 
@@ -1677,12 +1674,12 @@ class PaymentSheet internal constructor(
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
-                paymentResultCallback: PaymentSheetResultCallback,
+                paymentResultCallback: PaymentSheetResultCallback
             ): FlowController {
                 return FlowControllerFactory(
                     fragment,
                     paymentOptionCallback,
-                    paymentResultCallback,
+                    paymentResultCallback
                 ).create()
             }
 
@@ -1698,7 +1695,6 @@ class PaymentSheet internal constructor(
              * [PaymentSheet] is dismissed.
              */
             @JvmStatic
-            @JvmOverloads
             fun create(
                 fragment: Fragment,
                 paymentOptionCallback: PaymentOptionCallback,
@@ -1749,12 +1745,13 @@ class PaymentSheet internal constructor(
                  * @param fragment The Fragment that is presenting [PaymentSheet.FlowController].
                  */
                 fun build(fragment: Fragment): FlowController {
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+                        externalPaymentMethodConfirmHandler
+                    IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
                     return FlowControllerFactory(
                         fragment = fragment,
                         paymentOptionCallback = paymentOptionCallback,
                         paymentResultCallback = paymentResultCallback,
-                        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                        createIntentCallback = createIntentCallback,
                     ).create()
                 }
 
@@ -1764,12 +1761,13 @@ class PaymentSheet internal constructor(
                  * @param activity The Activity that is presenting [PaymentSheet.FlowController].
                  */
                 fun build(activity: ComponentActivity): FlowController {
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+                        externalPaymentMethodConfirmHandler
+                    IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
                     return FlowControllerFactory(
                         activity = activity,
                         paymentOptionCallback = paymentOptionCallback,
                         paymentResultCallback = paymentResultCallback,
-                        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-                        createIntentCallback = createIntentCallback,
                     ).create()
                 }
             }

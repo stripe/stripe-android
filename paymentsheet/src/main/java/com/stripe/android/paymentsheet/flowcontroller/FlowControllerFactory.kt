@@ -19,16 +19,12 @@ internal class FlowControllerFactory(
     private val activityResultRegistryOwner: ActivityResultRegistryOwner,
     private val statusBarColor: () -> Int?,
     private val paymentOptionCallback: PaymentOptionCallback,
-    private val paymentResultCallback: PaymentSheetResultCallback,
-    private val externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
-    private val createIntentCallback: CreateIntentCallback?,
+    private val paymentResultCallback: PaymentSheetResultCallback
 ) {
     constructor(
         activity: ComponentActivity,
         paymentOptionCallback: PaymentOptionCallback,
-        paymentResultCallback: PaymentSheetResultCallback,
-        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
-        createIntentCallback: CreateIntentCallback? = null,
+        paymentResultCallback: PaymentSheetResultCallback
     ) : this(
         viewModelStoreOwner = activity,
         lifecycleOwner = activity,
@@ -36,16 +32,12 @@ internal class FlowControllerFactory(
         statusBarColor = { activity.window.statusBarColor },
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-        createIntentCallback = createIntentCallback,
     )
 
     constructor(
         fragment: Fragment,
         paymentOptionCallback: PaymentOptionCallback,
-        paymentResultCallback: PaymentSheetResultCallback,
-        externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
-        createIntentCallback: CreateIntentCallback? = null,
+        paymentResultCallback: PaymentSheetResultCallback
     ) : this(
         viewModelStoreOwner = fragment,
         lifecycleOwner = fragment,
@@ -53,13 +45,9 @@ internal class FlowControllerFactory(
         statusBarColor = { fragment.activity?.window?.statusBarColor },
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
-        externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-        createIntentCallback = createIntentCallback,
     )
 
     fun create(): PaymentSheet.FlowController {
-        IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
         return DefaultFlowController.getInstance(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
