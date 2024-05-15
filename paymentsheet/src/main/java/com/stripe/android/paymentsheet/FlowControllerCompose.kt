@@ -22,9 +22,11 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    return rememberPaymentSheetFlowController(
+    return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
-        paymentResultCallback = paymentResultCallback
+        paymentResultCallback = paymentResultCallback,
+        createIntentCallback = null,
+        externalPaymentMethodConfirmHandler = null,
     )
 }
 
@@ -45,10 +47,11 @@ fun rememberPaymentSheetFlowController(
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
-    return rememberPaymentSheetFlowController(
+    return internalRememberPaymentSheetFlowController(
         paymentOptionCallback = paymentOptionCallback,
         paymentResultCallback = paymentResultCallback,
         createIntentCallback = createIntentCallback,
+        externalPaymentMethodConfirmHandler = null,
     )
 }
 
@@ -83,10 +86,10 @@ fun rememberPaymentSheetFlowController(
 
 @Composable
 private fun internalRememberPaymentSheetFlowController(
+    createIntentCallback: CreateIntentCallback?,
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
     paymentOptionCallback: PaymentOptionCallback,
     paymentResultCallback: PaymentSheetResultCallback,
-    createIntentCallback: CreateIntentCallback? = null,
-    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler? = null,
 ): PaymentSheet.FlowController {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
 
