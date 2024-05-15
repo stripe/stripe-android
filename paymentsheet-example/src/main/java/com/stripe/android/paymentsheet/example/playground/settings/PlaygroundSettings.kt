@@ -190,7 +190,7 @@ internal class PlaygroundSettings private constructor(
             val unserializedSettings = try {
                 Json.decodeFromString(SerializableSettings.serializer(), jsonString)
             } catch (exception: SerializationException) {
-                Log.e("PlaygroundParsingError", exception.message ?: exception::class.java.name)
+                Log.e("PlaygroundParsingError", "Error parsing settings from string", exception)
 
                 return createFromDefaults()
             }
