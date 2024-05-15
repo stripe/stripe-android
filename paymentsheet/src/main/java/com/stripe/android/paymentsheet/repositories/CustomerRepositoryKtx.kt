@@ -12,9 +12,9 @@ import com.stripe.android.model.PaymentMethod
  * @return a list of removal results that identify the payment methods that were successfully removed and the payment
  * methods that failed to be removed.
  */
-internal suspend fun CustomerRepository.detachPaymentMethodAndDuplicates(
+internal suspend fun CustomerRepository.detachCardPaymentMethodAndDuplicates(
     customerInfo: CustomerRepository.CustomerInfo,
-    paymentMethodId: String
+    paymentMethodId: String,
 ): List<PaymentMethodRemovalResult> {
     val paymentMethods = getPaymentMethods(
         customerInfo = customerInfo,
@@ -32,7 +32,7 @@ internal suspend fun CustomerRepository.detachPaymentMethodAndDuplicates(
 
     val requestedPaymentMethodToRemove = paymentMethods.find { paymentMethod ->
         paymentMethod.id == paymentMethodId
-    } ?: return listOf()
+    } ?: throw IllegalArgumentException("Payment method with id '$paymentMethodId' does not exist!")
 
     val paymentMethodRemovalResults = mutableListOf<PaymentMethodRemovalResult>()
 
@@ -41,33 +41,41 @@ internal suspend fun CustomerRepository.detachPaymentMethodAndDuplicates(
             paymentMethod.card?.fingerprint == requestedPaymentMethodToRemove.card?.fingerprint
     }
 
-    paymentMethodsToRemove.forEach { paymentMethod ->
-        val paymentMethodIdToRemove = paymentMethod.id!!
+    paymentMethodsToRemove.forEachIndexed { index, paymentMethod ->
+        val paymentMethodIdToRemove = paymentMethod.id
 
-        detachPaymentMethod(
-            customerInfo = customerInfo,
-            paymentMethodId = paymentMethodIdToRemove
-        ).onSuccess { removedPaymentMethod ->
-            paymentMethodRemovalResults.add(
-                PaymentMethodRemovalResult(
-                    paymentMethodId = paymentMethodIdToRemove,
-                    result = Result.success(removedPaymentMethod),
-                )
+        val result = paymentMethodIdToRemove?.let { id ->
+            detachPaymentMethod(
+                customerInfo = customerInfo,
+                paymentMethodId = id
             )
-        }.onFailure {
-            paymentMethodRemovalResults.add(
-                PaymentMethodRemovalResult(
-                    paymentMethodId = paymentMethodIdToRemove,
-                    result = Result.failure(it),
-                )
+        } ?: Result.failure(
+            NoPaymentMethodIdOnRemovalException(
+                index = index,
+                paymentMethod = paymentMethod
             )
-        }
+        )
+
+        paymentMethodRemovalResults.add(
+            PaymentMethodRemovalResult(
+                paymentMethodId = paymentMethodIdToRemove,
+                result = result,
+            )
+        )
     }
 
     return paymentMethodRemovalResults
 }
 
+internal class NoPaymentMethodIdOnRemovalException(
+    val index: Int,
+    val paymentMethod: PaymentMethod,
+) : Exception() {
+    override val message: String =
+        "A payment method at index '$index' with type '${paymentMethod.type}' does not have an ID!"
+}
+
 internal data class PaymentMethodRemovalResult(
-    val paymentMethodId: String,
+    val paymentMethodId: String?,
     val result: Result<PaymentMethod>,
 )

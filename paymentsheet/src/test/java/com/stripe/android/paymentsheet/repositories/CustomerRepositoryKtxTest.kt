@@ -5,10 +5,7 @@ import com.stripe.android.testing.PaymentMethodFactory
 import com.stripe.android.utils.FakeCustomerRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.mockito.Mockito.spy
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.verify
+import kotlin.test.assertFails
 
 class CustomerRepositoryKtxTest {
     @Test
@@ -34,16 +31,14 @@ class CustomerRepositoryKtxTest {
                 }
             }
 
-            val repository = spy(
-                FakeCustomerRepository(
-                    paymentMethods = cardsWithFingerprints,
-                    onDetachPaymentMethod = {
-                        Result.success(cards.first())
-                    }
-                )
+            val repository = FakeCustomerRepository(
+                paymentMethods = cardsWithFingerprints,
+                onDetachPaymentMethod = {
+                    Result.success(cards.first())
+                }
             )
 
-            repository.detachPaymentMethodAndDuplicates(
+            repository.detachCardPaymentMethodAndDuplicates(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "cus_1",
                     ephemeralKeySecret = "ephemeral_key_secret",
@@ -51,9 +46,14 @@ class CustomerRepositoryKtxTest {
                 paymentMethodId = cards[0].id!!
             )
 
-            verify(repository).detachPaymentMethod(any(), eq(cards[0].id!!))
-            verify(repository).detachPaymentMethod(any(), eq(cards[1].id!!))
-            verify(repository).detachPaymentMethod(any(), eq(cards[2].id!!))
+            assertThat(repository.detachRequests[0].paymentMethodId)
+                .isEqualTo(cards[0].id!!)
+
+            assertThat(repository.detachRequests[1].paymentMethodId)
+                .isEqualTo(cards[1].id!!)
+
+            assertThat(repository.detachRequests[2].paymentMethodId)
+                .isEqualTo(cards[2].id!!)
         }
 
     @Test
@@ -82,7 +82,7 @@ class CustomerRepositoryKtxTest {
                 }
             )
 
-            val results = repository.detachPaymentMethodAndDuplicates(
+            val results = repository.detachCardPaymentMethodAndDuplicates(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "cus_1",
                     ephemeralKeySecret = "ephemeral_key_secret",
@@ -115,7 +115,7 @@ class CustomerRepositoryKtxTest {
         }
 
     @Test
-    fun `'detachPaymentMethodAndDuplicates' returns payment method object received from removal operation`() =
+    fun `'detachCardPaymentMethodAndDuplicates' returns payment method object received from removal operation`() =
         runTest {
             val cards = PaymentMethodFactory.cards(size = 2).map { paymentMethod ->
                 paymentMethod.copy(
@@ -137,7 +137,7 @@ class CustomerRepositoryKtxTest {
                 }
             )
 
-            val results = repository.detachPaymentMethodAndDuplicates(
+            val results = repository.detachCardPaymentMethodAndDuplicates(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "cus_1",
                     ephemeralKeySecret = "ephemeral_key_secret",
@@ -168,7 +168,7 @@ class CustomerRepositoryKtxTest {
                 },
             )
 
-            val results = repository.detachPaymentMethodAndDuplicates(
+            val results = repository.detachCardPaymentMethodAndDuplicates(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "cus_1",
                     ephemeralKeySecret = "ephemeral_key_secret",
@@ -185,21 +185,61 @@ class CustomerRepositoryKtxTest {
         }
 
     @Test
-    fun `'detachPaymentMethodAndDuplicates' returns success with no removals if no payment methods were found`() =
+    fun `'detachPaymentMethodAndDuplicates' returns failure if payment method does not exist`() =
         runTest {
             val repository = FakeCustomerRepository(
                 paymentMethods = listOf(),
             )
 
-            val results = repository.detachPaymentMethodAndDuplicates(
+            val exception = assertFails {
+                repository.detachCardPaymentMethodAndDuplicates(
+                    customerInfo = CustomerRepository.CustomerInfo(
+                        id = "cus_1",
+                        ephemeralKeySecret = "ephemeral_key_secret",
+                    ),
+                    paymentMethodId = "pm_1"
+                )
+            }
+
+            assertThat(exception).isInstanceOf(IllegalArgumentException::class.java)
+            assertThat(exception.message).isEqualTo("Payment method with id 'pm_1' does not exist!")
+        }
+
+    @Test
+    fun `'detachPaymentMethodAndDuplicates' returns exception in result if a payment method has no id`() =
+        runTest {
+            val cards = PaymentMethodFactory.cards(size = 2).mapIndexed { index, paymentMethod ->
+                if (index == 1) {
+                    paymentMethod.copy(id = null)
+                } else {
+                    paymentMethod
+                }
+            }
+
+            val repository = FakeCustomerRepository(
+                paymentMethods = cards,
+                onDetachPaymentMethod = {
+                    Result.success(cards.first())
+                }
+            )
+
+            val results = repository.detachCardPaymentMethodAndDuplicates(
                 customerInfo = CustomerRepository.CustomerInfo(
                     id = "cus_1",
                     ephemeralKeySecret = "ephemeral_key_secret",
                 ),
-                paymentMethodId = "pm_1"
+                paymentMethodId = cards.first().id!!
             )
 
-            assertThat(results).isEmpty()
+            assertThat(results[0]).isEqualTo(
+                PaymentMethodRemovalResult(
+                    paymentMethodId = cards[0].id!!,
+                    result = Result.success(cards[0])
+                )
+            )
+
+            assertThat(results[1].result.exceptionOrNull())
+                .isInstanceOf(NoPaymentMethodIdOnRemovalException::class.java)
         }
 
     private data class TestException(override val message: String?) : Exception()
