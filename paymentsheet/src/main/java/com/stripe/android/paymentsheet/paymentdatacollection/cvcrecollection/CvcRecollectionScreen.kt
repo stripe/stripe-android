@@ -55,7 +55,7 @@ internal fun CvcRecollectionScreen(cardBrand: CardBrand, lastFour: String) {
     StripeTheme {
         Column(
             Modifier
-                .background(Color.White)
+                .background(MaterialTheme.stripeColors.materialColors.surface)
                 .padding(horizontal = 20.dp)
         ) {
             CvcRecollectionHeader(
