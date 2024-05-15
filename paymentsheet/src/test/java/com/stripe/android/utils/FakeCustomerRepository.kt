@@ -14,7 +14,7 @@ internal open class FakeCustomerRepository(
     private val onGetPaymentMethods: () -> Result<List<PaymentMethod>> = {
         Result.success(paymentMethods)
     },
-    private val onDetachPaymentMethod: () -> Result<PaymentMethod> = {
+    private val onDetachPaymentMethod: (paymentMethodId: String) -> Result<PaymentMethod> = {
         Result.failure(NotImplementedError())
     },
     private val onAttachPaymentMethod: () -> Result<PaymentMethod> = {
@@ -39,7 +39,7 @@ internal open class FakeCustomerRepository(
     override suspend fun detachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
         paymentMethodId: String
-    ): Result<PaymentMethod> = onDetachPaymentMethod()
+    ): Result<PaymentMethod> = onDetachPaymentMethod(paymentMethodId)
 
     override suspend fun attachPaymentMethod(
         customerInfo: CustomerRepository.CustomerInfo,
