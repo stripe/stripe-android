@@ -5,10 +5,6 @@ import androidx.activity.result.ActivityResultRegistryOwner
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ViewModelStoreOwner
-import com.stripe.android.paymentsheet.CreateIntentCallback
-import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
-import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
-import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.PaymentSheetResultCallback
@@ -47,8 +43,8 @@ internal class FlowControllerFactory(
         paymentResultCallback = paymentResultCallback,
     )
 
-    fun create(): PaymentSheet.FlowController {
-        return DefaultFlowController.getInstance(
+    fun create(): PaymentSheet.FlowController =
+        DefaultFlowController.getInstance(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
             activityResultRegistryOwner = activityResultRegistryOwner,
@@ -56,5 +52,4 @@ internal class FlowControllerFactory(
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback
         )
-    }
 }
