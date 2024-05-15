@@ -100,7 +100,7 @@ class PaymentSheet internal constructor(
     /**
      * [PaymentSheet] builder for cleaner object creation.
      */
-    class Builder (
+    class Builder(
         private val paymentResultCallback: PaymentSheetResultCallback,
     ) {
         private var createIntentCallback: CreateIntentCallback? = null
@@ -121,7 +121,9 @@ class PaymentSheet internal constructor(
          *
          * Provide this if you specify any external payment methods in your [PaymentSheet.Configuration].
          */
-        fun externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?) =
+        fun externalPaymentMethodConfirmHandler(
+            externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+        ) =
             apply {
                 this.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
             }
@@ -1712,7 +1714,7 @@ class PaymentSheet internal constructor(
             /**
              * [PaymentSheet.FlowController] builder for cleaner object creation.
              */
-            class Builder (
+            class Builder(
                 private val paymentOptionCallback: PaymentOptionCallback,
                 private val paymentResultCallback: PaymentSheetResultCallback,
             ) {
@@ -1722,8 +1724,8 @@ class PaymentSheet internal constructor(
                 /**
                  * Callback to create the [PaymentIntent] or [SetupIntent] on your server.
                  *
-                 * Provide this when you are intended to create and optionally confirm the [PaymentIntent] or [SetupIntent] on
-                 * your server.
+                 * Provide this when you are intended to create and optionally confirm the [PaymentIntent] or
+                 * [SetupIntent] on your server.
                  */
                 fun createIntentCallback(createIntentCallback: CreateIntentCallback) = apply {
                     this.createIntentCallback = createIntentCallback
@@ -1734,7 +1736,9 @@ class PaymentSheet internal constructor(
                  *
                  * Provide this if you specify any external payment methods in your [PaymentSheet.Configuration].
                  */
-                fun externalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?) =
+                fun externalPaymentMethodConfirmHandler(
+                    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?
+                ) =
                     apply {
                         this.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
                     }

@@ -92,6 +92,7 @@ private fun internalRememberPaymentSheetFlowController(
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet.FlowController {
     UpdateIntentConfirmationInterceptor(createIntentCallback)
+    UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
 
     val viewModelStoreOwner = requireNotNull(LocalViewModelStoreOwner.current) {
         "PaymentSheet.FlowController must be created with access to a ViewModelStoreOwner"
@@ -115,8 +116,6 @@ private fun internalRememberPaymentSheetFlowController(
             statusBarColor = { activity.window?.statusBarColor },
             paymentOptionCallback = paymentOptionCallback,
             paymentResultCallback = paymentResultCallback,
-            externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler,
-            createIntentCallback = createIntentCallback,
         ).create()
     }
 }
@@ -127,5 +126,14 @@ private fun UpdateIntentConfirmationInterceptor(
 ) {
     LaunchedEffect(createIntentCallback) {
         IntentConfirmationInterceptor.createIntentCallback = createIntentCallback
+    }
+}
+
+@Composable
+private fun UpdateExternalPaymentMethodConfirmHandler(
+    externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler?,
+) {
+    LaunchedEffect(externalPaymentMethodConfirmHandler) {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = externalPaymentMethodConfirmHandler
     }
 }
