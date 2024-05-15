@@ -7,7 +7,6 @@ import com.stripe.android.PaymentConfiguration
 import com.stripe.android.utils.FakeCardElementConfigRepository
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
-import okhttp3.internal.wait
 import org.junit.Test
 
 private val paymentConfig = PaymentConfiguration(
