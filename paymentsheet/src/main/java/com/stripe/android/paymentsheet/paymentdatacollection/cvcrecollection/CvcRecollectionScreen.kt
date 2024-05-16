@@ -160,7 +160,6 @@ private fun CvcRecollectionHeader(modifier: Modifier, viewModel: CvcRecollection
 
 @Composable
 private fun CvcRecollectionButton(viewModel: CvcRecollectionViewModel, element: CvcElement) {
-
     val isComplete = element.controller.isComplete.collectAsState()
 
     Box(
