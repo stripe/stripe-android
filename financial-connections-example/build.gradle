@@ -3,6 +3,8 @@ apply from: configs.androidApplication
 apply plugin: 'com.google.firebase.appdistribution'
 apply plugin: 'com.google.gms.google-services'
 apply plugin: 'org.jetbrains.kotlin.plugin.serialization'
+apply plugin: 'androidx.baselineprofile'
+
 
 
 def testEnvironment = System.getenv("test_environment") ?: "production"

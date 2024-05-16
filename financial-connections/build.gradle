@@ -5,6 +5,8 @@ apply plugin: 'org.jetbrains.kotlin.plugin.parcelize'
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'app.cash.paparazzi'
 apply plugin: 'com.google.devtools.ksp'
+apply plugin: 'androidx.baselineprofile'
+
 
 android {
     defaultConfig {
@@ -17,6 +19,7 @@ android {
         }
     }
 }
+
 
 dependencies {
     api project(":stripe-core")
@@ -41,6 +44,8 @@ dependencies {
     implementation libs.kotlin.coroutines
     implementation libs.kotlin.coroutinesAndroid
     implementation libs.kotlin.serialization
+
+    baselineProfile project(':baselineprofile')
 
     debugImplementation libs.compose.uiTestManifest
     debugImplementation libs.compose.uiTooling
@@ -78,6 +83,12 @@ dependencies {
 
     androidTestUtil testLibs.testOrchestrator
 }
+
+//baselineProfile {
+//    filter {
+//        include "**"
+//    }
+//}
 
 android {
     buildFeatures {

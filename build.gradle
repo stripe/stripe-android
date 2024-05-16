@@ -19,6 +19,7 @@ buildscript {
         classpath buildLibs.firebaseAppDistribution
         classpath buildLibs.googleServices
         classpath buildLibs.kotlinGradlePlugin
+        classpath buildLibs.benchmarkPlugin
         classpath buildLibs.kotlinSerializationPlugin
         classpath buildLibs.paparazzi
         classpath buildLibs.shot

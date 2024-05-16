@@ -86,6 +86,7 @@ ext.buildLibs = [
         paparazzi                   : "app.cash.paparazzi:paparazzi-gradle-plugin:${versions.paparazzi}",
         poko                        : "dev.drewhamilton.poko:poko-compiler-plugin:${versions.poko}",
         shot                        : "com.karumi:shot:${versions.shot}",
+        benchmarkPlugin             : "androidx.benchmark:benchmark-baseline-profile-gradle-plugin:1.2.4",
 ]
 
 ext.configs = [
@@ -101,7 +102,7 @@ ext.libs = [
                 navigationMaterial   : "com.google.accompanist:accompanist-navigation-material:${versions.accompanist}",
                 systemUiController   : "com.google.accompanist:accompanist-systemuicontroller:${versions.accompanist}",
                 materialThemeAdapter : "com.google.accompanist:accompanist-themeadapter-material:${versions.accompanist}",
-                material3ThemeAdapter : "com.google.accompanist:accompanist-themeadapter-material3:${versions.accompanist}",
+                material3ThemeAdapter: "com.google.accompanist:accompanist-themeadapter-material3:${versions.accompanist}",
                 webView              : "com.google.accompanist:accompanist-webview:${versions.accompanist}",
         ],
         alipay                              : "com.alipay.sdk:alipaysdk-android:${versions.alipay}",
