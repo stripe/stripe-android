@@ -18,10 +18,9 @@ class CvcRecollectionScreenScreenshotTest {
     )
 
     private val viewModel = CvcRecollectionViewModel(
-        CvcRecollectionContract.Args(
+        CvcRecollectionViewModel.Args(
             lastFour = "4242",
             cardBrand = CardBrand.Visa,
-            appearance = PaymentSheet.Appearance()
         )
     )
 

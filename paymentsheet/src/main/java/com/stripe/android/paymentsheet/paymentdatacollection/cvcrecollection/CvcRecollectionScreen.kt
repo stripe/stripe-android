@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.ui.core.elements.CvcController
 import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.H4Text
@@ -54,7 +55,13 @@ internal fun CvcRecollectionScreen(
     viewModel: CvcRecollectionViewModel = viewModel()
 ) {
     val element = remember {
-        CvcElement(IdentifierSpec(), CvcController(cardBrandFlow = stateFlowOf(CardBrand.Unknown)))
+        CvcElement(
+            IdentifierSpec(),
+            CvcController(
+                cardBrandFlow = stateFlowOf(viewModel.viewState.value.cardBrand
+                )
+            )
+        )
     }
 
     val viewState by viewModel.viewState.collectAsState()
@@ -156,28 +163,25 @@ private fun CvcRecollectionHeader(modifier: Modifier, viewModel: CvcRecollection
 
 @Composable
 private fun CvcRecollectionButton(viewModel: CvcRecollectionViewModel, element: CvcElement) {
+
+    val isComplete = element.controller.isComplete.collectAsState()
+
     Box(
         modifier = Modifier
             .fillMaxWidth(1f)
             .padding(0.dp, 32.dp, 0.dp, 20.dp),
         contentAlignment = Alignment.Center
     ) {
-        TextButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                viewModel.handleViewAction(
-                    CvcRecollectionViewAction.OnConfirmPressed(
-                        element.controller.fieldValue.value
-                    )
-                )
-            },
-            colors = ButtonDefaults.buttonColors(
-                backgroundColor = Color(
-                    StripeTheme.primaryButtonStyle.getBackgroundColor(LocalContext.current)
+        PrimaryButton(
+            label = stringResource(R.string.stripe_paymentsheet_confirm),
+            locked = false,
+            enabled = isComplete.value
+        ) {
+            viewModel.handleViewAction(
+                CvcRecollectionViewAction.OnConfirmPressed(
+                    element.controller.fieldValue.value
                 )
             )
-        ) {
-            Text(text = stringResource(R.string.stripe_paymentsheet_confirm))
         }
     }
 }
