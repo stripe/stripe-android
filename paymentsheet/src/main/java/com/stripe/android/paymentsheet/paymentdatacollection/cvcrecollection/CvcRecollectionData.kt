@@ -13,7 +13,9 @@ internal data class CvcRecollectionData(
         ): CvcRecollectionData? {
             return if (paymentSelection != null) {
                 CvcRecollectionData(paymentSelection.last4, paymentSelection.brand)
-            } else null
+            } else {
+                null
+            }
         }
     }
 }

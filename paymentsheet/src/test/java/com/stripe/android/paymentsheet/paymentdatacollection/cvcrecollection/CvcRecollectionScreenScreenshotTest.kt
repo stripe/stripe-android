@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
 import com.stripe.android.model.CardBrand
+import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -16,12 +17,19 @@ class CvcRecollectionScreenScreenshotTest {
         FontSize.entries
     )
 
+    private val viewModel = CvcRecollectionViewModel(
+        CvcRecollectionContract.Args(
+            lastFour = "4242",
+            cardBrand = CardBrand.Visa,
+            appearance = PaymentSheet.Appearance()
+        )
+    )
+
     @Test
     fun testEmpty() {
         paparazziRule.snapshot {
             CvcRecollectionScreen(
-                cardBrand = CardBrand.Visa,
-                lastFour = "4242"
+                viewModel = viewModel
             )
         }
     }
@@ -30,8 +38,7 @@ class CvcRecollectionScreenScreenshotTest {
     fun testFilled() {
         paparazziRule.snapshot {
             CvcRecollectionScreen(
-                cardBrand = CardBrand.Visa,
-                lastFour = "4242"
+                viewModel = viewModel
             )
         }
     }

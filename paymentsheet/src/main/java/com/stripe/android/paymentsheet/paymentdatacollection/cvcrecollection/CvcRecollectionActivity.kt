@@ -32,7 +32,6 @@ internal class CvcRecollectionActivity : AppCompatActivity() {
         args.appearance.parseAppearance()
         setContent {
             StripeTheme {
-
                 val bottomSheetState = rememberStripeBottomSheetState()
 
                 LaunchedEffect(bottomSheetState) {
