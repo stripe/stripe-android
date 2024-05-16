@@ -18,22 +18,34 @@ import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsThem
 import com.stripe.android.uicore.image.StripeImage
 
 @Composable
-internal fun InstitutionIcon(institutionIcon: String?) {
+internal fun InstitutionIcon(
+    institutionIcon: String?,
+    modifier: Modifier = Modifier,
+    disablePlaceholder: Boolean = false,
+) {
     val previewMode = LocalInspectionMode.current
-    val iconModifier = Modifier
+    val iconModifier = modifier
         .size(56.dp)
         .shadow(1.dp, RoundedCornerShape(12.dp), clip = true)
+
     when {
-        previewMode || institutionIcon == null -> InstitutionPlaceholder(iconModifier)
-        else -> StripeImage(
-            url = institutionIcon,
-            imageLoader = LocalImageLoader.current,
-            contentDescription = null,
-            modifier = iconModifier,
-            contentScale = ContentScale.Crop,
-            loadingContent = { Box(modifier = iconModifier.background(colors.backgroundOffset)) },
-            errorContent = { InstitutionPlaceholder(iconModifier) }
-        )
+        institutionIcon == null && disablePlaceholder -> {
+            Box(modifier = iconModifier.background(colors.backgroundOffset))
+        }
+        previewMode || institutionIcon == null -> {
+            InstitutionPlaceholder(iconModifier)
+        }
+        else -> {
+            StripeImage(
+                url = institutionIcon,
+                imageLoader = LocalImageLoader.current,
+                contentDescription = null,
+                modifier = iconModifier,
+                contentScale = ContentScale.Crop,
+                loadingContent = { Box(modifier = iconModifier.background(colors.backgroundOffset)) },
+                errorContent = { InstitutionPlaceholder(iconModifier) }
+            )
+        }
     }
 }
 

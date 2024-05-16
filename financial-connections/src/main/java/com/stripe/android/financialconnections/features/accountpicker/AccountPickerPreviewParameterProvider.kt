@@ -56,6 +56,18 @@ internal class AccountPickerPreviewParameterProvider :
     )
 
     private fun multiSelect() = AccountPickerState(
+        institution = Success(
+            FinancialConnectionsInstitution(
+                id = "1",
+                name = "Institution 1",
+                url = "Institution 1 url",
+                featured = false,
+                featuredOrder = null,
+                icon = Image(default = ""),
+                logo = null,
+                mobileHandoffCapable = false
+            )
+        ),
         payload = Success(
             AccountPickerState.Payload(
                 skipAccountSelection = false,
@@ -73,6 +85,18 @@ internal class AccountPickerPreviewParameterProvider :
     )
 
     private fun singleSelect() = AccountPickerState(
+        institution = Success(
+            FinancialConnectionsInstitution(
+                id = "1",
+                name = "Institution 1",
+                url = "Institution 1 url",
+                featured = false,
+                featuredOrder = null,
+                icon = Image(default = ""),
+                logo = null,
+                mobileHandoffCapable = false
+            )
+        ),
         payload = Success(
             AccountPickerState.Payload(
                 skipAccountSelection = false,

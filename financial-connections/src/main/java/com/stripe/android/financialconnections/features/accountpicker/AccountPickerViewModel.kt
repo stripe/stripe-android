@@ -33,6 +33,7 @@ import com.stripe.android.financialconnections.features.common.isDataFlow
 import com.stripe.android.financialconnections.features.notice.NoticeSheetState.NoticeSheetContent.DataAccess
 import com.stripe.android.financialconnections.features.notice.PresentNoticeSheet
 import com.stripe.android.financialconnections.model.DataAccessNotice
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.FinancialConnectionsSessionManifest.Pane
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.model.PartnerAccountsList
@@ -72,6 +73,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
     init {
         logErrors()
         onPayloadLoaded()
+        loadInstitution()
         loadAccounts()
     }
 
@@ -81,6 +83,16 @@ internal class AccountPickerViewModel @AssistedInject constructor(
             allowBackNavigation = false,
             error = state.payload.error,
         )
+    }
+
+    private fun loadInstitution() {
+        suspend {
+            val sync = getOrFetchSync()
+            val manifest = sync.manifest
+            requireNotNull(manifest.activeInstitution)
+        }.execute {
+            copy(institution = it)
+        }
     }
 
     private fun loadAccounts() {
@@ -376,6 +388,7 @@ internal class AccountPickerViewModel @AssistedInject constructor(
 }
 
 internal data class AccountPickerState(
+    val institution: Async<FinancialConnectionsInstitution> = Uninitialized,
     val payload: Async<Payload> = Uninitialized,
     val canRetry: Boolean = true,
     val selectAccounts: Async<PartnerAccountsList> = Uninitialized,

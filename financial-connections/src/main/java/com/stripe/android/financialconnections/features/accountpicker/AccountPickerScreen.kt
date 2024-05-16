@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
@@ -34,12 +35,14 @@ import com.stripe.android.financialconnections.features.accountpicker.AccountPic
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.SelectionMode
 import com.stripe.android.financialconnections.features.accountpicker.AccountPickerState.ViewEffect.OpenUrl
 import com.stripe.android.financialconnections.features.common.AccountItem
+import com.stripe.android.financialconnections.features.common.InstitutionIcon
 import com.stripe.android.financialconnections.features.common.LoadingShimmerEffect
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessModel
 import com.stripe.android.financialconnections.features.common.MerchantDataAccessText
 import com.stripe.android.financialconnections.features.common.NoAccountsAvailableErrorContent
 import com.stripe.android.financialconnections.features.common.NoSupportedPaymentMethodTypeAccountsErrorContent
 import com.stripe.android.financialconnections.features.common.UnclassifiedErrorContent
+import com.stripe.android.financialconnections.model.FinancialConnectionsInstitution
 import com.stripe.android.financialconnections.model.PartnerAccount
 import com.stripe.android.financialconnections.presentation.Async
 import com.stripe.android.financialconnections.presentation.Async.Fail
@@ -140,84 +143,91 @@ private fun AccountPickerLoaded(
     onClickableTextClick: (String) -> Unit,
     onSubmit: () -> Unit
 ) {
+    val displayablePayload = payload()?.takeIf { it.shouldSkipPane.not() }
+
     LazyLayout(
         lazyListState = lazyListState,
         verticalArrangement = Arrangement.spacedBy(16.dp),
         loading = payload is Loading,
         showPillOnSlowLoad = true,
         body = {
-            payload()
-                ?.takeIf { it.shouldSkipPane.not() }
-                ?.let {
-                    loadedContent(
-                        payload = it,
-                        state = state,
-                        onAccountClicked = onAccountClicked
-                    )
-                } ?: run { loadingContent() }
+            accountPickerContent(
+                institution = state.institution(),
+                payload = displayablePayload,
+                selectedIds = state.selectedIds,
+                onAccountClicked = onAccountClicked,
+            )
         },
         footer = {
-            payload()
-                ?.takeIf { it.shouldSkipPane.not() }
-                ?.let {
-                    Footer(
-                        merchantDataAccessModel = it.merchantDataAccess,
-                        onClickableTextClick = onClickableTextClick,
-                        submitEnabled = state.submitEnabled,
-                        submitLoading = state.submitLoading,
-                        onSubmit = onSubmit,
-                        selectedIds = state.selectedIds
-                    )
-                }
+            displayablePayload?.let {
+                Footer(
+                    merchantDataAccessModel = it.merchantDataAccess,
+                    onClickableTextClick = onClickableTextClick,
+                    submitEnabled = state.submitEnabled,
+                    submitLoading = state.submitLoading,
+                    onSubmit = onSubmit,
+                    selectedIds = state.selectedIds
+                )
+            }
         }
-
     )
 }
 
-private fun LazyListScope.loadedContent(
-    payload: AccountPickerState.Payload,
-    state: AccountPickerState,
-    onAccountClicked: (PartnerAccount) -> Unit
+private fun LazyListScope.accountPickerContent(
+    institution: FinancialConnectionsInstitution?,
+    payload: AccountPickerState.Payload?,
+    selectedIds: Set<String>,
+    onAccountClicked: (PartnerAccount) -> Unit,
 ) {
-    item {
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = stringResource(
-                when (payload.selectionMode) {
-                    SelectionMode.Single -> R.string.stripe_account_picker_singleselect_account
-                    SelectionMode.Multiple -> R.string.stripe_account_picker_multiselect_account
-                }
-            ),
-            style = FinancialConnectionsTheme.typography.headingXLarge
+    item("icon") {
+        InstitutionIcon(
+            institutionIcon = institution?.icon?.default,
+            modifier = Modifier.padding(top = 16.dp),
+            disablePlaceholder = true,
         )
     }
-    items(payload.accounts, key = { it.id }) { account ->
-        AccountItem(
-            selected = state.selectedIds.contains(account.id),
-            showInstitutionIcon = false,
-            onAccountClicked = onAccountClicked,
-            account = account,
-        )
-    }
-}
 
-private fun LazyListScope.loadingContent() {
-    item {
-        Text(
-            modifier = Modifier.fillMaxWidth(),
-            text = "Retrieving accounts",
-            style = FinancialConnectionsTheme.typography.headingXLarge
-        )
-    }
-    items(3) {
-        LoadingShimmerEffect {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(it)
+    item("header") {
+        if (payload != null) {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = stringResource(
+                    when (payload.selectionMode) {
+                        SelectionMode.Single -> R.string.stripe_account_picker_singleselect_account
+                        SelectionMode.Multiple -> R.string.stripe_account_picker_multiselect_account
+                    }
+                ),
+                style = FinancialConnectionsTheme.typography.headingXLarge
             )
+        } else {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = "Retrieving accounts",
+                style = FinancialConnectionsTheme.typography.headingXLarge
+            )
+        }
+    }
+
+    if (payload != null) {
+        items(payload.accounts, key = { it.id }) { account ->
+            AccountItem(
+                selected = selectedIds.contains(account.id),
+                showInstitutionIcon = false,
+                onAccountClicked = onAccountClicked,
+                account = account,
+            )
+        }
+    } else {
+        items(3) {
+            LoadingShimmerEffect {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(72.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(it)
+                )
+            }
         }
     }
 }
