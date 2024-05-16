@@ -29,8 +29,9 @@ tags:
       APP_ID: com.stripe.android.financialconnections.example
 ###############################################
 # SELECT SUCCESS ACCOUNT
-- extendedWaitUntil:
-    visible: "Success"
+- scrollUntilVisible:
+    element:
+      text: "Success"
     timeout: 60000
 - tapOn: "Success"
 - tapOn: "Connect Account"
