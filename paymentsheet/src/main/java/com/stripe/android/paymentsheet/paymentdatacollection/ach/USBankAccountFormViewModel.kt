@@ -209,9 +209,16 @@ internal class USBankAccountFormViewModel @Inject internal constructor(
             formFieldValues.all { it.second.isComplete }
         }
     ) { validName, validEmail, validPhone, validAddress ->
-        validName && validEmail &&
-            (validPhone || collectionConfiguration.phone != CollectionMode.Always) &&
+        val validBaseInfo = if (args.instantDebits) {
+            validEmail
+        } else {
+            validName && validEmail
+        }
+
+        val validAddressInfo = (validPhone || collectionConfiguration.phone != CollectionMode.Always) &&
             (validAddress || collectionConfiguration.address != AddressCollectionMode.Full)
+
+        validBaseInfo && validAddressInfo
     }
 
     @VisibleForTesting
