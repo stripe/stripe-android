@@ -838,6 +838,7 @@ internal abstract class BaseSheetViewModel(
         fun getPaymentMethodExtraParams(): PaymentMethodExtraParams?
 
         data class New(override val paymentSelection: PaymentSelection.New) : NewOrExternalPaymentSelection {
+
             override fun getPaymentMethodCode(): PaymentMethodCode {
                 return when (paymentSelection) {
                     is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
@@ -848,6 +849,7 @@ internal abstract class BaseSheetViewModel(
             }
 
             override fun getType(): String = paymentSelection.paymentMethodCreateParams.typeCode
+
             override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams =
                 paymentSelection.paymentMethodCreateParams
 
@@ -857,6 +859,7 @@ internal abstract class BaseSheetViewModel(
 
         data class External(override val paymentSelection: PaymentSelection.ExternalPaymentMethod) :
             NewOrExternalPaymentSelection {
+
             override fun getPaymentMethodCode(): PaymentMethodCode = paymentSelection.type
 
             override fun getType(): String = paymentSelection.type
