@@ -469,8 +469,8 @@ internal abstract class BaseSheetViewModel(
     fun updateSelection(selection: PaymentSelection?) {
         when (selection) {
             is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
-            is PaymentSelection.ExternalPaymentMethod -> newPaymentSelection =
-                NewOrExternalPaymentSelection.External(selection)
+            is PaymentSelection.ExternalPaymentMethod ->
+                newPaymentSelection = NewOrExternalPaymentSelection.External(selection)
             else -> Unit
         }
 
@@ -825,7 +825,9 @@ internal abstract class BaseSheetViewModel(
 
     data class UserErrorMessage(val message: String)
 
-    sealed interface NewOrExternalPaymentSelection {
+    internal sealed interface NewOrExternalPaymentSelection {
+
+        val paymentSelection: PaymentSelection
 
         fun getPaymentMethodCode(): PaymentMethodCode
 
@@ -835,7 +837,7 @@ internal abstract class BaseSheetViewModel(
 
         fun getPaymentMethodExtraParams(): PaymentMethodExtraParams?
 
-        data class New(val paymentSelection: PaymentSelection.New): NewOrExternalPaymentSelection {
+        data class New(override val paymentSelection: PaymentSelection.New) : NewOrExternalPaymentSelection {
             override fun getPaymentMethodCode(): PaymentMethodCode {
                 return when (paymentSelection) {
                     is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
@@ -846,11 +848,15 @@ internal abstract class BaseSheetViewModel(
             }
 
             override fun getType(): String = paymentSelection.paymentMethodCreateParams.typeCode
-            override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams = paymentSelection.paymentMethodCreateParams
-            override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = paymentSelection.paymentMethodExtraParams
+            override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams =
+                paymentSelection.paymentMethodCreateParams
+
+            override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? =
+                paymentSelection.paymentMethodExtraParams
         }
 
-        data class External(val paymentSelection: PaymentSelection.ExternalPaymentMethod): NewOrExternalPaymentSelection {
+        data class External(override val paymentSelection: PaymentSelection.ExternalPaymentMethod) :
+            NewOrExternalPaymentSelection {
             override fun getPaymentMethodCode(): PaymentMethodCode = paymentSelection.type
 
             override fun getType(): String = paymentSelection.type
@@ -860,7 +866,6 @@ internal abstract class BaseSheetViewModel(
             override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = null
         }
     }
-
 
     companion object {
         internal const val SAVED_CUSTOMER = "customer_info"
