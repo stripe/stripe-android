@@ -66,6 +66,7 @@ import com.stripe.android.uicore.R
 import com.stripe.android.uicore.elements.compat.CompatTextField
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -95,7 +96,7 @@ fun TextFieldSection(
     @StringRes sectionTitle: Int? = null,
     onTextStateChanged: (TextFieldState?) -> Unit = {}
 ) {
-    val error by textFieldController.error.collectAsState()
+    val error by textFieldController.error.collectAsStateSafely()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
@@ -139,19 +140,19 @@ fun TextField(
     focusRequester: FocusRequester = remember { FocusRequester() },
 ) {
     val focusManager = LocalFocusManager.current
-    val value by textFieldController.fieldValue.collectAsState()
-    val trailingIcon by textFieldController.trailingIcon.collectAsState()
-    val shouldShowError by textFieldController.visibleError.collectAsState()
-    val loading by textFieldController.loading.collectAsState()
-    val contentDescription by textFieldController.contentDescription.collectAsState()
-    val placeHolder by textFieldController.placeHolder.collectAsState()
+    val value by textFieldController.fieldValue.collectAsStateSafely()
+    val trailingIcon by textFieldController.trailingIcon.collectAsStateSafely()
+    val shouldShowError by textFieldController.visibleError.collectAsStateSafely()
+    val loading by textFieldController.loading.collectAsStateSafely()
+    val contentDescription by textFieldController.contentDescription.collectAsStateSafely()
+    val placeHolder by textFieldController.placeHolder.collectAsStateSafely()
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
 
     val fieldState by textFieldController.fieldState.collectAsState(
         TextFieldStateConstants.Error.Blank
     )
-    val label by textFieldController.label.collectAsState()
+    val label by textFieldController.label.collectAsStateSafely()
 
     LaunchedEffect(fieldState) {
         // When field is in focus and full, move to next field so the user can keep typing

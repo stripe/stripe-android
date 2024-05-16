@@ -58,6 +58,7 @@ import com.stripe.android.uicore.elements.menu.Checkbox
 import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.launch
 
 internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
@@ -74,8 +75,8 @@ fun LinkInlineSignup(
             factory = InlineSignupViewModel.Factory(component)
         )
 
-        val viewState by viewModel.viewState.collectAsState()
-        val errorMessage by viewModel.errorMessage.collectAsState()
+        val viewState by viewModel.viewState.collectAsStateSafely()
+        val errorMessage by viewModel.errorMessage.collectAsStateSafely()
 
         LaunchedEffect(viewState) {
             onStateChanged(component.configuration, viewState)
