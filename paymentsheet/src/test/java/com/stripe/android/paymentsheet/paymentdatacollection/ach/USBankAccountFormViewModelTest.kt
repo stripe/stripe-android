@@ -97,6 +97,16 @@ class USBankAccountFormViewModelTest {
         }
 
     @Test
+    fun `when name is valid then required fields are filled for instant debits flow`() =
+        runTest(UnconfinedTestDispatcher()) {
+            val viewModel = createViewModel(
+                args = defaultArgs.copy(instantDebits = true),
+            )
+
+            assertThat(viewModel.requiredFields.value).isTrue()
+        }
+
+    @Test
     fun `when email and name is invalid then required fields are not filled`() =
         runTest(UnconfinedTestDispatcher()) {
             val viewModel = createViewModel()
