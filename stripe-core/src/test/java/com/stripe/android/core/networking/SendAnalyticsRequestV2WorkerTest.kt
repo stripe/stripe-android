@@ -43,9 +43,19 @@ internal class SendAnalyticsRequestV2WorkerTest {
         )
     }
 
+    @Test
+    fun `Returns failure upon exceeding max attempts`() = runTest {
+        runWorkerTest(
+            executeRequest = { throw APIConnectionException() },
+            expectedResult = ListenableWorker.Result.failure(),
+            currentRunAttempt = 4,
+        )
+    }
+
     private suspend fun runWorkerTest(
         executeRequest: () -> StripeResponse<String>,
         expectedResult: ListenableWorker.Result,
+        currentRunAttempt: Int = 0,
     ) {
         val networkClient = FakeStripeNetworkClient(executeRequest = executeRequest)
         SendAnalyticsRequestV2Worker.setNetworkClient(networkClient)
@@ -59,6 +69,7 @@ internal class SendAnalyticsRequestV2WorkerTest {
 
         val worker = TestListenableWorkerBuilder<SendAnalyticsRequestV2Worker>(application)
             .setInputData(input)
+            .setRunAttemptCount(currentRunAttempt)
             .build()
 
         val result = worker.doWork()

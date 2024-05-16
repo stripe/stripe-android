@@ -25,10 +25,9 @@ internal class SendAnalyticsRequestV2Worker(
                 Result.success()
             },
             onFailure = { error ->
-                if (error.shouldRetry && runAttemptCount < MaxAttempts) {
+                if (error.shouldRetry && runAttemptCount < MaxAttempts - 1) {
                     Result.retry()
                 } else {
-                    deleteRequest()
                     Result.failure()
                 }
             },
@@ -39,12 +38,15 @@ internal class SendAnalyticsRequestV2Worker(
         val id = inputData.getString(DataKey) ?: return Result.failure()
         val request = storage(applicationContext).retrieve(id) ?: return Result.failure()
         val workManagerRequest = request.withWorkManagerParams(runAttemptCount)
-        return block(workManagerRequest)
-    }
 
-    private suspend fun deleteRequest() {
-        val id = inputData.getString(DataKey) ?: return
-        storage(applicationContext).delete(id)
+        val result = block(workManagerRequest)
+        val canRemove = result != Result.retry()
+
+        if (canRemove) {
+            storage(applicationContext).delete(id)
+        }
+
+        return block(workManagerRequest)
     }
 
     companion object {
