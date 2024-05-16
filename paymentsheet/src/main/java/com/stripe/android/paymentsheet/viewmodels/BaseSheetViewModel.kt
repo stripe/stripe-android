@@ -17,6 +17,8 @@ import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
+import com.stripe.android.model.PaymentMethodCreateParams
+import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
@@ -195,7 +197,7 @@ internal abstract class BaseSheetViewModel(
      * save a new payment method that is added so that the payment data entered is recovered when
      * the user returns to that payment method type.
      */
-    abstract var newPaymentSelection: PaymentSelection.New?
+    abstract var newPaymentSelection: NewOrExternalPaymentSelection?
 
     abstract fun onFatal(throwable: Throwable)
 
@@ -256,13 +258,7 @@ internal abstract class BaseSheetViewModel(
     )
 
     val initiallySelectedPaymentMethodType: PaymentMethodCode
-        get() = when (val selection = newPaymentSelection) {
-            is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
-            is PaymentSelection.New.Card,
-            is PaymentSelection.New.USBankAccount,
-            is PaymentSelection.New.GenericPaymentMethod -> selection.paymentMethodCreateParams.typeCode
-            else -> _supportedPaymentMethodsFlow.value.first()
-        }
+        get() = newPaymentSelection?.getPaymentMethodCode() ?: _supportedPaymentMethodsFlow.value.first()
 
     init {
         viewModelScope.launch {
@@ -471,8 +467,11 @@ internal abstract class BaseSheetViewModel(
     abstract fun handleConfirmUSBankAccount(paymentSelection: PaymentSelection.New.USBankAccount)
 
     fun updateSelection(selection: PaymentSelection?) {
-        if (selection is PaymentSelection.New) {
-            newPaymentSelection = selection
+        when (selection) {
+            is PaymentSelection.New -> newPaymentSelection = NewOrExternalPaymentSelection.New(selection)
+            is PaymentSelection.ExternalPaymentMethod -> newPaymentSelection =
+                NewOrExternalPaymentSelection.External(selection)
+            else -> Unit
         }
 
         savedStateHandle[SAVE_SELECTION] = selection
@@ -711,14 +710,14 @@ internal abstract class BaseSheetViewModel(
     }
 
     fun formElementsForCode(code: String): List<FormElement> {
-        val currentSelection = newPaymentSelection?.takeIf { it.paymentMethodCreateParams.typeCode == code }
+        val currentSelection = newPaymentSelection?.takeIf { it.getType() == code }
 
         return paymentMethodMetadata.value?.formElementsForCode(
             code = code,
             uiDefinitionFactoryArgumentsFactory = UiDefinitionFactory.Arguments.Factory.Default(
                 cardAccountRangeRepositoryFactory = cardAccountRangeRepositoryFactory,
-                paymentMethodCreateParams = currentSelection?.paymentMethodCreateParams,
-                paymentMethodExtraParams = currentSelection?.paymentMethodExtraParams,
+                paymentMethodCreateParams = currentSelection?.getPaymentMethodCreateParams(),
+                paymentMethodExtraParams = currentSelection?.getPaymentMethodExtraParams(),
             ),
         ) ?: emptyList()
     }
@@ -825,6 +824,43 @@ internal abstract class BaseSheetViewModel(
     abstract fun onError(error: String? = null)
 
     data class UserErrorMessage(val message: String)
+
+    sealed interface NewOrExternalPaymentSelection {
+
+        fun getPaymentMethodCode(): PaymentMethodCode
+
+        fun getType(): String
+
+        fun getPaymentMethodCreateParams(): PaymentMethodCreateParams?
+
+        fun getPaymentMethodExtraParams(): PaymentMethodExtraParams?
+
+        data class New(val paymentSelection: PaymentSelection.New): NewOrExternalPaymentSelection {
+            override fun getPaymentMethodCode(): PaymentMethodCode {
+                return when (paymentSelection) {
+                    is PaymentSelection.New.LinkInline -> PaymentMethod.Type.Card.code
+                    is PaymentSelection.New.Card,
+                    is PaymentSelection.New.USBankAccount,
+                    is PaymentSelection.New.GenericPaymentMethod -> paymentSelection.paymentMethodCreateParams.typeCode
+                }
+            }
+
+            override fun getType(): String = paymentSelection.paymentMethodCreateParams.typeCode
+            override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams = paymentSelection.paymentMethodCreateParams
+            override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = paymentSelection.paymentMethodExtraParams
+        }
+
+        data class External(val paymentSelection: PaymentSelection.ExternalPaymentMethod): NewOrExternalPaymentSelection {
+            override fun getPaymentMethodCode(): PaymentMethodCode = paymentSelection.type
+
+            override fun getType(): String = paymentSelection.type
+
+            override fun getPaymentMethodCreateParams(): PaymentMethodCreateParams? = null
+
+            override fun getPaymentMethodExtraParams(): PaymentMethodExtraParams? = null
+        }
+    }
+
 
     companion object {
         internal const val SAVED_CUSTOMER = "customer_info"
