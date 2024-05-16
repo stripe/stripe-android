@@ -7,6 +7,7 @@ import androidx.work.testing.TestListenableWorkerBuilder
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.InvalidRequestException
+import com.stripe.android.core.utils.FakeAnalyticsRequestV2Storage
 import com.stripe.android.core.utils.FakeStripeNetworkClient
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -42,20 +43,34 @@ internal class SendAnalyticsRequestV2WorkerTest {
         )
     }
 
+    @Test
+    fun `Returns failure upon exceeding max attempts`() = runTest {
+        runWorkerTest(
+            executeRequest = { throw APIConnectionException() },
+            expectedResult = ListenableWorker.Result.failure(),
+            currentRunAttempt = 4,
+        )
+    }
+
     private suspend fun runWorkerTest(
         executeRequest: () -> StripeResponse<String>,
         expectedResult: ListenableWorker.Result,
+        currentRunAttempt: Int = 0,
     ) {
+        val networkClient = FakeStripeNetworkClient(executeRequest = executeRequest)
+        SendAnalyticsRequestV2Worker.setNetworkClient(networkClient)
+
+        val storage = FakeAnalyticsRequestV2Storage()
+        SendAnalyticsRequestV2Worker.setStorage(storage)
+
         val request = mockAnalyticsRequest()
-        val input = SendAnalyticsRequestV2Worker.createInputData(request)
+        val id = storage.store(request)
+        val input = SendAnalyticsRequestV2Worker.createInputData(id)
 
         val worker = TestListenableWorkerBuilder<SendAnalyticsRequestV2Worker>(application)
             .setInputData(input)
+            .setRunAttemptCount(currentRunAttempt)
             .build()
-
-        val networkClient = FakeStripeNetworkClient(executeRequest = executeRequest)
-
-        SendAnalyticsRequestV2Worker.setNetworkClient(networkClient)
 
         val result = worker.doWork()
         assertThat(result).isEqualTo(expectedResult)
