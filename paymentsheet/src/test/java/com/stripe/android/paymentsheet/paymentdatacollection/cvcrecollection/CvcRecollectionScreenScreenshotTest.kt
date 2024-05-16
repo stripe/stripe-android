@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection
 
 import com.stripe.android.model.CardBrand
-import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
