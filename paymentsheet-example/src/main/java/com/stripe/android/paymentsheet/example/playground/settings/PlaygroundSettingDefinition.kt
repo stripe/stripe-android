@@ -23,6 +23,8 @@ internal interface PlaygroundSettingDefinition<T> {
 
     fun valueUpdated(value: T, playgroundSettings: PlaygroundSettings) {}
 
+    fun applicable(configurationData: PlaygroundConfigurationData): Boolean = true
+
     fun saveable(): Saveable<T>? {
         @Suppress("UNCHECKED_CAST")
         return this as? Saveable<T>?

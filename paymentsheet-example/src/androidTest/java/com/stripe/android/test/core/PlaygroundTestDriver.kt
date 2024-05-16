@@ -37,8 +37,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
-import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
-import com.stripe.android.paymentsheet.example.playground.settings.IntegrationTypeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
@@ -181,7 +180,11 @@ internal class PlaygroundTestDriver(
     ): PlaygroundState? {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+                }
             }
         )
         launchCustom()
@@ -229,7 +232,11 @@ internal class PlaygroundTestDriver(
     ): PlaygroundState? {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+                }
 
                 customerId?.let { id ->
                     settings[CustomerSettingsDefinition] = CustomerType.Existing(id)
@@ -283,7 +290,12 @@ internal class PlaygroundTestDriver(
 
         setup(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+                }
+
                 settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
             }
         )
@@ -605,7 +617,11 @@ internal class PlaygroundTestDriver(
     ) {
         setup(
             testParameters.copyPlaygroundSettings { settings ->
-                settings[IntegrationTypeSettingsDefinition] = IntegrationType.FlowController
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.FlowController
+                    )
+                }
             }
         )
         launchCustom()
