@@ -31,17 +31,30 @@ class FlowToStateFlow<T>(
     private val flow: Flow<T>,
     private val produceValue: () -> T,
 ) : StateFlow<T> {
+    @Volatile
+    private var currentValue: T? = null
 
     override val replayCache: List<T>
         get() = listOf(value)
 
     override val value: T
-        get() = produceValue()
+        get() = currentValue ?: run {
+            val result = produceValue()
+            currentValue = result
+            result
+        }
 
     @InternalCoroutinesApi
     override suspend fun collect(collector: FlowCollector<T>): Nothing {
+        if (currentValue == null) {
+            currentValue = produceValue()
+        }
         val collectorJob = currentCoroutineContext()[Job]
-        flow.distinctUntilChanged().collect(collector)
+        flow.distinctUntilChanged().collect(
+            InterceptingCollector(collector) {
+                currentValue = it
+            }
+        )
 
         try {
             while (true) {
@@ -50,6 +63,16 @@ class FlowToStateFlow<T>(
         } finally {
             // Nothing to do here
         }
+    }
+}
+
+private class InterceptingCollector<T>(
+    private val delegate: FlowCollector<T>,
+    private val valueUpdater: (T) -> Unit,
+) : FlowCollector<T> {
+    override suspend fun emit(value: T) {
+        valueUpdater(value)
+        delegate.emit(value)
     }
 }
 
