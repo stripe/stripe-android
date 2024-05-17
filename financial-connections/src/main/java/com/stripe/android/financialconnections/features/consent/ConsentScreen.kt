@@ -1,5 +1,6 @@
 package com.stripe.android.financialconnections.features.consent
 
+import androidx.activity.compose.ReportDrawnWhen
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -14,7 +15,10 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
@@ -119,6 +123,7 @@ private fun LoadedContent(
     onContinueClick: () -> Unit,
 ) {
     val scrollState = rememberLazyListState()
+    var contentComposed by remember { mutableStateOf(false) }
     val title = remember(payload.consent.title) {
         TextResource.Text(fromHtml(payload.consent.title))
     }
@@ -143,9 +148,11 @@ private fun LoadedContent(
                     onClickableTextClick = onClickableTextClick,
                     onContinueClick = onContinueClick
                 )
+                contentComposed = true
             }
         )
     }
+    ReportDrawnWhen { contentComposed }
 }
 
 private fun LazyListScope.consentBody(

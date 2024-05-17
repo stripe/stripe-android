@@ -86,8 +86,7 @@ internal class FinancialConnectionsSheetNativeViewModel @Inject constructor(
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetNativeState>(
     initialState,
     nativeAuthFlowCoordinator
-),
-    TopAppBarHost {
+), TopAppBarHost {
 
     private val mutex = Mutex()
     val navigationFlow = navigationManager.navigationFlow

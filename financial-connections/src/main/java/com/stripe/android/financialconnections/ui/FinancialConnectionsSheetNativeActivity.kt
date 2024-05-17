@@ -85,8 +85,12 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         if (getArgs(intent) == null) {
-            finish()
-            return
+            if (intent.data.toString().contains("macrobenchmark")) {
+                intent.putExtra(EXTRA_ARGS, MacrobenchmarkMocks.nativeArgs())
+            } else {
+                finish()
+                return
+            }
         }
 
         viewModel.activityRetainedComponent.inject(this)

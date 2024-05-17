@@ -17,9 +17,7 @@ import org.junit.runner.RunWith
  *
  * You can run the generator with the "Generate Baseline Profile" run configuration in Android Studio or
  * the equivalent `generateBaselineProfile` gradle task:
- * ```
- * ./gradlew :financial-connections-example:generateReleaseBaselineProfile
- * ```
+ *
  * The run configuration runs the Gradle task and applies filtering to run only the generators.
  *
  * Check [documentation](https://d.android.com/topic/performance/benchmarking/macrobenchmark-instrumentation-args)
@@ -43,18 +41,12 @@ class BaselineProfileGenerator {
         rule.collect(
             packageName = InstrumentationRegistry.getArguments().getString("targetAppId")
                 ?: throw Exception("targetAppId not passed as instrumentation runner "),
+            // startup profiles cannot be contributed by libraries.
             // See: https://d.android.com/topic/performance/baselineprofiles/dex-layout-optimizations
-            includeInStartupProfile = true
+            includeInStartupProfile = false
         ) {
-            pressHome()
-
-            startActivityAndWait()
-
-//            perform()
-//
-//            Espresso.
-//
-//            onView(withText("Connect Accounts")).perform(click())
+            val intent = financialConnectionsPlaygroundIntent()
+            startActivityAndWait(intent)
         }
     }
 }
