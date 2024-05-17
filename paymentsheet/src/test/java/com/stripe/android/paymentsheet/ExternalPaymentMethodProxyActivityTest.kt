@@ -12,7 +12,6 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.Address
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.testing.FakeErrorReporter
-import com.stripe.android.utils.TestUtils.idleLooper
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -27,38 +26,53 @@ class ExternalPaymentMethodProxyActivityTest {
 
     @Test
     fun `ExternalPaymentMethodInterceptor calls confirm handler`() {
-        var confirmedType: String? = null
-        var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
-        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
-            DefaultExternalPaymentMethodConfirmHandler(
-                setConfirmedType = { confirmedType = it },
-                setConfirmedBillingDetails = { confirmedBillingDetails = it }
-            )
+        val confirmHandler = DefaultExternalPaymentMethodConfirmHandler()
+        val activityLauncher = ExternalPaymentMethodActivityResultLauncher(
+            context,
+        )
         val expectedExternalPaymentMethodType = "external_fawry"
         val expectedBillingDetails =
             PaymentMethod.BillingDetails(name = "Joe", address = Address(city = "Seattle", line1 = "123 Main St"))
-        var scenario: ActivityScenario<ExternalPaymentMethodProxyActivity>? = null
 
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = confirmHandler
         ExternalPaymentMethodInterceptor.intercept(
             externalPaymentMethodType = expectedExternalPaymentMethodType,
             billingDetails = expectedBillingDetails,
             onPaymentResult = {},
-            externalPaymentMethodLauncher = ExternalPaymentMethodActivityResultLauncher(
-                context,
-                setScenario = { scenario = it }
-            ),
+            externalPaymentMethodLauncher = activityLauncher,
             errorReporter = FakeErrorReporter(),
         )
 
-        idleLooper()
-
-        assertThat(confirmedType).isEqualTo(expectedExternalPaymentMethodType)
-        assertThat(confirmedBillingDetails).isEqualTo(expectedBillingDetails)
+        assertThat(confirmHandler.confirmedType).isEqualTo(expectedExternalPaymentMethodType)
+        assertThat(confirmHandler.confirmedBillingDetails).isEqualTo(expectedBillingDetails)
         runCatching {
-            scenario?.result
+            activityLauncher.scenario?.result
         }.onSuccess {
             fail(message = "Activity has finished, but it should not have finished yet!")
         }
+    }
+
+    @Test
+    fun `Confirm is not called again when activity is recreated`() {
+        val confirmHandler = DefaultExternalPaymentMethodConfirmHandler()
+        val activityLauncher = ExternalPaymentMethodActivityResultLauncher(
+            context,
+        )
+
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = confirmHandler
+        ExternalPaymentMethodInterceptor.intercept(
+            externalPaymentMethodType = "external_fawry",
+            billingDetails = PaymentMethod.BillingDetails(),
+            onPaymentResult = {},
+            externalPaymentMethodLauncher = activityLauncher,
+            errorReporter = FakeErrorReporter(),
+        )
+
+        assertThat(confirmHandler.callCount).isEqualTo(1)
+
+        activityLauncher.scenario?.recreate()
+
+        assertThat(confirmHandler.callCount).isEqualTo(1)
     }
 
     @Test
@@ -104,23 +118,27 @@ class ExternalPaymentMethodProxyActivityTest {
         assertThat(scenario.result).isNotNull()
     }
 
-    class DefaultExternalPaymentMethodConfirmHandler(
-        private val setConfirmedType: (String?) -> Unit,
-        private val setConfirmedBillingDetails: (PaymentMethod.BillingDetails?) -> Unit,
-    ) : ExternalPaymentMethodConfirmHandler {
+    class DefaultExternalPaymentMethodConfirmHandler : ExternalPaymentMethodConfirmHandler {
+
+        var confirmedType: String? = null
+        var confirmedBillingDetails: PaymentMethod.BillingDetails? = null
+        var callCount: Int = 0
+
         override fun confirmExternalPaymentMethod(
             externalPaymentMethodType: String,
             billingDetails: PaymentMethod.BillingDetails
         ) {
-            setConfirmedType(externalPaymentMethodType)
-            setConfirmedBillingDetails(billingDetails)
+            this.callCount += 1
+            this.confirmedType = externalPaymentMethodType
+            this.confirmedBillingDetails = billingDetails
         }
     }
 
     internal class ExternalPaymentMethodActivityResultLauncher(
         private val context: Context,
-        private val setScenario: (ActivityScenario<ExternalPaymentMethodProxyActivity>) -> Unit,
     ) : ActivityResultLauncher<ExternalPaymentMethodInput>() {
+        var scenario: ActivityScenario<ExternalPaymentMethodProxyActivity>? = null
+
         override fun launch(input: ExternalPaymentMethodInput?, options: ActivityOptionsCompat?) {
             val contract = ExternalPaymentMethodContract(errorReporter = FakeErrorReporter())
             val scenario: ActivityScenario<ExternalPaymentMethodProxyActivity> =
@@ -128,7 +146,7 @@ class ExternalPaymentMethodProxyActivityTest {
                     contract.createIntent(context, input!!)
                 )
 
-            setScenario(scenario)
+            this.scenario = scenario
         }
 
         override fun unregister() {

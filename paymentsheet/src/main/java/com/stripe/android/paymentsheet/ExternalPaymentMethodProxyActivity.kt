@@ -16,15 +16,19 @@ import com.stripe.android.model.PaymentMethod
  */
 internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
 
+    private var hasConfirmStarted: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        savedInstanceState?.getBoolean(HAS_CONFIRM_STARTED_KEY)?.let { hasConfirmStarted = it }
 
         val type = intent.getStringExtra(EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE)
 
         @Suppress("DEPRECATION")
         val billingDetails = intent.getParcelableExtra<PaymentMethod.BillingDetails>(EXTRA_BILLING_DETAILS)
 
-        if (type != null) {
+        if (type != null && !hasConfirmStarted) {
+            hasConfirmStarted = true
             ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler?.confirmExternalPaymentMethod(
                 type,
                 billingDetails ?: PaymentMethod.BillingDetails()
@@ -68,8 +72,16 @@ internal class ExternalPaymentMethodProxyActivity : AppCompatActivity() {
         }
     }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        outState.putBoolean(HAS_CONFIRM_STARTED_KEY, hasConfirmStarted)
+
+        super.onSaveInstanceState(outState)
+    }
+
     internal companion object {
         const val EXTRA_EXTERNAL_PAYMENT_METHOD_TYPE = "external_payment_method_type"
         const val EXTRA_BILLING_DETAILS = "external_payment_method_billing_details"
+
+        const val HAS_CONFIRM_STARTED_KEY = "has_confirm_started"
     }
 }
