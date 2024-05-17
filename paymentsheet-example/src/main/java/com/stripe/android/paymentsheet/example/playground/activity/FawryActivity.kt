@@ -50,6 +50,12 @@ class FawryActivity : AppCompatActivity() {
         }
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+
+        ExternalPaymentMethodResultHandler.onExternalPaymentMethodResult(this, ExternalPaymentMethodResult.canceled())
+    }
+
     private fun onExternalPaymentMethodResult(
         context: Context,
         externalPaymentMethodResult: ExternalPaymentMethodResult
