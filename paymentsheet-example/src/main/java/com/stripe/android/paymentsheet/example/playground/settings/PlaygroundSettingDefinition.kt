@@ -63,9 +63,10 @@ internal interface PlaygroundSettingDefinition<T> {
             get() = true
     }
 
-    interface Displayable<T> : PlaygroundSettingDefinition<T> {
+    sealed interface Displayable<T> : PlaygroundSettingDefinition<T> {
         val displayName: String
-        val options: List<Option<T>>
+
+        fun createOptions(configurationData: PlaygroundConfigurationData): List<Option<T>>
 
         fun option(name: String, value: T): Option<T> {
             return Option(name, value)

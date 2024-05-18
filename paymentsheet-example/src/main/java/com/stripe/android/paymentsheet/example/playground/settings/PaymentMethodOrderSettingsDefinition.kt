@@ -10,10 +10,13 @@ internal object PaymentMethodOrderSettingsDefinition :
     override val key: String = "paymentMethodOrder"
     override val displayName: String = "Payment method order"
     override val defaultValue: String = ""
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<String>> = emptyList()
 
     override fun convertToString(value: String): String = value
     override fun convertToValue(value: String): String = value
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
 
     override fun configure(
         value: String,

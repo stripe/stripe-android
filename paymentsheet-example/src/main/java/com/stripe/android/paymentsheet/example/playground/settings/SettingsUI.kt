@@ -54,9 +54,15 @@ private fun <T> Setting(
     settingDefinition: PlaygroundSettingDefinition.Displayable<T>,
     playgroundSettings: PlaygroundSettings,
 ) {
+    val configurationData by playgroundSettings.configurationData.collectAsState()
+
+    val options = remember(configurationData) {
+        settingDefinition.createOptions(configurationData)
+    }
+
     Setting(
         name = settingDefinition.displayName,
-        options = settingDefinition.options,
+        options = options,
         valueFlow = playgroundSettings[settingDefinition],
     ) { newValue ->
         playgroundSettings[settingDefinition] = newValue
