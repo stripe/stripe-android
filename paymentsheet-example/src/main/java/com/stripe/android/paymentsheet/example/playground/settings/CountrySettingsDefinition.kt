@@ -12,17 +12,29 @@ internal object CountrySettingsDefinition :
         defaultValue = Country.US,
     ),
     PlaygroundSettingDefinition.Displayable<Country> {
-    private val supportedCountries = Country.entries.map { it.value }.toSet()
+    private val supportedPaymentFlowCountries = Country.entries.map { it.value }.toSet()
+    private val supportedCustomerFlowCountries = setOf(
+        Country.US,
+        Country.FR,
+    )
 
     override val displayName: String = "Merchant"
 
     override fun createOptions(
         configurationData: PlaygroundConfigurationData
-    ) = CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
-        country.code.value in supportedCountries
-    }.map { country ->
-        option(country.name, convertToValue(country.code.value))
-    }.toList()
+    ): List<PlaygroundSettingDefinition.Displayable.Option<Country>> {
+        val supportedCountries = if (configurationData.integrationType.isPaymentFlow()) {
+            supportedPaymentFlowCountries
+        } else {
+            supportedCustomerFlowCountries
+        }
+
+        return CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
+            country.code.value in supportedCountries
+        }.map { country ->
+            option(country.name, convertToValue(country.code.value))
+        }.toList()
+    }
 
     override fun configure(value: Country, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.merchantCountryCode(value.value)

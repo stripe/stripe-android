@@ -28,6 +28,10 @@ internal object ExternalPaymentMethodSettingsDefinition :
 
     override fun convertToString(value: ExternalPaymentMethodType): String = value.value
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(
         value: ExternalPaymentMethodType,
         configurationBuilder: PaymentSheet.Configuration.Builder,

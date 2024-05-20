@@ -7,6 +7,10 @@ internal object AutomaticPaymentMethodsSettingsDefinition : BooleanSettingsDefin
     displayName = "Automatic Payment Methods",
     defaultValue = true,
 ) {
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(
         value: Boolean,
         checkoutRequestBuilder: CheckoutRequest.Builder,

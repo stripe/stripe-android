@@ -22,6 +22,10 @@ internal object InitializationTypeSettingsDefinition :
         option("Deferred SSC + MP", InitializationType.DeferredMultiprocessor),
     )
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(
         value: InitializationType,
         checkoutRequestBuilder: CheckoutRequest.Builder
