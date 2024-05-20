@@ -142,7 +142,7 @@ internal abstract class IdentityScanViewModel(
 
     fun stopScan(lifecycleOwner: LifecycleOwner) {
         requireNotNull(identityScanFlow).resetFlow()
-        cameraManager.requireCameraAdapter().unbindFromLifecycle(lifecycleOwner)
+        cameraManager.cameraAdapter?.unbindFromLifecycle(lifecycleOwner)
     }
 
     /**

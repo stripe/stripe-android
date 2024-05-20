@@ -20,6 +20,7 @@
         <activity
             android:name=".addresselement.AddressElementActivity"
             android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:windowSoftInputMode="adjustResize"
             android:exported="false" />
         <activity
             android:name=".paymentdatacollection.bacs.BacsMandateConfirmationActivity"

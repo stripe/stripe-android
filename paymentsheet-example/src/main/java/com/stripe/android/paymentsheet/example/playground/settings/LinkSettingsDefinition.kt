@@ -7,6 +7,10 @@ internal object LinkSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Link",
     defaultValue = true,
 ) {
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(
         value: Boolean,
         checkoutRequestBuilder: CheckoutRequest.Builder,

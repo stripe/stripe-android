@@ -18,7 +18,7 @@ internal class ExternalPaymentMethodUiDefinitionFactory(
             lightThemeIconUrl = externalPaymentMethodSpec.lightImageUrl,
             darkThemeIconUrl = externalPaymentMethodSpec.darkImageUrl,
             iconResource = 0,
-            tintIconOnSelection = false,
+            iconRequiresTinting = false,
         )
     }
 

@@ -18,6 +18,10 @@ internal object PrimaryButtonLabelSettingsDefinition :
         configurationData: PlaygroundConfigurationData
     ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(
         value: String,
         configurationBuilder: PaymentSheet.Configuration.Builder,

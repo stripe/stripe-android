@@ -47,7 +47,7 @@ class PaymentMethodsUIScreenshotTest {
             code = "us_bank_account",
             displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
             iconResource = R.drawable.stripe_ic_paymentsheet_pm_bank,
-            tintIconOnSelection = true
+            iconRequiresTinting = true
         )
         val paymentMethods = paymentMethods.toMutableList()
         paymentMethods.add(1, bankPaymentMethod)
@@ -117,7 +117,7 @@ class PaymentMethodsUIScreenshotTest {
                 iconResource = 0,
                 lightThemeIconUrl = null,
                 darkThemeIconUrl = null,
-                tintIconOnSelection = false,
+                iconRequiresTinting = false,
             )
         ).plus(paymentMethods)
         paparazziRule.snapshot {
