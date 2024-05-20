@@ -27,31 +27,30 @@ internal data class SupportedPaymentMethod(
     /** An optional dark theme icon url if it's supported. */
     val darkThemeIconUrl: String?,
 
-    /** Indicates if the lpm icon in the selector is a single color and should be tinted
-     * on selection.
+    /** Indicates if the lpm icon in the selector requires tinting.
      */
-    val tintIconOnSelection: Boolean,
+    val iconRequiresTinting: Boolean,
 ) {
     constructor(
         paymentMethodDefinition: PaymentMethodDefinition,
         sharedDataSpec: SharedDataSpec? = null,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
-        tintIconOnSelection: Boolean = false,
+        iconRequiresTinting: Boolean = false,
     ) : this(
         code = paymentMethodDefinition.type.code,
         displayName = resolvableString(id = displayNameResource),
         iconResource = iconResource,
         lightThemeIconUrl = sharedDataSpec?.selectorIcon?.lightThemePng,
         darkThemeIconUrl = sharedDataSpec?.selectorIcon?.darkThemePng,
-        tintIconOnSelection = tintIconOnSelection,
+        iconRequiresTinting = iconRequiresTinting,
     )
 
     constructor(
         code: PaymentMethodCode,
         @StringRes displayNameResource: Int,
         @DrawableRes iconResource: Int,
-        tintIconOnSelection: Boolean = false,
+        iconRequiresTinting: Boolean = false,
         lightThemeIconUrl: String?,
         darkThemeIconUrl: String?,
     ) : this(
@@ -60,6 +59,6 @@ internal data class SupportedPaymentMethod(
         iconResource = iconResource,
         lightThemeIconUrl = lightThemeIconUrl,
         darkThemeIconUrl = darkThemeIconUrl,
-        tintIconOnSelection = tintIconOnSelection,
+        iconRequiresTinting = iconRequiresTinting,
     )
 }

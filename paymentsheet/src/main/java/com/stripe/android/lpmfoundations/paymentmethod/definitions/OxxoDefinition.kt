@@ -33,6 +33,6 @@ private object OxxoUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDataS
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_oxxo,
         lightThemeIconUrl = null,
         darkThemeIconUrl = null,
-        tintIconOnSelection = false,
+        iconRequiresTinting = false,
     )
 }

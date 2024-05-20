@@ -626,7 +626,7 @@ internal class PaymentMethodMetadataTest {
             lightThemeIconUrl = "example_url",
             darkThemeIconUrl = null,
             iconResource = 0,
-            tintIconOnSelection = false,
+            iconRequiresTinting = false,
         )
 
         val actualSupportedPaymentMethod = metadata.supportedPaymentMethodForCode("external_paypal")
