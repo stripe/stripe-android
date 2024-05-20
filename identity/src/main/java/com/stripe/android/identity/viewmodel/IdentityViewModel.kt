@@ -476,8 +476,10 @@ internal class IdentityViewModel constructor(
                 isFront = true
                 targetScanType = IdentityScanState.ScanType.DOC_FRONT
                 logError(
-                    IllegalStateException("incorrect legacy targetScanType: ${legacyOutput.category}, " +
-                        "upload as DOC_FRONT")
+                    IllegalStateException(
+                        "incorrect legacy targetScanType: ${legacyOutput.category}, " +
+                        "upload as DOC_FRONT"
+                    )
                 )
             }
         }
@@ -537,8 +539,10 @@ internal class IdentityViewModel constructor(
                 isFront = true
                 targetScanType = IdentityScanState.ScanType.DOC_FRONT
                 logError(
-                    IllegalStateException("incorrect modern targetScanType: ${modernOutput.category}, " +
-                        "upload as DOC_FRONT")
+                    IllegalStateException(
+                        "incorrect modern targetScanType: ${modernOutput.category}, " +
+                        "upload as DOC_FRONT"
+                    )
                 )
             }
         }
