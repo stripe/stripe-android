@@ -182,12 +182,6 @@ internal fun PaymentMethodUI(
     modifier: Modifier = Modifier,
     onItemSelectedListener: () -> Unit
 ) {
-    val color = if (isSelected) {
-        MaterialTheme.colors.primary
-    } else {
-        MaterialTheme.stripeColors.onComponent
-    }
-
     RowButton(
         isEnabled = isEnabled,
         isSelected = isSelected,
@@ -209,7 +203,7 @@ internal fun PaymentMethodUI(
                 iconRes = iconRes,
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
-                color = color,
+                color = MaterialTheme.stripeColors.onComponent,
                 tintOnSelected = tintOnSelected
             )
         }
@@ -217,7 +211,7 @@ internal fun PaymentMethodUI(
         LpmSelectorText(
             text = title,
             isEnabled = isEnabled,
-            textColor = color,
+            textColor = MaterialTheme.stripeColors.onComponent,
             modifier = Modifier.padding(top = 6.dp),
         )
     }
