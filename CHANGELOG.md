@@ -1,6 +1,8 @@
 # CHANGELOG
 
 ## XX.XX.XX - 20XX-XX-XX
+
+## 20.43.1 - 2024-05-20
 * [ADDED][8466](https://github.com/stripe/stripe-android/pull/8466) Added support for [external payment methods](https://docs.stripe.com/payments/external-payment-methods?platform=android).
 * [FIXED][8486](https://github.com/stripe/stripe-android/pull/8486) Prevent soft keyboard from covering "Enter address manually" button for Address Autocomplete
 
