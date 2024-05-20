@@ -42,7 +42,7 @@ private object CardUiDefinitionFactory : UiDefinitionFactory.Simple {
         paymentMethodDefinition = CardDefinition,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_card,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_card,
-        tintIconOnSelection = true,
+        iconRequiresTinting = true,
     )
 
     override fun createFormElements(

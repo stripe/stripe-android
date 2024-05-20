@@ -34,7 +34,7 @@ internal class PaymentMethodUIScreenshotTest {
                 title = "Card",
                 isSelected = true,
                 isEnabled = true,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -52,7 +52,7 @@ internal class PaymentMethodUIScreenshotTest {
                 title = "Card",
                 isSelected = false,
                 isEnabled = true,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -70,7 +70,7 @@ internal class PaymentMethodUIScreenshotTest {
                 title = "Card",
                 isSelected = false,
                 isEnabled = false,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )
@@ -88,7 +88,7 @@ internal class PaymentMethodUIScreenshotTest {
                 title = "The Greatest US Bank Account",
                 isSelected = false,
                 isEnabled = false,
-                tintOnSelected = true,
+                iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
             )

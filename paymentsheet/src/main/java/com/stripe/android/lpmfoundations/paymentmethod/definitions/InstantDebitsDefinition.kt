@@ -34,7 +34,7 @@ private object InstantDebitsUiDefinitionFactory : UiDefinitionFactory.Simple {
             code = InstantDebitsDefinition.type.code,
             displayNameResource = PaymentsUiCoreR.string.stripe_paymentsheet_payment_method_instant_debits,
             iconResource = PaymentsUiCoreR.drawable.stripe_ic_paymentsheet_pm_bank,
-            tintIconOnSelection = true,
+            iconRequiresTinting = true,
             lightThemeIconUrl = null,
             darkThemeIconUrl = null,
         )

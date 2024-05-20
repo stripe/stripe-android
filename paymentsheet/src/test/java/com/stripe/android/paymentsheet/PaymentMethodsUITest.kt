@@ -79,7 +79,7 @@ class PaymentMethodsUITest {
                 iconResource = iconRes ?: 0,
                 lightThemeIconUrl = iconUrl,
                 darkThemeIconUrl = null,
-                tintIconOnSelection = false,
+                iconRequiresTinting = false,
             )
         )
         composeTestRule.setContent {

@@ -105,7 +105,7 @@ internal fun PaymentMethodsUI(
                     title = item.displayName.resolve(),
                     isSelected = index == selectedIndex,
                     isEnabled = isEnabled,
-                    tintOnSelected = item.tintIconOnSelection,
+                    iconRequiresTinting = item.iconRequiresTinting,
                     onItemSelectedListener = {
                         onItemSelectedListener(paymentMethods[index])
                     }
@@ -178,7 +178,7 @@ internal fun PaymentMethodUI(
     title: String,
     isSelected: Boolean,
     isEnabled: Boolean,
-    tintOnSelected: Boolean,
+    iconRequiresTinting: Boolean,
     modifier: Modifier = Modifier,
     onItemSelectedListener: () -> Unit
 ) {
@@ -204,7 +204,7 @@ internal fun PaymentMethodUI(
                 iconUrl = iconUrl,
                 imageLoader = imageLoader,
                 color = MaterialTheme.stripeColors.onComponent,
-                tintOnSelected = tintOnSelected
+                iconRequiresTinting = iconRequiresTinting
             )
         }
 
@@ -222,11 +222,11 @@ private fun PaymentMethodIconUi(
     iconRes: Int,
     iconUrl: String?,
     imageLoader: StripeImageLoader,
-    tintOnSelected: Boolean,
+    iconRequiresTinting: Boolean,
     color: Color,
 ) {
-    val colorFilter = remember(tintOnSelected, color) {
-        if (tintOnSelected) {
+    val colorFilter = remember(iconRequiresTinting, color) {
+        if (iconRequiresTinting) {
             ColorFilter.tint(color)
         } else {
             null
