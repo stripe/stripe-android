@@ -77,6 +77,7 @@ class PaparazziRule(
                     }
                 }
             } finally {
+                testCase.reset()
                 paparazzi.close()
             }
         }
@@ -127,6 +128,10 @@ private data class TestCase(
 
     fun initialize() {
         configOptions.forEach { it.initialize() }
+    }
+
+    fun reset() {
+        configOptions.forEach { it.reset() }
     }
 
     fun apply(deviceConfig: DeviceConfig): DeviceConfig {

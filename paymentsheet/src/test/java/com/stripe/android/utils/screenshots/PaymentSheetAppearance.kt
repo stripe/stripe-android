@@ -61,4 +61,8 @@ enum class PaymentSheetAppearance(val appearance: PaymentSheet.Appearance) : Pap
     override fun initialize() {
         appearance.parseAppearance()
     }
+
+    override fun reset() {
+        DefaultAppearance.appearance.parseAppearance()
+    }
 }
