@@ -224,7 +224,7 @@ internal class PlaygroundSettings private constructor(
 
         private val uiSettingDefinitions: List<PlaygroundSettingDefinition.Displayable<*>> = listOf(
             InitializationTypeSettingsDefinition,
-            PaymentMethodModeDefinition,
+            CustomerSheetPaymentMethodModeDefinition,
             CustomerSessionSettingsDefinition,
             CustomerSettingsDefinition,
             CheckoutModeSettingsDefinition,

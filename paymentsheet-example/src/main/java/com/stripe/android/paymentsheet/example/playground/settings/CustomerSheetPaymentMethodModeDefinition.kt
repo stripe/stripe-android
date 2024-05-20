@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-internal object PaymentMethodModeDefinition :
+internal object CustomerSheetPaymentMethodModeDefinition :
     PlaygroundSettingDefinition<PaymentMethodMode>,
     PlaygroundSettingDefinition.Saveable<PaymentMethodMode> by EnumSaveable(
         key = "paymentMethodMode",
