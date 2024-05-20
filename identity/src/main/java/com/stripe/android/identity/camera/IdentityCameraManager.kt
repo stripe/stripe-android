@@ -12,7 +12,7 @@ import com.stripe.android.camera.scanui.CameraView
  */
 internal abstract class IdentityCameraManager {
     private var cameraView: CameraView? = null
-    private var cameraAdapter: CameraAdapter<CameraPreviewImage<Bitmap>>? = null
+    var cameraAdapter: CameraAdapter<CameraPreviewImage<Bitmap>>? = null
 
     /**
      * Callback from Jetpack Compose when a AndroidView is updated, might be called multiple times
