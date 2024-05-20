@@ -473,7 +473,12 @@ internal class IdentityViewModel constructor(
 
             else -> {
                 Log.e(TAG, "incorrect category: ${legacyOutput.category}")
-                throw IllegalStateException("incorrect targetScanType: ${legacyOutput.category}")
+                isFront = true
+                targetScanType = IdentityScanState.ScanType.DOC_FRONT
+                logError(
+                    IllegalStateException("incorrect legacy targetScanType: ${legacyOutput.category}, " +
+                        "upload as DOC_FRONT")
+                )
             }
         }
 
@@ -529,7 +534,12 @@ internal class IdentityViewModel constructor(
 
             else -> {
                 Log.e(TAG, "incorrect category: ${modernOutput.category}")
-                throw IllegalStateException("incorrect targetScanType: ${modernOutput.category}")
+                isFront = true
+                targetScanType = IdentityScanState.ScanType.DOC_FRONT
+                logError(
+                    IllegalStateException("incorrect modern targetScanType: ${modernOutput.category}, " +
+                        "upload as DOC_FRONT")
+                )
             }
         }
 
@@ -949,13 +959,13 @@ internal class IdentityViewModel constructor(
                             "sessionID: ${verificationArgs.verificationSessionId} and ephemeralKey: " +
                                 verificationArgs.ephemeralKeySecret
                             ).let { msg ->
-                            _verificationPage.postValue(
-                                Resource.error(
-                                    msg,
-                                    IllegalStateException(msg, it)
+                                _verificationPage.postValue(
+                                    Resource.error(
+                                        msg,
+                                        IllegalStateException(msg, it)
+                                    )
                                 )
-                            )
-                        }
+                            }
                 }
             )
         }
