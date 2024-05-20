@@ -478,7 +478,7 @@ internal class IdentityViewModel constructor(
                 logError(
                     IllegalStateException(
                         "incorrect legacy targetScanType: ${legacyOutput.category}, " +
-                        "upload as DOC_FRONT"
+                            "upload as DOC_FRONT"
                     )
                 )
             }
@@ -541,7 +541,7 @@ internal class IdentityViewModel constructor(
                 logError(
                     IllegalStateException(
                         "incorrect modern targetScanType: ${modernOutput.category}, " +
-                        "upload as DOC_FRONT"
+                            "upload as DOC_FRONT"
                     )
                 )
             }
