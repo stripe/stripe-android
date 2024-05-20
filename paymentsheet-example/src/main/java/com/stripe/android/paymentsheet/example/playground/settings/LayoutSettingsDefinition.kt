@@ -9,6 +9,10 @@ internal object LayoutSettingsDefinition : BooleanSettingsDefinition(
     displayName = "Vertical Mode",
     defaultValue = false,
 ) {
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     @OptIn(ExperimentalPaymentMethodLayoutApi::class)
     override fun configure(
         value: Boolean,

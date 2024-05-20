@@ -21,6 +21,10 @@ internal object SupportedPaymentMethodsSettingsDefinition :
         configurationData: PlaygroundConfigurationData
     ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun convertToString(value: String): String = value
     override fun convertToValue(value: String): String = value
 }

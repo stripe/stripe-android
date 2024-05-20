@@ -23,6 +23,10 @@ internal object CheckoutModeSettingsDefinition :
         option("Setup", CheckoutMode.SETUP),
     )
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(value: CheckoutMode, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.mode(value.value)
     }

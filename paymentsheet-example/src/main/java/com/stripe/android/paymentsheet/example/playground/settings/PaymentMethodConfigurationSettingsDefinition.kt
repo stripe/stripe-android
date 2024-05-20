@@ -17,6 +17,10 @@ internal object PaymentMethodConfigurationSettingsDefinition :
         configurationData: PlaygroundConfigurationData
     ) = emptyList<PlaygroundSettingDefinition.Displayable.Option<String>>()
 
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
+
     override fun configure(
         value: String,
         checkoutRequestBuilder: CheckoutRequest.Builder,

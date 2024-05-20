@@ -236,6 +236,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                     playgroundState = playgroundState,
                 )
             }
+
+            PlaygroundConfigurationData.IntegrationType.CustomerSheet -> {
+                // TODO(samer-stripe): Implement Customer Sheet UI
+            }
         }
     }
 

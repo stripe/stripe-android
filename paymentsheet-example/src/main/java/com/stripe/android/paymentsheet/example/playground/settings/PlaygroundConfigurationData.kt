@@ -14,5 +14,12 @@ data class PlaygroundConfigurationData(
 
         @SerialName("flowController")
         FlowController,
+
+        @SerialName("CustomerSheet")
+        CustomerSheet;
+
+        fun isPaymentFlow(): Boolean {
+            return this == PaymentSheet || this == FlowController
+        }
     }
 }
