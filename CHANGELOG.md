@@ -3,6 +3,9 @@
 ## XX.XX.XX - 20XX-XX-XX
 * [ADDED][8466](https://github.com/stripe/stripe-android/pull/8466) Added support for [external payment methods](https://docs.stripe.com/payments/external-payment-methods?platform=android).
 
+### Identity
+* [Fixed][8485](https://github.com/stripe/stripe-android/pull/8485) Fixed a crash when scanned type of an uploading image is not expected. 
+
 ## 20.43.0 - 2024-05-13
 
 ### Financial Connections
