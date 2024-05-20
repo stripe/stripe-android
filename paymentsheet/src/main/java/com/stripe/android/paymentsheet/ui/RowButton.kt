@@ -15,7 +15,7 @@ import com.stripe.android.uicore.getBorderStroke
 import com.stripe.android.uicore.stripeColors
 
 @Composable
-fun RowButton(
+internal fun RowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     onClick: () -> Unit,
