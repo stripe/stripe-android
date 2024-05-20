@@ -21,5 +21,9 @@ data class PlaygroundConfigurationData(
         fun isPaymentFlow(): Boolean {
             return this == PaymentSheet || this == FlowController
         }
+
+        fun isCustomerFlow(): Boolean {
+            return this == CustomerSheet
+        }
     }
 }
