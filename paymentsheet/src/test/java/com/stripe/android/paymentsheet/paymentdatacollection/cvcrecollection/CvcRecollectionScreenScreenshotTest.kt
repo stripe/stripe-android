@@ -16,18 +16,13 @@ class CvcRecollectionScreenScreenshotTest {
         FontSize.entries
     )
 
-    private val viewModel = CvcRecollectionViewModel(
-        CvcRecollectionViewModel.Args(
-            lastFour = "4242",
-            cardBrand = CardBrand.Visa,
-        )
-    )
-
     @Test
     fun testEmpty() {
         paparazziRule.snapshot {
             CvcRecollectionScreen(
-                viewModel = viewModel
+                cardBrand = CardBrand.Visa,
+                lastFour = "4242",
+                viewActionHandler = {}
             )
         }
     }
@@ -36,7 +31,9 @@ class CvcRecollectionScreenScreenshotTest {
     fun testFilled() {
         paparazziRule.snapshot {
             CvcRecollectionScreen(
-                viewModel = viewModel
+                cardBrand = CardBrand.Visa,
+                lastFour = "4242",
+                viewActionHandler = {}
             )
         }
     }

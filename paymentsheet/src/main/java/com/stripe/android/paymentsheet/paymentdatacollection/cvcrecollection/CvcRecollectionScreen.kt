@@ -21,8 +21,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -33,7 +33,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.model.CardBrand
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.PrimaryButton
@@ -48,20 +47,16 @@ import com.stripe.android.uicore.utils.stateFlowOf
 
 @Composable
 internal fun CvcRecollectionScreen(
-    viewModel: CvcRecollectionViewModel = viewModel()
+    cardBrand: CardBrand,
+    lastFour: String,
+    viewActionHandler: (action: CvcRecollectionViewAction) -> Unit
 ) {
     val element = remember {
         CvcElement(
             IdentifierSpec(),
-            CvcController(
-                cardBrandFlow = stateFlowOf(
-                    viewModel.viewState.value.cardBrand
-                )
-            )
+            CvcController(cardBrandFlow = stateFlowOf(cardBrand))
         )
     }
-
-    val viewState by viewModel.viewState.collectAsState()
 
     StripeTheme {
         Column(
@@ -72,11 +67,18 @@ internal fun CvcRecollectionScreen(
             CvcRecollectionHeader(
                 modifier = Modifier
                     .align(Alignment.End)
-                    .offset(16.dp),
-                viewModel = viewModel
-            )
-            CvcRecollectionField(element = element, cardBrand = viewState.cardBrand, lastFour = viewState.lastFour)
-            CvcRecollectionButton(viewModel, element)
+                    .offset(16.dp)
+            ) {
+                viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
+            }
+            CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
+            CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
+                viewActionHandler.invoke(
+                    CvcRecollectionViewAction.OnConfirmPressed(
+                        element.controller.fieldValue.value
+                    )
+                )
+            }
         }
     }
 }
@@ -145,9 +147,9 @@ internal fun CvcRecollectionField(element: CvcElement, cardBrand: CardBrand, las
 }
 
 @Composable
-private fun CvcRecollectionHeader(modifier: Modifier, viewModel: CvcRecollectionViewModel) {
+private fun CvcRecollectionHeader(modifier: Modifier, onClosePressed: () -> Unit) {
     IconButton(
-        onClick = { viewModel.handleViewAction(CvcRecollectionViewAction.OnBackPressed) },
+        onClick = { onClosePressed.invoke() },
         modifier = modifier
     ) {
         Icon(painterResource(id = R.drawable.stripe_ic_paymentsheet_close), contentDescription = null)
@@ -159,9 +161,7 @@ private fun CvcRecollectionHeader(modifier: Modifier, viewModel: CvcRecollection
 }
 
 @Composable
-private fun CvcRecollectionButton(viewModel: CvcRecollectionViewModel, element: CvcElement) {
-    val isComplete = element.controller.isComplete.collectAsState()
-
+private fun CvcRecollectionButton(isComplete: State<Boolean>, onConfirmPressed: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth(1f)
@@ -173,11 +173,7 @@ private fun CvcRecollectionButton(viewModel: CvcRecollectionViewModel, element: 
             locked = false,
             enabled = isComplete.value
         ) {
-            viewModel.handleViewAction(
-                CvcRecollectionViewAction.OnConfirmPressed(
-                    element.controller.fieldValue.value
-                )
-            )
+            onConfirmPressed.invoke()
         }
     }
 }
@@ -186,6 +182,10 @@ private fun CvcRecollectionButton(viewModel: CvcRecollectionViewModel, element: 
 @Preview
 private fun CvcRecollectionFieldPreview() {
     StripeTheme {
-        CvcRecollectionScreen()
+        CvcRecollectionScreen(
+            cardBrand = CardBrand.Visa,
+            lastFour = "4242",
+            viewActionHandler = { }
+        )
     }
 }
