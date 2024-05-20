@@ -7,7 +7,6 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -16,14 +15,11 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.Card
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
@@ -34,17 +30,17 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.paymentsheet.ui.LpmSelectorText
-import com.stripe.android.uicore.getBorderStroke
+import com.stripe.android.paymentsheet.ui.RowButton
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 
 private object Spacing {
-    val cardLeadingInnerPadding = 12.dp
+    val cardPadding = 12.dp
     val carouselOuterPadding = 20.dp
     val carouselInnerPadding = 12.dp
-    val iconSize = 28.dp
+    val iconSize = 16.dp
 }
 
 @VisibleForTesting
@@ -192,54 +188,38 @@ internal fun PaymentMethodUI(
         MaterialTheme.stripeColors.onComponent
     }
 
-    Card(
+    RowButton(
+        isEnabled = isEnabled,
+        isSelected = isSelected,
+        onClick = onItemSelectedListener,
+        contentPaddingValues = PaddingValues(
+            start = Spacing.cardPadding,
+            end = Spacing.cardPadding,
+            top = Spacing.cardPadding,
+        ),
         modifier = modifier
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
             .height(60.dp)
             .widthIn(min = minViewWidth),
-        shape = MaterialTheme.shapes.medium,
-        backgroundColor = MaterialTheme.stripeColors.component,
-        border = MaterialTheme.getBorderStroke(isSelected),
-        elevation = if (isSelected) 1.5.dp else 0.dp
     ) {
-        Column(
+        Box(
             modifier = Modifier
-                .selectable(
-                    selected = isSelected,
-                    enabled = isEnabled,
-                    onClick = {
-                        onItemSelectedListener()
-                    }
-                )
+                .height(Spacing.iconSize)
         ) {
-            Box(
-                modifier = Modifier
-                    .height(Spacing.iconSize)
-                    .padding(
-                        start = Spacing.cardLeadingInnerPadding,
-                        top = Spacing.cardLeadingInnerPadding,
-                    )
-            ) {
-                PaymentMethodIconUi(
-                    iconRes = iconRes,
-                    iconUrl = iconUrl,
-                    imageLoader = imageLoader,
-                    color = color,
-                    tintOnSelected = tintOnSelected
-                )
-            }
-
-            LpmSelectorText(
-                text = title,
-                isEnabled = isEnabled,
-                textColor = color,
-                modifier = Modifier.padding(
-                    top = 6.dp,
-                    start = Spacing.cardLeadingInnerPadding,
-                    end = Spacing.cardLeadingInnerPadding,
-                )
+            PaymentMethodIconUi(
+                iconRes = iconRes,
+                iconUrl = iconUrl,
+                imageLoader = imageLoader,
+                color = color,
+                tintOnSelected = tintOnSelected
             )
         }
+
+        LpmSelectorText(
+            text = title,
+            isEnabled = isEnabled,
+            textColor = color,
+            modifier = Modifier.padding(top = 6.dp),
+        )
     }
 }
 
