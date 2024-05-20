@@ -7,14 +7,13 @@
 ### Identity
 * [Fixed][8485](https://github.com/stripe/stripe-android/pull/8485) Fixed a crash when scanned type of an uploading image is not expected. 
 
-## 20.43.0 - 2024-05-13
-
 ### Financial Connections
 * [Changed][8377](https://github.com/stripe/stripe-android/pull/8377) The `FinancialConnectionsEvent.Name.CONSENT_ACQUIRED` event is now emitted when the consent has been acquired _and_ successfully confirmed with the Stripe backend. Previously, the event was emitted before the confirmation, making it possible to receive multiple `CONSENT_ACQUIRED` events in a single session.
 
 ### PaymentSheet
 * [ADDED][8430](https://github.com/stripe/stripe-android/pull/8430) Added support for using `Maestro` cards with `Google Pay`
 * [ADDED][8433](https://github.com/stripe/stripe-android/pull/8433) Added support for Multibanco to PaymentSheet.
+* [CHANGED][8340](https://github.com/stripe/stripe-android/pull/8480) Recreate PaymentSheet/FlowController in rememberPaymentSheet functions when an input callback changes.
 
 ### Payments
 * [ADDED][8433](https://github.com/stripe/stripe-android/pull/8433) Added support for Multibanco to API bindings.

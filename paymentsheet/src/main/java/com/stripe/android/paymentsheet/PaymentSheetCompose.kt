@@ -36,7 +36,7 @@ fun rememberPaymentSheet(
         "PaymentSheet must be created in the context of an Activity"
     }
 
-    return remember {
+    return remember(paymentResultCallback) {
         val launcher = DefaultPaymentSheetLauncher(
             activityResultLauncher = activityResultLauncher,
             activity = activity,

@@ -108,7 +108,7 @@ private fun internalRememberPaymentSheetFlowController(
         "PaymentSheet.FlowController must be created in the context of an Activity"
     }
 
-    return remember {
+    return remember(paymentOptionCallback, paymentResultCallback) {
         FlowControllerFactory(
             viewModelStoreOwner = viewModelStoreOwner,
             lifecycleOwner = lifecycleOwner,
