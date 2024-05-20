@@ -47,7 +47,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.IntegrationType
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
@@ -223,14 +223,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
 
         when (playgroundState.integrationType) {
-            IntegrationType.PaymentSheet -> {
+            PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
                 PaymentSheetUi(
                     paymentSheet = paymentSheet,
                     playgroundState = playgroundState,
                 )
             }
 
-            IntegrationType.FlowController -> {
+            PlaygroundConfigurationData.IntegrationType.FlowController -> {
                 FlowControllerUi(
                     flowController = flowController,
                     playgroundState = playgroundState,

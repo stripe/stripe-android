@@ -153,7 +153,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
     internal val isProcessingPaymentIntent
         get() = args.initializationMode.isProcessingPayment
 
-    override var newPaymentSelection: PaymentSelection.New? = null
+    override var newPaymentSelection: NewOrExternalPaymentSelection? = null
 
     private var googlePayPaymentMethodLauncher: GooglePayPaymentMethodLauncher? = null
 

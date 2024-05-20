@@ -8,11 +8,13 @@ import com.stripe.android.core.injection.STRIPE_ACCOUNT_ID
 import com.stripe.android.core.networking.AnalyticsRequestExecutor
 import com.stripe.android.core.networking.AnalyticsRequestFactory
 import com.stripe.android.core.networking.AnalyticsRequestV2Executor
+import com.stripe.android.core.networking.AnalyticsRequestV2Storage
 import com.stripe.android.core.networking.ApiRequest
 import com.stripe.android.core.networking.DefaultAnalyticsRequestExecutor
 import com.stripe.android.core.networking.DefaultAnalyticsRequestV2Executor
 import com.stripe.android.core.networking.DefaultStripeNetworkClient
 import com.stripe.android.core.networking.NetworkTypeDetector
+import com.stripe.android.core.networking.RealAnalyticsRequestV2Storage
 import com.stripe.android.core.networking.StripeNetworkClient
 import com.stripe.android.core.utils.ContextUtils.packageInfo
 import com.stripe.android.core.utils.IsWorkManagerAvailable
@@ -55,6 +57,10 @@ import kotlin.coroutines.CoroutineContext
     includes = [FinancialConnectionsSheetConfigurationModule::class]
 )
 internal interface FinancialConnectionsSheetSharedModule {
+
+    @Binds
+    @Singleton
+    fun bindsAnalyticsRequestV2Storage(impl: RealAnalyticsRequestV2Storage): AnalyticsRequestV2Storage
 
     @Binds
     @Singleton

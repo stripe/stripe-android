@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -26,9 +27,22 @@ import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun SettingsUi(playgroundSettings: PlaygroundSettings) {
-    Column {
-        for (settingDefinition in PlaygroundSettings.uiSettingDefinitions) {
-            Row(modifier = Modifier.padding(bottom = 16.dp)) {
+    val configurationData by playgroundSettings.configurationData.collectAsState()
+    val displayableDefinitions by playgroundSettings.displayableDefinitions.collectAsState()
+
+    Column(
+        modifier = Modifier.padding(bottom = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Row {
+            IntegrationTypeConfigurableSetting(
+                configurationData,
+                playgroundSettings::updateConfigurationData
+            )
+        }
+
+        for (settingDefinition in displayableDefinitions) {
+            Row {
                 Setting(settingDefinition, playgroundSettings)
             }
         }
@@ -40,9 +54,15 @@ private fun <T> Setting(
     settingDefinition: PlaygroundSettingDefinition.Displayable<T>,
     playgroundSettings: PlaygroundSettings,
 ) {
+    val configurationData by playgroundSettings.configurationData.collectAsState()
+
+    val options = remember(configurationData) {
+        settingDefinition.createOptions(configurationData)
+    }
+
     Setting(
         name = settingDefinition.displayName,
-        options = settingDefinition.options,
+        options = options,
         valueFlow = playgroundSettings[settingDefinition],
     ) { newValue ->
         playgroundSettings[settingDefinition] = newValue
@@ -78,6 +98,31 @@ private fun <T> Setting(
             value = value,
             onOptionChanged = onOptionChanged,
         )
+    }
+}
+
+@Composable
+private fun IntegrationTypeConfigurableSetting(
+    configurationData: PlaygroundConfigurationData,
+    updateConfigurationData: (updater: (PlaygroundConfigurationData) -> PlaygroundConfigurationData) -> Unit
+) {
+    RadioButtonSetting(
+        name = "Integration Type",
+        options = listOf(
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Payment Sheet",
+                value = PlaygroundConfigurationData.IntegrationType.PaymentSheet
+            ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Flow Controller",
+                value = PlaygroundConfigurationData.IntegrationType.FlowController
+            ),
+        ),
+        value = configurationData.integrationType
+    ) { integrationType ->
+        updateConfigurationData { configurationData ->
+            configurationData.copy(integrationType = integrationType)
+        }
     }
 }
 

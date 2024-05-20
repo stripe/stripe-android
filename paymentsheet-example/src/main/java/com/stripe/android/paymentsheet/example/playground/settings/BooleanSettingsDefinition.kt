@@ -7,12 +7,13 @@ internal abstract class BooleanSettingsDefinition(
 ) : PlaygroundSettingDefinition<Boolean>,
     PlaygroundSettingDefinition.Saveable<Boolean>,
     PlaygroundSettingDefinition.Displayable<Boolean> {
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<Boolean>> by lazy {
-        listOf(
-            option("On", true),
-            option("Off", false),
-        )
-    }
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = listOf(
+        option("On", true),
+        option("Off", false),
+    )
 
     override fun convertToString(value: Boolean): String {
         return value.toString()

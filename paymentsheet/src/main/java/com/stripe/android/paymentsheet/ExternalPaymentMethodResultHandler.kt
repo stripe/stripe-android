@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Parcelable
-import androidx.annotation.RestrictTo
 import com.stripe.android.core.exception.LocalStripeException
 import com.stripe.android.payments.paymentlauncher.PaymentResult
 import kotlinx.parcelize.IgnoredOnParcel
@@ -13,7 +12,6 @@ import kotlinx.parcelize.Parcelize
 /**
  * Handler used to respond to external payment method confirm results.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 object ExternalPaymentMethodResultHandler {
 
     /**
@@ -21,6 +19,7 @@ object ExternalPaymentMethodResultHandler {
      *
      * Should be called when [ExternalPaymentMethodConfirmHandler.confirmExternalPaymentMethod] completes.
      */
+    @JvmStatic
     fun onExternalPaymentMethodResult(context: Context, externalPaymentMethodResult: ExternalPaymentMethodResult) {
         context.startActivity(createResultIntent(context, externalPaymentMethodResult))
     }
@@ -46,7 +45,6 @@ object ExternalPaymentMethodResultHandler {
 /**
  * The result of an attempt to confirm an external payment method.
  */
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
 sealed class ExternalPaymentMethodResult : Parcelable {
 
     internal abstract fun toPaymentResult(): PaymentResult
@@ -84,14 +82,12 @@ sealed class ExternalPaymentMethodResult : Parcelable {
         }
     }
 
-    @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
     companion object {
 
         /**
          * The customer successfully completed the payment or setup.
          */
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun completed(): ExternalPaymentMethodResult {
             return Completed
         }
@@ -100,7 +96,6 @@ sealed class ExternalPaymentMethodResult : Parcelable {
          * The customer canceled the payment or setup attempt.
          */
         @JvmStatic
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun canceled(): ExternalPaymentMethodResult {
             return Canceled
         }
@@ -113,7 +108,6 @@ sealed class ExternalPaymentMethodResult : Parcelable {
          */
         @JvmStatic
         @JvmOverloads
-        @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
         fun failed(displayMessage: String? = null): ExternalPaymentMethodResult {
             return Failed(displayMessage)
         }

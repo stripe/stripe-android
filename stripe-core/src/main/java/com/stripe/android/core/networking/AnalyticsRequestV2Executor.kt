@@ -21,6 +21,7 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
     private val application: Application,
     private val networkClient: StripeNetworkClient,
     private val logger: Logger,
+    private val storage: AnalyticsRequestV2Storage,
     private val isWorkManagerAvailable: IsWorkManagerAvailable,
 ) : AnalyticsRequestV2Executor {
 
@@ -33,7 +34,8 @@ class DefaultAnalyticsRequestV2Executor @Inject constructor(
 
     private suspend fun enqueueRequest(request: AnalyticsRequestV2): Boolean {
         val workManager = WorkManager.getInstance(application)
-        val inputData = SendAnalyticsRequestV2Worker.createInputData(request)
+        val id = storage.store(request)
+        val inputData = SendAnalyticsRequestV2Worker.createInputData(id)
 
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)

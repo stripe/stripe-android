@@ -12,10 +12,12 @@ internal object ExternalPaymentMethodSettingsDefinition :
     ),
     PlaygroundSettingDefinition.Displayable<ExternalPaymentMethodType> {
     override val displayName: String = "External payment methods"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<ExternalPaymentMethodType>> =
-        ExternalPaymentMethodType.entries.map {
-            option(it.displayName, it)
-        }
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = ExternalPaymentMethodType.entries.map {
+        option(it.displayName, it)
+    }
 
     override fun convertToValue(value: String): ExternalPaymentMethodType {
         val possibleExternalPaymentMethods = value.split(",")

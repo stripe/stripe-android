@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet
 
 import android.app.Application
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.annotation.RestrictTo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -68,15 +67,31 @@ fun rememberPaymentSheet(
     return rememberPaymentSheet(paymentResultCallback)
 }
 
-@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+/**
+ * Creates a [PaymentSheet] that is remembered across compositions. Use this method if you implement any external
+ * payment methods, as specified in your [PaymentSheet.Configuration].
+ *
+ * This *must* be called unconditionally, as part of the initialization path.
+ *
+ * If you intend to create the [com.stripe.android.model.PaymentIntent] or [com.stripe.android.model.SetupIntent] on
+ * your server, include a [createIntentCallback].
+ *
+ * @param createIntentCallback If specified, called when the customer confirms the payment or setup.
+ * @param paymentResultCallback Called with the result of the payment after [PaymentSheet] is dismissed.
+ * @param externalPaymentMethodConfirmHandler Called when a user confirms payment for an external payment method.
+ */
 @Composable
 fun rememberPaymentSheet(
+    createIntentCallback: CreateIntentCallback? = null,
     externalPaymentMethodConfirmHandler: ExternalPaymentMethodConfirmHandler,
-    createIntentCallback: CreateIntentCallback,
     paymentResultCallback: PaymentSheetResultCallback,
 ): PaymentSheet {
     UpdateExternalPaymentMethodConfirmHandler(externalPaymentMethodConfirmHandler)
-    return rememberPaymentSheet(createIntentCallback, paymentResultCallback)
+    return if (createIntentCallback == null) {
+        rememberPaymentSheet(paymentResultCallback)
+    } else {
+        rememberPaymentSheet(createIntentCallback, paymentResultCallback)
+    }
 }
 
 @Composable

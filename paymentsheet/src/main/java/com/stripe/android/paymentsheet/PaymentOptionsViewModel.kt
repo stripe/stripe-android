@@ -124,10 +124,13 @@ internal class PaymentOptionsViewModel @Inject constructor(
         )
     }
 
-    // Only used to determine if we should skip the list and go to the add card view.
-    // and how to populate that view.
-    override var newPaymentSelection: PaymentSelection.New? =
-        args.state.paymentSelection as? PaymentSelection.New
+    // Only used to determine if we should skip the list and go to the add card view and how to populate that view.
+    override var newPaymentSelection: NewOrExternalPaymentSelection? =
+        when (val selection = args.state.paymentSelection) {
+            is PaymentSelection.New -> NewOrExternalPaymentSelection.New(selection)
+            is PaymentSelection.ExternalPaymentMethod -> NewOrExternalPaymentSelection.External(selection)
+            else -> null
+        }
 
     override val primaryButtonUiState = primaryButtonUiStateMapper.forCustomFlow().stateIn(
         scope = viewModelScope,

@@ -14,12 +14,14 @@ internal object CheckoutModeSettingsDefinition :
     PlaygroundSettingDefinition.Displayable<CheckoutMode> {
 
     override val displayName: String = "Checkout Mode"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<CheckoutMode>> =
-        listOf(
-            option("Pay", CheckoutMode.PAYMENT),
-            option("P & S", CheckoutMode.PAYMENT_WITH_SETUP),
-            option("Setup", CheckoutMode.SETUP),
-        )
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = listOf(
+        option("Pay", CheckoutMode.PAYMENT),
+        option("P & S", CheckoutMode.PAYMENT_WITH_SETUP),
+        option("Setup", CheckoutMode.SETUP),
+    )
 
     override fun configure(value: CheckoutMode, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.mode(value.value)

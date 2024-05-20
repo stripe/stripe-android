@@ -88,6 +88,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethodViewState
 import com.stripe.android.paymentsheet.ui.PrimaryButton
 import com.stripe.android.paymentsheet.utils.FakeEditPaymentMethodInteractorFactory
 import com.stripe.android.paymentsheet.utils.LinkTestUtils
+import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.Companion.SAVE_PROCESSING
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel.UserErrorMessage
 import com.stripe.android.testing.FakeErrorReporter
@@ -1677,7 +1678,35 @@ internal class PaymentSheetViewModelTest {
             viewModel.updateSelection(newSelection)
             assertThat(awaitItem())
                 .isEqualTo(newSelection)
-            assertThat(viewModel.newPaymentSelection).isEqualTo(newSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(
+                BaseSheetViewModel.NewOrExternalPaymentSelection.New(
+                    newSelection
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `updateSelection with external payment method updates the current selection`() = runTest {
+        val viewModel = createViewModel(initialPaymentSelection = null)
+
+        viewModel.selection.test {
+            val newSelection = PaymentSelection.ExternalPaymentMethod(
+                type = "external_fawry",
+                billingDetails = null,
+                label = "Fawry",
+                iconResource = 0,
+                lightThemeIconUrl = "some_url",
+                darkThemeIconUrl = null,
+            )
+            assertThat(awaitItem()).isNull()
+            viewModel.updateSelection(newSelection)
+            assertThat(awaitItem()).isEqualTo(newSelection)
+            assertThat(viewModel.newPaymentSelection).isEqualTo(
+                BaseSheetViewModel.NewOrExternalPaymentSelection.External(
+                    newSelection
+                )
+            )
         }
     }
 
