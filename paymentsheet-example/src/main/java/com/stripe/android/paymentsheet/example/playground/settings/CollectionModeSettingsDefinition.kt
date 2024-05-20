@@ -9,13 +9,14 @@ internal open class CollectionModeSettingsDefinition(
     PlaygroundSettingDefinition.Displayable<CollectionMode> {
 
     override val defaultValue: CollectionMode = CollectionMode.Automatic
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<CollectionMode>> by lazy {
-        listOf(
-            option("Auto", CollectionMode.Automatic),
-            option("Never", CollectionMode.Never),
-            option("Always", CollectionMode.Always),
-        )
-    }
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = listOf(
+        option("Auto", CollectionMode.Automatic),
+        option("Never", CollectionMode.Never),
+        option("Always", CollectionMode.Always),
+    )
 
     override fun convertToString(value: CollectionMode): String = when (value) {
         CollectionMode.Automatic -> "auto"

@@ -9,12 +9,14 @@ internal object CustomerSettingsDefinition :
     PlaygroundSettingDefinition.Saveable<CustomerType>,
     PlaygroundSettingDefinition.Displayable<CustomerType> {
     override val displayName: String = "Customer"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<CustomerType>> =
-        listOf(
-            option("Guest", CustomerType.GUEST),
-            option("New", CustomerType.NEW),
-            option("Returning", CustomerType.RETURNING),
-        )
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = listOf(
+        option("Guest", CustomerType.GUEST),
+        option("New", CustomerType.NEW),
+        option("Returning", CustomerType.RETURNING),
+    )
 
     override fun configure(
         value: CustomerType,

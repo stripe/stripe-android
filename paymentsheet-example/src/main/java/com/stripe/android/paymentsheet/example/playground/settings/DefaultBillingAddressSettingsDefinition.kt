@@ -16,12 +16,13 @@ internal object DefaultBillingAddressSettingsDefinition :
     override val displayName: String
         get() = "Default Billing Address"
 
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<DefaultBillingAddress>>
-        get() = listOf(
-            option("On", DefaultBillingAddress.On),
-            option("On with random email", DefaultBillingAddress.OnWithRandomEmail),
-            option("Off", DefaultBillingAddress.Off),
-        )
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = listOf(
+        option("On", DefaultBillingAddress.On),
+        option("On with random email", DefaultBillingAddress.OnWithRandomEmail),
+        option("Off", DefaultBillingAddress.Off),
+    )
 
     override fun configure(
         value: DefaultBillingAddress,

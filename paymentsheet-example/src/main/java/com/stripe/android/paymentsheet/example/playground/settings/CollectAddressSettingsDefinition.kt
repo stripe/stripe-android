@@ -12,13 +12,14 @@ internal object CollectAddressSettingsDefinition :
     override val defaultValue: CollectionMode = CollectionMode.Automatic
     override val key: String = "collectAddress"
     override val displayName: String = "Collect Address"
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<CollectionMode>> by lazy {
-        listOf(
-            option("Auto", CollectionMode.Automatic),
-            option("Never", CollectionMode.Never),
-            option("Full", CollectionMode.Full),
-        )
-    }
+
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = listOf(
+        option("Auto", CollectionMode.Automatic),
+        option("Never", CollectionMode.Never),
+        option("Full", CollectionMode.Full),
+    )
 
     override fun configure(
         value: CollectionMode,

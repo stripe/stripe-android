@@ -16,12 +16,13 @@ internal object CountrySettingsDefinition :
 
     override val displayName: String = "Merchant"
 
-    override val options: List<PlaygroundSettingDefinition.Displayable.Option<Country>>
-        get() = CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
-            country.code.value in supportedCountries
-        }.map { country ->
-            option(country.name, convertToValue(country.code.value))
-        }.toList()
+    override fun createOptions(
+        configurationData: PlaygroundConfigurationData
+    ) = CountryUtils.getOrderedCountries(Locale.getDefault()).filter { country ->
+        country.code.value in supportedCountries
+    }.map { country ->
+        option(country.name, convertToValue(country.code.value))
+    }.toList()
 
     override fun configure(value: Country, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.merchantCountryCode(value.value)
