@@ -172,12 +172,12 @@ internal class PaymentMethodUIScreenshotTest {
             NewPaymentMethodRowButton(
                 isEnabled = true,
                 isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "Klarna",
                 subtitle = "Buy now or pay later with Klarna.",
-                iconRequiresTinting = true,
+                iconRequiresTinting = false,
                 onClick = {},
                 modifier = Modifier,
             )
@@ -190,13 +190,13 @@ internal class PaymentMethodUIScreenshotTest {
             NewPaymentMethodRowButton(
                 isEnabled = true,
                 isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_klarna,
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "Klarna",
                 subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
                     " with Klarna.",
-                iconRequiresTinting = true,
+                iconRequiresTinting = false,
                 onClick = {},
                 modifier = Modifier,
             )
