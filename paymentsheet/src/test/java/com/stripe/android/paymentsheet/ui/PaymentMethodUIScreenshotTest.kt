@@ -81,7 +81,7 @@ internal class PaymentMethodUIScreenshotTest {
         paparazziRule.snapshot {
             PaymentMethodUI(
                 minViewWidth = 100.dp,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "The Greatest US Bank Account",
@@ -154,7 +154,7 @@ internal class PaymentMethodUIScreenshotTest {
             NewPaymentMethodRowButton(
                 isEnabled = true,
                 isSelected = false,
-                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "The Greatest US Bank Account",
