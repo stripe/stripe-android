@@ -322,10 +322,6 @@ public final class com/stripe/android/paymentsheet/FlowControllerComposeKt {
 	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentMethodsUIKt {
-	public static final field TEST_TAG_LIST Ljava/lang/String;
-}
-
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
 }
