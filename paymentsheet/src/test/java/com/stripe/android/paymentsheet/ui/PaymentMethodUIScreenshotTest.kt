@@ -3,7 +3,6 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.PaymentMethodUI
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -91,6 +90,78 @@ internal class PaymentMethodUIScreenshotTest {
                 iconRequiresTinting = true,
                 modifier = Modifier,
                 onItemSelectedListener = {},
+            )
+        }
+    }
+
+    @Test
+    fun testSelectedStateForVerticalMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = true,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "Card",
+                subTitle = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+            )
+        }
+    }
+
+    @Test
+    fun testUnselectedStateForVerticalMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "Card",
+                subTitle = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+            )
+        }
+    }
+
+    @Test
+    fun testDisabledForVerticalMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = false,
+                isSelected = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "Card",
+                subTitle = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+            )
+        }
+    }
+
+    @Test
+    fun testLongTitleForVerticalMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "The Greatest US Bank Account",
+                subTitle = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
             )
         }
     }
