@@ -10,7 +10,7 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToNode
 import androidx.test.platform.app.InstrumentationRegistry
-import com.stripe.android.paymentsheet.TEST_TAG_LIST
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.test.core.DEFAULT_UI_TIMEOUT
 
 class PaymentSelection(val composeTestRule: ComposeTestRule, val paymentMethodCode: String) {

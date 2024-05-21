@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
