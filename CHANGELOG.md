@@ -6,7 +6,7 @@
 
 ### PaymentSheet
 * [ADDED][8466](https://github.com/stripe/stripe-android/pull/8466) Added support for [external payment methods](https://docs.stripe.com/payments/external-payment-methods?platform=android).
-* [CHANGED][8340](https://github.com/stripe/stripe-android/pull/8480) Recreate PaymentSheet/FlowController in rememberPaymentSheet functions when an input callback changes.
+* [CHANGED][8340](https://github.com/stripe/stripe-android/pull/8480) Recreate PaymentSheet and FlowController in `rememberPaymentSheet` and `rememberPaymentSheetFlowController` functions when an input callback changes.
 * [FIXED][8486](https://github.com/stripe/stripe-android/pull/8486) Prevent soft keyboard from covering "Enter address manually" button for Address Autocomplete
 
 ### Identity
