@@ -26,7 +26,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
@@ -149,9 +148,7 @@ fun TextField(
 
     val hasFocus = rememberSaveable { mutableStateOf(false) }
 
-    val fieldState by textFieldController.fieldState.collectAsState(
-        TextFieldStateConstants.Error.Blank
-    )
+    val fieldState by textFieldController.fieldState.collectAsStateSafely()
     val label by textFieldController.label.collectAsStateSafely()
 
     LaunchedEffect(fieldState) {
