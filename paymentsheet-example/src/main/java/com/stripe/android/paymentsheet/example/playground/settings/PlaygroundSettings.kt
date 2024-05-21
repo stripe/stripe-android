@@ -7,6 +7,7 @@ import androidx.core.content.edit
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -111,6 +112,16 @@ internal class PlaygroundSettings private constructor(
                 definition.applicable(configurationData)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
+            }
+            return builder.build()
+        }
+
+        fun customerEphemeralKeyRequest(): CustomerEphemeralKeyRequest {
+            val builder = CustomerEphemeralKeyRequest.Builder()
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach {
+                // TODO(samer-stripe): Configure request with playground settings
             }
             return builder.build()
         }
