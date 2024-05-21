@@ -71,6 +71,7 @@ internal interface IntentConfirmationInterceptor {
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         requiresSaveOnConfirmation: Boolean,
+        recollectedCvc: String? = null
     ): NextStep
 
     companion object {
@@ -144,6 +145,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         shippingValues: ConfirmPaymentIntentParams.Shipping?,
         requiresSaveOnConfirmation: Boolean,
+        recollectedCvc: String?
     ): NextStep {
         return when (initializationMode) {
             is PaymentSheet.InitializationMode.DeferredIntent -> {
@@ -162,6 +164,7 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
                     paymentMethod = paymentMethod,
                     requiresSaveOnConfirmation = requiresSaveOnConfirmation,
                     isDeferred = false,
+                    recollectedCvc = recollectedCvc
                 )
             }
 
@@ -324,13 +327,14 @@ internal class DefaultIntentConfirmationInterceptor @Inject constructor(
         paymentMethod: PaymentMethod,
         requiresSaveOnConfirmation: Boolean,
         isDeferred: Boolean,
+        recollectedCvc: String? = null
     ): NextStep.Confirm {
         val factory = ConfirmStripeIntentParamsFactory.createFactory(
             clientSecret = clientSecret,
             shipping = shippingValues,
         )
 
-        val confirmParams = factory.create(paymentMethod, requiresSaveOnConfirmation)
+        val confirmParams = factory.create(paymentMethod, requiresSaveOnConfirmation, recollectedCvc)
         return NextStep.Confirm(
             confirmParams = confirmParams,
             isDeferred = isDeferred,

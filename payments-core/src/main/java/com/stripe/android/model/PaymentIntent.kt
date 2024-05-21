@@ -154,6 +154,10 @@ constructor(
 
     private val paymentMethodOptionsJsonString: String? = null,
 
+    val requireCvcRecollection: Boolean = paymentMethodOptionsJsonString?.let { json ->
+        JSONObject(json).optJSONObject("card")?.optBoolean("require_cvc_recollection") ?: false
+    } ?: false
+
 ) : StripeIntent {
 
     override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {

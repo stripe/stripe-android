@@ -21,6 +21,7 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         requiresSaveOnConfirmation: Boolean = false,
+        recollectedCvc: String? = null
     ): T
 
     abstract fun create(
@@ -31,11 +32,13 @@ sealed class ConfirmStripeIntentParamsFactory<out T : ConfirmStripeIntentParams>
     fun create(
         paymentMethod: PaymentMethod,
         requiresSaveOnConfirmation: Boolean = false,
+        recollectedCvc: String? = null
     ): T {
         return create(
             paymentMethodId = paymentMethod.id.orEmpty(),
             paymentMethodType = paymentMethod.type,
             requiresSaveOnConfirmation = requiresSaveOnConfirmation,
+            recollectedCvc = recollectedCvc
         )
     }
 
@@ -68,6 +71,7 @@ internal class ConfirmPaymentIntentParamsFactory(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         requiresSaveOnConfirmation: Boolean,
+        recollectedCvc: String?
     ): ConfirmPaymentIntentParams {
         return ConfirmPaymentIntentParams.createWithPaymentMethodId(
             paymentMethodId = paymentMethodId,
@@ -75,6 +79,7 @@ internal class ConfirmPaymentIntentParamsFactory(
             paymentMethodOptions = when (paymentMethodType) {
                 PaymentMethod.Type.Card -> {
                     PaymentMethodOptionsParams.Card(
+                        cvc = recollectedCvc,
                         setupFutureUsage = ConfirmPaymentIntentParams.SetupFutureUsage.OffSession?.takeIf {
                             requiresSaveOnConfirmation
                         } ?: ConfirmPaymentIntentParams.SetupFutureUsage.Blank
@@ -116,6 +121,7 @@ internal class ConfirmSetupIntentParamsFactory(
         paymentMethodId: String,
         paymentMethodType: PaymentMethod.Type?,
         requiresSaveOnConfirmation: Boolean,
+        recollectedCvc: String?
     ): ConfirmSetupIntentParams {
         return ConfirmSetupIntentParams.create(
             paymentMethodId = paymentMethodId,

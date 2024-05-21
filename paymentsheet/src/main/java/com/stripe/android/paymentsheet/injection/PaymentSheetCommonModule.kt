@@ -29,6 +29,8 @@ import com.stripe.android.paymentsheet.flowcontroller.DefaultPaymentSelectionUpd
 import com.stripe.android.paymentsheet.flowcontroller.PaymentSelectionUpdater
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.DefaultBacsMandateConfirmationLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.DefaultCvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.repositories.CustomerApiRepository
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.repositories.ElementsSessionRepository
@@ -139,6 +141,12 @@ internal abstract class PaymentSheetCommonModule {
         @Singleton
         fun provideBacsMandateConfirmationLauncherFactory(): BacsMandateConfirmationLauncherFactory {
             return DefaultBacsMandateConfirmationLauncherFactory
+        }
+
+        @Provides
+        @Singleton
+        fun provideCvcRecollectionLauncherFactory(): CvcRecollectionLauncherFactory {
+            return DefaultCvcRecollectionLauncherFactory
         }
 
         @Provides
