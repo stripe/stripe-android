@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -385,8 +386,11 @@ internal class DefaultFlowController @Inject internal constructor(
                     merchantName = state.config.merchantDisplayName
                 )
             )
-        } else if (paymentSelection.paymentMethod.type == PaymentMethod.Type.Card &&
-            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true) {
+        } else if (
+            FeatureFlags.cvcRecollection.isEnabled &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card &&
+            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true
+        ) {
             CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
                 cvcRecollectionLauncher.launch(
                     data = it,
