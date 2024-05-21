@@ -397,7 +397,9 @@ internal class DefaultFlowController @Inject internal constructor(
                     appearance = getPaymentAppearance()
                 )
             }
-        } else confirmPaymentSelection(paymentSelection, state)
+        } else {
+            confirmPaymentSelection(paymentSelection, state)
+        }
     }
 
     private fun confirmGenericPaymentMethod(
