@@ -1,5 +1,6 @@
 package com.stripe.android.lpmfoundations.paymentmethod.definitions
 
+import com.stripe.android.core.strings.resolvableString
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.luxe.TransformSpecToElements
 import com.stripe.android.lpmfoundations.paymentmethod.AddPaymentMethodRequirement
@@ -32,6 +33,7 @@ private object KlarnaUiDefinitionFactory : UiDefinitionFactory.RequiresSharedDat
         sharedDataSpec = sharedDataSpec,
         displayNameResource = R.string.stripe_paymentsheet_payment_method_klarna,
         iconResource = R.drawable.stripe_ic_paymentsheet_pm_klarna,
+        subtitle = resolvableString(id = R.string.stripe_klarna_buy_now_pay_later)
     )
 
     override fun createFormElements(

@@ -104,7 +104,7 @@ internal class PaymentMethodUIScreenshotTest {
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "Card",
-                subTitle = null,
+                subtitle = null,
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
@@ -122,7 +122,7 @@ internal class PaymentMethodUIScreenshotTest {
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "Card",
-                subTitle = null,
+                subtitle = null,
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
@@ -140,7 +140,7 @@ internal class PaymentMethodUIScreenshotTest {
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "Card",
-                subTitle = null,
+                subtitle = null,
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,
@@ -158,7 +158,44 @@ internal class PaymentMethodUIScreenshotTest {
                 iconUrl = null,
                 imageLoader = mock(),
                 title = "The Greatest US Bank Account",
-                subTitle = null,
+                subtitle = null,
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+            )
+        }
+    }
+
+    @Test
+    fun testSubtitleForVerticalMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "Klarna",
+                subtitle = "Buy now or pay later with Klarna.",
+                iconRequiresTinting = true,
+                onClick = {},
+                modifier = Modifier,
+            )
+        }
+    }
+
+    @Test
+    fun testLongSubtitleForVerticalMode() {
+        paparazziRule.snapshot {
+            NewPaymentMethodRowButton(
+                isEnabled = true,
+                isSelected = false,
+                iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
+                iconUrl = null,
+                imageLoader = mock(),
+                title = "Klarna",
+                subtitle = "A very long subtitle, that you should read all of and you should Buy now or pay later" +
+                    " with Klarna.",
                 iconRequiresTinting = true,
                 onClick = {},
                 modifier = Modifier,

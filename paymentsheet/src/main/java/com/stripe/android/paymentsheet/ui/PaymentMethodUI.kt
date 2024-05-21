@@ -23,6 +23,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.uicore.image.StripeImage
 import com.stripe.android.uicore.image.StripeImageLoader
@@ -157,7 +158,7 @@ internal fun NewPaymentMethodRowButton(
         iconUrl = iconUrl,
         imageLoader = imageLoader,
         title = supportedPaymentMethod.displayName.resolve(),
-        subTitle = null,
+        subtitle = supportedPaymentMethod.subtitle?.resolve(),
         iconRequiresTinting = supportedPaymentMethod.iconRequiresTinting,
         onClick = {
             onClick(supportedPaymentMethod)
@@ -174,7 +175,7 @@ internal fun NewPaymentMethodRowButton(
     iconUrl: String?,
     imageLoader: StripeImageLoader,
     title: String,
-    subTitle: String?,
+    subtitle: String?,
     iconRequiresTinting: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -202,13 +203,12 @@ internal fun NewPaymentMethodRowButton(
                     overflow = TextOverflow.Ellipsis
                 )
 
-                if (subTitle != null) {
+                if (subtitle != null) {
+                    val subtitleTextColor = MaterialTheme.stripeColors.subtitle
                     Text(
-                        text = subTitle,
-                        style = MaterialTheme.typography.subtitle1,
-                        color = if (isEnabled) textColor else textColor.copy(alpha = 0.6f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        text = subtitle,
+                        style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp),
+                        color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
                     )
                 }
             }
