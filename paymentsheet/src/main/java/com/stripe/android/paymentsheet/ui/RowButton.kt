@@ -25,12 +25,7 @@ internal fun RowButton(
 ) {
     Card(
         modifier = modifier
-            .alpha(alpha = if (isEnabled) 1.0F else 0.6F)
-            .selectable(
-                selected = isSelected,
-                enabled = isEnabled,
-                onClick = onClick
-            ),
+            .alpha(alpha = if (isEnabled) 1.0F else 0.6F),
         shape = MaterialTheme.shapes.medium,
         backgroundColor = MaterialTheme.stripeColors.component,
         border = MaterialTheme.getBorderStroke(isSelected),
@@ -38,6 +33,11 @@ internal fun RowButton(
     ) {
         Column(
             modifier = Modifier
+                .selectable(
+                    selected = isSelected,
+                    enabled = isEnabled,
+                    onClick = onClick
+                )
                 .padding(contentPaddingValues)
         ) {
             content()
