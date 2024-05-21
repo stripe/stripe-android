@@ -72,7 +72,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
     private val analyticsTracker: FinancialConnectionsAnalyticsTracker,
     private val nativeRouter: NativeAuthFlowRouter,
     nativeAuthFlowCoordinator: NativeAuthFlowCoordinator,
-    initialState: FinancialConnectionsSheetState
+    initialState: FinancialConnectionsSheetState,
 ) : FinancialConnectionsViewModel<FinancialConnectionsSheetState>(initialState, nativeAuthFlowCoordinator) {
 
     private val mutex = Mutex()
@@ -130,7 +130,7 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
         val manifest = sync.manifest
         val isInstantDebits = stateFlow.value.isInstantDebits
         val nativeAuthFlowEnabled = nativeRouter.nativeAuthFlowEnabled(manifest, isInstantDebits)
-        viewModelScope.launch { nativeRouter.logExposure(manifest, isInstantDebits) }
+        nativeRouter.logExposure(manifest, isInstantDebits)
         val hostedAuthUrl = buildHostedAuthUrl(manifest.hostedAuthUrl, isInstantDebits)
         if (hostedAuthUrl == null) {
             finishWithResult(
@@ -210,6 +210,13 @@ internal class FinancialConnectionsSheetViewModel @Inject constructor(
                 activityRecreated = true
             )
         }
+    }
+
+    fun onDismissed() {
+        finishWithResult(
+            state = stateFlow.value,
+            result = Canceled
+        )
     }
 
     /**

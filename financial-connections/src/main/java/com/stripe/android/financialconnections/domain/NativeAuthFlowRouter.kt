@@ -28,7 +28,7 @@ internal class NativeAuthFlowRouter @Inject constructor(
         return isInstantDebits.not() && killSwitchEnabled.not() && nativeExperimentEnabled
     }
 
-    suspend fun logExposure(
+    fun logExposure(
         manifest: FinancialConnectionsSessionManifest,
         isInstantDebits: Boolean,
     ) {
