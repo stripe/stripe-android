@@ -37,5 +37,9 @@
         <activity android:name=".ExternalPaymentMethodProxyActivity"
             android:theme="@style/StripePayLauncherDefaultTheme"
             android:exported="false" />
+        <activity
+            android:name=".paymentdatacollection.cvcrecollection.CvcRecollectionActivity"
+            android:theme="@style/StripePaymentSheetDefaultTheme"
+            android:windowSoftInputMode="adjustResize"/>
     </application>
 </manifest>

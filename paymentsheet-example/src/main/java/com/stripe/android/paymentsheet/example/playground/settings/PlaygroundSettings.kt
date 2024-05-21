@@ -242,6 +242,7 @@ internal class PlaygroundSettings private constructor(
             DelayedPaymentMethodsSettingsDefinition,
             AutomaticPaymentMethodsSettingsDefinition,
             SupportedPaymentMethodsSettingsDefinition,
+            RequireCvcRecollectionDefinition,
             PrimaryButtonLabelSettingsDefinition,
             PaymentMethodConfigurationSettingsDefinition,
             PreferredNetworkSettingsDefinition,
