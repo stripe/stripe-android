@@ -8,6 +8,10 @@
 * [ADDED][8466](https://github.com/stripe/stripe-android/pull/8466) Added support for [external payment methods](https://docs.stripe.com/payments/external-payment-methods?platform=android).
 * [CHANGED][8340](https://github.com/stripe/stripe-android/pull/8480) Recreate PaymentSheet and FlowController in `rememberPaymentSheet` and `rememberPaymentSheetFlowController` functions when an input callback changes.
 * [FIXED][8486](https://github.com/stripe/stripe-android/pull/8486) Prevent soft keyboard from covering "Enter address manually" button for Address Autocomplete
+* [REMOVED][8504](https://github.com/stripe/stripe-android/pull/8504) Remove support for using `Maestro` cards with `Google Pay`
+
+### Payments
+* [REMOVED][8504](https://github.com/stripe/stripe-android/pull/8504) Remove support for using `Maestro` cards with `Google Pay`
 
 ### Identity
 * [FIXED][8485](https://github.com/stripe/stripe-android/pull/8485) Fixed a crash when scanned type of an uploading image is not expected. 
