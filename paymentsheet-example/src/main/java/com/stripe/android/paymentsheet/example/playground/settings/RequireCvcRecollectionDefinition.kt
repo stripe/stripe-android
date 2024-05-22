@@ -7,6 +7,9 @@ internal object RequireCvcRecollectionDefinition : BooleanSettingsDefinition(
     displayName = "Require CVC Recollection",
     defaultValue = false
 ) {
+    override fun applicable(configurationData: PlaygroundConfigurationData): Boolean {
+        return configurationData.integrationType.isPaymentFlow()
+    }
 
     override fun configure(value: Boolean, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.requireCvcRecollection(value)
