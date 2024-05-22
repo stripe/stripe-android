@@ -25,40 +25,18 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
             .padding(16.dp)
     )
 
-    private val savedVisa = createSavedCard(CardBrand.Visa, "4242")
-
-    private val savedSepaDebit = DisplayableSavedPaymentMethod(
-        displayName = "4242",
+    private val savedVisa = DisplayableSavedPaymentMethod(
+        displayName = "····4242",
         paymentMethod = PaymentMethod(
-            id = "002",
+            id = "001",
             created = null,
             liveMode = false,
-            code = PaymentMethod.Type.SepaDebit.code,
-            type = PaymentMethod.Type.SepaDebit,
-        )
-    )
-
-    private val savedUsBankAccount =
-        DisplayableSavedPaymentMethod(
-            displayName = "4242",
-            paymentMethod = PaymentMethod(
-                id = "002",
-                created = null,
-                liveMode = false,
-                code = PaymentMethod.Type.USBankAccount.code,
-                type = PaymentMethod.Type.USBankAccount,
-                usBankAccount = PaymentMethodFixtures.US_BANK_ACCOUNT.usBankAccount,
+            code = PaymentMethod.Type.Card.code,
+            type = PaymentMethod.Type.Card,
+            card = PaymentMethod.Card(
+                brand = CardBrand.Visa,
+                last4 = "4242",
             )
-        )
-
-    private val savedOtherPaymentMethod = DisplayableSavedPaymentMethod(
-        displayName = "Klarna",
-        paymentMethod = PaymentMethod(
-            id = "002",
-            created = null,
-            liveMode = false,
-            code = PaymentMethod.Type.Klarna.code,
-            type = PaymentMethod.Type.Klarna,
         )
     )
 
@@ -93,66 +71,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                 displayableSavedPaymentMethod = savedVisa,
                 resources = null,
                 isEnabled = false,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedUsBankAccount() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedUsBankAccount,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedUsBankAccount_selected() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedUsBankAccount,
-                resources = null,
-                isEnabled = true,
-                isSelected = true,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedUsBankAccount_disabled() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedUsBankAccount,
-                resources = null,
-                isEnabled = false,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedSepaDebit() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedSepaDebit,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedOtherPaymentMethod() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedOtherPaymentMethod,
-                resources = null,
-                isEnabled = true,
                 isSelected = false,
             )
         }
