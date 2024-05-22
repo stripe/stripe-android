@@ -10,7 +10,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.ViewModelProvider
@@ -18,6 +17,7 @@ import com.stripe.android.common.ui.ElementsBottomSheetLayout
 import com.stripe.android.payments.PaymentFlowResult
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import com.stripe.android.uicore.utils.fadeOut
 import kotlin.time.Duration.Companion.seconds
 
@@ -47,7 +47,7 @@ internal class PollingActivity : AppCompatActivity() {
 
         setContent {
             StripeTheme {
-                val uiState by viewModel.uiState.collectAsState()
+                val uiState by viewModel.uiState.collectAsStateSafely()
 
                 val state = rememberStripeBottomSheetState(
                     confirmValueChange = { proposedValue ->
