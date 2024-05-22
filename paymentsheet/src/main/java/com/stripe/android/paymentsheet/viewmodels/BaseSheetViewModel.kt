@@ -12,9 +12,11 @@ import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
 import com.stripe.android.link.ui.inline.UserInput
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.lpmfoundations.luxe.isSaveForFutureUseValueChangeable
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadata
 import com.stripe.android.lpmfoundations.paymentmethod.UiDefinitionFactory
 import com.stripe.android.model.CardBrand
+import com.stripe.android.model.PaymentIntent
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.model.PaymentMethodCreateParams
@@ -31,6 +33,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
@@ -38,6 +41,7 @@ import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddAnotherPaymentMethod
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.AddFirstPaymentMethod
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.repositories.CustomerRepository
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.GooglePayState
@@ -51,6 +55,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combine
@@ -289,6 +294,8 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
+                    is PaymentSheetScreen.Form -> {
+                    }
                 }
             }
         }
@@ -351,14 +358,14 @@ internal abstract class BaseSheetViewModel(
         transitionTo(AddAnotherPaymentMethod)
     }
 
-    private fun transitionTo(target: PaymentSheetScreen) {
+    fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
         backStack.update { (it - PaymentSheetScreen.Loading) + target }
     }
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            is PaymentSheetScreen.Loading, is PaymentSheetScreen.EditPaymentMethod -> {
+            is PaymentSheetScreen.Loading, is PaymentSheetScreen.EditPaymentMethod, is PaymentSheetScreen.Form -> {
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
@@ -801,6 +808,51 @@ internal abstract class BaseSheetViewModel(
 
     fun reportCardNumberCompleted() {
         eventReporter.onCardNumberCompleted()
+    }
+
+    fun usBankAccountFormArguments(selectedPaymentMethodCode: String): USBankAccountFormArguments {
+        val isSaveForFutureUseValueChangeable = paymentMethodMetadata.value?.let {
+            isSaveForFutureUseValueChangeable(
+                code = selectedPaymentMethodCode,
+                metadata = it,
+            )
+        } ?: false
+        val instantDebits = selectedPaymentMethodCode == PaymentMethod.Type.Link.code
+        val initializationMode = (this as? PaymentSheetViewModel)
+            ?.args
+            ?.initializationMode
+        val onBehalfOf = (initializationMode as? PaymentSheet.InitializationMode.DeferredIntent)
+            ?.intentConfiguration
+            ?.onBehalfOf
+        val stripeIntent = paymentMethodMetadata.value?.stripeIntent
+        return USBankAccountFormArguments(
+            showCheckbox = isSaveForFutureUseValueChangeable,
+            instantDebits = instantDebits,
+            onBehalfOf = onBehalfOf,
+            isCompleteFlow = this is PaymentSheetViewModel,
+            isPaymentFlow = stripeIntent is PaymentIntent,
+            stripeIntentId = stripeIntent?.id,
+            clientSecret = stripeIntent?.clientSecret,
+            shippingDetails = config.shippingDetails,
+            draftPaymentSelection = newPaymentSelection?.paymentSelection,
+            onMandateTextChanged = ::updateMandateText,
+            onConfirmUSBankAccount = ::handleConfirmUSBankAccount,
+            onCollectBankAccountResult = null,
+            onUpdatePrimaryButtonUIState = ::updateCustomPrimaryButtonUiState,
+            onUpdatePrimaryButtonState = ::updatePrimaryButtonState,
+            onError = ::onError
+        )
+    }
+
+    fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
+        paymentMethodMetadata.value?.let { paymentMethodMetadata ->
+            val newSelection = formValues?.transformToPaymentSelection(
+                context = getApplication(),
+                paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
+            updateSelection(newSelection)
+        }
     }
 
     private fun reportFormShown(code: String) {
