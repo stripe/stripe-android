@@ -1234,7 +1234,6 @@ internal object ElementsSessionFixtures {
                     "elements_enable_mx_card_installments": false,
                     "elements_enable_passive_captcha": true,
                     "elements_enable_passive_hcaptcha_in_payment_method_creation": true,
-                    "elements_enable_payment_element_optimized_sign_up": true,
                     "elements_enable_payment_element_postal_validation": true,
                     "elements_enable_read_allow_redisplay": false,
                     "elements_enable_save_for_future_payments_pre_check": false,
