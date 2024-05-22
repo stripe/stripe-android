@@ -1,36 +1,63 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import androidx.compose.runtime.Stable
+import com.stripe.android.customersheet.CustomerAdapter
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CurrencySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationTypeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodConfigurationSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 
 @Stable
-internal data class PlaygroundState(
-    private val snapshot: PlaygroundSettings.Snapshot,
-    val amount: Long,
-    val paymentMethodTypes: List<String>,
-    val customerConfig: PaymentSheet.CustomerConfiguration?,
-    val clientSecret: String,
-) {
-    val initializationType = snapshot[InitializationTypeSettingsDefinition]
-    val currencyCode = snapshot[CurrencySettingsDefinition]
-    val countryCode = snapshot[CountrySettingsDefinition]
-    val checkoutMode = snapshot[CheckoutModeSettingsDefinition]
-    val integrationType = snapshot.configurationData.integrationType
-    val paymentMethodConfigurationId: String? = snapshot[PaymentMethodConfigurationSettingsDefinition].ifEmpty { null }
+internal sealed interface PlaygroundState {
+    val integrationType: PlaygroundConfigurationData.IntegrationType
+    val countryCode: Country
 
-    val stripeIntentId: String
-        get() = clientSecret.substringBefore("_secret_")
+    @Stable
+    data class Payment(
+        private val snapshot: PlaygroundSettings.Snapshot,
+        val amount: Long,
+        val paymentMethodTypes: List<String>,
+        val customerConfig: PaymentSheet.CustomerConfiguration?,
+        val clientSecret: String,
+    ) : PlaygroundState {
+        override val integrationType = snapshot.configurationData.integrationType
+        override val countryCode = snapshot[CountrySettingsDefinition]
 
-    fun paymentSheetConfiguration(): PaymentSheet.Configuration {
-        return snapshot.paymentSheetConfiguration(this)
+        val initializationType = snapshot[InitializationTypeSettingsDefinition]
+        val checkoutMode = snapshot[CheckoutModeSettingsDefinition]
+        val currencyCode = snapshot[CurrencySettingsDefinition]
+        val paymentMethodConfigurationId: String? =
+            snapshot[PaymentMethodConfigurationSettingsDefinition].ifEmpty { null }
+
+        val stripeIntentId: String
+            get() = clientSecret.substringBefore("_secret_")
+
+        fun paymentSheetConfiguration(): PaymentSheet.Configuration {
+            return snapshot.paymentSheetConfiguration(this)
+        }
+    }
+
+    @Stable
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    data class Customer(
+        private val snapshot: PlaygroundSettings.Snapshot,
+        val adapter: CustomerAdapter,
+    ) : PlaygroundState {
+        override val integrationType = snapshot.configurationData.integrationType
+        override val countryCode = snapshot[CountrySettingsDefinition]
+
+        fun customerSheetConfiguration(): CustomerSheet.Configuration {
+            return snapshot.customerSheetConfiguration(this)
+        }
     }
 
     companion object {
@@ -44,7 +71,7 @@ internal data class PlaygroundState(
                     .orEmpty()
                     .split(",")
             }
-            return PlaygroundState(
+            return Payment(
                 snapshot = snapshot,
                 amount = amount,
                 paymentMethodTypes = paymentMethodTypes,

@@ -6,6 +6,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performTextInput
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
+import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
@@ -95,7 +96,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         }
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = playgroundState?.customerConfig?.id,
+            customerId = playgroundState?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             afterBuyAction = {
                 ComposeButton(rules.compose, hasTestTag("SEPA_MANDATE_CONTINUE_BUTTON"))
@@ -120,7 +121,7 @@ internal class TestSepaDebit : BasePlaygroundTest() {
         }
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = playgroundState?.customerConfig?.id,
+            customerId = playgroundState?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.multiStepSelect.click()
@@ -128,6 +129,10 @@ internal class TestSepaDebit : BasePlaygroundTest() {
                 selectors.continueButton.click()
             }
         )
+    }
+
+    private fun PlaygroundState?.asPaymentState(): PlaygroundState.Payment? {
+        return this as? PlaygroundState.Payment
     }
 
     private fun fillOutIban() {

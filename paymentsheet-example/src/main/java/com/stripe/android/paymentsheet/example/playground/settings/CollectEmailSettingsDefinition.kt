@@ -13,7 +13,7 @@ internal object CollectEmailSettingsDefinition : CollectionModeSettingsDefinitio
     override fun configure(
         value: CollectionMode,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { copy(email = value) }
@@ -23,7 +23,7 @@ internal object CollectEmailSettingsDefinition : CollectionModeSettingsDefinitio
     override fun configure(
         value: CollectionMode,
         configurationBuilder: CustomerSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { copy(email = value) }

@@ -43,7 +43,7 @@ internal object CustomerSettingsDefinition :
     override fun configure(
         value: CustomerType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationBuilder.customer(playgroundState.customerConfig)

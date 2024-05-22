@@ -13,7 +13,7 @@ internal interface PlaygroundSettingDefinition<T> {
     fun configure(
         value: T,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PaymentSheetConfigurationData,
     ) {
     }
@@ -22,7 +22,7 @@ internal interface PlaygroundSettingDefinition<T> {
     fun configure(
         value: T,
         configurationBuilder: CustomerSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Customer,
         configurationData: CustomerSheetConfigurationData,
     ) {
     }

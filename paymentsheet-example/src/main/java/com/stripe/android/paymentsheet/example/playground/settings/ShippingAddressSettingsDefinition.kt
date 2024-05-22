@@ -14,7 +14,7 @@ internal object ShippingAddressSettingsDefinition : PlaygroundSettingDefinition<
     override fun configure(
         value: AddressDetails?,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         configurationBuilder.shippingDetails(value)

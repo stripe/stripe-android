@@ -7,6 +7,7 @@ import androidx.compose.ui.test.isSelected
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
@@ -137,7 +138,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -179,7 +180,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmExistingComplete(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             values = FieldPopulator.Values(
                 cardNumber = secondCardNumber,
@@ -190,7 +191,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCompleteWithDefaultSavedPaymentMethod(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -231,7 +232,7 @@ internal class TestCard : BasePlaygroundTest() {
         )
 
         testDriver.confirmCustomWithDefaultSavedPaymentMethod(
-            customerId = state?.customerConfig?.id,
+            customerId = state?.asPaymentState()?.customerConfig?.id,
             testParameters = testParameters,
             beforeBuyAction = { selectors ->
                 selectors.composeTestRule.waitUntilExactlyOneExists(
@@ -271,7 +272,7 @@ internal class TestCard : BasePlaygroundTest() {
             },
         )
 
-        val customerId = state?.customerConfig?.id
+        val customerId = state?.asPaymentState()?.customerConfig?.id
 
         testDriver.confirmCustomAndBuy(
             customerId = customerId,
@@ -311,5 +312,9 @@ internal class TestCard : BasePlaygroundTest() {
             },
             values = FieldPopulator.Values(cardNumber = "4000000000003220")
         )
+    }
+
+    private fun PlaygroundState?.asPaymentState(): PlaygroundState.Payment? {
+        return this as? PlaygroundState.Payment
     }
 }

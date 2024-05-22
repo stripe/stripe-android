@@ -12,7 +12,7 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
     override fun configure(
         value: Unit,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         configurationBuilder.appearance(AppearanceStore.state)
@@ -22,7 +22,7 @@ internal object AppearanceSettingsDefinition : PlaygroundSettingDefinition<Unit>
     override fun configure(
         value: Unit,
         configurationBuilder: CustomerSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
         configurationBuilder.appearance(AppearanceStore.state)

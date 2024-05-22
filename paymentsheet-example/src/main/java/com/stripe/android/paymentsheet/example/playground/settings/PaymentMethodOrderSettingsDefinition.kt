@@ -23,7 +23,7 @@ internal object PaymentMethodOrderSettingsDefinition :
     override fun configure(
         value: String,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         if (value.isNotEmpty()) {
@@ -35,7 +35,7 @@ internal object PaymentMethodOrderSettingsDefinition :
     override fun configure(
         value: String,
         configurationBuilder: CustomerSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
         if (value.isNotEmpty()) {
