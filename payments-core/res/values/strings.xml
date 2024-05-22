@@ -170,7 +170,7 @@
   <string name="stripe_title_select_shipping_method">Select Shipping Method</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Update card</string>
-  <!-- Title of vertical mode manage screen for selecting a payment method -->
+  <!-- Title of vertical mode manage screen when selecting a payment method -->
   <string name="stripe_title_select_payment_method">Select your payment method</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verify your payment</string>
