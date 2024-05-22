@@ -5,6 +5,7 @@ import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -107,8 +108,10 @@ class PaymentOptionsStateMapperTest {
 
             assertThat(awaitItem().selectedItem).isEqualTo(
                 PaymentOptionsItem.SavedPaymentMethod(
-                    displayName = "card",
-                    paymentMethod = selectedPaymentMethod.paymentMethod,
+                    DisplayableSavedPaymentMethod(
+                        displayName = "card",
+                        paymentMethod = selectedPaymentMethod.paymentMethod,
+                    )
                 )
             )
 
