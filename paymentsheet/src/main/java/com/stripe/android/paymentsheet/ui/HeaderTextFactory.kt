@@ -42,7 +42,7 @@ internal class HeaderTextFactory(
             StripeR.string.stripe_title_update_card
         }
         is PaymentSheetScreen.ManageSavedPaymentMethods -> {
-            StripeR.string.stripe_title_select_payment_method
+            R.string.stripe_paymentsheet_select_payment_method
         }
         is PaymentSheetScreen.Loading,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
@@ -60,7 +60,7 @@ internal class HeaderTextFactory(
         is PaymentSheetScreen.Loading, is PaymentSheetScreen.Form -> {
             null
         }
-        is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+        is PaymentSheetScreen.SelectSavedPaymentMethods, is PaymentSheetScreen.ManageSavedPaymentMethods -> {
             R.string.stripe_paymentsheet_select_payment_method
         }
         is PaymentSheetScreen.AddFirstPaymentMethod,
@@ -76,9 +76,6 @@ internal class HeaderTextFactory(
         }
         is PaymentSheetScreen.EditPaymentMethod -> {
             StripeR.string.stripe_title_update_card
-        }
-        is PaymentSheetScreen.ManageSavedPaymentMethods -> {
-            StripeR.string.stripe_title_select_payment_method
         }
         null -> {
             null
