@@ -22,6 +22,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -42,7 +43,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import com.stripe.android.uicore.utils.stateFlowOf
 
 @Composable
@@ -72,7 +72,7 @@ internal fun CvcRecollectionScreen(
                 viewActionHandler.invoke(CvcRecollectionViewAction.OnBackPressed)
             }
             CvcRecollectionField(element = element, cardBrand = cardBrand, lastFour = lastFour)
-            CvcRecollectionButton(element.controller.isComplete.collectAsStateSafely()) {
+            CvcRecollectionButton(element.controller.isComplete.collectAsState()) {
                 viewActionHandler.invoke(
                     CvcRecollectionViewAction.OnConfirmPressed(
                         element.controller.fieldValue.value

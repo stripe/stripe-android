@@ -16,6 +16,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,7 +54,6 @@ import com.stripe.android.uicore.elements.TextField
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.job
 
 @Composable
@@ -68,8 +68,8 @@ fun LinkOptionalInlineSignup(
             factory = InlineSignupViewModel.Factory(component)
         )
 
-        val viewState by viewModel.viewState.collectAsStateSafely()
-        val errorMessage by viewModel.errorMessage.collectAsStateSafely()
+        val viewState by viewModel.viewState.collectAsState()
+        val errorMessage by viewModel.errorMessage.collectAsState()
 
         LaunchedEffect(viewState) {
             onStateChanged(component.configuration, viewState)
@@ -122,7 +122,7 @@ internal fun LinkOptionalInlineSignup(
         val nameFocusRequester = remember { FocusRequester() }
 
         var didShowAllFields by rememberSaveable { mutableStateOf(false) }
-        val sectionError by sectionController.error.collectAsStateSafely()
+        val sectionError by sectionController.error.collectAsState()
 
         if (signUpState == SignUpState.InputtingRemainingFields) {
             LaunchedEffect(signUpState) {

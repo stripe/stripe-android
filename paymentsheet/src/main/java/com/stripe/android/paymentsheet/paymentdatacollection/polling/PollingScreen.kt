@@ -19,6 +19,7 @@ import androidx.compose.material.TextButton
 import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -37,7 +38,6 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import com.stripe.android.ui.core.R as StripeUiCoreR
@@ -54,7 +54,7 @@ internal fun PollingScreen(
     modifier: Modifier = Modifier,
 ) {
     val lifecycleOwner = LocalLifecycleOwner.current
-    val uiState by viewModel.uiState.collectAsStateSafely()
+    val uiState by viewModel.uiState.collectAsState()
 
     DisposableEffect(lifecycleOwner) {
         val observer = PollingLifecycleObserver(viewModel)

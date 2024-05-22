@@ -10,6 +10,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
@@ -23,7 +24,6 @@ import com.stripe.android.paymentsheet.injection.InputAddressViewModelSubcompone
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.CheckboxElementUI
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import javax.inject.Provider
 
 @Composable
@@ -88,22 +88,22 @@ internal fun InputAddressScreen(
             inputAddressViewModelSubcomponentBuilderProvider
         )
     )
-    val formController by viewModel.formController.collectAsStateSafely()
+    val formController by viewModel.formController.collectAsState()
     if (formController == null) {
         LoadingIndicator(
             modifier = Modifier.fillMaxSize()
         )
     } else {
         formController?.let {
-            val completeValues by it.completeFormValues.collectAsStateSafely()
+            val completeValues by it.completeFormValues.collectAsState()
             val buttonText = viewModel.args.config?.buttonTitle ?: stringResource(
                 R.string.stripe_paymentsheet_address_element_primary_button
             )
             val titleText = viewModel.args.config?.title ?: stringResource(
                 R.string.stripe_paymentsheet_address_element_shipping_address
             )
-            val formEnabled by viewModel.formEnabled.collectAsStateSafely()
-            val checkboxChecked by viewModel.checkboxChecked.collectAsStateSafely()
+            val formEnabled by viewModel.formEnabled.collectAsState()
+            val checkboxChecked by viewModel.checkboxChecked.collectAsState()
 
             InputAddressScreen(
                 primaryButtonEnabled = completeValues != null,

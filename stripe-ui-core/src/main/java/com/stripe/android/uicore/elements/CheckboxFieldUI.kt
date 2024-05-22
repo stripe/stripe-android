@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,7 +32,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.utils.collectAsStateSafely
 
 @Composable
 @RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
@@ -40,8 +40,8 @@ fun CheckboxFieldUI(
     controller: CheckboxFieldController,
     enabled: Boolean = true
 ) {
-    val isChecked by controller.isChecked.collectAsStateSafely()
-    val error by controller.error.collectAsStateSafely()
+    val isChecked by controller.isChecked.collectAsState()
+    val error by controller.error.collectAsState()
 
     CheckboxFieldUIView(
         modifier = modifier,

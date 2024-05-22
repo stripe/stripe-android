@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -46,7 +47,6 @@ import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.elements.TextFieldController
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import com.stripe.android.R as StripeR
 import com.stripe.android.ui.core.R as PaymentsUiCoreR
 
@@ -73,8 +73,8 @@ internal fun USBankAccountForm(
         },
     )
 
-    val currentScreenState by viewModel.currentScreenState.collectAsStateSafely()
-    val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsStateSafely()
+    val currentScreenState by viewModel.currentScreenState.collectAsState()
+    val lastTextFieldIdentifier by viewModel.lastTextFieldIdentifier.collectAsState()
 
     USBankAccountEmitters(
         viewModel = viewModel,
@@ -320,7 +320,7 @@ private fun PhoneSection(
     phoneController: PhoneNumberController,
     imeAction: ImeAction,
 ) {
-    val error by phoneController.error.collectAsStateSafely()
+    val error by phoneController.error.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
@@ -355,7 +355,7 @@ private fun AddressSection(
     lastTextFieldIdentifier: IdentifierSpec?,
     sameAsShippingElement: SameAsShippingElement?,
 ) {
-    val error by addressController.error.collectAsStateSafely()
+    val error by addressController.error.collectAsState()
 
     val sectionErrorString = error?.let {
         it.formatArgs?.let { args ->
