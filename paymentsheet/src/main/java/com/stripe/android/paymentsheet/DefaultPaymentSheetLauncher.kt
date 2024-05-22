@@ -28,6 +28,7 @@ internal class DefaultPaymentSheetLauncher(
             object : DefaultLifecycleObserver {
                 override fun onDestroy(owner: LifecycleOwner) {
                     IntentConfirmationInterceptor.createIntentCallback = null
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
                     super.onDestroy(owner)
                 }
             }
