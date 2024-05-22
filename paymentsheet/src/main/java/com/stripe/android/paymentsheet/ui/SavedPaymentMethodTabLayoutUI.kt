@@ -1,5 +1,3 @@
-@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
@@ -32,6 +30,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
@@ -102,27 +102,31 @@ private fun SavedPaymentMethodsTabLayoutPreview() {
                     PaymentOptionsItem.Link,
                     PaymentOptionsItem.GooglePay,
                     PaymentOptionsItem.SavedPaymentMethod(
-                        displayName = "4242",
-                        paymentMethod = PaymentMethod(
-                            id = "001",
-                            created = null,
-                            liveMode = false,
-                            code = PaymentMethod.Type.Card.code,
-                            type = PaymentMethod.Type.Card,
-                            card = PaymentMethod.Card(
-                                brand = CardBrand.Visa,
-                                last4 = "4242",
+                        DisplayableSavedPaymentMethod(
+                            displayName = "4242",
+                            paymentMethod = PaymentMethod(
+                                id = "001",
+                                created = null,
+                                liveMode = false,
+                                code = PaymentMethod.Type.Card.code,
+                                type = PaymentMethod.Type.Card,
+                                card = PaymentMethod.Card(
+                                    brand = CardBrand.Visa,
+                                    last4 = "4242",
+                                )
                             )
                         )
                     ),
                     PaymentOptionsItem.SavedPaymentMethod(
-                        displayName = "4242",
-                        paymentMethod = PaymentMethod(
-                            id = "002",
-                            created = null,
-                            liveMode = false,
-                            code = PaymentMethod.Type.SepaDebit.code,
-                            type = PaymentMethod.Type.SepaDebit,
+                        DisplayableSavedPaymentMethod(
+                            displayName = "4242",
+                            paymentMethod = PaymentMethod(
+                                id = "002",
+                                created = null,
+                                liveMode = false,
+                                code = PaymentMethod.Type.SepaDebit.code,
+                                type = PaymentMethod.Type.SepaDebit,
+                            )
                         )
                     ),
                 ),
