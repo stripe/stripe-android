@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal interface PlaygroundSettingDefinition<T> {
     val defaultValue: T
@@ -18,6 +19,12 @@ internal interface PlaygroundSettingDefinition<T> {
     fun configure(
         value: T,
         checkoutRequestBuilder: CheckoutRequest.Builder,
+    ) {
+    }
+
+    fun configure(
+        value: T,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder,
     ) {
     }
 

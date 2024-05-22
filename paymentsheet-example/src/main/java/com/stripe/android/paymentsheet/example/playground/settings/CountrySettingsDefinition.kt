@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 
 import com.stripe.android.core.model.CountryUtils
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import java.util.Locale
 
 internal object CountrySettingsDefinition :
@@ -38,6 +39,13 @@ internal object CountrySettingsDefinition :
 
     override fun configure(value: Country, checkoutRequestBuilder: CheckoutRequest.Builder) {
         checkoutRequestBuilder.merchantCountryCode(value.value)
+    }
+
+    override fun configure(
+        value: Country,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        customerEphemeralKeyRequestBuilder.merchantCountryCode(value.value)
     }
 
     override fun valueUpdated(value: Country, playgroundSettings: PlaygroundSettings) {
