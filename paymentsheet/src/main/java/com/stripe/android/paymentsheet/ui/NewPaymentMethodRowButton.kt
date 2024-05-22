@@ -70,27 +70,8 @@ internal fun NewPaymentMethodRowButton(
                 modifier = Modifier.size(20.dp),
             )
         },
-        textContent = {
-            val textColor = MaterialTheme.stripeColors.onComponent
-            Column {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.caption,
-                    color = if (isEnabled) textColor else textColor.copy(alpha = 0.6f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                if (subtitle != null) {
-                    val subtitleTextColor = MaterialTheme.stripeColors.subtitle
-                    Text(
-                        text = subtitle,
-                        style = MaterialTheme.typography.subtitle1.copy(fontSize = 10.sp),
-                        color = if (isEnabled) subtitleTextColor else subtitleTextColor.copy(alpha = 0.6f),
-                    )
-                }
-            }
-        },
+        title = title,
+        subtitle = subtitle,
         onClick = onClick,
         modifier = modifier,
     )
