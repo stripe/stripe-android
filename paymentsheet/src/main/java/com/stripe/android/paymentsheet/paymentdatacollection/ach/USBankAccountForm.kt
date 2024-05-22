@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
@@ -24,7 +25,6 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.stripe.android.paymentsheet.PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode
@@ -35,10 +35,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.elements.SaveForFutureUseElement
 import com.stripe.android.ui.core.elements.SaveForFutureUseElementUI
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
-import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.AddressController
 import com.stripe.android.uicore.elements.AddressElementUI
-import com.stripe.android.uicore.elements.EmailConfig
 import com.stripe.android.uicore.elements.H6Text
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.PhoneNumberController
@@ -253,7 +251,7 @@ internal fun BillingDetailsForm(
             } else {
                 stringResource(R.string.stripe_paymentsheet_save_bank_title)
             },
-            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            modifier = Modifier.padding(vertical = 8.dp)
         )
 
         val showName = if (instantDebits) {
@@ -418,8 +416,10 @@ private fun AccountDetailsForm(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 56.dp)
                     .padding(vertical = 12.dp)
-                    .padding(horizontal = 16.dp),
+                    .padding(start = 16.dp)
+                    .padding(end = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -443,7 +443,7 @@ private fun AccountDetailsForm(
                 IconButton(
                     enabled = !isProcessing,
                     onClick = { openDialog = true },
-                    modifier = Modifier.size(16.dp),
+                    modifier = Modifier.size(24.dp),
                 ) {
                     Icon(
                         painter = painterResource(StripeR.drawable.stripe_ic_clear),
@@ -485,35 +485,5 @@ private fun AccountDetailsForm(
                 openDialog = false
             }
         )
-    }
-}
-
-@Preview
-@Composable
-private fun AccountDetailsFormPreview() {
-    StripeTheme {
-        Column(
-            modifier = Modifier.padding(16.dp),
-        ) {
-            TextFieldSection(
-                textFieldController = EmailConfig.createController(
-                    initialValue = "email@email.com",
-                ),
-                imeAction = ImeAction.Next,
-                enabled = true,
-            )
-
-            AccountDetailsForm(
-                showCheckbox = true,
-                isProcessing = false,
-                bankName = "Bank of America",
-                last4 = "1234",
-                saveForFutureUseElement = SaveForFutureUseElement(
-                    initialValue = false,
-                    merchantName = "Example, Inc.",
-                ),
-                onRemoveAccount = {},
-            )
-        }
     }
 }
