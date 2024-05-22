@@ -2,6 +2,8 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -13,11 +15,16 @@ internal fun NewPaymentMethodVerticalLayoutUI(
     paymentMethods: List<SupportedPaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
+    onViewMorePaymentMethods: () -> Unit,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
     imageLoader: StripeImageLoader,
     modifier: Modifier = Modifier,
 ) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        TextButton(onClick = { onViewMorePaymentMethods() }) {
+            Text(text = "Go to manage screen")
+        }
+
         paymentMethods.forEachIndexed { index, item ->
             NewPaymentMethodRowButton(
                 isEnabled = isEnabled,
