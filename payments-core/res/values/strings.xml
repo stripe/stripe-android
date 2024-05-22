@@ -166,12 +166,12 @@
   <string name="stripe_title_bank_account">Bank Account</string>
   <!-- Title for Payment Method screen -->
   <string name="stripe_title_payment_method">Payment Method</string>
-  <!-- Title shown above a carousel containing the customer&apos;s payment methods -->
-  <string name="stripe_title_select_payment_method">Select your payment method</string>
   <!-- Screen title telling users they should select a shipping address -->
   <string name="stripe_title_select_shipping_method">Select Shipping Method</string>
   <!-- Title of screen to update a card -->
   <string name="stripe_title_update_card">Update card</string>
+  <!-- Title of vertical mode manage screen when selecting a payment method -->
+  <string name="stripe_title_select_payment_method">Select your payment method</string>
   <!-- When there are multiple browsers and web authentication is required, this will show in a window asking which browser they want to use to "Verify your payment" -->
   <string name="stripe_verify_your_payment">Verify your payment</string>
 </resources>
