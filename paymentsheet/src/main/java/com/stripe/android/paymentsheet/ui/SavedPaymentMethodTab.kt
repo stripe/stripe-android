@@ -1,6 +1,9 @@
-package com.stripe.android.paymentsheet
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
+package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.DrawableRes
+import androidx.annotation.RestrictTo
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -42,8 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.ui.LpmSelectorText
-import com.stripe.android.paymentsheet.ui.PaymentOptionEditState
+import com.stripe.android.paymentsheet.R
 import com.stripe.android.ui.core.elements.SimpleDialogElementUI
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.SectionCard
@@ -51,7 +53,7 @@ import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.R as StripeR
 
 @VisibleForTesting(otherwise = VisibleForTesting.PRIVATE)
-const val PAYMENT_OPTION_CARD_TEST_TAG = "PAYMENT_OPTION_CARD_TEST_TAG"
+const val SAVED_PAYMENT_METHOD_CARD_TEST_TAG = "SAVED_PAYMENT_METHOD_CARD_TEST_TAG"
 
 internal const val TEST_TAG_REMOVE_BADGE = "remove_badge"
 
@@ -66,7 +68,7 @@ private val editIconBackgroundColorDark = Color(0xFF525252)
 internal val SavedPaymentMethodsTopContentPadding = 12.dp
 
 @Composable
-internal fun PaymentOptionUi(
+internal fun SavedPaymentMethodTab(
     viewWidth: Dp,
     isSelected: Boolean,
     editState: PaymentOptionEditState,
@@ -89,7 +91,7 @@ internal fun PaymentOptionUi(
 
     BadgedBox(
         badge = {
-            PaymentOptionBadge(
+            SavedPaymentMethodBadge(
                 isSelected = isSelected,
                 editState = editState,
                 openRemoveDialog = openRemoveDialog,
@@ -100,7 +102,7 @@ internal fun PaymentOptionUi(
         },
         content = {
             Column {
-                PaymentOptionCard(
+                SavedPaymentMethodCard(
                     isSelected = isSelected,
                     isEnabled = isEnabled,
                     labelText = labelText,
@@ -148,7 +150,7 @@ internal fun PaymentOptionUi(
 }
 
 @Composable
-private fun PaymentOptionBadge(
+private fun SavedPaymentMethodBadge(
     isSelected: Boolean,
     editState: PaymentOptionEditState,
     openRemoveDialog: MutableState<Boolean>,
@@ -178,7 +180,7 @@ private fun PaymentOptionBadge(
 }
 
 @Composable
-private fun PaymentOptionCard(
+private fun SavedPaymentMethodCard(
     isSelected: Boolean,
     isEnabled: Boolean,
     iconRes: Int,
@@ -199,7 +201,7 @@ private fun PaymentOptionCard(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
                 .fillMaxSize()
-                .testTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$labelText")
+                .testTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$labelText")
                 .selectable(
                     selected = isSelected,
                     enabled = isEnabled,
@@ -306,9 +308,9 @@ private fun SelectedBadge(
 
 @Preview(name = "Selected payment option")
 @Composable
-private fun PaymentOptionUiSelected() {
+private fun SavedPaymentMethodTabUISelected() {
     StripeTheme {
-        PaymentOptionUi(
+        SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = true,
             editState = PaymentOptionEditState.None,
@@ -323,9 +325,9 @@ private fun PaymentOptionUiSelected() {
 
 @Preview(name = "Payment option in removable mode")
 @Composable
-private fun PaymentOptionUiRemovable() {
+private fun SavedPaymentMethodTabUIRemovable() {
     StripeTheme {
-        PaymentOptionUi(
+        SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = false,
             editState = PaymentOptionEditState.Removable,
@@ -340,9 +342,9 @@ private fun PaymentOptionUiRemovable() {
 
 @Preview(name = "Payment option in modifiable mode")
 @Composable
-private fun PaymentOptionUiModifiable() {
+private fun SavedPaymentMethodTabUIModifiable() {
     StripeTheme {
-        PaymentOptionUi(
+        SavedPaymentMethodTab(
             viewWidth = 100.dp,
             isSelected = false,
             editState = PaymentOptionEditState.Modifiable,

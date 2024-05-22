@@ -1,3 +1,5 @@
+@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+
 package com.stripe.android.paymentsheet.ui
 
 import androidx.annotation.RestrictTo
@@ -30,7 +32,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.paymentsheet.R
@@ -44,7 +45,7 @@ import com.stripe.android.R as StripeR
 
 @OptIn(ExperimentalComposeUiApi::class, ExperimentalFoundationApi::class)
 @Composable
-internal fun PaymentOptions(
+internal fun SavedPaymentMethodTabLayoutUI(
     state: PaymentOptionsState,
     isEditing: Boolean,
     isProcessing: Boolean,
@@ -70,7 +71,7 @@ internal fun PaymentOptions(
                 val isEnabled = !isProcessing && (!isEditing || item.isEnabledDuringEditing)
                 val isSelected = item == state.selectedItem && !isEditing
 
-                PaymentOption(
+                SavedPaymentMethodTab(
                     item = item,
                     width = width,
                     isEditing = isEditing,
@@ -92,9 +93,9 @@ internal fun PaymentOptions(
 
 @Preview(widthDp = 700)
 @Composable
-private fun PaymentOptionsPreview() {
+private fun SavedPaymentMethodsTabLayoutPreview() {
     DefaultStripeTheme {
-        PaymentOptions(
+        SavedPaymentMethodTabLayoutUI(
             state = PaymentOptionsState(
                 items = listOf(
                     PaymentOptionsItem.AddCard,
@@ -147,7 +148,7 @@ internal fun rememberItemWidth(maxWidth: Dp): Dp = remember(maxWidth) {
 }
 
 @Composable
-private fun PaymentOption(
+private fun SavedPaymentMethodTab(
     item: PaymentOptionsItem,
     width: Dp,
     isEnabled: Boolean,
@@ -161,7 +162,7 @@ private fun PaymentOption(
 ) {
     when (item) {
         is PaymentOptionsItem.AddCard -> {
-            AddCard(
+            AddCardTab(
                 width = width,
                 isEnabled = isEnabled,
                 onAddCardPressed = onAddCardPressed,
@@ -169,7 +170,7 @@ private fun PaymentOption(
             )
         }
         is PaymentOptionsItem.GooglePay -> {
-            GooglePay(
+            GooglePayTab(
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
@@ -178,7 +179,7 @@ private fun PaymentOption(
             )
         }
         is PaymentOptionsItem.Link -> {
-            Link(
+            LinkTab(
                 width = width,
                 isEnabled = isEnabled,
                 isSelected = isSelected,
@@ -187,7 +188,7 @@ private fun PaymentOption(
             )
         }
         is PaymentOptionsItem.SavedPaymentMethod -> {
-            SavedPaymentMethod(
+            SavedPaymentMethodTab(
                 paymentMethod = item,
                 width = width,
                 isEnabled = isEnabled,
@@ -204,7 +205,7 @@ private fun PaymentOption(
 }
 
 @Composable
-private fun AddCard(
+private fun AddCardTab(
     width: Dp,
     isEnabled: Boolean,
     onAddCardPressed: () -> Unit,
@@ -216,7 +217,7 @@ private fun AddCard(
         R.drawable.stripe_ic_paymentsheet_add_light
     }
 
-    PaymentOptionUi(
+    SavedPaymentMethodTab(
         viewWidth = width,
         editState = PaymentOptionEditState.None,
         isSelected = false,
@@ -230,14 +231,14 @@ private fun AddCard(
 }
 
 @Composable
-private fun GooglePay(
+private fun GooglePayTab(
     width: Dp,
     isEnabled: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    PaymentOptionUi(
+    SavedPaymentMethodTab(
         viewWidth = width,
         editState = PaymentOptionEditState.None,
         isSelected = isSelected,
@@ -251,14 +252,14 @@ private fun GooglePay(
 }
 
 @Composable
-private fun Link(
+private fun LinkTab(
     width: Dp,
     isEnabled: Boolean,
     isSelected: Boolean,
     onItemSelected: (PaymentSelection?) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    PaymentOptionUi(
+    SavedPaymentMethodTab(
         viewWidth = width,
         editState = PaymentOptionEditState.None,
         isSelected = isSelected,
@@ -273,7 +274,7 @@ private fun Link(
 }
 
 @Composable
-private fun SavedPaymentMethod(
+private fun SavedPaymentMethodTab(
     paymentMethod: PaymentOptionsItem.SavedPaymentMethod,
     width: Dp,
     isEnabled: Boolean,
@@ -301,7 +302,7 @@ private fun SavedPaymentMethod(
             text = AnnotatedString(labelText)
         }
     ) {
-        PaymentOptionUi(
+        SavedPaymentMethodTab(
             viewWidth = width,
             editState = when {
                 isEditing && isModifiable -> PaymentOptionEditState.Modifiable

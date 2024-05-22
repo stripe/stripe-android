@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -26,7 +25,7 @@ class PaymentOptionScreenshotTest {
     @Test
     fun testEnabled() {
         paparazziRule.snapshot {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
                 editState = PaymentOptionEditState.None,
@@ -42,7 +41,7 @@ class PaymentOptionScreenshotTest {
     @Test
     fun testDisabled() {
         paparazziRule.snapshot {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
                 editState = PaymentOptionEditState.None,
@@ -58,7 +57,7 @@ class PaymentOptionScreenshotTest {
     @Test
     fun testSelected() {
         paparazziRule.snapshot {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = true,
                 editState = PaymentOptionEditState.None,
@@ -74,7 +73,7 @@ class PaymentOptionScreenshotTest {
     @Test
     fun testSelectedAndDisabled() {
         paparazziRule.snapshot {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = true,
                 editState = PaymentOptionEditState.None,
@@ -90,7 +89,7 @@ class PaymentOptionScreenshotTest {
     @Test
     fun testRemoving() {
         paparazziRule.snapshot {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
                 editState = PaymentOptionEditState.Removable,
@@ -109,7 +108,7 @@ class PaymentOptionScreenshotTest {
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                PaymentOptionUi(
+                SavedPaymentMethodTab(
                     viewWidth = 160.dp,
                     isSelected = false,
                     editState = PaymentOptionEditState.Removable,
@@ -129,7 +128,7 @@ class PaymentOptionScreenshotTest {
     @Test
     fun testModifying() {
         paparazziRule.snapshot {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 160.dp,
                 isSelected = false,
                 editState = PaymentOptionEditState.Modifiable,

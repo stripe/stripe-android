@@ -9,14 +9,14 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
-import com.stripe.android.paymentsheet.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.PaymentOptions
-import com.stripe.android.paymentsheet.ui.VerticalModePaymentMethodsUI
+import com.stripe.android.paymentsheet.ui.NewPaymentMethodVerticalLayoutUI
+import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
+import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsStateSafely
@@ -80,7 +80,7 @@ internal sealed interface PaymentSheetScreen {
             val isEditing by viewModel.editing.collectAsStateSafely()
             val isProcessing by viewModel.processing.collectAsStateSafely()
 
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = state,
                 isEditing = isEditing,
                 isProcessing = isProcessing,
@@ -172,7 +172,7 @@ internal sealed interface PaymentSheetScreen {
 
             val isProcessing by viewModel.processing.collectAsStateSafely()
 
-            VerticalModePaymentMethodsUI(
+            NewPaymentMethodVerticalLayoutUI(
                 paymentMethods = supportedPaymentMethods,
                 selectedIndex = -1,
                 isEnabled = !isProcessing,
