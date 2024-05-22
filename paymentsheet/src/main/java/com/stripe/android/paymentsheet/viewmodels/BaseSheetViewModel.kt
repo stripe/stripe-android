@@ -31,6 +31,7 @@ import com.stripe.android.paymentsheet.PaymentSheetViewModel
 import com.stripe.android.paymentsheet.PrefsRepository
 import com.stripe.android.paymentsheet.analytics.EventReporter
 import com.stripe.android.paymentsheet.forms.FormArgumentsFactory
+import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.PaymentSelection.CustomerRequestedSave.RequestReuse
@@ -51,6 +52,7 @@ import com.stripe.android.paymentsheet.ui.PaymentMethodRemovalDelayMillis
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarState
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBarStateFactory
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.transformToPaymentSelection
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.utils.combine
@@ -289,6 +291,8 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
+                    is PaymentSheetScreen.Form -> {
+                    }
                 }
             }
         }
@@ -351,14 +355,14 @@ internal abstract class BaseSheetViewModel(
         transitionTo(AddAnotherPaymentMethod)
     }
 
-    private fun transitionTo(target: PaymentSheetScreen) {
+    fun transitionTo(target: PaymentSheetScreen) {
         clearErrorMessages()
         backStack.update { (it - PaymentSheetScreen.Loading) + target }
     }
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            is PaymentSheetScreen.Loading, is PaymentSheetScreen.EditPaymentMethod -> {
+            is PaymentSheetScreen.Loading, is PaymentSheetScreen.EditPaymentMethod, is PaymentSheetScreen.Form -> {
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {
@@ -801,6 +805,17 @@ internal abstract class BaseSheetViewModel(
 
     fun reportCardNumberCompleted() {
         eventReporter.onCardNumberCompleted()
+    }
+
+    fun onFormFieldValuesChanged(formValues: FormFieldValues?, selectedPaymentMethodCode: String) {
+        paymentMethodMetadata.value?.let { paymentMethodMetadata ->
+            val newSelection = formValues?.transformToPaymentSelection(
+                context = getApplication(),
+                paymentMethod = supportedPaymentMethodForCode(selectedPaymentMethodCode),
+                paymentMethodMetadata = paymentMethodMetadata,
+            )
+            updateSelection(newSelection)
+        }
     }
 
     private fun reportFormShown(code: String) {

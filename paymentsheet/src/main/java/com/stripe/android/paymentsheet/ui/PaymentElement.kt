@@ -80,7 +80,7 @@ internal fun PaymentElement(
 
         FormElement(
             enabled = enabled,
-            selectedItem = selectedItem,
+            selectedPaymentMethodCode = selectedItem.code,
             formElements = formElements,
             formArguments = formArguments,
             usBankAccountFormArguments = usBankAccountFormArguments,
@@ -100,9 +100,9 @@ internal fun PaymentElement(
 }
 
 @Composable
-private fun FormElement(
+internal fun FormElement(
     enabled: Boolean,
-    selectedItem: SupportedPaymentMethod,
+    selectedPaymentMethodCode: PaymentMethodCode,
     formElements: List<FormElement>,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
@@ -132,7 +132,7 @@ private fun FormElement(
                 }
             }
     ) {
-        if (selectedItem.code == USBankAccount.code || selectedItem.code == Link.code) {
+        if (selectedPaymentMethodCode == USBankAccount.code || selectedPaymentMethodCode == Link.code) {
             USBankAccountForm(
                 formArgs = formArguments,
                 usBankAccountFormArgs = usBankAccountFormArguments,

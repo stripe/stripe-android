@@ -34,13 +34,14 @@ internal class HeaderTextFactory(
                 }
                 is PaymentSheetScreen.Loading,
                 is PaymentSheetScreen.AddAnotherPaymentMethod,
+                is PaymentSheetScreen.Form,
                 null -> {
                     null
                 }
             }
         } else {
             when (screen) {
-                is PaymentSheetScreen.Loading, -> {
+                is PaymentSheetScreen.Loading, is PaymentSheetScreen.Form -> {
                     null
                 }
                 is PaymentSheetScreen.SelectSavedPaymentMethods -> {

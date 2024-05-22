@@ -1,17 +1,24 @@
 package com.stripe.android.paymentsheet.navigation
 
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.paymentsheet.SavedPaymentMethodsTopContentPadding
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
+import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentOptions
+import com.stripe.android.paymentsheet.ui.VerticalModePaymentMethodsUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsStateSafely
 import java.io.Closeable
 
@@ -22,6 +29,7 @@ internal val PaymentSheetScreen.topContentPadding: Dp
         }
         is PaymentSheetScreen.Loading,
         is PaymentSheetScreen.VerticalMode,
+        is PaymentSheetScreen.Form,
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.EditPaymentMethod -> {
@@ -151,6 +159,67 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+            val context = LocalContext.current
+            val imageLoader = remember {
+                StripeImageLoader(context.applicationContext)
+            }
+
+            val paymentMethodMetadata by viewModel.paymentMethodMetadata.collectAsStateSafely()
+
+            val supportedPaymentMethods = remember(paymentMethodMetadata) {
+                paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
+            }
+
+            val isProcessing by viewModel.processing.collectAsStateSafely()
+
+            VerticalModePaymentMethodsUI(
+                paymentMethods = supportedPaymentMethods,
+                selectedIndex = -1,
+                isEnabled = !isProcessing,
+                onItemSelectedListener = { viewModel.transitionTo(Form(it.code)) },
+                imageLoader = imageLoader,
+                modifier = Modifier.padding(horizontal = 20.dp)
+            )
+        }
+    }
+
+    data class Form(private val selectedPaymentMethodCode: String) : PaymentSheetScreen {
+
+        override val showsBuyButton: Boolean = true
+        override val showsContinueButton: Boolean = true
+        override val canNavigateBack: Boolean = true
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
+            return false
+        }
+
+        @Composable
+        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+            val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
+                USBankAccountFormArguments.create(viewModel, selectedPaymentMethodCode)
+            }
+            val formElements = remember(selectedPaymentMethodCode) {
+                viewModel.formElementsForCode(selectedPaymentMethodCode)
+            }
+            val formArguments = remember(selectedPaymentMethodCode) {
+                viewModel.createFormArguments(selectedPaymentMethodCode)
+            }
+            val isProcessing by viewModel.processing.collectAsStateSafely()
+
+            FormElement(
+                enabled = !isProcessing,
+                selectedPaymentMethodCode = selectedPaymentMethodCode,
+                formElements = formElements,
+                formArguments = formArguments,
+                usBankAccountFormArguments = usBankAccountFormArguments,
+                horizontalPadding = 20.dp,
+                onFormFieldValuesChanged = { formValues ->
+                    viewModel.onFormFieldValuesChanged(formValues, selectedPaymentMethodCode)
+                },
+                onInteractionEvent = {
+                    viewModel.reportFieldInteraction(selectedPaymentMethodCode)
+                },
+            )
         }
     }
 }
