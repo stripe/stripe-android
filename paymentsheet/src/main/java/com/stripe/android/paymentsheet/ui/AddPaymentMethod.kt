@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodOptionsParams
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.model.PaymentSelection
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
@@ -63,7 +64,7 @@ internal fun AddPaymentMethod(
                 sheetViewModel.formElementsForCode(selectedPaymentMethodCode)
             }
             val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
-                sheetViewModel.usBankAccountFormArguments(selectedPaymentMethodCode)
+                USBankAccountFormArguments.create(sheetViewModel, selectedPaymentMethodCode)
             }
 
             PaymentElement(

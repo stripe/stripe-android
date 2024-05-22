@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
 import com.stripe.android.paymentsheet.SavedPaymentMethodsTopContentPadding
+import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
@@ -195,7 +196,7 @@ internal sealed interface PaymentSheetScreen {
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
             val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
-                viewModel.usBankAccountFormArguments(selectedPaymentMethodCode)
+                USBankAccountFormArguments.create(viewModel, selectedPaymentMethodCode)
             }
             val formElements = remember(selectedPaymentMethodCode) {
                 viewModel.formElementsForCode(selectedPaymentMethodCode)
