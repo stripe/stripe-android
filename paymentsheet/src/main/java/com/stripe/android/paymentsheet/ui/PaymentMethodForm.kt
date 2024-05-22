@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -12,7 +13,6 @@ import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.ui.core.FormUI
 import com.stripe.android.uicore.elements.FormElement
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.flow.Flow
 
 @Composable
@@ -33,8 +33,8 @@ internal fun PaymentMethodForm(
     )
 
     val elements = formViewModel.elements
-    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsStateSafely()
-    val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsStateSafely()
+    val hiddenIdentifiers by formViewModel.hiddenIdentifiers.collectAsState()
+    val lastTextFieldIdentifier by formViewModel.lastTextFieldIdentifier.collectAsState()
 
     PaymentMethodForm(
         paymentMethodCode = args.paymentMethodCode,

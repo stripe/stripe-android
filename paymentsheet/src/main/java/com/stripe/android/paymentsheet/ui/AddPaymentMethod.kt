@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,7 +29,6 @@ import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
-import com.stripe.android.uicore.utils.collectAsStateSafely
 
 @Composable
 internal fun AddPaymentMethod(
@@ -43,9 +43,9 @@ internal fun AddPaymentMethod(
         sheetViewModel.createFormArguments(selectedPaymentMethodCode)
     }
 
-    val paymentSelection by sheetViewModel.selection.collectAsStateSafely()
+    val paymentSelection by sheetViewModel.selection.collectAsState()
 
-    val linkSignupMode by sheetViewModel.linkSignupMode.collectAsStateSafely()
+    val linkSignupMode by sheetViewModel.linkSignupMode.collectAsState()
     val linkInlineSignupMode = remember(linkSignupMode, selectedPaymentMethodCode) {
         linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
     }
@@ -59,7 +59,7 @@ internal fun AddPaymentMethod(
             LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent,
             LocalCardNumberCompletedEventReporter provides sheetViewModel::reportCardNumberCompleted,
         ) {
-            val processing by sheetViewModel.processing.collectAsStateSafely()
+            val processing by sheetViewModel.processing.collectAsState()
             val formElements = remember(selectedPaymentMethodCode) {
                 sheetViewModel.formElementsForCode(selectedPaymentMethodCode)
             }
