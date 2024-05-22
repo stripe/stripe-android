@@ -29,7 +29,7 @@ fun SectionElementUI(
     if (!hiddenIdentifiers.contains(element.identifier)) {
         val controller = element.controller
 
-        val error by controller.error.collectAsState()
+        val error by controller.error.collectAsState(null)
         val sectionErrorString = error?.let {
             it.formatArgs?.let { args ->
                 stringResource(
