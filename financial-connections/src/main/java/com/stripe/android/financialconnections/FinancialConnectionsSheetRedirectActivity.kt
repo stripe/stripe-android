@@ -20,9 +20,10 @@ class FinancialConnectionsSheetRedirectActivity : AppCompatActivity() {
          */
         intent.data
             ?.let { uri ->
-                uri.overrideWithDebugConfiguration().toIntent()
+                val uriWithDebugConfiguration = uri.overrideWithDebugConfiguration()
+                uriWithDebugConfiguration.toIntent()
                     ?.setFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                    ?.also { it.data = intent.data }
+                    ?.also { it.data = uriWithDebugConfiguration }
                     ?.let { startActivity(it) }
             }
         finish()
