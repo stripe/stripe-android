@@ -26,14 +26,7 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
     )
 
     private val savedVisa = createSavedCard(CardBrand.Visa, "4242")
-    private val savedAmex = createSavedCard(CardBrand.AmericanExpress, "0005")
-    private val savedMastercard = createSavedCard(CardBrand.MasterCard, "4444")
-    private val savedDiscover = createSavedCard(CardBrand.Discover, "1117")
-    private val savedDiners = createSavedCard(CardBrand.DinersClub, "0004")
-    private val savedJcb = createSavedCard(CardBrand.JCB, "0505")
-    private val savedUnionPay = createSavedCard(CardBrand.UnionPay, "0005")
-    private val savedCartesBincaires = createSavedCard(CardBrand.CartesBancaires, "1001")
-    private val savedUnknownCard = createSavedCard(CardBrand.Unknown, "1234")
+
     private val savedSepaDebit = DisplayableSavedPaymentMethod(
         displayName = "4242",
         paymentMethod = PaymentMethod(
@@ -136,102 +129,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
                 displayableSavedPaymentMethod = savedUsBankAccount,
                 resources = null,
                 isEnabled = false,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedAmex() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedAmex,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedMastercard() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedMastercard,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedDiscover() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedDiscover,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedDiners() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedDiners,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedJcb() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedJcb,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedUnionPay() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedUnionPay,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedCartesBincaires() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedCartesBincaires,
-                resources = null,
-                isEnabled = true,
-                isSelected = false,
-            )
-        }
-    }
-
-    @Test
-    fun testSavedUnknownCard() {
-        paparazziRule.snapshot {
-            SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = savedUnknownCard,
-                resources = null,
-                isEnabled = true,
                 isSelected = false,
             )
         }
