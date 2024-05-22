@@ -4,9 +4,9 @@ import androidx.activity.compose.LocalActivityResultRegistryOwner
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.flow.filterNot
 
 @Composable
@@ -15,8 +15,8 @@ internal fun USBankAccountEmitters(
     usBankAccountFormArgs: USBankAccountFormArguments,
 ) {
     val context = LocalContext.current
-    val screenState by viewModel.currentScreenState.collectAsState()
-    val hasRequiredFields by viewModel.requiredFields.collectAsState()
+    val screenState by viewModel.currentScreenState.collectAsStateSafely()
+    val hasRequiredFields by viewModel.requiredFields.collectAsStateSafely()
     val activityResultRegistryOwner = LocalActivityResultRegistryOwner.current
 
     LaunchedEffect(Unit) {

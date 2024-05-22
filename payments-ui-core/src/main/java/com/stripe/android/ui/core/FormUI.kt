@@ -4,7 +4,6 @@ import androidx.annotation.RestrictTo
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import com.stripe.android.ui.core.elements.AffirmElementUI
@@ -32,6 +31,7 @@ import com.stripe.android.uicore.elements.OTPElement
 import com.stripe.android.uicore.elements.OTPElementUI
 import com.stripe.android.uicore.elements.SectionElement
 import com.stripe.android.uicore.elements.SectionElementUI
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.flow.StateFlow
 
 @Composable
@@ -43,10 +43,10 @@ fun FormUI(
     lastTextFieldIdentifierFlow: StateFlow<IdentifierSpec?>,
     modifier: Modifier = Modifier
 ) {
-    val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsState()
-    val enabled by enabledFlow.collectAsState()
-    val elements by elementsFlow.collectAsState()
-    val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsState()
+    val hiddenIdentifiers by hiddenIdentifiersFlow.collectAsStateSafely()
+    val enabled by enabledFlow.collectAsStateSafely()
+    val elements by elementsFlow.collectAsStateSafely()
+    val lastTextFieldIdentifier by lastTextFieldIdentifierFlow.collectAsStateSafely()
 
     FormUI(
         hiddenIdentifiers = hiddenIdentifiers,

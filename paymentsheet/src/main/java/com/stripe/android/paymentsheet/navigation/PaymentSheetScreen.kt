@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -13,6 +12,7 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import java.io.Closeable
 
 internal val PaymentSheetScreen.topContentPadding: Dp
@@ -68,9 +68,9 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            val state by viewModel.paymentOptionsState.collectAsState()
-            val isEditing by viewModel.editing.collectAsState()
-            val isProcessing by viewModel.processing.collectAsState()
+            val state by viewModel.paymentOptionsState.collectAsStateSafely()
+            val isEditing by viewModel.editing.collectAsStateSafely()
+            val isProcessing by viewModel.processing.collectAsStateSafely()
 
             PaymentOptions(
                 state = state,

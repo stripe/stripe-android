@@ -28,7 +28,6 @@ import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +60,7 @@ import com.stripe.android.uicore.getComposeTextStyle
 import com.stripe.android.uicore.strings.resolve
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.stripeShapes
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import com.stripe.android.R as PaymentsCoreR
 import com.stripe.android.R as StripeR
 import com.stripe.android.uicore.R as UiCoreR
@@ -70,7 +70,7 @@ internal fun EditPaymentMethod(
     interactor: EditPaymentMethodViewInteractor,
     modifier: Modifier = Modifier
 ) {
-    val viewState by interactor.viewState.collectAsState()
+    val viewState by interactor.viewState.collectAsStateSafely()
 
     EditPaymentMethodUi(
         modifier = modifier,

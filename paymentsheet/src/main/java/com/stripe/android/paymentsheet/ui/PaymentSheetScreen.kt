@@ -21,7 +21,6 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,6 +56,7 @@ import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.uicore.strings.resolve
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.delay
 
 @Composable
@@ -65,11 +65,11 @@ internal fun PaymentSheetScreen(
     type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
-    val contentVisible by viewModel.contentVisible.collectAsState()
-    val processing by viewModel.processing.collectAsState()
+    val contentVisible by viewModel.contentVisible.collectAsStateSafely()
+    val processing by viewModel.processing.collectAsStateSafely()
 
-    val topBarState by viewModel.topBarState.collectAsState()
-    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
+    val topBarState by viewModel.topBarState.collectAsStateSafely()
+    val walletsProcessingState by viewModel.walletsProcessingState.collectAsStateSafely()
 
     val density = LocalDensity.current
     var contentHeight by remember { mutableStateOf(0.dp) }
@@ -131,12 +131,12 @@ internal fun PaymentSheetScreenContent(
     type: PaymentSheetFlowType,
     modifier: Modifier = Modifier,
 ) {
-    val headerText by viewModel.headerText.collectAsState()
-    val walletsState by viewModel.walletsState.collectAsState()
-    val walletsProcessingState by viewModel.walletsProcessingState.collectAsState()
-    val error by viewModel.error.collectAsState()
-    val currentScreen by viewModel.currentScreen.collectAsState()
-    val mandateText by viewModel.mandateText.collectAsState()
+    val headerText by viewModel.headerText.collectAsStateSafely()
+    val walletsState by viewModel.walletsState.collectAsStateSafely()
+    val walletsProcessingState by viewModel.walletsProcessingState.collectAsStateSafely()
+    val error by viewModel.error.collectAsStateSafely()
+    val currentScreen by viewModel.currentScreen.collectAsStateSafely()
+    val mandateText by viewModel.mandateText.collectAsStateSafely()
 
     Column(modifier) {
         PaymentSheetContent(
@@ -309,7 +309,7 @@ internal fun Wallet(
 
 @Composable
 private fun PrimaryButton(viewModel: BaseSheetViewModel, type: PaymentSheetFlowType) {
-    val uiState = viewModel.primaryButtonUiState.collectAsState()
+    val uiState = viewModel.primaryButtonUiState.collectAsStateSafely()
 
     val modifier = Modifier
         .testTag(PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG)
