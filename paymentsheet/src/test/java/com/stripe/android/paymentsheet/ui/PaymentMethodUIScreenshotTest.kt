@@ -23,9 +23,9 @@ internal class PaymentMethodUIScreenshotTest {
     )
 
     @Test
-    fun testSelectedState() {
+    fun testSelectedStateForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
                 iconUrl = null,
@@ -41,9 +41,9 @@ internal class PaymentMethodUIScreenshotTest {
     }
 
     @Test
-    fun testUnselectedState() {
+    fun testUnselectedStateForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
                 iconUrl = null,
@@ -59,9 +59,9 @@ internal class PaymentMethodUIScreenshotTest {
     }
 
     @Test
-    fun testDisabled() {
+    fun testDisabledForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_card,
                 iconUrl = null,
@@ -77,9 +77,9 @@ internal class PaymentMethodUIScreenshotTest {
     }
 
     @Test
-    fun testLongTitle() {
+    fun testLongTitleForTabMode() {
         paparazziRule.snapshot {
-            PaymentMethodUI(
+            NewPaymentMethodTab(
                 minViewWidth = 100.dp,
                 iconRes = R.drawable.stripe_ic_paymentsheet_pm_bank,
                 iconUrl = null,

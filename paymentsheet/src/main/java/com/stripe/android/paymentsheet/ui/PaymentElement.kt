@@ -68,7 +68,7 @@ internal fun PaymentElement(
 
     Column(modifier = Modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
-            PaymentMethodsUI(
+            NewPaymentMethodTabLayoutUI(
                 selectedIndex = selectedIndex,
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,

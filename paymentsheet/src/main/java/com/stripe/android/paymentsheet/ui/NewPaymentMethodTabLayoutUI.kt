@@ -7,7 +7,6 @@ import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
@@ -22,46 +21,19 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
-import com.stripe.android.paymentsheet.ui.PaymentMethodsUISpacing.verticalModeSpacing
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
 private object PaymentMethodsUISpacing {
     val carouselOuterPadding = 20.dp
     val carouselInnerPadding = 12.dp
-    val verticalModeSpacing = 12.dp
 }
 
 @VisibleForTesting
 const val TEST_TAG_LIST = "PaymentMethodsUITestTag"
 
 @Composable
-internal fun VerticalModePaymentMethodsUI(
-    paymentMethods: List<SupportedPaymentMethod>,
-    selectedIndex: Int,
-    isEnabled: Boolean,
-    onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
-    imageLoader: StripeImageLoader,
-    modifier: Modifier = Modifier,
-) {
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(verticalModeSpacing)) {
-        paymentMethods.forEachIndexed { index, item ->
-            NewPaymentMethodRowButton(
-                modifier = Modifier.testTag(
-                    TEST_TAG_LIST + item.code
-                ),
-                isEnabled = isEnabled,
-                isSelected = index == selectedIndex,
-                supportedPaymentMethod = item,
-                imageLoader = imageLoader,
-                onClick = onItemSelectedListener
-            )
-        }
-    }
-}
-
-@Composable
-internal fun PaymentMethodsUI(
+internal fun NewPaymentMethodTabLayoutUI(
     paymentMethods: List<SupportedPaymentMethod>,
     selectedIndex: Int,
     isEnabled: Boolean,
@@ -104,7 +76,7 @@ internal fun PaymentMethodsUI(
                 } else {
                     item.lightThemeIconUrl
                 }
-                PaymentMethodUI(
+                NewPaymentMethodTab(
                     modifier = Modifier.testTag(
                         TEST_TAG_LIST + item.code
                     ),

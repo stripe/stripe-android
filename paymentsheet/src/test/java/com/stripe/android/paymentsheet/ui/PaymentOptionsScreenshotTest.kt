@@ -24,7 +24,7 @@ class PaymentOptionsScreenshotTest {
     @Test
     fun testWidthLessThanScreen() {
         paparazziRule.snapshot {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(
                         PaymentOptionsItem.AddCard,
@@ -45,7 +45,7 @@ class PaymentOptionsScreenshotTest {
     @Test
     fun testWidthMoreThanScreen() {
         paparazziRule.snapshot {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(
                         PaymentOptionsItem.AddCard,
@@ -78,7 +78,7 @@ class PaymentOptionsScreenshotTest {
     @Test
     fun testWidthMoreThanScreenAndScrollToEnd() {
         paparazziRule.snapshot {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(
                         PaymentOptionsItem.AddCard,
