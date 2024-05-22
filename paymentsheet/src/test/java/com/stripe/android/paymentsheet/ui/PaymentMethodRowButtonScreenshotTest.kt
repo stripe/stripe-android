@@ -110,7 +110,7 @@ internal class PaymentMethodRowButtonScreenshotTest {
                     )
                 },
                 title = "**** 4242",
-                subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a forever.",
+                subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a forever.",
                 onClick = {},
             )
         }
