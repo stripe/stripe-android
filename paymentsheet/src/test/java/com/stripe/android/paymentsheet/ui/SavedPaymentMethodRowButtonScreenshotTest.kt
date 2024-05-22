@@ -25,7 +25,6 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
             .padding(16.dp)
     )
 
-
     private val savedVisa = createSavedCard(CardBrand.Visa, "4242")
     private val savedAmex = createSavedCard(CardBrand.AmericanExpress, "0005")
     private val savedMastercard = createSavedCard(CardBrand.MasterCard, "4444")

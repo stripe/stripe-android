@@ -11,7 +11,7 @@ import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 
 @Composable
-fun SavedPaymentMethodRowButton(
+internal fun SavedPaymentMethodRowButton(
     displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     resources: Resources?,
     isEnabled: Boolean,
@@ -42,7 +42,7 @@ fun SavedPaymentMethodRowButton(
 
 @Preview
 @Composable
-fun PreviewCardSavedPaymentMethodRowButton() {
+internal fun PreviewCardSavedPaymentMethodRowButton() {
     val cardSavedPaymentMethod = DisplayableSavedPaymentMethod(
         displayName = "4242",
         paymentMethod = PaymentMethod(

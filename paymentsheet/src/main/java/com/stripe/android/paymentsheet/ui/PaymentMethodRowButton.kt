@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.sp
 import com.stripe.android.uicore.stripeColors
 
 @Composable
-fun PaymentMethodRowButton(
+internal fun PaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     iconContent: @Composable RowScope.() -> Unit,

@@ -13,7 +13,7 @@ internal fun PaymentMethod.getSavedPaymentMethodIcon(forVerticalMode: Boolean = 
     return when (type) {
         PaymentMethod.Type.Card -> {
             val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
-            if(forVerticalMode) { brand?.getCardBrandIconForVerticalMode() } else { brand?.getCardBrandIcon() }
+            if (forVerticalMode) { brand?.getCardBrandIconForVerticalMode() } else { brand?.getCardBrandIcon() }
         }
         PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
