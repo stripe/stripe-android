@@ -24,7 +24,6 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -45,6 +44,7 @@ import com.stripe.android.uicore.darken
 import com.stripe.android.uicore.elements.TextFieldSection
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
+import com.stripe.android.uicore.utils.collectAsStateSafely
 import javax.inject.Provider
 
 @VisibleForTesting
@@ -72,9 +72,9 @@ internal fun AutocompleteScreen(
 
 @Composable
 internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
-    val predictions by viewModel.predictions.collectAsState()
-    val loading by viewModel.loading.collectAsState()
-    val query = viewModel.textFieldController.fieldValue.collectAsState()
+    val predictions by viewModel.predictions.collectAsStateSafely()
+    val loading by viewModel.loading.collectAsStateSafely()
+    val query = viewModel.textFieldController.fieldValue.collectAsStateSafely()
     val attributionDrawable =
         PlacesClientProxy.getPlacesPoweredByGoogleDrawable(isSystemInDarkTheme())
     val focusRequester = remember { FocusRequester() }
