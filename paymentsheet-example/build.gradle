@@ -70,6 +70,7 @@ dependencies {
     androidTestImplementation testLibs.espresso.core
     androidTestImplementation testLibs.espresso.intents
     androidTestImplementation testLibs.espresso.web
+    androidTestImplementation testLibs.leakCanaryInstrumentation
     androidTestImplementation testLibs.truth
 }
 

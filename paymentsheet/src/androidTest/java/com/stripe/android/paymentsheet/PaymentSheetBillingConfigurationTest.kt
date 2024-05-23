@@ -15,21 +15,25 @@ import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
+import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(AndroidJUnit4::class)
 internal class PaymentSheetBillingConfigurationTest {
-    @get:Rule
-    val composeTestRule = createAndroidComposeRule<MainActivity>()
-
+    private val composeTestRule = createAndroidComposeRule<MainActivity>()
+    private val networkRule = NetworkRule()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
-    val networkRule = NetworkRule()
+    val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(DetectLeaksAfterTestSuccess())
+        .around(composeTestRule)
+        .around(networkRule)
 
     @Test
     fun testPayloadWithDefaultsAndOverrides() {

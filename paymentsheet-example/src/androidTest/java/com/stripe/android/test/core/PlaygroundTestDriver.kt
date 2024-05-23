@@ -1038,6 +1038,7 @@ internal class PlaygroundTestDriver(
 
     internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
+        currentActivity[0] = null
     }
 
     private fun isSelectPaymentMethodScreen(): Boolean {

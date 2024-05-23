@@ -44,7 +44,7 @@ ext.versions = [
         kotlinSerialization         : '1.6.2',
         kotlinSerializationConverter: '1.0.0',
         ktlint                      : '0.48.2',
-        leakCanary                  : '2.13',
+        leakCanary                  : '2.14',
         material                    : '1.11.0',
         mockito                     : '5.10.0',
         mockitoInline               : '5.2.0',
@@ -218,6 +218,7 @@ ext.testLibs = [
                 junit      : "org.jetbrains.kotlin:kotlin-test-junit:${versions.kotlin}",
                 test       : "org.jetbrains.kotlin:kotlin-test:${versions.kotlin}",
         ],
+        leakCanaryInstrumentation : "com.squareup.leakcanary:leakcanary-android-instrumentation:${versions.leakCanary}",
         mockito              : [
                 android: "org.mockito:mockito-android:${versions.mockito}",
                 core   : "org.mockito:mockito-core:${versions.mockito}",

@@ -1,6 +1,7 @@
 package com.stripe.android.testing
 
 import android.util.Log
+import leakcanary.NoLeakAssertionFailedError
 import org.junit.AssumptionViolatedException
 import org.junit.rules.TestRule
 import org.junit.runner.Description
@@ -19,7 +20,7 @@ class RetryRule(private val attempts: Int) : TestRule {
                     }.onSuccess {
                         return
                     }.onFailure { error ->
-                        if (isLast || error is AssumptionViolatedException) {
+                        if (isLast || error is AssumptionViolatedException || error is NoLeakAssertionFailedError) {
                             throw error
                         }
                         Log.d(logTag, "Failed attempt $attempt out of $attempts with error")

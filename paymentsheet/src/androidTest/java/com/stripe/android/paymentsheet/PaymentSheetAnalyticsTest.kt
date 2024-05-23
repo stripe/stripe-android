@@ -21,6 +21,7 @@ import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
 import com.stripe.android.testing.RetryRule
+import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -40,6 +41,7 @@ internal class PaymentSheetAnalyticsTest {
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(DetectLeaksAfterTestSuccess())
         .around(composeTestRule)
         .around(retryRule)
         .around(networkRule)
