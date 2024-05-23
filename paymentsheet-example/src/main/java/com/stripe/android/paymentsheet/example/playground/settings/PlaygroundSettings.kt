@@ -52,6 +52,15 @@ internal class PlaygroundSettings private constructor(
     ) {
         val configurationData = updater(_configurationData.value)
 
+        /*
+         * Resets value of definitions if the definition's selected option not applicable to the selected
+         * integration type to the first available option.
+         *
+         * For example: Switching from `PaymentSheet` to `CustomerSheet` where the
+         * merchant country code value is 'MX'. `CustomerSheet` only supports
+         * `US` and `FR`. The value would be reset to the first available option (in
+         * this case `US`)
+         */
         displayableDefinitions.value.forEach { definition ->
             val values = definition.createOptions(configurationData).map { option ->
                 option.value

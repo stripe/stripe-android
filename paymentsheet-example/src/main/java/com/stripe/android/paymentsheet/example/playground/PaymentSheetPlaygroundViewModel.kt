@@ -195,6 +195,12 @@ internal class PaymentSheetPlaygroundViewModel(
                     response.publishableKey
                 )
 
+                if (snapshot[CustomerSettingsDefinition] == CustomerType.NEW) {
+                    playgroundSettingsFlow.value?.let { settings ->
+                        updateSettingsWithExistingCustomerId(settings, response.customerId)
+                    }
+                }
+
                 try {
                     CustomerAdapter.Result.success(
                         CustomerEphemeralKey.create(
@@ -401,6 +407,25 @@ internal class PaymentSheetPlaygroundViewModel(
                 val addressDetails = addressLauncherResult.address
                 playgroundSettingsFlow.value?.set(ShippingAddressSettingsDefinition, addressDetails)
                 flowControllerState.update { it?.copy(addressDetails = addressDetails) }
+            }
+        }
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    private fun updateSettingsWithExistingCustomerId(
+        settings: PlaygroundSettings,
+        customerId: String,
+    ) {
+        settings[CustomerSettingsDefinition] = CustomerType.Existing(customerId)
+
+        playgroundSettingsFlow.value = settings
+
+        state.value = state.value?.let { state ->
+            val updatedSnapshot = settings.snapshot()
+
+            when (state) {
+                is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
             }
         }
     }
