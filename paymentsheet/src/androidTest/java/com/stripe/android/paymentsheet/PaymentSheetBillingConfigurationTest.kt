@@ -6,19 +6,17 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
 import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runPaymentSheetTest
-import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
@@ -26,14 +24,12 @@ import java.util.concurrent.TimeUnit
 @RunWith(AndroidJUnit4::class)
 internal class PaymentSheetBillingConfigurationTest {
     private val composeTestRule = createAndroidComposeRule<MainActivity>()
-    private val networkRule = NetworkRule()
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 
     @get:Rule
-    val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(DetectLeaksAfterTestSuccess())
-        .around(composeTestRule)
-        .around(networkRule)
+    val testRules: TestRules = TestRules.create(composeTestRule = composeTestRule)
+
+    private val networkRule = testRules.networkRule
 
     @Test
     fun testPayloadWithDefaultsAndOverrides() {
