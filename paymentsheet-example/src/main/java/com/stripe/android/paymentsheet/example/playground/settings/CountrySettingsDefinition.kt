@@ -15,8 +15,8 @@ internal object CountrySettingsDefinition :
     PlaygroundSettingDefinition.Displayable<Country> {
     private val supportedPaymentFlowCountries = Country.entries.map { it.value }.toSet()
     private val supportedCustomerFlowCountries = setOf(
-        Country.US,
-        Country.FR,
+        Country.US.value,
+        Country.FR.value,
     )
 
     override val displayName: String = "Merchant"

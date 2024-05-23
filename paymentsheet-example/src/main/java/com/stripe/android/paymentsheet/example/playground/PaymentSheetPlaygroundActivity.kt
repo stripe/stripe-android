@@ -35,6 +35,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -242,7 +244,14 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 }
             }
             is PlaygroundState.Customer -> {
-                // TODO(samer-stripe): Implement Customer Sheet UI
+                val customerSheetState by viewModel.customerSheetState.collectAsState()
+
+                customerSheetState?.let { state ->
+                    CustomerSheetUi(
+                        customerSheetState = state,
+                        playgroundState = playgroundState
+                    )
+                }
             }
         }
     }
@@ -303,6 +312,34 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         BuyButton(
             buyButtonEnabled = flowControllerState?.selectedPaymentOption != null,
             onClick = flowController::confirm
+        )
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Composable
+    fun CustomerSheetUi(
+        playgroundState: PlaygroundState.Customer,
+        customerSheetState: CustomerSheetState,
+    ) {
+        val customerSheet = rememberCustomerSheet(
+            configuration = playgroundState.customerSheetConfiguration(),
+            customerAdapter = playgroundState.adapter,
+            callback = viewModel::onCustomerSheetCallback
+        )
+
+        LaunchedEffect(customerSheet) {
+            viewModel.fetchOption(customerSheet)
+        }
+
+        if (customerSheetState.shouldFetchPaymentOption) {
+            return
+        }
+
+        PaymentMethodSelector(
+            isEnabled = true,
+            paymentMethodLabel = customerSheetState.paymentMethodLabel(),
+            paymentMethodPainter = customerSheetState.paymentMethodPainter(),
+            onClick = customerSheet::present
         )
     }
 
