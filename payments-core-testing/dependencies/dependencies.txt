@@ -736,10 +736,51 @@
 +--- org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3 (*)
 +--- junit:junit:4.13.2
 |    \--- org.hamcrest:hamcrest-core:1.3
-\--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3
-     \--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.7.3
-          +--- org.jetbrains:annotations:23.0.0
-          +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3 (*)
-          +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 -> 1.9.10 (*)
-          +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
-          \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.20 -> 1.9.22 (*)
++--- org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.3
+|    \--- org.jetbrains.kotlinx:kotlinx-coroutines-test-jvm:1.7.3
+|         +--- org.jetbrains:annotations:23.0.0
+|         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.7.3 (*)
+|         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.20 -> 1.9.10 (*)
+|         +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3 (*)
+|         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.8.20 -> 1.9.22 (*)
+\--- com.squareup.leakcanary:leakcanary-android-instrumentation:2.14
+     +--- com.squareup.leakcanary:leakcanary-android-core:2.14
+     |    +--- com.squareup.leakcanary:shark-android:2.14
+     |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    |    \--- com.squareup.leakcanary:shark:2.14
+     |    |         +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    |         +--- com.squareup.okio:okio:2.2.2
+     |    |         |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.2.60 -> 1.9.22 (*)
+     |    |         \--- com.squareup.leakcanary:shark-graph:2.14
+     |    |              +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    |              +--- com.squareup.okio:okio:2.2.2 (*)
+     |    |              \--- com.squareup.leakcanary:shark-hprof:2.14
+     |    |                   +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    |                   \--- com.squareup.leakcanary:shark-log:2.14
+     |    |                        \--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    +--- com.squareup.leakcanary:leakcanary-object-watcher-android-core:2.14
+     |    |    +--- com.squareup.leakcanary:leakcanary-object-watcher:2.14
+     |    |    |    +--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    |    |    \--- com.squareup.leakcanary:shark-log:2.14 (*)
+     |    |    +--- com.squareup.leakcanary:leakcanary-android-utils:2.14
+     |    |    |    +--- com.squareup.leakcanary:shark-log:2.14 (*)
+     |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    |    +--- com.squareup.curtains:curtains:1.2.4
+     |    |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.4.21 -> 1.9.22 (*)
+     |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    +--- com.squareup.leakcanary:leakcanary-object-watcher-android-androidx:2.14
+     |    |    +--- com.squareup.leakcanary:leakcanary-object-watcher-android-core:2.14 (*)
+     |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    +--- com.squareup.leakcanary:leakcanary-object-watcher-android-support-fragments:2.14
+     |    |    +--- com.squareup.leakcanary:leakcanary-object-watcher-android-core:2.14 (*)
+     |    |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)
+     +--- androidx.test:runner:1.4.0
+     |    +--- androidx.annotation:annotation:1.0.0 -> 1.7.1 (*)
+     |    +--- androidx.test:monitor:1.4.0
+     |    |    \--- androidx.annotation:annotation:1.0.0 -> 1.7.1 (*)
+     |    +--- androidx.test.services:storage:1.4.0
+     |    |    +--- androidx.test:monitor:1.4.0 (*)
+     |    |    \--- com.google.code.findbugs:jsr305:2.0.1
+     |    \--- junit:junit:4.12 -> 4.13.2 (*)
+     \--- org.jetbrains.kotlin:kotlin-stdlib:1.3.72 -> 1.9.22 (*)

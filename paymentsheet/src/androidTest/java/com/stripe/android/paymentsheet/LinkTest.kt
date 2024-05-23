@@ -23,6 +23,7 @@ import com.stripe.android.paymentsheet.utils.LinkIntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runLinkTest
 import com.stripe.android.testing.RetryRule
+import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -41,6 +42,7 @@ internal class LinkTest {
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(DetectLeaksAfterTestSuccess())
         .around(composeTestRule)
         .around(retryRule)
         .around(networkRule)

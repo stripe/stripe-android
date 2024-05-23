@@ -26,6 +26,7 @@ import com.stripe.android.paymentsheet.utils.IntegrationTypeProvider
 import com.stripe.android.paymentsheet.utils.PrefsTestStore
 import com.stripe.android.paymentsheet.utils.runCustomerSheetTest
 import com.stripe.android.testing.RetryRule
+import leakcanary.DetectLeaksAfterTestSuccess
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.RuleChain
@@ -40,6 +41,7 @@ internal class CustomerSheetTest {
 
     @get:Rule
     val chain: RuleChain = RuleChain.emptyRuleChain()
+        .around(DetectLeaksAfterTestSuccess())
         .around(composeTestRule)
         .around(retryRule)
         .around(networkRule)
