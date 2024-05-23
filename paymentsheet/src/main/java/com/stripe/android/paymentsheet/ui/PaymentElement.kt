@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignup
@@ -44,7 +43,7 @@ internal fun PaymentElement(
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
-    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+    onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
@@ -153,12 +152,12 @@ internal fun FormElement(
 }
 
 @Composable
-private fun LinkElement(
+internal fun LinkElement(
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     linkSignupMode: LinkSignupMode?,
     enabled: Boolean,
     horizontalPadding: Dp,
-    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+    onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
 ) {
     if (linkConfigurationCoordinator != null && linkSignupMode != null) {
         when (linkSignupMode) {

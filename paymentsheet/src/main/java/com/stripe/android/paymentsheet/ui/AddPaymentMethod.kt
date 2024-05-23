@@ -70,9 +70,7 @@ internal fun AddPaymentMethod(
                 sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
             }
         },
-        onLinkSignupStateChanged = { _, inlineSignupViewState ->
-            sheetViewModel.onLinkSignUpStateUpdated(inlineSignupViewState)
-        },
+        onLinkSignupStateChanged = sheetViewModel::onLinkSignUpStateUpdated,
         formArguments = arguments,
         usBankAccountFormArguments = usBankAccountFormArguments,
         onFormFieldValuesChanged = { formValues ->
