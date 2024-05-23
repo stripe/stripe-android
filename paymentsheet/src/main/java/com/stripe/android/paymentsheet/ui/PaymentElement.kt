@@ -152,7 +152,7 @@ internal fun FormElement(
 }
 
 @Composable
-fun LinkElement(
+internal fun LinkElement(
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     linkSignupMode: LinkSignupMode?,
     enabled: Boolean,
