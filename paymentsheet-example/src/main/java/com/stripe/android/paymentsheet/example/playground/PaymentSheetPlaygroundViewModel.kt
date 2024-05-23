@@ -13,6 +13,7 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
+import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.CreateIntentResult
@@ -59,6 +60,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val status = MutableStateFlow<StatusMessage?>(null)
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
+    val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -73,6 +75,7 @@ internal class PaymentSheetPlaygroundViewModel(
     ) {
         state.value = null
         flowControllerState.value = null
+        customerSheetState.value = null
 
         if (playgroundSettings.configurationData.value.integrationType.isPaymentFlow()) {
             prepareCheckout(playgroundSettings)
@@ -162,6 +165,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     }
                 )
             )
+            customerSheetState.value = CustomerSheetState()
         }
     }
 
@@ -297,6 +301,30 @@ internal class PaymentSheetPlaygroundViewModel(
         }
 
         status.value = StatusMessage(statusMessage)
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    fun onCustomerSheetCallback(result: CustomerSheetResult) {
+        val statusMessage = when (result) {
+            is CustomerSheetResult.Selected -> {
+                customerSheetState.update { existingState ->
+                    existingState?.copy(
+                        selectedPaymentOption = result.selection?.paymentOption,
+                        shouldFetchPaymentOption = false
+                    )
+                }
+
+                null
+            }
+            is CustomerSheetResult.Failed -> "An error occurred: ${result.exception.message}"
+            is CustomerSheetResult.Canceled -> "Canceled"
+        }
+
+        statusMessage?.let { message ->
+            viewModelScope.launch {
+                status.emit(StatusMessage(message))
+            }
+        }
     }
 
     private fun createIntent(clientSecret: String): CreateIntentResult {
