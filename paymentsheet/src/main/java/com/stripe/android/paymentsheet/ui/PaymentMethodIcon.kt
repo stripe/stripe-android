@@ -58,7 +58,7 @@ internal fun PaymentMethodIcon(
 }
 
 @Composable
-private fun PaymentMethodIconFromResource(
+internal fun PaymentMethodIconFromResource(
     iconRes: Int,
     colorFilter: ColorFilter?,
 ) {
