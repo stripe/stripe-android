@@ -66,7 +66,7 @@ internal const val ProgressIndicatorTestTag = "CircularProgressIndicator"
 fun LinkInlineSignup(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     enabled: Boolean,
-    onStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+    onStateChanged: (InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     linkConfigurationCoordinator.component?.let { component ->
@@ -78,7 +78,7 @@ fun LinkInlineSignup(
         val errorMessage by viewModel.errorMessage.collectAsState()
 
         LaunchedEffect(viewState) {
-            onStateChanged(component.configuration, viewState)
+            onStateChanged(viewState)
         }
 
         val focusManager = LocalFocusManager.current

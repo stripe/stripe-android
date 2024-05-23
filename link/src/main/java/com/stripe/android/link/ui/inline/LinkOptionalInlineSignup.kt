@@ -60,7 +60,7 @@ import kotlinx.coroutines.job
 fun LinkOptionalInlineSignup(
     linkConfigurationCoordinator: LinkConfigurationCoordinator,
     enabled: Boolean,
-    onStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+    onStateChanged: (InlineSignupViewState) -> Unit,
     modifier: Modifier = Modifier
 ) {
     linkConfigurationCoordinator.component?.let { component ->
@@ -72,7 +72,7 @@ fun LinkOptionalInlineSignup(
         val errorMessage by viewModel.errorMessage.collectAsState()
 
         LaunchedEffect(viewState) {
-            onStateChanged(component.configuration, viewState)
+            onStateChanged(viewState)
         }
 
         val focusManager = LocalFocusManager.current
