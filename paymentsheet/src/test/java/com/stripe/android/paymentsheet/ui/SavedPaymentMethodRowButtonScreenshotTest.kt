@@ -74,20 +74,4 @@ internal class SavedPaymentMethodRowButtonScreenshotTest {
             )
         }
     }
-
-    private fun createSavedCard(brand: CardBrand, last4: String) =
-        DisplayableSavedPaymentMethod(
-            displayName = "····$last4",
-            paymentMethod = PaymentMethod(
-                id = "001",
-                created = null,
-                liveMode = false,
-                code = PaymentMethod.Type.Card.code,
-                type = PaymentMethod.Type.Card,
-                card = PaymentMethod.Card(
-                    brand = brand,
-                    last4 = last4,
-                )
-            )
-        )
 }
