@@ -1,10 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import android.content.Context
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -26,9 +23,7 @@ import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.FieldValuesToParamsMapConverter
-import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
 import com.stripe.android.uicore.elements.IdentifierSpec
-import com.stripe.android.uicore.elements.LocalAutofillEventReporter
 
 @Composable
 internal fun AddPaymentMethod(
@@ -54,46 +49,40 @@ internal fun AddPaymentMethod(
         sheetViewModel.clearErrorMessages()
     }
 
-    Column(modifier = modifier.fillMaxWidth()) {
-        CompositionLocalProvider(
-            LocalAutofillEventReporter provides sheetViewModel::reportAutofillEvent,
-            LocalCardNumberCompletedEventReporter provides sheetViewModel::reportCardNumberCompleted,
-        ) {
-            val processing by sheetViewModel.processing.collectAsState()
-            val formElements = remember(selectedPaymentMethodCode) {
-                sheetViewModel.formElementsForCode(selectedPaymentMethodCode)
-            }
-            val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
-                USBankAccountFormArguments.create(sheetViewModel, selectedPaymentMethodCode)
-            }
-
-            PaymentElement(
-                enabled = !processing,
-                supportedPaymentMethods = supportedPaymentMethods,
-                selectedItemCode = selectedPaymentMethodCode,
-                formElements = formElements,
-                linkSignupMode = linkInlineSignupMode,
-                linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
-                onItemSelectedListener = { selectedLpm ->
-                    if (selectedPaymentMethodCode != selectedLpm.code) {
-                        selectedPaymentMethodCode = selectedLpm.code
-                        sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
-                    }
-                },
-                onLinkSignupStateChanged = { _, inlineSignupViewState ->
-                    sheetViewModel.onLinkSignUpStateUpdated(inlineSignupViewState)
-                },
-                formArguments = arguments,
-                usBankAccountFormArguments = usBankAccountFormArguments,
-                onFormFieldValuesChanged = { formValues ->
-                    sheetViewModel.onFormFieldValuesChanged(formValues, selectedPaymentMethodCode)
-                },
-                onInteractionEvent = {
-                    sheetViewModel.reportFieldInteraction(selectedPaymentMethodCode)
-                }
-            )
-        }
+    val processing by sheetViewModel.processing.collectAsState()
+    val formElements = remember(selectedPaymentMethodCode) {
+        sheetViewModel.formElementsForCode(selectedPaymentMethodCode)
     }
+    val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
+        USBankAccountFormArguments.create(sheetViewModel, selectedPaymentMethodCode)
+    }
+
+    PaymentElement(
+        enabled = !processing,
+        supportedPaymentMethods = supportedPaymentMethods,
+        selectedItemCode = selectedPaymentMethodCode,
+        formElements = formElements,
+        linkSignupMode = linkInlineSignupMode,
+        linkConfigurationCoordinator = sheetViewModel.linkConfigurationCoordinator,
+        onItemSelectedListener = { selectedLpm ->
+            if (selectedPaymentMethodCode != selectedLpm.code) {
+                selectedPaymentMethodCode = selectedLpm.code
+                sheetViewModel.reportPaymentMethodTypeSelected(selectedLpm.code)
+            }
+        },
+        onLinkSignupStateChanged = { _, inlineSignupViewState ->
+            sheetViewModel.onLinkSignUpStateUpdated(inlineSignupViewState)
+        },
+        formArguments = arguments,
+        usBankAccountFormArguments = usBankAccountFormArguments,
+        onFormFieldValuesChanged = { formValues ->
+            sheetViewModel.onFormFieldValuesChanged(formValues, selectedPaymentMethodCode)
+        },
+        modifier = modifier,
+        onInteractionEvent = {
+            sheetViewModel.reportFieldInteraction(selectedPaymentMethodCode)
+        },
+    )
 }
 
 internal fun FormFieldValues.transformToPaymentMethodCreateParams(

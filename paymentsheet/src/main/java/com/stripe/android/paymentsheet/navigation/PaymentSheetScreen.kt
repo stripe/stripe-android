@@ -223,8 +223,3 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 }
-
-@Composable
-internal fun PaymentSheetScreen.Content(viewModel: BaseSheetViewModel) {
-    Content(viewModel, modifier = Modifier)
-}
