@@ -64,6 +64,10 @@ internal sealed interface PlaygroundState {
         return this as? Payment
     }
 
+    fun asCustomerState(): Customer? {
+        return this as? Customer
+    }
+
     companion object {
         fun CheckoutResponse.asPlaygroundState(
             snapshot: PlaygroundSettings.Snapshot,

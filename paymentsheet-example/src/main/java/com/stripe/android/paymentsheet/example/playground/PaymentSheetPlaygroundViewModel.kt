@@ -13,7 +13,6 @@ import com.github.kittinunf.result.Result
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerEphemeralKey
-import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.CustomerSheetResult
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.model.PaymentMethod
@@ -302,42 +301,6 @@ internal class PaymentSheetPlaygroundViewModel(
         }
 
         status.value = StatusMessage(statusMessage)
-    }
-
-    @OptIn(ExperimentalCustomerSheetApi::class)
-    fun fetchOption(customerSheet: CustomerSheet) {
-        viewModelScope.launch(Dispatchers.IO) {
-            when (val result = customerSheet.retrievePaymentOptionSelection()) {
-                is CustomerSheetResult.Selected -> {
-                    customerSheetState.update { existingState ->
-                        existingState?.copy(
-                            selectedPaymentOption = result.selection?.paymentOption,
-                            shouldFetchPaymentOption = false,
-                        )
-                    }
-                }
-                is CustomerSheetResult.Failed -> {
-                    customerSheetState.update { existingState ->
-                        existingState?.copy(
-                            shouldFetchPaymentOption = false,
-                        )
-                    }
-
-                    status.emit(
-                        StatusMessage(
-                            message = "Failed to retrieve payment options:\n${result.exception.message}"
-                        )
-                    )
-                }
-                is CustomerSheetResult.Canceled -> {
-                    customerSheetState.update { existingState ->
-                        existingState?.copy(
-                            shouldFetchPaymentOption = false,
-                        )
-                    }
-                }
-            }
-        }
     }
 
     @OptIn(ExperimentalCustomerSheetApi::class)
