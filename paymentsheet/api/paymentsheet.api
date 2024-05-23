@@ -1706,6 +1706,13 @@ public final class com/stripe/android/paymentsheet/model/SetupIntentClientSecret
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$BillingDetailsCollection$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$BillingDetailsCollection;
@@ -1918,6 +1925,13 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$EditP
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentSheetScreenKt {
