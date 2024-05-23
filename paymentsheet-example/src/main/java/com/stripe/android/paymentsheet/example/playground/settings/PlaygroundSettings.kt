@@ -50,7 +50,23 @@ internal class PlaygroundSettings private constructor(
     fun updateConfigurationData(
         updater: (PlaygroundConfigurationData) -> PlaygroundConfigurationData
     ) {
-        _configurationData.value = updater(_configurationData.value)
+        val configurationData = updater(_configurationData.value)
+
+        displayableDefinitions.value.forEach { definition ->
+            val values = definition.createOptions(configurationData).map { option ->
+                option.value
+            }
+
+            if (values.isEmpty()) {
+                return@forEach
+            }
+
+            if (!values.contains(settings[definition]?.value)) {
+                settings[definition]?.value = values.firstOrNull()
+            }
+        }
+
+        _configurationData.value = configurationData
     }
 
     fun snapshot(): Snapshot {

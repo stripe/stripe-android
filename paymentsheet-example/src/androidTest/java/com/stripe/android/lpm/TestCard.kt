@@ -7,7 +7,6 @@ import androidx.compose.ui.test.isSelected
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.stripe.android.BasePlaygroundTest
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.settings.CollectAddressSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
@@ -312,9 +311,5 @@ internal class TestCard : BasePlaygroundTest() {
             },
             values = FieldPopulator.Values(cardNumber = "4000000000003220")
         )
-    }
-
-    private fun PlaygroundState?.asPaymentState(): PlaygroundState.Payment? {
-        return this as? PlaygroundState.Payment
     }
 }

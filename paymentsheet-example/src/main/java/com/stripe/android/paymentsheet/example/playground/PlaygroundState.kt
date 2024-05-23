@@ -60,6 +60,10 @@ internal sealed interface PlaygroundState {
         }
     }
 
+    fun asPaymentState(): Payment? {
+        return this as? Payment
+    }
+
     companion object {
         fun CheckoutResponse.asPlaygroundState(
             snapshot: PlaygroundSettings.Snapshot,

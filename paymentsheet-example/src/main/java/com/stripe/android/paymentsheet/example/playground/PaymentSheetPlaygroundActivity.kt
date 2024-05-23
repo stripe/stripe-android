@@ -101,9 +101,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             PlaygroundTheme(
                 content = {
-                    val paymentPlaygroundState = playgroundState as? PlaygroundState.Payment
-
-                    paymentPlaygroundState?.stripeIntentId?.let { stripeIntentId ->
+                    playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
                         Text(
                             text = stripeIntentId,
                             modifier = Modifier.padding(bottom = 16.dp)

@@ -144,15 +144,19 @@ internal class PaymentSheetPlaygroundViewModel(
         viewModelScope.launch {
             val snapshot = playgroundSettings.snapshot()
 
+            snapshot.saveToSharedPreferences(getApplication())
+
             state.value = PlaygroundState.Customer(
                 snapshot = snapshot,
                 adapter = CustomerAdapter.create(
                     context = getApplication(),
-                    customerEphemeralKeyProvider = ::fetchEphemeralKey,
+                    customerEphemeralKeyProvider = {
+                        fetchEphemeralKey(snapshot)
+                    },
                     setupIntentClientSecretProvider = if (
                         snapshot[CustomerSheetPaymentMethodModeDefinition] == PaymentMethodMode.SetupIntent
                     ) {
-                        { createSetupIntentClientSecret(it) }
+                        { customerId -> createSetupIntentClientSecret(snapshot, customerId) }
                     } else {
                         null
                     }
@@ -162,19 +166,10 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     @OptIn(ExperimentalCustomerSheetApi::class)
-    private suspend fun fetchEphemeralKey(): CustomerAdapter.Result<CustomerEphemeralKey> {
-        val playgroundSettings = playgroundSettingsFlow.value
-            ?: return CustomerAdapter.Result.failure(
-                cause = Exception("Unexpected error: Playground settings were not found!"),
-                displayMessage = null,
-            )
-
-        // Snapshot before making the network request to not rely on UI staying in sync.
-        val playgroundSettingsSnapshot = playgroundSettings.snapshot()
-
-        playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
-
-        val requestBody = playgroundSettingsSnapshot.customerEphemeralKeyRequest()
+    private suspend fun fetchEphemeralKey(
+        snapshot: PlaygroundSettings.Snapshot
+    ): CustomerAdapter.Result<CustomerEphemeralKey> {
+        val requestBody = snapshot.customerEphemeralKeyRequest()
 
         val apiResponse = Fuel.post(settings.playgroundBackendUrl + "customer_ephemeral_key")
             .jsonBody(Json.encodeToString(CustomerEphemeralKeyRequest.serializer(), requestBody))
@@ -221,16 +216,13 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     @OptIn(ExperimentalCustomerSheetApi::class)
-    private suspend fun createSetupIntentClientSecret(customerId: String): CustomerAdapter.Result<String> {
-        val playgroundSettings = playgroundSettingsFlow.value
-            ?: return CustomerAdapter.Result.failure(
-                cause = Exception("Unexpected error: Playground settings were not found!"),
-                displayMessage = null,
-            )
-
+    private suspend fun createSetupIntentClientSecret(
+        snapshot: PlaygroundSettings.Snapshot,
+        customerId: String
+    ): CustomerAdapter.Result<String> {
         val request = CreateSetupIntentRequest(
             customerId = customerId,
-            merchantCountryCode = playgroundSettings[CountrySettingsDefinition].value.value,
+            merchantCountryCode = snapshot[CountrySettingsDefinition].value,
         )
 
         val apiResponse = Fuel.post(settings.playgroundBackendUrl + "create_setup_intent")
@@ -311,9 +303,9 @@ internal class PaymentSheetPlaygroundViewModel(
         paymentMethod: PaymentMethod,
         shouldSavePaymentMethod: Boolean,
     ): CreateIntentResult {
-        val playgroundState = state.value as? PlaygroundState.Payment ?: return CreateIntentResult.Failure(
-            cause = IllegalStateException("No playground state"),
-            displayMessage = "No playground state"
+        val playgroundState = state.value?.asPaymentState() ?: return CreateIntentResult.Failure(
+            cause = IllegalStateException("No payment playground state"),
+            displayMessage = "No payment playground state"
         )
         return createAndConfirmIntent(
             paymentMethodId = paymentMethod.id!!,
