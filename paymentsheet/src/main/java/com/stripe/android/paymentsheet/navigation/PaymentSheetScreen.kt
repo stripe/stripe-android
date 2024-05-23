@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.navigation
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -20,7 +21,6 @@ import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import java.io.Closeable
 
 internal val PaymentSheetScreen.topContentPadding: Dp
@@ -78,9 +78,9 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            val state by viewModel.paymentOptionsState.collectAsStateSafely()
-            val isEditing by viewModel.editing.collectAsStateSafely()
-            val isProcessing by viewModel.processing.collectAsStateSafely()
+            val state by viewModel.paymentOptionsState.collectAsState()
+            val isEditing by viewModel.editing.collectAsState()
+            val isProcessing by viewModel.processing.collectAsState()
 
             SavedPaymentMethodTabLayoutUI(
                 state = state,
@@ -166,13 +166,13 @@ internal sealed interface PaymentSheetScreen {
                 StripeImageLoader(context.applicationContext)
             }
 
-            val paymentMethodMetadata by viewModel.paymentMethodMetadata.collectAsStateSafely()
+            val paymentMethodMetadata by viewModel.paymentMethodMetadata.collectAsState()
 
             val supportedPaymentMethods = remember(paymentMethodMetadata) {
                 paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
             }
 
-            val isProcessing by viewModel.processing.collectAsStateSafely()
+            val isProcessing by viewModel.processing.collectAsState()
 
             PaymentMethodVerticalLayoutUI(
                 paymentMethods = supportedPaymentMethods,
@@ -207,7 +207,7 @@ internal sealed interface PaymentSheetScreen {
             val formArguments = remember(selectedPaymentMethodCode) {
                 viewModel.createFormArguments(selectedPaymentMethodCode)
             }
-            val isProcessing by viewModel.processing.collectAsStateSafely()
+            val isProcessing by viewModel.processing.collectAsState()
 
             FormElement(
                 enabled = !isProcessing,
@@ -238,9 +238,4 @@ internal sealed interface PaymentSheetScreen {
             Text("Manage your saved PMs here")
         }
     }
-}
-
-@Composable
-internal fun PaymentSheetScreen.Content(viewModel: BaseSheetViewModel) {
-    Content(viewModel, modifier = Modifier)
 }

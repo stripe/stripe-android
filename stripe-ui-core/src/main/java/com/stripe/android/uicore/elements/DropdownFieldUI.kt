@@ -23,6 +23,7 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,7 +40,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.stripe.android.uicore.R
 import com.stripe.android.uicore.stripeColors
-import com.stripe.android.uicore.utils.collectAsStateSafely
 
 @Preview
 @Composable
@@ -82,8 +82,8 @@ fun DropDown(
     modifier: Modifier = Modifier,
     showChevron: Boolean = true
 ) {
-    val label by controller.label.collectAsStateSafely()
-    val selectedIndex by controller.selectedIndex.collectAsStateSafely()
+    val label by controller.label.collectAsState()
+    val selectedIndex by controller.selectedIndex.collectAsState()
     val items = controller.displayItems
     val shouldDisableDropdownWithSingleItem =
         items.count() == 1 && controller.disableDropdownWithSingleElement

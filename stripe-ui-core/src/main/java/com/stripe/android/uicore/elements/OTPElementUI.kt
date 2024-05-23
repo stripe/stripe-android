@@ -21,6 +21,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
@@ -59,7 +60,6 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.getBorderStrokeWidth
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.autofill
-import com.stripe.android.uicore.utils.collectAsStateSafely
 
 @Composable
 @Preview(backgroundColor = 0xFFFFFFFF, showBackground = true)
@@ -137,7 +137,7 @@ fun OTPElementUI(
                     }
                 )
             ) {
-                val value by element.controller.fieldValues[index].collectAsStateSafely()
+                val value by element.controller.fieldValues[index].collectAsState()
 
                 var textFieldModifier = Modifier
                     .height(56.dp)

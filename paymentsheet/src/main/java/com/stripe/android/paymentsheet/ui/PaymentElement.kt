@@ -48,6 +48,7 @@ internal fun PaymentElement(
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
+    modifier: Modifier = Modifier,
     onInteractionEvent: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -66,7 +67,7 @@ internal fun PaymentElement(
         supportedPaymentMethods[selectedIndex]
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
             NewPaymentMethodTabLayoutUI(
                 selectedIndex = selectedIndex,

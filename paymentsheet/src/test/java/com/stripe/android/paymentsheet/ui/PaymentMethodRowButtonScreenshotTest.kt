@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Text
@@ -34,7 +33,8 @@ internal class PaymentMethodRowButtonScreenshotTest {
                         contentDescription = null
                     )
                 },
-                textContent = { Text(text = "**** 4242") },
+                title = "**** 4242",
+                subtitle = null,
                 onClick = {},
             )
         }
@@ -52,7 +52,8 @@ internal class PaymentMethodRowButtonScreenshotTest {
                         contentDescription = null
                     )
                 },
-                textContent = { Text(text = "**** 4242") },
+                title = "**** 4242",
+                subtitle = null,
                 onClick = {},
             )
         }
@@ -70,7 +71,8 @@ internal class PaymentMethodRowButtonScreenshotTest {
                         contentDescription = null
                     )
                 },
-                textContent = { Text(text = "**** 4242") },
+                title = "**** 4242",
+                subtitle = null,
                 onClick = {},
             )
         }
@@ -88,12 +90,8 @@ internal class PaymentMethodRowButtonScreenshotTest {
                         contentDescription = null
                     )
                 },
-                textContent = {
-                    Column {
-                        Text(text = "**** 4242")
-                        Text(text = "Please click me, I'm fancy")
-                    }
-                },
+                title = "**** 4242",
+                subtitle = "Please click me, I'm fancy",
                 onClick = {},
             )
         }
@@ -111,12 +109,9 @@ internal class PaymentMethodRowButtonScreenshotTest {
                         contentDescription = null
                     )
                 },
-                textContent = {
-                    Column {
-                        Text(text = "**** 4242")
-                        Text(text = "Please click me, I'm fancy, but I shouldn't extend a a a a forever.")
-                    }
-                },
+                title = "**** 4242",
+                subtitle = "Please click me, I'm fancy, but I shouldn't extend a a a a a a a a a a a a a a a a " +
+                    "forever.",
                 onClick = {},
             )
         }
@@ -134,11 +129,8 @@ internal class PaymentMethodRowButtonScreenshotTest {
                         contentDescription = null
                     )
                 },
-                textContent = {
-                    Column {
-                        Text(text = "**** 4242")
-                    }
-                },
+                title = "**** 4242",
+                subtitle = null,
                 onClick = {},
                 trailingContent = {
                     Text(text = "View more")

@@ -8,6 +8,7 @@ import androidx.activity.viewModels
 import androidx.annotation.VisibleForTesting
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -19,7 +20,6 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetScreen
 import com.stripe.android.paymentsheet.utils.applicationIsTaskOwner
 import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.uicore.elements.bottomsheet.rememberStripeBottomSheetState
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import kotlinx.coroutines.flow.filterNotNull
 
 internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
@@ -65,7 +65,7 @@ internal class PaymentSheetActivity : BaseSheetActivity<PaymentSheetResult>() {
 
         setContent {
             StripeTheme {
-                val isProcessing by viewModel.processing.collectAsStateSafely()
+                val isProcessing by viewModel.processing.collectAsState()
 
                 val bottomSheetState = rememberStripeBottomSheetState(
                     confirmValueChange = { !isProcessing },
