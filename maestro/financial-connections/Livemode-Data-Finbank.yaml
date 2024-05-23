@@ -32,6 +32,7 @@ tags:
 - inputText: "f_i_n"
 - tapOn: "Banking Password "
 - inputText: "b_a_n_k"
+- hideKeyboard
 - tapOn: "Submit"
 ###############################################
 # SELECT ALL ACCOUNTS (they're preselected)
