@@ -101,7 +101,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             PlaygroundTheme(
                 content = {
-                    playgroundState?.stripeIntentId?.let { stripeIntentId ->
+                    playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
                         Text(
                             text = stripeIntentId,
                             modifier = Modifier.padding(bottom = 16.dp)
@@ -194,7 +194,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     private fun ReloadButton(playgroundSettings: PlaygroundSettings) {
         Button(
             onClick = {
-                viewModel.prepareCheckout(
+                viewModel.prepare(
                     playgroundSettings = playgroundSettings,
                 )
             },
@@ -217,27 +217,31 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             return
         }
 
-        ShippingAddressButton(
-            addressLauncher = addressLauncher,
-            playgroundState = playgroundState,
-        )
-
-        when (playgroundState.integrationType) {
-            PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
-                PaymentSheetUi(
-                    paymentSheet = paymentSheet,
+        when (playgroundState) {
+            is PlaygroundState.Payment -> {
+                ShippingAddressButton(
+                    addressLauncher = addressLauncher,
                     playgroundState = playgroundState,
                 )
-            }
 
-            PlaygroundConfigurationData.IntegrationType.FlowController -> {
-                FlowControllerUi(
-                    flowController = flowController,
-                    playgroundState = playgroundState,
-                )
-            }
+                when (playgroundState.integrationType) {
+                    PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
+                        PaymentSheetUi(
+                            paymentSheet = paymentSheet,
+                            playgroundState = playgroundState,
+                        )
+                    }
 
-            PlaygroundConfigurationData.IntegrationType.CustomerSheet -> {
+                    PlaygroundConfigurationData.IntegrationType.FlowController -> {
+                        FlowControllerUi(
+                            flowController = flowController,
+                            playgroundState = playgroundState,
+                        )
+                    }
+                    else -> Unit
+                }
+            }
+            is PlaygroundState.Customer -> {
                 // TODO(samer-stripe): Implement Customer Sheet UI
             }
         }
@@ -246,7 +250,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @Composable
     fun PaymentSheetUi(
         paymentSheet: PaymentSheet,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         Button(
             onClick = {
@@ -263,7 +267,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @Composable
     fun FlowControllerUi(
         flowController: PaymentSheet.FlowController,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         LaunchedEffect(playgroundState) {
             configureFlowController(
@@ -305,7 +309,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @Composable
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         val context = LocalContext.current
         Button(
@@ -322,7 +326,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState) {
+    private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
@@ -349,7 +353,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
     private fun configureFlowController(
         flowController: PaymentSheet.FlowController,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {

@@ -25,7 +25,7 @@ internal object PrimaryButtonLabelSettingsDefinition :
     override fun configure(
         value: String,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         if (value.isNotEmpty()) {

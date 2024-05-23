@@ -16,7 +16,7 @@ internal object PreferredNetworkSettingsDefinition : BooleanSettingsDefinition(
     override fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         if (value) {
@@ -28,7 +28,7 @@ internal object PreferredNetworkSettingsDefinition : BooleanSettingsDefinition(
     override fun configure(
         value: Boolean,
         configurationBuilder: CustomerSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
         if (value) {

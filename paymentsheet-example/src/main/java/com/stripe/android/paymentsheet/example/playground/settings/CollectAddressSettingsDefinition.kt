@@ -26,7 +26,7 @@ internal object CollectAddressSettingsDefinition :
     override fun configure(
         value: CollectionMode,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { copy(address = value) }
@@ -36,7 +36,7 @@ internal object CollectAddressSettingsDefinition :
     override fun configure(
         value: CollectionMode,
         configurationBuilder: CustomerSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
         configurationData.updateBillingDetails { copy(address = value) }

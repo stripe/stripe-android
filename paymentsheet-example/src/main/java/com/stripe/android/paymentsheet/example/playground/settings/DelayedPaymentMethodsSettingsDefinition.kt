@@ -15,7 +15,7 @@ internal object DelayedPaymentMethodsSettingsDefinition : BooleanSettingsDefinit
     override fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         configurationBuilder.allowsDelayedPaymentMethods(value)

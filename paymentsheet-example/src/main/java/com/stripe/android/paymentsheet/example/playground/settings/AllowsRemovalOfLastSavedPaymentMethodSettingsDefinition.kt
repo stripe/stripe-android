@@ -15,7 +15,7 @@ internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : Boolea
     override fun configure(
         value: Boolean,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         configurationBuilder.allowsRemovalOfLastSavedPaymentMethod(value)
@@ -25,7 +25,7 @@ internal object AllowsRemovalOfLastSavedPaymentMethodSettingsDefinition : Boolea
     override fun configure(
         value: Boolean,
         configurationBuilder: CustomerSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Customer,
         configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
     ) {
         configurationBuilder.allowsRemovalOfLastSavedPaymentMethod(value)

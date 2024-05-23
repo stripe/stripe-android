@@ -35,7 +35,7 @@ internal object ExternalPaymentMethodSettingsDefinition :
     override fun configure(
         value: ExternalPaymentMethodType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
         when (value) {
