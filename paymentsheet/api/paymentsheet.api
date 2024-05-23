@@ -1920,8 +1920,8 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$EditP
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$NewPaymentMethodVerticalLayoutUIKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$NewPaymentMethodVerticalLayoutUIKt;
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentMethodVerticalLayoutUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentMethodVerticalLayoutUIKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function3;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;

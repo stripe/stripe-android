@@ -15,7 +15,7 @@ import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.NewPaymentMethodVerticalLayoutUI
+import com.stripe.android.paymentsheet.ui.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -174,7 +174,7 @@ internal sealed interface PaymentSheetScreen {
 
             val isProcessing by viewModel.processing.collectAsStateSafely()
 
-            NewPaymentMethodVerticalLayoutUI(
+            PaymentMethodVerticalLayoutUI(
                 paymentMethods = supportedPaymentMethods,
                 selectedIndex = -1,
                 isEnabled = !isProcessing,

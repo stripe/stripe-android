@@ -137,7 +137,6 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onViewMorePaymentMethods = {},
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -159,7 +158,6 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onViewMorePaymentMethods = {},
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -174,7 +172,6 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onViewMorePaymentMethods = {},
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -193,7 +190,6 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onViewMorePaymentMethods = {},
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
@@ -217,7 +213,6 @@ class PaymentMethodsUIScreenshotTest {
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
-                onViewMorePaymentMethods = {},
                 onItemSelectedListener = {},
                 imageLoader = mock(),
             )
