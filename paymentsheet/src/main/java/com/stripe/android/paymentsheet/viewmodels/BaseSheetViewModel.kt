@@ -291,7 +291,7 @@ internal abstract class BaseSheetViewModel(
                         previouslyShownForm = null
                         previouslyInteractedForm = null
                     }
-                    is PaymentSheetScreen.Form -> {
+                    is PaymentSheetScreen.Form, is PaymentSheetScreen.ManageSavedPaymentMethods -> {
                     }
                 }
             }
@@ -362,7 +362,10 @@ internal abstract class BaseSheetViewModel(
 
     private fun reportPaymentSheetShown(currentScreen: PaymentSheetScreen) {
         when (currentScreen) {
-            is PaymentSheetScreen.Loading, is PaymentSheetScreen.EditPaymentMethod, is PaymentSheetScreen.Form -> {
+            is PaymentSheetScreen.Loading,
+            is PaymentSheetScreen.EditPaymentMethod,
+            is PaymentSheetScreen.Form,
+            is PaymentSheetScreen.ManageSavedPaymentMethods -> {
                 // Nothing to do here
             }
             is PaymentSheetScreen.SelectSavedPaymentMethods -> {

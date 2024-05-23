@@ -111,4 +111,26 @@ class HeaderTextFactoryTest {
 
         assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_choose_payment_method)
     }
+
+    @Test
+    fun `Shows correct header for manage saved PMs screen when first opened`() {
+        val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = true)
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
+    @Test
+    fun `Shows correct header for manage saved PMs screen when first opened - FlowController`() {
+        val resource = getManagedSavedPaymentMethodsHeaderText(isCompleteFlow = false)
+
+        assertThat(resource).isEqualTo(R.string.stripe_paymentsheet_select_payment_method)
+    }
+
+    private fun getManagedSavedPaymentMethodsHeaderText(isCompleteFlow: Boolean): Int? {
+        return HeaderTextFactory(isCompleteFlow = isCompleteFlow).create(
+            screen = PaymentSheetScreen.ManageSavedPaymentMethods,
+            isWalletEnabled = false,
+            types = emptyList(),
+        )
+    }
 }

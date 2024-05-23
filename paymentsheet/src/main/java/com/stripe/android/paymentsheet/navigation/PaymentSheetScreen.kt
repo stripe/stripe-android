@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -15,7 +16,7 @@ import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.NewPaymentMethodVerticalLayoutUI
+import com.stripe.android.paymentsheet.ui.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
@@ -32,6 +33,7 @@ internal val PaymentSheetScreen.topContentPadding: Dp
         is PaymentSheetScreen.Form,
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
+        is PaymentSheetScreen.ManageSavedPaymentMethods,
         is PaymentSheetScreen.EditPaymentMethod -> {
             0.dp
         }
@@ -64,7 +66,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    object SelectSavedPaymentMethods : PaymentSheetScreen {
+    data object SelectSavedPaymentMethods : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
@@ -172,10 +174,11 @@ internal sealed interface PaymentSheetScreen {
 
             val isProcessing by viewModel.processing.collectAsState()
 
-            NewPaymentMethodVerticalLayoutUI(
+            PaymentMethodVerticalLayoutUI(
                 paymentMethods = supportedPaymentMethods,
                 selectedIndex = -1,
                 isEnabled = !isProcessing,
+                onViewMorePaymentMethods = { viewModel.transitionTo(ManageSavedPaymentMethods) },
                 onItemSelectedListener = { viewModel.transitionTo(Form(it.code)) },
                 imageLoader = imageLoader,
                 modifier = Modifier.padding(horizontal = 20.dp)
@@ -220,6 +223,19 @@ internal sealed interface PaymentSheetScreen {
                     viewModel.reportFieldInteraction(selectedPaymentMethodCode)
                 },
             )
+        }
+    }
+
+    data object ManageSavedPaymentMethods : PaymentSheetScreen {
+        override val showsBuyButton: Boolean = false
+        override val showsContinueButton: Boolean = false
+        override val canNavigateBack: Boolean = true
+
+        override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean = false
+
+        @Composable
+        override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
+            Text("Manage your saved PMs here")
         }
     }
 }
