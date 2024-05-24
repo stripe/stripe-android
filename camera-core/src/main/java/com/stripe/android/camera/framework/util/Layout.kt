@@ -214,6 +214,13 @@ fun Size.centerOn(rect: Rect) = Rect(
     rect.centerY() + this.height / 2
 )
 
+@CheckResult
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+fun Size.union(size: Size) = Size(
+    max(this.width, size.width),
+    max(this.height, size.height)
+)
+
 /**
  * Scale a [Rect] to have a size equivalent to the [scaledSize]. This will also scale the position
  * of the [Rect].
