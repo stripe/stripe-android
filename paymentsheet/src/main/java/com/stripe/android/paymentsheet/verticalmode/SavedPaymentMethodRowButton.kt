@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.ui
+package com.stripe.android.paymentsheet.verticalmode
 
 import android.content.res.Resources
 import androidx.compose.foundation.layout.RowScope
@@ -9,6 +9,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.ui.PaymentMethodIconFromResource
+import com.stripe.android.paymentsheet.ui.getLabel
+import com.stripe.android.paymentsheet.ui.getSavedPaymentMethodIcon
 
 @Composable
 internal fun SavedPaymentMethodRowButton(

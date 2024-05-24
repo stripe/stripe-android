@@ -1,9 +1,9 @@
-package com.stripe.android.paymentsheet.ui
+package com.stripe.android.paymentsheet.vertical
 
-import androidx.compose.foundation.lazy.LazyListState
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.verticalmode.NewPaymentMethodVerticalLayoutUI
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
@@ -14,8 +14,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.mockito.kotlin.mock
 
-class PaymentMethodsUIScreenshotTest {
-
+internal class NewPaymentMethodVerticalLayoutUIScreenshotTest {
     @get:Rule
     val paparazziRule = PaparazziRule(
         listOf(SystemAppearance.LightTheme),
@@ -28,9 +27,9 @@ class PaymentMethodsUIScreenshotTest {
     }
 
     @Test
-    fun testInitialState() {
+    fun testInitialStateForVerticalMode() {
         paparazziRule.snapshot {
-            NewPaymentMethodTabLayoutUI(
+            NewPaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
@@ -41,7 +40,7 @@ class PaymentMethodsUIScreenshotTest {
     }
 
     @Test
-    fun testLongPaymentMethodName() {
+    fun testLongPaymentMethodNameForVerticalMode() {
         val bankPaymentMethod = MockPaymentMethodsFactory.mockPaymentMethod(
             code = "us_bank_account",
             displayNameResource = R.string.stripe_paymentsheet_payment_method_us_bank_account,
@@ -51,7 +50,7 @@ class PaymentMethodsUIScreenshotTest {
         val paymentMethods = paymentMethods.toMutableList()
         paymentMethods.add(1, bankPaymentMethod)
         paparazziRule.snapshot {
-            NewPaymentMethodTabLayoutUI(
+            NewPaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
@@ -62,24 +61,10 @@ class PaymentMethodsUIScreenshotTest {
     }
 
     @Test
-    fun testScrolledToEnd() {
-        paparazziRule.snapshot {
-            NewPaymentMethodTabLayoutUI(
-                paymentMethods = paymentMethods,
-                selectedIndex = 3,
-                isEnabled = true,
-                state = LazyListState(firstVisibleItemIndex = 3),
-                onItemSelectedListener = {},
-                imageLoader = mock(),
-            )
-        }
-    }
-
-    @Test
-    fun testTwoPaymentMethodsExpandToFit() {
+    fun testTwoPaymentMethodsExpandToFitForVerticalMode() {
         val paymentMethods = paymentMethods.take(2)
         paparazziRule.snapshot {
-            NewPaymentMethodTabLayoutUI(
+            NewPaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
@@ -90,14 +75,14 @@ class PaymentMethodsUIScreenshotTest {
     }
 
     @Test
-    fun testExternalPaymentMethod_iconUrlFailsToLoad() {
+    fun testExternalPaymentMethod_iconUrlFailsToLoadForVerticalMode() {
         val paymentMethods = listOf(
             ExternalPaymentMethodUiDefinitionFactory(
                 PaymentMethodFixtures.PAYPAL_EXTERNAL_PAYMENT_METHOD_SPEC
             ).createSupportedPaymentMethod()
         ).plus(paymentMethods)
         paparazziRule.snapshot {
-            NewPaymentMethodTabLayoutUI(
+            NewPaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
@@ -108,7 +93,7 @@ class PaymentMethodsUIScreenshotTest {
     }
 
     @Test
-    fun testInvalidIconUrlAndInvalidResource() {
+    fun testInvalidIconUrlAndInvalidResourceForVerticalMode() {
         val paymentMethods = listOf(
             SupportedPaymentMethod(
                 code = "example_pm",
@@ -120,7 +105,7 @@ class PaymentMethodsUIScreenshotTest {
             )
         ).plus(paymentMethods)
         paparazziRule.snapshot {
-            NewPaymentMethodTabLayoutUI(
+            NewPaymentMethodVerticalLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,
