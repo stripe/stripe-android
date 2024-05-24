@@ -1,5 +1,6 @@
 package com.stripe.android.customersheet.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -293,8 +294,11 @@ private fun EditPaymentMethod(
     }
 }
 
-internal const val CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG = "CustomerSheetConfirmButton"
-internal const val CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG = "CustomerSheetSaveButton"
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val CUSTOMER_SHEET_CONFIRM_BUTTON_TEST_TAG = "CustomerSheetConfirmButton"
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val CUSTOMER_SHEET_SAVE_BUTTON_TEST_TAG = "CustomerSheetSaveButton"
 
 private class DefaultCardNumberCompletedEventReporter(
     private val viewActionHandler: (CustomerSheetViewAction) -> Unit
