@@ -10,6 +10,7 @@ import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.hasTestTag
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.ComposeTestRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
@@ -313,6 +314,50 @@ internal class PlaygroundTestDriver(
         teardown()
     }
 
+    fun savePaymentMethodInCustomerSheet(
+        testParameters: TestParameters,
+        values: FieldPopulator.Values = FieldPopulator.Values(),
+        populateCustomLpmFields: FieldPopulator.() -> Unit = {},
+    ): PlaygroundState? {
+        setup(
+            testParameters.copyPlaygroundSettings { settings ->
+                settings.updateConfigurationData { configurationData ->
+                    configurationData.copy(
+                        integrationType = PlaygroundConfigurationData.IntegrationType.CustomerSheet
+                    )
+                }
+            }
+        )
+
+        launchCustomerSheet()
+
+        selectors.paymentSelection.click()
+
+        val fieldPopulator = FieldPopulator(
+            selectors,
+            testParameters,
+            populateCustomLpmFields,
+            {},
+            values,
+        )
+        fieldPopulator.populateFields()
+
+        val result = playgroundState
+
+        pressCustomerSheetSave()
+
+        waitForManageSavedPaymentMethods()
+
+        pressCustomerSheetConfirm()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        teardown()
+
+        return result
+    }
+
     private fun pressMultiStepSelect() {
         selectors.multiStepSelect.click()
         waitForNotPlaygroundActivity()
@@ -323,6 +368,20 @@ internal class PlaygroundTestDriver(
         if (waitForPlayground) {
             waitForPlaygroundActivity()
         }
+    }
+
+    private fun pressCustomerSheetSave() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        selectors.customerSheetSaveButton.click()
+    }
+
+    private fun pressCustomerSheetConfirm() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        selectors.customerSheetConfirmButton.click()
     }
 
     /**
@@ -840,6 +899,17 @@ internal class PlaygroundTestDriver(
         }
     }
 
+    private fun launchCustomerSheet() {
+        selectors.reload.click()
+        Espresso.onIdle()
+        selectors.composeTestRule.waitForIdle()
+
+        selectors.multiStepSelect.waitForEnabled()
+        selectors.multiStepSelect.click()
+
+        waitForNotPlaygroundActivity()
+    }
+
     private fun doAuthorization() {
         selectors.apply {
             val checkoutMode =
@@ -1040,6 +1110,7 @@ internal class PlaygroundTestDriver(
     internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
         currentActivity = null
+        playgroundState = null
     }
 
     private fun isSelectPaymentMethodScreen(): Boolean {
@@ -1056,6 +1127,17 @@ internal class PlaygroundTestDriver(
     @OptIn(ExperimentalTestApi::class)
     private fun waitForAddPaymentMethodNode() {
         composeTestRule.waitUntilAtLeastOneExists(hasTestTag(ADD_PAYMENT_METHOD_NODE_TAG), 5000L)
+    }
+
+    @OptIn(ExperimentalTestApi::class)
+    private fun waitForManageSavedPaymentMethods() {
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        composeTestRule.waitUntilAtLeastOneExists(
+            hasText("Manage your payment methods"),
+            DEFAULT_UI_TIMEOUT.inWholeMilliseconds
+        )
     }
 
     private companion object {

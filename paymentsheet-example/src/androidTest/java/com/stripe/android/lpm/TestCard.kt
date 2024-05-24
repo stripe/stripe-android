@@ -11,8 +11,14 @@ import com.stripe.android.paymentsheet.example.playground.settings.CollectAddres
 import com.stripe.android.paymentsheet.example.playground.settings.CollectEmailSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectNameSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CollectPhoneSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddress
 import com.stripe.android.paymentsheet.example.playground.settings.DefaultBillingAddressSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
 import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_OPTION_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
@@ -310,6 +316,114 @@ internal class TestCard : BasePlaygroundTest() {
                 populateCardDetails()
             },
             values = FieldPopulator.Values(cardNumber = "4000000000003220")
+        )
+    }
+
+    @Test
+    fun testCardInCustomerSheet() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            TestParameters.create(paymentMethodCode = "card").copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
+            },
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithSetupIntentInCustomerSheet() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            TestParameters.create(paymentMethodCode = "card").copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.US
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+            },
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithNonUsMerchantInCustomerSheet() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            TestParameters.create(paymentMethodCode = "card").copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.FR
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.CreateAndAttach
+            },
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithSetupIntentAndNonUsMerchantInCustomerSheet() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            TestParameters.create(paymentMethodCode = "card").copyPlaygroundSettings { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.FR
+                settings[CustomerSheetPaymentMethodModeDefinition] = PaymentMethodMode.SetupIntent
+            },
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithBillingDetailsCollectionInCustomerSheet() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.US
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.Off
+                settings[CollectNameSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectEmailSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectPhoneSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectAddressSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            },
+            populateCustomLpmFields = {
+                populateCardDetails()
+                populateEmail()
+                populateName("Name on card")
+                populateAddress()
+                populatePhoneNumber()
+            },
+        )
+    }
+
+    @Test
+    fun testCardWithBillingDetailsCollectionWithDefaultsInCustomerSheet() {
+        testDriver.savePaymentMethodInCustomerSheet(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[CustomerSettingsDefinition] = CustomerType.NEW
+                settings[CountrySettingsDefinition] = Country.US
+                settings[DefaultBillingAddressSettingsDefinition] = DefaultBillingAddress.On
+                settings[CollectNameSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectEmailSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectPhoneSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.CollectionMode.Always
+                settings[CollectAddressSettingsDefinition] =
+                    PaymentSheet.BillingDetailsCollectionConfiguration.AddressCollectionMode.Full
+            },
+            populateCustomLpmFields = {
+                populateCardDetails()
+            },
         )
     }
 }
