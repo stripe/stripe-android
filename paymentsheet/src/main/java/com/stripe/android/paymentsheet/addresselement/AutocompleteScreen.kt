@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -41,8 +42,8 @@ import com.stripe.android.common.ui.LoadingIndicator
 import com.stripe.android.paymentsheet.injection.AutocompleteViewModelSubcomponent
 import com.stripe.android.paymentsheet.ui.AddressOptionsAppBar
 import com.stripe.android.ui.core.elements.autocomplete.PlacesClientProxy
-import com.stripe.android.uicore.darken
 import com.stripe.android.uicore.elements.TextFieldSection
+import com.stripe.android.uicore.shouldUseDarkDynamicColor
 import com.stripe.android.uicore.stripeColors
 import com.stripe.android.uicore.text.annotatedStringResource
 import javax.inject.Provider
@@ -93,10 +94,10 @@ internal fun AutocompleteScreenUI(viewModel: AutocompleteViewModel) {
             }
         },
         bottomBar = {
-            val background = if (isSystemInDarkTheme()) {
-                MaterialTheme.stripeColors.component
+            val background = if (MaterialTheme.stripeColors.materialColors.surface.shouldUseDarkDynamicColor()) {
+                Color.Black.copy(alpha = 0.07f)
             } else {
-                MaterialTheme.stripeColors.materialColors.surface.darken(0.07f)
+                Color.White.copy(alpha = 0.07f)
             }
             Row(
                 verticalAlignment = Alignment.CenterVertically,
