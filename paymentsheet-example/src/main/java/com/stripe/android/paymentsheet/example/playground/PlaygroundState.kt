@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.example.playground
 
 import androidx.compose.runtime.Stable
-import com.stripe.android.customersheet.CustomerAdapter
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -50,7 +49,6 @@ internal sealed interface PlaygroundState {
     @OptIn(ExperimentalCustomerSheetApi::class)
     data class Customer(
         private val snapshot: PlaygroundSettings.Snapshot,
-        val adapter: CustomerAdapter,
     ) : PlaygroundState {
         override val integrationType = snapshot.configurationData.integrationType
         override val countryCode = snapshot[CountrySettingsDefinition]
