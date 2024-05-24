@@ -48,6 +48,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import java.io.IOException
 
+@OptIn(ExperimentalCustomerSheetApi::class)
 internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     launchUri: Uri?,
@@ -61,6 +62,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val state = MutableStateFlow<PlaygroundState?>(null)
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
+    val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -76,6 +78,7 @@ internal class PaymentSheetPlaygroundViewModel(
         state.value = null
         flowControllerState.value = null
         customerSheetState.value = null
+        customerAdapter.value = null
 
         if (playgroundSettings.configurationData.value.integrationType.isPaymentFlow()) {
             prepareCheckout(playgroundSettings)
@@ -149,23 +152,23 @@ internal class PaymentSheetPlaygroundViewModel(
 
             snapshot.saveToSharedPreferences(getApplication())
 
-            state.value = PlaygroundState.Customer(
-                snapshot = snapshot,
-                adapter = CustomerAdapter.create(
-                    context = getApplication(),
-                    customerEphemeralKeyProvider = {
-                        fetchEphemeralKey(snapshot)
-                    },
-                    setupIntentClientSecretProvider = if (
-                        snapshot[CustomerSheetPaymentMethodModeDefinition] == PaymentMethodMode.SetupIntent
-                    ) {
-                        { customerId -> createSetupIntentClientSecret(snapshot, customerId) }
-                    } else {
-                        null
-                    }
-                )
+            val adapter = CustomerAdapter.create(
+                context = getApplication(),
+                customerEphemeralKeyProvider = {
+                    fetchEphemeralKey(snapshot)
+                },
+                setupIntentClientSecretProvider = if (
+                    snapshot[CustomerSheetPaymentMethodModeDefinition] == PaymentMethodMode.SetupIntent
+                ) {
+                    { customerId -> createSetupIntentClientSecret(snapshot, customerId) }
+                } else {
+                    null
+                }
             )
+
             customerSheetState.value = CustomerSheetState()
+            customerAdapter.value = adapter
+            state.value = PlaygroundState.Customer(snapshot = snapshot)
         }
     }
 

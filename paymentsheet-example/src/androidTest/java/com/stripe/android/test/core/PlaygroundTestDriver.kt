@@ -1139,9 +1139,6 @@ internal class PlaygroundTestDriver(
 
     @OptIn(ExperimentalTestApi::class)
     private fun waitForManageSavedPaymentMethods() {
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
-
         composeTestRule.waitUntilAtLeastOneExists(
             hasText("Manage your payment methods"),
             DEFAULT_UI_TIMEOUT.inWholeMilliseconds

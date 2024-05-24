@@ -106,13 +106,16 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
+            val customerAdapter by viewModel.customerAdapter.collectAsState()
 
             val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
-                rememberCustomerSheet(
-                    configuration = customerPlaygroundState.customerSheetConfiguration(),
-                    customerAdapter = customerPlaygroundState.adapter,
-                    callback = viewModel::onCustomerSheetCallback
-                )
+                customerAdapter?.let { adapter ->
+                    rememberCustomerSheet(
+                        configuration = customerPlaygroundState.customerSheetConfiguration(),
+                        customerAdapter = adapter,
+                        callback = viewModel::onCustomerSheetCallback
+                    )
+                }
             }
 
             PlaygroundTheme(
