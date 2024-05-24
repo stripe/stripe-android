@@ -61,6 +61,8 @@ internal class Selectors(
         testParameters.paymentMethodCode
     )
 
+    val formElement = FormElement(composeTestRule)
+
     val mandateText = composeTestRule.onNodeWithTag(MANDATE_TEST_TAG)
 
     val buyButton = BuyButton(

@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.ui
 
+import androidx.annotation.RestrictTo
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,7 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -116,6 +118,7 @@ internal fun FormElement(
 
     Box(
         modifier = Modifier
+            .testTag(FORM_ELEMENT_TEST_TAG)
             .pointerInput("AddPaymentMethod") {
                 awaitEachGesture {
                     val gesture = awaitPointerEvent()
@@ -184,3 +187,6 @@ internal fun LinkElement(
         }
     }
 }
+
+@RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
+const val FORM_ELEMENT_TEST_TAG = "FORM_ELEMENT_UI"

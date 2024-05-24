@@ -196,7 +196,7 @@ internal class PlaygroundTestDriver(
             // and click the payment method.
             addPaymentMethodNode().performClick()
         }
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         val fieldPopulator = FieldPopulator(
             selectors,
@@ -252,7 +252,7 @@ internal class PlaygroundTestDriver(
             // and click the payment method.
             addPaymentMethodNode().performClick()
         }
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         val fieldPopulator = FieldPopulator(
             selectors,
@@ -331,7 +331,7 @@ internal class PlaygroundTestDriver(
 
         launchCustomerSheet()
 
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         val fieldPopulator = FieldPopulator(
             selectors,
@@ -399,7 +399,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         FieldPopulator(
             selectors,
@@ -452,7 +452,7 @@ internal class PlaygroundTestDriver(
         waitForAddPaymentMethodNode()
         addPaymentMethodNode().performClick()
 
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         FieldPopulator(
             selectors,
@@ -574,7 +574,7 @@ internal class PlaygroundTestDriver(
     private fun confirmExternalPaymentMethod(
         button: ComposeButton,
     ) {
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         pressBuy()
 
@@ -635,7 +635,7 @@ internal class PlaygroundTestDriver(
         setup(testParameters)
         launchComplete()
 
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         FieldPopulator(
             selectors = selectors,
@@ -691,7 +691,7 @@ internal class PlaygroundTestDriver(
             // and click the payment method.
             addPaymentMethodNode().performClick()
         }
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
 
         FieldPopulator(
             selectors = selectors,
@@ -776,7 +776,7 @@ internal class PlaygroundTestDriver(
     internal fun pressSelection() {
         composeTestRule.waitForIdle()
 
-        selectors.paymentSelection.click()
+        clickPaymentSelection()
     }
 
     internal fun scrollToBottom() {
@@ -796,6 +796,14 @@ internal class PlaygroundTestDriver(
         composeTestRule
             .onNodeWithText("EDIT")
             .performClick()
+    }
+
+    private fun clickPaymentSelection() {
+        selectors.formElement.waitFor()
+        selectors.paymentSelection.click()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
     }
 
     /**
