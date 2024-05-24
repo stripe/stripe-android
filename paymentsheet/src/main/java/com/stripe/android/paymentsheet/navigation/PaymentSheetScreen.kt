@@ -20,9 +20,9 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.FormElement
 import com.stripe.android.paymentsheet.ui.LinkElement
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
-import com.stripe.android.paymentsheet.ui.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.utils.collectAsStateSafely

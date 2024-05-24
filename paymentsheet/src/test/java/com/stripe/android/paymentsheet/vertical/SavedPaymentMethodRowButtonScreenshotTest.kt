@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.ui
+package com.stripe.android.paymentsheet.vertical
 
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.Modifier
@@ -6,6 +6,7 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
+import com.stripe.android.paymentsheet.verticalmode.SavedPaymentMethodRowButton
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance

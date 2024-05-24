@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.ui
+package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.paymentsheet.ui.RowButton
 import com.stripe.android.uicore.stripeColors
 
 @Composable

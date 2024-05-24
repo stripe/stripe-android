@@ -1,4 +1,4 @@
-package com.stripe.android.paymentsheet.ui
+package com.stripe.android.paymentsheet.verticalmode
 
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.size
@@ -6,6 +6,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.ui.PaymentMethodIcon
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.strings.resolve
 
