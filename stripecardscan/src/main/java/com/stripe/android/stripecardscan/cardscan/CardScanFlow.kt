@@ -12,6 +12,7 @@ import com.stripe.android.camera.framework.ProcessBoundAnalyzerLoop
 import com.stripe.android.camera.framework.util.centerOn
 import com.stripe.android.camera.framework.util.minAspectRatioSurroundingSize
 import com.stripe.android.camera.framework.util.size
+import com.stripe.android.camera.framework.util.union
 import com.stripe.android.camera.scanui.ScanFlow
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopAggregator
 import com.stripe.android.stripecardscan.cardscan.result.MainLoopState
@@ -87,7 +88,7 @@ internal abstract class CardScanFlow(
                         SSDOcr.cameraPreviewToInput(
                             cameraImage.image,
                             minAspectRatioSurroundingSize(
-                                cameraImage.viewBounds.size(),
+                                cameraImage.viewBounds.size().union(viewFinder.size()),
                                 cameraImage.image.width.toFloat() / cameraImage.image.height
                             ).centerOn(cameraImage.viewBounds),
                             viewFinder
