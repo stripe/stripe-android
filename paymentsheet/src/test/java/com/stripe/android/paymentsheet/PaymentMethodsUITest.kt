@@ -4,6 +4,8 @@ import android.graphics.Bitmap
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
+import com.stripe.android.paymentsheet.ui.NewPaymentMethodTabLayoutUI
+import com.stripe.android.paymentsheet.ui.TEST_TAG_ICON_FROM_RES
 import com.stripe.android.ui.core.R
 import com.stripe.android.uicore.image.StripeImageLoader
 import com.stripe.android.uicore.image.TEST_TAG_IMAGE_FROM_URL
@@ -83,7 +85,7 @@ class PaymentMethodsUITest {
             )
         )
         composeTestRule.setContent {
-            PaymentMethodsUI(
+            NewPaymentMethodTabLayoutUI(
                 paymentMethods = paymentMethods,
                 selectedIndex = 0,
                 isEnabled = true,

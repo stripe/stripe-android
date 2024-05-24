@@ -223,6 +223,8 @@ internal class DefaultFlowController @Inject internal constructor(
                     paymentLauncher = null
                     linkLauncher.unregister()
                     PaymentSheet.FlowController.linkHandler = null
+                    IntentConfirmationInterceptor.createIntentCallback = null
+                    ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler = null
                 }
             }
         )

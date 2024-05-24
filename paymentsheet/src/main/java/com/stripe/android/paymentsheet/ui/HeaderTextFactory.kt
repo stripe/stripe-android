@@ -16,54 +16,69 @@ internal class HeaderTextFactory(
         types: List<PaymentMethodCode>,
     ): Int? {
         return if (isCompleteFlow) {
-            when (screen) {
-                is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                    if (isWalletEnabled) {
-                        null
-                    } else {
-                        R.string.stripe_paymentsheet_select_payment_method
-                    }
-                }
-                is PaymentSheetScreen.AddFirstPaymentMethod, PaymentSheetScreen.VerticalMode -> {
-                    R.string.stripe_paymentsheet_add_payment_method_title.takeUnless {
-                        isWalletEnabled
-                    }
-                }
-                is PaymentSheetScreen.EditPaymentMethod -> {
-                    StripeR.string.stripe_title_update_card
-                }
-                is PaymentSheetScreen.Loading,
-                is PaymentSheetScreen.AddAnotherPaymentMethod,
-                null -> {
-                    null
-                }
-            }
+            createForCompleteFlow(screen, isWalletEnabled)
         } else {
-            when (screen) {
-                is PaymentSheetScreen.Loading, -> {
-                    null
-                }
-                is PaymentSheetScreen.SelectSavedPaymentMethods -> {
-                    R.string.stripe_paymentsheet_select_payment_method
-                }
-                is PaymentSheetScreen.AddFirstPaymentMethod,
-                is PaymentSheetScreen.AddAnotherPaymentMethod,
-                is PaymentSheetScreen.VerticalMode -> {
-                    val title = if (types.singleOrNull() == PaymentMethod.Type.Card.code) {
-                        StripeR.string.stripe_title_add_a_card
-                    } else {
-                        R.string.stripe_paymentsheet_choose_payment_method
-                    }
+            createForFlowController(screen, types, isWalletEnabled)
+        }
+    }
 
-                    title.takeUnless { isWalletEnabled }
-                }
-                is PaymentSheetScreen.EditPaymentMethod -> {
-                    StripeR.string.stripe_title_update_card
-                }
-                null -> {
-                    null
-                }
+    private fun createForCompleteFlow(
+        screen: PaymentSheetScreen?,
+        isWalletEnabled: Boolean
+    ) = when (screen) {
+        is PaymentSheetScreen.SelectSavedPaymentMethods -> {
+            if (isWalletEnabled) {
+                null
+            } else {
+                R.string.stripe_paymentsheet_select_payment_method
             }
+        }
+        is PaymentSheetScreen.AddFirstPaymentMethod, PaymentSheetScreen.VerticalMode -> {
+            R.string.stripe_paymentsheet_add_payment_method_title.takeUnless {
+                isWalletEnabled
+            }
+        }
+        is PaymentSheetScreen.EditPaymentMethod -> {
+            StripeR.string.stripe_title_update_card
+        }
+        is PaymentSheetScreen.ManageSavedPaymentMethods -> {
+            R.string.stripe_paymentsheet_select_payment_method
+        }
+        is PaymentSheetScreen.Loading,
+        is PaymentSheetScreen.AddAnotherPaymentMethod,
+        is PaymentSheetScreen.Form,
+        null -> {
+            null
+        }
+    }
+
+    private fun createForFlowController(
+        screen: PaymentSheetScreen?,
+        types: List<PaymentMethodCode>,
+        isWalletEnabled: Boolean
+    ) = when (screen) {
+        is PaymentSheetScreen.Loading, is PaymentSheetScreen.Form -> {
+            null
+        }
+        is PaymentSheetScreen.SelectSavedPaymentMethods, is PaymentSheetScreen.ManageSavedPaymentMethods -> {
+            R.string.stripe_paymentsheet_select_payment_method
+        }
+        is PaymentSheetScreen.AddFirstPaymentMethod,
+        is PaymentSheetScreen.AddAnotherPaymentMethod,
+        is PaymentSheetScreen.VerticalMode -> {
+            val title = if (types.singleOrNull() == PaymentMethod.Type.Card.code) {
+                StripeR.string.stripe_title_add_a_card
+            } else {
+                R.string.stripe_paymentsheet_choose_payment_method
+            }
+
+            title.takeUnless { isWalletEnabled }
+        }
+        is PaymentSheetScreen.EditPaymentMethod -> {
+            StripeR.string.stripe_title_update_card
+        }
+        null -> {
+            null
         }
     }
 }

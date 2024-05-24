@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.ui
 import androidx.compose.foundation.lazy.LazyListState
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
 import com.stripe.android.screenshottesting.FontSize
@@ -24,7 +25,7 @@ class PaymentOptionsScreenshotTest {
     @Test
     fun testWidthLessThanScreen() {
         paparazziRule.snapshot {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(
                         PaymentOptionsItem.AddCard,
@@ -45,22 +46,28 @@ class PaymentOptionsScreenshotTest {
     @Test
     fun testWidthMoreThanScreen() {
         paparazziRule.snapshot {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(
                         PaymentOptionsItem.AddCard,
                         PaymentOptionsItem.GooglePay,
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Card",
-                            paymentMethod = createCard("4242"),
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("4242"),
+                            )
                         ),
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Card",
-                            paymentMethod = createCard("4000"),
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("4000"),
+                            )
                         ),
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Card",
-                            paymentMethod = createCard("1234"),
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("1234"),
+                            )
                         ),
                     ),
                     selectedIndex = 1,
@@ -78,22 +85,28 @@ class PaymentOptionsScreenshotTest {
     @Test
     fun testWidthMoreThanScreenAndScrollToEnd() {
         paparazziRule.snapshot {
-            PaymentOptions(
+            SavedPaymentMethodTabLayoutUI(
                 state = PaymentOptionsState(
                     items = listOf(
                         PaymentOptionsItem.AddCard,
                         PaymentOptionsItem.GooglePay,
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Card",
-                            paymentMethod = createCard("4242"),
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("4242"),
+                            )
                         ),
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Card",
-                            paymentMethod = createCard("4000"),
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("4000"),
+                            )
                         ),
                         PaymentOptionsItem.SavedPaymentMethod(
-                            displayName = "Card",
-                            paymentMethod = createCard("1234"),
+                            DisplayableSavedPaymentMethod(
+                                displayName = "Card",
+                                paymentMethod = createCard("1234"),
+                            )
                         ),
                     ),
                     selectedIndex = 1,

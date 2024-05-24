@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.example.playground.settings
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 
 internal object CustomerSettingsDefinition :
     PlaygroundSettingDefinition<CustomerType>,
@@ -34,8 +35,15 @@ internal object CustomerSettingsDefinition :
 
     override fun configure(
         value: CustomerType,
+        customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder
+    ) {
+        customerEphemeralKeyRequestBuilder.customerType(value.value)
+    }
+
+    override fun configure(
+        value: CustomerType,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
     ) {
         configurationBuilder.customer(playgroundState.customerConfig)

@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.lifecycle.Lifecycle
 import androidx.test.core.app.ActivityScenario
 import com.google.common.truth.Truth.assertThat
@@ -8,7 +7,6 @@ import com.google.testing.junit.testparameterinjector.TestParameter
 import com.google.testing.junit.testparameterinjector.TestParameterInjector
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.utils.urlEncode
-import com.stripe.android.networktesting.NetworkRule
 import com.stripe.android.networktesting.RequestMatchers.bodyPart
 import com.stripe.android.networktesting.RequestMatchers.method
 import com.stripe.android.networktesting.RequestMatchers.not
@@ -17,28 +15,23 @@ import com.stripe.android.networktesting.RequestMatchers.query
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.ActivityLaunchObserver
 import com.stripe.android.paymentsheet.utils.IntegrationType
+import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.assertFailed
 import com.stripe.android.paymentsheet.utils.runFlowControllerTest
-import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
 @RunWith(TestParameterInjector::class)
 internal class FlowControllerTest {
-    private val composeTestRule = createEmptyComposeRule()
-    private val retryRule = RetryRule(5)
-    private val networkRule = NetworkRule()
-
     @get:Rule
-    val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(composeTestRule)
-        .around(retryRule)
-        .around(networkRule)
+    val testRules: TestRules = TestRules.create()
+
+    private val composeTestRule = testRules.compose
+    private val networkRule = testRules.networkRule
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 

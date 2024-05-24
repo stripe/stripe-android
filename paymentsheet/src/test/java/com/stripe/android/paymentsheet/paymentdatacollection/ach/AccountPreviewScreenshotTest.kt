@@ -26,7 +26,7 @@ internal class AccountPreviewScreenshotTest {
     val paparazzi = PaparazziRule(
         SystemAppearance.entries,
         boxModifier = Modifier
-            .padding(0.dp)
+            .padding(16.dp)
             .fillMaxWidth(),
     )
 

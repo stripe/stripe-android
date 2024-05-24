@@ -9,11 +9,11 @@ import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.paymentdatacollection.ach.TransformToBankIcon
 
 @DrawableRes
-internal fun PaymentMethod.getSavedPaymentMethodIcon(): Int {
+internal fun PaymentMethod.getSavedPaymentMethodIcon(forVerticalMode: Boolean = false): Int {
     return when (type) {
         PaymentMethod.Type.Card -> {
             val brand = CardBrand.fromCode(card?.displayBrand).takeIf { it != Unknown } ?: card?.brand
-            brand?.getCardBrandIcon()
+            if (forVerticalMode) { brand?.getCardBrandIconForVerticalMode() } else { brand?.getCardBrandIcon() }
         }
         PaymentMethod.Type.SepaDebit -> R.drawable.stripe_ic_paymentsheet_sepa
         PaymentMethod.Type.USBankAccount -> usBankAccount?.bankName?.let { TransformToBankIcon(it) }
@@ -28,6 +28,19 @@ internal fun CardBrand.getCardBrandIcon(): Int = when (this) {
     CardBrand.Discover -> R.drawable.stripe_ic_paymentsheet_card_discover
     CardBrand.JCB -> R.drawable.stripe_ic_paymentsheet_card_jcb
     CardBrand.DinersClub -> R.drawable.stripe_ic_paymentsheet_card_dinersclub
+    CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
+    CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
+    CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires
+    Unknown -> R.drawable.stripe_ic_paymentsheet_card_unknown
+}
+
+@DrawableRes
+internal fun CardBrand.getCardBrandIconForVerticalMode(): Int = when (this) {
+    CardBrand.Visa -> com.stripe.payments.model.R.drawable.stripe_ic_visa
+    CardBrand.AmericanExpress -> com.stripe.payments.model.R.drawable.stripe_ic_amex
+    CardBrand.Discover -> com.stripe.payments.model.R.drawable.stripe_ic_discover
+    CardBrand.JCB -> com.stripe.payments.model.R.drawable.stripe_ic_jcb
+    CardBrand.DinersClub -> com.stripe.payments.model.R.drawable.stripe_ic_diners
     CardBrand.MasterCard -> R.drawable.stripe_ic_paymentsheet_card_mastercard
     CardBrand.UnionPay -> R.drawable.stripe_ic_paymentsheet_card_unionpay
     CardBrand.CartesBancaires -> R.drawable.stripe_ic_paymentsheet_card_cartes_bancaires

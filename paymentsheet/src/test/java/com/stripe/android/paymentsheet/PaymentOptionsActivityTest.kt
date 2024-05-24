@@ -36,6 +36,8 @@ import com.stripe.android.paymentsheet.databinding.StripePrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_PRIMARY_BUTTON_TEST_TAG
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
+import com.stripe.android.paymentsheet.ui.TEST_TAG_LIST
 import com.stripe.android.paymentsheet.ui.getLabel
 import com.stripe.android.uicore.elements.bottomsheet.BottomSheetContentTestTag
 import com.stripe.android.utils.FakeCustomerRepository
@@ -129,7 +131,7 @@ internal class PaymentOptionsActivityTest {
                 // due to their mandate requirement.
                 val usBankAccountLabel = usBankAccount.getLabel(context.resources)
                 composeTestRule
-                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$usBankAccountLabel")
+                    .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$usBankAccountLabel")
                     .performClick()
 
                 pressBack()
@@ -189,7 +191,7 @@ internal class PaymentOptionsActivityTest {
 
                 // Navigate to "Add Payment Method" fragment
                 composeTestRule
-                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add")
+                    .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add")
                     .performClick()
 
                 assertThat(activity.continueButton.isVisible).isTrue()
@@ -237,7 +239,7 @@ internal class PaymentOptionsActivityTest {
         runActivityScenario(args) { scenario ->
             scenario.onActivity {
                 composeTestRule
-                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay")
+                    .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay")
                     .performClick()
             }
 
@@ -268,7 +270,7 @@ internal class PaymentOptionsActivityTest {
         runActivityScenario(args) {
             it.onActivity {
                 composeTestRule
-                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_$label")
+                    .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_$label")
                     .performClick()
 
                 composeTestRule
@@ -276,7 +278,7 @@ internal class PaymentOptionsActivityTest {
                     .assertIsDisplayed()
 
                 composeTestRule
-                    .onNodeWithTag("${PAYMENT_OPTION_CARD_TEST_TAG}_Google Pay")
+                    .onNodeWithTag("${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_Google Pay")
                     .performClick()
 
                 composeTestRule

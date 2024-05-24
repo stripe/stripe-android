@@ -8,7 +8,7 @@ import com.stripe.android.model.PaymentMethod
  * To learn more about external payment methods, see
  * https://docs.stripe.com/payments/external-payment-methods?platform=android.
  */
-interface ExternalPaymentMethodConfirmHandler {
+fun interface ExternalPaymentMethodConfirmHandler {
 
     /**
      * Called when a user confirms payment or setup with an external payment method.

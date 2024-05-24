@@ -229,17 +229,6 @@ public final class com/stripe/android/paymentsheet/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/paymentsheet/ComposableSingletons$PaymentOptionUiKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ComposableSingletons$PaymentOptionUiKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public static field lambda-2 Lkotlin/jvm/functions/Function2;
-	public static field lambda-3 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public abstract interface class com/stripe/android/paymentsheet/CreateIntentCallback {
 	public abstract fun onCreateIntent (Lcom/stripe/android/model/PaymentMethod;ZLkotlin/coroutines/Continuation;)Ljava/lang/Object;
 }
@@ -322,10 +311,6 @@ public final class com/stripe/android/paymentsheet/FlowControllerComposeKt {
 	public static final fun rememberPaymentSheetFlowController (Lcom/stripe/android/paymentsheet/PaymentOptionCallback;Lcom/stripe/android/paymentsheet/PaymentSheetResultCallback;Landroidx/compose/runtime/Composer;I)Lcom/stripe/android/paymentsheet/PaymentSheet$FlowController;
 }
 
-public final class com/stripe/android/paymentsheet/PaymentMethodsUIKt {
-	public static final field TEST_TAG_LIST Ljava/lang/String;
-}
-
 public abstract interface class com/stripe/android/paymentsheet/PaymentOptionCallback {
 	public abstract fun onPaymentOption (Lcom/stripe/android/paymentsheet/model/PaymentOption;)V
 }
@@ -360,10 +345,6 @@ public final class com/stripe/android/paymentsheet/PaymentOptionResult$Succeeded
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/PaymentOptionResult$Succeeded;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
-}
-
-public final class com/stripe/android/paymentsheet/PaymentOptionUiKt {
-	public static final field PAYMENT_OPTION_CARD_TEST_TAG Ljava/lang/String;
 }
 
 public final class com/stripe/android/paymentsheet/PaymentSheet {
@@ -1725,6 +1706,13 @@ public final class com/stripe/android/paymentsheet/model/SetupIntentClientSecret
 	public synthetic fun newArray (I)[Ljava/lang/Object;
 }
 
+public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/ComposableSingletons$USBankAccountFormKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
 public final class com/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$BillingDetailsCollection$Creator : android/os/Parcelable$Creator {
 	public fun <init> ()V
 	public final fun createFromParcel (Landroid/os/Parcel;)Lcom/stripe/android/paymentsheet/paymentdatacollection/ach/USBankAccountFormScreenState$BillingDetailsCollection;
@@ -1939,8 +1927,8 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$EditP
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
-public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentOptionsUIKt {
-	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$PaymentOptionsUIKt;
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$MandateTextKt;
 	public static field lambda-1 Lkotlin/jvm/functions/Function2;
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
@@ -1960,6 +1948,24 @@ public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$Payme
 	public fun <init> ()V
 	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public static field lambda-2 Lkotlin/jvm/functions/Function2;
+	public static field lambda-3 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-2$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+	public final fun getLambda-3$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
+}
+
+public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabLayoutUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/ui/ComposableSingletons$SavedPaymentMethodTabLayoutUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function2;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function2;
 }
 
 public final class com/stripe/android/paymentsheet/ui/ComposableSingletons$SepaMandateActivityKt {
@@ -1993,5 +1999,12 @@ public final class com/stripe/android/paymentsheet/ui/SepaMandateResult$Canceled
 	public synthetic fun createFromParcel (Landroid/os/Parcel;)Ljava/lang/Object;
 	public final fun newArray (I)[Lcom/stripe/android/paymentsheet/ui/SepaMandateResult$Canceled;
 	public synthetic fun newArray (I)[Ljava/lang/Object;
+}
+
+public final class com/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodVerticalLayoutUIKt {
+	public static final field INSTANCE Lcom/stripe/android/paymentsheet/verticalmode/ComposableSingletons$PaymentMethodVerticalLayoutUIKt;
+	public static field lambda-1 Lkotlin/jvm/functions/Function3;
+	public fun <init> ()V
+	public final fun getLambda-1$paymentsheet_release ()Lkotlin/jvm/functions/Function3;
 }
 

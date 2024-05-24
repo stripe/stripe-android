@@ -23,9 +23,9 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ErrorMessage
 import com.stripe.android.paymentsheet.ui.Mandate
 import com.stripe.android.paymentsheet.ui.PaymentElement
-import com.stripe.android.paymentsheet.ui.PaymentOptions
 import com.stripe.android.paymentsheet.ui.PaymentSheetScaffold
 import com.stripe.android.paymentsheet.ui.PaymentSheetTopBar
+import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
 import com.stripe.android.ui.core.elements.H4Text
@@ -113,7 +113,7 @@ internal fun SelectPaymentMethod(
                 .padding(horizontal = horizontalPadding)
         )
 
-        PaymentOptions(
+        SavedPaymentMethodTabLayoutUI(
             state = PaymentOptionsStateFactory.create(
                 paymentMethods = viewState.savedPaymentMethods,
                 showGooglePay = viewState.isGooglePayEnabled,
@@ -218,7 +218,7 @@ internal fun AddPaymentMethod(
                 onItemSelectedListener = {
                     viewActionHandler(CustomerSheetViewAction.OnAddPaymentMethodItemChanged(it))
                 },
-                onLinkSignupStateChanged = { _, _ -> },
+                onLinkSignupStateChanged = { _ -> },
                 formArguments = viewState.formArguments,
                 usBankAccountFormArguments = viewState.usBankAccountFormArguments,
                 onFormFieldValuesChanged = {

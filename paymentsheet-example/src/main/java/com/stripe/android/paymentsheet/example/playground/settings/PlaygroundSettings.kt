@@ -4,9 +4,12 @@ import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.Stable
 import androidx.core.content.edit
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
+import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -47,7 +50,32 @@ internal class PlaygroundSettings private constructor(
     fun updateConfigurationData(
         updater: (PlaygroundConfigurationData) -> PlaygroundConfigurationData
     ) {
-        _configurationData.value = updater(_configurationData.value)
+        val configurationData = updater(_configurationData.value)
+
+        /*
+         * Resets value of definitions if the definition's selected option not applicable to the selected
+         * integration type to the first available option.
+         *
+         * For example: Switching from `PaymentSheet` to `CustomerSheet` where the
+         * merchant country code value is 'MX'. `CustomerSheet` only supports
+         * `US` and `FR`. The value would be reset to the first available option (in
+         * this case `US`)
+         */
+        displayableDefinitions.value.forEach { definition ->
+            val values = definition.createOptions(configurationData).map { option ->
+                option.value
+            }
+
+            if (values.isEmpty()) {
+                return@forEach
+            }
+
+            if (!values.contains(settings[definition]?.value)) {
+                settings[definition]?.value = values.firstOrNull()
+            }
+        }
+
+        _configurationData.value = configurationData
     }
 
     fun snapshot(): Snapshot {
@@ -77,7 +105,7 @@ internal class PlaygroundSettings private constructor(
         }
 
         fun paymentSheetConfiguration(
-            playgroundState: PlaygroundState
+            playgroundState: PlaygroundState.Payment
         ): PaymentSheet.Configuration {
             val builder = PaymentSheet.Configuration.Builder("Example, Inc.")
             val paymentSheetConfigurationData =
@@ -90,11 +118,42 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
+        @OptIn(ExperimentalCustomerSheetApi::class)
+        fun customerSheetConfiguration(
+            playgroundState: PlaygroundState.Customer
+        ): CustomerSheet.Configuration {
+            val builder = CustomerSheet.Configuration.builder("Example, Inc.")
+            val customerSheetConfigurationData =
+                PlaygroundSettingDefinition.CustomerSheetConfigurationData(builder)
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(value, builder, playgroundState, customerSheetConfigurationData)
+            }
+            return builder.build()
+        }
+
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             value: Any?,
             configurationBuilder: PaymentSheet.Configuration.Builder,
-            playgroundState: PlaygroundState,
+            playgroundState: PlaygroundState.Payment,
             configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(
+                value = value as T,
+                configurationBuilder = configurationBuilder,
+                playgroundState = playgroundState,
+                configurationData = configurationData,
+            )
+        }
+
+        @OptIn(ExperimentalCustomerSheetApi::class)
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            value: Any?,
+            configurationBuilder: CustomerSheet.Configuration.Builder,
+            playgroundState: PlaygroundState.Customer,
+            configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData,
         ) {
             @Suppress("UNCHECKED_CAST")
             configure(
@@ -115,12 +174,30 @@ internal class PlaygroundSettings private constructor(
             return builder.build()
         }
 
+        fun customerEphemeralKeyRequest(): CustomerEphemeralKeyRequest {
+            val builder = CustomerEphemeralKeyRequest.Builder()
+            settings.filter { (definition, _) ->
+                definition.applicable(configurationData)
+            }.onEach { (settingDefinition, value) ->
+                settingDefinition.configure(builder, value)
+            }
+            return builder.build()
+        }
+
         private fun <T> PlaygroundSettingDefinition<T>.configure(
             checkoutRequestBuilder: CheckoutRequest.Builder,
             value: Any?,
         ) {
             @Suppress("UNCHECKED_CAST")
             configure(value as T, checkoutRequestBuilder)
+        }
+
+        private fun <T> PlaygroundSettingDefinition<T>.configure(
+            customerEphemeralKeyRequestBuilder: CustomerEphemeralKeyRequest.Builder,
+            value: Any?,
+        ) {
+            @Suppress("UNCHECKED_CAST")
+            configure(value as T, customerEphemeralKeyRequestBuilder)
         }
 
         private fun asJsonString(filter: (PlaygroundSettingDefinition<*>) -> Boolean): String {

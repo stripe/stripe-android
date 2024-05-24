@@ -28,12 +28,13 @@ internal sealed class PaymentOptionsItem {
      * Represents a [PaymentMethod] that is already saved and attached to the current customer.
      */
     data class SavedPaymentMethod(
-        val displayName: String,
-        val paymentMethod: PaymentMethod,
-        val isCbcEligible: Boolean = false
+        val displayableSavedPaymentMethod: DisplayableSavedPaymentMethod,
     ) : PaymentOptionsItem() {
         override val viewType: ViewType = ViewType.SavedPaymentMethod
         override val isEnabledDuringEditing: Boolean = true
+        val displayName = displayableSavedPaymentMethod.displayName
+        val paymentMethod = displayableSavedPaymentMethod.paymentMethod
+        private val isCbcEligible = displayableSavedPaymentMethod.isCbcEligible
 
         val isModifiable: Boolean by lazy {
             val hasMultipleNetworks = paymentMethod.card?.networks?.available?.let { available ->

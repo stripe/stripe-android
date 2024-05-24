@@ -35,7 +35,7 @@ internal object CheckoutModeSettingsDefinition :
 internal enum class CheckoutMode(override val value: String) : ValueEnum {
     SETUP("setup") {
         override fun intentConfigurationMode(
-            playgroundState: PlaygroundState
+            playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Setup(
                 currency = playgroundState.currencyCode.value,
@@ -45,7 +45,7 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
     },
     PAYMENT("payment") {
         override fun intentConfigurationMode(
-            playgroundState: PlaygroundState
+            playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = playgroundState.amount,
@@ -55,7 +55,7 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
     },
     PAYMENT_WITH_SETUP("payment_with_setup") {
         override fun intentConfigurationMode(
-            playgroundState: PlaygroundState
+            playgroundState: PlaygroundState.Payment
         ): PaymentSheet.IntentConfiguration.Mode {
             return PaymentSheet.IntentConfiguration.Mode.Payment(
                 amount = playgroundState.amount,
@@ -66,6 +66,6 @@ internal enum class CheckoutMode(override val value: String) : ValueEnum {
     };
 
     abstract fun intentConfigurationMode(
-        playgroundState: PlaygroundState
+        playgroundState: PlaygroundState.Payment
     ): PaymentSheet.IntentConfiguration.Mode
 }

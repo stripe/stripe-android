@@ -45,7 +45,9 @@ import com.stripe.android.paymentsheet.CreateIntentCallback
 import com.stripe.android.paymentsheet.CreateIntentResult
 import com.stripe.android.paymentsheet.DeferredIntentConfirmationType
 import com.stripe.android.paymentsheet.DelicatePaymentSheetApi
+import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.ExternalPaymentMethodContract
+import com.stripe.android.paymentsheet.ExternalPaymentMethodInterceptor
 import com.stripe.android.paymentsheet.FakePrefsRepository
 import com.stripe.android.paymentsheet.IntentConfirmationInterceptor
 import com.stripe.android.paymentsheet.PaymentOptionCallback
@@ -149,7 +151,7 @@ internal class DefaultFlowControllerTest {
 
     private val prefsRepository = FakePrefsRepository()
 
-    private val lifeCycleOwner = TestLifecycleOwner()
+    private val lifecycleOwner = TestLifecycleOwner()
 
     private val testDispatcher = UnconfinedTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -246,7 +248,7 @@ internal class DefaultFlowControllerTest {
             )
         ).thenReturn(mock())
 
-        lifeCycleOwner.currentState = Lifecycle.State.RESUMED
+        lifecycleOwner.currentState = Lifecycle.State.RESUMED
     }
 
     @AfterTest
@@ -456,7 +458,7 @@ internal class DefaultFlowControllerTest {
         flowController.configureExpectingSuccess(
             configuration = PaymentSheetFixtures.CONFIG_CUSTOMER_WITH_GOOGLEPAY,
         )
-        lifeCycleOwner.currentState = Lifecycle.State.DESTROYED
+        lifecycleOwner.currentState = Lifecycle.State.DESTROYED
         whenever(paymentOptionActivityLauncher.launch(any(), any())).thenThrow(IllegalStateException("Boom"))
         verifyNoInteractions(paymentResultCallback)
 
@@ -1841,6 +1843,43 @@ internal class DefaultFlowControllerTest {
         assertThat(isPhoneRequired).isFalse()
     }
 
+    @Test
+    fun `Clears out CreateIntentCallback when lifecycle owner is destroyed`() {
+        IntentConfirmationInterceptor.createIntentCallback = CreateIntentCallback { _, _ ->
+            error("I’m alive")
+        }
+
+        createFlowController()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(IntentConfirmationInterceptor.createIntentCallback).isNull()
+    }
+
+    @Test
+    fun `Clears out externalPaymentMethodConfirmHandler when lifecycle owner is destroyed`() {
+        ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler =
+            ExternalPaymentMethodConfirmHandler { _, _ ->
+                error("I’m alive")
+            }
+
+        createFlowController()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_PAUSE)
+        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_STOP)
+        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNotNull()
+
+        lifecycleOwner.handleLifecycleEvent(Lifecycle.Event.ON_DESTROY)
+        assertThat(ExternalPaymentMethodInterceptor.externalPaymentMethodConfirmHandler).isNull()
+    }
+
     private suspend fun selectionSavedTest(
         customerRequestedSave: PaymentSelection.CustomerRequestedSave =
             PaymentSelection.CustomerRequestedSave.NoRequest,
@@ -1940,7 +1979,7 @@ internal class DefaultFlowControllerTest {
         cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock()
     ) = DefaultFlowController(
         viewModelScope = testScope,
-        lifecycleOwner = lifeCycleOwner,
+        lifecycleOwner = lifecycleOwner,
         activityResultRegistryOwner = activityResultRegistryOwner,
         statusBarColor = { STATUS_BAR_COLOR },
         paymentOptionFactory = PaymentOptionFactory(

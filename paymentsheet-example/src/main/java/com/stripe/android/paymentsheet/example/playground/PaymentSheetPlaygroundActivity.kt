@@ -35,6 +35,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.CustomerSheetResult
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
+import com.stripe.android.customersheet.rememberCustomerSheet
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.ExternalPaymentMethodConfirmHandler
 import com.stripe.android.paymentsheet.PaymentSheet
@@ -53,9 +57,12 @@ import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
 import com.stripe.android.paymentsheet.example.samples.ui.shared.BuyButton
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PaymentMethodSelector
+import com.stripe.android.paymentsheet.model.PaymentOption
 import com.stripe.android.paymentsheet.rememberPaymentSheet
 import com.stripe.android.paymentsheet.rememberPaymentSheetFlowController
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.withContext
 
 internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPaymentMethodConfirmHandler {
     companion object {
@@ -74,6 +81,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
+    @OptIn(ExperimentalCustomerSheetApi::class)
     @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,9 +107,17 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             val playgroundState by viewModel.state.collectAsState()
 
+            val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
+                rememberCustomerSheet(
+                    configuration = customerPlaygroundState.customerSheetConfiguration(),
+                    customerAdapter = customerPlaygroundState.adapter,
+                    callback = viewModel::onCustomerSheetCallback
+                )
+            }
+
             PlaygroundTheme(
                 content = {
-                    playgroundState?.stripeIntentId?.let { stripeIntentId ->
+                    playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
                         Text(
                             text = stripeIntentId,
                             modifier = Modifier.padding(bottom = 16.dp)
@@ -128,6 +144,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                                 playgroundState = playgroundState,
                                 paymentSheet = paymentSheet,
                                 flowController = flowController,
+                                customerSheet = customerSheet,
                                 addressLauncher = addressLauncher,
                             )
                         }
@@ -194,7 +211,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     private fun ReloadButton(playgroundSettings: PlaygroundSettings) {
         Button(
             onClick = {
-                viewModel.prepareCheckout(
+                viewModel.prepare(
                     playgroundSettings = playgroundSettings,
                 )
             },
@@ -206,39 +223,45 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
+    @OptIn(ExperimentalCustomerSheetApi::class)
     @Composable
     private fun PlaygroundStateUi(
         playgroundState: PlaygroundState?,
         paymentSheet: PaymentSheet,
         flowController: PaymentSheet.FlowController,
+        customerSheet: CustomerSheet?,
         addressLauncher: AddressLauncher
     ) {
         if (playgroundState == null) {
             return
         }
 
-        ShippingAddressButton(
-            addressLauncher = addressLauncher,
-            playgroundState = playgroundState,
-        )
-
-        when (playgroundState.integrationType) {
-            PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
-                PaymentSheetUi(
-                    paymentSheet = paymentSheet,
+        when (playgroundState) {
+            is PlaygroundState.Payment -> {
+                ShippingAddressButton(
+                    addressLauncher = addressLauncher,
                     playgroundState = playgroundState,
                 )
-            }
 
-            PlaygroundConfigurationData.IntegrationType.FlowController -> {
-                FlowControllerUi(
-                    flowController = flowController,
-                    playgroundState = playgroundState,
-                )
-            }
+                when (playgroundState.integrationType) {
+                    PlaygroundConfigurationData.IntegrationType.PaymentSheet -> {
+                        PaymentSheetUi(
+                            paymentSheet = paymentSheet,
+                            playgroundState = playgroundState,
+                        )
+                    }
 
-            PlaygroundConfigurationData.IntegrationType.CustomerSheet -> {
-                // TODO(samer-stripe): Implement Customer Sheet UI
+                    PlaygroundConfigurationData.IntegrationType.FlowController -> {
+                        FlowControllerUi(
+                            flowController = flowController,
+                            playgroundState = playgroundState,
+                        )
+                    }
+                    else -> Unit
+                }
+            }
+            is PlaygroundState.Customer -> customerSheet?.run {
+                CustomerSheetUi(customerSheet = this)
             }
         }
     }
@@ -246,7 +269,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @Composable
     fun PaymentSheetUi(
         paymentSheet: PaymentSheet,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         Button(
             onClick = {
@@ -263,7 +286,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
     @Composable
     fun FlowControllerUi(
         flowController: PaymentSheet.FlowController,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         LaunchedEffect(playgroundState) {
             configureFlowController(
@@ -302,10 +325,50 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         )
     }
 
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    @Composable
+    fun CustomerSheetUi(
+        customerSheet: CustomerSheet,
+    ) {
+        val customerSheetState by viewModel.customerSheetState.collectAsState()
+
+        customerSheetState?.let { state ->
+            LaunchedEffect(state) {
+                if (state.shouldFetchPaymentOption) {
+                    fetchOption(customerSheet).onSuccess { option ->
+                        viewModel.customerSheetState.emit(
+                            CustomerSheetState(
+                                selectedPaymentOption = option,
+                                shouldFetchPaymentOption = false
+                            )
+                        )
+                    }.onFailure { exception ->
+                        viewModel.status.emit(
+                            StatusMessage(
+                                message = "Failed to retrieve payment options:\n${exception.message}"
+                            )
+                        )
+                    }
+                }
+            }
+
+            if (state.shouldFetchPaymentOption) {
+                return
+            }
+
+            PaymentMethodSelector(
+                isEnabled = true,
+                paymentMethodLabel = customerSheetState.paymentMethodLabel(),
+                paymentMethodPainter = customerSheetState.paymentMethodPainter(),
+                onClick = customerSheet::present
+            )
+        }
+    }
+
     @Composable
     private fun ShippingAddressButton(
         addressLauncher: AddressLauncher,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         val context = LocalContext.current
         Button(
@@ -322,7 +385,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
         }
     }
 
-    private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState) {
+    private fun presentPaymentSheet(paymentSheet: PaymentSheet, playgroundState: PlaygroundState.Payment) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
                 paymentSheet.presentWithSetupIntent(
@@ -349,7 +412,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
     private fun configureFlowController(
         flowController: PaymentSheet.FlowController,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
     ) {
         if (playgroundState.initializationType == InitializationType.Normal) {
             if (playgroundState.checkoutMode == CheckoutMode.SETUP) {
@@ -375,6 +438,17 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 configuration = playgroundState.paymentSheetConfiguration(),
                 callback = viewModel::onFlowControllerConfigured,
             )
+        }
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    private suspend fun fetchOption(
+        customerSheet: CustomerSheet
+    ): Result<PaymentOption?> = withContext(Dispatchers.IO) {
+        when (val result = customerSheet.retrievePaymentOptionSelection()) {
+            is CustomerSheetResult.Selected -> Result.success(result.selection?.paymentOption)
+            is CustomerSheetResult.Failed -> Result.failure(result.exception)
+            is CustomerSheetResult.Canceled -> Result.success(null)
         }
     }
 

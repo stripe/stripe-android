@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import androidx.compose.ui.test.junit4.createEmptyComposeRule
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.closeSoftKeyboard
 import com.google.common.truth.Truth.assertThat
@@ -20,30 +19,25 @@ import com.stripe.android.networktesting.RequestMatchers.path
 import com.stripe.android.networktesting.testBodyFromFile
 import com.stripe.android.paymentsheet.utils.LinkIntegrationType
 import com.stripe.android.paymentsheet.utils.LinkIntegrationTypeProvider
+import com.stripe.android.paymentsheet.utils.TestRules
 import com.stripe.android.paymentsheet.utils.assertCompleted
 import com.stripe.android.paymentsheet.utils.runLinkTest
-import com.stripe.android.testing.RetryRule
 import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.RuleChain
 import org.junit.runner.RunWith
 import java.util.UUID
 import kotlin.time.Duration.Companion.seconds
 
 @RunWith(TestParameterInjector::class)
 internal class LinkTest {
-    private val composeTestRule = createEmptyComposeRule()
-    private val retryRule = RetryRule(5)
-
     // The /v1/consumers/sessions/log_out request is launched async from a GlobalScope. We want to make sure it happens,
     // but it's okay if it takes a bit to happen.
     private val networkRule = NetworkRule(validationTimeout = 5.seconds)
 
     @get:Rule
-    val chain: RuleChain = RuleChain.emptyRuleChain()
-        .around(composeTestRule)
-        .around(retryRule)
-        .around(networkRule)
+    val testRules: TestRules = TestRules.create(networkRule = networkRule)
+
+    private val composeTestRule = testRules.compose
 
     private val page: PaymentSheetPage = PaymentSheetPage(composeTestRule)
 

@@ -5,13 +5,6 @@ public final class com/stripe/android/financialconnections/BuildConfig {
 	public fun <init> ()V
 }
 
-public final class com/stripe/android/financialconnections/ComposableSingletons$FinancialConnectionsSheetActivityKt {
-	public static final field INSTANCE Lcom/stripe/android/financialconnections/ComposableSingletons$FinancialConnectionsSheetActivityKt;
-	public static field lambda-1 Lkotlin/jvm/functions/Function2;
-	public fun <init> ()V
-	public final fun getLambda-1$financial_connections_release ()Lkotlin/jvm/functions/Function2;
-}
-
 public final class com/stripe/android/financialconnections/FinancialConnections {
 	public static final field $stable I
 	public static final field INSTANCE Lcom/stripe/android/financialconnections/FinancialConnections;

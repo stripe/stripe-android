@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
+import com.stripe.android.customersheet.CustomerSheet
+import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import java.util.UUID
@@ -27,16 +29,34 @@ internal object DefaultBillingAddressSettingsDefinition :
     override fun configure(
         value: DefaultBillingAddress,
         configurationBuilder: PaymentSheet.Configuration.Builder,
-        playgroundState: PlaygroundState,
+        playgroundState: PlaygroundState.Payment,
         configurationData: PlaygroundSettingDefinition.PaymentSheetConfigurationData
     ) {
+        createBillingDetails(value)?.let { billingDetails ->
+            configurationBuilder.defaultBillingDetails(billingDetails)
+        }
+    }
+
+    @OptIn(ExperimentalCustomerSheetApi::class)
+    override fun configure(
+        value: DefaultBillingAddress,
+        configurationBuilder: CustomerSheet.Configuration.Builder,
+        playgroundState: PlaygroundState.Customer,
+        configurationData: PlaygroundSettingDefinition.CustomerSheetConfigurationData
+    ) {
+        createBillingDetails(value)?.let { billingDetails ->
+            configurationBuilder.defaultBillingDetails(billingDetails)
+        }
+    }
+
+    private fun createBillingDetails(value: DefaultBillingAddress): PaymentSheet.BillingDetails? {
         val email = when (value) {
             DefaultBillingAddress.On -> "email@email.com"
             DefaultBillingAddress.OnWithRandomEmail -> "email_${UUID.randomUUID()}@email.com"
             DefaultBillingAddress.Off -> null
         }
 
-        val billingDetails = email?.let {
+        return email?.let {
             PaymentSheet.BillingDetails(
                 address = PaymentSheet.Address(
                     line1 = "354 Oyster Point Blvd",
@@ -46,13 +66,11 @@ internal object DefaultBillingAddressSettingsDefinition :
                     postalCode = "94080",
                     country = "US",
                 ),
-                email = it,
+                email = email,
                 name = "Jenny Rosen",
                 phone = "+18008675309",
             )
         }
-
-        configurationBuilder.defaultBillingDetails(billingDetails)
     }
 }
 

@@ -16,7 +16,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.stripe.android.link.LinkConfiguration
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkInlineSignup
@@ -26,7 +25,6 @@ import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.model.PaymentMethod.Type.Link
 import com.stripe.android.model.PaymentMethod.Type.USBankAccount
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.PaymentMethodsUI
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.forms.FormFieldValues
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
@@ -45,10 +43,11 @@ internal fun PaymentElement(
     linkSignupMode: LinkSignupMode?,
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     onItemSelectedListener: (SupportedPaymentMethod) -> Unit,
-    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+    onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
     onFormFieldValuesChanged: (FormFieldValues?) -> Unit,
+    modifier: Modifier = Modifier,
     onInteractionEvent: () -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -67,9 +66,9 @@ internal fun PaymentElement(
         supportedPaymentMethods[selectedIndex]
     }
 
-    Column(modifier = Modifier.fillMaxWidth()) {
+    Column(modifier = modifier.fillMaxWidth()) {
         if (supportedPaymentMethods.size > 1) {
-            PaymentMethodsUI(
+            NewPaymentMethodTabLayoutUI(
                 selectedIndex = selectedIndex,
                 isEnabled = enabled,
                 paymentMethods = supportedPaymentMethods,
@@ -81,7 +80,7 @@ internal fun PaymentElement(
 
         FormElement(
             enabled = enabled,
-            selectedItem = selectedItem,
+            selectedPaymentMethodCode = selectedItem.code,
             formElements = formElements,
             formArguments = formArguments,
             usBankAccountFormArguments = usBankAccountFormArguments,
@@ -101,9 +100,9 @@ internal fun PaymentElement(
 }
 
 @Composable
-private fun FormElement(
+internal fun FormElement(
     enabled: Boolean,
-    selectedItem: SupportedPaymentMethod,
+    selectedPaymentMethodCode: PaymentMethodCode,
     formElements: List<FormElement>,
     formArguments: FormArguments,
     usBankAccountFormArguments: USBankAccountFormArguments,
@@ -133,7 +132,7 @@ private fun FormElement(
                 }
             }
     ) {
-        if (selectedItem.code == USBankAccount.code || selectedItem.code == Link.code) {
+        if (selectedPaymentMethodCode == USBankAccount.code || selectedPaymentMethodCode == Link.code) {
             USBankAccountForm(
                 formArgs = formArguments,
                 usBankAccountFormArgs = usBankAccountFormArguments,
@@ -153,12 +152,12 @@ private fun FormElement(
 }
 
 @Composable
-private fun LinkElement(
+internal fun LinkElement(
     linkConfigurationCoordinator: LinkConfigurationCoordinator?,
     linkSignupMode: LinkSignupMode?,
     enabled: Boolean,
     horizontalPadding: Dp,
-    onLinkSignupStateChanged: (LinkConfiguration, InlineSignupViewState) -> Unit,
+    onLinkSignupStateChanged: (InlineSignupViewState) -> Unit,
 ) {
     if (linkConfigurationCoordinator != null && linkSignupMode != null) {
         when (linkSignupMode) {

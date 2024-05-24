@@ -9,9 +9,7 @@ import androidx.compose.ui.test.onParent
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.stripe.android.paymentsheet.PaymentOptionUi
 import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.TEST_TAG_REMOVE_BADGE
 import com.stripe.android.ui.core.elements.TEST_TAG_DIALOG_CONFIRM_BUTTON
 import org.junit.Rule
 import org.junit.Test
@@ -30,7 +28,7 @@ class PaymentOptionTest {
         val label = "Card ending in 4242"
 
         composeTestRule.setContent {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 100.dp,
                 isSelected = false,
                 editState = PaymentOptionEditState.None,
@@ -53,7 +51,7 @@ class PaymentOptionTest {
         val label = "Card ending in 4242"
 
         composeTestRule.setContent {
-            PaymentOptionUi(
+            SavedPaymentMethodTab(
                 viewWidth = 100.dp,
                 isSelected = false,
                 editState = PaymentOptionEditState.Removable,

@@ -28,7 +28,6 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
-import com.stripe.android.paymentsheet.PAYMENT_OPTION_CARD_TEST_TAG
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
@@ -39,6 +38,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.ui.PAYMENT_SHEET_ERROR_TEXT_TEST_TAG
+import com.stripe.android.paymentsheet.ui.SAVED_PAYMENT_METHOD_CARD_TEST_TAG
 import com.stripe.android.test.core.ui.BrowserUI
 import com.stripe.android.test.core.ui.ComposeButton
 import com.stripe.android.test.core.ui.Selectors
@@ -71,7 +71,8 @@ internal class PlaygroundTestDriver(
     private lateinit var testParameters: TestParameters
     private lateinit var selectors: Selectors
 
-    private val currentActivity = Array<Activity?>(1) { null }
+    @Volatile
+    private var currentActivity: Activity? = null
     private var application: Application? = null
 
     @Volatile
@@ -85,7 +86,7 @@ internal class PlaygroundTestDriver(
         override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) {}
         override fun onActivityDestroyed(activity: Activity) {}
         override fun onActivityResumed(activity: Activity) {
-            currentActivity[0] = activity
+            currentActivity = activity
         }
     }
 
@@ -677,7 +678,7 @@ internal class PlaygroundTestDriver(
         waitForScreenToLoad(testParameters)
         customOperations()
 
-        currentActivity[0]?.let {
+        currentActivity?.let {
             compareScreenshot(it)
         }
 
@@ -744,7 +745,7 @@ internal class PlaygroundTestDriver(
      * that would require exposing the activities publicly.
      */
     private fun waitForNotPlaygroundActivity() {
-        while (currentActivity[0] is PaymentSheetPlaygroundActivity) {
+        while (currentActivity is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
         Espresso.onIdle()
@@ -755,7 +756,7 @@ internal class PlaygroundTestDriver(
      * Here we wait for the Playground to come back into view.
      */
     private fun waitForPlaygroundActivity() {
-        while (currentActivity[0] !is PaymentSheetPlaygroundActivity) {
+        while (currentActivity !is PaymentSheetPlaygroundActivity) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
         Espresso.onIdle()
@@ -768,7 +769,7 @@ internal class PlaygroundTestDriver(
     private fun waitForPollingToFinish(timeout: Duration = 30.seconds) {
         val className =
             "com.stripe.android.paymentsheet.paymentdatacollection.polling.PollingActivity"
-        while (currentActivity[0]?.componentName?.className != className) {
+        while (currentActivity?.componentName?.className != className) {
             Thread.sleep(10)
         }
 
@@ -960,7 +961,7 @@ internal class PlaygroundTestDriver(
     }
 
     private fun cancelInstantDebitsFlowOnLaunch() {
-        while (currentActivity[0]?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
+        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
@@ -984,12 +985,16 @@ internal class PlaygroundTestDriver(
     }
 
     private fun doUSBankAccountAuthorization() {
-        while (currentActivity[0]?.javaClass?.name != FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY) {
+        while (currentActivity?.javaClass?.name != FINANCIAL_CONNECTIONS_ACTIVITY) {
             TimeUnit.MILLISECONDS.sleep(250)
         }
 
-        Espresso.onIdle()
-        composeTestRule.waitForIdle()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("Agree and continue")
+                .fetchSemanticsNodes()
+                .size == 1
+        }
 
         if (testParameters.authorizationAction == AuthorizeAction.Cancel) {
             selectors.authorizeAction?.click()
@@ -1034,6 +1039,7 @@ internal class PlaygroundTestDriver(
 
     internal fun teardown() {
         application?.unregisterActivityLifecycleCallbacks(activityLifecycleCallbacks)
+        currentActivity = null
     }
 
     private fun isSelectPaymentMethodScreen(): Boolean {
@@ -1053,10 +1059,8 @@ internal class PlaygroundTestDriver(
     }
 
     private companion object {
-        const val ADD_PAYMENT_METHOD_NODE_TAG = "${PAYMENT_OPTION_CARD_TEST_TAG}_+ Add"
+        const val ADD_PAYMENT_METHOD_NODE_TAG = "${SAVED_PAYMENT_METHOD_CARD_TEST_TAG}_+ Add"
         const val FINANCIAL_CONNECTIONS_ACTIVITY =
             "com.stripe.android.financialconnections.FinancialConnectionsSheetActivity"
-        const val FINANCIAL_CONNECTIONS_NATIVE_ACTIVITY =
-            "com.stripe.android.financialconnections.ui.FinancialConnectionsSheetNativeActivity"
     }
 }

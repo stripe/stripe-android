@@ -117,6 +117,10 @@ private fun IntegrationTypeConfigurableSetting(
                 name = "Flow Controller",
                 value = PlaygroundConfigurationData.IntegrationType.FlowController
             ),
+            PlaygroundSettingDefinition.Displayable.Option(
+                name = "Customer Sheet",
+                value = PlaygroundConfigurationData.IntegrationType.CustomerSheet
+            ),
         ),
         value = configurationData.integrationType
     ) { integrationType ->

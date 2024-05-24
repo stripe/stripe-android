@@ -185,9 +185,7 @@ internal fun FinancialConnectionsTheme(
             SideEffect {
                 window?.let { window ->
                     val insets = WindowCompat.getInsetsController(window, view)
-                    window.statusBarColor = barColor.toArgb()
                     window.navigationBarColor = barColor.toArgb()
-                    insets.isAppearanceLightStatusBars = true
                     insets.isAppearanceLightNavigationBars = true
                 }
             }

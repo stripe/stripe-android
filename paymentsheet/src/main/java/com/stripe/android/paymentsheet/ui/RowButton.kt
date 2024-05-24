@@ -33,12 +33,12 @@ internal fun RowButton(
     ) {
         Column(
             modifier = Modifier
-                .padding(contentPaddingValues)
                 .selectable(
                     selected = isSelected,
                     enabled = isEnabled,
                     onClick = onClick
                 )
+                .padding(contentPaddingValues)
         ) {
             content()
         }
