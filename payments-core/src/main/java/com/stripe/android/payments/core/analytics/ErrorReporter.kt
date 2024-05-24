@@ -186,7 +186,10 @@ interface ErrorReporter {
         ),
         EXTERNAL_PAYMENT_METHOD_UNEXPECTED_RESULT_CODE(
             partialEventName = "paymentsheet.external_payment_method.unexpected_result_code"
-        )
+        ),
+        CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION(
+            partialEventName = "payments.cvc_recollection_unexpected_payment_selection"
+        ),
         ;
 
         override val eventName: String

@@ -606,6 +606,9 @@ internal class DefaultFlowController @Inject internal constructor(
                                 )
                             )
                         )
+                        errorReporter.report(
+                            ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
+                        )
                     },
                     onFailure = { error ->
                         paymentResultCallback.onPaymentSheetResult(

@@ -154,10 +154,6 @@ constructor(
 
     private val paymentMethodOptionsJsonString: String? = null,
 
-    val requireCvcRecollection: Boolean = paymentMethodOptionsJsonString?.let { json ->
-        JSONObject(json).optJSONObject("card")?.optBoolean("require_cvc_recollection") ?: false
-    } ?: false
-
 ) : StripeIntent {
 
     override fun getPaymentMethodOptions() = paymentMethodOptionsJsonString?.let {
@@ -215,6 +211,11 @@ constructor(
 
     override val lastErrorMessage: String?
         get() = lastPaymentError?.message
+
+    val requireCvcRecollection: Boolean
+        get() = paymentMethodOptionsJsonString?.let { json ->
+            JSONObject(json).optJSONObject(CARD)?.optBoolean(REQUIRE_CVC_RECOLLECTION) ?: false
+        } ?: false
 
     override fun requiresAction(): Boolean {
         return status === StripeIntent.Status.RequiresAction
@@ -458,5 +459,8 @@ constructor(
                 PaymentIntentJsonParser().parse(it)
             }
         }
+
+        const val CARD = "card"
+        const val REQUIRE_CVC_RECOLLECTION = "require_cvc_recollection"
     }
 }
