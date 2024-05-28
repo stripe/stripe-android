@@ -8,24 +8,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
-import com.stripe.android.model.PaymentMethod
-import com.stripe.android.paymentsheet.R
-import com.stripe.android.paymentsheet.paymentdatacollection.ach.USBankAccountFormArguments
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
-import com.stripe.android.paymentsheet.ui.FormElement
-import com.stripe.android.paymentsheet.ui.LinkElement
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
+import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
+import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.uicore.image.StripeImageLoader
-import com.stripe.android.uicore.utils.collectAsStateSafely
 import java.io.Closeable
 
 internal val PaymentSheetScreen.topContentPadding: Dp
@@ -184,14 +180,16 @@ internal sealed interface PaymentSheetScreen {
                 selectedIndex = -1,
                 isEnabled = !isProcessing,
                 onViewMorePaymentMethods = { viewModel.transitionTo(ManageSavedPaymentMethods) },
-                onItemSelectedListener = { viewModel.transitionTo(Form(it.code)) },
+                onItemSelectedListener = {
+                    viewModel.transitionTo(Form(DefaultVerticalModeFormInteractor(it.code, viewModel)))
+                },
                 imageLoader = imageLoader,
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
         }
     }
 
-    data class Form(private val selectedPaymentMethodCode: String) : PaymentSheetScreen {
+    class Form(private val interactor: VerticalModeFormInteractor) : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
@@ -203,48 +201,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            val usBankAccountFormArguments = remember(selectedPaymentMethodCode) {
-                USBankAccountFormArguments.create(viewModel, selectedPaymentMethodCode)
-            }
-            val formElements = remember(selectedPaymentMethodCode) {
-                viewModel.formElementsForCode(selectedPaymentMethodCode)
-            }
-            val formArguments = remember(selectedPaymentMethodCode) {
-                viewModel.createFormArguments(selectedPaymentMethodCode)
-            }
-            val isProcessing by viewModel.processing.collectAsState()
-
-            val horizontalPadding = dimensionResource(
-                id = R.dimen.stripe_paymentsheet_outer_spacing_horizontal
-            )
-
-            FormElement(
-                enabled = !isProcessing,
-                selectedPaymentMethodCode = selectedPaymentMethodCode,
-                formElements = formElements,
-                formArguments = formArguments,
-                usBankAccountFormArguments = usBankAccountFormArguments,
-                horizontalPadding = horizontalPadding,
-                onFormFieldValuesChanged = { formValues ->
-                    viewModel.onFormFieldValuesChanged(formValues, selectedPaymentMethodCode)
-                },
-                onInteractionEvent = {
-                    viewModel.reportFieldInteraction(selectedPaymentMethodCode)
-                },
-            )
-
-            val linkSignupMode by viewModel.linkSignupMode.collectAsStateSafely()
-            val linkInlineSignupMode = remember(linkSignupMode, selectedPaymentMethodCode) {
-                linkSignupMode.takeIf { selectedPaymentMethodCode == PaymentMethod.Type.Card.code }
-            }
-
-            LinkElement(
-                linkConfigurationCoordinator = viewModel.linkConfigurationCoordinator,
-                linkSignupMode = linkInlineSignupMode,
-                enabled = !isProcessing,
-                horizontalPadding = horizontalPadding,
-                onLinkSignupStateChanged = viewModel::onLinkSignUpStateUpdated,
-            )
+            VerticalModeFormUI(interactor)
         }
     }
 
