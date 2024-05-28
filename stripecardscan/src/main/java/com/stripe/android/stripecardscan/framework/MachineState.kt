@@ -1,12 +1,12 @@
 package com.stripe.android.stripecardscan.framework
 
-import kotlin.time.TimeMark
-import kotlin.time.TimeSource
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
 
-internal abstract class MachineState(internal val timeSource: TimeSource) {
+internal abstract class MachineState {
 
     /**
      * Keep track of when this state was reached
      */
-    protected open val reachedStateAt: TimeMark = timeSource.markNow()
+    protected open val reachedStateAt: ClockMark = Clock.markNow()
 }

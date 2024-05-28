@@ -1,14 +1,22 @@
-package com.stripe.android.camera.framework.util
+package com.stripe.android.stripecardscan.framework.util
 
 import androidx.test.filters.SmallTest
-import com.stripe.android.camera.framework.time.delay
+import com.stripe.android.camera.framework.time.milliseconds
+import com.stripe.android.camera.framework.util.cacheFirstResult
+import com.stripe.android.camera.framework.util.cacheFirstResultSuspend
+import com.stripe.android.camera.framework.util.cachedFirstResult
+import com.stripe.android.camera.framework.util.cachedFirstResultSuspend
+import com.stripe.android.camera.framework.util.memoize
+import com.stripe.android.camera.framework.util.memoizeSuspend
+import com.stripe.android.camera.framework.util.memoized
+import com.stripe.android.camera.framework.util.memoizedSuspend
+import com.stripe.android.stripecardscan.framework.time.delay
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
-import kotlin.time.Duration.Companion.milliseconds
 
 class MemoizeTest {
 

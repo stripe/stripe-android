@@ -1,6 +1,8 @@
 package com.stripe.android.identity.states
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.core.model.StripeFilePurpose
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.BoundingBox
@@ -17,20 +19,18 @@ import org.mockito.kotlin.spy
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import org.robolectric.RobolectricTestRunner
-import kotlin.time.ComparableTimeMark
-import kotlin.time.Duration.Companion.milliseconds
 
 @RunWith(RobolectricTestRunner::class)
 internal class FaceDetectorTransitionerTest {
-    private val mockNeverTimeoutClockMark = mock<ComparableTimeMark>().also {
-        whenever(it.hasPassedNow()).thenReturn(false)
+    private val mockNeverTimeoutClockMark = mock<ClockMark>().also {
+        whenever(it.hasPassed()).thenReturn(false)
     }
 
-    private val mockAlwaysTimeoutClockMark = mock<ComparableTimeMark>().also {
-        whenever(it.hasPassedNow()).thenReturn(true)
+    private val mockAlwaysTimeoutClockMark = mock<ClockMark>().also {
+        whenever(it.hasPassed()).thenReturn(true)
     }
 
-    private val mockReachedStateAt = mock<ComparableTimeMark>()
+    private val mockReachedStateAt = mock<ClockMark>()
 
     private val mockSelfieFrameSaver = mock<FaceDetectorTransitioner.SelfieFrameSaver>()
 
@@ -127,7 +127,7 @@ internal class FaceDetectorTransitionerTest {
             FaceDetectorTransitioner(SELFIE_CAPTURE_PAGE)
         transitioner.timeoutAt = mockNeverTimeoutClockMark
 
-        whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL - 10).milliseconds)
+        whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL - 10).milliseconds)
 
         val foundState = IdentityScanState.Found(
             IdentityScanState.ScanType.SELFIE,
@@ -154,7 +154,7 @@ internal class FaceDetectorTransitionerTest {
                 )
             transitioner.timeoutAt = mockNeverTimeoutClockMark
 
-            whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+            whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
             whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES - 1)
 
             val foundState = IdentityScanState.Found(
@@ -184,7 +184,7 @@ internal class FaceDetectorTransitionerTest {
                 )
             transitioner.timeoutAt = mockNeverTimeoutClockMark
 
-            whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+            whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
             whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES)
 
             assertThat(
@@ -210,7 +210,7 @@ internal class FaceDetectorTransitionerTest {
                 )
             transitioner.timeoutAt = mockNeverTimeoutClockMark
 
-            whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+            whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
             whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES - 1)
 
             val foundState = IdentityScanState.Found(
@@ -240,7 +240,7 @@ internal class FaceDetectorTransitionerTest {
                 )
             transitioner.timeoutAt = mockNeverTimeoutClockMark
 
-            whenever(mockReachedStateAt.elapsedNow()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
+            whenever(mockReachedStateAt.elapsedSince()).thenReturn((SAMPLE_INTERVAL + 10).milliseconds)
             whenever(mockSelfieFrameSaver.selfieCollected()).thenReturn(NUM_SAMPLES - 1)
 
             val foundState = IdentityScanState.Found(

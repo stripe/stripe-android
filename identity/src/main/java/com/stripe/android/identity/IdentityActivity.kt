@@ -21,7 +21,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import com.stripe.android.camera.CameraPermissionCheckingActivity
-import com.stripe.android.camera.framework.time.asEpochMillisecondsComparableTimeMark
+import com.stripe.android.camera.framework.time.asEpochMillisecondsClockMark
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.injection.Injectable
 import com.stripe.android.core.injection.Injector
@@ -166,7 +166,7 @@ internal class IdentityActivity :
         )
 
         identityViewModel.screenTracker.screenTransitionStart(
-            startedAt = starterArgs.presentTime.asEpochMillisecondsComparableTimeMark()
+            startedAt = starterArgs.presentTime.asEpochMillisecondsClockMark()
         )
         supportActionBar?.hide()
 

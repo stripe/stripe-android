@@ -3,6 +3,7 @@ package com.stripe.android.identity.networking
 import android.content.Context
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.camera.framework.time.Clock
 import com.stripe.android.core.exception.APIConnectionException
 import com.stripe.android.core.exception.APIException
 import com.stripe.android.core.model.StripeFile
@@ -29,7 +30,6 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import java.io.File
 import javax.inject.Inject
-import kotlin.time.TimeSource
 
 internal class DefaultIdentityRepository @Inject constructor(
     private val stripeNetworkClient: StripeNetworkClient,
@@ -282,7 +282,7 @@ internal class DefaultIdentityRepository @Inject constructor(
         responseJsonParser: ModelJsonParser<Response>,
         onSuccessExecutionTimeBlock: (Long) -> Unit = {}
     ): Response {
-        val started = TimeSource.Monotonic.markNow()
+        val started = Clock.markNow()
         return runCatching {
             stripeNetworkClient.executeRequest(
                 request
@@ -298,7 +298,7 @@ internal class DefaultIdentityRepository @Inject constructor(
                     )
                 } else {
                     responseJsonParser.parse(response.responseJson())?.let { response ->
-                        onSuccessExecutionTimeBlock(started.elapsedNow().inWholeMilliseconds)
+                        onSuccessExecutionTimeBlock(started.elapsedSince().inMilliseconds.toLong())
                         response
                     } ?: run {
                         throw APIException(

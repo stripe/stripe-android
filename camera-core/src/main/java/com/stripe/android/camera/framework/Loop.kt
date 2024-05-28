@@ -1,6 +1,9 @@
 package com.stripe.android.camera.framework
 
 import androidx.annotation.RestrictTo
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Duration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -18,9 +21,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.time.ComparableTimeMark
-import kotlin.time.Duration
-import kotlin.time.TimeSource
 
 internal object NoAnalyzersAvailableException : Exception()
 
@@ -63,7 +63,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
     private val statsName: String? = null
 ) : ResultHandler<DataFrame, Output, Boolean> {
     private val started = AtomicBoolean(false)
-    protected var startedAt: ComparableTimeMark? = null
+    protected var startedAt: ClockMark? = null
     private var finished: Boolean = false
 
     private val cancelMutex = Mutex()
@@ -75,7 +75,7 @@ sealed class AnalyzerLoop<DataFrame, State, Output>(
         processingCoroutineScope: CoroutineScope
     ): Job? {
         if (!started.getAndSet(true)) {
-            startedAt = TimeSource.Monotonic.markNow()
+            startedAt = Clock.markNow()
         } else {
             analyzerLoopErrorListener.onAnalyzerFailure(AlreadySubscribedException)
             return null
@@ -238,7 +238,7 @@ class FiniteAnalyzerLoop<DataFrame, State, Output>(
 
     override suspend fun onResult(result: Output, data: DataFrame): Boolean {
         val framesProcessed = this.framesProcessed.incrementAndGet()
-        val timeElapsed = startedAt?.elapsedNow() ?: Duration.ZERO
+        val timeElapsed = startedAt?.elapsedSince() ?: Duration.ZERO
         resultHandler.onResult(result, data)
 
         if (framesProcessed >= framesToProcess) {

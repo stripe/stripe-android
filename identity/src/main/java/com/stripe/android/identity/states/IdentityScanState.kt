@@ -1,11 +1,11 @@
 package com.stripe.android.identity.states
 
 import androidx.annotation.IntegerRes
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
 import com.stripe.android.camera.scanui.ScanState
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
-import kotlin.time.ComparableTimeMark
-import kotlin.time.TimeSource
 
 /**
  * States during scanning a document.
@@ -57,7 +57,7 @@ internal sealed class IdentityScanState(
     internal class Found(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
-        internal var reachedStateAt: ComparableTimeMark = TimeSource.Monotonic.markNow(),
+        internal var reachedStateAt: ClockMark = Clock.markNow(),
         @IntegerRes val feedbackRes: Int? = null,
         val isFromLegacyDetector: Boolean? = null
     ) : IdentityScanState(type, transitioner, false) {
@@ -84,7 +84,7 @@ internal sealed class IdentityScanState(
     internal class Satisfied(
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
-        val reachedStateAt: ComparableTimeMark = TimeSource.Monotonic.markNow()
+        val reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,
@@ -100,7 +100,7 @@ internal sealed class IdentityScanState(
         val reason: String,
         type: ScanType,
         transitioner: IdentityScanStateTransitioner,
-        val reachedStateAt: ComparableTimeMark = TimeSource.Monotonic.markNow()
+        val reachedStateAt: ClockMark = Clock.markNow()
     ) : IdentityScanState(type, transitioner, false) {
         override suspend fun consumeTransition(
             analyzerInput: AnalyzerInput,

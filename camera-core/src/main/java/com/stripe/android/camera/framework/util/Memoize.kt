@@ -1,13 +1,10 @@
-@file:RestrictTo(RestrictTo.Scope.LIBRARY_GROUP)
-
 package com.stripe.android.camera.framework.util
 
-import androidx.annotation.RestrictTo
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Duration
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.time.ComparableTimeMark
-import kotlin.time.Duration
-import kotlin.time.TimeSource
 
 /**
  * A symbol for identifying values that have not yet been initialized.
@@ -119,13 +116,13 @@ private class MemoizeSuspendExpiring0<out Result>(
 
     @Volatile
     private var value: Any? = UninitializedValue
-    private var expiration: ComparableTimeMark? = null
+    private var expiration: ClockMark? = null
 
     fun memoize(): suspend () -> Result = {
         initializeMutex.withLock {
-            if (value == UninitializedValue || expiration?.hasPassedNow() != false) {
+            if (value == UninitializedValue || expiration?.hasPassed() != false) {
                 value = f()
-                expiration = TimeSource.Monotonic.markNow() + validFor
+                expiration = Clock.markNow() + validFor
             }
             @Suppress("UNCHECKED_CAST")
             (value as Result)
@@ -145,7 +142,7 @@ private class MemoizeSuspendExpiring1<in Input, out Result>(
 ) {
     private val lookupMutex = Mutex()
 
-    private val values = mutableMapOf<Input, Pair<Result, ComparableTimeMark>>()
+    private val values = mutableMapOf<Input, Pair<Result, ClockMark>>()
     private val mutexes = mutableMapOf<Input, Mutex>()
 
     private suspend fun getMutex(input: Input): Mutex = lookupMutex.withLock {
@@ -154,10 +151,10 @@ private class MemoizeSuspendExpiring1<in Input, out Result>(
 
     fun memoize(): suspend (Input) -> Result = { input ->
         getMutex(input).withLock {
-            val (result, expiration) = values[input] ?: (UninitializedValue to null)
-            if (result == UninitializedValue || expiration?.hasPassedNow() != false) {
+            val (result, expiration) = values[input] ?: UninitializedValue to null
+            if (result == UninitializedValue || expiration?.hasPassed() != false) {
                 val computedResult = f(input)
-                values[input] = computedResult to TimeSource.Monotonic.markNow() + validFor
+                values[input] = computedResult to Clock.markNow() + validFor
                 computedResult
             } else {
                 @Suppress("UNCHECKED_CAST")
@@ -179,7 +176,7 @@ private class MemoizeSuspendExpiring2<in Input1, in Input2, out Result>(
 ) {
     private val lookupMutex = Mutex()
 
-    private val values = mutableMapOf<Pair<Input1, Input2>, Pair<Result, ComparableTimeMark>>()
+    private val values = mutableMapOf<Pair<Input1, Input2>, Pair<Result, ClockMark>>()
     private val mutexes = mutableMapOf<Pair<Input1, Input2>, Mutex>()
 
     private suspend fun getMutex(input1: Input1, input2: Input2): Mutex = lookupMutex.withLock {
@@ -188,10 +185,10 @@ private class MemoizeSuspendExpiring2<in Input1, in Input2, out Result>(
 
     fun memoize(): suspend (Input1, Input2) -> Result = { input1, input2 ->
         getMutex(input1, input2).withLock {
-            val (result, expiration) = values[input1 to input2] ?: (UninitializedValue to null)
-            if (result == UninitializedValue || expiration?.hasPassedNow() != false) {
+            val (result, expiration) = values[input1 to input2] ?: UninitializedValue to null
+            if (result == UninitializedValue || expiration?.hasPassed() != false) {
                 val computedResult = f(input1, input2)
-                values[input1 to input2] = computedResult to TimeSource.Monotonic.markNow() + validFor
+                values[input1 to input2] = computedResult to Clock.markNow() + validFor
                 computedResult
             } else {
                 @Suppress("UNCHECKED_CAST")
@@ -211,7 +208,7 @@ private class MemoizeSuspendExpiring3<in Input1, in Input2, in Input3, out Resul
     private val validFor: Duration,
     private val f: suspend (Input1, Input2, Input3) -> Result
 ) {
-    private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Pair<Result, ComparableTimeMark>>()
+    private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Pair<Result, ClockMark>>()
     private val mutexes = mutableMapOf<Triple<Input1, Input2, Input3>, Mutex>()
 
     @Synchronized
@@ -221,11 +218,11 @@ private class MemoizeSuspendExpiring3<in Input1, in Input2, in Input3, out Resul
     fun memoize(): suspend (Input1, Input2, Input3) -> Result = { input1, input2, input3 ->
         getMutex(input1, input2, input3).withLock {
             val (result, expiration) =
-                values[Triple(input1, input2, input3)] ?: (UninitializedValue to null)
-            if (result == UninitializedValue || expiration?.hasPassedNow() != false) {
+                values[Triple(input1, input2, input3)] ?: UninitializedValue to null
+            if (result == UninitializedValue || expiration?.hasPassed() != false) {
                 val computedResult = f(input1, input2, input3)
                 values[Triple(input1, input2, input3)] =
-                    computedResult to TimeSource.Monotonic.markNow() + validFor
+                    computedResult to Clock.markNow() + validFor
                 computedResult
             } else {
                 @Suppress("UNCHECKED_CAST")
@@ -334,13 +331,13 @@ private class MemoizeExpiring0<out Result>(
 ) : () -> Result {
     @Volatile
     private var value: Any? = UninitializedValue
-    private var expiration: ComparableTimeMark? = null
+    private var expiration: ClockMark? = null
 
     @Synchronized
     override fun invoke(): Result {
-        if (value == UninitializedValue || expiration?.hasPassedNow() != false) {
+        if (value == UninitializedValue || expiration?.hasPassed() != false) {
             value = function()
-            expiration = TimeSource.Monotonic.markNow() + validFor
+            expiration = Clock.markNow() + validFor
         }
         @Suppress("UNCHECKED_CAST")
         return (value as Result)
@@ -357,7 +354,7 @@ private class MemoizeExpiring1<in Input, out Result>(
     private val validFor: Duration,
     private val function: (Input) -> Result
 ) : (Input) -> Result {
-    private val values = mutableMapOf<Input, Pair<Result, ComparableTimeMark>>()
+    private val values = mutableMapOf<Input, Pair<Result, ClockMark>>()
     private val locks = mutableMapOf<Input, Any>()
 
     @Synchronized
@@ -366,10 +363,10 @@ private class MemoizeExpiring1<in Input, out Result>(
     override fun invoke(input: Input): Result {
         val lock = getLock(input)
         return synchronized(lock) {
-            val (result, expiration) = values[input] ?: (UninitializedValue to null)
-            if (result == UninitializedValue || expiration?.hasPassedNow() != false) {
+            val (result, expiration) = values[input] ?: UninitializedValue to null
+            if (result == UninitializedValue || expiration?.hasPassed() != false) {
                 val computedResult = function(input)
-                values[input] = computedResult to TimeSource.Monotonic.markNow() + validFor
+                values[input] = computedResult to Clock.markNow() + validFor
                 computedResult
             } else {
                 @Suppress("UNCHECKED_CAST")
@@ -389,7 +386,7 @@ private class MemoizeExpiring2<in Input1, in Input2, out Result>(
     private val validFor: Duration,
     private val function: (Input1, Input2) -> Result
 ) : (Input1, Input2) -> Result {
-    private val values = mutableMapOf<Pair<Input1, Input2>, Pair<Result, ComparableTimeMark>>()
+    private val values = mutableMapOf<Pair<Input1, Input2>, Pair<Result, ClockMark>>()
     private val locks = mutableMapOf<Pair<Input1, Input2>, Any>()
 
     @Synchronized
@@ -399,10 +396,10 @@ private class MemoizeExpiring2<in Input1, in Input2, out Result>(
     override fun invoke(input1: Input1, input2: Input2): Result {
         val lock = getLock(input1, input2)
         return synchronized(lock) {
-            val (result, expiration) = values[input1 to input2] ?: (UninitializedValue to null)
-            if (result == UninitializedValue || expiration?.hasPassedNow() != false) {
+            val (result, expiration) = values[input1 to input2] ?: UninitializedValue to null
+            if (result == UninitializedValue || expiration?.hasPassed() != false) {
                 val computedResult = function(input1, input2)
-                values[input1 to input2] = computedResult to TimeSource.Monotonic.markNow() + validFor
+                values[input1 to input2] = computedResult to Clock.markNow() + validFor
                 computedResult
             } else {
                 @Suppress("UNCHECKED_CAST")
@@ -422,7 +419,7 @@ private class MemoizeExpiring3<in Input1, in Input2, in Input3, out Result>(
     private val validFor: Duration,
     private val function: (Input1, Input2, Input3) -> Result
 ) : (Input1, Input2, Input3) -> Result {
-    private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Pair<Result, ComparableTimeMark>>()
+    private val values = mutableMapOf<Triple<Input1, Input2, Input3>, Pair<Result, ClockMark>>()
     private val locks = mutableMapOf<Triple<Input1, Input2, Input3>, Any>()
 
     @Synchronized
@@ -433,11 +430,11 @@ private class MemoizeExpiring3<in Input1, in Input2, in Input3, out Result>(
         val lock = getLock(input1, input2, input3)
         return synchronized(lock) {
             val (result, expiration) =
-                values[Triple(input1, input2, input3)] ?: (UninitializedValue to null)
-            if (result == UninitializedValue || expiration?.hasPassedNow() != false) {
+                values[Triple(input1, input2, input3)] ?: UninitializedValue to null
+            if (result == UninitializedValue || expiration?.hasPassed() != false) {
                 val computedResult = function(input1, input2, input3)
                 values[Triple(input1, input2, input3)] =
-                    computedResult to TimeSource.Monotonic.markNow() + validFor
+                    computedResult to Clock.markNow() + validFor
                 computedResult
             } else {
                 @Suppress("UNCHECKED_CAST")
@@ -612,8 +609,8 @@ fun <Input, Result> ((Input) -> Result).memoized(): (Input) -> Result = Memoize1
 fun <Input1, Input2, Result> ((Input1, Input2) -> Result).memoized(): (Input1, Input2) -> Result =
     Memoize2(this)
 
-fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).memoized():
-    (Input1, Input2, Input3) -> Result = Memoize3(this)
+fun <Input1, Input2, Input3, Result> ((Input1, Input2, Input3) -> Result).memoized(): (Input1, Input2, Input3) -> Result =
+    Memoize3(this)
 
 /* mark: memoized with duration function extensions */
 fun <Result> (() -> Result).memoized(validFor: Duration): () -> Result =

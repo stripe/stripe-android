@@ -2,6 +2,9 @@ package com.stripe.android.identity.states
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.camera.framework.util.FrameSaver
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
@@ -17,9 +20,6 @@ import com.stripe.android.identity.utils.roundToMaxDecimals
 import kotlin.math.abs
 import kotlin.math.pow
 import kotlin.math.sqrt
-import kotlin.time.ComparableTimeMark
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.TimeSource
 
 /**
  * [IdentityScanStateTransitioner] for FaceDetector model.
@@ -50,12 +50,12 @@ internal class FaceDetectorTransitioner(
     private val stayInFoundDuration: Int = DEFAULT_STAY_IN_FOUND_DURATION
 ) : IdentityScanStateTransitioner {
     @VisibleForTesting
-    var timeoutAt: ComparableTimeMark =
-        TimeSource.Monotonic.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
+    var timeoutAt: ClockMark =
+        Clock.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
 
     @VisibleForTesting
     fun resetAndReturn(): FaceDetectorTransitioner {
-        timeoutAt = TimeSource.Monotonic.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
+        timeoutAt = Clock.markNow() + selfieCapturePage.autoCaptureTimeout.milliseconds
         return this
     }
 
@@ -130,7 +130,7 @@ internal class FaceDetectorTransitioner(
         }
         selfieFrameSaver.reset()
         return when {
-            timeoutAt.hasPassedNow() -> {
+            timeoutAt.hasPassed() -> {
                 Log.d(TAG, "Timeout in Initial state: $initialState")
                 IdentityScanState.TimeOut(initialState.type, this)
             }
@@ -158,12 +158,12 @@ internal class FaceDetectorTransitioner(
     ): IdentityScanState {
         require(analyzerOutput is FaceDetectorOutput) { "Unexpected output type: $analyzerOutput" }
         return when {
-            timeoutAt.hasPassedNow() -> {
+            timeoutAt.hasPassed() -> {
                 Log.d(TAG, "Timeout in Found state: $foundState")
                 IdentityScanState.TimeOut(foundState.type, this)
             }
 
-            foundState.reachedStateAt.elapsedNow() < selfieCapturePage.sampleInterval.milliseconds -> {
+            foundState.reachedStateAt.elapsedSince() < selfieCapturePage.sampleInterval.milliseconds -> {
                 Log.d(
                     TAG,
                     "Get a selfie before selfie capture interval, ignored. " +
@@ -191,11 +191,11 @@ internal class FaceDetectorTransitioner(
                 }
             }
 
-            foundState.reachedStateAt.elapsedNow() < stayInFoundDuration.milliseconds -> {
+            foundState.reachedStateAt.elapsedSince() < stayInFoundDuration.milliseconds -> {
                 Log.d(
                     TAG,
                     "Get an invalid selfie in Found state, but not enough time " +
-                        "passed(${foundState.reachedStateAt.elapsedNow()}), stays in Found. " +
+                        "passed(${foundState.reachedStateAt.elapsedSince()}), stays in Found. " +
                         "Current selfieCollected: ${selfieFrameSaver.selfieCollected()}"
                 )
                 foundState

@@ -2,6 +2,10 @@ package com.stripe.android.identity.states
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.ClockMark
+import com.stripe.android.camera.framework.time.Duration
+import com.stripe.android.camera.framework.time.milliseconds
 import com.stripe.android.identity.ml.AnalyzerInput
 import com.stripe.android.identity.ml.AnalyzerOutput
 import com.stripe.android.identity.ml.BoundingBox
@@ -14,10 +18,6 @@ import com.stripe.android.identity.states.IdentityScanState.ScanType
 import com.stripe.android.identity.states.IdentityScanState.Unsatisfied
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.time.ComparableTimeMark
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.TimeSource
 
 /**
  * [IdentityScanStateTransitioner] for IDDetector model, decides transition based on the
@@ -44,7 +44,7 @@ internal class IDDetectorTransitioner(
     private var unmatchedFrame = 0
 
     @VisibleForTesting
-    var timeoutAt: ComparableTimeMark = TimeSource.Monotonic.markNow() + timeout
+    var timeoutAt: ClockMark = Clock.markNow() + timeout
 
     /**
      * Rest internal state and return itself.
@@ -53,7 +53,7 @@ internal class IDDetectorTransitioner(
     fun resetAndReturn(): IDDetectorTransitioner {
         previousBoundingBox = null
         unmatchedFrame = 0
-        timeoutAt = TimeSource.Monotonic.markNow() + timeout
+        timeoutAt = Clock.markNow() + timeout
         Log.d(TAG, "Reset! timeoutAt: $timeoutAt")
         return this
     }
@@ -67,7 +67,7 @@ internal class IDDetectorTransitioner(
             "Unexpected output type: $analyzerOutput"
         }
         return when {
-            timeoutAt.hasPassedNow() -> {
+            timeoutAt.hasPassed() -> {
                 IdentityScanState.TimeOut(initialState.type, this)
             }
 
@@ -130,7 +130,7 @@ internal class IDDetectorTransitioner(
             foundState.transitioner
         )
 
-        timeoutAt.hasPassedNow() -> {
+        timeoutAt.hasPassed() -> {
             IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
         }
 
@@ -142,13 +142,13 @@ internal class IDDetectorTransitioner(
 
         !iOUCheckPass(analyzerOutput.boundingBox) -> {
             // reset timer of the foundState
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState.reachedStateAt = Clock.markNow()
             foundState
         }
 
         isBlurry(analyzerOutput.blurScore) -> {
             // reset timer of the foundState
-            foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+            foundState.reachedStateAt = Clock.markNow()
             foundState
         }
 
@@ -176,7 +176,7 @@ internal class IDDetectorTransitioner(
                 foundState.type,
                 foundState.transitioner
             )
-            timeoutAt.hasPassedNow() -> {
+            timeoutAt.hasPassed() -> {
                 IdentityScanState.TimeOut(foundState.type, foundState.transitioner)
             }
 
@@ -194,13 +194,13 @@ internal class IDDetectorTransitioner(
 
             !iOUCheckPassed -> {
                 // reset timer of the foundState
-                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState.reachedStateAt = Clock.markNow()
                 foundState.withFeedback(feedbackIntRes)
             }
 
             isBlurry(analyzerOutput.blurScore) -> {
                 // reset timer of the foundState
-                foundState.reachedStateAt = TimeSource.Monotonic.markNow()
+                foundState.reachedStateAt = Clock.markNow()
                 foundState.withFeedback(feedbackIntRes)
             }
 
@@ -237,7 +237,7 @@ internal class IDDetectorTransitioner(
         analyzerInput: AnalyzerInput,
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
-        return if (satisfiedState.reachedStateAt.elapsedNow() > displaySatisfiedDuration.milliseconds) {
+        return if (satisfiedState.reachedStateAt.elapsedSince() > displaySatisfiedDuration.milliseconds) {
             Log.d(TAG, "Scan for ${satisfiedState.type} Satisfied, transition to Finished.")
             IdentityScanState.Finished(satisfiedState.type, this)
         } else {
@@ -251,11 +251,11 @@ internal class IDDetectorTransitioner(
         analyzerOutput: AnalyzerOutput
     ): IdentityScanState {
         return when {
-            timeoutAt.hasPassedNow() -> {
+            timeoutAt.hasPassed() -> {
                 IdentityScanState.TimeOut(unsatisfiedState.type, this)
             }
 
-            unsatisfiedState.reachedStateAt.elapsedNow() > displayUnsatisfiedDuration.milliseconds -> {
+            unsatisfiedState.reachedStateAt.elapsedSince() > displayUnsatisfiedDuration.milliseconds -> {
                 Log.d(
                     TAG,
                     "Scan for ${unsatisfiedState.type} Unsatisfied with reason " +
@@ -319,7 +319,7 @@ internal class IDDetectorTransitioner(
     }
 
     private fun moreResultsRequired(foundState: Found): Boolean {
-        return foundState.reachedStateAt.elapsedNow() < timeRequired.milliseconds
+        return foundState.reachedStateAt.elapsedSince() < timeRequired.milliseconds
     }
 
     /**

@@ -3,8 +3,8 @@ package com.stripe.android.identity.analytics
 import com.stripe.android.camera.framework.StatTracker
 import com.stripe.android.camera.framework.StatTrackerImpl
 import com.stripe.android.camera.framework.TaskStats
+import com.stripe.android.camera.framework.time.Duration
 import javax.inject.Inject
-import kotlin.time.Duration
 
 /**
  * Tracker for model performance.
@@ -21,13 +21,13 @@ internal class ModelPerformanceTracker @Inject constructor(
             this.fold(Duration.ZERO) { accDuration, next ->
                 accDuration + next.duration
             } / size
-            ).inWholeMilliseconds
+            ).inMilliseconds.toLong()
 
     fun trackPreprocess(): StatTracker =
         StatTrackerImpl { startedAt, _ ->
             preprocessStats += TaskStats(
                 startedAt,
-                startedAt.elapsedNow(),
+                startedAt.elapsedSince(),
                 null
             )
         }
@@ -36,7 +36,7 @@ internal class ModelPerformanceTracker @Inject constructor(
         StatTrackerImpl { startedAt, _ ->
             inferenceStats += TaskStats(
                 startedAt,
-                startedAt.elapsedNow(),
+                startedAt.elapsedSince(),
                 null
             )
         }

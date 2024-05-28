@@ -1,12 +1,12 @@
 package com.stripe.android.stripecardscan.cardscan.result
 
+import com.stripe.android.camera.framework.time.Clock
+import com.stripe.android.camera.framework.time.seconds
 import com.stripe.android.stripecardscan.framework.MachineState
 import com.stripe.android.stripecardscan.framework.util.ItemCounter
 import com.stripe.android.stripecardscan.payment.ml.SSDOcr
-import kotlin.time.Duration.Companion.seconds
-import kotlin.time.TimeSource
 
-internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeSource) {
+internal sealed class MainLoopState : MachineState() {
 
     companion object {
         /**
@@ -30,41 +30,37 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
         transition: SSDOcr.Prediction
     ): MainLoopState
 
-    class Initial(timeSource: TimeSource) : MainLoopState(timeSource) {
+    class Initial : MainLoopState() {
         override suspend fun consumeTransition(
             transition: SSDOcr.Prediction
         ): MainLoopState = if (transition.pan.isNullOrEmpty()) {
             this
         } else {
             OcrFound(
-                timeSource = timeSource,
                 pan = transition.pan
             )
         }
     }
 
     class OcrFound private constructor(
-        timeSource: TimeSource,
         private val panCounter: ItemCounter<String>
-    ) : MainLoopState(timeSource) {
+    ) : MainLoopState() {
 
         internal constructor(
-            timeSource: TimeSource,
             pan: String
         ) : this(
-            timeSource,
             ItemCounter(pan)
         )
 
         private val mostLikelyPan: String
             get() = panCounter.getHighestCountItem().second
 
-        private var lastCardVisible = TimeSource.Monotonic.markNow()
+        private var lastCardVisible = Clock.markNow()
 
         private fun highestOcrCount() = panCounter.getHighestCountItem().first
         private fun isOcrSatisfied() = highestOcrCount() >= DESIRED_OCR_AGREEMENT
-        private fun isTimedOut() = reachedStateAt.elapsedNow() > OCR_SEARCH_DURATION
-        private fun isNoCardVisible() = lastCardVisible.elapsedNow() > NO_CARD_VISIBLE_DURATION
+        private fun isTimedOut() = reachedStateAt.elapsedSince() > OCR_SEARCH_DURATION
+        private fun isNoCardVisible() = lastCardVisible.elapsedSince() > NO_CARD_VISIBLE_DURATION
 
         override suspend fun consumeTransition(
             transition: SSDOcr.Prediction
@@ -72,7 +68,7 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
             val transitionPan = transition.pan
             if (!transitionPan.isNullOrEmpty()) {
                 panCounter.countItem(transitionPan)
-                lastCardVisible = TimeSource.Monotonic.markNow()
+                lastCardVisible = Clock.markNow()
             }
 
             val pan = mostLikelyPan
@@ -80,17 +76,16 @@ internal sealed class MainLoopState(timeSource: TimeSource) : MachineState(timeS
             return when {
                 isOcrSatisfied() || isTimedOut() ->
                     Finished(
-                        timeSource = timeSource,
                         pan = pan
                     )
                 isNoCardVisible() ->
-                    Initial(timeSource)
+                    Initial()
                 else -> this
             }
         }
     }
 
-    class Finished(timeSource: TimeSource, val pan: String) : MainLoopState(timeSource) {
+    class Finished(val pan: String) : MainLoopState() {
         override suspend fun consumeTransition(
             transition: SSDOcr.Prediction
         ): MainLoopState = this
