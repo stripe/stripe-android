@@ -5,10 +5,9 @@
 ## 20.44.1 - 2024-05-28
 
 ### PaymentSheet
-* [FIXED][8538](https://github.com/stripe/stripe-android/pull/8538) Change Autocomplete Screen "Enter address manually" button background to prevent unexpected changes to user set colors
-
+* [FIXED][8538](https://github.com/stripe/stripe-android/pull/8538) Change the autocomplete screen’s "Enter address manually" button background to prevent unexpected changes to user-defined colors
 ### CardScan
-* [FIXED][8537](https://github.com/stripe/stripe-android/pull/8537) Fixed cardscan issue #7915 where crashes were happening on some devices with odd camera vs. screen resolutions
+* [FIXED][8537](https://github.com/stripe/stripe-android/pull/8537) Fix a crash that happened on some devices with odd camera-to-screen ratios
 
 ## 20.44.0 - 2024-05-20
 
