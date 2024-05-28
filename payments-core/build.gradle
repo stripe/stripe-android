@@ -70,6 +70,7 @@ dependencies {
 
     androidTestImplementation project(':stripe-ui-core') // Resources defined here, but used in payments-core.
     androidTestImplementation project(':payments-core-testing')
+    androidTestImplementation testLibs.androidx.composeUi
     androidTestImplementation testLibs.androidx.coreKtx
     androidTestImplementation testLibs.androidx.testRules
     androidTestImplementation testLibs.androidx.testRunner

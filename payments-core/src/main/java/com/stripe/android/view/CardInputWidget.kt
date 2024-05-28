@@ -26,6 +26,7 @@ import androidx.core.os.bundleOf
 import androidx.core.view.AccessibilityDelegateCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
+import androidx.core.view.doOnPreDraw
 import androidx.core.view.updateLayoutParams
 import androidx.core.widget.doAfterTextChanged
 import androidx.lifecycle.ViewModelStoreOwner
@@ -592,48 +593,6 @@ class CardInputWidget @JvmOverloads constructor(
         if (state is Bundle) {
             postalCodeEnabled = state.getBoolean(STATE_POSTAL_CODE_ENABLED, true)
             isShowingFullCard = state.getBoolean(STATE_CARD_VIEWED, true)
-            updateSpaceSizes(isShowingFullCard)
-            placement.totalLengthInPixels = frameWidth
-            val cardStartMargin: Int
-            val dateStartMargin: Int
-            val cvcStartMargin: Int
-            val postalCodeStartMargin: Int
-            if (isShowingFullCard) {
-                cardStartMargin = 0
-                dateStartMargin = placement.getDateStartMargin(isFullCard = true)
-                cvcStartMargin = placement.getCvcStartMargin(isFullCard = true)
-                postalCodeStartMargin = placement.getPostalCodeStartMargin(isFullCard = true)
-            } else {
-                cardStartMargin = -1 * placement.hiddenCardWidth
-                dateStartMargin = placement.getDateStartMargin(isFullCard = false)
-                cvcStartMargin = placement.getCvcStartMargin(isFullCard = false)
-                postalCodeStartMargin = if (postalCodeEnabled) {
-                    placement.getPostalCodeStartMargin(isFullCard = false)
-                } else {
-                    placement.totalLengthInPixels
-                }
-            }
-
-            updateFieldLayout(
-                view = cardNumberTextInputLayout,
-                newWidth = placement.cardWidth,
-                newMarginStart = cardStartMargin
-            )
-            updateFieldLayout(
-                view = expiryDateTextInputLayout,
-                newWidth = placement.dateWidth,
-                newMarginStart = dateStartMargin
-            )
-            updateFieldLayout(
-                view = cvcNumberTextInputLayout,
-                newWidth = placement.cvcWidth,
-                newMarginStart = cvcStartMargin
-            )
-            updateFieldLayout(
-                view = postalCodeTextInputLayout,
-                newWidth = placement.postalCodeWidth,
-                newMarginStart = postalCodeStartMargin
-            )
 
             super.onRestoreInstanceState(state.getParcelable(STATE_SUPER_STATE))
         } else {
@@ -700,9 +659,11 @@ class CardInputWidget @JvmOverloads constructor(
         newWidth: Int,
         newMarginStart: Int
     ) {
-        view.updateLayoutParams<FrameLayout.LayoutParams> {
-            width = newWidth
-            marginStart = newMarginStart
+        view.doOnPreDraw {
+            it.updateLayoutParams<FrameLayout.LayoutParams> {
+                width = newWidth
+                marginStart = newMarginStart
+            }
         }
     }
 

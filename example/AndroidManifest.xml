@@ -85,6 +85,7 @@
         <activity android:name=".activity.SwishExampleActivity"/>
         <activity android:name=".activity.MobilePayExampleActivity"/>
         <activity android:name=".activity.AlmaActivity"/>
+        <activity android:name=".activity.CardInputWidgetExampleActivity"/>
     </application>
 
 </manifest>
