@@ -151,4 +151,3 @@ internal class VerticalModeFormUITest {
         val viewActionRecorder: ViewActionRecorder,
     )
 }
-
