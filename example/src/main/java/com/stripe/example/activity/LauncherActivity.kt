@@ -207,8 +207,8 @@ class LauncherActivity : AppCompatActivity() {
                 StripeImageActivity::class.java
             ),
             Item(
-                "Card Input Widget Example",
-                CardInputWidgetExampleActivity::class.java
+                "Card Input Widget Compose Example",
+                CardInputWidgetComposeExampleActivity::class.java
             )
         )
 

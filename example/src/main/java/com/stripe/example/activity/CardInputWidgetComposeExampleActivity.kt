@@ -32,7 +32,7 @@ import com.stripe.android.uicore.StripeTheme
 import com.stripe.android.view.CardInputWidget
 import com.stripe.example.R
 
-class CardInputWidgetExampleActivity : AppCompatActivity() {
+class CardInputWidgetComposeExampleActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
