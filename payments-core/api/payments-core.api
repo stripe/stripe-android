@@ -3085,10 +3085,8 @@ public final class com/stripe/android/model/MobileCardElementConfig$Creator : an
 
 public final class com/stripe/android/model/PaymentIntent : com/stripe/android/model/StripeIntent {
 	public static final field $stable I
-	public static final field CARD Ljava/lang/String;
 	public static final field CREATOR Landroid/os/Parcelable$Creator;
 	public static final field Companion Lcom/stripe/android/model/PaymentIntent$Companion;
-	public static final field REQUIRE_CVC_RECOLLECTION Ljava/lang/String;
 	public final fun component1 ()Ljava/lang/String;
 	public final fun component10 ()J
 	public final fun component11 ()Ljava/lang/String;
@@ -3137,7 +3135,6 @@ public final class com/stripe/android/model/PaymentIntent : com/stripe/android/m
 	public fun getPaymentMethodOptions ()Ljava/util/Map;
 	public fun getPaymentMethodTypes ()Ljava/util/List;
 	public final fun getReceiptEmail ()Ljava/lang/String;
-	public final fun getRequireCvcRecollection ()Z
 	public final fun getSetupFutureUsage ()Lcom/stripe/android/model/StripeIntent$Usage;
 	public final fun getShipping ()Lcom/stripe/android/model/PaymentIntent$Shipping;
 	public fun getStatus ()Lcom/stripe/android/model/StripeIntent$Status;
