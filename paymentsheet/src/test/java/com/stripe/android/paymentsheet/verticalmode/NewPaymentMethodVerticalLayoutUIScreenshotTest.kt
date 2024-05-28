@@ -1,9 +1,8 @@
-package com.stripe.android.paymentsheet.vertical
+package com.stripe.android.paymentsheet.verticalmode
 
 import com.stripe.android.lpmfoundations.luxe.SupportedPaymentMethod
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.ExternalPaymentMethodUiDefinitionFactory
 import com.stripe.android.model.PaymentMethodFixtures
-import com.stripe.android.paymentsheet.verticalmode.NewPaymentMethodVerticalLayoutUI
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
 import com.stripe.android.screenshottesting.SystemAppearance
