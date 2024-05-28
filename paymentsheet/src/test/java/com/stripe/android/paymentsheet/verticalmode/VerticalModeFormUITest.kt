@@ -1,5 +1,6 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import android.os.Build
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -24,8 +25,10 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [Build.VERSION_CODES.Q])
 internal class VerticalModeFormUITest {
     @get:Rule
     val composeRule = createComposeRule()
@@ -74,12 +77,12 @@ internal class VerticalModeFormUITest {
 
         composeRule.onNodeWithTag(FORM_ELEMENT_TEST_TAG).assertExists()
 
-        Scenario(stateFlow, viewActionRecorder).apply(block)
+        Scenario(viewActionRecorder).apply(block)
     }
 
     private fun createInteractor(
-        stateFlow: StateFlow<VerticalModeFormInteractor.State> = MutableStateFlow(createCardState()),
-        viewActionRecorder: ViewActionRecorder = ViewActionRecorder(),
+        stateFlow: StateFlow<VerticalModeFormInteractor.State>,
+        viewActionRecorder: ViewActionRecorder,
     ): VerticalModeFormInteractor {
         return object : VerticalModeFormInteractor {
             override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlow
@@ -147,7 +150,6 @@ internal class VerticalModeFormUITest {
     }
 
     private data class Scenario(
-        val stateFlow: MutableStateFlow<VerticalModeFormInteractor.State>,
         val viewActionRecorder: ViewActionRecorder,
     )
 }
