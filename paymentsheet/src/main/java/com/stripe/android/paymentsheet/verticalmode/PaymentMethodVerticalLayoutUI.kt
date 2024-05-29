@@ -32,7 +32,9 @@ internal fun PaymentMethodVerticalLayoutUI(interactor: PaymentMethodVerticalLayo
         selectedIndex = -1,
         isEnabled = !state.isProcessing,
         onViewMorePaymentMethods = {
-            interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods)
+            interactor.handleViewAction(
+                PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
+            )
         },
         onItemSelectedListener = {
             interactor.handleViewAction(PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToForm(it.code))

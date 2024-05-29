@@ -32,7 +32,9 @@ internal class PaymentMethodVerticalLayoutUITest {
     ) {
         assertThat(viewActionRecorder.viewActions).isEmpty()
         composeRule.onNodeWithTag(TEST_TAG_MANAGE_SCREEN).performClick()
-        viewActionRecorder.consume(PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods)
+        viewActionRecorder.consume(
+            PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods
+        )
         assertThat(viewActionRecorder.viewActions).isEmpty()
     }
 
