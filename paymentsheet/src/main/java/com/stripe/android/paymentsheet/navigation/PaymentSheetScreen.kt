@@ -4,9 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
@@ -19,11 +17,11 @@ import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteracto
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
+import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
-import com.stripe.android.uicore.image.StripeImageLoader
 import java.io.Closeable
 
 internal val PaymentSheetScreen.topContentPadding: Dp
@@ -152,7 +150,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    object VerticalMode : PaymentSheetScreen {
+    class VerticalMode(private val interactor: PaymentMethodVerticalLayoutInteractor) : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
@@ -164,38 +162,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            val context = LocalContext.current
-            val imageLoader = remember {
-                StripeImageLoader(context.applicationContext)
-            }
-
-            val paymentMethodMetadata by viewModel.paymentMethodMetadata.collectAsState()
-
-            val supportedPaymentMethods = remember(paymentMethodMetadata) {
-                paymentMethodMetadata?.sortedSupportedPaymentMethods() ?: emptyList()
-            }
-
-            val isProcessing by viewModel.processing.collectAsState()
-
-            PaymentMethodVerticalLayoutUI(
-                paymentMethods = supportedPaymentMethods,
-                selectedIndex = -1,
-                isEnabled = !isProcessing,
-                onViewMorePaymentMethods = {
-                    viewModel.transitionTo(
-                        ManageSavedPaymentMethods(
-                            interactor = DefaultManageScreenInteractor(
-                                viewModel
-                            )
-                        )
-                    )
-                },
-                onItemSelectedListener = {
-                    viewModel.transitionTo(Form(DefaultVerticalModeFormInteractor(it.code, viewModel)))
-                },
-                imageLoader = imageLoader,
-                modifier = Modifier.padding(horizontal = 20.dp)
-            )
+            PaymentMethodVerticalLayoutUI(interactor)
         }
     }
 

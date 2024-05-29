@@ -119,34 +119,26 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
 
             AutoResolveHelper.RESULT_ERROR -> {
                 val status = taskResult.status
-                val statusMessage = status.statusMessage.orEmpty()
-                val statusCode = status.statusCode.toString()
-                errorReporter.report(
-                    ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
-                    additionalNonPiiParams = mapOf(
-                        "status_message" to statusMessage,
-                        "status_code" to statusCode,
-                    )
-                )
-                viewModel.updateResult(
-                    GooglePayLauncher.Result.Failed(
-                        RuntimeException(
-                            "Google Pay failed with error $statusCode: $statusMessage"
-                        )
-                    )
-                )
-            }
 
-            else -> {
-                errorReporter.report(ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_RESULT_CODE)
-                viewModel.updateResult(
-                    GooglePayLauncher.Result.Failed(
+                onError(
+                    errorEvent = ErrorReporter.ExpectedErrorEvent.GOOGLE_PAY_FAILED,
+                    taskResult = taskResult,
+                    failedResult = GooglePayLauncher.Result.Failed(
                         RuntimeException(
-                            "Google Pay returned an unexpected result code."
-                        )
+                            "Google Pay failed with error ${status.statusCode}: ${status.statusMessage.orEmpty()}"
+                        ),
                     )
                 )
             }
+            else -> onError(
+                errorEvent = ErrorReporter.UnexpectedErrorEvent.GOOGLE_PAY_UNEXPECTED_RESULT_CODE,
+                taskResult = taskResult,
+                failedResult = GooglePayLauncher.Result.Failed(
+                    RuntimeException(
+                        "Google Pay returned an unexpected result code."
+                    )
+                )
+            )
         }
     }
 
@@ -163,6 +155,26 @@ internal class GooglePayLauncherActivity : AppCompatActivity() {
                 data ?: Intent()
             )
         }
+    }
+
+    private fun onError(
+        taskResult: ApiTaskResult<PaymentData>,
+        errorEvent: ErrorReporter.ErrorEvent,
+        failedResult: GooglePayLauncher.Result.Failed
+    ) {
+        val status = taskResult.status
+        val statusMessage = status.statusMessage.orEmpty()
+        val statusCode = status.statusCode.toString()
+
+        errorReporter.report(
+            errorEvent,
+            additionalNonPiiParams = mapOf(
+                "status_message" to statusMessage,
+                "status_code" to statusCode,
+            )
+        )
+
+        viewModel.updateResult(failedResult)
     }
 
     private fun finishWithResult(result: GooglePayLauncher.Result) {
