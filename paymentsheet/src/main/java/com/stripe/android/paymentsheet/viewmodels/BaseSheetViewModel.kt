@@ -22,6 +22,7 @@ import com.stripe.android.model.PaymentMethodExtraParams
 import com.stripe.android.model.PaymentMethodUpdateParams
 import com.stripe.android.model.SetupIntent
 import com.stripe.android.payments.paymentlauncher.PaymentResult
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.LinkHandler
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -210,15 +211,24 @@ internal abstract class BaseSheetViewModel(
         !isProcessing && !isEditing
     }
 
+    internal val displayableSavedPaymentMethods: StateFlow<List<DisplayableSavedPaymentMethod>?> =
+        combineAsStateFlow(paymentMethods, paymentMethodMetadata) { paymentMethods, paymentMethodMetadata ->
+            paymentMethods?.map {
+                DisplayableSavedPaymentMethod(
+                    displayName = providePaymentMethodName(it.type?.code),
+                    paymentMethod = it,
+                    isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible
+                )
+            }
+        }
+
     private val paymentOptionsStateMapper: PaymentOptionsStateMapper by lazy {
         PaymentOptionsStateMapper(
-            paymentMethods = paymentMethods,
+            paymentMethods = displayableSavedPaymentMethods,
             currentSelection = selection,
             googlePayState = googlePayState,
             isLinkEnabled = linkHandler.isLinkEnabled,
             isNotPaymentFlow = this is PaymentOptionsViewModel,
-            nameProvider = ::providePaymentMethodName,
-            isCbcEligible = { paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible }
         )
     }
 

@@ -1,7 +1,6 @@
 package com.stripe.android.paymentsheet.navigation
 
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -16,7 +15,10 @@ import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodsTopContentPadding
+import com.stripe.android.paymentsheet.verticalmode.DefaultManageScreenInteractor
 import com.stripe.android.paymentsheet.verticalmode.DefaultVerticalModeFormInteractor
+import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
+import com.stripe.android.paymentsheet.verticalmode.ManageScreenUI
 import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutUI
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
@@ -179,7 +181,15 @@ internal sealed interface PaymentSheetScreen {
                 paymentMethods = supportedPaymentMethods,
                 selectedIndex = -1,
                 isEnabled = !isProcessing,
-                onViewMorePaymentMethods = { viewModel.transitionTo(ManageSavedPaymentMethods) },
+                onViewMorePaymentMethods = {
+                    viewModel.transitionTo(
+                        ManageSavedPaymentMethods(
+                            interactor = DefaultManageScreenInteractor(
+                                viewModel
+                            )
+                        )
+                    )
+                },
                 onItemSelectedListener = {
                     viewModel.transitionTo(Form(DefaultVerticalModeFormInteractor(it.code, viewModel)))
                 },
@@ -205,7 +215,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data object ManageSavedPaymentMethods : PaymentSheetScreen {
+    data class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
@@ -214,7 +224,7 @@ internal sealed interface PaymentSheetScreen {
 
         @Composable
         override fun Content(viewModel: BaseSheetViewModel, modifier: Modifier) {
-            Text("Manage your saved PMs here")
+            ManageScreenUI(interactor = interactor, modifier = modifier.padding(horizontal = 20.dp))
         }
     }
 }

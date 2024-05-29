@@ -3,8 +3,8 @@ package com.stripe.android.paymentsheet.viewmodels
 import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import app.cash.turbine.test
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.model.PaymentMethodFixtures.toDisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.PaymentOptionsState
@@ -20,7 +20,7 @@ class PaymentOptionsStateMapperTest {
     @get:Rule
     val instantTaskExecutorRule = InstantTaskExecutorRule()
 
-    private val paymentMethodsFlow = MutableStateFlow<List<PaymentMethod>?>(null)
+    private val paymentMethodsFlow = MutableStateFlow<List<DisplayableSavedPaymentMethod>?>(null)
     private val currentSelectionFlow = MutableStateFlow<PaymentSelection?>(null)
     private val googlePayStateFlow = MutableStateFlow<GooglePayState>(GooglePayState.Indeterminate)
     private val isLinkEnabledFlow = MutableStateFlow<Boolean?>(null)
@@ -33,14 +33,12 @@ class PaymentOptionsStateMapperTest {
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
-            nameProvider = { it!! },
-            isCbcEligible = { false }
         )
 
         mapper().test {
             assertThat(awaitItem()).isEqualTo(PaymentOptionsState())
 
-            paymentMethodsFlow.value = PaymentMethodFixtures.createCards(2)
+            paymentMethodsFlow.value = PaymentMethodFixtures.createSavedCards(2)
             currentSelectionFlow.value = PaymentSelection.GooglePay
             googlePayStateFlow.value = GooglePayState.Available
             isLinkEnabledFlow.value = true
@@ -64,16 +62,14 @@ class PaymentOptionsStateMapperTest {
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = false,
-            nameProvider = { it!! },
-            isCbcEligible = { false }
         )
 
         mapper().test {
             assertThat(awaitItem()).isEqualTo(PaymentOptionsState())
 
-            val cards = PaymentMethodFixtures.createCards(2)
+            val cards = PaymentMethodFixtures.createSavedCards(2)
             paymentMethodsFlow.value = cards
-            currentSelectionFlow.value = PaymentSelection.Saved(cards.first())
+            currentSelectionFlow.value = PaymentSelection.Saved(cards.first().paymentMethod)
             googlePayStateFlow.value = GooglePayState.Available
             isLinkEnabledFlow.value = true
 
@@ -92,15 +88,13 @@ class PaymentOptionsStateMapperTest {
             googlePayState = googlePayStateFlow,
             isLinkEnabled = isLinkEnabledFlow,
             isNotPaymentFlow = true,
-            nameProvider = { it!! },
-            isCbcEligible = { false }
         )
 
         mapper().test {
             assertThat(awaitItem()).isEqualTo(PaymentOptionsState())
 
-            val cards = PaymentMethodFixtures.createCards(2)
-            val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last())
+            val cards = PaymentMethodFixtures.createSavedCards(2)
+            val selectedPaymentMethod = PaymentSelection.Saved(paymentMethod = cards.last().paymentMethod)
             paymentMethodsFlow.value = cards
             currentSelectionFlow.value = selectedPaymentMethod
             googlePayStateFlow.value = GooglePayState.Available
@@ -116,7 +110,7 @@ class PaymentOptionsStateMapperTest {
             )
 
             // Remove the currently selected payment option
-            paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod
+            paymentMethodsFlow.value = cards - selectedPaymentMethod.paymentMethod.toDisplayableSavedPaymentMethod()
             currentSelectionFlow.value = null
 
             assertThat(awaitItem().selectedItem).isNull()
