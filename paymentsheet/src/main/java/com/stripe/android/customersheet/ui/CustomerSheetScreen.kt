@@ -18,7 +18,6 @@ import com.stripe.android.common.ui.PrimaryButton
 import com.stripe.android.customersheet.CustomerSheetViewAction
 import com.stripe.android.customersheet.CustomerSheetViewState
 import com.stripe.android.model.PaymentMethodCode
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.PaymentOptionsStateFactory
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
@@ -117,16 +116,12 @@ internal fun SelectPaymentMethod(
 
         SavedPaymentMethodTabLayoutUI(
             state = PaymentOptionsStateFactory.create(
-                paymentMethods = viewState.savedPaymentMethods.map {
-                    DisplayableSavedPaymentMethod(
-                        displayName = paymentMethodNameProvider.invoke(it.type?.code),
-                        paymentMethod = it,
-                        isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible
-                    )
-                },
+                paymentMethods = viewState.savedPaymentMethods,
                 showGooglePay = viewState.isGooglePayEnabled,
                 showLink = false,
                 currentSelection = viewState.paymentSelection,
+                nameProvider = paymentMethodNameProvider,
+                isCbcEligible = viewState.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             ),
             isEditing = viewState.isEditing,
             isProcessing = viewState.isProcessing,

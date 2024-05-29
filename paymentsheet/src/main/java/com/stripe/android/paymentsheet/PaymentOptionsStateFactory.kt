@@ -1,5 +1,7 @@
 package com.stripe.android.paymentsheet
 
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.paymentsheet.model.SavedSelection
 
@@ -14,17 +16,25 @@ internal data class PaymentOptionsState(
 internal object PaymentOptionsStateFactory {
 
     fun create(
-        paymentMethods: List<DisplayableSavedPaymentMethod>,
+        paymentMethods: List<PaymentMethod>,
         showGooglePay: Boolean,
         showLink: Boolean,
         currentSelection: PaymentSelection?,
+        nameProvider: (PaymentMethodCode?) -> String,
+        isCbcEligible: Boolean
     ): PaymentOptionsState {
         val items = listOfNotNull(
             PaymentOptionsItem.AddCard,
             PaymentOptionsItem.GooglePay.takeIf { showGooglePay },
             PaymentOptionsItem.Link.takeIf { showLink }
         ) + paymentMethods.map {
-            PaymentOptionsItem.SavedPaymentMethod(it)
+            PaymentOptionsItem.SavedPaymentMethod(
+                DisplayableSavedPaymentMethod(
+                    displayName = nameProvider(it.type?.code),
+                    paymentMethod = it,
+                    isCbcEligible = isCbcEligible
+                )
+            )
         }
 
         val currentSelectionIndex = currentSelection?.let {

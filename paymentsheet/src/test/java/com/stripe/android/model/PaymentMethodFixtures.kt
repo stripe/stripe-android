@@ -1,7 +1,6 @@
 package com.stripe.android.model
 
 import com.stripe.android.model.parsers.PaymentMethodJsonParser
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.model.PaymentSelection
 import com.stripe.android.ui.core.elements.ExternalPaymentMethodSpec
 import org.json.JSONObject
@@ -514,20 +513,6 @@ internal object PaymentMethodFixtures {
             origin = paymentMethod.created!!
             paymentMethod
         }
-    }
-
-    fun createSavedCards(size: Int, isCbcEligible: Boolean = false): List<DisplayableSavedPaymentMethod> {
-        return createCards(size).map {
-            it.toDisplayableSavedPaymentMethod(isCbcEligible = isCbcEligible)
-        }
-    }
-
-    fun PaymentMethod.toDisplayableSavedPaymentMethod(isCbcEligible: Boolean = false): DisplayableSavedPaymentMethod {
-        return DisplayableSavedPaymentMethod(
-            displayName = this.type!!.code,
-            paymentMethod = this,
-            isCbcEligible = isCbcEligible,
-        )
     }
 //
 //    fun createPaymentMethod(type: PaymentMethod.Type): PaymentMethod {
