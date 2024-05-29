@@ -217,10 +217,8 @@ internal class StripeApiRepositoryTest {
 
     @Test
     fun testGetRefreshSetupIntentUrl() {
-        assertEquals(
-            "https://api.stripe.com/v1/setup_intents/pi123/refresh",
-            StripeApiRepository.getRefreshSetupIntentUrl("pi123")
-        )
+        assertThat(StripeApiRepository.getRefreshSetupIntentUrl("pi123"))
+            .isEqualTo("https://api.stripe.com/v1/setup_intents/pi123/refresh")
     }
 
     @Test
