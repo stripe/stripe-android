@@ -130,7 +130,6 @@ internal abstract class BaseSheetViewModel(
                     PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit, PaymentMethod.Type.USBankAccount -> it
                     else -> null
                 }
-
             }
         }
 
