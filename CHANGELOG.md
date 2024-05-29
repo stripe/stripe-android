@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### PaymentSheet
+* [FIXED][8553](https://github.com/stripe/stripe-android/pull/8553) Issue where "Select your payment method" screen would be displayed with no saved payment methods to select
+
 ## 20.44.1 - 2024-05-28
 
 ### PaymentSheet
