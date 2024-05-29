@@ -13,18 +13,14 @@ import androidx.compose.ui.unit.dp
 internal fun ManageScreenUI(interactor: ManageScreenInteractor, modifier: Modifier) {
     val state by interactor.state.collectAsState()
 
-    val currentPaymentMethods = state.paymentMethods
-
-    if (currentPaymentMethods != null) {
-        Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            currentPaymentMethods.forEach {
-                SavedPaymentMethodRowButton(
-                    displayableSavedPaymentMethod = it,
-                    resources = LocalContext.current.resources,
-                    isEnabled = true,
-                    isSelected = false
-                )
-            }
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        state.paymentMethods?.forEach {
+            SavedPaymentMethodRowButton(
+                displayableSavedPaymentMethod = it,
+                resources = LocalContext.current.resources,
+                isEnabled = true,
+                isSelected = false
+            )
         }
     }
 }
