@@ -33,7 +33,7 @@ internal class HeaderTextFactory(
                 R.string.stripe_paymentsheet_select_payment_method
             }
         }
-        is PaymentSheetScreen.AddFirstPaymentMethod, PaymentSheetScreen.VerticalMode -> {
+        is PaymentSheetScreen.AddFirstPaymentMethod, is PaymentSheetScreen.VerticalMode -> {
             R.string.stripe_paymentsheet_add_payment_method_title.takeUnless {
                 isWalletEnabled
             }

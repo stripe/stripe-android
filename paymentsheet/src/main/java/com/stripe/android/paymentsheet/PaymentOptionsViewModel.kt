@@ -30,6 +30,7 @@ import com.stripe.android.paymentsheet.state.WalletsState
 import com.stripe.android.paymentsheet.ui.HeaderTextFactory
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.PrimaryButton
+import com.stripe.android.paymentsheet.verticalmode.DefaultPaymentMethodVerticalLayoutInteractor
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.paymentsheet.viewmodels.PrimaryButtonUiStateMapper
 import com.stripe.android.uicore.utils.combineAsStateFlow
@@ -325,7 +326,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
 
     override fun determineInitialBackStack(): List<PaymentSheetScreen> {
         if (config.paymentMethodLayout == PaymentSheet.PaymentMethodLayout.Vertical) {
-            return listOf(PaymentSheetScreen.VerticalMode)
+            return listOf(PaymentSheetScreen.VerticalMode(DefaultPaymentMethodVerticalLayoutInteractor(this)))
         }
         val target = if (args.state.showSavedPaymentMethods) {
             SelectSavedPaymentMethods
