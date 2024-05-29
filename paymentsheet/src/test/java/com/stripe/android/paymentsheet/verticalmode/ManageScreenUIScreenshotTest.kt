@@ -29,7 +29,6 @@ internal class ManageScreenUIScreenshotTest {
         paparazziRule.snapshot {
             ManageScreenUI(
                 interactor = FakeManageScreenInteractor(paymentMethods = savedPaymentMethods),
-                modifier = Modifier
             )
         }
     }
