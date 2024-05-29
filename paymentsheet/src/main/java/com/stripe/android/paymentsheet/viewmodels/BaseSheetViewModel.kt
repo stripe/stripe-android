@@ -125,7 +125,13 @@ internal abstract class BaseSheetViewModel(
     internal val paymentMethods: StateFlow<List<PaymentMethod>?> = savedStateHandle
         .getStateFlow<CustomerState?>(SAVED_CUSTOMER, null)
         .mapAsStateFlow { state ->
-            state?.paymentMethods
+            state?.paymentMethods?.mapNotNull {
+                when (it.type) {
+                    PaymentMethod.Type.Card, PaymentMethod.Type.SepaDebit, PaymentMethod.Type.USBankAccount -> it
+                    else -> null
+                }
+
+            }
         }
 
     protected val backStack = MutableStateFlow<List<PaymentSheetScreen>>(
