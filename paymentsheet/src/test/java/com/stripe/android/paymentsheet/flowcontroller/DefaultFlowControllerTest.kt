@@ -69,6 +69,8 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
 import com.stripe.android.paymentsheet.state.CustomerState
 import com.stripe.android.paymentsheet.state.LinkState
 import com.stripe.android.paymentsheet.state.PaymentSheetLoader
@@ -237,6 +239,14 @@ internal class DefaultFlowControllerTest {
 
         whenever(paymentLauncherAssistedFactory.create(any(), any(), anyOrNull(), any(), any()))
             .thenReturn(paymentLauncher)
+
+        whenever(
+            activityResultRegistry.register(
+                any(),
+                any<CvcRecollectionContract>(),
+                any()
+            )
+        ).thenReturn(mock())
 
         lifecycleOwner.currentState = Lifecycle.State.RESUMED
     }
@@ -1965,7 +1975,8 @@ internal class DefaultFlowControllerTest {
     private fun createFlowController(
         paymentSheetLoader: PaymentSheetLoader,
         viewModel: FlowControllerViewModel = createViewModel(),
-        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock()
+        bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory = mock(),
+        cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory = mock()
     ) = DefaultFlowController(
         viewModelScope = testScope,
         lifecycleOwner = lifecycleOwner,
@@ -1999,6 +2010,7 @@ internal class DefaultFlowControllerTest {
         ),
         intentConfirmationInterceptor = fakeIntentConfirmationInterceptor,
         errorReporter = FakeErrorReporter(),
+        cvcRecollectionLauncherFactory = cvcRecollectionLauncherFactory,
     )
 
     private fun createViewModel(): FlowControllerViewModel {

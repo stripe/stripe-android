@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.ViewModelStoreOwner
 import com.stripe.android.PaymentConfiguration
 import com.stripe.android.core.injection.ENABLE_LOGGING
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncherContractV2
@@ -61,6 +62,11 @@ import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateCon
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationLauncherFactory
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateConfirmationResult
 import com.stripe.android.paymentsheet.paymentdatacollection.bacs.BacsMandateData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionContract
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionData
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncher
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionLauncherFactory
+import com.stripe.android.paymentsheet.paymentdatacollection.cvcrecollection.CvcRecollectionResult
 import com.stripe.android.paymentsheet.state.PaymentSheetState
 import com.stripe.android.paymentsheet.ui.SepaMandateContract
 import com.stripe.android.paymentsheet.ui.SepaMandateResult
@@ -101,6 +107,7 @@ internal class DefaultFlowController @Inject internal constructor(
     @Named(PRODUCT_USAGE) private val productUsage: Set<String>,
     private val googlePayPaymentMethodLauncherFactory: GooglePayPaymentMethodLauncherFactory,
     bacsMandateConfirmationLauncherFactory: BacsMandateConfirmationLauncherFactory,
+    cvcRecollectionLauncherFactory: CvcRecollectionLauncherFactory,
     private val linkLauncher: LinkPaymentLauncher,
     private val configurationHandler: FlowControllerConfigurationHandler,
     private val intentConfirmationInterceptor: IntentConfirmationInterceptor,
@@ -111,6 +118,7 @@ internal class DefaultFlowController @Inject internal constructor(
         ActivityResultLauncher<GooglePayPaymentMethodLauncherContractV2.Args>
     private val sepaMandateActivityLauncher: ActivityResultLauncher<SepaMandateContract.Args>
     private val bacsMandateConfirmationLauncher: BacsMandateConfirmationLauncher
+    private val cvcRecollectionLauncher: CvcRecollectionLauncher
 
     /**
      * [FlowControllerComponent] is hold to inject into [Activity]s and created
@@ -174,6 +182,15 @@ internal class DefaultFlowController @Inject internal constructor(
         )
         this.externalPaymentMethodLauncher = externalPaymentMethodLauncher
 
+        val cvcRecollectionActivityLauncher = activityResultRegistryOwner.register(
+            CvcRecollectionContract(),
+            ::onCvcRecollectionResult
+        )
+
+        cvcRecollectionLauncher = cvcRecollectionLauncherFactory.create(
+            cvcRecollectionActivityLauncher
+        )
+
         val activityResultLaunchers = setOf(
             paymentLauncherActivityResultLauncher,
             paymentOptionActivityLauncher,
@@ -181,6 +198,7 @@ internal class DefaultFlowController @Inject internal constructor(
             sepaMandateActivityLauncher,
             bacsMandateConfirmationActivityLauncher,
             externalPaymentMethodLauncher,
+            cvcRecollectionActivityLauncher
         )
 
         linkLauncher.register(
@@ -370,6 +388,17 @@ internal class DefaultFlowController @Inject internal constructor(
                     merchantName = state.config.merchantDisplayName
                 )
             )
+        } else if (
+            FeatureFlags.cvcRecollection.isEnabled &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card &&
+            (state.stripeIntent as? PaymentIntent)?.requireCvcRecollection == true
+        ) {
+            CvcRecollectionData.fromPaymentSelection(paymentSelection.paymentMethod.card)?.let {
+                cvcRecollectionLauncher.launch(
+                    data = it,
+                    appearance = getPaymentAppearance()
+                )
+            }
         } else {
             confirmPaymentSelection(paymentSelection, state)
         }
@@ -552,6 +581,44 @@ internal class DefaultFlowController @Inject internal constructor(
             }
             is BacsMandateConfirmationResult.ModifyDetails -> presentPaymentOptions()
             is BacsMandateConfirmationResult.Cancelled -> Unit
+        }
+    }
+
+    internal fun onCvcRecollectionResult(
+        result: CvcRecollectionResult
+    ) {
+        when (result) {
+            is CvcRecollectionResult.Cancelled -> Unit
+            is CvcRecollectionResult.Confirmed -> {
+                runCatching {
+                    requireNotNull(viewModel.state)
+                }.fold(
+                    onSuccess = { state ->
+                        (viewModel.paymentSelection as? PaymentSelection.Saved)?.let {
+                            val selection = PaymentSelection.Saved(
+                                paymentMethod = it.paymentMethod,
+                                walletType = it.walletType,
+                                recollectedCvc = result.cvc
+                            )
+                            confirmPaymentSelection(selection, state)
+                        } ?: paymentResultCallback.onPaymentSheetResult(
+                            PaymentSheetResult.Failed(
+                                CvcRecollectionException(
+                                    type = CvcRecollectionException.Type.IncorrectSelection
+                                )
+                            )
+                        )
+                        errorReporter.report(
+                            ErrorReporter.UnexpectedErrorEvent.CVC_RECOLLECTION_UNEXPECTED_PAYMENT_SELECTION
+                        )
+                    },
+                    onFailure = { error ->
+                        paymentResultCallback.onPaymentSheetResult(
+                            PaymentSheetResult.Failed(error)
+                        )
+                    }
+                )
+            }
         }
     }
 
@@ -809,6 +876,18 @@ internal class DefaultFlowController @Inject internal constructor(
 
         enum class Type {
             MissingInformation,
+            IncorrectSelection
+        }
+    }
+
+    class CvcRecollectionException(
+        val type: Type
+    ) : Exception() {
+        override val message: String = when (type) {
+            Type.IncorrectSelection -> "PaymentSelection must be PaymentSelection.Saved for CVC recollection"
+        }
+
+        enum class Type {
             IncorrectSelection
         }
     }

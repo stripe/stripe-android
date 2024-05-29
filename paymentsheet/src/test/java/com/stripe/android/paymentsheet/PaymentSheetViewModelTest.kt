@@ -862,6 +862,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = any(),
                 shippingValues = isNull(),
                 requiresSaveOnConfirmation = eq(true),
+                recollectedCvc = isNull(),
             )
         }
 
@@ -885,6 +886,7 @@ internal class PaymentSheetViewModelTest {
                 paymentMethod = any(),
                 shippingValues = isNull(),
                 requiresSaveOnConfirmation = eq(false),
+                recollectedCvc = isNull(),
             )
         }
 
