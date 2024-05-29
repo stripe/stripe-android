@@ -2,7 +2,6 @@ package com.stripe.android
 
 import androidx.test.core.app.ApplicationProvider
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.core.ApiVersion
 import com.stripe.android.core.version.StripeSdkVersion
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
