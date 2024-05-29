@@ -3,6 +3,7 @@ package com.stripe.android
 import android.content.Context
 import com.stripe.android.core.ApiKeyValidator
 import com.stripe.android.core.ApiVersion
+import com.stripe.android.core.version.StripeSdkVersion
 import org.json.JSONException
 import org.json.JSONObject
 
@@ -14,7 +15,7 @@ class GooglePayConfig @JvmOverloads constructor(
     private val connectedAccountId: String? = null
 ) {
     private val validPublishableKey: String = ApiKeyValidator.get().requireValid(publishableKey)
-    private val apiVersion: String = ApiVersion.get().code
+    private val apiVersion: String = StripeSdkVersion.VERSION_NAME
 
     /**
      * @return a [JSONObject] representing a [Google Pay TokenizationSpecification](https://developers.google.com/pay/api/android/reference/object#gateway)
@@ -28,7 +29,7 @@ class GooglePayConfig @JvmOverloads constructor(
                 "parameters",
                 JSONObject()
                     .put("gateway", "stripe")
-                    .put("stripe:version", apiVersion)
+                    .put("stripe:version", "$USER_AGENT/$apiVersion")
                     .put("stripe:publishableKey", key)
             )
 
@@ -49,4 +50,8 @@ class GooglePayConfig @JvmOverloads constructor(
         publishableKey = paymentConfiguration.publishableKey,
         connectedAccountId = paymentConfiguration.stripeAccountId
     )
+
+    private companion object {
+        const val USER_AGENT = "StripeAndroid"
+    }
 }
