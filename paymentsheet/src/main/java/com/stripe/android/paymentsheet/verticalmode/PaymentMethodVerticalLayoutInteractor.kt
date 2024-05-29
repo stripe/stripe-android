@@ -48,7 +48,13 @@ internal class DefaultPaymentMethodVerticalLayoutInteractor(
                 )
             }
             PaymentMethodVerticalLayoutInteractor.ViewAction.TransitionToManageSavedPaymentMethods -> {
-                viewModel.transitionTo(PaymentSheetScreen.ManageSavedPaymentMethods)
+                viewModel.transitionTo(
+                    PaymentSheetScreen.ManageSavedPaymentMethods(
+                        interactor = DefaultManageScreenInteractor(
+                            viewModel
+                        )
+                    )
+                )
             }
         }
     }
