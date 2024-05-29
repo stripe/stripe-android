@@ -29,29 +29,17 @@ internal class ManageScreenUIScreenshotTest {
     fun testManageUIScreen_noSelectedPMs() {
         paparazziRule.snapshot {
             ManageScreenUI(
-                interactor = FakeManageScreenInteractor(displayableSavedPaymentMethods = savedPaymentMethods),
+                interactor = FakeManageScreenInteractor(paymentMethods = savedPaymentMethods),
                 modifier = Modifier
             )
         }
     }
 
-    private val savedPaymentMethods: List<DisplayableSavedPaymentMethod> = listOf(
-        DisplayableSavedPaymentMethod(
-            "····4242",
-            createCard("4242"),
-        ),
-        DisplayableSavedPaymentMethod(
-            "····4000",
-            createCard("4000"),
-        ),
-        DisplayableSavedPaymentMethod(
-            "····1001",
-            createUsBank("1001"),
-        ),
-        DisplayableSavedPaymentMethod(
-            "····1234",
-            createCard("1234"),
-        ),
+    private val savedPaymentMethods: List<PaymentMethod> = listOf(
+        createCard("4242"),
+        createCard("4000"),
+        createUsBank("1001"),
+        createCard("1234"),
     )
 
     private fun createCard(last4: String): PaymentMethod {

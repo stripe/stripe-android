@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 
 @Composable
 internal fun ManageScreenUI(interactor: ManageScreenInteractor, modifier: Modifier) {
@@ -16,7 +17,11 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor, modifier: Modifi
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(12.dp)) {
         state.paymentMethods?.forEach {
             SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = it,
+                displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
+                    displayName = interactor.state.value.nameProvider(it.type?.code),
+                    paymentMethod = it,
+                    isCbcEligible = interactor.state.value.isCbcEligible,
+                ),
                 resources = LocalContext.current.resources,
                 isEnabled = true,
                 isSelected = false
