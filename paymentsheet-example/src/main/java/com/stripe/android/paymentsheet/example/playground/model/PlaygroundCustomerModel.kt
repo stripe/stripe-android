@@ -11,6 +11,12 @@ class CustomerEphemeralKeyRequest private constructor(
     val customerKeyType: CustomerKeyType?,
     @SerialName("merchant_country_code")
     val merchantCountryCode: String?,
+    @SerialName("customer_session_payment_method_save")
+    val paymentMethodSaveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_remove")
+    val paymentMethodRemoveFeature: FeatureState?,
+    @SerialName("customer_session_payment_method_redisplay")
+    val paymentMethodRedisplayFeature: FeatureState?
 ) {
     @Serializable
     enum class CustomerKeyType {
@@ -19,6 +25,15 @@ class CustomerEphemeralKeyRequest private constructor(
 
         @SerialName("legacy")
         Legacy;
+    }
+
+    @Serializable
+    enum class FeatureState {
+        @SerialName("enabled")
+        Enabled,
+
+        @SerialName("disabled")
+        Disabled;
     }
 
     class Builder {
@@ -38,6 +53,9 @@ class CustomerEphemeralKeyRequest private constructor(
                 customerType = customerType,
                 customerKeyType = CustomerKeyType.Legacy,
                 merchantCountryCode = merchantCountryCode,
+                paymentMethodSaveFeature = FeatureState.Enabled,
+                paymentMethodRemoveFeature = FeatureState.Enabled,
+                paymentMethodRedisplayFeature = FeatureState.Enabled,
             )
         }
     }
