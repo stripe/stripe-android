@@ -118,7 +118,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
-
             val playgroundState by viewModel.state.collectAsState()
             val customerAdapter by viewModel.customerAdapter.collectAsState()
             var showMerchantOverrideDialog by remember { mutableStateOf(false) }

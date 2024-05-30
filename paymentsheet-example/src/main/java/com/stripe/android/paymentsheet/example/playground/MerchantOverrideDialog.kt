@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
@@ -25,6 +26,9 @@ internal fun MerchantOverrideDialog(
 ) {
     var publicKeyField by remember { mutableStateOf(keys?.first ?: "") }
     var privateKeyField by remember { mutableStateOf(keys?.second ?: "") }
+    var publicKeyError by remember { mutableStateOf(false) }
+    var privateKeyError by remember { mutableStateOf(false) }
+    val isConfirmEnabled = !publicKeyError && !privateKeyError
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
@@ -38,21 +42,46 @@ internal fun MerchantOverrideDialog(
             Column {
                 TextField(
                     value = publicKeyField,
-                    onValueChange = { publicKeyField = it },
+                    onValueChange = {
+                        publicKeyField = it
+                        publicKeyError = !it.startsWith("pk_")
+                    },
+                    isError = publicKeyError,
                     label = { Text("Public key") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (publicKeyError) {
+                    Text(
+                        text = "Public key must start with 'pk_'",
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
                 Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = privateKeyField,
-                    onValueChange = { privateKeyField = it },
+                    isError = privateKeyError,
+                    onValueChange = {
+                        privateKeyField = it
+                        privateKeyError = !it.startsWith("sk_")
+                    },
                     label = { Text("Private key") },
                     modifier = Modifier.fillMaxWidth()
                 )
+                if (privateKeyError) {
+                    Text(
+                        text = "Private key must start with 'sk_'",
+                        color = MaterialTheme.colors.error,
+                        style = MaterialTheme.typography.caption,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
             }
         },
         confirmButton = {
             Button(
+                enabled = isConfirmEnabled,
                 onClick = { onConfirm(publicKeyField, privateKeyField) }
             ) {
                 Text("OK")
