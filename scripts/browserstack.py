@@ -185,7 +185,7 @@ def getAllTestClassNames():
 
 def testShards(isNightly, testClassNames):
     # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
-    numberOfShards = 8.0 if isNightly else 10.0
+    numberOfShards = 2.0 if isNightly else 10.0
     testClassesPerShard = math.ceil(len(testClassNames) / numberOfShards)
 
     shards = []
@@ -269,8 +269,15 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
     devices = []
     if isNightly:
         devices = [
+            "Google Pixel 8-14.0",
             "Google Pixel 7-13.0",
             "Samsung Galaxy S22-12.0",
+            "Google Pixel 5-11.0",
+            "Google Pixel 4 XL-10.0",
+            "Google Pixel 3-9.0",
+            "Samsung Galaxy S9-8.0",
+            "Samsung Galaxy S8-7.0",
+            "Samsung Galaxy S7-6.0",
         ]
     else:
         devices = [

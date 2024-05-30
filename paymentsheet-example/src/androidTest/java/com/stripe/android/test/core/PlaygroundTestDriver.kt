@@ -29,6 +29,7 @@ import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.uiautomator.UiDevice
 import com.google.common.truth.Truth.assertThat
 import com.karumi.shot.ScreenshotTest
+import com.stripe.android.paymentsheet.example.BuildConfig
 import com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
@@ -48,6 +49,8 @@ import com.stripe.android.test.core.ui.clickTextInWebView
 import kotlinx.coroutines.launch
 import org.junit.Assert.fail
 import org.junit.Assume
+import org.junit.Assume.assumeFalse
+import org.junit.Assume.assumeTrue
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 import kotlin.time.Duration
@@ -865,7 +868,7 @@ internal class PlaygroundTestDriver(
         }
         if (authorizeAction == AuthorizeAction.DisplayQrCode) {
             // Browserstack tests fail on pixel 2 API 26.
-            Assume.assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
+            assumeFalse("walleye + 26" == "${Build.DEVICE} + ${Build.VERSION.SDK_INT}")
         }
     }
 
@@ -1080,6 +1083,15 @@ internal class PlaygroundTestDriver(
     }
 
     internal fun setup(testParameters: TestParameters) {
+        if (BuildConfig.IS_NIGHTLY_BUILD) {
+            assumeTrue(testParameters.executeInNightlyRun)
+        }
+
+        if (Build.VERSION.SDK_INT <= 28) {
+            val unsupportedAuthorizeActions = setOf(AuthorizeAction.Authorize3ds2, AuthorizeAction.DisplayQrCode)
+            assumeFalse(unsupportedAuthorizeActions.contains(testParameters.authorizationAction))
+        }
+
         this.testParameters = testParameters
         this.selectors = Selectors(device, composeTestRule, testParameters)
 

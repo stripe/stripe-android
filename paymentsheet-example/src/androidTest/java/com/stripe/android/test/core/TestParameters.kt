@@ -22,6 +22,7 @@ internal data class TestParameters(
     val saveForFutureUseCheckboxVisible: Boolean,
     val useBrowser: Browser? = null,
     val authorizationAction: AuthorizeAction? = null,
+    val executeInNightlyRun: Boolean = false,
     val playgroundSettingsSnapshot: PlaygroundSettings.Snapshot = playgroundSettings().snapshot(),
 ) {
     fun copyPlaygroundSettings(block: (PlaygroundSettings) -> Unit): TestParameters {
@@ -34,14 +35,16 @@ internal data class TestParameters(
         fun create(
             paymentMethodCode: String,
             requiresBrowser: Boolean = true,
-            authorizationAction: AuthorizeAction = AuthorizeAction.AuthorizePayment(requiresBrowser),
-            playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {}
+            authorizationAction: AuthorizeAction? = AuthorizeAction.AuthorizePayment(requiresBrowser),
+            executeInNightlyRun: Boolean = false,
+            playgroundSettingsBlock: (PlaygroundSettings) -> Unit = {},
         ): TestParameters {
             return TestParameters(
                 paymentMethodCode = paymentMethodCode,
                 saveCheckboxValue = false,
                 saveForFutureUseCheckboxVisible = false,
                 authorizationAction = authorizationAction,
+                executeInNightlyRun = executeInNightlyRun,
                 playgroundSettingsSnapshot = playgroundSettings(playgroundSettingsBlock).snapshot()
             )
         }
