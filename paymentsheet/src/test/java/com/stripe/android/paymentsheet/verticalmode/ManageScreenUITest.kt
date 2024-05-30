@@ -3,6 +3,7 @@ package com.stripe.android.paymentsheet.verticalmode
 import android.os.Build
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onChildren
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
@@ -70,7 +71,10 @@ class ManageScreenUITest {
     ) {
         composeRule.onNodeWithTag(
             "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[1].paymentMethod.id}"
-        ).assertIsSelected()
+        )
+            // The selected node is the PaymentMethodRowButton which is a child of the SavedPaymentMethodRowButton
+            .onChild()
+            .assertIsSelected()
     }
 
     private val displayableSavedPaymentMethods = PaymentMethodFixtures.createCards(4).map {

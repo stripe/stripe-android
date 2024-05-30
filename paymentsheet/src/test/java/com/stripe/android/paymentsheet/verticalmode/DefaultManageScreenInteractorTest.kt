@@ -13,6 +13,8 @@ class DefaultManageScreenInteractorTest {
     @Test
     fun initializeState_nullCurrentSelection() {
         val paymentMethods = PaymentMethodFixtures.createCards(2).plus(
+            // This is here because an easy bug to write would be selecting a PM with a null ID when the current
+            // selection is also null
             PaymentMethodFixtures.CARD_PAYMENT_METHOD.copy(id = null)
         )
         val initialState = createInitialState(paymentMethods, currentSelection = null)
