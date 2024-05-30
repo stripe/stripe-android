@@ -1,6 +1,6 @@
 package com.stripe.android.paymentsheet
 
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow
@@ -31,8 +31,8 @@ internal class FakeManageScreenInteractor(
         }
 
         fun consume(viewAction: ManageScreenInteractor.ViewAction) {
-            Truth.assertThat(_viewActions.size).isGreaterThan(0)
-            Truth.assertThat(_viewActions[0]).isEqualTo(viewAction)
+            assertThat(_viewActions.size).isGreaterThan(0)
+            assertThat(_viewActions[0]).isEqualTo(viewAction)
             _viewActions.removeAt(0)
         }
     }
