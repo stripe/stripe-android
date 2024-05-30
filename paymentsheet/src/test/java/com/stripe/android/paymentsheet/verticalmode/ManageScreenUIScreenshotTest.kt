@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
+import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.FakeManageScreenInteractor
 import com.stripe.android.screenshottesting.FontSize
 import com.stripe.android.screenshottesting.PaparazziRule
@@ -33,12 +34,18 @@ internal class ManageScreenUIScreenshotTest {
         }
     }
 
-    private val savedPaymentMethods: List<PaymentMethod> = listOf(
+    private val savedPaymentMethods: List<DisplayableSavedPaymentMethod> = listOf(
         createCard("4242"),
         createCard("4000"),
         createUsBank("1001"),
         createCard("1234"),
-    )
+    ).map {
+        DisplayableSavedPaymentMethod(
+            displayName = it.card?.last4 ?: it.usBankAccount?.last4 ?: "",
+            paymentMethod = it,
+            isCbcEligible = false,
+        )
+    }
 
     private fun createCard(last4: String): PaymentMethod {
         val original = PaymentMethodFixtures.createCard()

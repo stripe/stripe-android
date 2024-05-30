@@ -25,13 +25,9 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
         modifier = Modifier.padding(horizontal = horizontalPadding),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        state.paymentMethods?.forEach {
+        state.paymentMethods.forEach {
             SavedPaymentMethodRowButton(
-                displayableSavedPaymentMethod = DisplayableSavedPaymentMethod(
-                    displayName = state.nameProvider(it.type?.code),
-                    paymentMethod = it,
-                    isCbcEligible = state.isCbcEligible,
-                ),
+                displayableSavedPaymentMethod = it,
                 resources = LocalContext.current.resources,
                 isEnabled = true,
                 isSelected = false
