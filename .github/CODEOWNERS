@@ -1,4 +1,4 @@
-# Automatically request reviews from @android-sdk-reviewers by default, allow reviews from @android-sdk-non-core-reviewers
+# Require approvals from the android-sdk-reviewers team for all changes not in directories listed below.
 * @stripe/android-sdk-reviewers @stripe/android-sdk-non-core-reviewers
 
 # Payments SDK
