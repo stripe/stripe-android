@@ -5,6 +5,7 @@ import com.stripe.android.model.PaymentMethodCode
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.cbc.CardBrandChoiceEligibility
+import com.stripe.android.uicore.utils.combineAsStateFlow
 import com.stripe.android.uicore.utils.mapAsStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -17,12 +18,15 @@ internal interface ManageScreenInteractor {
 }
 
 internal class DefaultManageScreenInteractor(viewModel: BaseSheetViewModel) : ManageScreenInteractor {
-    override val state = viewModel.paymentMethods.mapAsStateFlow { paymentMethods ->
+    override val state = combineAsStateFlow(
+        viewModel.paymentMethods,
+        viewModel.paymentMethodMetadata
+    ) { paymentMethods, paymentMethodMetadata ->
         val displayablePaymentMethods = paymentMethods?.map {
             DisplayableSavedPaymentMethod(
                 displayName = viewModel.providePaymentMethodName(it.type?.code),
                 paymentMethod = it,
-                isCbcEligible = viewModel.paymentMethodMetadata.value?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
+                isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
             )
         }
         ManageScreenInteractor.State(displayablePaymentMethods ?: emptyList())
