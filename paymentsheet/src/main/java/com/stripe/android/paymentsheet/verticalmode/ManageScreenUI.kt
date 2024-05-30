@@ -8,9 +8,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
-import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
 import com.stripe.android.paymentsheet.R
 
 @Composable
@@ -22,8 +22,8 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
     val state by interactor.state.collectAsState()
 
     Column(
-        modifier = Modifier.padding(horizontal = horizontalPadding),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier = Modifier.padding(horizontal = horizontalPadding).testTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         state.paymentMethods.forEach {
             SavedPaymentMethodRowButton(
@@ -35,3 +35,5 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
         }
     }
 }
+
+internal const val TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST = "manage_screen_saved_pms_list"
