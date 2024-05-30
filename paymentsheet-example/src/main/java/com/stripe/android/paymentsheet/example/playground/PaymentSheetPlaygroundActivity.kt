@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -112,10 +111,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 callback = viewModel::onAddressLauncherResult
             )
 
-            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState().also {
-                Log.d("ComposeDebug", "PlaygroundSettings: $it")
-            }
-
+            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState()
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
 
             val playgroundState by viewModel.state.collectAsState()
