@@ -143,6 +143,7 @@ private fun NetworkingLinkSignupLoaded(
     }
 
     Layout(
+        applyImePadding = false,
         scrollState = scrollState,
         body = {
             Title(payload.content.title)

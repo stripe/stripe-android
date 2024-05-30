@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -36,6 +37,7 @@ import com.stripe.android.financialconnections.ui.components.DragHandle
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsButton
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsScaffold
 import com.stripe.android.financialconnections.ui.components.FinancialConnectionsTopAppBar
+import com.stripe.android.financialconnections.ui.conditional
 import com.stripe.android.financialconnections.ui.theme.FinancialConnectionsTheme.typography
 
 /**
@@ -56,6 +58,7 @@ internal fun Layout(
     inModal: Boolean = false,
     loading: Boolean = false,
     showPillOnSlowLoad: Boolean = false,
+    applyImePadding: Boolean = true,
     verticalArrangement: Arrangement.Vertical = Arrangement.Top,
     showFooterShadowWhenScrollable: Boolean = true,
     scrollState: ScrollState = rememberScrollState(),
@@ -66,6 +69,7 @@ internal fun Layout(
         canScrollForward = scrollState.canScrollForward,
         canScrollBackward = scrollState.canScrollBackward,
         inModal = inModal,
+        applyImePadding = applyImePadding,
         loading = loading,
         showPillOnSlowLoad = showPillOnSlowLoad,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
@@ -101,6 +105,7 @@ internal fun Layout(
 internal fun LazyLayout(
     modifier: Modifier = Modifier,
     bodyPadding: PaddingValues = PaddingValues(horizontal = 24.dp),
+    applyImePadding: Boolean = true,
     inModal: Boolean = false,
     loading: Boolean = false,
     showPillOnSlowLoad: Boolean = false,
@@ -115,6 +120,7 @@ internal fun LazyLayout(
         canScrollBackward = lazyListState.canScrollBackward,
         inModal = inModal,
         loading = loading,
+        applyImePadding = applyImePadding,
         showPillOnSlowLoad = showPillOnSlowLoad,
         showFooterShadowWhenScrollable = showFooterShadowWhenScrollable,
         modifier = modifier,
@@ -137,6 +143,7 @@ private fun LayoutScaffold(
     showPillOnSlowLoad: Boolean,
     inModal: Boolean,
     showFooterShadowWhenScrollable: Boolean,
+    applyImePadding: Boolean,
     modifier: Modifier = Modifier,
     footer: (@Composable () -> Unit)?,
     body: @Composable () -> Unit,
@@ -148,8 +155,15 @@ private fun LayoutScaffold(
     }
 
     Column(
-        modifier
-            .also { if (inModal.not()) it.fillMaxSize() }
+        modifier = modifier
+            .conditional(
+                condition = inModal.not(),
+                ifTrue = { fillMaxSize() }
+            )
+            .conditional(
+                condition = applyImePadding,
+                ifTrue = { imePadding() }
+            )
     ) {
         if (inModal) {
             DragHandle(

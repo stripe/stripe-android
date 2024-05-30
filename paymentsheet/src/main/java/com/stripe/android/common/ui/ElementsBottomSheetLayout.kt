@@ -3,6 +3,7 @@ package com.stripe.android.common.ui
 import android.os.Build
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue.Expanded
 import androidx.compose.runtime.Composable
@@ -56,7 +57,8 @@ internal fun ElementsBottomSheetLayout(
     StripeBottomSheetLayout(
         state = state,
         layoutInfo = layoutInfo,
-        modifier = modifier,
+        modifier = modifier
+            .imePadding(),
         onDismissed = onDismissed,
         sheetContent = content,
     )

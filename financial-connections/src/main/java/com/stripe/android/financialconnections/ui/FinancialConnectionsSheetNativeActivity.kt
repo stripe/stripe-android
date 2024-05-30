@@ -8,6 +8,7 @@ import android.os.Bundle
 import androidx.activity.addCallback
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.ModalBottomSheetValue
@@ -93,6 +94,7 @@ internal class FinancialConnectionsSheetNativeActivity : AppCompatActivity() {
 
         viewModel.activityRetainedComponent.inject(this)
 
+        enableEdgeToEdge()
         observeBackPress()
         observeBackgroundEvents()
         observeViewEffects()
