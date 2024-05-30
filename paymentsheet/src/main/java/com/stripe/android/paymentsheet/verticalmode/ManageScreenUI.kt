@@ -12,6 +12,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import com.stripe.android.paymentsheet.R
+import com.stripe.android.paymentsheet.ui.SelectedBadge
 
 @Composable
 internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
@@ -26,11 +27,15 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         state.paymentMethods.forEach {
+            val isSelected = it == state.currentSelection
+
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 resources = LocalContext.current.resources,
                 isEnabled = true,
-                isSelected = false
+                isSelected = isSelected,
+                trailingContent = { if (isSelected) SelectedBadge() },
+                onClick = { interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it)) }
             )
         }
     }

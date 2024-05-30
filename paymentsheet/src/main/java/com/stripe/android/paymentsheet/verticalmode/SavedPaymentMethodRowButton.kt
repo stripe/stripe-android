@@ -21,6 +21,7 @@ internal fun SavedPaymentMethodRowButton(
     isEnabled: Boolean,
     isSelected: Boolean,
     modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
     trailingContent: (@Composable RowScope.() -> Unit)? = null,
 ) {
     val paymentMethodTitle =
@@ -38,7 +39,7 @@ internal fun SavedPaymentMethodRowButton(
         },
         title = paymentMethodTitle,
         subtitle = null,
-        onClick = {},
+        onClick = onClick,
         modifier = modifier.testTag(
             "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethod.paymentMethod.id}"
         ),
