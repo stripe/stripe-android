@@ -26,7 +26,7 @@ internal interface ManageScreenInteractor {
     }
 }
 
-internal class DefaultManageScreenInteractor(val viewModel: BaseSheetViewModel) : ManageScreenInteractor {
+internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetViewModel) : ManageScreenInteractor {
     override val state = combineAsStateFlow(
         viewModel.paymentMethods,
         viewModel.paymentMethodMetadata,
