@@ -7,7 +7,6 @@ import androidx.core.content.edit
 import com.stripe.android.customersheet.CustomerSheet
 import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
-import com.stripe.android.paymentsheet.example.playground.MerchantOverrideState
 import com.stripe.android.paymentsheet.example.playground.PlaygroundState
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
@@ -179,16 +178,14 @@ internal class PlaygroundSettings private constructor(
             )
         }
 
-        fun checkoutRequest(merchantOverride: MerchantOverrideState?): CheckoutRequest {
+        fun checkoutRequest(): CheckoutRequest {
             val builder = CheckoutRequest.Builder()
             settings.filter { (definition, _) ->
                 definition.applicable(configurationData)
             }.onEach { (settingDefinition, value) ->
                 settingDefinition.configure(builder, value)
             }
-            return builder
-                .also { merchantOverride?.let { keys -> it.publicKey(keys.publicKey).privateKey(keys.privateKey) } }
-                .build()
+            return builder.build()
         }
 
         fun customerEphemeralKeyRequest(): CustomerEphemeralKeyRequest {
@@ -348,6 +345,7 @@ internal class PlaygroundSettings private constructor(
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
+            MerchantOverrideDefinition,
             ShippingAddressSettingsDefinition,
         )
 

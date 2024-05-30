@@ -36,6 +36,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.CustomerSetti
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantOverrideDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
@@ -63,7 +64,6 @@ internal class PaymentSheetPlaygroundViewModel(
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
     val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
-    private val merchantState = MutableStateFlow<MerchantOverrideState?>(null)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -101,7 +101,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
             playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
 
-            val requestBody = playgroundSettingsSnapshot.checkoutRequest(merchantState.value)
+            val requestBody = playgroundSettingsSnapshot.checkoutRequest()
 
             val apiResponse = Fuel.post(settings.playgroundBackendUrl + "checkout")
                 .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
@@ -463,8 +463,16 @@ internal class PaymentSheetPlaygroundViewModel(
     }
 
     fun onMerchantOverride(publicKey: String, privateKey: String) {
-        merchantState.update {
-            MerchantOverrideState(publicKey = publicKey, privateKey = privateKey)
+        playgroundSettingsFlow.value?.let { settings ->
+            settings[MerchantOverrideDefinition] = publicKey to privateKey
+            playgroundSettingsFlow.value = settings
+            state.value = state.value?.let { state ->
+                val updatedSnapshot = settings.snapshot()
+                when (state) {
+                    is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
+                    is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
+                }
+            }
         }
     }
 
