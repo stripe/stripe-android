@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
@@ -26,10 +27,14 @@ internal fun MerchantOverrideDialog(
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
-        title = { Text("Enter merchant details") },
+        title = {
+            Text(
+                text = "Enter merchant details",
+                style = MaterialTheme.typography.h6
+            )
+        },
         text = {
             Column {
-                Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = publicKeyField,
                     onValueChange = { publicKeyField = it },
