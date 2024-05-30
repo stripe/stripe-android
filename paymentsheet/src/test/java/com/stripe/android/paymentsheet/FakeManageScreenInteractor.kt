@@ -1,6 +1,5 @@
 package com.stripe.android.paymentsheet
 
-import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.verticalmode.ManageScreenInteractor
 import com.stripe.android.uicore.utils.stateFlowOf
 import kotlinx.coroutines.flow.StateFlow

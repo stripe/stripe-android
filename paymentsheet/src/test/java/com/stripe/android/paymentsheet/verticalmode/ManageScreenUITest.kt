@@ -21,7 +21,6 @@ class ManageScreenUITest {
     @get:Rule
     val composeRule = createComposeRule()
 
-
     @Test
     fun allSavedPaymentMethodsAreShown() {
         val displayableSavedPaymentMethods = PaymentMethodFixtures.createCards(4).map {
