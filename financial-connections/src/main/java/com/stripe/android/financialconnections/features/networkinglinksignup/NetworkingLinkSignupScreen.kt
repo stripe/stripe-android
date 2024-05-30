@@ -142,9 +142,9 @@ private fun NetworkingLinkSignupLoaded(
             emailFocusRequester.requestFocus()
         }
     }
-    // Everytime full form is shown, scroll to bottom and focus on phone number field
+    // Everytime full form is shown, scroll to bottom and focus on phone number field (if not empty)
     LaunchedEffect(showFullForm) {
-        if (showFullForm) {
+        if (showFullForm && payload.phoneController.fieldValue.value.isEmpty()) {
             scrollState.animateScrollToBottom()
             phoneNumberFocusRequester.requestFocus()
         }
