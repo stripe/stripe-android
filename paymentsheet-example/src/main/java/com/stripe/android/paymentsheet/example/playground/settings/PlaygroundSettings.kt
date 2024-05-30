@@ -70,7 +70,21 @@ internal class PlaygroundSettings private constructor(
                 return@forEach
             }
 
-            if (!values.contains(settings[definition]?.value)) {
+            val value = settings[definition]?.value
+
+            /*
+             * Keeps the existing customer ID if the country value can be shared between integration types
+             */
+            if (definition == CustomerSettingsDefinition && value is CustomerType.Existing) {
+                val countryOptions = CountrySettingsDefinition.createOptions(configurationData)
+                val country = settings[CountrySettingsDefinition]?.value
+
+                if (countryOptions.any { it.value == country }) {
+                    return@forEach
+                }
+            }
+
+            if (!values.contains(value)) {
                 settings[definition]?.value = values.firstOrNull()
             }
         }
