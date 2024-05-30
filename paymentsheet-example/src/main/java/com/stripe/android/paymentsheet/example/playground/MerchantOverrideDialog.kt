@@ -19,11 +19,12 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 internal fun MerchantOverrideDialog(
+    keys: Pair<String, String>?,
     onDismiss: () -> Unit,
     onConfirm: (String, String) -> Unit
 ) {
-    var publicKeyField by remember { mutableStateOf("") }
-    var privateKeyField by remember { mutableStateOf("") }
+    var publicKeyField by remember { mutableStateOf(keys?.first ?: "") }
+    var privateKeyField by remember { mutableStateOf(keys?.second ?: "") }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },

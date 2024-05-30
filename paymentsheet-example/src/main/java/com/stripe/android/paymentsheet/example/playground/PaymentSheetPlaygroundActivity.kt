@@ -2,6 +2,7 @@ package com.stripe.android.paymentsheet.example.playground
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -59,6 +60,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
+import com.stripe.android.paymentsheet.example.playground.settings.MerchantOverrideDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
@@ -110,12 +112,17 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 callback = viewModel::onAddressLauncherResult
             )
 
-            val playgroundSettings by viewModel.playgroundSettingsFlow.collectAsState()
+            val playgroundSettings: PlaygroundSettings? by viewModel.playgroundSettingsFlow.collectAsState().also {
+                Log.d("ComposeDebug", "PlaygroundSettings: $it")
+            }
+
             val localPlaygroundSettings = playgroundSettings ?: return@setContent
+
 
             val playgroundState by viewModel.state.collectAsState()
             val customerAdapter by viewModel.customerAdapter.collectAsState()
             var showMerchantOverrideDialog by remember { mutableStateOf(false) }
+            val merchantSettings by localPlaygroundSettings[MerchantOverrideDefinition].collectAsState()
 
             val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
                 customerAdapter?.let { adapter ->
@@ -129,6 +136,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             if (showMerchantOverrideDialog) {
                 MerchantOverrideDialog(
+                    merchantSettings,
                     onConfirm = { publicKey, privateKey ->
                         viewModel.onMerchantOverride(publicKey, privateKey)
                         showMerchantOverrideDialog = false
