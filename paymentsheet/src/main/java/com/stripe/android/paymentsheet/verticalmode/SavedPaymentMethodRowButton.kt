@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.tooling.preview.Preview
 import com.stripe.android.model.CardBrand
 import com.stripe.android.model.PaymentMethod
@@ -38,7 +39,9 @@ internal fun SavedPaymentMethodRowButton(
         title = paymentMethodTitle,
         subtitle = null,
         onClick = {},
-        modifier = modifier,
+        modifier = modifier.testTag(
+            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethod.paymentMethod.id}"
+        ),
         trailingContent = trailingContent,
     )
 }
@@ -68,3 +71,5 @@ internal fun PreviewCardSavedPaymentMethodRowButton() {
         isSelected = true,
     )
 }
+
+internal const val TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON = "saved_payment_method_row_button"

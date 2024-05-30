@@ -222,7 +222,7 @@ internal abstract class BaseSheetViewModel(
         )
     }
 
-    private fun providePaymentMethodName(code: PaymentMethodCode?): String {
+    internal fun providePaymentMethodName(code: PaymentMethodCode?): String {
         return code?.let {
             paymentMethodMetadata.value?.supportedPaymentMethodForCode(code)
         }?.displayName?.resolve(getApplication()).orEmpty()

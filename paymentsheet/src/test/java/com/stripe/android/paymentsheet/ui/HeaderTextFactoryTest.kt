@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
+import com.stripe.android.paymentsheet.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
 import org.junit.Test
@@ -128,7 +129,7 @@ class HeaderTextFactoryTest {
 
     private fun getManagedSavedPaymentMethodsHeaderText(isCompleteFlow: Boolean): Int? {
         return HeaderTextFactory(isCompleteFlow = isCompleteFlow).create(
-            screen = PaymentSheetScreen.ManageSavedPaymentMethods,
+            screen = PaymentSheetScreen.ManageSavedPaymentMethods(interactor = FakeManageScreenInteractor()),
             isWalletEnabled = false,
             types = emptyList(),
         )
