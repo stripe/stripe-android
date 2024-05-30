@@ -179,7 +179,7 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-   class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen {
+    class ManageSavedPaymentMethods(private val interactor: ManageScreenInteractor) : PaymentSheetScreen {
         override val showsBuyButton: Boolean = false
         override val showsContinueButton: Boolean = false
         override val canNavigateBack: Boolean = true
