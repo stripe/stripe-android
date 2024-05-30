@@ -63,6 +63,7 @@ internal class PaymentSheetPlaygroundViewModel(
     val flowControllerState = MutableStateFlow<FlowControllerState?>(null)
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
     val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
+    private val merchantState = MutableStateFlow<MerchantOverrideState?>(null)
 
     init {
         viewModelScope.launch(Dispatchers.IO) {
@@ -100,7 +101,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
             playgroundSettingsSnapshot.saveToSharedPreferences(getApplication())
 
-            val requestBody = playgroundSettingsSnapshot.checkoutRequest()
+            val requestBody = playgroundSettingsSnapshot.checkoutRequest(merchantState.value)
 
             val apiResponse = Fuel.post(settings.playgroundBackendUrl + "checkout")
                 .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
@@ -458,6 +459,12 @@ internal class PaymentSheetPlaygroundViewModel(
                 is PlaygroundState.Customer -> state.copy(snapshot = updatedSnapshot)
                 is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
             }
+        }
+    }
+
+    fun onMerchantOverride(publicKey: String, privateKey: String) {
+        merchantState.update {
+            MerchantOverrideState(publicKey = publicKey, privateKey = privateKey)
         }
     }
 

@@ -81,7 +81,7 @@ internal sealed interface PlaygroundState {
                 snapshot = snapshot,
                 amount = amount,
                 paymentMethodTypes = paymentMethodTypes,
-                customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
+                customerConfig = makeCustomerConfig(snapshot.checkoutRequest(null).customerKeyType),
                 clientSecret = intentClientSecret,
             )
         }

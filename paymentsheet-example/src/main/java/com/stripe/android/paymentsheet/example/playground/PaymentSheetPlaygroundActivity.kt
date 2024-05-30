@@ -20,16 +20,24 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.darkColors
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -107,6 +115,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             val playgroundState by viewModel.state.collectAsState()
             val customerAdapter by viewModel.customerAdapter.collectAsState()
+            var showMerchantOverrideDialog by remember { mutableStateOf(false) }
 
             val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
                 customerAdapter?.let { adapter ->
@@ -116,6 +125,18 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                         callback = viewModel::onCustomerSheetCallback
                     )
                 }
+            }
+
+            if (showMerchantOverrideDialog) {
+                MerchantOverrideDialog(
+                    onConfirm = { publicKey, privateKey ->
+                        viewModel.onMerchantOverride(publicKey, privateKey)
+                        showMerchantOverrideDialog = false
+                    },
+                    onDismiss = {
+                        showMerchantOverrideDialog = false
+                    }
+                )
             }
 
             PlaygroundTheme(
@@ -134,6 +155,24 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
                     ClearLinkDataButton()
+                },
+                topBar = {
+                    TopAppBar(
+                        title = {
+                            Text(
+                                text = "PaymentSheet Playground",
+                                modifier = Modifier.padding(16.dp)
+                            )
+                        },
+                        actions = {
+                            IconButton(onClick = { showMerchantOverrideDialog = true }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Storefront,
+                                    contentDescription = "Update merchant"
+                                )
+                            }
+                        }
+                    )
                 },
                 bottomBarContent = {
                     ReloadButton(playgroundSettings = localPlaygroundSettings)
@@ -473,6 +512,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 @Composable
 private fun PlaygroundTheme(
     content: @Composable ColumnScope.() -> Unit,
+    topBar: @Composable () -> Unit = {},
     bottomBarContent: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
@@ -490,6 +530,7 @@ private fun PlaygroundTheme(
             color = MaterialTheme.colors.background,
         ) {
             Scaffold(
+                topBar = topBar,
                 bottomBar = {
                     Column(
                         modifier = Modifier
