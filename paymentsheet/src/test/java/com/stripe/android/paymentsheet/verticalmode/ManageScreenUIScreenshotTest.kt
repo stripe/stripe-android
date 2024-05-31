@@ -23,7 +23,26 @@ internal class ManageScreenUIScreenshotTest {
     fun testManageUIScreen_noSelectedPMs() {
         paparazziRule.snapshot {
             ManageScreenUI(
-                interactor = FakeManageScreenInteractor(paymentMethods = savedPaymentMethods),
+                interactor = FakeManageScreenInteractor(
+                    initialState = ManageScreenInteractor.State(
+                        paymentMethods = savedPaymentMethods,
+                        currentSelection = null
+                    )
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testManageUIScreen_withSelectedPM() {
+        paparazziRule.snapshot {
+            ManageScreenUI(
+                interactor = FakeManageScreenInteractor(
+                    initialState = ManageScreenInteractor.State(
+                        paymentMethods = savedPaymentMethods,
+                        currentSelection = savedPaymentMethods[1]
+                    )
+                ),
             )
         }
     }

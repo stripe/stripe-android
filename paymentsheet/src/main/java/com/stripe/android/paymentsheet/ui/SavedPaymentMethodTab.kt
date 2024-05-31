@@ -9,7 +9,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -22,10 +21,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.BadgedBox
-import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
@@ -278,32 +274,6 @@ private fun ModifyBadge(
             .background(color = backgroundColor)
             .clickable(onClick = onPressed),
     )
-}
-
-@Composable
-private fun SelectedBadge(
-    modifier: Modifier = Modifier,
-) {
-    val iconColor = MaterialTheme.colors.primary
-    val checkSymbolColor = if (iconColor.shouldUseDarkDynamicColor()) {
-        Color.Black
-    } else {
-        Color.White
-    }
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = modifier
-            .clip(CircleShape)
-            .size(24.dp)
-            .background(MaterialTheme.colors.primary)
-    ) {
-        Icon(
-            imageVector = Icons.Filled.Check,
-            contentDescription = null,
-            tint = checkSymbolColor,
-            modifier = Modifier.size(12.dp),
-        )
-    }
 }
 
 @Preview(name = "Selected payment option")
