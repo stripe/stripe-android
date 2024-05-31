@@ -22,6 +22,7 @@ object ConsumerFixtures {
                 "client_secret": "secret",
                 "email_address": "email@example.com",
                 "redacted_phone_number": "+1********68",
+                "redacted_formatted_phone_number": "(***) *** **68",
                 "support_payment_details_types": [
                   "CARD"
                 ],
@@ -42,6 +43,7 @@ object ConsumerFixtures {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDNmZDE1MjA5LTM1YjctND",
                 "email_address": "test@stripe.com",
                 "redacted_phone_number": "+1********56",
+                "redacted_formatted_phone_number": "(***) *** **56",
                 "support_payment_details_types": [
                   "CARD"
                 ],
@@ -64,6 +66,7 @@ object ConsumerFixtures {
                 "client_secret": "12oBEhVjc21yKkFYNnhMVTlXbXdBQUFJRmEaJDUzNTFkNjNhLTZkNGMtND",
                 "email_address": "test@stripe.com",
                 "redacted_phone_number": "+1********56",
+                "redacted_formatted_phone_number": "(***) *** **56",
                 "support_payment_details_types": [
                   "CARD"
                 ],
@@ -86,6 +89,7 @@ object ConsumerFixtures {
                 "client_secret": "12oBEhVjc21yKkFYNmNWT0JmaFFBQUFLUXcaJDk5OGFjYTFlLTkxMWYtND",
                 "email_address": "test@stripe.com",
                 "redacted_phone_number": "+1********23",
+                "redacted_formatted_phone_number": "(***) *** **23",
                 "support_payment_details_types": [
                   "CARD"
                 ],
