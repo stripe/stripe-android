@@ -9,6 +9,7 @@ import sys
 import json
 import math
 import zipfile
+from collections import defaultdict
 
 # These need to be set in environment variables.
 user = os.getenv("BROWSERSTACK_USERNAME")
@@ -215,7 +216,20 @@ def testShards(isNightly, testClassNames):
 
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
-def executeTests(appUrl, testUrl, isNightly, testClasses):
+def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
+    baseParams = {
+        "app": appUrl,
+        "devices": devices,
+        "testSuite": testUrl,
+        "networkLogs": True,
+        "deviceLogs": True,
+        "video": True,
+        "acceptInsecureCerts": True,
+        "locale": "en_US",
+        "enableSpoonFramework": False,
+        "project": PROJECT_NAME,
+    }
+    json = {**baseParams, **addedParams}
     print(
         "RUNNING the tests (appUrl: {app}, testUrl: {test})...".format(
             app=appUrl, test=testUrl
@@ -223,38 +237,9 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
         end="",
     )
     url = "https://api-cloud.browserstack.com/app-automate/espresso/v2/build"
-    # firefox doesn't work on this samsung: Samsung Galaxy S9 Plus-9.0"]
-    shards = testShards(isNightly, testClasses)
-    runningAllTests = len(testClasses) == len(getAllTestClassNames())
-    devices = []
-    if isNightly:
-        devices = [
-            "Google Pixel 7-13.0",
-            "Samsung Galaxy S22-12.0",
-        ]
-    else:
-        devices = [
-            "Samsung Galaxy S22-12.0",
-        ]
     response = requests.post(
         url,
-        json={
-            "app": appUrl,
-            "devices": devices,
-            "testSuite": testUrl,
-            "networkLogs": True,
-            "deviceLogs": True,
-            "video": True,
-            "acceptInsecureCerts": True,
-            "locale": "en_US",
-            "enableSpoonFramework": False,
-            "project": PROJECT_NAME,
-            "shards": {
-                "numberOfShards": len(shards),
-                "mapping": shards,
-            },
-            "class": None if runningAllTests else testClasses,
-        },
+        json=json,
         auth=(user, authKey),
     )
     jsonResponse = response.json()
@@ -279,6 +264,31 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
         )
         return None
 
+def executeTests(appUrl, testUrl, isNightly, testClasses):
+    shards = testShards(isNightly, testClasses)
+    devices = []
+    if isNightly:
+        devices = [
+            "Google Pixel 7-13.0",
+            "Samsung Galaxy S22-12.0",
+        ]
+    else:
+        devices = [
+            "Samsung Galaxy S22-12.0",
+        ]
+    addedParams = {
+        "shards": {
+            "numberOfShards": len(shards),
+            "mapping": shards,
+        },
+    }
+    return executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams)
+
+def executeTestsForFailure(appUrl, testUrl, device, testClasses):
+    addedParams = {
+        "class": testClasses,
+    }
+    return executeTestsWithAddedParams(appUrl, testUrl, [device], addedParams)
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
 def get_build_status(buildId):
@@ -387,6 +397,15 @@ def runTests(appUrl, testUrl, isNightly, testClasses):
         deleteTestSuite(testUrl.replace("bs://", ""))
     return {"exitStatus": exitStatus, "buildId": buildId}
 
+def runTestsForFailure(appUrl, testUrl, device, testClasses):
+    print(f"RUNNING {str(len(testClasses))} test cases on {device}")
+    buildId = executeTestsForFailure(appUrl, testUrl, device, testClasses)
+    exitStatus = 1
+    if buildId != None:
+        exitStatus = waitForBuildComplete(buildId)
+    else:
+        deleteTestSuite(testUrl.replace("bs://", ""))
+    return {"exitStatus": exitStatus, "buildId": buildId}
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/sessions#get-session-details
 def getFailedTestClassesForSession(buildId, sessionId):
@@ -410,14 +429,13 @@ def getFailedTestClassesForSession(buildId, sessionId):
     return failedTestClasses
 
 
-def classNamesToFullyQualifiedClassNames(failedTestClassNames):
+def classNameToFullyQualifiedClassName(failedTestClassName):
     fullyQualifiedTestClassNames = getAllTestClassNames()
-    failedFullyQualifiedTestClassNames = []
     for fullyQualifiedTestClassName in fullyQualifiedTestClassNames:
         testClassName = fullyQualifiedTestClassName.split(".")[-1]
-        if testClassName in failedTestClassNames:
-            failedFullyQualifiedTestClassNames.append(fullyQualifiedTestClassName)
-    return failedFullyQualifiedTestClassNames
+        if testClassName == failedTestClassName:
+            return fullyQualifiedTestClassName
+    return None
 
 
 def getSessionIdsForBuild(buildId):
@@ -430,15 +448,45 @@ def getSessionIdsForBuild(buildId):
             sessionIds.append(session["id"])
     return sessionIds
 
+def getSessionIdsAndDeviceForBuild(buildId):
+    sessionIds = []
+    buildStatus = get_build_status(buildId)
+    devices = buildStatus.json()["devices"]
+    for device in devices:
+        sessions_on_device = device["sessions"]
+        for session in sessions_on_device:
+            deviceIdentifier = f"{device['device']}-{device['os_version']}"
+            sessionIds.append({"session_id": session["id"], "device": deviceIdentifier})
+    return sessionIds
+
 
 def getFailedTestsForBuild(buildId):
-    sessionIds = getSessionIdsForBuild(buildId)
-    failedClasses = []
-    for sessionId in sessionIds:
-        failedClassesInSession = getFailedTestClassesForSession(buildId, sessionId)
+    print(f"Getting failed tests for build {buildId}")
+    sessionIdsAndDevices = getSessionIdsAndDeviceForBuild(buildId)
+    devicesWithFailedClasses = defaultdict(list)
+    for item in sessionIdsAndDevices:
+        failedClassesInSession = getFailedTestClassesForSession(buildId, item["session_id"])
         for failedClass in failedClassesInSession:
-            failedClasses.append(failedClass)
-    return classNamesToFullyQualifiedClassNames(failedClasses)
+            devicesWithFailedClasses[item["device"]].append(classNameToFullyQualifiedClassName(failedClass))
+            print(f"Device failed: {item['device']} - {failedClass}")
+    return devicesWithFailedClasses
+
+
+def retryFailedTests(buildId, numRetries):
+    failedTestsDictionary = getFailedTestsForBuild(buildId)
+    while numRetries > 0:
+        updatedFailedTestsDictionary = {}
+        numRetries -= 1
+        for failedDevice in failedTestsDictionary:
+            deviceTestResults = runTestsForFailure(appUrl, testUrl, failedDevice, failedTestsDictionary[failedDevice])
+            deviceExitStatus = deviceTestResults["exitStatus"]
+            if deviceExitStatus != 0:
+                updatedFailedTestsDictionary[failedDevice] = getFailedTestsForBuild(deviceTestResults["buildId"])[failedDevice]
+
+        if len(updatedFailedTestsDictionary) == 0:
+            return 0
+        failedTestsDictionary = updatedFailedTestsDictionary
+    return -1
 
 
 if __name__ == "__main__":
@@ -524,19 +572,15 @@ if __name__ == "__main__":
 
             exitStatus = 1
             testClassesToRun = getAllTestClassNames()
-            while numRetries >= 0:
-                testResults = runTests(
-                    appUrl, testUrl, args.is_nightly, testClassesToRun
-                )
-                print("-----------------")
-                exitStatus = testResults["exitStatus"]
-                updateObservabilityWithResults(testResults["buildId"])
-                if exitStatus == 0:
-                    break
-                else:
-                    numRetries -= 1
-                    testClassesToRun = getFailedTestsForBuild(testResults["buildId"])
-                    os.environ["BROWSERSTACK_RERUN"] = "true"
+            testResults = runTests(
+                appUrl, testUrl, args.is_nightly, testClassesToRun
+            )
+            print("-----------------")
+            exitStatus = testResults["exitStatus"]
+            updateObservabilityWithResults(testResults["buildId"])
+            if exitStatus != 0 and numRetries > 0:
+                os.environ["BROWSERSTACK_RERUN"] = "true"
+                exitStatus = retryFailedTests(testResults["buildId"], numRetries)
 
             os.environ["BROWSERSTACK_RERUN"] = "false"
             sys.exit(exitStatus)
