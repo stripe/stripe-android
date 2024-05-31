@@ -10,7 +10,7 @@ import androidx.compose.ui.test.performClick
 import com.google.common.truth.Truth.assertThat
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.FakeManageScreenInteractor
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import org.junit.Rule
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -89,7 +89,7 @@ class ManageScreenUITest {
         initialState: ManageScreenInteractor.State,
         block: Scenario.() -> Unit
     ) {
-        val viewActionRecorder = FakeManageScreenInteractor.ViewActionRecorder()
+        val viewActionRecorder = ViewActionRecorder<ManageScreenInteractor.ViewAction>()
 
         val manageScreenInteractor = FakeManageScreenInteractor(
             initialState = initialState,
@@ -104,6 +104,6 @@ class ManageScreenUITest {
     }
 
     private data class Scenario(
-        val viewActionRecorder: FakeManageScreenInteractor.ViewActionRecorder,
+        val viewActionRecorder: ViewActionRecorder<ManageScreenInteractor.ViewAction>,
     )
 }

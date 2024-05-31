@@ -6,7 +6,6 @@ import androidx.compose.ui.unit.dp
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.model.PaymentMethodFixtures
 import com.stripe.android.paymentsheet.DisplayableSavedPaymentMethod
-import com.stripe.android.paymentsheet.FakeManageScreenInteractor
 import com.stripe.android.screenshottesting.PaparazziRule
 import org.junit.Rule
 import org.junit.Test
