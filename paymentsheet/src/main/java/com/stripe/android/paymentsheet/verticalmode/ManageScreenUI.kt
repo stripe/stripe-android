@@ -58,11 +58,9 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                     )
                 },
                 onClick = {
-                    if (!state.isEditing) interactor.handleViewAction(
-                        ManageScreenInteractor.ViewAction.SelectPaymentMethod(
-                            it
-                        )
-                    )
+                    if (!state.isEditing) {
+                        interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it))
+                    }
                 },
             )
         }
@@ -73,8 +71,8 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
 private fun TrailingContent(isSelected: Boolean, isEditing: Boolean, isModifiable: Boolean, paymentMethodId: String?) {
     if (isEditing && isModifiable) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-           EditIcon(paymentMethodId)
-           DeleteIcon(paymentMethodId)
+            EditIcon(paymentMethodId)
+            DeleteIcon(paymentMethodId)
         }
     } else if (isEditing) {
         DeleteIcon(paymentMethodId)

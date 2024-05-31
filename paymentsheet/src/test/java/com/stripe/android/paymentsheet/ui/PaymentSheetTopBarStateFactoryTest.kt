@@ -142,7 +142,6 @@ class PaymentSheetTopBarStateFactoryTest {
         assertThat(state.showEditMenu).isFalse()
     }
 
-
     @Test
     fun `Hides edit menu if not on the saved payment methods screen`() {
         val state = buildTopBarState(

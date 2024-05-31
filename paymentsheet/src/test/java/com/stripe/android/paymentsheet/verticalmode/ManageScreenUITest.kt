@@ -103,7 +103,6 @@ class ManageScreenUITest {
             assertThat(viewActionRecorder.viewActions).isEmpty()
         }
 
-
     @Test
     fun initiallySelectedPm_isSelectedInUi() = runScenario(
         initialState = ManageScreenInteractor.State(
@@ -135,7 +134,6 @@ class ManageScreenUITest {
             .onChild()
             .assertIsNotSelected()
     }
-
 
     @Test
     fun correctIconsAreShown_inEditMode() = runScenario(

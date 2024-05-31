@@ -14,7 +14,7 @@ internal class HeaderTextFactory(
         screen: PaymentSheetScreen?,
         isWalletEnabled: Boolean,
         types: List<PaymentMethodCode>,
-        isEditing : Boolean = false,
+        isEditing: Boolean = false,
     ): Int? {
         return if (isCompleteFlow) {
             createForCompleteFlow(screen, isWalletEnabled, isEditing)
