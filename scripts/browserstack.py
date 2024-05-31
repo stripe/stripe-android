@@ -217,7 +217,7 @@ def testShards(isNightly, testClassNames):
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
 def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
-    json = {
+    baseParams = {
         "app": appUrl,
         "devices": devices,
         "testSuite": testUrl,
@@ -228,7 +228,8 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
         "locale": "en_US",
         "enableSpoonFramework": False,
         "project": PROJECT_NAME,
-    } | addedParams
+    }
+    json = {**baseParams, **addedParams}
     print(
         "RUNNING the tests (appUrl: {app}, testUrl: {test})...".format(
             app=appUrl, test=testUrl
