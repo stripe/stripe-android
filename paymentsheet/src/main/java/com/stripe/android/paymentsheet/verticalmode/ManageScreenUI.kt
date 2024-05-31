@@ -54,6 +54,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
                         isSelected = isSelected,
                         isEditing = state.isEditing,
                         isModifiable = it.isModifiable(),
+                        paymentMethodId = it.paymentMethod.id,
                     )
                 },
                 onClick = {
@@ -69,34 +70,42 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
 }
 
 @Composable
-private fun TrailingContent(isSelected: Boolean, isEditing: Boolean, isModifiable: Boolean) {
+private fun TrailingContent(isSelected: Boolean, isEditing: Boolean, isModifiable: Boolean, paymentMethodId: String?) {
     if (isEditing && isModifiable) {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-           EditIcon()
-           DeleteIcon()
+           EditIcon(paymentMethodId)
+           DeleteIcon(paymentMethodId)
         }
     } else if (isEditing) {
-        DeleteIcon()
+        DeleteIcon(paymentMethodId)
     } else if (isSelected) {
         SelectedBadge()
     }
 }
 
 @Composable
-private fun DeleteIcon() {
-    TrailingIcon(backgroundColor = Color.Red, icon = Icons.Filled.Close)
+private fun DeleteIcon(paymentMethodId: String?) {
+    TrailingIcon(
+        backgroundColor = Color.Red,
+        icon = Icons.Filled.Close,
+        modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_DELETE_ICON}_$paymentMethodId")
+    )
 }
 
 @Composable
-private fun EditIcon() {
-    TrailingIcon(backgroundColor = Color.Gray, icon = Icons.Filled.Edit)
+private fun EditIcon(paymentMethodId: String?) {
+    TrailingIcon(
+        backgroundColor = Color.Gray,
+        icon = Icons.Filled.Edit,
+        modifier = Modifier.testTag("${TEST_TAG_MANAGE_SCREEN_EDIT_ICON}_$paymentMethodId")
+    )
 }
 
 @Composable
-private fun TrailingIcon(backgroundColor: Color, icon: ImageVector) {
+private fun TrailingIcon(backgroundColor: Color, icon: ImageVector, modifier: Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier
+        modifier = modifier
             .clip(CircleShape)
             .size(24.dp)
             .background(backgroundColor)
@@ -111,3 +120,5 @@ private fun TrailingIcon(backgroundColor: Color, icon: ImageVector) {
 }
 
 internal const val TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST = "manage_screen_saved_pms_list"
+internal const val TEST_TAG_MANAGE_SCREEN_EDIT_ICON = "manage_screen_edit_icon"
+internal const val TEST_TAG_MANAGE_SCREEN_DELETE_ICON = "manage_screen_delete_icon"

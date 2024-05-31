@@ -44,7 +44,8 @@ class DefaultManageScreenInteractorTest {
                 stripeIntent = PaymentIntentFixtures.PI_REQUIRES_PAYMENT_METHOD
             ),
             selection = currentSelection,
-            providePaymentMethodName = { it ?: "Missing name" }
+            providePaymentMethodName = { it ?: "Missing name" },
+            isEditing = false,
         )
     }
 }
