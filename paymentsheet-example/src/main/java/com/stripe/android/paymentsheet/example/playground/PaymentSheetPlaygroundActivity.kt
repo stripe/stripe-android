@@ -21,16 +21,11 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.darkColors
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Storefront
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -116,7 +111,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             val playgroundState by viewModel.state.collectAsState()
             val customerAdapter by viewModel.customerAdapter.collectAsState()
-            var showMerchantOverrideDialog by remember { mutableStateOf(false) }
+            var showCustomEndpointDialog by remember { mutableStateOf(false) }
             val endpoint = playgroundState?.endpoint
 
             val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
@@ -129,15 +124,15 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                 }
             }
 
-            if (showMerchantOverrideDialog) {
+            if (showCustomEndpointDialog) {
                 CustomEndpointDialog(
                     endpoint.orEmpty(),
                     onConfirm = { backendUrl ->
                         viewModel.onBackendUrlChanged(backendUrl)
-                        showMerchantOverrideDialog = false
+                        showCustomEndpointDialog = false
                     },
                     onDismiss = {
-                        showMerchantOverrideDialog = false
+                        showCustomEndpointDialog = false
                     }
                 )
             }
@@ -148,7 +143,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                         Text(
                             text = "Using $customEndpoint",
                             modifier = Modifier
-                                .clickable { showMerchantOverrideDialog = true }
+                                .clickable { showCustomEndpointDialog = true }
                                 .padding(bottom = 16.dp),
                         )
                     }
@@ -167,24 +162,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
                     QrCodeButton(playgroundSettings = localPlaygroundSettings)
 
                     ClearLinkDataButton()
-                },
-                topBar = {
-                    TopAppBar(
-                        title = {
-                            Text(
-                                text = "PaymentSheet Playground",
-                                modifier = Modifier.padding(16.dp)
-                            )
-                        },
-                        actions = {
-                            IconButton(onClick = { showMerchantOverrideDialog = true }) {
-                                Icon(
-                                    imageVector = Icons.Filled.Storefront,
-                                    contentDescription = "Update merchant"
-                                )
-                            }
-                        }
-                    )
                 },
                 bottomBarContent = {
                     ReloadButton(playgroundSettings = localPlaygroundSettings)

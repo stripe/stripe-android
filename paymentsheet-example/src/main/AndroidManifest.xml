@@ -48,7 +48,6 @@
         <activity android:name="com.stripe.android.paymentsheet.example.playground.activity.FawryActivity" />
         <activity
             android:name="com.stripe.android.paymentsheet.example.playground.PaymentSheetPlaygroundActivity"
-            android:theme="@style/AppTheme.NoActionBar"
             android:exported="true"
             >
             <intent-filter>
