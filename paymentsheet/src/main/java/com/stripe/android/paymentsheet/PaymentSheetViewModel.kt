@@ -206,7 +206,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
-    // hmm
     override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
@@ -435,6 +434,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         checkout(PaymentSelection.GooglePay, CheckoutIdentifier.SheetTopWallet)
     }
 
+    @Suppress("LongMethod", "CyclomaticComplexMethod", "ComplexCondition")
     private fun checkout(
         paymentSelection: PaymentSelection?,
         identifier: CheckoutIdentifier,
@@ -489,10 +489,10 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                 )
             }
         } else if (
-            FeatureFlags.cvcRecollection.isEnabled
-            && isCvcRecollectionRequired()
-            && paymentSelection is PaymentSelection.Saved
-            && paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
+            FeatureFlags.cvcRecollection.isEnabled &&
+            isCvcRecollectionRequired() &&
+            paymentSelection is PaymentSelection.Saved &&
+            paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
         ) {
             confirmPaymentSelection(
                 paymentSelection.copy(
@@ -855,12 +855,6 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             null
         }
     }
-
-    private fun shouldSetCvc(paymentSelection: PaymentSelection?): Boolean =
-        isCvcRecollectionRequired()
-        && paymentSelection is PaymentSelection.Saved
-        && paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
-
 
     private fun storeAwaitingPaymentResult() {
         savedStateHandle[AwaitingPaymentResultKey] = true

@@ -200,6 +200,7 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
@@ -247,8 +248,8 @@ private fun PaymentSheetContent(
         }
 
         if (
-            currentScreen is PaymentSheetScreen.SelectSavedPaymentMethods
-            && currentScreen.cvcRecollectionState is CvcRecollectionState.Required
+            currentScreen is PaymentSheetScreen.SelectSavedPaymentMethods &&
+            currentScreen.cvcRecollectionState is CvcRecollectionState.Required
         ) {
             CvcRecollectionField(currentScreen.cvcRecollectionState.cvcControllerFlow)
         }

@@ -81,8 +81,8 @@ internal class PrimaryButtonUiStateMapper(
 
     private fun cvcRecollectionRequired(screen: PaymentSheetScreen, complete: Boolean): Boolean {
         return if (
-            screen is PaymentSheetScreen.SelectSavedPaymentMethods
-            && screen.cvcRecollectionState is CvcRecollectionState.Required
+            screen is PaymentSheetScreen.SelectSavedPaymentMethods &&
+            screen.cvcRecollectionState is CvcRecollectionState.Required
         ) {
             complete
         } else {
