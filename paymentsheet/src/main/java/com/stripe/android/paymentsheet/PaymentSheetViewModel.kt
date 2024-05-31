@@ -19,6 +19,7 @@ import com.stripe.android.common.exception.stripeErrorMessage
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
 import com.stripe.android.core.strings.resolvableString
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.googlepaylauncher.GooglePayEnvironment
 import com.stripe.android.googlepaylauncher.GooglePayPaymentMethodLauncher
@@ -133,6 +134,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         amountFlow = paymentMethodMetadata.mapAsStateFlow { it?.amount() },
         selectionFlow = selection,
         customPrimaryButtonUiStateFlow = customPrimaryButtonUiState,
+        cvcCompleteFlow = cvcRecollectionCompleteFlow,
         onClick = {
             reportConfirmButtonPressed()
             checkout()
@@ -204,6 +206,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             }
         }
 
+    // hmm
     override val primaryButtonUiState = primaryButtonUiStateMapper.forCompleteFlow().stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(),
@@ -485,6 +488,17 @@ internal class PaymentSheetViewModel @Inject internal constructor(
                         .getString(R.string.stripe_something_went_wrong)
                 )
             }
+        } else if (
+            FeatureFlags.cvcRecollection.isEnabled
+            && isCvcRecollectionRequired()
+            && paymentSelection is PaymentSelection.Saved
+            && paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
+        ) {
+            confirmPaymentSelection(
+                paymentSelection.copy(
+                    recollectedCvc = cvcControllerFlow.value.fieldValue.value
+                )
+            )
         } else {
             confirmPaymentSelection(paymentSelection)
         }
@@ -818,7 +832,13 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
         val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
         val target = if (hasPaymentMethods) {
-            PaymentSheetScreen.SelectSavedPaymentMethods
+            PaymentSheetScreen.SelectSavedPaymentMethods(
+                if (isCvcRecollectionRequired() && FeatureFlags.cvcRecollection.isEnabled) {
+                    PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
+                } else {
+                    PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
+                }
+            )
         } else {
             PaymentSheetScreen.AddFirstPaymentMethod
         }
@@ -835,6 +855,12 @@ internal class PaymentSheetViewModel @Inject internal constructor(
             null
         }
     }
+
+    private fun shouldSetCvc(paymentSelection: PaymentSelection?): Boolean =
+        isCvcRecollectionRequired()
+        && paymentSelection is PaymentSelection.Saved
+        && paymentSelection.paymentMethod.type == PaymentMethod.Type.Card
+
 
     private fun storeAwaitingPaymentResult() {
         savedStateHandle[AwaitingPaymentResultKey] = true

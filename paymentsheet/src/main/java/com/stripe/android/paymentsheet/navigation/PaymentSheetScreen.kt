@@ -19,6 +19,8 @@ import com.stripe.android.paymentsheet.verticalmode.PaymentMethodVerticalLayoutU
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormInteractor
 import com.stripe.android.paymentsheet.verticalmode.VerticalModeFormUI
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
+import com.stripe.android.ui.core.elements.CvcController
+import kotlinx.coroutines.flow.StateFlow
 import java.io.Closeable
 
 internal val PaymentSheetScreen.topContentPadding: Dp
@@ -64,7 +66,14 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    data object SelectSavedPaymentMethods : PaymentSheetScreen {
+    data class SelectSavedPaymentMethods(
+        val cvcRecollectionState: CvcRecollectionState = CvcRecollectionState.NotRequired,
+    ) : PaymentSheetScreen {
+
+        sealed interface CvcRecollectionState {
+            data object NotRequired : CvcRecollectionState
+            class Required(val cvcControllerFlow: StateFlow<CvcController>) : CvcRecollectionState
+        }
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = false
