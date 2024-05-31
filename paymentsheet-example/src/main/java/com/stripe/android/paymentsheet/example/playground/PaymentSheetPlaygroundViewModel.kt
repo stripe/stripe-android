@@ -454,7 +454,6 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    @OptIn(ExperimentalCustomerSheetApi::class)
     private fun updateSettingsWithExistingCustomerId(
         settings: PlaygroundSettings,
         customerId: String,
@@ -473,9 +472,9 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun onCustomUrlUpdated(backendUrl: String) {
+    fun onCustomUrlUpdated(backendUrl: String?) {
         playgroundSettingsFlow.value?.let { settings ->
-            settings[CustomEndpointDefinition] = backendUrl.takeIf { it.isNotBlank() }
+            settings[CustomEndpointDefinition] = backendUrl
             playgroundSettingsFlow.value = settings
             state.value = state.value?.let { state ->
                 val updatedSnapshot = settings.snapshot()

@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 internal fun CustomEndpointDialog(
     currentUrl: String?,
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String?) -> Unit
 ) {
     var urlField by remember { mutableStateOf(currentUrl ?: "") }
 
@@ -48,18 +48,23 @@ internal fun CustomEndpointDialog(
                     },
                     onValueChange = { urlField = it }
                 )
+                TextButton(
+                    onClick = { onConfirm(null) }
+                ) {
+                    Text("Reset to default")
+                }
                 Spacer(modifier = Modifier.height(8.dp))
             }
         },
         confirmButton = {
-            Button(
+            TextButton(
                 onClick = { onConfirm(urlField) }
             ) {
-                Text("OK")
+                Text("Save")
             }
         },
         dismissButton = {
-            Button(
+            TextButton(
                 onClick = { onDismiss() }
             ) {
                 Text("Cancel")
