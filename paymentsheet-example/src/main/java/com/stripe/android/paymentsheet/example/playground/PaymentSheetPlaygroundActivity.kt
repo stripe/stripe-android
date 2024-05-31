@@ -501,7 +501,6 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 @Composable
 private fun PlaygroundTheme(
     content: @Composable ColumnScope.() -> Unit,
-    topBar: @Composable () -> Unit = {},
     bottomBarContent: @Composable ColumnScope.() -> Unit,
 ) {
     val colors = if (isSystemInDarkTheme() || AppearanceStore.forceDarkMode) {
@@ -519,7 +518,6 @@ private fun PlaygroundTheme(
             color = MaterialTheme.colors.background,
         ) {
             Scaffold(
-                topBar = topBar,
                 bottomBar = {
                     Column(
                         modifier = Modifier

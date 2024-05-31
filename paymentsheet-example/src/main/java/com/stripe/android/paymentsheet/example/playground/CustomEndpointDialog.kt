@@ -30,7 +30,7 @@ internal fun CustomEndpointDialog(
         onDismissRequest = { onDismiss() },
         title = {
             Text(
-                text = "Enter custom endpoint url",
+                text = "Enter custom endpoint URL",
                 style = MaterialTheme.typography.h6
             )
         },
@@ -41,18 +41,13 @@ internal fun CustomEndpointDialog(
                     value = urlField,
                     validator = {
                         when {
-                            it.startsWith("http").not() -> "Must be a valid url"
+                            it.startsWith("http").not() -> "Must be a valid URL"
                             it.endsWith("/").not() -> "Must end with /"
                             else -> null
                         }
                     },
                     onValueChange = { urlField = it }
                 )
-                TextButton(
-                    onClick = { onConfirm(null) }
-                ) {
-                    Text("Reset to default")
-                }
                 Spacer(modifier = Modifier.height(8.dp))
             }
         },
@@ -65,9 +60,9 @@ internal fun CustomEndpointDialog(
         },
         dismissButton = {
             TextButton(
-                onClick = { onDismiss() }
+                onClick = { onConfirm(null) }
             ) {
-                Text("Cancel")
+                Text("Reset")
             }
         }
     )
