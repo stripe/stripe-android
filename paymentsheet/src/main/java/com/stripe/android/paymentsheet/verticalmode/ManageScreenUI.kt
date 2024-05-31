@@ -1,12 +1,25 @@
 package com.stripe.android.paymentsheet.verticalmode
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.dimensionResource
@@ -23,21 +36,77 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
     val state by interactor.state.collectAsState()
 
     Column(
-        modifier = Modifier.padding(horizontal = horizontalPadding).testTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
+        modifier = Modifier
+            .padding(horizontal = horizontalPadding)
+            .testTag(TEST_TAG_MANAGE_SCREEN_SAVED_PMS_LIST),
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         state.paymentMethods.forEach {
-            val isSelected = it == state.currentSelection
+            val isSelected = !state.isEditing && it == state.currentSelection
 
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
                 resources = LocalContext.current.resources,
                 isEnabled = true,
                 isSelected = isSelected,
-                trailingContent = { if (isSelected) SelectedBadge() },
-                onClick = { interactor.handleViewAction(ManageScreenInteractor.ViewAction.SelectPaymentMethod(it)) }
+                trailingContent = {
+                    TrailingContent(
+                        isSelected = isSelected,
+                        isEditing = state.isEditing,
+                        isModifiable = it.isModifiable(),
+                    )
+                },
+                onClick = {
+                    if (!state.isEditing) interactor.handleViewAction(
+                        ManageScreenInteractor.ViewAction.SelectPaymentMethod(
+                            it
+                        )
+                    )
+                },
             )
         }
+    }
+}
+
+@Composable
+private fun TrailingContent(isSelected: Boolean, isEditing: Boolean, isModifiable: Boolean) {
+    if (isEditing && isModifiable) {
+        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+           EditIcon()
+           DeleteIcon()
+        }
+    } else if (isEditing) {
+        DeleteIcon()
+    } else if (isSelected) {
+        SelectedBadge()
+    }
+}
+
+@Composable
+private fun DeleteIcon() {
+    TrailingIcon(backgroundColor = Color.Red, icon = Icons.Filled.Close)
+}
+
+@Composable
+private fun EditIcon() {
+    TrailingIcon(backgroundColor = Color.Gray, icon = Icons.Filled.Edit)
+}
+
+@Composable
+private fun TrailingIcon(backgroundColor: Color, icon: ImageVector) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .clip(CircleShape)
+            .size(24.dp)
+            .background(backgroundColor)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(12.dp),
+        )
     }
 }
 
