@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.example.playground.settings
 
-internal object CustomEndpointDefinition : PlaygroundSettingDefinition<String?>,
+internal object CustomEndpointDefinition :
+    PlaygroundSettingDefinition<String?>,
     PlaygroundSettingDefinition.Saveable<String?> {
 
     override val key: String = "custom-endpoint"
