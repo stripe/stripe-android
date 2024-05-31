@@ -169,6 +169,7 @@ private fun Header(payload: Payload) {
         Text(
             text = stringResource(R.string.stripe_networking_save_to_link_verification_title),
             style = FinancialConnectionsTheme.typography.headingXLarge,
+            color = FinancialConnectionsTheme.colors.textDefault,
         )
         Text(
             text = stringResource(

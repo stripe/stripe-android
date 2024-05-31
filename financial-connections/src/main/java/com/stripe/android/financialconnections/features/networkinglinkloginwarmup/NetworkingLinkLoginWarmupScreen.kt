@@ -172,7 +172,7 @@ internal fun ExistingEmailSection(
             Text(
                 text = email.getOrElse(0) { '@' }.uppercaseChar().toString(),
                 style = typography.bodySmall,
-                color = LinkColors.Brand600
+                color = LinkColors.Brand900,
             )
         }
         Spacer(modifier = Modifier.size(12.dp))
