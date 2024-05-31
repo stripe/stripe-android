@@ -30,7 +30,7 @@ internal fun CustomEndpointDialog(
         onDismissRequest = { onDismiss() },
         title = {
             Text(
-                text = "Enter backend url",
+                text = "Enter custom endpoint url",
                 style = MaterialTheme.typography.h6
             )
         },
@@ -39,7 +39,13 @@ internal fun CustomEndpointDialog(
                 ValidatedTextField(
                     label = "Backend url",
                     value = urlField,
-                    validator = { if (it.startsWith("http")) null else "Must be a valid url" },
+                    validator = {
+                        when {
+                            it.startsWith("http").not() -> "Must be a valid url"
+                            it.endsWith("/").not() -> "Must end with /"
+                            else -> null
+                        }
+                    },
                     onValueChange = { urlField = it }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
