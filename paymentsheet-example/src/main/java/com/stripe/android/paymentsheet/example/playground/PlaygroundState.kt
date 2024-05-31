@@ -6,6 +6,7 @@ import com.stripe.android.customersheet.ExperimentalCustomerSheetApi
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.example.playground.model.CheckoutResponse
 import com.stripe.android.paymentsheet.example.playground.settings.AutomaticPaymentMethodsSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.Country
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
@@ -19,6 +20,7 @@ import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSet
 internal sealed interface PlaygroundState {
     val integrationType: PlaygroundConfigurationData.IntegrationType
     val countryCode: Country
+    val endpoint: String
 
     @Stable
     data class Payment(
@@ -27,6 +29,7 @@ internal sealed interface PlaygroundState {
         val paymentMethodTypes: List<String>,
         val customerConfig: PaymentSheet.CustomerConfiguration?,
         val clientSecret: String,
+        private val defaultEndpoint: String,
     ) : PlaygroundState {
         override val integrationType = snapshot.configurationData.integrationType
         override val countryCode = snapshot[CountrySettingsDefinition]
@@ -40,6 +43,9 @@ internal sealed interface PlaygroundState {
         val stripeIntentId: String
             get() = clientSecret.substringBefore("_secret_")
 
+        override val endpoint: String
+            get() = snapshot[CustomEndpointDefinition] ?: defaultEndpoint
+
         fun paymentSheetConfiguration(): PaymentSheet.Configuration {
             return snapshot.paymentSheetConfiguration(this)
         }
@@ -49,6 +55,7 @@ internal sealed interface PlaygroundState {
     @OptIn(ExperimentalCustomerSheetApi::class)
     data class Customer(
         private val snapshot: PlaygroundSettings.Snapshot,
+        override val endpoint: String,
     ) : PlaygroundState {
         override val integrationType = snapshot.configurationData.integrationType
         override val countryCode = snapshot[CountrySettingsDefinition]
@@ -69,6 +76,7 @@ internal sealed interface PlaygroundState {
     companion object {
         fun CheckoutResponse.asPlaygroundState(
             snapshot: PlaygroundSettings.Snapshot,
+            defaultEndpoint: String,
         ): PlaygroundState {
             val paymentMethodTypes = if (snapshot[AutomaticPaymentMethodsSettingsDefinition]) {
                 emptyList()
@@ -83,6 +91,7 @@ internal sealed interface PlaygroundState {
                 paymentMethodTypes = paymentMethodTypes,
                 customerConfig = makeCustomerConfig(snapshot.checkoutRequest().customerKeyType),
                 clientSecret = intentClientSecret,
+                defaultEndpoint = defaultEndpoint
             )
         }
     }

@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +60,6 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.activity.QrCodeActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.MerchantOverrideDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.SettingsUi
@@ -117,7 +117,7 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             val playgroundState by viewModel.state.collectAsState()
             val customerAdapter by viewModel.customerAdapter.collectAsState()
             var showMerchantOverrideDialog by remember { mutableStateOf(false) }
-            val merchantSettings by localPlaygroundSettings[MerchantOverrideDefinition].collectAsState()
+            val endpoint = playgroundState?.endpoint
 
             val customerSheet = playgroundState?.asCustomerState()?.let { customerPlaygroundState ->
                 customerAdapter?.let { adapter ->
@@ -130,10 +130,10 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
             }
 
             if (showMerchantOverrideDialog) {
-                MerchantOverrideDialog(
-                    merchantSettings,
-                    onConfirm = { publicKey, privateKey ->
-                        viewModel.onMerchantOverride(publicKey, privateKey)
+                CustomEndpointDialog(
+                    endpoint.orEmpty(),
+                    onConfirm = { backendUrl ->
+                        viewModel.onBackendUrlChanged(backendUrl)
                         showMerchantOverrideDialog = false
                     },
                     onDismiss = {
@@ -144,6 +144,15 @@ internal class PaymentSheetPlaygroundActivity : AppCompatActivity(), ExternalPay
 
             PlaygroundTheme(
                 content = {
+                    playgroundState?.asPaymentState()?.endpoint?.let { customEndpoint ->
+                        Text(
+                            text = "Using $customEndpoint",
+                            modifier = Modifier
+                                .clickable { showMerchantOverrideDialog = true }
+                                .padding(bottom = 16.dp),
+                        )
+                    }
+
                     playgroundState?.asPaymentState()?.stripeIntentId?.let { stripeIntentId ->
                         Text(
                             text = stripeIntentId,

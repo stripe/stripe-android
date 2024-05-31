@@ -19,42 +19,35 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-internal fun MerchantOverrideDialog(
-    keys: Pair<String, String>?,
+internal fun CustomEndpointDialog(
+    currentUrl: String?,
     onDismiss: () -> Unit,
-    onConfirm: (String, String) -> Unit
+    onConfirm: (String) -> Unit
 ) {
-    var publicKeyField by remember { mutableStateOf(keys?.first ?: "") }
-    var privateKeyField by remember { mutableStateOf(keys?.second ?: "") }
+    var urlField by remember { mutableStateOf(currentUrl ?: "") }
 
     AlertDialog(
         onDismissRequest = { onDismiss() },
         title = {
             Text(
-                text = "Enter merchant details",
+                text = "Enter backend url",
                 style = MaterialTheme.typography.h6
             )
         },
         text = {
             Column {
                 ValidatedTextField(
-                    label = "Public key",
-                    value = publicKeyField,
-                    validator = { if (it.startsWith("pk_")) null else "Public key must start with 'pk_'" },
-                    onValueChange = { publicKeyField = it }
+                    label = "Backend url",
+                    value = urlField,
+                    validator = { if (it.startsWith("http")) null else "Must be a valid url" },
+                    onValueChange = { urlField = it }
                 )
                 Spacer(modifier = Modifier.height(8.dp))
-                ValidatedTextField(
-                    label = "Private key",
-                    value = privateKeyField,
-                    validator = { if (it.startsWith("sk_")) null else "Public key must start with 'sk_'" },
-                    onValueChange = { privateKeyField = it }
-                )
             }
         },
         confirmButton = {
             Button(
-                onClick = { onConfirm(publicKeyField, privateKeyField) }
+                onClick = { onConfirm(urlField) }
             ) {
                 Text("OK")
             }

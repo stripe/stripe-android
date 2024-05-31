@@ -31,12 +31,12 @@ import com.stripe.android.paymentsheet.example.playground.model.CreateSetupInten
 import com.stripe.android.paymentsheet.example.playground.model.CreateSetupIntentResponse
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyRequest
 import com.stripe.android.paymentsheet.example.playground.model.CustomerEphemeralKeyResponse
+import com.stripe.android.paymentsheet.example.playground.settings.CustomEndpointDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSheetPaymentMethodModeDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.InitializationType
-import com.stripe.android.paymentsheet.example.playground.settings.MerchantOverrideDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.PaymentMethodMode
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundSettings
 import com.stripe.android.paymentsheet.example.playground.settings.ShippingAddressSettingsDefinition
@@ -54,6 +54,7 @@ internal class PaymentSheetPlaygroundViewModel(
     application: Application,
     launchUri: Uri?,
 ) : AndroidViewModel(application) {
+
     private val settings by lazy {
         Settings(application)
     }
@@ -65,12 +66,19 @@ internal class PaymentSheetPlaygroundViewModel(
     val customerSheetState = MutableStateFlow<CustomerSheetState?>(null)
     val customerAdapter = MutableStateFlow<CustomerAdapter?>(null)
 
+    private val baseUrl: String
+        get() {
+            val customEndpoint = playgroundSettingsFlow.value?.get(CustomEndpointDefinition)?.value
+            return customEndpoint ?: settings.playgroundBackendUrl
+        }
+
     init {
         viewModelScope.launch(Dispatchers.IO) {
             playgroundSettingsFlow.value =
                 PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
                     ?: PlaygroundSettings.createFromSharedPreferences(application)
         }
+        onBackendUrlChanged(settings.playgroundBackendUrl)
     }
 
     fun prepare(
@@ -103,7 +111,7 @@ internal class PaymentSheetPlaygroundViewModel(
 
             val requestBody = playgroundSettingsSnapshot.checkoutRequest()
 
-            val apiResponse = Fuel.post(settings.playgroundBackendUrl + "checkout")
+            val apiResponse = Fuel.post(baseUrl + "checkout")
                 .jsonBody(Json.encodeToString(CheckoutRequest.serializer(), requestBody))
                 .suspendable()
                 .awaitModel(CheckoutResponse.serializer())
@@ -137,6 +145,7 @@ internal class PaymentSheetPlaygroundViewModel(
                     playgroundSettingsFlow.value = updatedSettings
                     val updatedState = checkoutResponse.asPlaygroundState(
                         snapshot = updatedSettings.snapshot(),
+                        defaultEndpoint = settings.playgroundBackendUrl
                     )
                     state.value = updatedState
                 }
@@ -169,7 +178,10 @@ internal class PaymentSheetPlaygroundViewModel(
 
             customerSheetState.value = CustomerSheetState()
             customerAdapter.value = adapter
-            state.value = PlaygroundState.Customer(snapshot = snapshot)
+            state.value = PlaygroundState.Customer(
+                snapshot = snapshot,
+                endpoint = settings.playgroundBackendUrl,
+            )
         }
     }
 
@@ -179,7 +191,7 @@ internal class PaymentSheetPlaygroundViewModel(
     ): CustomerAdapter.Result<CustomerEphemeralKey> {
         val requestBody = snapshot.customerEphemeralKeyRequest()
 
-        val apiResponse = Fuel.post(settings.playgroundBackendUrl + "customer_ephemeral_key")
+        val apiResponse = Fuel.post(baseUrl + "customer_ephemeral_key")
             .jsonBody(Json.encodeToString(CustomerEphemeralKeyRequest.serializer(), requestBody))
             .suspendable()
             .awaitModel(CustomerEphemeralKeyResponse.serializer())
@@ -239,7 +251,7 @@ internal class PaymentSheetPlaygroundViewModel(
             merchantCountryCode = snapshot[CountrySettingsDefinition].value,
         )
 
-        val apiResponse = Fuel.post(settings.playgroundBackendUrl + "create_setup_intent")
+        val apiResponse = Fuel.post(baseUrl + "create_setup_intent")
             .jsonBody(Json.encodeToString(CreateSetupIntentRequest.serializer(), request))
             .suspendable()
             .awaitModel(CreateSetupIntentResponse.serializer())
@@ -399,7 +411,7 @@ internal class PaymentSheetPlaygroundViewModel(
             returnUrl = RETURN_URL,
         )
 
-        val result = Fuel.post(settings.playgroundBackendUrl + "confirm_intent")
+        val result = Fuel.post(baseUrl + "confirm_intent")
             .jsonBody(Json.encodeToString(ConfirmIntentRequest.serializer(), request))
             .suspendable()
             .awaitModel(ConfirmIntentResponse.serializer())
@@ -462,9 +474,9 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun onMerchantOverride(publicKey: String, privateKey: String) {
+    fun onBackendUrlChanged(backendUrl: String) {
         playgroundSettingsFlow.value?.let { settings ->
-            settings[MerchantOverrideDefinition] = publicKey to privateKey
+            settings[CustomEndpointDefinition] = backendUrl.takeIf { it.isNotBlank() }
             playgroundSettingsFlow.value = settings
             state.value = state.value?.let { state ->
                 val updatedSnapshot = settings.snapshot()

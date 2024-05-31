@@ -345,7 +345,7 @@ internal class PlaygroundSettings private constructor(
 
         private val nonUiSettingDefinitions: List<PlaygroundSettingDefinition<*>> = listOf(
             AppearanceSettingsDefinition,
-            MerchantOverrideDefinition,
+            CustomEndpointDefinition,
             ShippingAddressSettingsDefinition,
         )
 
