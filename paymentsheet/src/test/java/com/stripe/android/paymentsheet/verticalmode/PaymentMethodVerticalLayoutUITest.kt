@@ -9,6 +9,7 @@ import com.google.common.truth.Truth.assertThat
 import com.stripe.android.lpmfoundations.paymentmethod.PaymentMethodMetadataFactory
 import com.stripe.android.lpmfoundations.paymentmethod.definitions.CardDefinition
 import com.stripe.android.model.PaymentIntentFixtures
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import org.junit.Rule
@@ -79,7 +80,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         block: Scenario.() -> Unit
     ) {
         val stateFlow = MutableStateFlow(initialState)
-        val viewActionRecorder = ViewActionRecorder()
+        val viewActionRecorder = ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>()
         val interactor = createInteractor(stateFlow, viewActionRecorder)
 
         composeRule.setContent {
@@ -91,7 +92,7 @@ internal class PaymentMethodVerticalLayoutUITest {
 
     private fun createInteractor(
         stateFlow: StateFlow<PaymentMethodVerticalLayoutInteractor.State>,
-        viewActionRecorder: ViewActionRecorder,
+        viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>,
     ): PaymentMethodVerticalLayoutInteractor {
         return object : PaymentMethodVerticalLayoutInteractor {
             override val state: StateFlow<PaymentMethodVerticalLayoutInteractor.State> = stateFlow
@@ -102,23 +103,7 @@ internal class PaymentMethodVerticalLayoutUITest {
         }
     }
 
-    private class ViewActionRecorder {
-        private val _viewActions: MutableList<PaymentMethodVerticalLayoutInteractor.ViewAction> = mutableListOf()
-        val viewActions: List<PaymentMethodVerticalLayoutInteractor.ViewAction>
-            get() = _viewActions.toList()
-
-        fun record(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
-            _viewActions += viewAction
-        }
-
-        fun consume(viewAction: PaymentMethodVerticalLayoutInteractor.ViewAction) {
-            assertThat(_viewActions.size).isGreaterThan(0)
-            assertThat(_viewActions[0]).isEqualTo(viewAction)
-            _viewActions.removeAt(0)
-        }
-    }
-
     private data class Scenario(
-        val viewActionRecorder: ViewActionRecorder,
+        val viewActionRecorder: ViewActionRecorder<PaymentMethodVerticalLayoutInteractor.ViewAction>,
     )
 }

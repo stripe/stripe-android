@@ -1,9 +1,9 @@
 package com.stripe.android.paymentsheet.ui
 
 import com.google.common.truth.Truth.assertThat
-import com.stripe.android.paymentsheet.FakeManageScreenInteractor
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
+import com.stripe.android.paymentsheet.verticalmode.FakeManageScreenInteractor
 import org.junit.Test
 import org.mockito.Mockito.mock
 import com.stripe.android.R as StripeR

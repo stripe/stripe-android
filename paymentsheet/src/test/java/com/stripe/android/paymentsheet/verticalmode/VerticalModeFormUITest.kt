@@ -12,6 +12,7 @@ import com.stripe.android.lpmfoundations.paymentmethod.formElements
 import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.FormPage
 import com.stripe.android.paymentsheet.PaymentSheet
+import com.stripe.android.paymentsheet.ViewActionRecorder
 import com.stripe.android.paymentsheet.paymentdatacollection.FormArguments
 import com.stripe.android.paymentsheet.ui.FORM_ELEMENT_TEST_TAG
 import com.stripe.android.ui.core.Amount
@@ -64,7 +65,7 @@ internal class VerticalModeFormUITest {
         block: Scenario.() -> Unit
     ) {
         val stateFlow = MutableStateFlow(initialState)
-        val viewActionRecorder = ViewActionRecorder()
+        val viewActionRecorder = ViewActionRecorder<VerticalModeFormInteractor.ViewAction>()
         val interactor = createInteractor(stateFlow, viewActionRecorder)
 
         composeRule.setContent {
@@ -82,7 +83,7 @@ internal class VerticalModeFormUITest {
 
     private fun createInteractor(
         stateFlow: StateFlow<VerticalModeFormInteractor.State>,
-        viewActionRecorder: ViewActionRecorder,
+        viewActionRecorder: ViewActionRecorder<VerticalModeFormInteractor.ViewAction>,
     ): VerticalModeFormInteractor {
         return object : VerticalModeFormInteractor {
             override val state: StateFlow<VerticalModeFormInteractor.State> = stateFlow
@@ -133,23 +134,7 @@ internal class VerticalModeFormUITest {
         )
     }
 
-    private class ViewActionRecorder {
-        private val _viewActions: MutableList<VerticalModeFormInteractor.ViewAction> = mutableListOf()
-        val viewActions: List<VerticalModeFormInteractor.ViewAction>
-            get() = _viewActions.toList()
-
-        fun record(viewAction: VerticalModeFormInteractor.ViewAction) {
-            _viewActions += viewAction
-        }
-
-        fun consume(viewAction: VerticalModeFormInteractor.ViewAction) {
-            assertThat(_viewActions.size).isGreaterThan(0)
-            assertThat(_viewActions[0]).isEqualTo(viewAction)
-            _viewActions.removeAt(0)
-        }
-    }
-
     private data class Scenario(
-        val viewActionRecorder: ViewActionRecorder,
+        val viewActionRecorder: ViewActionRecorder<VerticalModeFormInteractor.ViewAction>,
     )
 }
