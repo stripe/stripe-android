@@ -9,6 +9,7 @@ import sys
 import json
 import math
 import zipfile
+from collections import defaultdict
 
 # These need to be set in environment variables.
 user = os.getenv("BROWSERSTACK_USERNAME")
@@ -215,7 +216,19 @@ def testShards(isNightly, testClassNames):
 
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
-def executeTestsWithJson(appUrl, testUrl, json):
+def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
+    json = {
+        "app": appUrl,
+        "devices": devices,
+        "testSuite": testUrl,
+        "networkLogs": True,
+        "deviceLogs": True,
+        "video": True,
+        "acceptInsecureCerts": True,
+        "locale": "en_US",
+        "enableSpoonFramework": False,
+        "project": PROJECT_NAME,
+    } | addedParams
     print(
         "RUNNING the tests (appUrl: {app}, testUrl: {test})...".format(
             app=appUrl, test=testUrl
@@ -262,39 +275,19 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
         devices = [
             "Samsung Galaxy S22-12.0",
         ]
-    json = {
-        "app": appUrl,
-        "devices": devices,
-        "testSuite": testUrl,
-        "networkLogs": True,
-        "deviceLogs": True,
-        "video": True,
-        "acceptInsecureCerts": True,
-        "locale": "en_US",
-        "enableSpoonFramework": False,
-        "project": PROJECT_NAME,
+    addedParams = {
         "shards": {
             "numberOfShards": len(shards),
             "mapping": shards,
         },
     }
-    return executeTestsWithJson(appUrl, testUrl, json)
+    return executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams)
 
 def executeTestsForFailure(appUrl, testUrl, device, testClasses):
-    json = {
-        "app": appUrl,
-        "devices": [device],
-        "testSuite": testUrl,
-        "networkLogs": True,
-        "deviceLogs": True,
-        "video": True,
-        "acceptInsecureCerts": True,
-        "locale": "en_US",
-        "enableSpoonFramework": False,
-        "project": PROJECT_NAME,
+    addedParams = {
         "class": testClasses,
     }
-    return executeTestsWithJson(appUrl, testUrl, json)
+    return executeTestsWithAddedParams(appUrl, testUrl, [device], addedParams)
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#get-build-status
 def get_build_status(buildId):
@@ -467,16 +460,32 @@ def getSessionIdsAndDeviceForBuild(buildId):
 
 
 def getFailedTestsForBuild(buildId):
+    print(f"Getting failed tests for build {buildId}")
     sessionIdsAndDevices = getSessionIdsAndDeviceForBuild(buildId)
-    devicesWithFailedClasses = {}
+    devicesWithFailedClasses = defaultdict(list)
     for item in sessionIdsAndDevices:
         failedClassesInSession = getFailedTestClassesForSession(buildId, item["session_id"])
         for failedClass in failedClassesInSession:
-            if item["device"] not in devicesWithFailedClasses:
-                devicesWithFailedClasses[item["device"]] = []
             devicesWithFailedClasses[item["device"]].append(classNameToFullyQualifiedClassName(failedClass))
             print(f"Device failed: {item['device']} - {failedClass}")
     return devicesWithFailedClasses
+
+
+def retryFailedTests(buildId, numRetries):
+    failedTestsDictionary = getFailedTestsForBuild(buildId)
+    while numRetries > 0:
+        updatedFailedTestsDictionary = {}
+        numRetries -= 1
+        for failedDevice in failedTestsDictionary:
+            deviceTestResults = runTestsForFailure(appUrl, testUrl, failedDevice, failedTestsDictionary[failedDevice])
+            deviceExitStatus = deviceTestResults["exitStatus"]
+            if deviceExitStatus != 0:
+                updatedFailedTestsDictionary[failedDevice] = getFailedTestsForBuild(deviceTestResults["buildId"])[failedDevice]
+
+        if len(updatedFailedTestsDictionary) == 0:
+            return 0
+        failedTestsDictionary = updatedFailedTestsDictionary
+    return -1
 
 
 if __name__ == "__main__":
@@ -570,20 +579,7 @@ if __name__ == "__main__":
             updateObservabilityWithResults(testResults["buildId"])
             if exitStatus != 0 and numRetries > 0:
                 os.environ["BROWSERSTACK_RERUN"] = "true"
-                print(f"Getting failed tests for build {testResults['buildId']}")
-                failedTestsDictionary = getFailedTestsForBuild(testResults["buildId"])
-                while numRetries > 0:
-                    updatedFailedTestsDictionary = {}
-                    numRetries -= 1
-                    for failedDevice in failedTestsDictionary:
-                        testResults = runTestsForFailure(appUrl, testUrl, failedDevice, failedTestsDictionary[failedDevice])
-                        exitStatus = testResults["exitStatus"]
-                        if exitStatus != 0 and numRetries > 0:
-                            updatedFailedTestsDictionary[failedDevice] = getFailedTestsForBuild(testResults["buildId"])[failedDevice]
-
-                    if len(updatedFailedTestsDictionary) == 0:
-                        break
-                    failedTestsDictionary = updatedFailedTestsDictionary
+                exitStatus = retryFailedTests(testResults["buildId"], numRetries)
 
             os.environ["BROWSERSTACK_RERUN"] = "false"
             sys.exit(exitStatus)
