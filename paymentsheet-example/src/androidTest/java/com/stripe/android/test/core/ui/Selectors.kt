@@ -25,6 +25,7 @@ import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
 import com.stripe.android.paymentsheet.example.samples.ui.shared.CHECKOUT_TEST_TAG
 import com.stripe.android.paymentsheet.example.samples.ui.shared.PAYMENT_METHOD_SELECTOR_TEST_TAG
+import com.stripe.android.paymentsheet.ui.GOOGLE_PAY_BUTTON_TEST_TAG
 import com.stripe.android.test.core.AuthorizeAction
 import com.stripe.android.test.core.HOOKS_PAGE_LOAD_TIMEOUT
 import com.stripe.android.test.core.TestParameters
@@ -101,6 +102,22 @@ internal class Selectors(
     val externalPaymentMethodFailButton = ComposeButton(
         composeTestRule,
         hasTestTag(FawryActivity.FAILED_BUTTON_TEST_TAG)
+    )
+
+    val googlePayButton = ComposeButton(
+        composeTestRule,
+        hasTestTag(GOOGLE_PAY_BUTTON_TEST_TAG)
+    )
+
+    val googlePaySheet = UiAutomatorWindow(
+        device,
+        "com.google.android.gms"
+    )
+
+    val googlePayContinueButton = UiAutomatorText(
+        "Continue",
+        "android.widget.Button",
+        device
     )
 
     val playgroundBuyButton = ComposeButton(composeTestRule, hasTestTag(CHECKOUT_TEST_TAG))
