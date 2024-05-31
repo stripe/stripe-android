@@ -78,7 +78,6 @@ internal class PaymentSheetPlaygroundViewModel(
                 PaymentSheetPlaygroundUrlHelper.settingsFromUri(launchUri)
                     ?: PlaygroundSettings.createFromSharedPreferences(application)
         }
-        onBackendUrlChanged(settings.playgroundBackendUrl)
     }
 
     fun prepare(
@@ -474,7 +473,7 @@ internal class PaymentSheetPlaygroundViewModel(
         }
     }
 
-    fun onBackendUrlChanged(backendUrl: String) {
+    fun onCustomUrlUpdated(backendUrl: String) {
         playgroundSettingsFlow.value?.let { settings ->
             settings[CustomEndpointDefinition] = backendUrl.takeIf { it.isNotBlank() }
             playgroundSettingsFlow.value = settings
