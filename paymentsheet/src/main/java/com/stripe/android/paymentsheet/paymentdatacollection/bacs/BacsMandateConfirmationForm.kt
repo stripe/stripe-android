@@ -201,6 +201,7 @@ internal fun BacsMandateItem(
                 color = MaterialTheme.colors.primary
             )
         )
+
         false -> Text(
             modifier = modifier,
             text = text,
