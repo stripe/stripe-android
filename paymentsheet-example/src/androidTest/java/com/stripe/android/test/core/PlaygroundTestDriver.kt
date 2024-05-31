@@ -35,6 +35,8 @@ import com.stripe.android.paymentsheet.example.playground.SUCCESS_RESULT
 import com.stripe.android.paymentsheet.example.playground.activity.FawryActivity
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutMode
 import com.stripe.android.paymentsheet.example.playground.settings.CheckoutModeSettingsDefinition
+import com.stripe.android.paymentsheet.example.playground.settings.Country
+import com.stripe.android.paymentsheet.example.playground.settings.CountrySettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerSettingsDefinition
 import com.stripe.android.paymentsheet.example.playground.settings.CustomerType
 import com.stripe.android.paymentsheet.example.playground.settings.PlaygroundConfigurationData
@@ -356,6 +358,34 @@ internal class PlaygroundTestDriver(
         teardown()
 
         return result
+    }
+
+    fun confirmWithGooglePay(
+        country: Country
+    ) {
+        setup(
+            TestParameters.create(
+                paymentMethodCode = "card",
+            ) { settings ->
+                settings[CountrySettingsDefinition] = country
+            }
+        )
+
+        launchComplete()
+
+        Espresso.onIdle()
+        composeTestRule.waitForIdle()
+
+        selectors.googlePayButton.waitForEnabled()
+        selectors.googlePayButton.click()
+
+        selectors.googlePaySheet.waitFor()
+
+        selectors.googlePayContinueButton.click()
+
+        waitForPlaygroundActivity()
+
+        teardown()
     }
 
     private fun pressMultiStepSelect() {
