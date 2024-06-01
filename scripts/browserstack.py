@@ -277,7 +277,6 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
             "Google Pixel 3-9.0",
             "Samsung Galaxy S9-8.0",
             "Samsung Galaxy S8-7.0",
-            "Samsung Galaxy S7-6.0",
         ]
     else:
         devices = [
