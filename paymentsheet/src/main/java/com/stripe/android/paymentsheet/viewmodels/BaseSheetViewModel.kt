@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.stripe.android.cards.DefaultCardAccountRangeRepositoryFactory
 import com.stripe.android.core.Logger
+import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.link.ui.inline.InlineSignupViewState
 import com.stripe.android.link.ui.inline.LinkSignupMode
@@ -495,17 +496,6 @@ internal abstract class BaseSheetViewModel(
         }
 
         savedStateHandle[SAVE_SELECTION] = selection
-        if (selection is PaymentSelection.Saved && selection.paymentMethod.type == PaymentMethod.Type.Card) {
-            _cvcControllerFlow.value = CvcController(
-                CvcConfig(),
-                stateFlowOf(selection.paymentMethod.card?.brand ?: CardBrand.Unknown)
-            )
-            viewModelScope.launch {
-                cvcControllerFlow.value.isComplete.collect {
-                    _cvcRecollectionCompleteFlow.value = it
-                }
-            }
-        }
 
         val isRequestingReuse = if (selection is PaymentSelection.New) {
             selection.customerRequestedSave == RequestReuse
@@ -523,6 +513,7 @@ internal abstract class BaseSheetViewModel(
         val showAbove = (selection as? PaymentSelection.Saved?)
             ?.showMandateAbovePrimaryButton == true
 
+        updateCvcFlows(selection)
         updateMandateText(mandateText = mandateText, showAbove = showAbove)
         clearErrorMessages()
     }
@@ -549,6 +540,28 @@ internal abstract class BaseSheetViewModel(
             eventReporter.onCannotProperlyReturnFromLinkAndOtherLPMs()
 
             previouslySentDeepLinkEvent = true
+        }
+    }
+
+    private fun updateCvcFlows(selection: PaymentSelection?) {
+        if (selection is PaymentSelection.Saved && selection.paymentMethod.type == PaymentMethod.Type.Card) {
+            _cvcControllerFlow.value = CvcController(
+                CvcConfig(),
+                stateFlowOf(selection.paymentMethod.card?.brand ?: CardBrand.Unknown)
+            )
+            viewModelScope.launch {
+                cvcControllerFlow.value.isComplete.collect {
+                    _cvcRecollectionCompleteFlow.value = it
+                }
+            }
+        }
+    }
+
+    internal fun getCvcRecollectionState(): PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState {
+        return if (isCvcRecollectionRequired() && FeatureFlags.cvcRecollection.isEnabled) {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
+        } else {
+            PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
         }
     }
 

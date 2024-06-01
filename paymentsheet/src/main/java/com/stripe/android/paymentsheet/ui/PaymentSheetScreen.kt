@@ -12,16 +12,13 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeight
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -31,9 +28,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalTextInputService
@@ -53,7 +48,6 @@ import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentOptionsP
 import com.stripe.android.paymentsheet.databinding.StripeFragmentPaymentSheetPrimaryButtonBinding
 import com.stripe.android.paymentsheet.model.MandateText
 import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen
-import com.stripe.android.paymentsheet.navigation.PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState
 import com.stripe.android.paymentsheet.navigation.topContentPadding
 import com.stripe.android.paymentsheet.state.WalletsProcessingState
 import com.stripe.android.paymentsheet.state.WalletsState
@@ -62,16 +56,11 @@ import com.stripe.android.paymentsheet.ui.PaymentSheetFlowType.Custom
 import com.stripe.android.paymentsheet.utils.PaymentSheetContentPadding
 import com.stripe.android.paymentsheet.viewmodels.BaseSheetViewModel
 import com.stripe.android.ui.core.CircularProgressIndicator
-import com.stripe.android.ui.core.elements.CvcController
-import com.stripe.android.ui.core.elements.CvcElement
 import com.stripe.android.ui.core.elements.H4Text
 import com.stripe.android.ui.core.elements.events.LocalCardNumberCompletedEventReporter
-import com.stripe.android.uicore.elements.IdentifierSpec
 import com.stripe.android.uicore.elements.LocalAutofillEventReporter
-import com.stripe.android.uicore.elements.SectionCard
 import com.stripe.android.uicore.strings.resolve
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.StateFlow
 
 @Composable
 internal fun PaymentSheetScreen(
@@ -200,7 +189,6 @@ private fun BoxScope.ProgressOverlay(walletsProcessingState: WalletsProcessingSt
     }
 }
 
-@Suppress("LongMethod")
 @Composable
 private fun PaymentSheetContent(
     viewModel: BaseSheetViewModel,
@@ -247,13 +235,6 @@ private fun PaymentSheetContent(
             }
         }
 
-        if (
-            currentScreen is PaymentSheetScreen.SelectSavedPaymentMethods &&
-            currentScreen.cvcRecollectionState is CvcRecollectionState.Required
-        ) {
-            CvcRecollectionField(currentScreen.cvcRecollectionState.cvcControllerFlow)
-        }
-
         if (mandateText?.showAbovePrimaryButton == true) {
             Mandate(
                 mandateText = mandateText.text,
@@ -282,37 +263,6 @@ private fun PaymentSheetContent(
                     .padding(horizontal = horizontalPadding),
             )
         }
-    }
-}
-
-@OptIn(ExperimentalComposeUiApi::class)
-@Composable
-internal fun CvcRecollectionField(cvcControllerFlow: StateFlow<CvcController>) {
-    val element = CvcElement(
-        IdentifierSpec(),
-        cvcControllerFlow.collectAsState().value
-    )
-
-    Text(
-        text = stringResource(R.string.stripe_paymentsheet_confirm_your_cvc),
-        style = MaterialTheme.typography.body1,
-        modifier = Modifier.padding(20.dp, 20.dp, 0.dp, 0.dp)
-    )
-    SectionCard(
-        Modifier
-            .padding(20.dp, 8.dp, 20.dp, 8.dp)
-            .height(IntrinsicSize.Min)
-    ) {
-        element.controller.ComposeUI(
-            enabled = true,
-            field = element,
-            modifier = Modifier
-                .fillMaxWidth(),
-            hiddenIdentifiers = setOf(),
-            lastTextFieldIdentifier = null,
-            nextFocusDirection = FocusDirection.Exit,
-            previousFocusDirection = FocusDirection.Previous
-        )
     }
 }
 

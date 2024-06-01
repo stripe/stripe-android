@@ -832,13 +832,7 @@ internal class PaymentSheetViewModel @Inject internal constructor(
         }
         val hasPaymentMethods = !paymentMethods.value.isNullOrEmpty()
         val target = if (hasPaymentMethods) {
-            PaymentSheetScreen.SelectSavedPaymentMethods(
-                if (isCvcRecollectionRequired() && FeatureFlags.cvcRecollection.isEnabled) {
-                    PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
-                } else {
-                    PaymentSheetScreen.SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
-                }
-            )
+            PaymentSheetScreen.SelectSavedPaymentMethods(getCvcRecollectionState())
         } else {
             PaymentSheetScreen.AddFirstPaymentMethod
         }

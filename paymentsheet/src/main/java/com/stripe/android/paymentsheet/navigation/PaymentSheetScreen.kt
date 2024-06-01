@@ -7,7 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.stripe.android.common.ui.BottomSheetLoadingIndicator
+import com.stripe.android.model.PaymentMethod
+import com.stripe.android.paymentsheet.PaymentOptionsItem
 import com.stripe.android.paymentsheet.ui.AddPaymentMethod
+import com.stripe.android.paymentsheet.ui.CvcRecollectionField
 import com.stripe.android.paymentsheet.ui.EditPaymentMethod
 import com.stripe.android.paymentsheet.ui.ModifiableEditPaymentMethodViewInteractor
 import com.stripe.android.paymentsheet.ui.SavedPaymentMethodTabLayoutUI
@@ -99,6 +102,14 @@ internal sealed interface PaymentSheetScreen {
                 onItemRemoved = viewModel::removePaymentMethod,
                 modifier = modifier,
             )
+
+            if (
+                cvcRecollectionState is CvcRecollectionState.Required &&
+                (state.selectedItem as? PaymentOptionsItem.SavedPaymentMethod)
+                    ?.paymentMethod?.type == PaymentMethod.Type.Card
+            ) {
+                CvcRecollectionField(cvcControllerFlow = cvcRecollectionState.cvcControllerFlow)
+            }
         }
     }
 

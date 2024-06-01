@@ -11,7 +11,6 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.stripe.android.analytics.SessionSavedStateHandler
 import com.stripe.android.core.Logger
 import com.stripe.android.core.injection.IOContext
-import com.stripe.android.core.utils.FeatureFlags
 import com.stripe.android.core.utils.requireApplication
 import com.stripe.android.link.LinkConfigurationCoordinator
 import com.stripe.android.model.PaymentIntent
@@ -331,13 +330,7 @@ internal class PaymentOptionsViewModel @Inject constructor(
             return listOf(PaymentSheetScreen.VerticalMode(DefaultPaymentMethodVerticalLayoutInteractor(this)))
         }
         val target = if (args.state.showSavedPaymentMethods) {
-            SelectSavedPaymentMethods(
-                if (isCvcRecollectionRequired() && FeatureFlags.cvcRecollection.isEnabled) {
-                    SelectSavedPaymentMethods.CvcRecollectionState.Required(cvcControllerFlow)
-                } else {
-                    SelectSavedPaymentMethods.CvcRecollectionState.NotRequired
-                }
-            )
+            SelectSavedPaymentMethods(getCvcRecollectionState())
         } else {
             AddFirstPaymentMethod
         }

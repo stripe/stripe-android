@@ -1,6 +1,7 @@
 package com.stripe.android.paymentsheet.viewmodels
 
 import android.content.Context
+import com.stripe.android.model.PaymentMethod
 import com.stripe.android.paymentsheet.PaymentSheet
 import com.stripe.android.paymentsheet.R
 import com.stripe.android.paymentsheet.model.PaymentSelection
@@ -39,7 +40,7 @@ internal class PrimaryButtonUiStateMapper(
             customPrimaryButton ?: PrimaryButton.UIState(
                 label = buyButtonLabel(amount),
                 onClick = onClick,
-                enabled = buttonsEnabled && selection != null && cvcRecollectionRequired(screen, cvcComplete),
+                enabled = buttonsEnabled && selection != null && cvcRequired(screen, cvcComplete, selection),
                 lockVisible = true,
             ).takeIf { screen.showsBuyButton }
         }
@@ -79,10 +80,16 @@ internal class PrimaryButtonUiStateMapper(
         return customLabel ?: context.getString(StripeUiCoreR.string.stripe_continue_button_label)
     }
 
-    private fun cvcRecollectionRequired(screen: PaymentSheetScreen, complete: Boolean): Boolean {
+    private fun cvcRequired(
+        screen: PaymentSheetScreen,
+        complete: Boolean,
+        selection: PaymentSelection
+    ): Boolean {
         return if (
-            screen is PaymentSheetScreen.SelectSavedPaymentMethods &&
-            screen.cvcRecollectionState is CvcRecollectionState.Required
+            (screen as? PaymentSheetScreen.SelectSavedPaymentMethods)
+                ?.cvcRecollectionState is CvcRecollectionState.Required &&
+            (selection as? PaymentSelection.Saved)
+                ?.paymentMethod?.type == PaymentMethod.Type.Card
         ) {
             complete
         } else {
