@@ -32,11 +32,12 @@ class PrimaryButtonUiStateMapperTest {
 
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods()),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(null),
             customPrimaryButtonUiStateFlow = stateFlowOf(usBankButton),
+            cvcFlow = stateFlowOf(true)
         )
 
         val result = mapper.forCompleteFlow()
@@ -50,11 +51,12 @@ class PrimaryButtonUiStateMapperTest {
     fun `Enables button if selection is not null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods()),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(cardSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
         )
 
         val result = mapper.forCompleteFlow()
@@ -68,11 +70,12 @@ class PrimaryButtonUiStateMapperTest {
     fun `Disables button if selection is null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods()),
             buttonsEnabledFlow = stateFlowOf(true),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(null),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
         )
 
         val result = mapper.forCompleteFlow()
@@ -86,11 +89,12 @@ class PrimaryButtonUiStateMapperTest {
     fun `Disables button if editing or processing, even if selection is not null`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods()),
             buttonsEnabledFlow = stateFlowOf(false),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(cardSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
         )
 
         val result = mapper.forCompleteFlow()
@@ -109,6 +113,7 @@ class PrimaryButtonUiStateMapperTest {
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(cardSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
         )
 
         val result = mapper.forCompleteFlow()
@@ -122,10 +127,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Hides button in custom flow if on a screen that isn't supposed to show it`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods()),
             buttonsEnabledFlow = stateFlowOf(false),
             selectionFlow = stateFlowOf(cardSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
         )
 
         val result = mapper.forCustomFlow()
@@ -139,10 +145,11 @@ class PrimaryButtonUiStateMapperTest {
     fun `Shows button in custom flow if selected payment method requires confirmation`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods()),
             buttonsEnabledFlow = stateFlowOf(false),
             selectionFlow = stateFlowOf(usBankAccountSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
         )
 
         val result = mapper.forCustomFlow()
@@ -156,11 +163,12 @@ class PrimaryButtonUiStateMapperTest {
     fun `Shows lock icon correctly based on the flow type`() = runTest {
         val mapper = createMapper(
             isProcessingPayment = true,
-            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods),
+            currentScreenFlow = stateFlowOf(PaymentSheetScreen.SelectSavedPaymentMethods()),
             buttonsEnabledFlow = stateFlowOf(false),
             amountFlow = stateFlowOf(Amount(value = 1234, currencyCode = "usd")),
             selectionFlow = stateFlowOf(usBankAccountSelection()),
             customPrimaryButtonUiStateFlow = stateFlowOf(null),
+            cvcFlow = stateFlowOf(true)
         )
 
         val resultWithLock = mapper.forCompleteFlow()
@@ -183,6 +191,7 @@ class PrimaryButtonUiStateMapperTest {
         amountFlow: StateFlow<Amount?> = stateFlowOf(null),
         selectionFlow: StateFlow<PaymentSelection?>,
         customPrimaryButtonUiStateFlow: StateFlow<PrimaryButton.UIState?>,
+        cvcFlow: StateFlow<Boolean>,
     ): PrimaryButtonUiStateMapper {
         return PrimaryButtonUiStateMapper(
             context = ApplicationProvider.getApplicationContext(),
@@ -193,6 +202,7 @@ class PrimaryButtonUiStateMapperTest {
             amountFlow = amountFlow,
             selectionFlow = selectionFlow,
             customPrimaryButtonUiStateFlow = customPrimaryButtonUiStateFlow,
+            cvcCompleteFlow = cvcFlow,
             onClick = {},
         )
     }

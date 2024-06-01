@@ -14,7 +14,7 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `SelectSavedPaymentMethods shows correct navigation icon`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods,
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
             canEdit = false,
             isLiveMode = false,
             isProcessing = false,
@@ -79,7 +79,7 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `Shows edit menu if displaying customer payment methods`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods,
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
             canEdit = true,
             isLiveMode = false,
             isProcessing = false,
@@ -92,7 +92,7 @@ class PaymentSheetTopBarStateFactoryTest {
     @Test
     fun `Hides edit menu if customer has no payment methods`() {
         val state = buildTopBarState(
-            screen = PaymentSheetScreen.SelectSavedPaymentMethods,
+            screen = PaymentSheetScreen.SelectSavedPaymentMethods(),
             canEdit = false,
             isLiveMode = false,
             isProcessing = false,

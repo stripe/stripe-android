@@ -174,7 +174,7 @@ internal class PaymentOptionsViewModelTest {
         )
 
         viewModel.currentScreen.test {
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
         }
     }
 
@@ -195,7 +195,7 @@ internal class PaymentOptionsViewModelTest {
             verify(eventReporter).onShowNewPaymentOptionForm()
 
             viewModel.handleBackPressed()
-            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
         }
     }
 
@@ -336,7 +336,7 @@ internal class PaymentOptionsViewModelTest {
             )
 
             viewModel.currentScreen.test {
-                assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+                assertThat(awaitItem()).isEqualTo(SelectSavedPaymentMethods())
 
                 verify(eventReporter).onShowExistingPaymentOptions()
             }
@@ -620,7 +620,7 @@ internal class PaymentOptionsViewModelTest {
             val screenTurbine = viewModel.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods())
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
@@ -632,7 +632,7 @@ internal class PaymentOptionsViewModelTest {
             screenTurbine.expectNoEvents()
             editViewState.interactor.handleViewAction(EditPaymentMethodViewAction.OnRemoveConfirmed)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods())
 
             // The list of payment methods should not be updated until we're back on the SPM screen
             paymentMethodsTurbine.expectNoEvents()
@@ -672,7 +672,7 @@ internal class PaymentOptionsViewModelTest {
             val screenTurbine = viewModel.currentScreen.testIn(this)
             val paymentMethodsTurbine = viewModel.paymentMethods.testIn(this)
 
-            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods)
+            assertThat(screenTurbine.awaitItem()).isEqualTo(SelectSavedPaymentMethods())
 
             assertThat(paymentMethodsTurbine.awaitItem()).containsExactlyElementsIn(cards).inOrder()
 
