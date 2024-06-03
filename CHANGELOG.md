@@ -2,6 +2,9 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+### Identity
+* [FIXED][8566](https://github.com/stripe/stripe-android/pull/8566) Fixed a crash when scan finishes and states is cleared.
+
 ## 20.44.1 - 2024-05-28
 
 ### PaymentSheet
