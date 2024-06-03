@@ -2,7 +2,6 @@ package com.stripe.android.paymentsheet.verticalmode
 
 import android.os.Build
 import androidx.compose.ui.test.SemanticsNodeInteraction
-import androidx.compose.ui.test.assertIsNotSelected
 import androidx.compose.ui.test.assertIsSelected
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChild
@@ -117,22 +116,6 @@ class ManageScreenUITest {
             // The selected node is the PaymentMethodRowButton which is a child of the SavedPaymentMethodRowButton
             .onChild()
             .assertIsSelected()
-    }
-
-    @Test
-    fun initiallySelectedPm_inEditMode_isNotSelectedInUi() = runScenario(
-        initialState = ManageScreenInteractor.State(
-            paymentMethods = displayableSavedPaymentMethods,
-            currentSelection = displayableSavedPaymentMethods[1],
-            isEditing = true,
-        )
-    ) {
-        composeRule.onNodeWithTag(
-            "${TEST_TAG_SAVED_PAYMENT_METHOD_ROW_BUTTON}_${displayableSavedPaymentMethods[1].paymentMethod.id}"
-        )
-            // The selected node would be the PaymentMethodRowButton which is a child of the SavedPaymentMethodRowButton
-            .onChild()
-            .assertIsNotSelected()
     }
 
     @Test

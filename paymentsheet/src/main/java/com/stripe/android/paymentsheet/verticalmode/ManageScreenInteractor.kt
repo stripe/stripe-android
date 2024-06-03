@@ -71,7 +71,11 @@ internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetVie
                     isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
                 )
             } ?: emptyList()
-            val currentSelection = paymentSelectionToDisplayableSavedPaymentMethod(selection, displayablePaymentMethods)
+            val currentSelection = if (isEditing) {
+                null
+            } else {
+                paymentSelectionToDisplayableSavedPaymentMethod(selection, displayablePaymentMethods)
+            }
             return ManageScreenInteractor.State(displayablePaymentMethods, currentSelection, isEditing)
         }
 

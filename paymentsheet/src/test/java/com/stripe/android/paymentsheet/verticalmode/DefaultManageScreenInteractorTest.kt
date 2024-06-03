@@ -34,9 +34,22 @@ class DefaultManageScreenInteractorTest {
         assertThat(initialState.currentSelection?.paymentMethod).isEqualTo(paymentMethods[0])
     }
 
+    @Test
+    fun initializeState_noCurrentSelectionIfEditing() {
+        val paymentMethods = PaymentMethodFixtures.createCards(2)
+        val initialState = createInitialState(
+            paymentMethods,
+            currentSelection = PaymentSelection.Saved(paymentMethods[0]),
+            isEditing = true,
+        )
+
+        assertThat(initialState.currentSelection).isNull()
+    }
+
     private fun createInitialState(
         paymentMethods: List<PaymentMethod>?,
         currentSelection: PaymentSelection?,
+        isEditing: Boolean = false,
     ): ManageScreenInteractor.State {
         return DefaultManageScreenInteractor.computeInitialState(
             paymentMethods = paymentMethods,
@@ -45,7 +58,7 @@ class DefaultManageScreenInteractorTest {
             ),
             selection = currentSelection,
             providePaymentMethodName = { it ?: "Missing name" },
-            isEditing = false,
+            isEditing = isEditing,
         )
     }
 }

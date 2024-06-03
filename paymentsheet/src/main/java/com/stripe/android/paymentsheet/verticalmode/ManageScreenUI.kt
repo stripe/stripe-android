@@ -42,7 +42,7 @@ internal fun ManageScreenUI(interactor: ManageScreenInteractor) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         state.paymentMethods.forEach {
-            val isSelected = !state.isEditing && it == state.currentSelection
+            val isSelected = it == state.currentSelection
 
             SavedPaymentMethodRowButton(
                 displayableSavedPaymentMethod = it,
