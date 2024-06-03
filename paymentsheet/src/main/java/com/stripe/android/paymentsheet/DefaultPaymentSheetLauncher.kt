@@ -40,10 +40,9 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         activityResultLauncher = activity.registerForActivityResult(
-            PaymentSheetContractV2()
-        ) {
-            callback.onPaymentSheetResult(it)
-        },
+            PaymentSheetContractV2(),
+            callback::onPaymentSheetResult,
+        ),
         activity = activity,
         lifecycleOwner = activity,
         application = activity.application,
@@ -55,10 +54,9 @@ internal class DefaultPaymentSheetLauncher(
         callback: PaymentSheetResultCallback
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
-            PaymentSheetContractV2()
-        ) {
-            callback.onPaymentSheetResult(it)
-        },
+            PaymentSheetContractV2(),
+            callback::onPaymentSheetResult,
+        ),
         activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
@@ -73,10 +71,9 @@ internal class DefaultPaymentSheetLauncher(
     ) : this(
         activityResultLauncher = fragment.registerForActivityResult(
             PaymentSheetContractV2(),
-            registry
-        ) {
-            callback.onPaymentSheetResult(it)
-        },
+            registry,
+            callback::onPaymentSheetResult,
+        ),
         activity = fragment.requireActivity(),
         lifecycleOwner = fragment,
         application = fragment.requireActivity().application,
