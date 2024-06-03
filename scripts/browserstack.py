@@ -161,26 +161,52 @@ def uploadEspressoApk(espressoApkFile):
         return None
 
 
+def runFastScandir(dir, ext):
+    subfolders, files = [], []
+
+    for f in os.scandir(dir):
+        if f.is_dir():
+            subfolders.append(f.path)
+        if f.is_file():
+            if os.path.splitext(f.name)[1].lower() in ext:
+                files.append(f.path)
+
+    for dir in list(subfolders):
+        sf, f = runFastScandir(dir, ext)
+        subfolders.extend(sf)
+        files.extend(f)
+
+    return subfolders, files
+
+
+def testFilesFromKotlinFiles(kotlinFiles):
+    testFiles = []
+
+    for file in kotlinFiles:
+        with open(file) as file_handle:
+            if 'import org.junit.Test' in file_handle.read():
+                testFiles.append(file)
+                continue
+
+    return testFiles
+
+
+def classNamesFromTestFiles(testDirectory, testFileNames):
+    classNames = []
+
+    for fileName in testFileNames:
+        className = (fileName[len(testDirectory):][:-3]).replace('/', '.')
+        classNames.append(className)
+
+    return classNames
+
+
 def getAllTestClassNames():
-    testClassNames = [
-        # Hard coded tests.
-        "com.stripe.android.TestAuthorization",
-        "com.stripe.android.TestBrowsers",
-        "com.stripe.android.TestCustomers",
-        "com.stripe.android.addresselement.AddressElementTest",
-    ]
+    directory = 'paymentsheet-example/src/androidTest/java/'
+    _, kotlinFileNames = runFastScandir(directory, [".kt"])
+    testFileNames = testFilesFromKotlinFiles(kotlinFileNames)
+    return classNamesFromTestFiles(directory, testFileNames)
 
-    # Add LPM tests to testClassNames.
-    lpmFileNames = os.listdir(
-        "paymentsheet-example/src/androidTest/java/com/stripe/android/lpm"
-    )
-    for fileName in lpmFileNames:
-        if not fileName.endswith(".kt"):
-            continue
-        className = fileName[:-3]
-        testClassNames.append(f"com.stripe.android.lpm.{className}")
-
-    return testClassNames
 
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
 def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
