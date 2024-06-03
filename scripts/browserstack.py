@@ -182,39 +182,6 @@ def getAllTestClassNames():
 
     return testClassNames
 
-
-def testShards(isNightly, testClassNames):
-    # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
-    numberOfShards = 2.0 if isNightly else 10.0
-    testClassesPerShard = math.ceil(len(testClassNames) / numberOfShards)
-
-    shards = []
-    shardValues = []
-
-    for testClass in testClassNames:
-        shardValues.append(testClass)
-        if len(shardValues) == testClassesPerShard:
-            shards.append(
-                {
-                    "name": f"Shard {len(shards) + 1}",
-                    "strategy": "class",
-                    "values": shardValues,
-                },
-            )
-            shardValues = []
-
-    if len(shardValues) > 0:
-        shards.append(
-            {
-                "name": f"Shard {len(shards) + 1}",
-                "strategy": "class",
-                "values": shardValues,
-            },
-        )
-
-    return shards
-
-
 # https://www.browserstack.com/docs/app-automate/api-reference/espresso/builds#execute-a-build
 def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
     baseParams = {
@@ -264,8 +231,7 @@ def executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams):
         )
         return None
 
-def executeTests(appUrl, testUrl, isNightly, testClasses):
-    shards = testShards(isNightly, testClasses)
+def executeTests(appUrl, testUrl, isNightly):
     devices = []
     if isNightly:
         devices = [
@@ -282,10 +248,13 @@ def executeTests(appUrl, testUrl, isNightly, testClasses):
         devices = [
             "Samsung Galaxy S22-12.0",
         ]
+
+    # We only have 25 parallel runs, and we want multiple PRs to run at the same time.
+    numberOfShards = 2.0 if isNightly else 10.0
+
     addedParams = {
         "shards": {
-            "numberOfShards": len(shards),
-            "mapping": shards,
+            "numberOfShards": numberOfShards,
         },
     }
     return executeTestsWithAddedParams(appUrl, testUrl, devices, addedParams)
@@ -393,9 +362,9 @@ def confirm(message):
     return answer == "y"
 
 
-def runTests(appUrl, testUrl, isNightly, testClasses):
-    print("RUNNING " + str(len(testClasses)) + " test cases")
-    buildId = executeTests(appUrl, testUrl, isNightly, testClasses)
+def runTests(appUrl, testUrl, isNightly):
+    print("RUNNING all test cases")
+    buildId = executeTests(appUrl, testUrl, isNightly)
     exitStatus = 1
     if buildId != None:
         exitStatus = waitForBuildComplete(buildId)
@@ -577,10 +546,7 @@ if __name__ == "__main__":
             numRetries = int(args.num_retries) if args.num_retries is not None else 0
 
             exitStatus = 1
-            testClassesToRun = getAllTestClassNames()
-            testResults = runTests(
-                appUrl, testUrl, args.is_nightly, testClassesToRun
-            )
+            testResults = runTests(appUrl, testUrl, args.is_nightly)
             print("-----------------")
             exitStatus = testResults["exitStatus"]
             updateObservabilityWithResults(testResults["buildId"])
