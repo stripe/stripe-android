@@ -321,18 +321,17 @@ internal class PaymentSheetPlaygroundViewModel(
     @OptIn(ExperimentalCustomerSheetApi::class)
     fun onCustomerSheetCallback(result: CustomerSheetResult) {
         val statusMessage = when (result) {
+            is CustomerSheetResult.Canceled -> {
+                updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
+
+                "Canceled"
+            }
             is CustomerSheetResult.Selected -> {
-                customerSheetState.update { existingState ->
-                    existingState?.copy(
-                        selectedPaymentOption = result.selection?.paymentOption,
-                        shouldFetchPaymentOption = false
-                    )
-                }
+                updatePaymentOptionForCustomerSheet(result.selection?.paymentOption)
 
                 null
             }
             is CustomerSheetResult.Failed -> "An error occurred: ${result.exception.message}"
-            is CustomerSheetResult.Canceled -> "Canceled"
         }
 
         statusMessage?.let { message ->
@@ -483,6 +482,15 @@ internal class PaymentSheetPlaygroundViewModel(
                     is PlaygroundState.Payment -> state.copy(snapshot = updatedSnapshot)
                 }
             }
+        }
+    }
+
+    private fun updatePaymentOptionForCustomerSheet(paymentOption: PaymentOption?) {
+        customerSheetState.update { existingState ->
+            existingState?.copy(
+                selectedPaymentOption = paymentOption,
+                shouldFetchPaymentOption = false
+            )
         }
     }
 

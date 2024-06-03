@@ -640,7 +640,9 @@ internal class CustomerSheetViewModel(
 
     private fun updatePaymentMethodInState(updatedMethod: PaymentMethod) {
         viewModelScope.launch {
-            val newSavedPaymentMethods = viewState.value.savedPaymentMethods.map { savedMethod ->
+            val currentViewState = viewState.value
+
+            val newSavedPaymentMethods = currentViewState.savedPaymentMethods.map { savedMethod ->
                 val savedId = savedMethod.id
                 val updatedId = updatedMethod.id
 
@@ -651,8 +653,33 @@ internal class CustomerSheetViewModel(
                 }
             }
 
-            updateViewState<CustomerSheetViewState.SelectPaymentMethod> {
-                it.copy(savedPaymentMethods = newSavedPaymentMethods)
+            updateViewState<CustomerSheetViewState.SelectPaymentMethod> { viewState ->
+                val originalSelection = originalPaymentSelection
+                val currentSelection = viewState.paymentSelection
+
+                val updatedCurrentSelection = if (
+                    currentSelection is PaymentSelection.Saved &&
+                    currentSelection.paymentMethod.id == updatedMethod.id
+                ) {
+                    currentSelection.copy(paymentMethod = updatedMethod)
+                } else {
+                    currentSelection
+                }
+
+                originalPaymentSelection = if (
+                    currentSelection is PaymentSelection.Saved &&
+                    originalSelection is PaymentSelection.Saved &&
+                    currentSelection.paymentMethod.id == updatedMethod.id
+                ) {
+                    originalSelection.copy(paymentMethod = updatedMethod)
+                } else {
+                    originalSelection
+                }
+
+                viewState.copy(
+                    paymentSelection = updatedCurrentSelection,
+                    savedPaymentMethods = newSavedPaymentMethods
+                )
             }
         }
     }
