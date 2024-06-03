@@ -163,14 +163,17 @@ internal sealed interface PaymentSheetScreen {
         }
     }
 
-    class Form(private val interactor: VerticalModeFormInteractor) : PaymentSheetScreen {
+    class Form(
+        private val interactor: VerticalModeFormInteractor,
+        private val showsWalletHeader: Boolean = false,
+    ) : PaymentSheetScreen {
 
         override val showsBuyButton: Boolean = true
         override val showsContinueButton: Boolean = true
         override val canNavigateBack: Boolean = true
 
         override fun showsWalletsHeader(isCompleteFlow: Boolean): Boolean {
-            return false
+            return showsWalletHeader
         }
 
         @Composable
