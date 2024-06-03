@@ -2,6 +2,8 @@
 
 ## XX.XX.XX - 20XX-XX-XX
 
+## 20.44.2 - 2024-06-03
+
 ### Identity
 * [FIXED][8566](https://github.com/stripe/stripe-android/pull/8566) Fixed a crash when scan finishes and states is cleared.
 
