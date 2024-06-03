@@ -14,17 +14,19 @@ internal class HeaderTextFactory(
         screen: PaymentSheetScreen?,
         isWalletEnabled: Boolean,
         types: List<PaymentMethodCode>,
+        isEditing: Boolean = false,
     ): Int? {
         return if (isCompleteFlow) {
-            createForCompleteFlow(screen, isWalletEnabled)
+            createForCompleteFlow(screen, isWalletEnabled, isEditing)
         } else {
-            createForFlowController(screen, types, isWalletEnabled)
+            createForFlowController(screen, types, isWalletEnabled, isEditing)
         }
     }
 
     private fun createForCompleteFlow(
         screen: PaymentSheetScreen?,
-        isWalletEnabled: Boolean
+        isWalletEnabled: Boolean,
+        isEditing: Boolean,
     ) = when (screen) {
         is PaymentSheetScreen.SelectSavedPaymentMethods -> {
             if (isWalletEnabled) {
@@ -41,9 +43,7 @@ internal class HeaderTextFactory(
         is PaymentSheetScreen.EditPaymentMethod -> {
             StripeR.string.stripe_title_update_card
         }
-        is PaymentSheetScreen.ManageSavedPaymentMethods -> {
-            R.string.stripe_paymentsheet_select_payment_method
-        }
+        is PaymentSheetScreen.ManageSavedPaymentMethods -> getHeaderTextForManageScreen(isEditing)
         is PaymentSheetScreen.Loading,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.Form,
@@ -55,14 +55,16 @@ internal class HeaderTextFactory(
     private fun createForFlowController(
         screen: PaymentSheetScreen?,
         types: List<PaymentMethodCode>,
-        isWalletEnabled: Boolean
+        isWalletEnabled: Boolean,
+        isEditing: Boolean,
     ) = when (screen) {
         is PaymentSheetScreen.Loading, is PaymentSheetScreen.Form -> {
             null
         }
-        is PaymentSheetScreen.SelectSavedPaymentMethods, is PaymentSheetScreen.ManageSavedPaymentMethods -> {
+        is PaymentSheetScreen.SelectSavedPaymentMethods -> {
             R.string.stripe_paymentsheet_select_payment_method
         }
+        is PaymentSheetScreen.ManageSavedPaymentMethods -> getHeaderTextForManageScreen(isEditing)
         is PaymentSheetScreen.AddFirstPaymentMethod,
         is PaymentSheetScreen.AddAnotherPaymentMethod,
         is PaymentSheetScreen.VerticalMode -> {
@@ -79,6 +81,14 @@ internal class HeaderTextFactory(
         }
         null -> {
             null
+        }
+    }
+
+    private fun getHeaderTextForManageScreen(isEditing: Boolean): Int {
+        return if (isEditing) {
+            R.string.stripe_paymentsheet_manage_your_payment_methods
+        } else {
+            R.string.stripe_paymentsheet_select_payment_method
         }
     }
 }

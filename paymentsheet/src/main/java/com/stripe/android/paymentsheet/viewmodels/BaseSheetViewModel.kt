@@ -143,8 +143,9 @@ internal abstract class BaseSheetViewModel(
             currentScreen,
             walletsState,
             supportedPaymentMethodsFlow,
-        ) { screen, walletsState, supportedPaymentMethods ->
-            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods)
+            editing,
+        ) { screen, walletsState, supportedPaymentMethods, editing ->
+            mapToHeaderTextResource(screen, walletsState, supportedPaymentMethods, editing)
         }
     }
 
@@ -684,11 +685,13 @@ internal abstract class BaseSheetViewModel(
         screen: PaymentSheetScreen?,
         walletsState: WalletsState?,
         supportedPaymentMethods: List<PaymentMethodCode>,
+        editing: Boolean,
     ): Int? {
         return headerTextFactory.create(
             screen = screen,
             isWalletEnabled = walletsState != null,
             types = supportedPaymentMethods,
+            isEditing = editing,
         )
     }
 

@@ -10,9 +10,10 @@ internal class FakeManageScreenInteractor(
 ) : ManageScreenInteractor {
     override val state: StateFlow<ManageScreenInteractor.State> =
         stateFlowOf(
-            ManageScreenInteractor.State(
-                initialState?.paymentMethods ?: emptyList(),
-                currentSelection = initialState?.currentSelection,
+            initialState ?: ManageScreenInteractor.State(
+                emptyList(),
+                currentSelection = null,
+                isEditing = false,
             )
         )
 

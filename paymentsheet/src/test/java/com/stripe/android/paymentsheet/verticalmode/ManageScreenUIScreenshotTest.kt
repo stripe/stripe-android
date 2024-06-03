@@ -25,7 +25,8 @@ internal class ManageScreenUIScreenshotTest {
                 interactor = FakeManageScreenInteractor(
                     initialState = ManageScreenInteractor.State(
                         paymentMethods = savedPaymentMethods,
-                        currentSelection = null
+                        currentSelection = null,
+                        isEditing = false,
                     )
                 ),
             )
@@ -39,7 +40,23 @@ internal class ManageScreenUIScreenshotTest {
                 interactor = FakeManageScreenInteractor(
                     initialState = ManageScreenInteractor.State(
                         paymentMethods = savedPaymentMethods,
-                        currentSelection = savedPaymentMethods[1]
+                        currentSelection = savedPaymentMethods[1],
+                        isEditing = false,
+                    )
+                ),
+            )
+        }
+    }
+
+    @Test
+    fun testManageUIScreen_inEditMode() {
+        paparazziRule.snapshot {
+            ManageScreenUI(
+                interactor = FakeManageScreenInteractor(
+                    initialState = ManageScreenInteractor.State(
+                        paymentMethods = savedPaymentMethods,
+                        currentSelection = null,
+                        isEditing = true,
                     )
                 ),
             )
@@ -50,12 +67,12 @@ internal class ManageScreenUIScreenshotTest {
         createCard("4242"),
         createCard("4000"),
         createUsBank("1001"),
-        createCard("1234"),
+        PaymentMethodFixtures.CARD_WITH_NETWORKS_PAYMENT_METHOD,
     ).map {
         DisplayableSavedPaymentMethod(
             displayName = it.card?.last4 ?: it.usBankAccount?.last4 ?: "",
             paymentMethod = it,
-            isCbcEligible = false,
+            isCbcEligible = true,
         )
     }
 

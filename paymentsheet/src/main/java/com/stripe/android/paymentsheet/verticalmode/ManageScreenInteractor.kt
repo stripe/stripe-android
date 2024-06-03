@@ -19,6 +19,7 @@ internal interface ManageScreenInteractor {
     data class State(
         val paymentMethods: List<DisplayableSavedPaymentMethod>,
         val currentSelection: DisplayableSavedPaymentMethod?,
+        val isEditing: Boolean,
     )
 
     sealed class ViewAction {
@@ -31,12 +32,14 @@ internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetVie
         viewModel.paymentMethods,
         viewModel.paymentMethodMetadata,
         viewModel.selection,
-    ) { paymentMethods, paymentMethodMetadata, paymentSelection ->
+        viewModel.editing,
+    ) { paymentMethods, paymentMethodMetadata, paymentSelection, editing ->
         computeInitialState(
             paymentMethods,
             paymentMethodMetadata,
             paymentSelection,
-            viewModel::providePaymentMethodName
+            viewModel::providePaymentMethodName,
+            editing,
         )
     }
 
@@ -59,6 +62,7 @@ internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetVie
             paymentMethodMetadata: PaymentMethodMetadata?,
             selection: PaymentSelection?,
             providePaymentMethodName: (PaymentMethodCode?) -> String,
+            isEditing: Boolean,
         ): ManageScreenInteractor.State {
             val displayablePaymentMethods = paymentMethods?.map {
                 DisplayableSavedPaymentMethod(
@@ -67,8 +71,12 @@ internal class DefaultManageScreenInteractor(private val viewModel: BaseSheetVie
                     isCbcEligible = paymentMethodMetadata?.cbcEligibility is CardBrandChoiceEligibility.Eligible,
                 )
             } ?: emptyList()
-            val currentSelection = paymentSelectionToDisplayableSavedPaymentMethod(selection, displayablePaymentMethods)
-            return ManageScreenInteractor.State(displayablePaymentMethods, currentSelection)
+            val currentSelection = if (isEditing) {
+                null
+            } else {
+                paymentSelectionToDisplayableSavedPaymentMethod(selection, displayablePaymentMethods)
+            }
+            return ManageScreenInteractor.State(displayablePaymentMethods, currentSelection, isEditing)
         }
 
         private fun paymentSelectionToDisplayableSavedPaymentMethod(
