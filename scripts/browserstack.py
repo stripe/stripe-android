@@ -161,6 +161,7 @@ def uploadEspressoApk(espressoApkFile):
         return None
 
 
+# https://stackoverflow.com/a/59803793
 def runFastScandir(dir, ext):
     subfolders, files = [], []
 
@@ -195,6 +196,11 @@ def classNamesFromTestFiles(testDirectory, testFileNames):
     classNames = []
 
     for fileName in testFileNames:
+        # Removes the prefix of the test directory, then removes the suffix of the '.kt',
+        #   then replaces the directory markers ('/', with their package representation.
+        # Transforms something like:
+        #   paymentsheet-example/src/androidTest/java/com/stripe/android/TestCustomers.kt
+        #   to com.stripe.android.TestCustomers
         className = (fileName[len(testDirectory):][:-3]).replace('/', '.')
         classNames.append(className)
 
